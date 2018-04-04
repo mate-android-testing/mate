@@ -362,4 +362,10 @@ public class EnvironmentManager {
         }
         return length;
     }
+
+    public static void markScreenshot(Widget widget, String packageName, String nodeId) {
+        //ANDRE
+        String imageName = emulator+"_"+packageName+"_"+nodeId+".png";
+        //cmd = "mark:"+imageName+widget....
+    }
 }

@@ -149,8 +149,12 @@ public class UniformRandomForAccessibility {
 
                                 boolean contrastRatioOK = contrastChecker.check(widget);
 
-                                if (!contrastRatioOK)
-                                    AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,String.valueOf(contrastChecker.contratio));
+                                if (!contrastRatioOK) {
+                                    AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW", widget, String.valueOf(contrastChecker.contratio));
+                                    //ANDRE: mandar gerar imagem com marcacao
+                                    EnvironmentManager.markScreenshot(widget,selectedScreenState.getPackageName(),selectedScreenState.getId());
+
+                                }
 
                                 boolean multDescOK = multDescChecker.check(widget);
                                 UniformRandomForAccessibility.totalNumberOfChecks++;
