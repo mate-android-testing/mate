@@ -29,23 +29,6 @@ public class DataGenerator {
 
         words = Dictionary.getWords();
 
-        /*
-        String wordsPath = "src/main/resources/words.txt";
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(wordsPath));
-            String line = br.readLine();
-            while (line!=null){
-                words.add(line);
-                line = br.readLine();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (IOException ioe){
-
-        }*/
-
     }
 
     public String getRandomText(int maxLength){
@@ -98,24 +81,7 @@ public class DataGenerator {
     public String getRandomValidString(int size){
 
         return getRandomText(size);
-        /*
-        String randomString = "";
-        Random random = new Random();
 
-        if (size ==-1)
-            size = random.nextInt(32);
-
-        String alphabet = " 0123456789abcdefghijklmnopqrstuvxwyzABCDEFGHIJKLMNOPQRSTUVXYWZ";
-
-        //for the first letter (valid char)
-        int index = 11+random.nextInt(alphabet.length()-11);
-        randomString+=alphabet.charAt(index);
-
-        for (int i=1; i<size; i++)
-            randomString+=alphabet.charAt(random.nextInt(alphabet.length()));
-
-        return randomString;
-        */
     }
 
     public String getRandomNumber(int size){
@@ -211,11 +177,5 @@ public class DataGenerator {
         randomValidString = randomValidString.replace(" ","");
         return randomValidString;
     }
-
-
-    public boolean getRandomBoolean(){
-        return new Random().nextBoolean();
-    }
-
 
 }

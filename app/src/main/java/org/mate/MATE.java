@@ -8,15 +8,9 @@ import android.content.pm.PackageManager;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
-import org.mate.accessibility.AccessibilitySettings;
-import org.mate.accessibility.ContentDescAccessibilityCheck;
-import org.mate.accessibility.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.LabelByAccessibilityCheck;
-import org.mate.accessibility.TargetSizeAccessibilityCheck;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.aco.ACO;
 import org.mate.exploration.depthfirst.DepthFirst;
-import org.mate.exploration.random.CompleteRandom;
 import org.mate.exploration.random.ManualExploration;
 import org.mate.exploration.random.UniformRandom;
 import org.mate.exploration.random.UniformRandomForAccessibility;
@@ -26,10 +20,8 @@ import org.mate.model.graph.GraphGUIModel;
 import org.mate.model.graph.StateGraph;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.AccessibilityChecker;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
-import org.mate.ui.Widget;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -122,10 +114,6 @@ public class MATE {
                     uniformRandomExploration.startUniformRandomExploration(state,runningTime);
                 }
 
-                if (explorationStrategy.equals("CompleteRandom")) {
-                    CompleteRandom completeRandom = new CompleteRandom(deviceMgr);
-                    completeRandom.startCompleteRandomExploration(runningTime);
-                }
 
                 if (explorationStrategy.equals("ManualExploration")) {
                     this.guiModel = new GraphGUIModel();

@@ -11,6 +11,8 @@ import com.google.android.apps.common.testing.accessibility.framework.Accessibil
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.ui.EnvironmentManager;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -27,8 +29,14 @@ public class CheckScreenUsingAccessibilityFramework {
     @Test
     public void useAppContext() throws Exception {
 
-        UseTestFramework use = new UseTestFramework();
-        use.runTests();
+        int i=0;
+        while (i<100) {
+            Thread.sleep(2000);
+            MATE.log("execute");
+            UseTestFramework use = new UseTestFramework();
+            use.runTests();
+            i++;
+        }
 
 
     }

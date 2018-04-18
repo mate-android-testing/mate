@@ -124,12 +124,6 @@ public class DepthFirst {
                             //when model is updated, the current screen changes
                             //if the reached screen node/state has not been explored yet
                             if (!statesVisited.contains(guiModel.getCurrentStateId())) {
-                                //starts exploring the new state
-//                                Bitmap bitmap = screenShot();
-//                                if (bitmap!=null)
-//                                    MATE.log("BITMAP: " + bitmap.getByteCount());
-//                                else
-//                                    MATE.log("BITMAP: NULL");
                                 startExploreDepthFirst(guiModel.getCurrentStateId(), t1);
                             }
                         }
@@ -173,8 +167,6 @@ public class DepthFirst {
         while (hasProgressBar && (end-ini)<22000) {
             hasProgressBar=false;
             for (Widget widget : state.getWidgets()) {
-                //if (widget.getClazz().contains("ProgressBar"))
-                  //  MATE.log("__"+widget.getId()+" _ " + widget.isEnabled() + " _ cd: " + widget.getContentDesc());
                 if (widget.getClazz().contains("ProgressBar") && widget.isEnabled() && widget.getContentDesc().contains("Loading")) {
                     MATE.log("WAITING PROGRESS BAR TO FINISH");
                     hasProgressBar = true;
@@ -189,13 +181,6 @@ public class DepthFirst {
             end = new Date().getTime();
         }
         return end-ini;
-    }
-
-    public Bitmap screenShot() {
-        //Bitmap bitmap = Bitmap.createBitmap(device.getDisplayWidth(),
-          //      device.getDisplayHeight(), Bitmap.Config.ARGB_8888);
-        Bitmap bitmap = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-        return bitmap;
     }
 
 }

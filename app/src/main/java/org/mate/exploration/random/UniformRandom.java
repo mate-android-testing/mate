@@ -20,29 +20,22 @@ import static org.mate.MATE.device;
 public class UniformRandom {
     private DeviceMgr deviceMgr;
     private String packageName;
-    private MATE mate;
-    private IScreenState launchState;
     private Vector<Action> executableActions;
 
     public UniformRandom(DeviceMgr deviceMgr,
                          String packageName,MATE mate){
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
-        this.mate = mate;
     }
 
     public void startUniformRandomExploration(IScreenState selectedScreenState, long runningTime) {
 
         long currentTime = new Date().getTime();
-        this.launchState = selectedScreenState;
-        boolean isEqualState = false;
         int numberOfActions = 0;
         while (currentTime - runningTime <= MATE.TIME_OUT){
             System.out.println(currentTime - runningTime+" gap");
             //get a list of all executable actions as long as this state is different from last state
             executableActions = selectedScreenState.getActions();
-            //MATE.log(" time to get possible actions: " + (l2-l1));
-
 
             //select one action randomly
             Action action = executableActions.get(selectRandomAction(executableActions.size()));
@@ -50,13 +43,12 @@ public class UniformRandom {
             try {
                 //execute this selected action
                 deviceMgr.executeAction(action);
-                //MATE.log(" time to execute action: " + (l2-l1));
                 numberOfActions++;
 
                 String currentPackageName = device.getCurrentPackageName();
-                //MATE.log(" time to get current package: " + (l2-l1));
 
                 //check the validity of current package after executing the selected action
+                //check the random_lengh (number of actions before restarting the app)
                 if (!currentPackageName.equals(this.packageName)||numberOfActions>=MATE.RANDOM_LENGH) {
                     deviceMgr.restartApp();
                     numberOfActions=0;
