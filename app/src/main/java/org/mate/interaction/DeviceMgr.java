@@ -50,9 +50,7 @@ public class DeviceMgr implements IApp {
     }
 
     public void executeAction(Action action) throws AUTCrashException{
-        long t1 = new Date().getTime();
         MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
-        //sleep(500);
         Widget selectedWidget = action.getWidget();
         int typeOfAction = action.getActionType();
 
@@ -68,11 +66,6 @@ public class DeviceMgr implements IApp {
 
             case ActionType.TYPE_TEXT:
                 handleEdit(action);
-                //MATE.log("BEFORE ESCAPE");
-                //sleep(4000);
-                //device.pressKeyCode(KeyEvent.KEYCODE_ESCAPE);
-                //device.pressEnter();
-                //MATE.log("AFTER ESCAPE");
                 break;
 
             case ActionType.CLEAR_WIDGET:
@@ -112,24 +105,20 @@ public class DeviceMgr implements IApp {
 
         }
 
-        //MATE.log("sleep time: " + action.getTimeToWait());
+        //if there is a progress bar associated to that action
         sleep(action.getTimeToWait());
-        //InstrumentationRegistry.getInstrumentation().getUiAutomation().getWindows();
+
+        //hancle app crashes
         UiObject window = new UiObject(new UiSelector().packageName("android")
                 .textContains("has stopped"));
         if (window.exists()) {
             MATE.log("    CRASH");
             throw new AUTCrashException("App crashed");
         }
-
-        long t2 = new Date().getTime();
-        //MATE.log(" ... time to execute action: " + (t2-t1));
     }
 
     public void handleClick(Widget widget){
         device.click(widget.getX(),widget.getY());
-
-//        Dro
     }
 
     public void handleClear(Widget widget){
@@ -140,7 +129,6 @@ public class DeviceMgr implements IApp {
 
     public void handleSwipe(Widget widget, int direction){
 
-        float percentage = 0.2f;
         int pixelsmove=300;
         int X = 0;
         int Y = 0;
@@ -166,21 +154,16 @@ public class DeviceMgr implements IApp {
                 pixelsmove=X;
         }
 
-
         //50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction){
             case 0: device.swipe(X, Y, X, Y-pixelsmove,steps);
-                    //obj.swipe(Direction.DOWN,percentage);
                 break;
 
-            case 1: //obj.swipe(Direction.UP,percentage);
-                    device.swipe(X, Y, X, Y+pixelsmove,steps);
+            case 1: device.swipe(X, Y, X, Y+pixelsmove,steps);
                 break;
-            case 2: //obj.swipe(Direction.LEFT,percentage);
-                    device.swipe(X, Y, X+pixelsmove, Y,steps);
+            case 2: device.swipe(X, Y, X+pixelsmove, Y,steps);
                 break;
-            case 3: //obj.swipe(Direction.RIGHT,percentage);
-                    device.swipe(X, Y, X-pixelsmove, Y,steps);
+            case 3: device.swipe(X, Y, X-pixelsmove, Y,steps);
                 break;
         }
     }
@@ -192,7 +175,6 @@ public class DeviceMgr implements IApp {
         if (obj!=null){
             X = obj.getVisibleBounds().centerX();
             Y = obj.getVisibleBounds().centerY();
-            //obj.getParent().longClick();
         }
         device.swipe(X, Y, X, Y,120);
     }
@@ -235,6 +217,58 @@ public class DeviceMgr implements IApp {
     }
 
     public void handleEdit(Action action){
+
+        Widget widget = action.getWidget();
+        String textData = generateTextData(action);
+
+        if (widget.getResourceID().equals("")){
+            if (!widget.getText().equals("")) {
+                UiObject2 obj = device.findObject(By.text(widget.getText()));
+                if (obj != null) {
+                    obj.setText(textData);
+                }
+            }
+            else{
+                device.click(widget.getX(),widget.getY());
+                UiObject2 obj = device.findObject(By.focused(true));
+                if (obj!=null){
+                    obj.setText(textData);
+                }
+            }
+        }
+        else{
+            List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
+            if (objs!=null && objs.size()>0){
+                int i=0;
+                int size = objs.size();
+                boolean objfound=false;
+                while (i<size && !objfound){
+                    UiObject2 obj = objs.get(i);
+                    if (obj!=null) {
+                        String objText = "";
+                        if (obj.getText()!=null)
+                            objText = obj.getText();
+                        if (objText.equals(widget.getText())) {
+                            obj.setText(textData);
+                            objfound=true;
+
+                        }
+                    }
+                    i++;
+                }
+                if (!objfound)
+                    MATE.log("  ********* obj "+widget.getId()+ "  not found");
+            }
+            else{
+                MATE.log("  ********* obj "+widget.getId()+ "  not found");
+            }
+        }
+
+        action.setExtraInfo(textData);
+
+    }
+
+    private String generateTextData(Action action) {
         Widget widget = action.getWidget();
 
         String widgetText = widget.getText();
@@ -246,11 +280,10 @@ public class DeviceMgr implements IApp {
         int maxLengthInt=widget.getMaxLength();
         if (action.getExtraInfo().equals("")){
 
-
             if (maxLengthInt<0)
-                maxLengthInt=10;
-            if (maxLengthInt>10)
-                maxLengthInt=10;
+                maxLengthInt=15;
+            if (maxLengthInt>15)
+                maxLengthInt=15;
 
             if (widget.getInputType() == (InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER))
                 inputType="number";
@@ -284,74 +317,7 @@ public class DeviceMgr implements IApp {
         else{
             textData = action.getExtraInfo();
         }
-        MATE.log("text type: " + inputType);
-        MATE.log("text data: " + textData);
-
-        //device.wait(Until.findObject(By.res(widget.getId())),200);
-        //device.click(widget.getX(),widget.getY());
-        //UiObject2 obj =device.findObject(By.focused(true));
-        //sleep(4000);
-        //MATE.log("Widget res id: " + widget.getResourceID() + " " + widget.getId() + " " + widget.getText());
-
-        if (widget.getResourceID().equals("")){
-            if (!widget.getText().equals("")) {
-                UiObject2 obj = device.findObject(By.text(widget.getText()));
-                if (obj != null) {
-//                    MATE.log("FOUND OBJ BY TEXT: " + obj.getResourceName());
-//                    MATE.log("SET TEXT");
-                    obj.setText(textData);
-                }
-            }
-            else{
-                device.click(widget.getX(),widget.getY());
-                UiObject2 obj = device.findObject(By.focused(true));
-                if (obj!=null){
-//                    MATE.log("FOUND FOCUSED OBJ");
-//                    MATE.log("SET TEXT");
-                    obj.setText(textData);
-                }
-            }
-
-        }
-        else{
-
-//            AccessibilityNodeInfo info =
-            List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
-            if (objs!=null && objs.size()>0){
-                //MATE.log("FOUND OBJ BY ID");
-                int i=0;
-                int size = objs.size();
-                boolean objfound=false;
-                while (i<size && !objfound){
-                    UiObject2 obj = objs.get(i);
-                    //MATE.log("Obj "+(i+1) + " - " + obj.getText());
-                    if (obj!=null) {
-                        String objText = "";
-                        if (obj.getText()!=null)
-                            objText = obj.getText();
-                        if (objText.equals(widget.getText())) {
-                            //MATE.log("SET TEXT");
-                            obj.setText(textData);
-                            objfound=true;
-
-                        }
-                    }
-                    i++;
-                }
-                if (!objfound)
-                    MATE.log("  ********* obj "+widget.getId()+ "  not found");
-            }
-            else{
-                MATE.log("  ********* obj "+widget.getId()+ "  not found");
-            }
-        }
-
-        action.setExtraInfo(textData);
-
-
-        //UiObject2 obj = this.getObjectById(widget.getId());
-        //MATE.log("   set text: " + textData+"  in "+widget.getId());
-
+        return textData;
     }
 
     private String getRandomData(String inputType, int maxLengthInt) {
