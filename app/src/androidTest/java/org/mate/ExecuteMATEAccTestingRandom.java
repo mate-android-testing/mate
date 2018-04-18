@@ -28,26 +28,19 @@ public class ExecuteMATEAccTestingRandom {
 
         MATE.log("start testing acc");
         MATE mate = new MATE();
-        MATE.TIME_OUT = 30* 60 * 1000;
-        long timeout = EnvironmentManager.getTimeout();
-        MATE.TIME_OUT = timeout * 60 * 1000;
-        MATE.log("TIMEOUT : " + timeout);
 
-
-        MATE.TIME_OUT = timeout;
-        MATE.RANDOM_LENGH = EnvironmentManager.getRandomLength();
-        MATE.log("RANDOM length by server: " + MATE.RANDOM_LENGH);
-
+        //run mate for timeout minutes
         mate.testApp("AccRandom");
+
         String packageName = mate.getPackageName();
         IGUIModel guiModel = mate.getGuiModel();
+
+        //produce summary - print to the log file
         if (guiModel!=null) {
             //MATE.logsum("STATES_VISITED_BY_MATE:"+guiModel.getStates().size());
-            AccessibilityInfoChecker.listFlawsByWidget(packageName,guiModel);
             AccessibilitySummary.printSummary(guiModel);
-            EnvironmentManager.deleteAllScreenShots(packageName);
-            //EnvironmentManager.logFlaws(packageName,mate.logMessage);
-            EnvironmentManager.releaseEmulator();
+            //EnvironmentManager.deleteAllScreenShots(packageName);
+
         }
     }
 }

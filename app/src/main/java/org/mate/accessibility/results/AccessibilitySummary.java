@@ -27,11 +27,6 @@ public class AccessibilitySummary {
 
     public int size=0;
     public int contrast=0;
-    public int missingspeakabletext=0;
-    public int editablecontentdesc=0;
-    public int duplicatespeakabletext=0;
-    public int clickablespan=0;
-    public int duplicateclickablebounds=0;
 
     public static String[] etypes = new String[]{"ACCESSIBILITY_SIZE_FLAW","ACCESSIBILITY_CONTRAST_FLAW",
             "DUPLICATE_SPEAKABLE_TEXT_FLAW","MISSING_SPEAKABLE_TEXT_FLAW",
@@ -66,7 +61,6 @@ public class AccessibilitySummary {
         if (!flawsByActivity.contains(nodeId)){
             flawsByActivity.add(nodeId);
             flawsByType.put(activityName,flawsByActivity);
-
             reportFlaw(packageName,activityName,checkType,node,extraInfo);
         }
     }
@@ -93,8 +87,6 @@ public class AccessibilitySummary {
             flawsByType.put(activityName,flawsByActivity);
             reportFlaw(packageName,activityName,checkType,node,extraInfo);
         }
-
-
     }
 
     private static void reportFlaw(String packageName, String activityName, String checkType, AccessibilityNodeInfo node, String extraInfo) {
@@ -114,12 +106,9 @@ public class AccessibilitySummary {
 
         if (checkType.equals("ACCESSIBILITY_SIZE_FLAW")) {
             size_flaws.add("ACC_SIZE:"+activityName.replace(packageName,"") +","+nodeId.replace(packageName,"")+","+clazz+","+text+","+extraInfo);
-            //MATE.log_acc("ACC_SIZE:"+activityName.replace(packageName,"") +","+nodeId.replace(packageName,"")+","+text+","+extraInfo);
         }
 
         all_flaws.add("ACC_FLAW:"+activityName.replace(packageName,"") + ","+nodeId.replace(packageName,"")+","+clazz+","+text.replace(",","-")+","+checkType+","+extraInfo);
-        //MATE.log_acc("ACC_FLAW:"+activityName.replace(packageName,"") + ","+widget.getId().replace(packageName,"")+","+text.replace(",","-")+","+extraInfo);
-
 
         MATE.log(checkType+" - " + nodeId + " - " + text);
     }
@@ -129,7 +118,6 @@ public class AccessibilitySummary {
         text = text.replace("\n","#");
         if (checkType.equals("ACCESSIBILITY_CONTRAST_FLAW")) {
             contrast_flaws.add("ACC_CONTRAST:"+activityName.replace(packageName,"") + ","+widget.getId().replace(packageName,"")+","+widget.getClazz()+","+text.replace(",","-")+","+extraInfo);
-            //MATE.log_acc("ACC_CONTRAST:"+activityName.replace(packageName,"") + ","+widget.getId().replace(packageName,"")+","+text.replace(",","-")+","+extraInfo);
         }
 
         all_flaws.add("ACC_FLAW:"+activityName.replace(packageName,"") + ","+widget.getId().replace(packageName,"")+","+widget.getClazz()+","+text.replace(",","-")+","+checkType+","+extraInfo);
@@ -172,15 +160,7 @@ public class AccessibilitySummary {
         if (summaryStr.length()>0)
             summaryStr = summaryStr.substring(0,summaryStr.length()-1);
 
-        //size,contrast,missingspeakabletext,editablecontentdesc,duplicatespeakabletext,clickablespan,duplicateclickablebounds;
-
-//        MATE.log("Accessibility problems:");
-//        MATE.log(" ... size: " + sizeFlaws);
-//        MATE.log(" ... content desc: " + contentDescFlaws);
-//        MATE.log(" ... labeled by: " + labeledByFlaws);
-//        MATE.log(" ... contrastratio: " + contrastFlaws);
-//        MATE.log(" ... mult desc: " + multDescFlaws);
-          MATE.logsum("ACC_SUMMARY:"+currentPackageName+","+total+","+summaryStr);
+        MATE.logsum("ACC_SUMMARY:"+currentPackageName+","+total+","+summaryStr);
 
         MATE.logsum("STATES_VISITED_BY_MATE:"+guiModel.getStates().size());
         Set<String> uniqueActivities = new HashSet<String>();

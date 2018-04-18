@@ -10,14 +10,11 @@ import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.aco.ACO;
-import org.mate.exploration.depthfirst.DepthFirst;
 import org.mate.exploration.random.ManualExploration;
-import org.mate.exploration.random.UniformRandom;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
 import org.mate.model.graph.GraphGUIModel;
-import org.mate.model.graph.StateGraph;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
@@ -42,18 +39,11 @@ public class MATE {
     private Vector<Action> actions;
     private DeviceMgr deviceMgr;
     public static long total_time;
-    public static long RANDOM_LENGH = 500;
+    public static long RANDOM_LENGH;
     private long runningTime = new Date().getTime();
-    public static long TIME_OUT = 30 * 60 * 1000;
+    public static long TIME_OUT;
 
-
-
-    private int antGeneration = 1;
-    private int antNumber = 1;
-    private int antLength = 10;
     private GraphGUIModel completeModel;
-//    private GraphGUIModel partialModelForOneGeneration;
-    private StateGraph graphForOneAnt;
 
     public static String logMessage;
 
@@ -61,70 +51,65 @@ public class MATE {
     //public static Vector<String> checkedWidgets = new Vector<String>();
     public static Set<String> visitedActivities = new HashSet<String>();
 
-    public void testApp(String explorationStrategy){
+    public MATE(){
+        //get timeout from server using EnvironmentManager
+        long timeout = EnvironmentManager.getTimeout();
+        if (timeout==0)
+            timeout = 30; //set default - 30 minutes
+        MATE.TIME_OUT = timeout * 60 * 1000;
+        MATE.log("TIMEOUT : " + timeout);
+
+        //get random length = number of actions before restarting the app
+        long rlength = EnvironmentManager.getRandomLength();
+        if (rlength==0)
+            rlength = 1000; //default
+        MATE.RANDOM_LENGH = rlength;
+        MATE.log("RANDOM length by server: " + MATE.RANDOM_LENGH);
+
         logMessage="";
-        TIME_OUT = EnvironmentManager.getTimeout()*60*1000;
-        MATE.log("TIMEOUT: " + TIME_OUT);
+
         //Defines the class that represents the device
         Instrumentation instrumentation =  getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
+
+        //get the name of the package of the app currently running
         this.packageName = device.getCurrentPackageName();
         MATE.log("Package name: " + this.packageName);
-        //Defines the class to handle the user interactions
+
+        //checks whether user needs to authorize access to something on the device/emulator
         handleAuth(device);
 
+        //list the activities of the app under test
+        listActivities(instrumentation.getContext());
+
+    }
+
+    public void testApp(String explorationStrategy){
 
         String emulator = EnvironmentManager.detectEmulator(this.packageName);
         MATE.log("EMULATOR: " + emulator);
+
         runningTime = new Date().getTime();
         try{
             if (emulator!=null && !emulator.equals("")){
 
                 this.deviceMgr = new DeviceMgr(device,packageName);
 
-                listActivities(instrumentation.getContext());
+
                 //Analyses the screen and gets an object that represents the screen state (configuration of widgets)
                 IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
-
-                //gets the initial time
-                long t1 = new Date().getTime();
-
-                //starts exploring the app starting from the current node, which, in this case, is the main activity/initial state
-                if (explorationStrategy.equals("DepthFirst")) {
-                    //creates the graph that represents the GUI model
-                    this.guiModel = new GraphGUIModel();
-                    //first state (root node - action ==null)
-                    this.guiModel.updateModel(null,state);
-                    DepthFirst depthFirst = new DepthFirst(deviceMgr, packageName, guiModel);
-                    depthFirst.startExploreDepthFirst(guiModel.getCurrentStateId(), runningTime);
-                    MATE.log("total time: " + total_time);
-                }
 
                 if (explorationStrategy.equals("AccRandom")) {
                     //creates the graph that represents the GUI model
                     this.guiModel = new GraphGUIModel();
                     //first state (root node - action ==null)
                     this.guiModel.updateModel(null,state);
-                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,this,guiModel);
+                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,guiModel,true);
                     unirandomacc.startUniformRandomExploration(state,runningTime);
                 }
 
-                if (explorationStrategy.equals("UniformRandom")){
-                    UniformRandom uniformRandomExploration = new UniformRandom(deviceMgr,packageName,this);
-                    uniformRandomExploration.startUniformRandomExploration(state,runningTime);
-                }
-
-
-                if (explorationStrategy.equals("ManualExploration")) {
-                    this.guiModel = new GraphGUIModel();
-                    //first state (root node - action ==null)
-                    this.guiModel.updateModel(null,state);
-                    ManualExploration manualExploration = new ManualExploration(deviceMgr,packageName,this,guiModel);
-                    manualExploration.startManualExploration(runningTime);
-                }
-
                 checkVisitedActivities(explorationStrategy);
-                //AccessibilityChecker.checkAccessibility(packageName,guiModel);
+                EnvironmentManager.releaseEmulator();
             }
             else
                 MATE.log("Emulator is null");
@@ -134,7 +119,7 @@ public class MATE {
         }
         finally{
             EnvironmentManager.releaseEmulator();
-            EnvironmentManager.deleteAllScreenShots(packageName);
+            //EnvironmentManager.deleteAllScreenShots(packageName);
         }
 
     }
@@ -186,18 +171,6 @@ public class MATE {
 
     }
 
-    public void executeACO(){
-        //Defines the class that represents the device
-        Instrumentation instrumentation =  getInstrumentation();
-        device = UiDevice.getInstance(instrumentation);
-        packageName = device.getCurrentPackageName();
-        deviceMgr = new DeviceMgr(device,packageName);
-        //create a model for all ants in all generations
-        completeModel = new GraphGUIModel();
-        ACO aco = new ACO(deviceMgr,packageName,completeModel);
-        aco.startExploreACO();
-    }
-
     public static void log(String msg) {
         Log.i("apptest", msg);
     }
@@ -213,30 +186,6 @@ public class MATE {
         logMessage+=msg+"\n";
     }
 
-    /*
-    private int getNumberOfActivitiesVisited(){
-        Set<String> visitedActivities = new HashSet<String>();
-        for (ScreenNode scnd: guiModel.getStateGraph().getScreenNodes().values()){
-            visitedActivities.add(scnd.getActivityName());
-        }
-        return visitedActivities.size();
-    }
-
-    private void reportActivitiesVisited() {
-
-        listActivities(getInstrumentation().getContext());
-
-        log("*****");
-        Set<String> visitedActivities = new HashSet<String>();
-        for (ScreenNode scnd: guiModel.getStateGraph().getScreenNodes().values()){
-            visitedActivities.add(scnd.getActivityName());
-        }
-        MATE.log("Number of activities: " + visitedActivities.size());
-        for (String actName: visitedActivities){
-            MATE.log("  "+actName);
-        }
-    }
-*/
     public void listActivities(Context context){
 
         //list all activities of the application being executed
@@ -250,21 +199,6 @@ public class MATE {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    public int getNumberOfActivities(Context context){
-        PackageManager pm = (PackageManager) context.getPackageManager();
-        ActivityInfo[] activities = null;
-        try {
-            PackageInfo pinfo = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-            activities = pinfo.activities;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (activities!=null)
-            return activities.length;
-        else
-            return 0;
     }
 
     public String getPackageName(){

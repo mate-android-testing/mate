@@ -97,7 +97,7 @@ public class EnvironmentManager {
     }
 
     public static long getTimeout(){
-        long timeout = 30;
+        long timeout=0;
 
         String cmd = "timeout";
         try {
@@ -126,7 +126,7 @@ public class EnvironmentManager {
         } catch (IOException e) {
             MATE.log("socket error sending");
             e.printStackTrace();
-            timeout=30;
+            timeout=0;
         }
         return timeout;
     }
@@ -306,30 +306,30 @@ public class EnvironmentManager {
     }
 
     public static void deleteAllScreenShots(String packageName) {
-//        MATE.log("DELETE SCREENSHOTS");
-//        try {
-//            Socket cliente = new Socket(SERVER_IP, 12345);
-//            cliente.setSoTimeout(5000);
-//            PrintStream saida = new PrintStream(cliente.getOutputStream());
-//            saida.println("rm "+emulator+"_"+packageName+"*.png");
-//
-//            String serverResponse="";
-//            BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
-//            while(true) {
-//                if ((serverResponse = in.readLine()) != null) {
-//                    break;
-//                }
-//            }
-//            cliente.close();
-//            saida.close();
-//        } catch (IOException e) {
-//            MATE.log_acc("socket error: delete png");
-//            e.printStackTrace();
-//        }
+        MATE.log("DELETE SCREENSHOTS");
+        try {
+            Socket cliente = new Socket(SERVER_IP, 12345);
+            cliente.setSoTimeout(5000);
+            PrintStream saida = new PrintStream(cliente.getOutputStream());
+            saida.println("rm "+emulator+"_"+packageName+"*.png");
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    break;
+                }
+            }
+            cliente.close();
+            saida.close();
+        } catch (IOException e) {
+            MATE.log_acc("socket error: delete png");
+            e.printStackTrace();
+        }
     }
 
     public static long getRandomLength(){
-        long length = 1000;
+        long length = 0;
 
         String cmd = "randomlength";
         try {
@@ -358,7 +358,7 @@ public class EnvironmentManager {
         } catch (IOException e) {
             MATE.log("socket error sending");
             e.printStackTrace();
-            length=1000;
+            length=0;
         }
         return length;
     }

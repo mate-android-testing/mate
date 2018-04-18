@@ -25,12 +25,8 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 @RunWith(AndroidJUnit4.class)
 public class CheckScreen {
 
-
-
     @Test
     public void useAppContext() throws Exception {
-        IGUIModel iguiModel = new GraphGUIModel();
-        Date time = new Date();
         IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
         Vector<Action> actions = screenState.getActions();
 
@@ -45,7 +41,6 @@ public class CheckScreen {
 
         MATE.log("");
         MATE.log("");
-
 
         //iguiModel.updateModel(null,screenState);
         //screenState.setId(String.valueOf(time.getTime()));

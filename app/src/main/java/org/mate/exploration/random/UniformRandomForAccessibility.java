@@ -26,14 +26,16 @@ public class UniformRandomForAccessibility {
     private Vector<Action> executableActions;
     private IGUIModel guiModel;
     public static String currentActivityName;
+    private boolean runAccChecks;
 
 
     public UniformRandomForAccessibility(DeviceMgr deviceMgr,
-                                         String packageName, MATE mate, IGUIModel guiModel){
+                                         String packageName, IGUIModel guiModel, boolean runAccChecks){
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.guiModel = guiModel;
         this.currentActivityName="";
+        this.runAccChecks = runAccChecks;
     }
 
 
@@ -104,63 +106,12 @@ public class UniformRandomForAccessibility {
                         //   then a new state is created (newstate = true)
                         boolean newState = guiModel.updateModel(action,state);
 
+
+                        if (this.runAccChecks)
                         //if it is a new state or the initial screen (first action)
                         //    then check the accessibility properties of the screen
                         if (newState || numberOfActions==1){
-
-                            //updates the current activity name
-                            this.currentActivityName=state.getActivityName();
-                            MATE.log("start ACCESSIBILITY CHECKS: " );
-                            MATE.logactivity(state.getActivityName());
-
-
-                            //prepare for collecting results
-                            AccessibilitySummary.currentActivityName=state.getActivityName();
-                            AccessibilitySummary.currentPackageName=state.getPackageName();
-
-                            //run accessibility checks implemented by Google ATF / eyes free:
-                            //   EditableContentDesc
-                            //   SpeakableTextPresent
-                            //   ClickableSpan
-                            //   TouchTargetSize
-                            //   DuplicateClickableBounds
-                            AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();
-                            accChecker.runAccessibilityTests(state);
-
-                            //run accessibility checks implemented by MATE team
-
-                            //create checker for multiple (duplicate) content description
-                            MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
-                            //create checker for contrast issues
-                            ContrastRatioAccessibilityCheck contrastChecker =
-                                    new ContrastRatioAccessibilityCheck(state.getPackageName(),
-                                            state.getActivityName(),
-                                            state.getId(),
-                                            device.getDisplayWidth(),
-                                            device.getDisplayHeight());
-
-                            //run checks for each widget on the screen
-                            for (Widget widget: state.getWidgets()) {
-
-                                //run constrast check
-                                boolean contrastRatioOK = contrastChecker.check(widget);
-
-                                if (!contrastRatioOK) {
-                                    //report accessibility flaw found
-                                    AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW", widget, String.valueOf(contrastChecker.contratio));
-                                    //ANDRE: mandar gerar imagem com marcacao // generate marked image/screenshot
-                                    //TBD
-                                    EnvironmentManager.markScreenshot(widget,selectedScreenState.getPackageName(),selectedScreenState.getId());
-                                }
-
-                                //run multiple desc check
-                                boolean multDescOK = multDescChecker.check(widget);
-                                if (!multDescOK)
-                                    //report accessibility flaw found
-                                    AccessibilitySummary.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
-
-                            }
-                            MATE.log("finish ACCESSIBILITY CHECKS: " );
+                            runAccessibilityChecks(state,selectedScreenState);
                         }
                     }
 
@@ -177,6 +128,63 @@ public class UniformRandomForAccessibility {
             currentTime = new Date().getTime();
         }
         MATE.log_acc("NUMBER_OF_ACTIONS: " + totalNumberOfActions);
+    }
+
+    private void runAccessibilityChecks(IScreenState state, IScreenState selectedScreenState) {
+
+        //updates the current activity name
+        this.currentActivityName=state.getActivityName();
+        MATE.log("start ACCESSIBILITY CHECKS: " );
+        MATE.logactivity(state.getActivityName());
+
+
+        //prepare for collecting results
+        AccessibilitySummary.currentActivityName=state.getActivityName();
+        AccessibilitySummary.currentPackageName=state.getPackageName();
+
+        //run accessibility checks implemented by Google ATF / eyes free:
+        //   EditableContentDesc
+        //   SpeakableTextPresent
+        //   ClickableSpan
+        //   TouchTargetSize
+        //   DuplicateClickableBounds
+        AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();
+        accChecker.runAccessibilityTests(state);
+
+        //run accessibility checks implemented by MATE team
+
+        //create checker for multiple (duplicate) content description
+        MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
+        //create checker for contrast issues
+        ContrastRatioAccessibilityCheck contrastChecker =
+                new ContrastRatioAccessibilityCheck(state.getPackageName(),
+                        state.getActivityName(),
+                        state.getId(),
+                        device.getDisplayWidth(),
+                        device.getDisplayHeight());
+
+        //run checks for each widget on the screen
+        for (Widget widget: state.getWidgets()) {
+
+            //run constrast check
+            boolean contrastRatioOK = contrastChecker.check(widget);
+
+            if (!contrastRatioOK) {
+                //report accessibility flaw found
+                AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW", widget, String.valueOf(contrastChecker.contratio));
+                //ANDRE: mandar gerar imagem com marcacao // generate marked image/screenshot
+                //TBD
+                EnvironmentManager.markScreenshot(widget,selectedScreenState.getPackageName(),selectedScreenState.getId());
+            }
+
+            //run multiple desc check
+            boolean multDescOK = multDescChecker.check(widget);
+            if (!multDescOK)
+                //report accessibility flaw found
+                AccessibilitySummary.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
+
+        }
+        MATE.log("finish ACCESSIBILITY CHECKS: " );
     }
 
     public int selectRandomAction(int executionActionSize){
