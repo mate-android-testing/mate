@@ -1,7 +1,5 @@
-package org.mate.accessibility;
+package org.mate.accessibility.check;
 
-import org.mate.MATE;
-import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 

@@ -2,10 +2,9 @@ package org.mate.exploration.random;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
-import org.mate.accessibility.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.MultipleContentDescCheck;
-import org.mate.accessibility.results.AccessibilitySummary;
-import org.mate.exceptions.AUTCrashException;
+import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.MultipleContentDescCheck;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
@@ -15,7 +14,6 @@ import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
 
 import java.util.Date;
-import java.util.Random;
 import java.util.Vector;
 
 import static org.mate.MATE.device;
@@ -77,8 +75,8 @@ public class ManualExploration {
             if (newState || cont==1){
                 MATE.logactivity(state.getActivityName());
                 AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();
-                AccessibilitySummary.currentActivityName=state.getActivityName();
-                AccessibilitySummary.currentPackageName=state.getPackageName();
+                AccessibilitySummaryResults.currentActivityName=state.getActivityName();
+                AccessibilitySummaryResults.currentPackageName=state.getPackageName();
                 accChecker.runAccessibilityTests(state);
                 //MATE.log_acc("CHECK CONTRAST");
                 MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
@@ -90,11 +88,11 @@ public class ManualExploration {
                     //MATE.log("Check contrast of "+widget.getId() + ": " + contrastChecker.contratio);
 
                     if (!contrastRatioOK)
-                        AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,String.valueOf(contrastChecker.contratio));
+                        AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,String.valueOf(contrastChecker.contratio));
 
                     boolean multDescOK = multDescChecker.check(widget);
                     if (!multDescOK)
-                        AccessibilitySummary.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
+                        AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
 
                 }
             }

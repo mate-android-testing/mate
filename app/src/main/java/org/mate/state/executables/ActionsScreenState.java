@@ -125,16 +125,9 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
                 idAmount.put(widget.getId(),++amount);
                 amount = idAmount.get(widget.getId());
             }
-//            if (widget.getId().contains("taskRow_innerLayout")) {
-//                MATE.log(widget.getId()+" - amount: " + amount);
-//                MATE.log("sameIDwidgets: " + sameIDWidgets.get(widget.getId()));
-//                MATE.log("max amount: " + getMaxAmountOfID(sameIDWidgets,widget.getId()));
-//                MATE.log("same widget id size: " + sameIDWidgets.get(widget.getId()).size());
-//            }
+
             if (amount>getMaxAmountOfID(sameIDWidgets,widget.getId()) && sameIDWidgets.get(widget.getId()).size()==2){
                 selected=false;
-//                if (widget.getId().contains("taskRow_innerLayout"))
-//                    MATE.log("selected = false");
             }
 
             if (selected){
@@ -165,11 +158,6 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
                     selected=false;
             }
 
-//            if (selected){
-//                if(widget.getClazz().contains("Layout"))
-//                    selected=false;
-//            }
-
             if (!widget.isEnabled())
                 selected=false;
 
@@ -185,8 +173,6 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
                     event = new Action(widget,ActionType.TYPE_TEXT);
                     executables.add(0,event);
                     editables++;
-                    //event = new Action(widget,ActionType.CLEAR_WIDGET);
-                    //executables.add(event);
                 }
 
 
@@ -231,7 +217,6 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
             }
         }
 
-
         //update number of ids
         for (String id: idAmount.keySet()){
             Vector<Integer> amounts = sameIDWidgets.get(id);
@@ -260,7 +245,6 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
 
         if (activityName.contains("GoogleOAuthActivity"))
             executables = new Vector<Action>();
-        //if (executables.size()==0)
         executables.add(new Action(ActionType.BACK));
         executables.add(new Action(ActionType.MENU));
 
@@ -291,7 +275,6 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
                     setActThis.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
                 else
                     setActThis.add(act.getWidget().getId() + "-" + act.getActionType());
-                //MATE.log("THIS: " + act.getWidget().getId() + "-" + act.getActionType());
             }
 
         }
@@ -301,29 +284,23 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
                     setActOther.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
                 else
                     setActOther.add(act.getWidget().getId() + "-" + act.getActionType());
-                //MATE.log("OTHER: " + act.getWidget().getId() + "-" + act.getActionType());
             }
         }
 
-        //MATE.log("    this: " + setActThis.size() + " vs other: " + actionsOther.size());
         if (setActThis.size()==setActOther.size()){
 
             for (String strActThis: setActThis){
                 if (!setActOther.contains(strActThis)) {
-                    //MATE.log(" DIF: " + strActThis);
                     return false;
                 }
             }
 
-
-            //MATE.log("****check editables");
             Hashtable<String, Widget> editablesThis = this.getEditableWidgets();
             Hashtable<String, Widget> editablesOther = screenState.getEditableWidgets();
 
             for (Widget wdgThis: editablesThis.values()){
 
                 Widget wdgOther = editablesOther.get(wdgThis.getId());
-                // MATE.log("*** "+wdgOther.getId()+" vs " + wdgThis.getId());
                 if (wdgOther==null) {
                     return false;
                 }
@@ -357,38 +334,22 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
     }
 
 
+    //yan
     @Override
     public void updatePheromone(Action triggeredAction) {
         //find pheromone in hashMap and update
     }
 
+    //yan
     @Override
     public HashMap<Action, Float> getActionsWithPheromone() {
         return actionsWithPheromone;
     }
 
+    //yan
     @Override
     public AccessibilityNodeInfo getRootAccessibilityNodeInfo() {
         return rootNodeInfo;
     }
 
-    public void setRootAccessibilityNodeInfo(AccessibilityNodeInfo rootNodeInfo){
-        this.rootNodeInfo = rootNodeInfo;
-    }
-
-    public void setActionsWithPheromone(HashMap<Action, Float> actionsWithPheromone) {
-        this.actionsWithPheromone = actionsWithPheromone;
-    }
-
-    public HashMap<Action, Float> getActionWithFitness() {
-        return actionWithFitness;
-    }
-
-    public void setActionWithFitness(HashMap<Action, Float> actionWithFitness) {
-        this.actionWithFitness = actionWithFitness;
-    }
-
-    public void initPheromone(){
-
-    }
 }

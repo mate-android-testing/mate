@@ -83,12 +83,6 @@ public class AppScreen {
         if (id==null)
             id="";
 
-
-//        if (id.contains("go_to_help")){
-//            UiObject2 obj2 = device.findObject(By.res(id));
-//        }
-
-
         String clazz = "null";
         if (obj.getClassName()!=null)
             clazz = obj.getClassName().toString();

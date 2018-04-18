@@ -14,14 +14,6 @@ public class ScreenNode {
     private String id;
     private IScreenState screenState;
     private Vector<EventEdge> eventEdges;
-    private boolean searchVisited;
-    private boolean explorationVisited;
-
-    private Action triggeredAction;
-
-    public void demo(Action triggeredAction){
-        screenState.updatePheromone(triggeredAction);
-    }
 
     public void initPheromone(){
         //TODO: how about selectState.getactions
@@ -35,8 +27,6 @@ public class ScreenNode {
         setId(id);
         setScreenState(screenState);
         eventEdges = new Vector<EventEdge>();
-        searchVisited = false;
-
         //init pheromone when creating a new node
         initPheromone();
     }
@@ -74,9 +64,6 @@ public class ScreenNode {
         return neighbors;
     }
 
-    public void setEventEdges(Vector<EventEdge> eventEdges) {
-        this.eventEdges = eventEdges;
-    }
 
     public String getPackageName() {
         return screenState.getPackageName();
@@ -87,20 +74,4 @@ public class ScreenNode {
         return screenState.getActivityName();
     }
 
-
-    public void setSearchVisited(boolean searchVisited) {
-        this.searchVisited = searchVisited;
-    }
-
-    public boolean isSearchVisited() {
-         return this.searchVisited;
-    }
-
-    public void setExplorationVisited(boolean explorationVisited) {
-        this.explorationVisited = explorationVisited;
-    }
-
-    public boolean isExplorationVisited(){
-        return explorationVisited;
-    }
 }

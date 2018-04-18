@@ -2,9 +2,9 @@ package org.mate.exploration.random;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
-import org.mate.accessibility.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.MultipleContentDescCheck;
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.MultipleContentDescCheck;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
@@ -145,8 +145,8 @@ public class UniformRandomForAccessibility {
 
 
         //prepare for collecting results
-        AccessibilitySummary.currentActivityName=state.getActivityName();
-        AccessibilitySummary.currentPackageName=state.getPackageName();
+        AccessibilitySummaryResults.currentActivityName=state.getActivityName();
+        AccessibilitySummaryResults.currentPackageName=state.getPackageName();
 
         //run accessibility checks implemented by Google ATF / eyes free:
         //   EditableContentDesc
@@ -177,7 +177,7 @@ public class UniformRandomForAccessibility {
 
             if (!contrastRatioOK) {
                 //report accessibility flaw found
-                AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW", widget, String.valueOf(contrastChecker.contratio));
+                AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW", widget, String.valueOf(contrastChecker.contratio));
                 //ANDRE: mandar gerar imagem com marcacao // generate marked image/screenshot
                 //TBD
                 EnvironmentManager.markScreenshot(widget,selectedScreenState.getPackageName(),selectedScreenState.getId());
@@ -187,7 +187,7 @@ public class UniformRandomForAccessibility {
             boolean multDescOK = multDescChecker.check(widget);
             if (!multDescOK)
                 //report accessibility flaw found
-                AccessibilitySummary.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
+                AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
 
         }
         MATE.log("finish ACCESSIBILITY CHECKS: " );

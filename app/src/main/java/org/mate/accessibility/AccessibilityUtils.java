@@ -17,7 +17,6 @@ public class AccessibilityUtils {
         if (node==null){
             return false;
         }
-        boolean isClickable = false;
 
         if (node.isClickable() || node.isEditable() || node.isLongClickable() || node.isScrollable())
             return true;
@@ -50,43 +49,6 @@ public class AccessibilityUtils {
             if (wparent.getClassName().toString().contains(type))
                 return true;
         return false;
-    }
-
-    public String getIdFromAccessibityNodeInfo(AccessibilityNodeInfo obj){
-        AccessibilityNodeInfo parent = obj.getParent();
-        String parentResourceId = this.getValidResourceIDFromTree(parent);
-
-        String id = obj.getViewIdResourceName();
-        if (id==null)
-            id="";
-
-
-//        if (id.contains("go_to_help")){
-//            UiObject2 obj2 = device.findObject(By.res(id));
-//        }
-
-
-        String clazz = "null";
-        if (obj.getClassName()!=null)
-            clazz = obj.getClassName().toString();
-
-        String text = "";
-        if (obj.getText()!=null)
-            text = obj.getText().toString();
-
-
-        String newId = clazz;
-        if (id.equals("")) {
-
-            if (parent!=null && !parentResourceId.equals("")){
-
-                id = parentResourceId+"-child-"+parent.getChildCount()+":"+clazz;
-            }
-            else
-                id = clazz+"-"+text;
-        }
-
-        return id;
     }
 
     public static String getValidResourceIDFromTree(AccessibilityNodeInfo obj){

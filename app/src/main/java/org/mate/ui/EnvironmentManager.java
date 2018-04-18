@@ -29,7 +29,6 @@ public class EnvironmentManager {
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
-
             String release="";
             String serverResponse="";
             BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
@@ -39,7 +38,6 @@ public class EnvironmentManager {
                     break;
                 }
             }
-
 
             server.close();
             output.close();
@@ -53,9 +51,6 @@ public class EnvironmentManager {
     }
 
     public static String detectEmulator(String packageName){
-
-        
-
 
         String cmd = "getEmulator:"+packageName;
         try {
@@ -163,40 +158,6 @@ public class EnvironmentManager {
 
         return currentActivity;
     }
-
-//    public static String getDensity(){
-//        String density = "0";
-//
-//        String cmd = "get density";
-//        try {
-//            Socket server = new Socket(SERVER_IP, 12345);
-//            server.setSoTimeout(5000);
-//            PrintStream output = new PrintStream(server.getOutputStream());
-//            output.println(cmd);
-//
-//
-//            String serverResponse="";
-//            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-//            while(true) {
-//                if ((serverResponse = in.readLine()) != null) {
-//                    density = serverResponse;
-//                    break;
-//                }
-//            }
-//
-//            server.close();
-//            output.close();
-//            in.close();
-//
-//        } catch (IOException e) {
-//            MATE.log_acc("socket error sending");
-//            e.printStackTrace();
-//            density="0";
-//        }
-//
-//        return density;
-//    }
-
 
     public static String screenShot(String packageName,String nodeId){
 

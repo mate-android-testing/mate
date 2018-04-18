@@ -15,7 +15,6 @@
 package com.google.android.apps.common.testing.accessibility.framework;
 
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheckResult.AccessibilityCheckResultType;
-import com.google.eyesfree.utils.AccessibilityNodeInfoUtils;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -24,9 +23,8 @@ import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityUtils;
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
@@ -90,7 +88,7 @@ public class TouchTargetSizeInfoCheck extends AccessibilityInfoCheck {
           targetWidth,
           targetHeight,
           density);
-      AccessibilitySummary.addAccessibilityFlaw("ACCESSIBILITY_SIZE_FLAW",info,(int)targetWidth+","+(int)targetHeight);
+      AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_SIZE_FLAW",info,(int)targetWidth+","+(int)targetHeight);
       results.add(new AccessibilityInfoCheckResult(this.getClass(),
           AccessibilityCheckResultType.ERROR, message, info));
     }

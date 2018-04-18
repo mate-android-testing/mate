@@ -1,4 +1,4 @@
-package org.mate.accessibility;
+package org.mate.accessibility.check;
 
 import org.mate.MATE;
 import org.mate.ui.Widget;

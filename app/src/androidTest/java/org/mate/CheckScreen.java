@@ -3,21 +3,13 @@ package org.mate;
 import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.accessibility.ContrastRatioAccessibilityCheck;
-import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
-import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.AccessibilityChecker;
 import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
-import java.util.Date;
 import java.util.Vector;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Created by marceloeler on 29/06/17.

@@ -29,8 +29,7 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 
 
-import org.mate.MATE;
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
@@ -76,7 +75,7 @@ public class SpeakableTextPresentInfoCheck extends AccessibilityInfoCheck {
         results.add(new AccessibilityInfoCheckResult(this.getClass(),
             AccessibilityCheckResultType.ERROR,
             "View is missing speakable text needed for a screen reader", info));
-        AccessibilitySummary.addAccessibilityFlaw("MISSING_SPEAKABLE_TEXT_FLAW",info,"");
+        AccessibilitySummaryResults.addAccessibilityFlaw("MISSING_SPEAKABLE_TEXT_FLAW",info,"");
       }
     } else {
       results.add(new AccessibilityInfoCheckResult(this.getClass(),

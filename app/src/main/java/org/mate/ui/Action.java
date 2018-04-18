@@ -25,10 +25,6 @@ public class Action {
         return adjActions;
     }
 
-    public void setAdjActions(Vector<Action> adjActions){
-        this.adjActions = adjActions;
-    }
-
     public Action(int actionType){
         this.actionType = actionType;
         fitness=0;
@@ -41,10 +37,6 @@ public class Action {
         setExtraInfo("");
         adjActions = new Vector<Action>();
         setExecuted(false);
-    }
-
-    public boolean isExecuted() {
-        return executed;
     }
 
     public void setExecuted(boolean executed) {
@@ -76,9 +68,6 @@ public class Action {
 
     public void addAdjAction(Action eventAction){
         adjActions.add(eventAction);
-    }
-    public float getFitness() {
-        return fitness;
     }
 
     public void setFitness(float fitness) {

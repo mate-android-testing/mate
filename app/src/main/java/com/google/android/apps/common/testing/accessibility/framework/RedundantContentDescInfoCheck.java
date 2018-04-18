@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.AccessibilitySummaryResults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class RedundantContentDescInfoCheck extends AccessibilityInfoHierarchyChe
               AccessibilityCheckResultType.WARNING,
               "View's speakable text ends with view type",
               info));
-              AccessibilitySummary.addAccessibilityFlaw("REDUNDANT_CONTENT_DESC_INFO",info,"");
+              AccessibilitySummaryResults.addAccessibilityFlaw("REDUNDANT_CONTENT_DESC_INFO",info,"");
           break;
         }
       }

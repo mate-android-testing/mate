@@ -1,10 +1,8 @@
-package org.mate.accessibility.results;
+package org.mate.accessibility;
 
-import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
-import org.mate.accessibility.AccessibilityUtils;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
@@ -18,7 +16,7 @@ import java.util.Vector;
  * Created by marceloeler on 26/07/17.
  */
 
-public class AccessibilitySummary {
+public class AccessibilitySummaryResults {
 
     public static Hashtable<String,Hashtable<String,Set<String>>> flawsByTypeAndActivity = new Hashtable<String,Hashtable<String,Set<String>>>();
 

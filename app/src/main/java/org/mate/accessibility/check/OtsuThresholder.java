@@ -1,4 +1,4 @@
-package org.mate.accessibility;
+package org.mate.accessibility.check;
 
 /**
  * Created by marceloeler on 19/02/17.

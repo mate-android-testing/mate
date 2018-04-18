@@ -1,4 +1,4 @@
-package org.mate.accessibility;
+package org.mate.accessibility.check;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;

@@ -26,8 +26,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.EditText;
 
 
-import org.mate.MATE;
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
@@ -57,7 +56,7 @@ public class EditableContentDescInfoCheck extends AccessibilityInfoCheck {
       if (info.isEditable()) {
         //MATE.log("is editable");
         if (!TextUtils.isEmpty(info.getContentDescription())) {
-          AccessibilitySummary.addAccessibilityFlaw("EDITABLE_CONTENT_DESC_FLAW",info,"");
+          AccessibilitySummaryResults.addAccessibilityFlaw("EDITABLE_CONTENT_DESC_FLAW",info,"");
           results.add(new AccessibilityInfoCheckResult(this.getClass(),
               AccessibilityCheckResultType.ERROR,
               "Editable view should not have a contentDescription", info));
@@ -78,7 +77,7 @@ public class EditableContentDescInfoCheck extends AccessibilityInfoCheck {
           results.add(new AccessibilityInfoCheckResult(this.getClass(),
               AccessibilityCheckResultType.ERROR, "EditText should not have a contentDescription",
               info));
-          AccessibilitySummary.addAccessibilityFlaw("EDITABLE_CONTENT_DESC_FLAW",info,"");
+          AccessibilitySummaryResults.addAccessibilityFlaw("EDITABLE_CONTENT_DESC_FLAW",info,"");
         }
       } else {
         results.add(new AccessibilityInfoCheckResult(this.getClass(),

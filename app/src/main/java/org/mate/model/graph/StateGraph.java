@@ -91,18 +91,11 @@ public class StateGraph {
 
     //poor algorithm - quick implementation
     public Vector<Vector<Action>> pathFromTo(String sourceStr, String targetStr){
-        //System.out.println("path from "+sourceStr+" to " + targetStr);
         ScreenNode source = getScreenNodes().get(sourceStr);
         ScreenNode target = getScreenNodes().get(targetStr);
 
         String pathID =source.getId()+"-"+target.getId();
 
-//        Vector<Vector<EventEdge>> multPaths = savedPaths.get(pathID);
-//        if (multPaths!=null){
-//            return multPaths;
-//        }
-//        else
-//            multPaths = new Vector<Vector<EventEdge>>();
         Vector<Vector<Action>> multPaths  = new Vector<Vector<Action>>();
         long ts1 = new Date().getTime();
         Vector<Action> path = new Vector<Action>();
@@ -117,7 +110,6 @@ public class StateGraph {
             allStrPaths = new Vector<String>();
         }
         else{
-            //System.out.println("not null");
             //busca no grafo existente - se nao tiver atualiza e procura
             for (String stPath: allStrPaths){
                 int indexSource = stPath.indexOf(source.getId());
@@ -194,7 +186,6 @@ public class StateGraph {
         if ( (t2-t1)>pathTimeout) {
             return;
         }
-        node.setSearchVisited(true);
         visitedNodes.add(node);
         if (!path.equals(""))
             path+="-";
@@ -225,18 +216,4 @@ public class StateGraph {
         visitedNodes.remove(node);
     }
 
-//    public void updateEdgeFitness(String transitionID, float fitness) {
-//        EventEdge edge = this.eventEdges.get(transitionID);
-//        if (edge!=null){
-//            edge.setFitness(fitness);
-//        }
-//    }
-//
-//    public float getEdgeFitness(String transitionID) {
-//        EventEdge edge = this.eventEdges.get(transitionID);
-//        if (edge!=null){
-//            return edge.getFitness();
-//        }
-//        return -9999;
-//    }
 }

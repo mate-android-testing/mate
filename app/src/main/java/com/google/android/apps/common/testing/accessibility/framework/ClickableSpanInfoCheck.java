@@ -23,7 +23,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
@@ -32,7 +31,7 @@ import android.widget.TextView;
 
 
 import org.mate.MATE;
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class ClickableSpanInfoCheck extends AccessibilityInfoCheck {
             if (url == null) {
               results.add(new AccessibilityInfoCheckResult(this.getClass(),
                   AccessibilityCheckResultType.ERROR, "URLSpan has null URL", info));
-              AccessibilitySummary.addAccessibilityFlaw("CLICKABLE_SPAN_FLAW",info,"");
+              AccessibilitySummaryResults.addAccessibilityFlaw("CLICKABLE_SPAN_FLAW",info,"");
             } else {
               Uri uri = Uri.parse(url);
               if (uri.isRelative()) {
@@ -87,7 +86,7 @@ public class ClickableSpanInfoCheck extends AccessibilityInfoCheck {
                 results.add(new AccessibilityInfoCheckResult(this.getClass(),
                     AccessibilityCheckResultType.ERROR, "URLSpan should not contain relative links",
                     info));
-                AccessibilitySummary.addAccessibilityFlaw("CLICKABLE_SPAN_FLAW",info,"");
+                AccessibilitySummaryResults.addAccessibilityFlaw("CLICKABLE_SPAN_FLAW",info,"");
               }
             }
           } else { // Non-URLSpan ClickableSpan
@@ -95,7 +94,7 @@ public class ClickableSpanInfoCheck extends AccessibilityInfoCheck {
                 AccessibilityCheckResultType.ERROR,
                 "URLSpan should be used in place of ClickableSpan for improved accessibility",
                 info));
-            AccessibilitySummary.addAccessibilityFlaw("CLICKABLE_SPAN_FLAW",info,"");
+            AccessibilitySummaryResults.addAccessibilityFlaw("CLICKABLE_SPAN_FLAW",info,"");
           }
         }
       }

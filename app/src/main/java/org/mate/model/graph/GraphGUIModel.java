@@ -26,18 +26,12 @@ public class GraphGUIModel implements IGUIModel {
         return stateId;
     }
 
-    public void setStateId(String stateId) {
-        this.stateId = stateId;
-    }
-
     String stateId = null;
     ScreenNode newScreenNode = null;
     private EventEdge currentEventEdge;
     public static int stateCount;
     private int nodeCount;
-    //need to know the number of node for complete model and partial model
-//    private int nodeCount = 0;
-    private boolean isFirstNode = false;
+
     public GraphGUIModel(){
         stateGraph = new StateGraph();
         stateCount = 0;
@@ -58,7 +52,7 @@ public class GraphGUIModel implements IGUIModel {
         if (currentScreenNode==null)
             return "";
         return
-                currentScreenNode.getId();
+             currentScreenNode.getId();
     }
 
     public IScreenState getStateById(String id){
@@ -73,14 +67,10 @@ public class GraphGUIModel implements IGUIModel {
         if (screenState==null)
             return "";
         for (ScreenNode scNode: stateGraph.getScreenNodes().values()){
-            //MATE.log("comparing with " + scNode.getId());
+            //compares widgest/actions of the screens on the graph
             if (scNode.getScreenState().equals(screenState)){
                 return scNode.getId();
             }
-
-            //activity granularity
-            //if (scNode.getScreenState().getActivityName().equals(screenState.getActivityName()))
-            //    return scNode.getId();
         }
         return "";
     }
@@ -112,7 +102,6 @@ public class GraphGUIModel implements IGUIModel {
         else {
             if (screenState != null) {
                 String stateId = getNewNodeName(screenState);
-                MATE.log("STATEID found: " + stateId);
                 EventEdge eventEdge = null;
                 ScreenNode newScreenNode;
                 if (stateId.equals("")) {
@@ -144,6 +133,7 @@ public class GraphGUIModel implements IGUIModel {
     }
 
 
+    //yan
     public IScreenState updateModelForACO(Action event, IScreenState screenState, Ant ant){
         IScreenState historyScreenState = null;
         if (event == null)
@@ -190,19 +180,12 @@ public class GraphGUIModel implements IGUIModel {
         return stateGraph.pathFromTo(source,target);
     }
 
-    public ScreenNode getCurrentScreenNode() {
-        return currentScreenNode;
-    }
-
-    public void setCurrentScreenNode(ScreenNode currentScreenNode) {
-        this.currentScreenNode = currentScreenNode;
-    }
-
     public String getNewNodeName(IScreenState screenState) {
         //return "";
         return findScreenNodeByState(screenState);
     }
 
+    //yan
     public boolean getNewNodeNameForACO(IScreenState screenState,boolean isFirstNodeOfAnt) {
         stateId = findScreenNodeByState(screenState);
         if (stateId.equals("")){
@@ -223,36 +206,6 @@ public class GraphGUIModel implements IGUIModel {
 
     public StateGraph getStateGraph() {
         return stateGraph;
-    }
-
-    public void setStateGraph(StateGraph stateGraph) {
-        this.stateGraph = stateGraph;
-    }
-
-//    public void updateTransitionFitness(String transitionID, float fitness){
-//        stateGraph.updateEdgeFitness(transitionID,fitness);
-//    }
-//
-//    public float getTransitionFitness(String transitionID){
-//        return stateGraph.getEdgeFitness(transitionID);
-//    }
-public EventEdge getCurrentEventEdge() {
-    return currentEventEdge;
-}
-
-    public void setCurrentEventEdge(EventEdge currentEventEdge) {
-        this.currentEventEdge = currentEventEdge;
-    }
-
-    public ScreenNode getNewScreenNode() {
-        return newScreenNode;
-    }
-
-    public void setNewScreenNode(ScreenNode newScreenNode) {
-        this.newScreenNode = newScreenNode;
-    }
-    public void setNodeCount(int nodeCount) {
-        this.nodeCount = nodeCount;
     }
 
     public Vector<IScreenState> getStates(){

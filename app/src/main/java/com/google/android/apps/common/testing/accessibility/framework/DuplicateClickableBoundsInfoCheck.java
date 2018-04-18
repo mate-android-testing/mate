@@ -21,9 +21,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityUtils;
-import org.mate.accessibility.results.AccessibilitySummary;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
@@ -67,7 +66,7 @@ public class DuplicateClickableBoundsInfoCheck extends AccessibilityInfoHierarch
             AccessibilityCheckResultType.ERROR,
             "Clickable view has same bounds as another clickable view (likely a descendent)",
             clickableRectToInfoMap.get(bounds)));
-            AccessibilitySummary.addAccessibilityFlaw("DUPLICATE_CLICKABLE_BOUNDS_FLAW",root,"");
+            AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_CLICKABLE_BOUNDS_FLAW",root,"");
       } else {
         clickableRectToInfoMap.put(bounds, AccessibilityNodeInfo.obtain(root));
       }

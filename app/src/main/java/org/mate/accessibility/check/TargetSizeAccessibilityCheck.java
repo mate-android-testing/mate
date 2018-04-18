@@ -1,12 +1,7 @@
-package org.mate.accessibility;
+package org.mate.accessibility.check;
 
-import android.app.Instrumentation;
-import android.support.test.uiautomator.UiDevice;
-
-import org.mate.MATE;
+import org.mate.accessibility.AccessibilitySettings;
 import org.mate.ui.Widget;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Created by marceloeler on 26/06/17.
