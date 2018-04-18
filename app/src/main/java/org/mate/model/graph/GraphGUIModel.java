@@ -47,8 +47,6 @@ public class GraphGUIModel implements IGUIModel {
     public void addRootNode(IScreenState screenState){
         stateId = "S"+String.valueOf(nodeCount);
         screenState.setId(stateId);
-        //File f = new File("/sdcard/"+stateId+".png");
-        //MATE.device.takeScreenshot(f);
         ScreenNode rnd = new ScreenNode(stateId,screenState);
         stateGraph.setRootNode(rnd);
         stateGraph.addScreenNode(rnd);
@@ -97,7 +95,6 @@ public class GraphGUIModel implements IGUIModel {
             //System.out.println("Throw execption - There is no such state in the state model");
             stateId = "S" + String.valueOf(nodeCount++);
             screenState.setId(stateId);
-            //EnvironmentManager.screenShot(screenState.getPackageName(),stateId);
             newScreenNode = new ScreenNode(stateId, screenState);
             stateGraph.addScreenNode(newScreenNode);
             currentScreenNode = newScreenNode;
@@ -110,7 +107,6 @@ public class GraphGUIModel implements IGUIModel {
 
         if (event == null) {
             addRootNode(screenState);
-            EnvironmentManager.screenShot(screenState.getPackageName(),stateId);
             updated=true;
         }
         else {
@@ -123,7 +119,6 @@ public class GraphGUIModel implements IGUIModel {
                     //new state
                     stateId = "S" + String.valueOf(nodeCount++);
                     screenState.setId(stateId);
-                    EnvironmentManager.screenShot(screenState.getPackageName(),stateId);
                     newScreenNode = new ScreenNode(stateId, screenState);
                     stateGraph.addScreenNode(newScreenNode);
                     updated=true;

@@ -107,11 +107,14 @@ public class UniformRandomForAccessibility {
                         boolean newState = guiModel.updateModel(action,state);
 
 
-                        if (this.runAccChecks)
-                        //if it is a new state or the initial screen (first action)
-                        //    then check the accessibility properties of the screen
-                        if (newState || numberOfActions==1){
-                            runAccessibilityChecks(state,selectedScreenState);
+                        if (this.runAccChecks) {
+                            //if it is a new state or the initial screen (first action)
+                            //    then check the accessibility properties of the screen
+                            if (newState || numberOfActions == 1) {
+
+                                runAccessibilityChecks(state, selectedScreenState);
+
+                            }
                         }
                     }
 
@@ -131,6 +134,9 @@ public class UniformRandomForAccessibility {
     }
 
     private void runAccessibilityChecks(IScreenState state, IScreenState selectedScreenState) {
+
+
+        EnvironmentManager.screenShot(state.getPackageName(),state.getId());
 
         //updates the current activity name
         this.currentActivityName=state.getActivityName();
