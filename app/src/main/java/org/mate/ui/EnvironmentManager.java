@@ -1,7 +1,6 @@
 package org.mate.ui;
 
 import org.mate.MATE;
-import org.mate.accessibility.AccessibilitySettings;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -159,38 +158,11 @@ public class EnvironmentManager {
         return currentActivity;
     }
 
-    public static String screenShot(String packageName,String nodeId){
+    public static void screenShot(String packageName,String nodeId){
 
-        String response="";
         String cmd = "screenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
-        MATE.log(cmd);
-        try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
 
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    response = serverResponse;
-                    MATE.log("screenshot response: " + response);
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log_acc("socket error sending: screenshot");
-            e.printStackTrace();
-        }
-
-        return response;
+        sendCommandToServer(cmd);
     }
 
     public static void clearAppData(String packageName) {
@@ -324,9 +296,51 @@ public class EnvironmentManager {
         return length;
     }
 
-    public static void markScreenshot(Widget widget, String packageName, String nodeId) {
-        //ANDRE
-        String imageName = emulator+"_"+packageName+"_"+nodeId+".png";
-        //cmd = "mark:"+imageName+widget....
+    public static void markScreenshot(final Widget widget, final String packageName,
+                                      final String nodeId, final String flawDescription,
+                                      final String extraInfo) {
+
+        final String imageName = emulator +  "_" + packageName + "_" +
+                String.valueOf(Math.abs(System.currentTimeMillis())) +".png";
+
+        String cmd = "screenshot:"+emulator+":"+imageName;
+
+        sendCommandToServer(cmd);
+
+        cmd = "mark-image:" + imageName + ":x-" + widget.getX1() + ":y-"
+                + widget.getY1() + ":width-" + (widget.getX2() - widget.getX1())
+                + ":heigth-" + (widget.getY2() - widget.getY1()) + ":" + flawDescription + ":" + extraInfo;
+
+        sendCommandToServer(cmd);
+    }
+
+    private static void sendCommandToServer(String cmd) {
+        String response;
+        MATE.log(cmd);
+        try {
+            Socket server = new Socket(SERVER_IP, 12345);
+            server.setSoTimeout(5000);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+
+            String serverResponse = "";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    response = serverResponse;
+                    MATE.log("screenshot response: " + response);
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+        } catch (IOException e) {
+            MATE.log_acc("socket error sending: screenshot");
+            e.printStackTrace();
+        }
     }
 }

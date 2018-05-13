@@ -27,6 +27,7 @@ public class UniformRandomForAccessibility {
     private IGUIModel guiModel;
     public static String currentActivityName;
     private boolean runAccChecks;
+    public static int totalNumberOfChecks;
 
 
     public UniformRandomForAccessibility(DeviceMgr deviceMgr,
@@ -34,7 +35,7 @@ public class UniformRandomForAccessibility {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.guiModel = guiModel;
-        this.currentActivityName="";
+        currentActivityName="";
         this.runAccChecks = runAccChecks;
     }
 
@@ -139,14 +140,14 @@ public class UniformRandomForAccessibility {
         EnvironmentManager.screenShot(state.getPackageName(),state.getId());
 
         //updates the current activity name
-        this.currentActivityName=state.getActivityName();
+        currentActivityName = state.getActivityName();
         MATE.log("start ACCESSIBILITY CHECKS: " );
         MATE.logactivity(state.getActivityName());
 
 
         //prepare for collecting results
-        AccessibilitySummaryResults.currentActivityName=state.getActivityName();
-        AccessibilitySummaryResults.currentPackageName=state.getPackageName();
+        AccessibilitySummaryResults.currentActivityName = state.getActivityName();
+        AccessibilitySummaryResults.currentPackageName = state.getPackageName();
 
         //run accessibility checks implemented by Google ATF / eyes free:
         //   EditableContentDesc
@@ -177,10 +178,14 @@ public class UniformRandomForAccessibility {
 
             if (!contrastRatioOK) {
                 //report accessibility flaw found
-                AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW", widget, String.valueOf(contrastChecker.contratio));
+                AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",
+                        widget, String.valueOf(contrastChecker.contratio));
+
                 //ANDRE: mandar gerar imagem com marcacao // generate marked image/screenshot
                 //TBD
-                EnvironmentManager.markScreenshot(widget,selectedScreenState.getPackageName(),selectedScreenState.getId());
+                EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
+                        selectedScreenState.getId(), "ACCESSIBILITY_CONTRAST_FLAW",
+                        String.valueOf(contrastChecker.contratio));
             }
 
             //run multiple desc check

@@ -1,38 +1,25 @@
 package org.mate.interaction;
 
-import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
-import android.inputmethodservice.Keyboard;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.BySelector;
-import android.support.test.uiautomator.Direction;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
-import android.support.test.uiautomator.Until;
 import android.text.InputType;
-import android.view.KeyEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
+import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.model.IGUIModel;
 import org.mate.ui.Action;
-import org.mate.datagen.DataGenerator;
 import org.mate.ui.ActionType;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.Socket;
-import java.util.Date;
 import java.util.List;
 
 /**
