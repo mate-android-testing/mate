@@ -314,7 +314,7 @@ public class EnvironmentManager {
         sendCommandToServer(cmd);
     }
 
-    private static void sendCommandToServer(String cmd) {
+    public static void sendCommandToServer(String cmd) {
         String response;
         MATE.log(cmd);
         try {

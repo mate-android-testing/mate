@@ -131,6 +131,9 @@ public class UniformRandomForAccessibility {
 
             currentTime = new Date().getTime();
         }
+
+        EnvironmentManager.sendCommandToServer("FINISH"+ "_" + EnvironmentManager.emulator
+                + selectedScreenState.getPackageName());
         MATE.log_acc("NUMBER_OF_ACTIONS: " + totalNumberOfActions);
     }
 
@@ -181,8 +184,6 @@ public class UniformRandomForAccessibility {
                 AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",
                         widget, String.valueOf(contrastChecker.contratio));
 
-                //ANDRE: mandar gerar imagem com marcacao // generate marked image/screenshot
-                //TBD
                 EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
                         selectedScreenState.getId(), "ACCESSIBILITY_CONTRAST_FLAW",
                         String.valueOf(contrastChecker.contratio));
@@ -190,10 +191,14 @@ public class UniformRandomForAccessibility {
 
             //run multiple desc check
             boolean multDescOK = multDescChecker.check(widget);
-            if (!multDescOK)
+            if (!multDescOK) {
                 //report accessibility flaw found
-                AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
+                AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW", widget, "");
 
+                EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
+                        selectedScreenState.getId(), "DUPLICATE_SPEAKABLE_TEXT_FLAW",
+                        "");
+            }
         }
         MATE.log("finish ACCESSIBILITY CHECKS: " );
     }
