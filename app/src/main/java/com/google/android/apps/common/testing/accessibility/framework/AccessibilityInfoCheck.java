@@ -40,7 +40,7 @@ public abstract class AccessibilityInfoCheck extends AccessibilityInfoHierarchyC
     for (AccessibilityNodeInfoCompat compatInfo : compatInfos) {
       AccessibilityNodeInfo info = (AccessibilityNodeInfo) compatInfo.getInfo();
       results.addAll(runCheckOnInfo(info, context, metadata));
-      UniformRandomForAccessibility.totalNumberOfChecks++;
+      //UniformRandomForAccessibility.totalNumberOfChecks++;
     }
     return results;
   }

@@ -7,6 +7,7 @@ import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.Widget;
 
 import java.io.File;
 import java.util.Date;
@@ -64,8 +65,10 @@ public class GraphGUIModel implements IGUIModel {
     }
 
     private String findScreenNodeByState(IScreenState screenState){
-        if (screenState==null)
-            return "";
+        if (screenState==null){
+            MATE.log_acc("screenstate is null");
+            return ""; }
+
         for (ScreenNode scNode: stateGraph.getScreenNodes().values()){
             //compares widgest/actions of the screens on the graph
             if (scNode.getScreenState().equals(screenState)){
@@ -98,6 +101,74 @@ public class GraphGUIModel implements IGUIModel {
         if (event == null) {
             addRootNode(screenState);
             updated=true;
+
+            MATE.log_vin("New state name: "+stateId);
+            MATE.log_vin("Activity name: "+screenState.getActivityName());
+            MATE.log_vin("Widgets: " );
+            for (Widget w: screenState.getWidgets()) {
+                MATE.log_vin(w.getId() + " " + w.getClazz());
+            }
+        }
+        else {
+            if (screenState != null) {
+                String stateId = getNewNodeName(screenState);
+                EventEdge eventEdge = null;
+                ScreenNode newScreenNode;
+                if (stateId.equals("")) {
+                    //new state
+                    stateId = "S" + String.valueOf(nodeCount++);
+
+                    MATE.log_vin("New state name: "+stateId);
+                    MATE.log_vin("Activity name: "+screenState.getActivityName());
+                    MATE.log_vin("Widgets: " );
+                    for (Widget w: screenState.getWidgets()){
+                        MATE.log_vin(w.getId()+ " " + w.getClazz());
+                    }
+
+                    screenState.setId(stateId);
+                    newScreenNode = new ScreenNode(stateId, screenState);
+                    stateGraph.addScreenNode(newScreenNode);
+                    updated=true;
+                    eventEdge = new EventEdge(currentScreenNode, newScreenNode, event);
+                    stateGraph.addEventEdge(eventEdge);
+                } else {
+                    //System.out.println("Existent state");
+                    screenState.setId(stateId);
+                    newScreenNode = stateGraph.getScreenNodes().get(stateId);
+                    eventEdge = stateGraph.getEdge(currentScreenNode, newScreenNode);
+                    if (eventEdge == null) {
+                        eventEdge = new EventEdge(currentScreenNode,newScreenNode,event);
+                        stateGraph.addEventEdge(eventEdge);
+                    }
+                }
+                currentScreenNode = newScreenNode;
+            } else {
+                //outside the scope of the application
+                String stateid = "OUTAPP";
+            }
+        }
+        return updated;
+    }
+
+
+    //VIN
+    public boolean updateModelEVO(Action event, IScreenState screenState){
+        boolean updated = false;
+
+        if (event == null) {
+            if(this.getStates().size()==0) {
+                addRootNode(screenState);
+                updated = true;
+            }
+            //TODO: consider screenstate null
+            else {
+                String stateId = getNewNodeName(screenState);
+                ScreenNode newScreenNode;
+                screenState.setId(stateId);
+                newScreenNode = stateGraph.getScreenNodes().get(stateId);
+                currentScreenNode = newScreenNode;
+                updated = false;
+            }
         }
         else {
             if (screenState != null) {

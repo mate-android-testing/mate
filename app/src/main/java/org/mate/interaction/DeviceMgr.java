@@ -108,11 +108,11 @@ public class DeviceMgr implements IApp {
         //if there is a progress bar associated to that action
         sleep(action.getTimeToWait());
 
-        //hancle app crashes
+        //handle app crashes
         UiObject window = new UiObject(new UiSelector().packageName("android")
                 .textContains("has stopped"));
         if (window.exists()) {
-            MATE.log("    CRASH");
+            MATE.log("CRASH");
             throw new AUTCrashException("App crashed");
         }
     }

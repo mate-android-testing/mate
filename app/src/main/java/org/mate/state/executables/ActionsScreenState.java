@@ -256,11 +256,17 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
     @Override
     public boolean equals(IScreenState object) {
 
-        if (!this.activityName.equals(object.getActivityName()))
+        if (!this.activityName.equals(object.getActivityName())){
+            //MATE.log_acc("Strobe 1: State "+this.id+"different from State: "+object.getId());
             return false;
+        }
 
-        if (!this.packageName.equals(object.getPackageName()))
+
+        if (!this.packageName.equals(object.getPackageName())){
+            //MATE.log_acc("Strobe 2: State "+this.id+"different from State: "+object.getId());
             return false;
+        }
+
 
         ActionsScreenState screenState = (ActionsScreenState) object;
 
@@ -291,6 +297,7 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
 
             for (String strActThis: setActThis){
                 if (!setActOther.contains(strActThis)) {
+                    //MATE.log_acc("Strobe 3: State "+this.id+"different from State: "+object.getId());
                     return false;
                 }
             }
@@ -302,17 +309,19 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
 
                 Widget wdgOther = editablesOther.get(wdgThis.getId());
                 if (wdgOther==null) {
+                    //MATE.log_acc("Strobe 4 State "+this.id+"different from State: "+object.getId());
                     return false;
                 }
 
 
                 if (wdgOther.isEmpty() != wdgThis.isEmpty()) {
-
+                    //MATE.log_acc("Strobe 5: State "+this.id+"different from State: "+object.getId());
                     return false;
                 }
             }
 
 
+            //as for the checkables it considers two GUIs equals if they have the same objects checked
             Hashtable<String,Widget> checkablesThis = this.getCheckableWidgets();
             Hashtable<String,Widget> checkablesOther = screenState.getCheckableWidgets();
             for (Widget wdgThis: checkablesThis.values()){

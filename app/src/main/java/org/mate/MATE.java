@@ -9,8 +9,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
-import org.mate.exploration.aco.ACO;
-import org.mate.exploration.random.ManualExploration;
+import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
@@ -42,6 +41,7 @@ public class MATE {
     public static long RANDOM_LENGH;
     private long runningTime = new Date().getTime();
     public static long TIME_OUT;
+    public Instrumentation instrumentation;
 
     private GraphGUIModel completeModel;
 
@@ -69,7 +69,8 @@ public class MATE {
         logMessage="";
 
         //Defines the class that represents the device
-        Instrumentation instrumentation =  getInstrumentation();
+        //Instrumentation instrumentation =  getInstrumentation();
+        instrumentation =  getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
 
         //get the name of the package of the app currently running
@@ -92,8 +93,14 @@ public class MATE {
         runningTime = new Date().getTime();
         try{
             if (emulator!=null && !emulator.equals("")){
-
                 this.deviceMgr = new DeviceMgr(device,packageName);
+
+                //TODO: reinstall the app to make it start from scratch
+                deviceMgr.reinstallApp();
+                Thread.sleep(5000);
+                deviceMgr.restartApp();
+                Thread.sleep(5000);
+
 
 
                 //Analyses the screen and gets an object that represents the screen state (configuration of widgets)
@@ -106,6 +113,18 @@ public class MATE {
                     this.guiModel.updateModel(null,state);
                     UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,guiModel,true);
                     unirandomacc.startUniformRandomExploration(state,runningTime);
+                }
+
+
+                else if (explorationStrategy.equals("Novelty")) {
+                    //creates the graph that represents the GUI model
+                    this.guiModel = new GraphGUIModel();
+                    //first state (root node - action ==null)
+
+                    boolean updated = this.guiModel.updateModel(null, state);
+
+                    NoveltyBased noveltyExploration = new NoveltyBased(deviceMgr,packageName,guiModel);
+                    noveltyExploration.startEvolutionaryExploration(state);
                 }
 
                 checkVisitedActivities(explorationStrategy);
@@ -152,6 +171,7 @@ public class MATE {
                         try {
                             dmgr.executeAction(action);
                         } catch (AUTCrashException e) {
+                            MATE.log_acc(e.getStackTrace().toString());
                             e.printStackTrace();
                         }
                         break;
@@ -183,6 +203,11 @@ public class MATE {
 
     public static void log_acc(String msg){
         Log.e("acc",msg);
+        logMessage+=msg+"\n";
+    }
+
+    public static void log_vin(String msg){
+        Log.i("vinDebug",msg);
         logMessage+=msg+"\n";
     }
 
