@@ -102,6 +102,7 @@ public class ACO {
     }
 
     public IScreenState handleFirstNodeOfAnt(IScreenState state, Ant ant, int l) {
+        //if it is the first event of an ant
         if (l==0){
             state = ScreenStateFactory.getScreenState("ActionsScreenState");
             screenState = state;
@@ -195,6 +196,7 @@ public class ACO {
                 screenState = state;
                 this.currentNodeId = wholeModel.getCurrentStateId();
             } else {
+                //restarts ACO if the exploration left the app
                 restartACO(action);
             }
         }else {
