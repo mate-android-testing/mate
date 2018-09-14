@@ -2,6 +2,7 @@ package org.mate.state.executables;
 
 import android.app.Instrumentation;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.StaleObjectException;
@@ -44,10 +45,12 @@ public class AppScreen {
 
         Instrumentation instrumentation =  getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
-
         this.packageName = device.getCurrentPackageName();
-
         AccessibilityNodeInfo ninfo= InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
+        if (ninfo==null) {
+            MATE.log("APP DISCONNECTED");
+            //Try to reconnect
+        }
         rootNodeInfo = ninfo;
         readNodes(ninfo,null);
     }
