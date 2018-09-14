@@ -1,8 +1,10 @@
 package org.mate.state.executables;
 
 import android.app.Instrumentation;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.StaleObjectException;
@@ -49,6 +51,13 @@ public class AppScreen {
         AccessibilityNodeInfo ninfo= InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
         if (ninfo==null) {
             MATE.log("APP DISCONNECTED");
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getInstrumentation().getContext());
+            if (prefs.getBoolean("isServiceEnabled", false)){
+                MATE.log("ACCSERVICE FALSE");
+            }
+            else
+                MATE.log("ACCSERVICE TRUE");
             //Try to reconnect
         }
         rootNodeInfo = ninfo;
@@ -70,6 +79,8 @@ public class AppScreen {
                 Rect rec = new Rect();
                 obj.getBoundsInScreen(rec);
                 //MATE.log("WIDGET NULL: "+ rec.toShortString());
+
+
 
             }
             for (int i=0; i<obj.getChildCount(); i++)
