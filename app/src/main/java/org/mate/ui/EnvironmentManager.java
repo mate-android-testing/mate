@@ -305,13 +305,15 @@ public class EnvironmentManager {
 
         String cmd = "screenshot:"+emulator+":"+imageName;
 
-        sendCommandToServer(cmd);
+        //for now I'm keeping this command commented so it can speed up the process
+        //sendCommandToServer(cmd);
 
         cmd = "mark-image:" + imageName + ":x-" + widget.getX1() + ":y-"
                 + widget.getY1() + ":width-" + (widget.getX2() - widget.getX1())
                 + ":heigth-" + (widget.getY2() - widget.getY1()) + ":" + flawDescription + ":" + extraInfo;
 
-        sendCommandToServer(cmd);
+        //for now I'm keeping this command commented so it can speed up the process
+        //sendCommandToServer(cmd);
     }
 
     public static void sendCommandToServer(String cmd) {
