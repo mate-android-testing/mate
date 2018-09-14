@@ -129,7 +129,8 @@ public class EnvironmentManager {
         String currentActivity = "current_activity";
 
         //String cmd = "adb shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6 | cut -d / -f 2";
-        String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
+        String cmd = "getActivity:"+emulator;
+        //String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
         try {
             Socket server = new Socket(SERVER_IP, 12345);
             server.setSoTimeout(5000);
