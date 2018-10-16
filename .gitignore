@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/intellij+all
 
 ### Intellij+all ###
@@ -84,3 +83,13 @@ modules.xml
 
 
 # End of https://www.gitignore.io/api/intellij+all
+
+# Manually added entries
+
+## Gradle files
+.gradle/
+gradlew
+gradlew.bat
+
+## Local properties
+local.properties
