@@ -3,7 +3,7 @@ MATE is a tool for automated android app testing featuring various (genetic)
 algorithms. The project is divided into two parts: the MATE framework and unit
 tests for android managed in this repository and a server that runs on a host
 machine which is responsible for some analysis that can not be performed by the
-unit tests themselves. The repository containing the MATE server can be found
+instrumentation tests themselves. The repository containing the MATE server can be found
 [here](https://gitlab.infosun.fim.uni-passau.de/fraser/mate-server).
 
 ## How to run MATE
@@ -18,7 +18,8 @@ from the MATE server repository.
 ### 3) Installing and running MATE
 #### a) Android Studio (for Developers)
 Open Android Studio. Select "Check out project from Version Control" and click
-through the wizard. Install Android Sdk when prompted. 
+through the wizard (use git with url https://gitlab.infosun.fim.uni-passau.de/fraser/mate.git).
+Install Android Sdk when prompted. 
 
 To run a test use the project browser to find the unit tests (either
 `app -> java -> org.mate (androidTest)` or
