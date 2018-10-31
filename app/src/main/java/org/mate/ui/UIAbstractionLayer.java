@@ -3,7 +3,6 @@ package org.mate.ui;
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -13,10 +12,12 @@ import java.util.Random;
 import java.util.Vector;
 
 import static org.mate.MATE.device;
-import static org.mate.ui.UIAbstractionLayer.ActionExecution.FAILURE_APP_CRASH;
-import static org.mate.ui.UIAbstractionLayer.ActionExecution.FAILURE_EMULATOR_CRASH;
-import static org.mate.ui.UIAbstractionLayer.ActionExecution.SUCCESS_INBOUND;
-import static org.mate.ui.UIAbstractionLayer.ActionExecution.SUCCESS_OUTBOUND;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_UNKOWN;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
 public class UIAbstractionLayer {
     private String packageName;
@@ -36,13 +37,21 @@ public class UIAbstractionLayer {
         return actions.get(rnd.nextInt(actions.size()));
     }
 
-    public ActionExecution executeAction(Action action) {
+    public ActionResult executeAction(Action action) {
+        try {
+            return executeActionUnsafe(action);
+        } catch (Exception ignored) {
+        }
+        return FAILURE_UNKOWN;
+    }
+
+    private ActionResult executeActionUnsafe(Action action) {
         try {
             //execute this selected action
             deviceMgr.executeAction(action);
 
             //TODO: testing sleep
-            //Thread.sleep(2500);
+            sleep(2500);
 
             //create an object that represents the screen
             //using type: ActionScreenState
@@ -98,12 +107,14 @@ public class UIAbstractionLayer {
 
 
             //update model with new state
-            boolean newState = guiModel.updateModel(action, state);
-            return SUCCESS_INBOUND;
+            if (guiModel.updateModel(action, state)) {
+                return SUCCESS_NEW_STATE;
+            }
+            return SUCCESS;
         }
     }
 
-    private IScreenState getCurrentScreenState() {
+    public IScreenState getCurrentScreenState() {
         return guiModel.getStateById(guiModel.getCurrentStateId());
     }
 
@@ -169,7 +180,7 @@ public class UIAbstractionLayer {
             return currentPackage;
     }
 
-    private void resetApp() {
+    public void resetApp() {
         deviceMgr.reinstallApp();
         sleep(5000);
         deviceMgr.restartApp();
@@ -185,7 +196,7 @@ public class UIAbstractionLayer {
         }
     }
 
-    public enum ActionExecution {
-        FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_INBOUND, SUCCESS_OUTBOUND
+    public enum ActionResult {
+        FAILURE_UNKOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
     }
 }
