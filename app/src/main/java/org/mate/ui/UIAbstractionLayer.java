@@ -14,7 +14,7 @@ import java.util.Vector;
 import static org.mate.MATE.device;
 import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
 import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_UNKOWN;
+import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS;
 import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
 import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
@@ -41,8 +41,9 @@ public class UIAbstractionLayer {
         try {
             return executeActionUnsafe(action);
         } catch (Exception ignored) {
+            //MATE.log();
         }
-        return FAILURE_UNKOWN;
+        return FAILURE_UNKNOWN;
     }
 
     private ActionResult executeActionUnsafe(Action action) {
@@ -108,6 +109,7 @@ public class UIAbstractionLayer {
 
             //update model with new state
             if (guiModel.updateModel(action, state)) {
+                MATE.log("New State found:" + state.getId());
                 return SUCCESS_NEW_STATE;
             }
             return SUCCESS;
@@ -197,6 +199,6 @@ public class UIAbstractionLayer {
     }
 
     public enum ActionResult {
-        FAILURE_UNKOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
+        FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
     }
 }

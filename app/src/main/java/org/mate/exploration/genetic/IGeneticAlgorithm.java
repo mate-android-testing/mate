@@ -1,9 +1,9 @@
 package org.mate.exploration.genetic;
 
-import java.util.Map;
+import java.util.List;
 
-interface IGeneticAlgorithm<T> {
-    Map<String, IChromosome<T>> getCurrentPopulation();
+public interface IGeneticAlgorithm<T> {
+    List<IChromosome<T>> getCurrentPopulation();
 
     void createInitialPopulation();
 

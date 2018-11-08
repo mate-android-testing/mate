@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic;
 
-public abstract class Chromosome<T> implements IChromosome<T> {
+public class Chromosome<T> implements IChromosome<T> {
     private T value;
 
     public Chromosome(T value) {

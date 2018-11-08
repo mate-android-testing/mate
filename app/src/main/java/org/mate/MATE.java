@@ -9,6 +9,8 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
+import org.mate.exploration.evolutionary.OnePlusOne;
+import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
@@ -18,6 +20,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.UIAbstractionLayer;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -125,6 +128,21 @@ public class MATE {
 
                     NoveltyBased noveltyExploration = new NoveltyBased(deviceMgr,packageName,guiModel);
                     noveltyExploration.startEvolutionaryExploration(state);
+                } else if (explorationStrategy.equals("OnePlusOne")) {
+                    this.guiModel = new GraphGUIModel();
+
+                    boolean updated = this.guiModel.updateModel(null, state);
+
+                    OnePlusOne onePlusOne = new OnePlusOne(deviceMgr,packageName,guiModel);
+                    onePlusOne.startEvolutionaryExploration(state);
+                } else if (explorationStrategy.equals("OnePlusOneNew")) {
+                    this.guiModel = new GraphGUIModel();
+                    UIAbstractionLayer uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+
+                    boolean updated = this.guiModel.updateModel(null, state);
+
+                    IGeneticAlgorithm onePlusOneNew = new org.mate.exploration.genetic.OnePlusOne(uiAbstractionLayer);
+                    onePlusOneNew.run();
                 }
 
                 checkVisitedActivities(explorationStrategy);
@@ -156,7 +174,7 @@ public class MATE {
 
     public void handleAuth(UiDevice device){
 
-        if (this.packageName.contains("com.android.packageinstaller")) {
+        if (this.packageName != null && this.packageName.contains("com.android.packageinstaller")) {
             long timeA = new Date().getTime();
 
 
