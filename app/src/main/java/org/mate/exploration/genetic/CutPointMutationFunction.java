@@ -22,6 +22,8 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     }
     @Override
     public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> parent) {
+        uiAbstractionLayer.resetApp();
+
         List<IChromosome<TestCase>> offspring = new ArrayList<>();
 
         int cutPoint = chooseCutPoint(parent.getValue());

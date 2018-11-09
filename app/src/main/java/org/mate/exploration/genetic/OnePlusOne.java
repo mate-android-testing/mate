@@ -6,20 +6,44 @@ import org.mate.ui.UIAbstractionLayer;
 
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.MAX_NUM_EVENTS;
-import static org.mate.Properties.MAX_NUM_TCS;
 
 public class OnePlusOne extends GeneticAlgorithm<TestCase> {
-    public OnePlusOne(int populationSize, int generationSurvivorCount, float pMutate, UIAbstractionLayer uiAbstractionLayer, int maxNumEvents, int iterations) {
-        super(populationSize, generationSurvivorCount, 0, pMutate);
-        MATE.log_acc("Using new One Plus One");
-        chromosomeFactory = new AndroidRandomChromosomeFactory(uiAbstractionLayer,maxNumEvents);
-        selectionFunction = new FitnessProportionateSelectionFunction<>();
+    public OnePlusOne(UIAbstractionLayer uiAbstractionLayer, int maxNumEvents, int iterations) {
+        super(1, 1, 0, 1);
+        MATE.log_acc("Starting new One Plus One");
+        chromosomeFactory = new AndroidRandomChromosomeFactory(uiAbstractionLayer, maxNumEvents);
+        selectionFunction = new FitnessSelectionFunction<>();
         mutationFunction = new CutPointMutationFunction(uiAbstractionLayer, maxNumEvents);
         fitnessFunction = new AndroidStateFitnessFunction();
         terminationCondition = new IterTerminationCondition(iterations);
     }
 
     public OnePlusOne(UIAbstractionLayer uiAbstractionLayer) {
-        this(MAX_NUM_TCS, 7, 1, uiAbstractionLayer, MAX_NUM_EVENTS, EVO_ITERATIONS_NUMBER);
+        this(uiAbstractionLayer, MAX_NUM_EVENTS, EVO_ITERATIONS_NUMBER);
+    }
+
+    @Override
+    public void evolve() {
+        MATE.log_acc("Evolving into generation: " + (currentGenerationNumber + 1));
+        // Temporarily allow two chromosomes in the population.
+        populationSize++;
+
+        // Add offspring to population
+        super.evolve();
+
+        // Discard old chromosome if not better than new one.
+        double compared = fitnessFunction.getFitness(population.get(0))
+                          - fitnessFunction.getFitness(population.get(1));
+        if (!maximizeFitness) {
+            compared = -compared;
+        }
+        if (compared > 0) {
+            population.remove(1);
+        } else {
+            population.remove(0);
+        }
+
+        // Revert population size back to normal;
+        populationSize--;
     }
 }

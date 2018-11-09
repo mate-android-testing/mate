@@ -7,10 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class FitnessProportionateSelectionFunction<T> implements ISelectionFunction<T> {
+public class FitnessSelectionFunction<T> implements ISelectionFunction<T> {
     @Override
     public List<IChromosome<T>> select(List<IChromosome<T>> population, final IFitnessFunction<T> fitnessFunction) {
-        List<IChromosome<T>> list = new ArrayList<>();
+        List<IChromosome<T>> list = new ArrayList<>(population);
         Collections.sort(list, new Comparator<IChromosome<T>>() {
             @Override
             public int compare(IChromosome<T> o1, IChromosome<T> o2) {

@@ -26,20 +26,13 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected Random rnd;
 
     public GeneticAlgorithm(int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
-        if (generationSurvivorCount >= populationSize) {
-            throw new IllegalArgumentException("The survival count of a generation must be smaller than the population size. Otherwise the population will become stagnant");
-        }
-        if (generationSurvivorCount < 2) {
-            throw new IllegalArgumentException("Generation survivor count has be greater or equal to 2");
-        }
-
         this.populationSize = populationSize;
         this.generationSurvivorCount = generationSurvivorCount;
         population = new ArrayList<>();
         this.pCrossover = pCrossover;
         this.pMutate = pMutate;
 
-        currentGenerationNumber = 1;
+        currentGenerationNumber = 0;
 
         rnd = new Random();
     }
@@ -59,6 +52,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     @Override
     public void createInitialPopulation() {
+        currentGenerationNumber++;
         for (int i = 0; i < populationSize; i++) {
             population.add(chromosomeFactory.createChromosome());
         }
