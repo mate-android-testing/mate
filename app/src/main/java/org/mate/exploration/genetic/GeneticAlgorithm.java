@@ -15,8 +15,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected List<IFitnessFunction<T>> fitnessFunctions;
     protected ITerminationCondition terminationCondition;
 
-    protected boolean maximizeFitness = true;
-
     protected int populationSize;
     protected int generationSurvivorCount;
     protected List<IChromosome<T>> population;
@@ -24,7 +22,16 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected float pCrossover;
     protected float pMutate;
 
-    public GeneticAlgorithm(int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
+
+    public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T>
+            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
+        this.chromosomeFactory = chromosomeFactory;
+        this.selectionFunction = selectionFunction;
+        this.crossOverFunction = crossOverFunction;
+        this.mutationFunction = mutationFunction;
+        this.fitnessFunctions = fitnessFunctions;
+        this.terminationCondition = terminationCondition;
+
         this.populationSize = populationSize;
         this.generationSurvivorCount = generationSurvivorCount;
         population = new ArrayList<>();
@@ -99,9 +106,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             @Override
             public int compare(IChromosome<T> o1, IChromosome<T> o2) {
                 double c = fitnessFunctions.get(0).getFitness(o2) - fitnessFunctions.get(0).getFitness(o1);
-                if (!maximizeFitness) {
-                    c = -c;
-                }
                 if (c > 0) {
                     return 1;
                 } else if (c < 0) {
