@@ -4,21 +4,19 @@ import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.UIAbstractionLayer;
+import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
-    private Random rnd;
 
     public CutPointMutationFunction(UIAbstractionLayer uiAbstractionLayer, int maxNumEvents) {
         this.uiAbstractionLayer = uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
-        rnd = new Random();
     }
     @Override
     public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> parent) {
@@ -39,7 +37,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             if (i < cutPoint) {
                 newAction = parent.getValue().getEventSequence().get(i);
             } else {
-                newAction = uiAbstractionLayer.getRandomExecutableAction();
+                newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
             }
             mutant.addEvent(newAction);
             UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
@@ -62,7 +60,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     }
 
     private int chooseCutPoint(TestCase testCase) {
-        return rnd.nextInt(testCase.getEventSequence().size());
+        return Randomness.getRnd().nextInt(testCase.getEventSequence().size());
     }
 
     private void updateTestCase(TestCase testCase, String event) {

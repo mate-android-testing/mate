@@ -1,17 +1,18 @@
 package org.mate.exploration.genetic;
 
+import org.mate.utils.Randomness;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected IChromosomeFactory<T> chromosomeFactory;
     protected ISelectionFunction<T> selectionFunction;
     protected ICrossOverFunction<T> crossOverFunction;
     protected IMutationFunction<T> mutationFunction;
-    protected IFitnessFunction<T> fitnessFunction;
+    protected List<IFitnessFunction<T>> fitnessFunctions;
     protected ITerminationCondition terminationCondition;
 
     protected boolean maximizeFitness = true;
@@ -23,8 +24,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected float pCrossover;
     protected float pMutate;
 
-    protected Random rnd;
-
     public GeneticAlgorithm(int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
         this.populationSize = populationSize;
         this.generationSurvivorCount = generationSurvivorCount;
@@ -33,8 +32,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         this.pMutate = pMutate;
 
         currentGenerationNumber = 0;
-
-        rnd = new Random();
     }
 
     @Override
@@ -65,11 +62,11 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         List<IChromosome<T>> newGeneration = new ArrayList<>(survivors);
 
         while (newGeneration.size() < populationSize) {
-            List<IChromosome<T>> parents = selectionFunction.select(survivors, fitnessFunction);
+            List<IChromosome<T>> parents = selectionFunction.select(survivors, fitnessFunctions.get(0));
 
             IChromosome<T> parent;
 
-            if (rnd.nextDouble() < pCrossover) {
+            if (Randomness.getRnd().nextDouble() < pCrossover) {
                 parent = crossOverFunction.cross(parents);
             } else {
                 parent = parents.get(0);
@@ -77,7 +74,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
             List<IChromosome<T>> offspring = new ArrayList<>();
             offspring.add(parent);
-            if (rnd.nextDouble() < pMutate) {
+            if (Randomness.getRnd().nextDouble() < pMutate) {
                 offspring = mutationFunction.mutate(parent);
             }
 
@@ -101,7 +98,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         Collections.sort(survivors, new Comparator<IChromosome<T>>() {
             @Override
             public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                double c = fitnessFunction.getFitness(o2) - fitnessFunction.getFitness(o1);
+                double c = fitnessFunctions.get(0).getFitness(o2) - fitnessFunctions.get(0).getFitness(o1);
                 if (!maximizeFitness) {
                     c = -c;
                 }

@@ -4,6 +4,8 @@ import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.ui.UIAbstractionLayer;
 
+import java.util.LinkedList;
+
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.MAX_NUM_EVENTS;
 
@@ -14,7 +16,8 @@ public class OnePlusOne extends GeneticAlgorithm<TestCase> {
         chromosomeFactory = new AndroidRandomChromosomeFactory(uiAbstractionLayer, maxNumEvents);
         selectionFunction = new FitnessSelectionFunction<>();
         mutationFunction = new CutPointMutationFunction(uiAbstractionLayer, maxNumEvents);
-        fitnessFunction = new AndroidStateFitnessFunction();
+        fitnessFunctions = new LinkedList<>();
+        fitnessFunctions.add(new AndroidStateFitnessFunction());
         terminationCondition = new IterTerminationCondition(iterations);
     }
 
@@ -32,8 +35,8 @@ public class OnePlusOne extends GeneticAlgorithm<TestCase> {
         super.evolve();
 
         // Discard old chromosome if not better than new one.
-        double compared = fitnessFunction.getFitness(population.get(0))
-                          - fitnessFunction.getFitness(population.get(1));
+        double compared = fitnessFunctions.get(0).getFitness(population.get(0))
+                          - fitnessFunctions.get(0).getFitness(population.get(1));
         if (!maximizeFitness) {
             compared = -compared;
         }

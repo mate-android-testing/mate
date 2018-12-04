@@ -8,6 +8,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -23,18 +24,15 @@ public class UIAbstractionLayer {
     private String packageName;
     private DeviceMgr deviceMgr;
     private GraphGUIModel guiModel;
-    private Random rnd;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName, GraphGUIModel guiModel) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.guiModel = guiModel;
-        this.rnd = new Random();
     }
 
-    public Action getRandomExecutableAction() {
-        Vector<Action> actions = getCurrentScreenState().getActions();
-        return actions.get(rnd.nextInt(actions.size()));
+    public List<Action> getExecutableActions() {
+        return getCurrentScreenState().getActions();
     }
 
     public ActionResult executeAction(Action action) {

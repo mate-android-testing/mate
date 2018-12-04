@@ -4,6 +4,7 @@ import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.UIAbstractionLayer;
+import org.mate.utils.Randomness;
 
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         updateTestCase(testCase, "init");
 
         for (int i = 0 ; i < maxNumEvents; i++) {
-            Action newAction = uiAbstractionLayer.getRandomExecutableAction();
+            Action newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
             testCase.addEvent(newAction);
             UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
 
