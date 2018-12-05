@@ -135,7 +135,7 @@ public class MATE {
 
                     OnePlusOne onePlusOne = new OnePlusOne(deviceMgr,packageName,guiModel);
                     onePlusOne.startEvolutionaryExploration(state);
-                } else if (explorationStrategy.equals("OnePlusOneNew")) {
+                } /*else if (explorationStrategy.equals("OnePlusOneNew")) {
                     this.guiModel = new GraphGUIModel();
                     UIAbstractionLayer uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
 
@@ -143,7 +143,7 @@ public class MATE {
 
                     IGeneticAlgorithm onePlusOneNew = new org.mate.exploration.genetic.OnePlusOne(uiAbstractionLayer);
                     onePlusOneNew.run();
-                }
+                } */
 
                 checkVisitedActivities(explorationStrategy);
                 EnvironmentManager.releaseEmulator();
