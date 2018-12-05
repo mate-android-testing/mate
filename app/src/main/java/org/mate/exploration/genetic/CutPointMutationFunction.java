@@ -19,23 +19,23 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         this.maxNumEvents = maxNumEvents;
     }
     @Override
-    public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> parent) {
+    public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> chromosome) {
         uiAbstractionLayer.resetApp();
 
-        List<IChromosome<TestCase>> offspring = new ArrayList<>();
+        List<IChromosome<TestCase>> mutations = new ArrayList<>();
 
-        int cutPoint = chooseCutPoint(parent.getValue());
+        int cutPoint = chooseCutPoint(chromosome.getValue());
 
         TestCase mutant = new TestCase(UUID.randomUUID().toString());
 
-        offspring.add(new Chromosome<>(mutant));
+        mutations.add(new Chromosome<>(mutant));
 
         updateTestCase(mutant, "init");
 
         for (int i = 0; i < maxNumEvents; i++) {
             Action newAction;
             if (i < cutPoint) {
-                newAction = parent.getValue().getEventSequence().get(i);
+                newAction = chromosome.getValue().getEventSequence().get(i);
             } else {
                 newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
             }
@@ -49,14 +49,14 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                     break;
                 case FAILURE_APP_CRASH:
                     mutant.setCrashDetected();
-                case SUCCESS_OUTBOUND: return offspring;
+                case SUCCESS_OUTBOUND: return mutations;
                 case FAILURE_UNKNOWN:
                 case FAILURE_EMULATOR_CRASH: throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
                 default: throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
             }
         }
 
-        return offspring;
+        return mutations;
     }
 
     private int chooseCutPoint(TestCase testCase) {

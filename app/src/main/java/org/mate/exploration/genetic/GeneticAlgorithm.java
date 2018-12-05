@@ -7,6 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Abstract class that serves as a basis for genetic algorithms
+ * @param <T> Type wrapped by the chromosome implementation
+ */
 public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected IChromosomeFactory<T> chromosomeFactory;
     protected ISelectionFunction<T> selectionFunction;
@@ -23,6 +27,19 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected float pMutate;
 
 
+    /**
+     * Initializing the genetic algorithm with all necessary attributes
+     * @param chromosomeFactory see {@link IChromosomeFactory}
+     * @param selectionFunction see {@link ISelectionFunction}
+     * @param crossOverFunction see {@link ICrossOverFunction}
+     * @param mutationFunction see {@link IMutationFunction}
+     * @param fitnessFunctions see {@link IFitnessFunction}
+     * @param terminationCondition see {@link ITerminationCondition}
+     * @param populationSize size of population kept by the genetic algorithm
+     * @param generationSurvivorCount amount of survivors of each generation
+     * @param pCrossover probability that crossover occurs (between 0 and 1)
+     * @param pMutate probability that mutation occurs (between 0 and 1)
+     */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T>
             selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
         this.chromosomeFactory = chromosomeFactory;
