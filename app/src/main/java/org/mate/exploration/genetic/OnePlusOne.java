@@ -10,12 +10,12 @@ import java.util.List;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.MAX_NUM_EVENTS;
 
-public class OnePlusOne extends GeneticAlgorithm<TestCase> {
-    public OnePlusOne(IChromosomeFactory<TestCase> chromosomeFactory,
-                      ISelectionFunction<TestCase> selectionFunction,
-                      ICrossOverFunction<TestCase> crossOverFunction,
-                      IMutationFunction<TestCase> mutationFunction,
-                      List<IFitnessFunction<TestCase>> fitnessFunctions,
+public class OnePlusOne<T> extends GeneticAlgorithm<T> {
+    public OnePlusOne(IChromosomeFactory<T> chromosomeFactory,
+                      ISelectionFunction<T> selectionFunction,
+                      ICrossOverFunction<T> crossOverFunction,
+                      IMutationFunction<T> mutationFunction,
+                      List<IFitnessFunction<T>> fitnessFunctions,
                       ITerminationCondition terminationCondition) {
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
                 fitnessFunctions, terminationCondition, 1, 1,

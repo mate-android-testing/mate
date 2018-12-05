@@ -50,7 +50,7 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
 
             //TODO: testing sleep
-            sleep(2500);
+            sleep(500);
 
             //create an object that represents the screen
             //using type: ActionScreenState

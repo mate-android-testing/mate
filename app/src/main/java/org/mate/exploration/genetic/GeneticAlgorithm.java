@@ -69,7 +69,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         List<IChromosome<T>> newGeneration = new ArrayList<>(survivors);
 
         while (newGeneration.size() < populationSize) {
-            List<IChromosome<T>> parents = selectionFunction.select(survivors, fitnessFunctions.get(0));
+            List<IChromosome<T>> parents = selectionFunction.select(survivors, fitnessFunctions);
 
             IChromosome<T> parent;
 
