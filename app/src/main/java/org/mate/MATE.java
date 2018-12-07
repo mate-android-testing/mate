@@ -10,11 +10,18 @@ import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
+import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.CutPointMutationFunction;
+import org.mate.exploration.genetic.FitnessSelectionFunction;
+import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
+import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
+import org.mate.model.TestCase;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -36,6 +43,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 public class MATE {
 
     public static UiDevice device;
+    public static UIAbstractionLayer uiAbstractionLayer;
     private String packageName;
     private IGUIModel guiModel;
     private Vector<Action> actions;
@@ -135,15 +143,21 @@ public class MATE {
 
                     OnePlusOne onePlusOne = new OnePlusOne(deviceMgr,packageName,guiModel);
                     onePlusOne.startEvolutionaryExploration(state);
-                } /*else if (explorationStrategy.equals("OnePlusOneNew")) {
-                    this.guiModel = new GraphGUIModel();
-                    UIAbstractionLayer uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                } else if (explorationStrategy.equals("OnePlusOneNew")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
 
-                    boolean updated = this.guiModel.updateModel(null, state);
-
-                    IGeneticAlgorithm onePlusOneNew = new org.mate.exploration.genetic.OnePlusOne(uiAbstractionLayer);
+                    IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.OnePlusOne.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .build();
                     onePlusOneNew.run();
-                } */
+                }
 
                 checkVisitedActivities(explorationStrategy);
                 EnvironmentManager.releaseEmulator();

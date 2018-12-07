@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
@@ -9,11 +10,13 @@ import org.mate.utils.Randomness;
 import java.util.UUID;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
+    public static final String CHROMOSOME_FACTORY_ID = "android_random_chromosome_factory";
+
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
-    public AndroidRandomChromosomeFactory(UIAbstractionLayer uiAbstractionLayer, int maxNumEvents) {
-        this.uiAbstractionLayer = uiAbstractionLayer;
+    public AndroidRandomChromosomeFactory(int maxNumEvents) {
+        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
     }
 
