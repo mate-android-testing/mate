@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
@@ -11,11 +12,13 @@ import java.util.List;
 import java.util.UUID;
 
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
+    public static final String MUTATION_FUNCTION_ID = "cut_point_mutation_function";
+
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
-    public CutPointMutationFunction(UIAbstractionLayer uiAbstractionLayer, int maxNumEvents) {
-        this.uiAbstractionLayer = uiAbstractionLayer;
+    public CutPointMutationFunction(int maxNumEvents) {
+        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
     }
     @Override

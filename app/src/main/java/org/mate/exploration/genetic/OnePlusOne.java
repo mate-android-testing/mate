@@ -11,6 +11,8 @@ import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.MAX_NUM_EVENTS;
 
 public class OnePlusOne<T> extends GeneticAlgorithm<T> {
+    public static final String ALGORITHM_NAME = "OnePlusOne";
+
     public OnePlusOne(IChromosomeFactory<T> chromosomeFactory,
                       ISelectionFunction<T> selectionFunction,
                       ICrossOverFunction<T> crossOverFunction,

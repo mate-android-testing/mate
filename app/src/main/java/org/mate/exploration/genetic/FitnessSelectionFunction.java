@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class FitnessSelectionFunction<T> implements ISelectionFunction<T> {
+    public static final String SELECTION_FUNCTION_ID = "fitness_selection_function";
+
     @Override
     public List<IChromosome<T>> select(List<IChromosome<T>> population, final List<IFitnessFunction<T>> fitnessFunctions) {
         List<IChromosome<T>> list = new ArrayList<>(population);
