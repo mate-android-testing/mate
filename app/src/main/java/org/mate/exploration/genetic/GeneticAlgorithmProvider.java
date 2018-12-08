@@ -202,11 +202,11 @@ public class GeneticAlgorithmProvider {
     }
 
     private int getPopulationSize() {
-        return 10;
+        return 4;
     }
 
     private int getGenerationSurvivorCount() {
-        return 5;
+        return 2;
     }
 
     private float getPCrossOver() {

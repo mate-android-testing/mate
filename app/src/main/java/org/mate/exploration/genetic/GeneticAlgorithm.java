@@ -1,11 +1,14 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static org.mate.utils.MathUtils.isEpsEq;
 
 /**
  * Abstract class that serves as a basis for genetic algorithms
@@ -73,15 +76,18 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     @Override
     public void createInitialPopulation() {
+        MATE.log_acc("Creating initial population (1st generation)");
         currentGenerationNumber++;
         for (int i = 0; i < populationSize; i++) {
             population.add(chromosomeFactory.createChromosome());
         }
 
+        logCurrentFitness();
     }
 
     @Override
     public void evolve() {
+        MATE.log_acc("Creating population #" + currentGenerationNumber + 1);
         List<IChromosome<T>> survivors = getGenerationSurvivors();
         List<IChromosome<T>> newGeneration = new ArrayList<>(survivors);
 
@@ -115,6 +121,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         population.clear();
         population.addAll(newGeneration);
         currentGenerationNumber++;
+        logCurrentFitness();
     }
 
     @Override
@@ -124,15 +131,29 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             @Override
             public int compare(IChromosome<T> o1, IChromosome<T> o2) {
                 double c = fitnessFunctions.get(0).getFitness(o2) - fitnessFunctions.get(0).getFitness(o1);
-                //todo: epsilon compare
+                if (isEpsEq(c)) {
+                    return 0;
+                }
                 if (c > 0) {
                     return 1;
-                } else if (c < 0) {
-                    return -1;
                 }
-                return 0;
+                return -1;
             }
         });
         return survivors.subList(0, generationSurvivorCount);
     }
+
+    private void logCurrentFitness() {
+        MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
+        for (int i = 0; i < fitnessFunctions.size(); i++) {
+            MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
+            IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+            for (int j = 0; j < population.size(); j++) {
+                IChromosome<T> chromosome = population.get(j);
+                MATE.log_acc("Chromosome " + (j + 1) + ": "
+                        + fitnessFunction.getFitness(chromosome));
+            }
+        }
+    }
+
 }
