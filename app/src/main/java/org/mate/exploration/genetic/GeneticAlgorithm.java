@@ -87,7 +87,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     @Override
     public void evolve() {
-        MATE.log_acc("Creating population #" + currentGenerationNumber + 1);
+        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
         List<IChromosome<T>> survivors = getGenerationSurvivors();
         List<IChromosome<T>> newGeneration = new ArrayList<>(survivors);
 

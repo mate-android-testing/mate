@@ -10,6 +10,7 @@ import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
+import org.mate.exploration.genetic.ActivityFitnessFunction;
 import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.AndroidStateFitnessFunction;
 import org.mate.exploration.genetic.CutPointMutationFunction;
@@ -163,6 +164,7 @@ public class MATE {
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
