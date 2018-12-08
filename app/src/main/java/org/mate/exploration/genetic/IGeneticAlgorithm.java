@@ -29,4 +29,6 @@ public interface IGeneticAlgorithm<T> {
      * execute it as well.
      */
     void run();
+
+    List<IChromosome<T>> getGenerationSurvivors();
 }

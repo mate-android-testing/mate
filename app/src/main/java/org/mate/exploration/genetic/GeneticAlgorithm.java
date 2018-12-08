@@ -117,12 +117,14 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         currentGenerationNumber++;
     }
 
-    private List<IChromosome<T>> getGenerationSurvivors() {
+    @Override
+    public List<IChromosome<T>> getGenerationSurvivors() {
         List<IChromosome<T>> survivors = new ArrayList<>(population);
         Collections.sort(survivors, new Comparator<IChromosome<T>>() {
             @Override
             public int compare(IChromosome<T> o1, IChromosome<T> o2) {
                 double c = fitnessFunctions.get(0).getFitness(o2) - fitnessFunctions.get(0).getFitness(o1);
+                //todo: epsilon compare
                 if (c > 0) {
                     return 1;
                 } else if (c < 0) {

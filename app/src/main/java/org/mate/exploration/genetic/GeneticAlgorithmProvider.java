@@ -31,10 +31,26 @@ public class GeneticAlgorithmProvider {
         switch (algorithmName) {
             case OnePlusOne.ALGORITHM_NAME:
                 return initializeOnePlusOne();
+            case NSGAII.ALGORITHM_NAME:
+                return initializeNSGAII();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
 
+    }
+
+    private <T> NSGAII<T> initializeNSGAII() {
+        return new NSGAII<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate());
     }
 
     private <T> OnePlusOne<T> initializeOnePlusOne() {
@@ -183,5 +199,21 @@ public class GeneticAlgorithmProvider {
         } else {
             return Integer.valueOf(numberIterations);
         }
+    }
+
+    private int getPopulationSize() {
+        return 10;
+    }
+
+    private int getGenerationSurvivorCount() {
+        return 5;
+    }
+
+    private float getPCrossOver() {
+        return 0;
+    }
+
+    private float getPMutate() {
+        return 1;
     }
 }
