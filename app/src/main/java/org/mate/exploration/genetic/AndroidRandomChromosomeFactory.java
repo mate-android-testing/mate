@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
@@ -9,11 +10,13 @@ import org.mate.utils.Randomness;
 import java.util.UUID;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
+    public static final String CHROMOSOME_FACTORY_ID = "android_random_chromosome_factory";
+
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
-    public AndroidRandomChromosomeFactory(UIAbstractionLayer uiAbstractionLayer, int maxNumEvents) {
-        this.uiAbstractionLayer = uiAbstractionLayer;
+    public AndroidRandomChromosomeFactory(int maxNumEvents) {
+        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
     }
 
@@ -27,7 +30,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         updateTestCase(testCase, "init");
 
         for (int i = 0 ; i < maxNumEvents; i++) {
-            Action newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+            Action newAction = selectAction();
             testCase.addEvent(newAction);
             UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
 
@@ -46,6 +49,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         }
 
         return chromosome;
+    }
+
+    protected Action selectAction() {
+        return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
     }
 
     private void updateTestCase(TestCase testCase, String event) {

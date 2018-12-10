@@ -10,11 +10,19 @@ import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
+import org.mate.exploration.genetic.ActivityFitnessFunction;
+import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.CutPointMutationFunction;
+import org.mate.exploration.genetic.FitnessSelectionFunction;
+import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
+import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
+import org.mate.model.TestCase;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -36,6 +44,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 public class MATE {
 
     public static UiDevice device;
+    public static UIAbstractionLayer uiAbstractionLayer;
     private String packageName;
     private IGUIModel guiModel;
     private Vector<Action> actions;
@@ -54,26 +63,26 @@ public class MATE {
     //public static Vector<String> checkedWidgets = new Vector<String>();
     public static Set<String> visitedActivities = new HashSet<String>();
 
-    public MATE(){
+    public MATE() {
         //get timeout from server using EnvironmentManager
         long timeout = EnvironmentManager.getTimeout();
-        if (timeout==0)
+        if (timeout == 0)
             timeout = 30; //set default - 30 minutes
         MATE.TIME_OUT = timeout * 60 * 1000;
         MATE.log("TIMEOUT : " + timeout);
 
         //get random length = number of actions before restarting the app
         long rlength = EnvironmentManager.getRandomLength();
-        if (rlength==0)
+        if (rlength == 0)
             rlength = 1000; //default
         MATE.RANDOM_LENGH = rlength;
         MATE.log("RANDOM length by server: " + MATE.RANDOM_LENGH);
 
-        logMessage="";
+        logMessage = "";
 
         //Defines the class that represents the device
         //Instrumentation instrumentation =  getInstrumentation();
-        instrumentation =  getInstrumentation();
+        instrumentation = getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
 
         //get the name of the package of the app currently running
@@ -88,22 +97,21 @@ public class MATE {
 
     }
 
-    public void testApp(String explorationStrategy){
+    public void testApp(String explorationStrategy) {
 
         String emulator = EnvironmentManager.detectEmulator(this.packageName);
         MATE.log("EMULATOR: " + emulator);
 
         runningTime = new Date().getTime();
-        try{
-            if (emulator!=null && !emulator.equals("")){
-                this.deviceMgr = new DeviceMgr(device,packageName);
+        try {
+            if (emulator != null && !emulator.equals("")) {
+                this.deviceMgr = new DeviceMgr(device, packageName);
 
                 //TODO: reinstall the app to make it start from scratch
                 deviceMgr.reinstallApp();
                 Thread.sleep(5000);
                 deviceMgr.restartApp();
                 Thread.sleep(5000);
-
 
 
                 //Analyses the screen and gets an object that represents the screen state (configuration of widgets)
@@ -113,48 +121,63 @@ public class MATE {
                     //creates the graph that represents the GUI model
                     this.guiModel = new GraphGUIModel();
                     //first state (root node - action ==null)
-                    this.guiModel.updateModel(null,state);
-                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,guiModel,true);
-                    unirandomacc.startUniformRandomExploration(state,runningTime);
-                }
-
-
-                else if (explorationStrategy.equals("Novelty")) {
+                    this.guiModel.updateModel(null, state);
+                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr, packageName, guiModel, true);
+                    unirandomacc.startUniformRandomExploration(state, runningTime);
+                } else if (explorationStrategy.equals("Novelty")) {
                     //creates the graph that represents the GUI model
                     this.guiModel = new GraphGUIModel();
                     //first state (root node - action ==null)
 
                     boolean updated = this.guiModel.updateModel(null, state);
 
-                    NoveltyBased noveltyExploration = new NoveltyBased(deviceMgr,packageName,guiModel);
+                    NoveltyBased noveltyExploration = new NoveltyBased(deviceMgr, packageName, guiModel);
                     noveltyExploration.startEvolutionaryExploration(state);
                 } else if (explorationStrategy.equals("OnePlusOne")) {
                     this.guiModel = new GraphGUIModel();
 
                     boolean updated = this.guiModel.updateModel(null, state);
 
-                    OnePlusOne onePlusOne = new OnePlusOne(deviceMgr,packageName,guiModel);
+                    OnePlusOne onePlusOne = new OnePlusOne(deviceMgr, packageName, guiModel);
                     onePlusOne.startEvolutionaryExploration(state);
-                } /*else if (explorationStrategy.equals("OnePlusOneNew")) {
-                    this.guiModel = new GraphGUIModel();
-                    UIAbstractionLayer uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                } else if (explorationStrategy.equals("OnePlusOneNew")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
 
-                    boolean updated = this.guiModel.updateModel(null, state);
-
-                    IGeneticAlgorithm onePlusOneNew = new org.mate.exploration.genetic.OnePlusOne(uiAbstractionLayer);
+                    IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.OnePlusOne.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .build();
                     onePlusOneNew.run();
-                } */
+                } else if (explorationStrategy.equals("NSGA-II")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+
+                    IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .build();
+                    nsga.run();
+                }
 
                 checkVisitedActivities(explorationStrategy);
                 EnvironmentManager.releaseEmulator();
-            }
-            else
+            } else
                 MATE.log("Emulator is null");
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally{
+        } finally {
             EnvironmentManager.releaseEmulator();
             //EnvironmentManager.deleteAllScreenShots(packageName);
         }
@@ -163,29 +186,29 @@ public class MATE {
 
     private void checkVisitedActivities(String explorationStrategy) {
         Set<String> visitedActivities = new HashSet<String>();
-        for (IScreenState scnd: guiModel.getStates()){
+        for (IScreenState scnd : guiModel.getStates()) {
             visitedActivities.add(scnd.getActivityName());
         }
 
         MATE.log(explorationStrategy + " visited activities " + visitedActivities.size());
-        for (String act: visitedActivities)
-            MATE.log("   "+act);
+        for (String act : visitedActivities)
+            MATE.log("   " + act);
     }
 
-    public void handleAuth(UiDevice device){
+    public void handleAuth(UiDevice device) {
 
         if (this.packageName != null && this.packageName.contains("com.android.packageinstaller")) {
             long timeA = new Date().getTime();
 
 
             boolean goOn = true;
-            while (goOn){
+            while (goOn) {
 
-                DeviceMgr dmgr = new DeviceMgr(device,"");
+                DeviceMgr dmgr = new DeviceMgr(device, "");
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
                 Vector<Action> actions = screenState.getActions();
-                for (Action action: actions){
-                    if(action.getWidget().getId().contains("allow")){
+                for (Action action : actions) {
+                    if (action.getWidget().getId().contains("allow")) {
                         try {
                             dmgr.executeAction(action);
                         } catch (AUTCrashException e) {
@@ -199,10 +222,10 @@ public class MATE {
                 this.packageName = device.getCurrentPackageName();
                 MATE.log("new package name: " + this.packageName);
                 long timeB = new Date().getTime();
-                if (timeB-timeA>30000)
-                    goOn=false;
+                if (timeB - timeA > 30000)
+                    goOn = false;
                 if (!this.packageName.contains("com.android.packageinstaller"))
-                    goOn=false;
+                    goOn = false;
             }
         }
 
@@ -215,44 +238,44 @@ public class MATE {
 
     public static void logsum(String msg) {
         Log.e("acc", msg);
-        logMessage+=msg+"\n";
+        logMessage += msg + "\n";
 
     }
 
-    public static void log_acc(String msg){
-        Log.e("acc",msg);
-        logMessage+=msg+"\n";
+    public static void log_acc(String msg) {
+        Log.e("acc", msg);
+        logMessage += msg + "\n";
     }
 
-    public static void log_vin(String msg){
-        Log.i("vinDebug",msg);
-        logMessage+=msg+"\n";
+    public static void log_vin(String msg) {
+        Log.i("vinDebug", msg);
+        logMessage += msg + "\n";
     }
 
-    public void listActivities(Context context){
+    public void listActivities(Context context) {
 
         //list all activities of the application being executed
         PackageManager pm = (PackageManager) context.getPackageManager();
         try {
             PackageInfo pinfo = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
             ActivityInfo[] activities = pinfo.activities;
-            for (int i=0; i<activities.length; i++){
-                log("Activity "+(i+1)+": " + activities[i].name);
+            for (int i = 0; i < activities.length; i++) {
+                log("Activity " + (i + 1) + ": " + activities[i].name);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public String getPackageName(){
+    public String getPackageName() {
         return packageName;
     }
 
-    public IGUIModel getGuiModel(){
+    public IGUIModel getGuiModel() {
         return guiModel;
     }
 
     public static void logactivity(String activityName) {
-        Log.i("acc","ACTIVITY_VISITED: " + activityName);
+        Log.i("acc", "ACTIVITY_VISITED: " + activityName);
     }
 }
