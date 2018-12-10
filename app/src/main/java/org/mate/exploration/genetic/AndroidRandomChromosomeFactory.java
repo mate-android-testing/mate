@@ -30,7 +30,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         updateTestCase(testCase, "init");
 
         for (int i = 0 ; i < maxNumEvents; i++) {
-            Action newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+            Action newAction = selectAction();
             testCase.addEvent(newAction);
             UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
 
@@ -49,6 +49,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         }
 
         return chromosome;
+    }
+
+    protected Action selectAction() {
+        return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
     }
 
     private void updateTestCase(TestCase testCase, String event) {
