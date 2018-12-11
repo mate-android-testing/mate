@@ -1,24 +1,24 @@
-package org.mate.ui;
+package org.mate.interaction;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
-import org.mate.interaction.DeviceMgr;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.ui.Action;
+import org.mate.ui.Widget;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.Vector;
 
 import static org.mate.MATE.device;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
-import static org.mate.ui.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
 public class UIAbstractionLayer {
     private String packageName;

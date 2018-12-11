@@ -1,14 +1,8 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
-import org.mate.model.TestCase;
-import org.mate.ui.UIAbstractionLayer;
 
-import java.util.LinkedList;
 import java.util.List;
-
-import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
-import static org.mate.Properties.MAX_NUM_EVENTS;
 
 public class OnePlusOne<T> extends GeneticAlgorithm<T> {
     public static final String ALGORITHM_NAME = "OnePlusOne";
