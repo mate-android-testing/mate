@@ -1,5 +1,7 @@
 package org.mate.exploration.genetic;
 
+import org.mate.utils.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -139,9 +141,10 @@ public class GeneticAlgorithmProvider {
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
             for (String fitnessFunctionSerialized
-                    : fitnessFunctionIds.split(GeneticAlgorithmBuilder.SEPARATOR)) {
+                    : fitnessFunctionIds.split(
+                            StringUtils.regexEscape(GeneticAlgorithmBuilder.SEPARATOR))) {
                 String[] argSplit = fitnessFunctionSerialized.split(
-                        GeneticAlgorithmBuilder.ARG_SEPARATOR);
+                        StringUtils.regexEscape(GeneticAlgorithmBuilder.ARG_SEPARATOR));
                 fitnessFunctions.add(this.<T>initializeFitnessFunction(
                         argSplit[0], Arrays.asList(argSplit).subList(1, argSplit.length)));
             }
