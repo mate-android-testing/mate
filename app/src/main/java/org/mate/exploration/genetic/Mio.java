@@ -10,7 +10,7 @@ public class Mio<T> extends GeneticAlgorithm {
 
     private final float pSampleRandom;
     private final float focusedSearchStart;
-    private HashMap<IFitnessFunction, LinkedList<IChromosome>> archive;
+    private HashMap<IFitnessFunction, List<IndividualFitnessTuple>> archive;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -51,7 +51,7 @@ public class Mio<T> extends GeneticAlgorithm {
 
     @Override
     public void evolve() {
-        IChromosome individual = null;
+        IChromosome individual;
         if (Randomness.getRnd().nextDouble() < pSampleRandom) {
             // Sample Random
             individual = chromosomeFactory.createChromosome();
@@ -59,8 +59,9 @@ public class Mio<T> extends GeneticAlgorithm {
             // Sample individual from archive
             Object[] keys = archive.keySet().toArray();
             Object key = keys[Randomness.getRnd().nextInt(keys.length)];
-            LinkedList<IChromosome> individuals = archive.get(key);
-            individual = individuals.get(Randomness.getRnd().nextInt(individuals.size()));
+            List<IndividualFitnessTuple> individuals = archive.get(key);
+            IndividualFitnessTuple tuple = individuals.get(Randomness.getRnd().nextInt(individuals.size()));
+            individual = tuple.getIndividual();
             List<IChromosome> mutated = mutationFunction.mutate(individual);
             individual = mutated.get(0); //todo check
         }
@@ -68,20 +69,24 @@ public class Mio<T> extends GeneticAlgorithm {
         // Fixme this cast?
         for (IFitnessFunction fitnessFunction : (List<IFitnessFunction>) this.fitnessFunctions) {
             if (archive.get(fitnessFunction) == null ) {
-                archive.put(fitnessFunction, new LinkedList<IChromosome>());
+                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
             }
 
             // Are my fitness functions the targets I need to cover?
             double fitness = fitnessFunction.getFitness(individual);
             if (fitness == 1) {
                 // check population size
+                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
+
                 archive.get(fitnessFunction).clear();
-                archive.get(fitnessFunction).add(individual);
+                archive.get(fitnessFunction).add(tuple);
             } else if (fitness > 0){
                 // Todo: Remove worst if we reached limit
-                archive.get(fitnessFunction).add(individual);
+                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
+                archive.get(fitnessFunction).add(tuple);
                 if (archive.get(fitnessFunction).size() > populationSize){
-                    removeWorstTest(archive.get(fitnessFunction), fitness);
+                    List<IndividualFitnessTuple> tuples = removeWorstTest(archive.get(fitnessFunction));
+                    archive.put(fitnessFunction, tuples);
                 }
             }
         }
@@ -94,8 +99,40 @@ public class Mio<T> extends GeneticAlgorithm {
 
     }
 
-    private void removeWorstTest(List<IChromosome> iChromosomes, double fitness) {
+    private List<IndividualFitnessTuple> removeWorstTest(List<IndividualFitnessTuple> tuples) {
         // In place
         // Is it better "re-measure" the fitnesses or save a tuple in the archive?
+        if (tuples == null) {
+            return null;
+        }
+
+        IndividualFitnessTuple worstTuple = null;
+        for (IndividualFitnessTuple tuple:  tuples) {
+            if (worstTuple == null || worstTuple.getFitness() > tuple.getFitness()) {
+                worstTuple = tuple;
+            }
+        }
+
+        tuples.remove(worstTuple);
+        return tuples;
+    }
+
+    private class IndividualFitnessTuple {
+
+        private IChromosome individual;
+        private double fitness;
+
+        public IndividualFitnessTuple(IChromosome individual, double fitness) {
+            this.individual = individual;
+            this.fitness = fitness;
+        }
+
+        public IChromosome getIndividual() {
+            return individual;
+        }
+
+        public double getFitness() {
+            return fitness;
+        }
     }
 }
