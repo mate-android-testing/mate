@@ -77,6 +77,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new AndroidRandomChromosomeFactory(getNumEvents());
+            case AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IChromosomeFactory<T>) new AndroidSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -173,6 +177,16 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(args.get(0));
+            case AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>)
+                        new AmountCrashesFitnessFunction();
+            case TestLengthFitnessFunction.FITNESS_FUNCTION_ID:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>)
+                        new TestLengthFitnessFunction();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
@@ -191,6 +205,20 @@ public class GeneticAlgorithmProvider {
             default:
                 throw new UnsupportedOperationException("Unknown termination condition: "
                         + terminationConditionId);
+        }
+    }
+
+    private int getNumTestCases() {
+        String numTestCases = properties.getProperty(GeneticAlgorithmBuilder.NUM_TEST_CASES_KEY);
+        if (numTestCases == null) {
+            if (useDefaults) {
+                return org.mate.Properties.MAX_NUM_TCS;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of test cases not specified");
+            }
+        } else {
+            return Integer.valueOf(numTestCases);
         }
     }
 

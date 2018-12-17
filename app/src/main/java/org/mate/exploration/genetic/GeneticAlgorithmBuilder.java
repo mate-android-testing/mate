@@ -20,6 +20,7 @@ public class GeneticAlgorithmBuilder {
     public static final String SELECTION_FUNCTION_KEY = "selection_function";
     public static final String CROSSOVER_FUNCTION_KEY = "crossover_function";
     public static final String MUTATION_FUNCTION_KEY = "mutation_function";
+    public static final String NUM_TEST_CASES_KEY = "num_test_cases";
 
     private Properties properties;
 
@@ -83,6 +84,11 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withTerminationCondition(String terminationConditionId) {
         properties.setProperty(TERMINATION_CONDITION_KEY, terminationConditionId);
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withNumTestCases(int numTestCases) {
+        properties.setProperty(NUM_TEST_CASES_KEY, String.valueOf(numTestCases));
         return this;
     }
 
