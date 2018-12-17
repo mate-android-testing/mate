@@ -4,9 +4,12 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Randomness;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuite> {
+    public static final String MUTATION_FUNCTION_ID = "suite_cut_point_mutation_function";
+
     private final CutPointMutationFunction cutPointMutationFunction;
 
     public SuiteCutPointMutationFunction(int maxNumEvents) {
@@ -22,10 +25,13 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
             if (i == randomElementIndex) {
                 TestCase mutatedTestCase = cutPointMutationFunction.mutate(new Chromosome<>(
                         chromosome.getValue().getTestCases().get(i))).get(0).getValue();
+                mutatedTestSuite.getTestCases().add(mutatedTestCase);
+            } else {
+                mutatedTestSuite.getTestCases().add(chromosome.getValue().getTestCases().get(i));
             }
         }
-        for (TestCase testCase : chromosome.getValue().getTestCases()) {
-            if ()
-        }
+        List<IChromosome<TestSuite>> mutated = new ArrayList<>();
+        mutated.add(new Chromosome<>(mutatedTestSuite));
+        return mutated;
     }
 }

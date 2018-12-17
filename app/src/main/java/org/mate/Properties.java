@@ -25,7 +25,7 @@ public class Properties {
      *  Added by vin on 24/05/2018
      */
 
-    public static int MAX_NUM_TCS = 10;// 10;
+    public static int MAX_NUM_TCS = 2;// 10;
 
     public static int MAX_NUM_EVENTS = 20;
 

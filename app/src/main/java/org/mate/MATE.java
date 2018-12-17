@@ -11,13 +11,18 @@ import android.util.Log;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
 import org.mate.exploration.genetic.ActivityFitnessFunction;
+import org.mate.exploration.genetic.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.CutPointMutationFunction;
 import org.mate.exploration.genetic.FitnessSelectionFunction;
 import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
+import org.mate.exploration.genetic.SuiteActivityFitnessFunction;
+import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
+import org.mate.exploration.genetic.TestLengthFitnessFunction;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
@@ -158,6 +163,10 @@ public class MATE {
                     guiModel = new GraphGUIModel();
                     guiModel.updateModel(null, state);
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    MATE.log_acc("Activities");
+                    for (String s : EnvironmentManager.getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
 
                     IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
@@ -166,6 +175,26 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .build();
+                    nsga.run();
+                } else if (explorationStrategy.equals("Sapienz")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    MATE.log_acc("Activities");
+                    for (String s : EnvironmentManager.getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
+                    IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withMutationFunction(SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(SuiteActivityFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
                     nsga.run();

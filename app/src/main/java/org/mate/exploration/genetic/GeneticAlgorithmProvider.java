@@ -128,6 +128,10 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
+                case SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID:
+                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -187,6 +191,11 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new TestLengthFitnessFunction();
+            case SuiteActivityFitnessFunction.FITNESS_FUNCTION_ID:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>)
+                        new SuiteActivityFitnessFunction();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
