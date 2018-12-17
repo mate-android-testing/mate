@@ -1,5 +1,6 @@
 package org.mate.ui;
 
+import java.util.Objects;
 import java.util.Vector;
 
 /**
@@ -95,15 +96,19 @@ public class Action {
     public void setProportionalPheromone(float proportionalPheromone) {
         this.proportionalPheromone = proportionalPheromone;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Action action = (Action) o;
+        return actionType == action.actionType &&
+                Objects.equals(widget.getIdByActivity(), action.widget.getIdByActivity());
+    }
 
-        if (actionType != action.actionType) return false;
-        if (widget != null ? !widget.equals(action.widget) : action.widget != null) return false;
-        return true;
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(widget.getIdByActivity(), actionType);
     }
 }
