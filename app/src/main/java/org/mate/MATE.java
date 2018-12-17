@@ -28,7 +28,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
-import org.mate.ui.UIAbstractionLayer;
+import org.mate.interaction.UIAbstractionLayer;
 
 import java.util.Date;
 import java.util.HashSet;

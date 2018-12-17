@@ -1,6 +1,9 @@
 package org.mate.exploration.genetic;
 
+import org.mate.utils.StringUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -137,15 +140,20 @@ public class GeneticAlgorithmProvider {
             return new ArrayList<>();
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
-            for (String fitnessFunctionId
-                    : fitnessFunctionIds.split(GeneticAlgorithmBuilder.SEPARATOR)) {
-                fitnessFunctions.add(this.<T>initializeFitnessFunction(fitnessFunctionId));
+            for (String fitnessFunctionSerialized
+                    : fitnessFunctionIds.split(
+                            StringUtils.regexEscape(GeneticAlgorithmBuilder.SEPARATOR))) {
+                String[] argSplit = fitnessFunctionSerialized.split(
+                        StringUtils.regexEscape(GeneticAlgorithmBuilder.ARG_SEPARATOR));
+                fitnessFunctions.add(this.<T>initializeFitnessFunction(
+                        argSplit[0], Arrays.asList(argSplit).subList(1, argSplit.length)));
             }
             return fitnessFunctions;
         }
     }
 
-    private <T> IFitnessFunction<T> initializeFitnessFunction(String fitnessFunctionId) {
+    private <T> IFitnessFunction<T> initializeFitnessFunction(
+            String fitnessFunctionId, List<String> args) {
         switch (fitnessFunctionId) {
             case AndroidStateFitnessFunction.FITNESS_FUNCTION_ID:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
@@ -155,6 +163,16 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new ActivityFitnessFunction();
+            case SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID:
+                if (args.size() == 0) {
+                    throw new IllegalArgumentException("Required argument activityName for "
+                            + SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID
+                            + " not specified");
+                }
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>)
+                        new SpecificActivityCoveredFitnessFunction(args.get(0));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

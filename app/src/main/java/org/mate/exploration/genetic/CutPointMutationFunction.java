@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
-import org.mate.ui.UIAbstractionLayer;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;

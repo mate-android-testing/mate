@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by marceloeler on 12/05/17.
@@ -157,6 +159,36 @@ public class EnvironmentManager {
         }
 
         return currentActivity;
+    }
+
+    public static List<String> getActivityNames() {
+        List<String> activities = new ArrayList<>();
+
+        //String cmd = "adb shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6 | cut -d / -f 2";
+        String cmd = "getActivities:"+emulator;
+        //String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
+        try {
+            Socket server = new Socket(SERVER_IP, 12345);
+            server.setSoTimeout(5000);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
+                activities.add(line);
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+
+        return activities;
     }
 
     public static void screenShot(String packageName,String nodeId){

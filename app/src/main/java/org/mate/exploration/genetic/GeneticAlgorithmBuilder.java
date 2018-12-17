@@ -6,6 +6,9 @@ public class GeneticAlgorithmBuilder {
     // Separator symbol must not appear in any id (e.g. not in the id
     // AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
     public static final String SEPARATOR = ",";
+    // Argument separator symbol must not appear in any id (e.g. not in the id
+    // AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
+    public static final String ARG_SEPARATOR = "|";
     public static final String TRUE_STRING = "true";
     public static final String ALGORITHM_KEY = "algorithm";
     public static final String FITNESS_FUNCTIONS_KEY = "fitness_functions";
@@ -62,6 +65,18 @@ public class GeneticAlgorithmBuilder {
         } else {
             properties.setProperty(FITNESS_FUNCTIONS_KEY,
                     oldValue + SEPARATOR + fitnessFunctionId);
+        }
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId, String arg1) {
+        String insertValue = fitnessFunctionId + ARG_SEPARATOR + arg1;
+        String oldValue = properties.getProperty(FITNESS_FUNCTIONS_KEY);
+        if (oldValue == null) {
+            properties.setProperty(FITNESS_FUNCTIONS_KEY, insertValue);
+        } else {
+            properties.setProperty(FITNESS_FUNCTIONS_KEY,
+                    oldValue + SEPARATOR + insertValue);
         }
         return this;
     }
