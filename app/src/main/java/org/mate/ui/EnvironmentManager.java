@@ -18,6 +18,7 @@ import java.util.List;
 public class EnvironmentManager {
 
     public static String SERVER_IP = "10.0.2.2";
+    public static int port = 12345;
     //public static String SERVER_IP = "192.168.1.26";
 
     public static String emulator=null;
@@ -25,8 +26,7 @@ public class EnvironmentManager {
     public static void releaseEmulator(){
         String cmd = "releaseEmulator:"+emulator;
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
@@ -55,8 +55,7 @@ public class EnvironmentManager {
 
         String cmd = "getEmulator:"+packageName;
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
@@ -97,8 +96,7 @@ public class EnvironmentManager {
 
         String cmd = "timeout";
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
@@ -134,8 +132,7 @@ public class EnvironmentManager {
         String cmd = "getActivity:"+emulator;
         //String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
@@ -168,8 +165,7 @@ public class EnvironmentManager {
         String cmd = "getActivities:"+emulator;
         //String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
@@ -200,8 +196,7 @@ public class EnvironmentManager {
 
     public static void clearAppData(String packageName) {
         try {
-            Socket cliente = new Socket(SERVER_IP, 12345);
-            cliente.setSoTimeout(5000);
+            Socket cliente = new Socket(SERVER_IP, port);
             PrintStream saida = new PrintStream(cliente.getOutputStream());
             saida.println("adb -s "+emulator+" shell pm clear "+packageName);
 
@@ -223,8 +218,7 @@ public class EnvironmentManager {
     public static double getContrastRatio(String packageName, String stateId, Widget widget, int maxw, int maxh){
         double contrastRatio = 21;
         try {
-            Socket cliente = new Socket(SERVER_IP, 12345);
-            cliente.setSoTimeout(5000);
+            Socket cliente = new Socket(SERVER_IP, port);
             PrintStream saida = new PrintStream(cliente.getOutputStream());
 
             String cmd = "contrastratio:";
@@ -274,8 +268,7 @@ public class EnvironmentManager {
     public static void deleteAllScreenShots(String packageName) {
         MATE.log("DELETE SCREENSHOTS");
         try {
-            Socket cliente = new Socket(SERVER_IP, 12345);
-            cliente.setSoTimeout(5000);
+            Socket cliente = new Socket(SERVER_IP, port);
             PrintStream saida = new PrintStream(cliente.getOutputStream());
             saida.println("rm "+emulator+"_"+packageName+"*.png");
 
@@ -299,8 +292,7 @@ public class EnvironmentManager {
 
         String cmd = "randomlength";
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
@@ -353,8 +345,7 @@ public class EnvironmentManager {
         String response;
         MATE.log(cmd);
         try {
-            Socket server = new Socket(SERVER_IP, 12345);
-            server.setSoTimeout(5000);
+            Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
 
