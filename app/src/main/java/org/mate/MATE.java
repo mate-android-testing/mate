@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
@@ -35,6 +36,10 @@ import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -69,6 +74,14 @@ public class MATE {
     public static Set<String> visitedActivities = new HashSet<String>();
 
     public MATE() {
+        try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
+            EnvironmentManager.port = Integer.valueOf(reader.readLine());
+            MATE.log_acc("Using server port: " + EnvironmentManager.port);
+        } catch (IOException e) {
+            //ignore: use default port if file does not exists
+        }
+
         //get timeout from server using EnvironmentManager
         long timeout = EnvironmentManager.getTimeout();
         if (timeout == 0)
