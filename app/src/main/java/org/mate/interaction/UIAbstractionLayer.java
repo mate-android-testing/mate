@@ -79,7 +79,7 @@ public class UIAbstractionLayer {
         //get the package name of the app currently running
         String currentPackageName = state.getPackageName();
         //check whether it is an installation package
-        if (currentPackageName != null && currentPackageName.contains("com.android.packageinstaller")) {
+        if (currentPackageName != null && currentPackageName.contains("com.google.android.packageinstaller")) {
             currentPackageName = handleAuth(deviceMgr, currentPackageName);
         }
         //if current package is null, emulator has crashed/closed
@@ -147,7 +147,7 @@ public class UIAbstractionLayer {
 
     private String handleAuth(DeviceMgr dmgr, String currentPackage) {
 
-        if (currentPackage.contains("com.android.packageinstaller")) {
+        if (currentPackage.contains("com.google.android.packageinstaller")) {
             long timeA = new Date().getTime();
 
 
@@ -172,7 +172,7 @@ public class UIAbstractionLayer {
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)
                     goOn = false;
-                if (!currentPackage.contains("com.android.packageinstaller"))
+                if (!currentPackage.contains("com.google.android.packageinstaller"))
                     goOn = false;
             }
             return currentPackage;
