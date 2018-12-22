@@ -6,11 +6,9 @@ import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static org.mate.ui.ActionType.BACK;
 import static org.mate.ui.ActionType.MENU;
@@ -21,18 +19,21 @@ import static org.mate.ui.ActionType.SWIPE_UP;
 
 public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory {
 
+    //stores the number of executions of an actions
     private Map<Action, Integer> executionCounter = new HashMap<>();
-    private Map<Action, Integer> unvisitedChildrenWidgetCounter = new HashMap<>();
+    //list of already visited widgets
+    private List<String> visitedWidgetIds = new ArrayList<>();
+    //stores the number of unvisited widgets followed by an action
+    private Map<Action, Integer> unvisitedChildWidgetCounter = new HashMap<>();
+    //stores a List of actions leading to the widget (contains the id of the widget)
+    private Map<String, List<Action>> actionsPrecedingWidget = new HashMap<>();
 
     private double alpha, beta, gamma;
 
     private Action previousAction = null;
 
     public HeuristicalChromosomeFactory(int maxNumEvents) {
-        super(maxNumEvents);
-        this.alpha = 0.5;
-        this.beta = 0.3;
-        this.gamma = 0.4;
+        this(maxNumEvents, 1, 0.3, 1.5);
     }
 
     public HeuristicalChromosomeFactory(int maxNumEvents, double alpha, double beta, double gamma) {
@@ -46,15 +47,9 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     public IChromosome<TestCase> createChromosome() {
         IChromosome<TestCase> chromosome = super.createChromosome();
 
-        //update unvisitedActions for last selected chromosome
-        if (previousAction != null) {
-            unvisitedChildrenWidgetCounter.put(previousAction, 0);
-            for (Action action : uiAbstractionLayer.getExecutableActions()) {
-                if (!executionCounter.containsKey(action)) {
-                    unvisitedChildrenWidgetCounter.put(previousAction, unvisitedChildrenWidgetCounter.get(previousAction) + 1);
-                }
-            }
-        }
+        //update unvisitedActions for last selected action
+        computeUnvisitedWidgets(uiAbstractionLayer.getExecutableActions());
+
         return chromosome;
     }
 
@@ -63,27 +58,32 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         List<Action> executableActions = uiAbstractionLayer.getExecutableActions();
 
         //compute unvisited Actions of previous action (if there is a previous action)
-        if (previousAction != null) {
-            unvisitedChildrenWidgetCounter.put(previousAction, 0);
-            for (Action action : executableActions) {
-                if (!executionCounter.containsKey(action)) {
-                    unvisitedChildrenWidgetCounter.put(previousAction, unvisitedChildrenWidgetCounter.get(previousAction) + 1);
-                }
-            }
-        }
+       computeUnvisitedWidgets(executableActions);
 
         //store all candidates with (same) highest weight in list
         List<Action> candidateActions = new ArrayList<>();
         double maxWeight = 0.0;
 
         for (Action action : executableActions) {
+            //create list of actions with the highest weight
             double weight = computeExecutionWeight(action);
             if( weight > maxWeight){
-                candidateActions = new ArrayList<>(Collections.singletonList(action));
+                candidateActions = Arrays.asList(action);
                 maxWeight = weight;
             } else if (weight == maxWeight) {
                 candidateActions.add(action);
             }
+
+            //add previously executed action to list of actions preceding an available widget
+            String widgetId = action.getWidget().getId();
+            if(actionsPrecedingWidget.containsKey(widgetId)){
+                if(!actionsPrecedingWidget.get(widgetId).contains(previousAction)){
+                    actionsPrecedingWidget.get(widgetId).add(previousAction);
+                }
+            } else {
+                actionsPrecedingWidget.put(widgetId, Arrays.asList(previousAction));
+            }
+
         }
 
         //select random element form candidates
@@ -96,11 +96,27 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
             executionCounter.put(selectedAction, 1);
         }
 
+        //decrease the number of unvisited widgets, because this widget will be visited next
+        if(!visitedWidgetIds.contains(selectedAction.getWidget().getId())) {
+            for (Action action: actionsPrecedingWidget.get(selectedAction.getWidget().getId())) {
+                if(unvisitedChildWidgetCounter.get(action) > 0) {
+                    unvisitedChildWidgetCounter.put(action, unvisitedChildWidgetCounter.get(action) - 1);
+                }
+            }
+            visitedWidgetIds.add(selectedAction.getWidget().getId());
+        }
+
         previousAction = selectedAction;
 
         return selectedAction;
     }
 
+    /**
+     * Computes the weight according to Stoat of the given action
+     *
+     * @param action for which the weight should be computed
+     * @return  computed weight for given action
+     */
     private double computeExecutionWeight(Action action) {
 
         //compute weight for selected event type
@@ -122,8 +138,8 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         }
 
         int unvisitedChildren;
-        if (unvisitedChildrenWidgetCounter.containsKey(action)) {
-            unvisitedChildren = unvisitedChildrenWidgetCounter.get(action);
+        if (unvisitedChildWidgetCounter.containsKey(action)) {
+            unvisitedChildren = unvisitedChildWidgetCounter.get(action);
         } else {
             //zero if value is unknown
             unvisitedChildren = 0;
@@ -132,8 +148,22 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         //add 1 to not divide by zero
         int executionFrequency = (executionCounter.containsKey(action) ? executionCounter.get(action) : 0) + 1;
 
-        double executionWeight = ((alpha * eventTypeWeight) + (beta * unvisitedChildren)) / (gamma * executionFrequency);
+        return((alpha * eventTypeWeight) + (beta * unvisitedChildren)) / (gamma * executionFrequency);
+    }
 
-        return executionWeight;
+    /**
+     * Computes the number of unvisited widgets of the selected action in the previous selection
+     * @param executableActions List of available actions on current screen
+     */
+    private void computeUnvisitedWidgets(List<Action> executableActions) {
+        if (previousAction != null) {
+            int count = 0;
+            for (Action action : executableActions) {
+                if (!visitedWidgetIds.contains(action.getWidget().getId())) {
+                   count++;
+                }
+            }
+            unvisitedChildWidgetCounter.put(previousAction, count);
+        }
     }
 }
