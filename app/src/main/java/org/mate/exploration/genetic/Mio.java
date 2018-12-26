@@ -60,42 +60,35 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
     @Override
     public void evolve() {
-        IChromosome individual;
+        IChromosome<T> individual;
         if (Randomness.getRnd().nextDouble() < pSampleRandom) {
             // Sample Random
             individual = chromosomeFactory.createChromosome();
         } else {
             // Sample individual from archive
-            Object[] keys = archive.keySet().toArray();
-            Object key = keys[Randomness.getRnd().nextInt(keys.length)];
-            List<IndividualFitnessTuple> individuals = archive.get(key);
-            IndividualFitnessTuple tuple = individuals.get(Randomness.getRnd().nextInt(individuals.size()));
+            IFitnessFunction<T> key = Randomness.randomElement(new ArrayList<>(archive.keySet()));
+            IndividualFitnessTuple<T> tuple = Randomness.randomElement(archive.get(key));
             individual = tuple.getIndividual();
-            List<IChromosome> mutated = mutationFunction.mutate(individual);
+            List<IChromosome<T>> mutated = mutationFunction.mutate(individual);
             individual = mutated.get(0);
         }
 
-        //Todo: Is this cast ok?
-        for (IFitnessFunction fitnessFunction : (List<IFitnessFunction>) this.fitnessFunctions) {
+        for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
             if (archive.get(fitnessFunction) == null ) {
-                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
+                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple<T>>());
             }
 
-            // Are my fitness functions the targets I need to cover?
             double fitness = fitnessFunction.getFitness(individual);
+            IndividualFitnessTuple<T> tuple = new IndividualFitnessTuple<>(individual, fitness);
             if (fitness == 1) {
                 // check population size
-                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
-
                 archive.get(fitnessFunction).clear();
                 archive.get(fitnessFunction).add(tuple);
             } else if (fitness > 0){
-                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
                 archive.get(fitnessFunction).add(tuple);
                 if (archive.get(fitnessFunction).size() > populationSize){
                     // Remove worst if we reached limit population limit
-                    List<IndividualFitnessTuple> tuples = removeWorstTest(archive.get(fitnessFunction));
-                    archive.put(fitnessFunction, tuples);
+                    removeWorstTest(archive.get(fitnessFunction));
                 }
             }
         }
