@@ -3,18 +3,19 @@ package org.mate.exploration.genetic;
 import org.mate.MATE;
 import org.mate.utils.Randomness;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Mio<T> extends GeneticAlgorithm {
+public class Mio<T> extends GeneticAlgorithm<T> {
 
     private final int populationSizeStart;
     private final long startTime;
     private float pSampleRandom;
     private final float pSampleRandomStart;
     private final float focusedSearchStart;
-    private HashMap<IFitnessFunction, List<IndividualFitnessTuple>> archive;
+    private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple<T>>> archive;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -30,11 +31,12 @@ public class Mio<T> extends GeneticAlgorithm {
      * @param pCrossover              probability that crossover occurs (between 0 and 1)
      * @param pMutate                 probability that mutation occurs (between 0 and 1)
      * @param pSampleRandom           probability that a random individual is sampled
+     * @param focusedSearchStart      percentage as decimal value (e.g 0.8) of time, after which the focused search starts
      */
-    public Mio(IChromosomeFactory chromosomeFactory,
-               ISelectionFunction selectionFunction,
-               ICrossOverFunction crossOverFunction,
-               IMutationFunction mutationFunction,
+    public Mio(IChromosomeFactory<T> chromosomeFactory,
+               ISelectionFunction<T> selectionFunction,
+               ICrossOverFunction<T> crossOverFunction,
+               IMutationFunction<T> mutationFunction,
                List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
                int populationSize,
@@ -105,47 +107,45 @@ public class Mio<T> extends GeneticAlgorithm {
         // We also need to shrink the population at this point
         long currentTime = System.currentTimeMillis();
         long expiredTime = (currentTime - startTime);
-        long focusedStartAbsolut = (long) (MATE.TIME_OUT * focusedSearchStart);
+        long focusedStartAbsolute = (long) (MATE.TIME_OUT * focusedSearchStart);
 
-        if (expiredTime >= focusedStartAbsolut) {
+        if (expiredTime >= focusedStartAbsolute) {
             pSampleRandom = 0;
             populationSize = 1;
         } else {
             float expiredTimePercent = expiredTime / (MATE.TIME_OUT / 100);
-            float decreasePercent = (expiredTimePercent) / focusedSearchStart;
-            populationSize = (int) (populationSize * (1 - decreasePercent));
-            pSampleRandom = (int) (pSampleRandom) * (1 - decreasePercent);
+            float decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
+            populationSize = (int) (populationSizeStart * (1 - decreasePercent));
+            pSampleRandom = (int) pSampleRandomStart * (1 - decreasePercent);
         }
    }
 
-    private List<IndividualFitnessTuple> removeWorstTest(List<IndividualFitnessTuple> tuples) {
-        // In place
+    private void removeWorstTest(List<IndividualFitnessTuple<T>> tuples) {
         if (tuples == null) {
-            return null;
+            throw new IllegalArgumentException("Cannot remove worst test if list is empty");
         }
 
-        IndividualFitnessTuple worstTuple = null;
+        IndividualFitnessTuple worstTuple = tuples.get(0);
         for (IndividualFitnessTuple tuple:  tuples) {
-            if (worstTuple == null || worstTuple.getFitness() > tuple.getFitness()) {
+            if (worstTuple.getFitness() > tuple.getFitness()) {
                 worstTuple = tuple;
             }
         }
 
         tuples.remove(worstTuple);
-        return tuples;
     }
 
-    private class IndividualFitnessTuple {
+    private class IndividualFitnessTuple<R> {
 
-        private IChromosome individual;
+        private IChromosome<R> individual;
         private double fitness;
 
-        IndividualFitnessTuple(IChromosome individual, double fitness) {
+        IndividualFitnessTuple(IChromosome<R> individual, double fitness) {
             this.individual = individual;
             this.fitness = fitness;
         }
 
-        IChromosome getIndividual() {
+        IChromosome<R> getIndividual() {
             return individual;
         }
 
