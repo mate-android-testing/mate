@@ -15,7 +15,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private float pSampleRandom;
     private final float pSampleRandomStart;
     private final float focusedSearchStart;
-    private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple<T>>> archive;
+    private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> archive;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -67,7 +67,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         } else {
             // Sample individual from archive
             IFitnessFunction<T> key = Randomness.randomElement(new ArrayList<>(archive.keySet()));
-            IndividualFitnessTuple<T> tuple = Randomness.randomElement(archive.get(key));
+            IndividualFitnessTuple tuple = Randomness.randomElement(archive.get(key));
             individual = tuple.getIndividual();
             List<IChromosome<T>> mutated = mutationFunction.mutate(individual);
             individual = mutated.get(0);
@@ -75,11 +75,11 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
             if (archive.get(fitnessFunction) == null ) {
-                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple<T>>());
+                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
             }
 
             double fitness = fitnessFunction.getFitness(individual);
-            IndividualFitnessTuple<T> tuple = new IndividualFitnessTuple<>(individual, fitness);
+            IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
             if (fitness == 1) {
                 // check population size
                 archive.get(fitnessFunction).clear();
@@ -113,7 +113,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
    }
 
-    private void removeWorstTest(List<IndividualFitnessTuple<T>> tuples) {
+    private void removeWorstTest(List<IndividualFitnessTuple> tuples) {
         if (tuples == null || tuples.isEmpty()) {
             throw new IllegalArgumentException("Cannot remove worst test if list is empty");
         }
@@ -128,17 +128,17 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         tuples.remove(worstTuple);
     }
 
-    private class IndividualFitnessTuple<R> {
+    private class IndividualFitnessTuple {
 
-        private IChromosome<R> individual;
+        private IChromosome<T> individual;
         private double fitness;
 
-        IndividualFitnessTuple(IChromosome<R> individual, double fitness) {
+        IndividualFitnessTuple(IChromosome<T> individual, double fitness) {
             this.individual = individual;
             this.fitness = fitness;
         }
 
-        IChromosome<R> getIndividual() {
+        IChromosome<T> getIndividual() {
             return individual;
         }
 
