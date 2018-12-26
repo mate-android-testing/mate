@@ -114,7 +114,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
    }
 
     private void removeWorstTest(List<IndividualFitnessTuple<T>> tuples) {
-        if (tuples == null) {
+        if (tuples == null || tuples.isEmpty()) {
             throw new IllegalArgumentException("Cannot remove worst test if list is empty");
         }
 
