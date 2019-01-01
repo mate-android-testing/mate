@@ -6,7 +6,9 @@ import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +28,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     //stores the number of unvisited widgets followed by an action
     private Map<Action, Integer> unvisitedChildWidgetCounter = new HashMap<>();
     //stores a List of actions leading to the widget (contains the id of the widget)
-    private Map<String, List<Action>> actionsPrecedingWidget = new HashMap<>();
+    private Map<String, Set<Action>> actionsPrecedingWidget = new HashMap<>();
 
     private double alpha, beta, gamma;
 
@@ -75,13 +77,11 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
             }
 
             //add previously executed action to list of actions preceding an available widget
-            String widgetId = action.getWidget().getId();
+            String widgetId = action.getWidget().getIdByActivity();
             if(actionsPrecedingWidget.containsKey(widgetId)){
-                if(!actionsPrecedingWidget.get(widgetId).contains(previousAction)){
-                    actionsPrecedingWidget.get(widgetId).add(previousAction);
-                }
+                actionsPrecedingWidget.get(widgetId).add(previousAction);
             } else {
-                actionsPrecedingWidget.put(widgetId, Arrays.asList(previousAction));
+                actionsPrecedingWidget.put(widgetId, new HashSet<>(Collections.singletonList(previousAction)));
             }
 
         }
@@ -97,13 +97,13 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         }
 
         //decrease the number of unvisited widgets, because this widget will be visited next
-        if(!visitedWidgetIds.contains(selectedAction.getWidget().getId())) {
-            for (Action action: actionsPrecedingWidget.get(selectedAction.getWidget().getId())) {
+        if(!visitedWidgetIds.contains(selectedAction.getWidget().getIdByActivity())) {
+            for (Action action: actionsPrecedingWidget.get(selectedAction.getWidget().getIdByActivity())) {
                 if(unvisitedChildWidgetCounter.get(action) > 0) {
                     unvisitedChildWidgetCounter.put(action, unvisitedChildWidgetCounter.get(action) - 1);
                 }
             }
-            visitedWidgetIds.add(selectedAction.getWidget().getId());
+            visitedWidgetIds.add(selectedAction.getWidget().getIdByActivity());
         }
 
         previousAction = selectedAction;
@@ -159,7 +159,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         if (previousAction != null) {
             int count = 0;
             for (Action action : executableActions) {
-                if (!visitedWidgetIds.contains(action.getWidget().getId())) {
+                if (!visitedWidgetIds.contains(action.getWidget().getIdByActivity())) {
                    count++;
                 }
             }
