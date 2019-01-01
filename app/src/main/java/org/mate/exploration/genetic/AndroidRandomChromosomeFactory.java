@@ -12,7 +12,7 @@ import java.util.UUID;
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
     public static final String CHROMOSOME_FACTORY_ID = "android_random_chromosome_factory";
 
-    private UIAbstractionLayer uiAbstractionLayer;
+    protected UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
