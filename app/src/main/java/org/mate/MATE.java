@@ -21,6 +21,7 @@ import org.mate.exploration.genetic.FitnessSelectionFunction;
 import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
+import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
@@ -205,7 +206,7 @@ public class MATE {
                             .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(SuiteActivityFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
