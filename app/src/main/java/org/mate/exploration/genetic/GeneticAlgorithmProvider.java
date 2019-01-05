@@ -196,6 +196,8 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SuiteActivityFitnessFunction();
+            case StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID:
+                return new StatementCoverageFitnessFunction<>();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

@@ -187,6 +187,38 @@ public class EnvironmentManager {
         return activities;
     }
 
+    public static double getCoverage(){
+        String cmd = "getCoverage:"+emulator;
+
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            String coverageString;
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    coverageString = serverResponse;
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+            return Double.valueOf(coverageString);
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+
+        throw new IllegalStateException("Coverage could not be retrieved");
+    }
+
     public static void screenShot(String packageName,String nodeId){
 
         String cmd = "screenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
