@@ -3,12 +3,26 @@ package org.mate.exploration.genetic;
 import org.mate.MATE;
 import org.mate.ui.EnvironmentManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> {
     public static final String FITNESS_FUNCTION_ID = "statement_coverage_fitness_function";
 
+    private final Map<IChromosome<T>, Double> cache;
+
+    public StatementCoverageFitnessFunction() {
+        cache = new HashMap<>();
+    }
+
     @Override
     public double getFitness(IChromosome<T> chromosome) {
+        if (cache.containsKey(chromosome)) {
+            return cache.get(chromosome);
+        }
         MATE.uiAbstractionLayer.stopApp();
-        return EnvironmentManager.getCoverage();
+        double fitness = EnvironmentManager.getCoverage();
+        cache.put(chromosome, fitness);
+        return fitness;
     }
 }
