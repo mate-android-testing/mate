@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -125,8 +126,45 @@ public class EnvironmentManager {
         return timeout;
     }
 
-    public static void stopApp(){
-        String cmd = "stopApp:"+emulator;
+    public static void copyCoverageData(Object source, Object target, List<? extends Object> entities){
+        StringBuilder sb = new StringBuilder();
+        String prefix = "";
+        for (Object entity : entities) {
+            sb.append(prefix);
+            prefix = ",";
+            sb.append(entity.toString());
+        }
+        String cmd = "copyCoverageData:"+emulator+":"+source.toString()+":"+target.toString()
+                +":"+sb.toString();
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+    }
+
+    public static void storeCoverageData(Object o, Object o2){
+        String cmd = "storeCoverageData:"+emulator+":"+o.toString();
+        if (o2 != null) {
+            cmd += ":" + o2.toString();
+        }
         try {
             Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
@@ -214,8 +252,8 @@ public class EnvironmentManager {
         return activities;
     }
 
-    public static double getCoverage(){
-        String cmd = "getCoverage:"+emulator;
+    public static double getCoverage(Object o){
+        String cmd = "getCoverage:"+emulator+":"+o.toString();
 
         try {
             Socket server = new Socket(SERVER_IP, port);

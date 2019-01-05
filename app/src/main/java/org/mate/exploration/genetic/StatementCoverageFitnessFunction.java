@@ -20,8 +20,7 @@ public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> 
         if (cache.containsKey(chromosome)) {
             return cache.get(chromosome);
         }
-        MATE.uiAbstractionLayer.stopApp();
-        double fitness = EnvironmentManager.getCoverage();
+        double fitness = EnvironmentManager.getCoverage(chromosome);
         cache.put(chromosome, fitness);
         return fitness;
     }

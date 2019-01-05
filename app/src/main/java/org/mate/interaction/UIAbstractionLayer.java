@@ -189,11 +189,6 @@ public class UIAbstractionLayer {
         guiModel.updateModelEVO(null, ScreenStateFactory.getScreenState("ActionsScreenState"));
     }
 
-    public void stopApp() {
-        EnvironmentManager.stopApp();
-        sleep(2000);
-    }
-
     private void sleep(int millis) {
         try {
             Thread.sleep(millis);
