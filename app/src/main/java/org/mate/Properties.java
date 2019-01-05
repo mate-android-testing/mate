@@ -27,7 +27,7 @@ public class Properties {
 
     public static int MAX_NUM_TCS = 2;// 10;
 
-    public static int MAX_NUM_EVENTS = 20;
+    public static int MAX_NUM_EVENTS = 5;
 
     public static float NOVELTY_THRESHOLD = 0; // if 0 any point will be added to the archive
 

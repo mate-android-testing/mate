@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.ui.EnvironmentManager;
 
 public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> {
@@ -7,6 +8,7 @@ public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> 
 
     @Override
     public double getFitness(IChromosome<T> chromosome) {
+        MATE.uiAbstractionLayer.stopApp();
         return EnvironmentManager.getCoverage();
     }
 }

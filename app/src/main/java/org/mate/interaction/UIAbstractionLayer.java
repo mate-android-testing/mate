@@ -6,6 +6,7 @@ import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
+import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.Date;
@@ -186,6 +187,11 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         sleep(2000);
         guiModel.updateModelEVO(null, ScreenStateFactory.getScreenState("ActionsScreenState"));
+    }
+
+    public void stopApp() {
+        EnvironmentManager.stopApp();
+        sleep(2000);
     }
 
     private void sleep(int millis) {

@@ -125,6 +125,33 @@ public class EnvironmentManager {
         return timeout;
     }
 
+    public static void stopApp(){
+        String cmd = "stopApp:"+emulator;
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+    }
+
+
     public static String getCurrentActivityName(){
         String currentActivity = "current_activity";
 
