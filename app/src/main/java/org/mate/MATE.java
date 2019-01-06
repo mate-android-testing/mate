@@ -36,6 +36,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -45,6 +46,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -201,7 +203,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
+                    final IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
@@ -211,7 +213,14 @@ public class MATE {
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
-                    nsga.run();
+
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            nsga.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
                 }
 
                 checkVisitedActivities(explorationStrategy);
