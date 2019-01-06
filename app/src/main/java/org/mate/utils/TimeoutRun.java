@@ -18,7 +18,7 @@ public class TimeoutRun {
 
         try {
             MATE.log_acc("Starting timeout run...");
-            System.out.println(future.get(milliseconds, TimeUnit.MILLISECONDS));
+            future.get(milliseconds, TimeUnit.MILLISECONDS);
             MATE.log_acc("Finished run before timeout.");
             finishedWithoutTimeout = true;
         } catch (TimeoutException e) {
