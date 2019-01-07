@@ -59,7 +59,6 @@ public class UIAbstractionLayer {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
 
-            resetApp();
             return FAILURE_APP_CRASH;
         }
 
@@ -95,7 +94,6 @@ public class UIAbstractionLayer {
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log_acc("current package different from app package: " + currentPackageName);
 
-            resetApp();
             return SUCCESS_OUTBOUND;
         } else {
             //if the app under test is running
