@@ -16,7 +16,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             maxNumEvents) {
         this.storeCoverage = storeCoverage;
         this.numTestCases = numTestCases;
-        androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory(maxNumEvents);
+        androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory(false, maxNumEvents);
     }
 
     public AndroidSuiteRandomChromosomeFactory(int numTestCases, int maxNumEvents) {
@@ -30,8 +30,16 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
         for (int i = 0; i < numTestCases; i++) {
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
             ts.getTestCases().add(tc);
-            EnvironmentManager.storeCoverageData(chromosome, tc);
+            if (storeCoverage) {
+                EnvironmentManager.storeCoverageData(chromosome, tc);
+            }
         }
+
+        if (storeCoverage) {
+            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                    .getCoverage(chromosome));
+        }
+
         return chromosome;
     }
 }

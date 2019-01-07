@@ -248,6 +248,32 @@ public class MATE {
 
                     EnvironmentManager.storeCoverageData(heuristicRandom, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                } else if (explorationStrategy.equals("RandomExploration")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    MATE.log_acc("Activities");
+                    for (String s : EnvironmentManager.getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
+                    final IGeneticAlgorithm<TestCase> randomExploration = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withMaxNumEvents(Integer.MAX_VALUE)
+                            .withPopulationSize(Integer.MAX_VALUE)
+                            .build();
+
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            randomExploration.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                    EnvironmentManager.storeCoverageData(randomExploration, null);
+                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 }
 
                 checkVisitedActivities(explorationStrategy);

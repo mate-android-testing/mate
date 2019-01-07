@@ -39,11 +39,15 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     private Action previousAction = null;
 
     public HeuristicalChromosomeFactory(int maxNumEvents) {
-        this(maxNumEvents, 1, 0.3, 1.5);
+        this(true, maxNumEvents);
     }
 
-    public HeuristicalChromosomeFactory(int maxNumEvents, double alpha, double beta, double gamma) {
-        super(maxNumEvents);
+    public HeuristicalChromosomeFactory(boolean storeCoverage, int maxNumEvents) {
+        this(storeCoverage, maxNumEvents, 1, 0.3, 1.5);
+    }
+
+    public HeuristicalChromosomeFactory(boolean storeCoverage, int maxNumEvents, double alpha, double beta, double gamma) {
+        super(storeCoverage, maxNumEvents);
         this.alpha = alpha;
         this.beta = beta;
         this.gamma = gamma;
@@ -55,12 +59,6 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
 
         //update unvisitedActions for last selected action
         computeUnvisitedWidgets(uiAbstractionLayer.getExecutableActions());
-
-        EnvironmentManager.storeCoverageData(chromosome, null);
-
-        MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
-                .getCoverage(chromosome));
-        MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 
         return chromosome;
     }

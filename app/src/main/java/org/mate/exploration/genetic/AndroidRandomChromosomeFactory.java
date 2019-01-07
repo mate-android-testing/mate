@@ -5,6 +5,7 @@ import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.UUID;
@@ -14,10 +15,16 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
 
     protected UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
+    private boolean storeCoverage;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
+        this(true, maxNumEvents);
+    }
+
+    public AndroidRandomChromosomeFactory(boolean storeCoverage, int maxNumEvents) {
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
+        this.storeCoverage = storeCoverage;
     }
 
     @Override
@@ -46,6 +53,14 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 case FAILURE_EMULATOR_CRASH: throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
                 default: throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
             }
+        }
+
+        if (storeCoverage) {
+            EnvironmentManager.storeCoverageData(chromosome, null);
+
+            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                    .getCoverage(chromosome));
+            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
         }
 
         return chromosome;
