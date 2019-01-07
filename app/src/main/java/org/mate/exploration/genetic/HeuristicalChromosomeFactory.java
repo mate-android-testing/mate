@@ -1,7 +1,9 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import static org.mate.ui.ActionType.SWIPE_RIGHT;
 import static org.mate.ui.ActionType.SWIPE_UP;
 
 public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory {
+    public static final String CHROMOSOME_FACTORY_ID = "heuristical_chromosome_factory";
 
     //stores the number of executions of an actions
     private Map<Action, Integer> executionCounter = new HashMap<>();
@@ -53,6 +56,12 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         //update unvisitedActions for last selected action
         computeUnvisitedWidgets(uiAbstractionLayer.getExecutableActions());
 
+        EnvironmentManager.storeCoverageData(chromosome, null);
+
+        MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                .getCoverage(chromosome));
+        MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+
         return chromosome;
     }
 
@@ -71,18 +80,21 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
             //create list of actions with the highest weight
             double weight = computeExecutionWeight(action);
             if( weight > maxWeight){
-                candidateActions = Arrays.asList(action);
+                candidateActions = new ArrayList<>();
+                candidateActions.add(action);
                 maxWeight = weight;
             } else if (weight == maxWeight) {
                 candidateActions.add(action);
             }
 
-            //add previously executed action to list of actions preceding an available widget
-            String widgetId = action.getWidget().getIdByActivity();
-            if(actionsPrecedingWidget.containsKey(widgetId)){
-                actionsPrecedingWidget.get(widgetId).add(previousAction);
-            } else {
-                actionsPrecedingWidget.put(widgetId, new HashSet<>(Collections.singletonList(previousAction)));
+            if (previousAction != null) {
+                //add previously executed action to list of actions preceding an available widget
+                String widgetId = action.getWidget().getIdByActivity();
+                if (actionsPrecedingWidget.containsKey(widgetId)) {
+                    actionsPrecedingWidget.get(widgetId).add(previousAction);
+                } else {
+                    actionsPrecedingWidget.put(widgetId, new HashSet<>(Collections.singletonList(previousAction)));
+                }
             }
 
         }
@@ -97,14 +109,16 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
             executionCounter.put(selectedAction, 1);
         }
 
-        //decrease the number of unvisited widgets, because this widget will be visited next
-        if(!visitedWidgetIds.contains(selectedAction.getWidget().getIdByActivity())) {
-            for (Action action: actionsPrecedingWidget.get(selectedAction.getWidget().getIdByActivity())) {
-                if(unvisitedChildWidgetCounter.get(action) > 0) {
-                    unvisitedChildWidgetCounter.put(action, unvisitedChildWidgetCounter.get(action) - 1);
+        if (previousAction != null) {
+            //decrease the number of unvisited widgets, because this widget will be visited next
+            if (!visitedWidgetIds.contains(selectedAction.getWidget().getIdByActivity())) {
+                for (Action action : actionsPrecedingWidget.get(selectedAction.getWidget().getIdByActivity())) {
+                    if (unvisitedChildWidgetCounter.get(action) > 0) {
+                        unvisitedChildWidgetCounter.put(action, unvisitedChildWidgetCounter.get(action) - 1);
+                    }
                 }
+                visitedWidgetIds.add(selectedAction.getWidget().getIdByActivity());
             }
-            visitedWidgetIds.add(selectedAction.getWidget().getIdByActivity());
         }
 
         previousAction = selectedAction;

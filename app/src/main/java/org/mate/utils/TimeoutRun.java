@@ -26,6 +26,7 @@ public class TimeoutRun {
             MATE.log_acc("Finshed run due to timeout.");
         } catch (InterruptedException | ExecutionException e) {
             MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
+            e.printStackTrace();
         }
 
         executor.shutdownNow();

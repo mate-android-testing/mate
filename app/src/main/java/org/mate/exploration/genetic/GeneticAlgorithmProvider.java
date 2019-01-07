@@ -81,6 +81,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new AndroidSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
+            case HeuristicalChromosomeFactory.CHROMOSOME_FACTORY_ID:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IChromosomeFactory<T>) new HeuristicalChromosomeFactory(getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -263,7 +267,19 @@ public class GeneticAlgorithmProvider {
     }
 
     private int getPopulationSize() {
-        return 4;
+        String populationSize
+                = properties.getProperty(GeneticAlgorithmBuilder.POPULATION_SIZE_KEY);
+        if (populationSize == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 4;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Integer.valueOf(populationSize);
+        }
     }
 
     private int getGenerationSurvivorCount() {

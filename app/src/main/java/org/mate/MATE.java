@@ -19,6 +19,7 @@ import org.mate.exploration.genetic.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.CutPointMutationFunction;
 import org.mate.exploration.genetic.FitnessSelectionFunction;
 import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
+import org.mate.exploration.genetic.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
@@ -221,6 +222,32 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+                } else if (explorationStrategy.equals("HeuristicRandom")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    MATE.log_acc("Activities");
+                    for (String s : EnvironmentManager.getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
+                    final IGeneticAlgorithm<TestCase> heuristicRandom = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
+                            .withChromosomeFactory(HeuristicalChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withMaxNumEvents(Integer.MAX_VALUE)
+                            .withPopulationSize(Integer.MAX_VALUE)
+                            .build();
+
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            heuristicRandom.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                    EnvironmentManager.storeCoverageData(heuristicRandom, null);
+                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 }
 
                 checkVisitedActivities(explorationStrategy);
