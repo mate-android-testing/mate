@@ -36,32 +36,39 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
 
         updateTestCase(testCase, "init");
 
-        for (int i = 0 ; i < maxNumEvents; i++) {
-            Action newAction = selectAction();
-            testCase.addEvent(newAction);
-            UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
+        try {
+            for (int i = 0; i < maxNumEvents; i++) {
+                Action newAction = selectAction();
+                testCase.addEvent(newAction);
+                UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
 
-            switch (actionResult) {
-                case SUCCESS:
-                case SUCCESS_NEW_STATE:
-                    updateTestCase(testCase, String.valueOf(i));
-                    break;
-                case FAILURE_APP_CRASH:
-                    testCase.setCrashDetected();
-                case SUCCESS_OUTBOUND: return chromosome;
-                case FAILURE_UNKNOWN:
-                case FAILURE_EMULATOR_CRASH: throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
-                default: throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+                switch (actionResult) {
+                    case SUCCESS:
+                    case SUCCESS_NEW_STATE:
+                        updateTestCase(testCase, String.valueOf(i));
+                        break;
+                    case FAILURE_APP_CRASH:
+                        testCase.setCrashDetected();
+                    case SUCCESS_OUTBOUND:
+                        return chromosome;
+                    case FAILURE_UNKNOWN:
+                    case FAILURE_EMULATOR_CRASH:
+                        throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
+                    default:
+                        throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+                }
+            }
+        } finally {
+            //store coverage in an case
+            if (storeCoverage) {
+                EnvironmentManager.storeCoverageData(chromosome, null);
+
+                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                        .getCoverage(chromosome));
+                MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
             }
         }
 
-        if (storeCoverage) {
-            EnvironmentManager.storeCoverageData(chromosome, null);
-
-            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
-                    .getCoverage(chromosome));
-            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
-        }
 
         return chromosome;
     }
