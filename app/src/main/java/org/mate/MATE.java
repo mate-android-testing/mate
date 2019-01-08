@@ -27,6 +27,7 @@ import org.mate.exploration.genetic.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
 import org.mate.exploration.heuristical.HeuristicExploration;
+import org.mate.exploration.heuristical.RandomExploration;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
@@ -253,12 +254,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final IGeneticAlgorithm<TestCase> randomExploration = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withMaxNumEvents(Integer.MAX_VALUE)
-                            .withPopulationSize(Integer.MAX_VALUE)
-                            .build();
+                    final RandomExploration randomExploration = new RandomExploration(200);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
