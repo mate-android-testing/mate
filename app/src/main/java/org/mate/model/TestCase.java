@@ -1,11 +1,14 @@
 package org.mate.model;
 
+import org.mate.MATE;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 
 public class TestCase {
@@ -99,5 +102,53 @@ public class TestCase {
                 featureVector.put(state.getId(),0);
             }
         }
+    }
+
+    /**
+     * Initializes
+     * @return
+     */
+    public static TestCase newInitializedTestCase() {
+        TestCase tc = new TestCase(UUID.randomUUID().toString());
+        tc.updateTestCase("init");
+        return tc;
+    }
+
+    /**
+     * Perform action and update TestCase accordingly.
+     * @param a Action to perform
+     * @param event Event name
+     * @return True if action successful inbound false if outbound or crash
+     */
+    public boolean updateTestCase(Action a, String event) {
+        if (!MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
+            throw new IllegalStateException("Action not applicable to current state");
+        }
+        addEvent(a);
+        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(a);
+
+        switch (actionResult) {
+            case SUCCESS:
+            case SUCCESS_NEW_STATE:
+                updateTestCase(event);
+                return true;
+            case FAILURE_APP_CRASH:
+                setCrashDetected();
+            case SUCCESS_OUTBOUND:
+                return false;
+            case FAILURE_UNKNOWN:
+            case FAILURE_EMULATOR_CRASH:
+                throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
+            default:
+                throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+        }
+    }
+
+    private void updateTestCase(String event) {
+        IScreenState currentScreenstate = MATE.uiAbstractionLayer.getCurrentScreenState();
+
+        updateVisitedStates(currentScreenstate);
+        updateVisitedActivities(currentScreenstate.getActivityName());
+        updateStatesMap(currentScreenstate.getId(), event);
     }
 }

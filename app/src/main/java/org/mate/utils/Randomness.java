@@ -27,4 +27,16 @@ public class Randomness {
     public static <T> T randomElement(List<T> list) {
         return list.get(rnd.nextInt(list.size()));
     }
+
+    public static int getInRangeStd(int range) {
+        return getInRangeStd(range, 2.0/15.0 * range);
+    }
+
+    public static int getInRangeStd(int range, double std) {
+        int x;
+        do {
+            x = (int) Math.round(getRnd().nextGaussian() * std + (range - 1) / 2.0);
+        } while (x < 0 || x >= range);
+        return x;
+    }
 }

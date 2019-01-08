@@ -68,6 +68,15 @@ public class StateGraph {
         return rootNode;
     }
 
+    public EventEdge getEdgeByAction(Action a) {
+        for (EventEdge eventEdge : eventEdges.values()) {
+            if (eventEdge.getEvent().equals(a)) {
+                return eventEdge;
+            }
+        }
+        return null;
+    }
+
     public EventEdge getEdge(String node1, String node2){
         ScreenNode source = screenNodes.get(node1);
         if (source==null)
