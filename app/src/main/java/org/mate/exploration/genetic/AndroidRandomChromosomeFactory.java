@@ -16,20 +16,24 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     protected UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
     private boolean storeCoverage;
+    private boolean resetApp;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
-        this(true, maxNumEvents);
+        this(true, true, maxNumEvents);
     }
 
-    public AndroidRandomChromosomeFactory(boolean storeCoverage, int maxNumEvents) {
+    public AndroidRandomChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
         this.storeCoverage = storeCoverage;
+        this.resetApp = resetApp;
     }
 
     @Override
     public IChromosome<TestCase> createChromosome() {
-        uiAbstractionLayer.resetApp();
+        if (resetApp) {
+            uiAbstractionLayer.resetApp();
+        }
 
         TestCase testCase = new TestCase(UUID.randomUUID().toString());
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);

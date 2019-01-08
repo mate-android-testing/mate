@@ -16,7 +16,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             maxNumEvents) {
         this.storeCoverage = storeCoverage;
         this.numTestCases = numTestCases;
-        androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory(false, maxNumEvents);
+        androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory(false, true, maxNumEvents);
     }
 
     public AndroidSuiteRandomChromosomeFactory(int numTestCases, int maxNumEvents) {

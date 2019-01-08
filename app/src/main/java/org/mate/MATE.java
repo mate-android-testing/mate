@@ -26,6 +26,7 @@ import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
+import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
@@ -231,22 +232,17 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final IGeneticAlgorithm<TestCase> heuristicRandom = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
-                            .withChromosomeFactory(HeuristicalChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withMaxNumEvents(Integer.MAX_VALUE)
-                            .withPopulationSize(Integer.MAX_VALUE)
-                            .build();
+                    final HeuristicExploration heuristicExploration = new HeuristicExploration(200);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {
-                            heuristicRandom.run();
+                            heuristicExploration.run();
                             return null;
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(heuristicRandom, null);
+                    EnvironmentManager.storeCoverageData(heuristicExploration, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     guiModel = new GraphGUIModel();

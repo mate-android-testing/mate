@@ -39,15 +39,15 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     private Action previousAction = null;
 
     public HeuristicalChromosomeFactory(int maxNumEvents) {
-        this(true, maxNumEvents);
+        this(true, true, maxNumEvents);
     }
 
-    public HeuristicalChromosomeFactory(boolean storeCoverage, int maxNumEvents) {
-        this(storeCoverage, maxNumEvents, 1, 0.3, 1.5);
+    public HeuristicalChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {
+        this(storeCoverage, resetApp, maxNumEvents, 1, 0.3, 1.5);
     }
 
-    public HeuristicalChromosomeFactory(boolean storeCoverage, int maxNumEvents, double alpha, double beta, double gamma) {
-        super(storeCoverage, maxNumEvents);
+    public HeuristicalChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents, double alpha, double beta, double gamma) {
+        super(storeCoverage, resetApp, maxNumEvents);
         this.alpha = alpha;
         this.beta = beta;
         this.gamma = gamma;
@@ -59,6 +59,8 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
 
         //update unvisitedActions for last selected action
         computeUnvisitedWidgets(uiAbstractionLayer.getExecutableActions());
+
+        previousAction = null;
 
         return chromosome;
     }
@@ -154,8 +156,13 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         if (unvisitedChildWidgetCounter.containsKey(action)) {
             unvisitedChildren = unvisitedChildWidgetCounter.get(action);
         } else {
-            //zero if value is unknown
-            unvisitedChildren = 0;
+            //twice highest if unknown
+            int max = 0;
+            for (Action key : unvisitedChildWidgetCounter.keySet()) {
+                int current = unvisitedChildWidgetCounter.get(key);
+                max = current > max ? current : max;
+            }
+            unvisitedChildren = max * 2;
         }
 
         //add 1 to not divide by zero
