@@ -41,8 +41,8 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                ITerminationCondition terminationCondition,
                int populationSize,
                int generationSurvivorCount,
-               float pCrossover,
-               float pMutate,
+               double pCrossover,
+               double pMutate,
                float pSampleRandom,
                float focusedSearchStart) {
 

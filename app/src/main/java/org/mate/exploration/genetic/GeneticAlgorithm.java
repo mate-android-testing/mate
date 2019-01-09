@@ -26,8 +26,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected int generationSurvivorCount;
     protected List<IChromosome<T>> population;
     protected int currentGenerationNumber;
-    protected float pCrossover;
-    protected float pMutate;
+    protected double pCrossover;
+    protected double pMutate;
 
 
     /**
@@ -44,7 +44,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      * @param pMutate probability that mutation occurs (between 0 and 1)
      */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T>
-            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
+            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
         this.chromosomeFactory = chromosomeFactory;
         this.selectionFunction = selectionFunction;
         this.crossOverFunction = crossOverFunction;

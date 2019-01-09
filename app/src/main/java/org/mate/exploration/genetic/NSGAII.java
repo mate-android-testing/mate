@@ -14,7 +14,7 @@ import static org.mate.utils.MathUtils.isEpsEq;
 public class NSGAII<T> extends GeneticAlgorithm<T> {
     public static final String ALGORITHM_NAME = "NSGA-II";
 
-    public NSGAII(IChromosomeFactory chromosomeFactory, ISelectionFunction selectionFunction, ICrossOverFunction crossOverFunction, IMutationFunction mutationFunction, List list, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
+    public NSGAII(IChromosomeFactory chromosomeFactory, ISelectionFunction selectionFunction, ICrossOverFunction crossOverFunction, IMutationFunction mutationFunction, List list, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, list, terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
     }
 

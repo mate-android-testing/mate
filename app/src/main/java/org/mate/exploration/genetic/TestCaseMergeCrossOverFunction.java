@@ -7,6 +7,7 @@ import org.mate.model.graph.GraphGUIModel;
 import org.mate.model.graph.StateGraph;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
@@ -14,6 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
+    public static final String CROSSOVER_FUNCTION_ID = "test_case_merge_crossover_function";
+    private boolean storeCoverage;
+
+    public TestCaseMergeCrossOverFunction() {
+        this(true);
+    }
+
+    public TestCaseMergeCrossOverFunction(boolean storeCoverage) {
+        this.storeCoverage = storeCoverage;
+    }
+
     @Override
     public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
         List<Action> l1 = parents.get(0).getValue().getEventSequence();
@@ -61,6 +73,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
                 }
             }
         }
+        MATE.log_acc("No match found.");
         return parents.get(0);
     }
 
@@ -76,7 +89,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             EventEdge e1 = sg.getEdgeByAction(from);
             EventEdge e2 = sg.getEdgeByAction(l.get(idx));
 
-            if (e1.getTarget().getScreenState().equals(e2.getTarget().getScreenState())) {
+            if (e1 != null && e2 != null
+                    && e1.getTarget().getScreenState().equals(e2.getSource().getScreenState())) {
                 return Optional.some(idx);
             }
 
@@ -123,6 +137,15 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         for (int i = count; i < finalSize; i++) {
             Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
             testCase.updateTestCase(action, String.valueOf(count));
+        }
+
+        if (storeCoverage) {
+            EnvironmentManager.storeCoverageData(chromosome, null);
+
+            MATE.log_acc("After test case merge crossover:");
+            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                    .getCoverage(chromosome));
+            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
         }
 
         return chromosome;

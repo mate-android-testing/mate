@@ -32,6 +32,8 @@ public class GeneticAlgorithmProvider {
             throw new IllegalArgumentException("No algorithm specified");
         }
         switch (algorithmName) {
+            case GenericGeneticAlgorithm.ALGORITHM_NAME:
+                return initializeGenericGeneticAlgorithm();
             case OnePlusOne.ALGORITHM_NAME:
                 return initializeOnePlusOne();
             case NSGAII.ALGORITHM_NAME:
@@ -40,6 +42,20 @@ public class GeneticAlgorithmProvider {
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
 
+    }
+
+    private <T> GenericGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+        return new GenericGeneticAlgorithm<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate());
     }
 
     private <T> NSGAII<T> initializeNSGAII() {
@@ -114,6 +130,10 @@ public class GeneticAlgorithmProvider {
             return null;
         } else {
             switch (crossOverFunctionId) {
+                case TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
@@ -286,11 +306,35 @@ public class GeneticAlgorithmProvider {
         return 2;
     }
 
-    private float getPCrossOver() {
-        return 0;
+    private double getPCrossOver() {
+        String pCrossover
+                = properties.getProperty(GeneticAlgorithmBuilder.P_CROSSOVER_KEY);
+        if (pCrossover == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 0;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Double.valueOf(pCrossover);
+        }
     }
 
-    private float getPMutate() {
-        return 1;
+    private double getPMutate() {
+        String pMutate
+                = properties.getProperty(GeneticAlgorithmBuilder.P_MUTATE_KEY);
+        if (pMutate == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 1;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Double.valueOf(pMutate);
+        }
     }
 }

@@ -22,6 +22,8 @@ public class GeneticAlgorithmBuilder {
     public static final String MUTATION_FUNCTION_KEY = "mutation_function";
     public static final String NUM_TEST_CASES_KEY = "num_test_cases";
     public static final String POPULATION_SIZE_KEY = "population_size";
+    public static final String P_MUTATE_KEY = "p_mutate";
+    public static final String P_CROSSOVER_KEY = "p_crossover";
 
     private Properties properties;
 
@@ -105,6 +107,16 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withPopulationSize(int populationSize) {
         properties.setProperty(POPULATION_SIZE_KEY, String.valueOf(populationSize));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withPMutate(double pMutate) {
+        properties.setProperty(P_MUTATE_KEY, String.valueOf(pMutate));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withPCrossover(double pCrossover) {
+        properties.setProperty(P_CROSSOVER_KEY, String.valueOf(pCrossover));
         return this;
     }
 

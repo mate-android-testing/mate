@@ -25,6 +25,7 @@ import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
+import org.mate.exploration.genetic.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
@@ -197,6 +198,26 @@ public class MATE {
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
                     nsga.run();
+                } else if (explorationStrategy.equals("GenericGeneticAlgorithm")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    MATE.log_acc("Activities");
+                    for (String s : EnvironmentManager.getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
+                    IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(org.mate.exploration.genetic.GenericGeneticAlgorithm.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withPCrossover(1)
+                            .build();
+                    genericGA.run();
                 } else if (explorationStrategy.equals("Sapienz")) {
                     guiModel = new GraphGUIModel();
                     guiModel.updateModel(null, state);
@@ -233,7 +254,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final HeuristicExploration heuristicExploration = new HeuristicExploration(200);
+                    final HeuristicExploration heuristicExploration = new HeuristicExploration(1000);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -254,7 +275,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final RandomExploration randomExploration = new RandomExploration(200);
+                    final RandomExploration randomExploration = new RandomExploration(1000);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
