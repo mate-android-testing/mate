@@ -4,6 +4,8 @@ import org.mate.MATE;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.utils.Optional;
+import org.mate.utils.Randomness;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +23,7 @@ public class TestCase {
     private double sparseness;
     private HashMap<String, String> statesMap;
     private HashMap<String, Integer> featureVector;
+    private Optional<Integer> desiredSize = Optional.none();
 
 
     public TestCase(String id){
@@ -33,6 +36,14 @@ public class TestCase {
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
 
+    }
+
+    public void setDesiredSize(Optional<Integer> desiredSize) {
+        this.desiredSize = desiredSize;
+    }
+
+    public Optional<Integer> getDesiredSize() {
+        return desiredSize;
     }
 
     public String getId() {
@@ -102,6 +113,34 @@ public class TestCase {
                 featureVector.put(state.getId(),0);
             }
         }
+    }
+
+    public static TestCase fromDummy(TestCase testCase) {
+        TestCase resultingTc = newInitializedTestCase();
+
+        int finalSize = testCase.eventSequence.size();
+
+        if (testCase.desiredSize.hasValue()) {
+            finalSize = testCase.desiredSize.getValue();
+        }
+
+        int count = 0;
+        for (Action action : testCase.eventSequence) {
+            if (count < finalSize) {
+                if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
+                    resultingTc.updateTestCase(action, String.valueOf(count));
+                    count++;
+                }
+            } else {
+                break;
+            }
+        }
+        for (int i = count; i < finalSize; i++) {
+            Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+            resultingTc.updateTestCase(action, String.valueOf(count));
+        }
+
+        return resultingTc;
     }
 
     /**

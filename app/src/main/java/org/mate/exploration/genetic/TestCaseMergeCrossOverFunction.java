@@ -17,6 +17,7 @@ import java.util.List;
 public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
     public static final String CROSSOVER_FUNCTION_ID = "test_case_merge_crossover_function";
     private boolean storeCoverage;
+    private boolean executeActions;
 
     public TestCaseMergeCrossOverFunction() {
         this(true);
@@ -24,6 +25,11 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
 
     public TestCaseMergeCrossOverFunction(boolean storeCoverage) {
         this.storeCoverage = storeCoverage;
+        executeActions = true;
+    }
+
+    public void setExecuteActions(boolean executeActions) {
+        this.executeActions = executeActions;
     }
 
     @Override
@@ -120,34 +126,27 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
     private IChromosome<TestCase> merge(List<Action> l1, List<Action> l2, int finalSize) {
         List<Action> all = new ArrayList<>(l1);
         all.addAll(l2);
-        TestCase testCase = TestCase.newInitializedTestCase();
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
-        int count = 0;
-        for (Action action : all) {
-            if (count < finalSize) {
-                if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
-                    testCase.updateTestCase(action, String.valueOf(count));
-                    count++;
-                }
-            } else {
-                break;
+        TestCase testCase = new TestCase("dummy");
+        testCase.setDesiredSize(Optional.some(finalSize));
+        testCase.getEventSequence().addAll(all);
+
+        if (executeActions) {
+            TestCase executedTestCase = TestCase.fromDummy(testCase);
+            Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
+
+            if (storeCoverage) {
+                EnvironmentManager.storeCoverageData(chromosome, null);
+
+                MATE.log_acc("After test case merge crossover:");
+                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                        .getCoverage(chromosome));
+                MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
             }
-        }
-        for (int i = count; i < finalSize; i++) {
-            Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
-            testCase.updateTestCase(action, String.valueOf(count));
+
+            return chromosome;
         }
 
-        if (storeCoverage) {
-            EnvironmentManager.storeCoverageData(chromosome, null);
-
-            MATE.log_acc("After test case merge crossover:");
-            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
-                    .getCoverage(chromosome));
-            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
-        }
-
-        return chromosome;
+        return new Chromosome<>(testCase);
     }
 }
