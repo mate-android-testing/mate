@@ -2,6 +2,7 @@ package org.mate.utils;
 
 import org.mate.Properties;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -42,5 +43,16 @@ public class Randomness {
             x = (int) Math.round(getRnd().nextGaussian() * std + (range - 1) / 2.0);
         } while (x < 0 || x >= range);
         return x;
+    }
+
+    public static <T> void shuffleList(List<T> list) {
+        List<T> pickList = new ArrayList<>(list);
+        list.clear();
+
+        for (int i = 0; i < pickList.size(); i++) {
+            int choice = randomIndex(pickList);
+            list.add(pickList.get(choice));
+            pickList.remove(choice);
+        }
     }
 }
