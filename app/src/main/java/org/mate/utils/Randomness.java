@@ -28,6 +28,10 @@ public class Randomness {
         return list.get(rnd.nextInt(list.size()));
     }
 
+    public static <T> int randomIndex(List<T> list) {
+        return rnd.nextInt(list.size());
+    }
+
     public static int getInRangeStd(int range) {
         return getInRangeStd(range, 2.0/15.0 * range);
     }
