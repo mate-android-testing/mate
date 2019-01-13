@@ -14,7 +14,7 @@ import static org.mate.utils.MathUtils.isEpsEq;
 public class NSGAII<T> extends GeneticAlgorithm<T> {
     public static final String ALGORITHM_NAME = "NSGA-II";
 
-    public NSGAII(IChromosomeFactory chromosomeFactory, ISelectionFunction selectionFunction, ICrossOverFunction crossOverFunction, IMutationFunction mutationFunction, List list, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
+    public NSGAII(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T> selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> list, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, list, terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
     }
 
@@ -39,25 +39,54 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
             updateCrowdingDistance(paretoFront, fitnessFunctions, crowdingDistanceMap);
             rank++;
         }
-
-        Collections.sort(survivors, new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                int c = rankMap.get(o1).compareTo(rankMap.get(o2));
-                if (c == 0) {
-                    double cd = crowdingDistanceMap.get(o1).compareTo(crowdingDistanceMap.get(o2));
-                    if (isEpsEq(cd)) {
-                        return 0;
-                    }
-                    if (cd < 0) {
-                        return 1;
-                    }
-                    return -1;
-                }
-                return c;
-            }
-        });
+        Collections.sort(survivors, new RankComparator<>(rankMap, crowdingDistanceMap));
         return survivors.subList(0, generationSurvivorCount);
     }
 
+    static class RankComparator<T> implements Comparator<IChromosome<T>> {
+        private final Map<IChromosome<T>, Integer> rankMap;
+        private final Map<IChromosome<T>, Double> crowdingDistanceMap;
+
+        RankComparator(Map<IChromosome<T>, Integer> rankMap, Map<IChromosome<T>, Double> crowdingDistanceMap) {
+            this.rankMap = rankMap;
+            this.crowdingDistanceMap = crowdingDistanceMap;
+        }
+
+        @Override
+        public int compare(IChromosome<T> o1, IChromosome<T> o2) {
+            final Integer o1Rank = rankMap.get(o1);
+            if (o1Rank == null) {
+                return 1;
+            }
+            final Integer o2Rank = rankMap.get(o2);
+            if (o2Rank == null) {
+                return -1;
+            }
+
+            int c = o1Rank.compareTo(o2Rank);
+            if (c == 0) {
+                final Double o1CrowdDistance = crowdingDistanceMap.get(o1);
+                if (o1CrowdDistance == null) {
+                    return 1;
+                }
+                final Double o2CrowdDistance = crowdingDistanceMap.get(o2);
+                if (o2CrowdDistance == null) {
+                    return -1;
+                }
+
+                double cd = o1CrowdDistance - o2CrowdDistance;
+                if (isEpsEq(cd)) {
+                    return 0;
+                }
+                if (cd < 0) {
+                    // o1 is smaller than o2
+                    return 1;
+                }
+
+                // o1 is bigger than o2
+                return -1;
+            }
+            return c;
+        }
+    }
 }
