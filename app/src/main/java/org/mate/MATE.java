@@ -21,6 +21,7 @@ import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.genetic.MOSA;
+import org.mate.exploration.genetic.RandomSelectionFunction;
 import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
@@ -229,7 +230,7 @@ public class MATE {
                     final IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
