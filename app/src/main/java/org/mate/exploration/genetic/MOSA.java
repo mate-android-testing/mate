@@ -16,6 +16,13 @@ import static org.mate.exploration.genetic.GAUtils.updateCrowdingDistance;
 /**
  * Implementation of the Many-Objective Sorting Algorithm (MOSA) based on the paper:
  * <a href="https://ieeexplore.ieee.org/abstract/document/7102604">Reformulating Branch Coverage as a Many-Objective Optimization Problem</a>
+ * <p>
+ * In contrast to the proposed algorithms in the paper which minimises each testing target, this implementation
+ * <emp>maximises</emp> each fitness function to ease integration with other genetic algorithm implementations.
+ * <p>
+ * In the paper, a fitness function is fulfilled once it yields 0 (e.g. for branch distance: covers that branch).
+ * In this implementation, a fitness function is fulfilled when it yields 1. That means, the fitness function values
+ * have to be between {@code [0.0, 1.0]}.
  *
  * @param <T> Type wrapped by the chromosome implementation. Has to be a {@link TestCase} or sub class.
  */
@@ -83,14 +90,14 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
                 double bestFitness = fitnessFunction.getFitness(best);
                 for (IChromosome<T> chrom : population) {
                     final double chromFitness = fitnessFunction.getFitness(chrom);
-                    if (chromFitness < bestFitness) {
+                    if (chromFitness > bestFitness) {
                         best = chrom;
                         bestFitness = chromFitness;
                     }
                 }
 
                 // fitness function is covered
-                if (bestFitness == 0) {
+                if (bestFitness == 1) {
                     coveredFitnessFunctions.add(fitnessFunction);
                 }
                 // Rank 0
@@ -141,7 +148,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
                 final double score = fitnessFunction.getFitness(survivor);
                 final double length = survivor.getValue().getEventSequence().size();
 
-                if (score == 0 && length <= bestLength) {
+                if (score == 1 && length <= bestLength) {
                     best = survivor;
                     bestLength = length;
                 }
