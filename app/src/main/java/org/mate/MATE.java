@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
-
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
 import org.mate.exploration.genetic.ActivityFitnessFunction;
@@ -19,11 +18,11 @@ import org.mate.exploration.genetic.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.CutPointMutationFunction;
 import org.mate.exploration.genetic.FitnessSelectionFunction;
 import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
+import org.mate.exploration.genetic.MOSA;
+import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
-import org.mate.exploration.genetic.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
 import org.mate.exploration.heuristical.HeuristicExploration;
@@ -31,6 +30,7 @@ import org.mate.exploration.heuristical.RandomExploration;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.model.graph.GraphGUIModel;
@@ -38,7 +38,6 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
-import org.mate.interaction.UIAbstractionLayer;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
@@ -266,6 +265,31 @@ public class MATE {
 
                     EnvironmentManager.storeCoverageData(randomExploration, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+
+                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(MOSA.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID);
+
+                    // add specific fitness functions for all activities of the Application Under Test
+                    for (String activityName : EnvironmentManager.getActivityNames()) {
+                        builder.withFitnessFunction(SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID, activityName);
+                    }
+
+                    final IGeneticAlgorithm<TestCase> mosa = builder.build();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            mosa.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
                 }
 
                 checkVisitedActivities(explorationStrategy);
