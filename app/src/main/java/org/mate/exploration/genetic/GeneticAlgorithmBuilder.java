@@ -22,6 +22,7 @@ public class GeneticAlgorithmBuilder {
     public static final String P_MUTATE_KEY = "p_mutate";
     public static final String P_CROSSOVER_KEY = "p_crossover";
     public static final String AMOUNT_FITNESS_FUNCTIONS_KEY = "amount_fitness_functions";
+    public static final String GENERATION_SURVIVOR_COUNT_KEY = "generation_survivor_count";
 
     private Properties properties;
 
@@ -108,6 +109,11 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withPopulationSize(int populationSize) {
         properties.setProperty(POPULATION_SIZE_KEY, String.valueOf(populationSize));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withGenerationSurvivorCount(int generationSurvivorCount) {
+        properties.setProperty(GENERATION_SURVIVOR_COUNT_KEY, String.valueOf(generationSurvivorCount));
         return this;
     }
 

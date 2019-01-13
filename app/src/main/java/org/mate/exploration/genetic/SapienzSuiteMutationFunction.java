@@ -1,7 +1,9 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -9,12 +11,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
+    public static final String MUTATION_FUNCTION_ID = "sapienz_suite_mutation_function";
+
     private final double pMutate;
     private final TestCaseMergeCrossOverFunction testCaseMergeCrossOverFunction;
     private final TestCaseShuffleMutationFunction testCaseShuffleMutationFunction;
+    private final boolean storeCoverage;
 
     public SapienzSuiteMutationFunction(double pMutate) {
+        this(true, pMutate);
+    }
+
+    public SapienzSuiteMutationFunction(boolean storeCoverage, double pMutate) {
         this.pMutate = pMutate;
+        this.storeCoverage = storeCoverage;
         testCaseMergeCrossOverFunction = new TestCaseMergeCrossOverFunction(false);
         testCaseMergeCrossOverFunction.setExecuteActions(false);
         testCaseShuffleMutationFunction = new TestCaseShuffleMutationFunction(false);
@@ -25,7 +35,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     public List<IChromosome<TestSuite>> mutate(IChromosome<TestSuite> chromosome) {
         TestSuite mutatedTestSuite = new TestSuite();
         List<IChromosome<TestSuite>> mutations = new ArrayList<>();
-        mutations.add(new Chromosome<>(mutatedTestSuite));
+        IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
+        mutations.add(mutatedChromosome);
 
         List<TestCase> oldTestCases = chromosome.getValue().getTestCases();
         Randomness.shuffleList(oldTestCases);
@@ -54,6 +65,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
             afterOnePointCrossover.add(oldTestCases.get(oldTestCases.size() - 1));
         }
 
+        /* don't do this for now
         for (TestCase testCase : afterOnePointCrossover) {
             if (Randomness.getRnd().nextDouble() < pMutate) {
                 TestCase mutatedTc = testCaseShuffleMutationFunction.mutate(
@@ -63,9 +75,30 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 afterInternalMutation.add(testCase);
             }
         }
+        */
 
+        List<TestCase> copyTestCases = new ArrayList<>();
         for (TestCase testCase : afterInternalMutation) {
-            executedTestCases.add(TestCase.fromDummy(testCase));
+            if (testCase.getId().equals("dummy")) {
+                TestCase mutatedTestCase = TestCase.fromDummy(testCase);
+                executedTestCases.add(mutatedTestCase);
+                if (storeCoverage) {
+                    EnvironmentManager.storeCoverageData(mutatedChromosome, mutatedTestCase);
+
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                            .getCoverage(chromosome));
+                    MATE.log_acc("Found crash: " + String.valueOf(mutatedTestCase.getCrashDetected()));
+                }
+            } else {
+                executedTestCases.add(testCase);
+                if (storeCoverage) {
+                    copyTestCases.add(testCase);
+                }
+            }
+        }
+
+        if (!copyTestCases.isEmpty()) {
+            EnvironmentManager.copyCoverageData(chromosome, mutatedChromosome, copyTestCases);
         }
 
         mutatedTestSuite.getTestCases().addAll(executedTestCases);

@@ -137,6 +137,8 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
+                case UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID:
+                    return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
@@ -159,6 +161,10 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
+                case SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID:
+                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -174,7 +180,7 @@ public class GeneticAlgorithmProvider {
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
             for (int i = 0; i < amountFitnessFunctions; i++) {
-                fitnessFunctions.add(this.<T>initializeFitnessFunction(amountFitnessFunctions));
+                fitnessFunctions.add(this.<T>initializeFitnessFunction(i));
             }
             return fitnessFunctions;
         }
@@ -303,7 +309,19 @@ public class GeneticAlgorithmProvider {
     }
 
     private int getGenerationSurvivorCount() {
-        return 2;
+        String generationSurvivorCount
+                = properties.getProperty(GeneticAlgorithmBuilder.GENERATION_SURVIVOR_COUNT_KEY);
+        if (generationSurvivorCount == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 2;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Integer.valueOf(generationSurvivorCount);
+        }
     }
 
     private double getPCrossOver() {

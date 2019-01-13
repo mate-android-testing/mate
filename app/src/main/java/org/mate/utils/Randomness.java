@@ -48,8 +48,9 @@ public class Randomness {
     public static <T> void shuffleList(List<T> list) {
         List<T> pickList = new ArrayList<>(list);
         list.clear();
+        int size = pickList.size();
 
-        for (int i = 0; i < pickList.size(); i++) {
+        for (int i = 0; i < size; i++) {
             int choice = randomIndex(pickList);
             list.add(pickList.get(choice));
             pickList.remove(choice);

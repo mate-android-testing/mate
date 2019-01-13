@@ -22,11 +22,13 @@ import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.genetic.MOSA;
 import org.mate.exploration.genetic.RandomSelectionFunction;
+import org.mate.exploration.genetic.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.UniformSuiteCrossoverFunction;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
 import org.mate.exploration.novelty.NoveltyBased;
@@ -40,14 +42,17 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Randomness;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.Callable;
@@ -227,15 +232,35 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    List<Integer> asdf = new ArrayList<>();
+                    asdf.add(1);
+                    asdf.add(2);
+                    asdf.add(3);
+                    asdf.add(4);
+                    System.out.println(asdf.size());
+                    Randomness.shuffleList(asdf);
+                    System.out.println(asdf.size());
+                    for (Integer integer : asdf) {
+                        System.out.println(integer);
+                    }
+
                     final IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
-                            .withMutationFunction(SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withPopulationSize(4)
+                            .withGenerationSurvivorCount(2)
+                            .withMaxNumEvents(4)
+                            .withNumberIterations(Integer.MAX_VALUE)
+                            .withPMutate(0.75)
+                            .withPCrossover(0.75)
+                            .withNumTestCases(2)
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -245,6 +270,9 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+
+                    EnvironmentManager.storeCoverageData(nsga, null);
+                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("HeuristicRandom")) {
                     guiModel = new GraphGUIModel();
                     guiModel.updateModel(null, state);
