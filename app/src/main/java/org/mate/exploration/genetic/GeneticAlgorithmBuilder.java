@@ -1,17 +1,14 @@
 package org.mate.exploration.genetic;
 
+import java.util.Locale;
 import java.util.Properties;
 
 public class GeneticAlgorithmBuilder {
-    // Separator symbol must not appear in any id (e.g. not in the id
-    // AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
-    public static final String SEPARATOR = ",";
-    // Argument separator symbol must not appear in any id (e.g. not in the id
-    // AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
-    public static final String ARG_SEPARATOR = "|";
+    public static final Locale FORMAT_LOCALE = Locale.US;
     public static final String TRUE_STRING = "true";
     public static final String ALGORITHM_KEY = "algorithm";
-    public static final String FITNESS_FUNCTIONS_KEY = "fitness_functions";
+    public static final String FITNESS_FUNCTION_KEY_FORMAT = "fitness_function_%d";
+    public static final String FITNESS_FUNCTION_ARG_KEY_FORMAT = "fitness_function_%d_arg";
     public static final String CHROMOSOME_FACTORY_KEY = "chromosome_factory";
     public static final String MAX_NUM_EVENTS_KEY = "num_events";
     public static final String USE_DEFAULTS_KEY = "use_defaults";
@@ -24,12 +21,14 @@ public class GeneticAlgorithmBuilder {
     public static final String POPULATION_SIZE_KEY = "population_size";
     public static final String P_MUTATE_KEY = "p_mutate";
     public static final String P_CROSSOVER_KEY = "p_crossover";
+    public static final String AMOUNT_FITNESS_FUNCTIONS_KEY = "amount_fitness_functions";
 
     private Properties properties;
 
     public GeneticAlgorithmBuilder() {
         properties = new Properties();
         properties.setProperty(USE_DEFAULTS_KEY, TRUE_STRING);
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, "0");
     }
 
     public GeneticAlgorithmBuilder noDefaults() {
@@ -63,25 +62,27 @@ public class GeneticAlgorithmBuilder {
     }
 
     public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId) {
-        String oldValue = properties.getProperty(FITNESS_FUNCTIONS_KEY);
-        if (oldValue == null) {
-            properties.setProperty(FITNESS_FUNCTIONS_KEY, fitnessFunctionId);
-        } else {
-            properties.setProperty(FITNESS_FUNCTIONS_KEY,
-                    oldValue + SEPARATOR + fitnessFunctionId);
-        }
+        int amountFitnessFunctions = Integer.valueOf(
+                properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY,
+                String.valueOf(amountFitnessFunctions + 1));
+
+        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT,
+                amountFitnessFunctions);
+        properties.setProperty(key, fitnessFunctionId);
         return this;
     }
 
     public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId, String arg1) {
-        String insertValue = fitnessFunctionId + ARG_SEPARATOR + arg1;
-        String oldValue = properties.getProperty(FITNESS_FUNCTIONS_KEY);
-        if (oldValue == null) {
-            properties.setProperty(FITNESS_FUNCTIONS_KEY, insertValue);
-        } else {
-            properties.setProperty(FITNESS_FUNCTIONS_KEY,
-                    oldValue + SEPARATOR + insertValue);
-        }
+        int amountFitnessFunctions = Integer.valueOf(
+                properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
+
+        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_ARG_KEY_FORMAT,
+                amountFitnessFunctions);
+
+        properties.setProperty(key, arg1);
+
+        withFitnessFunction(fitnessFunctionId);
         return this;
     }
 

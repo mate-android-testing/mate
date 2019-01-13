@@ -5,6 +5,7 @@ import org.mate.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 public class GeneticAlgorithmProvider {
@@ -164,28 +165,24 @@ public class GeneticAlgorithmProvider {
     }
 
     private <T> List<IFitnessFunction<T>> initializeFitnessFunctions() {
-        String fitnessFunctionIds
-                = properties.getProperty(GeneticAlgorithmBuilder.FITNESS_FUNCTIONS_KEY);
-        if (fitnessFunctionIds == null) {
+        int amountFitnessFunctions = Integer.valueOf(properties.getProperty
+                (GeneticAlgorithmBuilder.AMOUNT_FITNESS_FUNCTIONS_KEY));
+        if (amountFitnessFunctions == 0) {
             return null;
-        } else if (fitnessFunctionIds.isEmpty()) {
-            return new ArrayList<>();
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
-            for (String fitnessFunctionSerialized
-                    : fitnessFunctionIds.split(
-                            StringUtils.regexEscape(GeneticAlgorithmBuilder.SEPARATOR))) {
-                String[] argSplit = fitnessFunctionSerialized.split(
-                        StringUtils.regexEscape(GeneticAlgorithmBuilder.ARG_SEPARATOR));
-                fitnessFunctions.add(this.<T>initializeFitnessFunction(
-                        argSplit[0], Arrays.asList(argSplit).subList(1, argSplit.length)));
+            for (int i = 0; i < amountFitnessFunctions; i++) {
+                fitnessFunctions.add(this.<T>initializeFitnessFunction(amountFitnessFunctions));
             }
             return fitnessFunctions;
         }
     }
 
-    private <T> IFitnessFunction<T> initializeFitnessFunction(
-            String fitnessFunctionId, List<String> args) {
+    private <T> IFitnessFunction<T> initializeFitnessFunction(int index) {
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
+                .FITNESS_FUNCTION_KEY_FORMAT, index);
+        String fitnessFunctionId = properties.getProperty(key);
+
         switch (fitnessFunctionId) {
             case AndroidStateFitnessFunction.FITNESS_FUNCTION_ID:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
@@ -196,15 +193,10 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new ActivityFitnessFunction();
             case SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID:
-                if (args.size() == 0) {
-                    throw new IllegalArgumentException("Required argument activityName for "
-                            + SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID
-                            + " not specified");
-                }
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
-                        new SpecificActivityCoveredFitnessFunction(args.get(0));
+                        new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
             case AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
@@ -226,6 +218,12 @@ public class GeneticAlgorithmProvider {
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
         }
+    }
+
+    private String getFitnessFunctionArgument(int index) {
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
+                .FITNESS_FUNCTION_ARG_KEY_FORMAT, index);
+        return properties.getProperty(key);
     }
 
     private ITerminationCondition initializeTerminationCondition() {
