@@ -23,6 +23,9 @@ import static org.mate.exploration.genetic.GAUtils.updateCrowdingDistance;
  * In the paper, a fitness function is fulfilled once it yields 0 (e.g. for branch distance: covers that branch).
  * In this implementation, a fitness function is fulfilled when it yields 1. That means, the fitness function values
  * have to be between {@code [0.0, 1.0]}.
+ * <p>
+ * The result of MOSA are all test cases which are stored in the {@link #archive}, i.e. the shortest test cases
+ * which fulfill provided test targets (here fitness functions).
  *
  * @param <T> Type wrapped by the chromosome implementation. Has to be a {@link TestCase} or sub class.
  */
@@ -37,13 +40,15 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
      */
     private Map<IFitnessFunction<T>, IChromosome<T>> archive = new HashMap<>();
     /**
-     * Stores all fitness functions which have already been covered and which criteria have been met, i.e. result
-     * of the fitness function is 0 for at least one chromosome.
+     * Stores all fitness functions which have <emp>not yet</emp> been fulfilled and which criteria has not been met,
+     * i.e. result of the fitness function is smaller than 1 for all chromosomes.
      */
-    private List<IFitnessFunction> coveredFitnessFunctions = new ArrayList<>();
+    private List<IFitnessFunction<T>> uncoveredFitnessFunctions = new ArrayList<>();
 
     public MOSA(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T> selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions, terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
+
+        uncoveredFitnessFunctions.addAll(fitnessFunctions);
     }
 
     @Override
@@ -54,82 +59,84 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
 
     @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
-        List<IChromosome<T>> survivors = new ArrayList<>(population);
+        List<IChromosome<T>> population = new ArrayList<>(this.population);
 
-        List<IChromosome<T>> nextSurvivors = preferenceSorting(survivors).subList(0, generationSurvivorCount);
-
-        updateArchive(nextSurvivors);
-
-        return nextSurvivors;
-    }
-
-    /**
-     * Sorting the current population based on <a href="https://ieeexplore.ieee.org/abstract/document/7102604">MOSA Algorithm 2</a>.
-     * <p>
-     * The returned sorted list contains the so far best chromosomes for all fitness functions.
-     *
-     * @param population a list of chromosomes to be sorted by preference.
-     *
-     * @return a sorted updated population matching all fitness functions best.
-     */
-    private List<IChromosome<T>> preferenceSorting(List<IChromosome<T>> population) {
-        if (population.isEmpty()) {
-            return population;
-        }
         final Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
+
+        // List of chromosomes that fulfill a certain testing target best.
+        final List<IChromosome<T>> preferredChromosomes = extractPreferred(population);
+        for (IChromosome<T> chromosome : preferredChromosomes) {
+            // MOSA best possible rank
+            rankMap.put(chromosome, 0);
+        }
+
+        // The following represents Algorithm 2 (lines 7-12) and algorithm 1 (lines 10-17):
+        // Apply rank and crowding distance values for all non-preference sorted chromosomes
+        final List<IChromosome<T>> remaining = new ArrayList<>(population);
+        remaining.removeAll(preferredChromosomes);
+
         final Map<IChromosome<T>, Double> crowdingDistanceMap = new HashMap<>();
 
-        final List<IChromosome<T>> remaining = new ArrayList<>(population);
+        // Start at best possible rank in NSGA-II
+        int rank = 1;
 
-        final Set<IChromosome<T>> firstNonDominatedFront = new HashSet<>();
-        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
+        while (!remaining.isEmpty()) {
+            List<IChromosome<T>> paretoFront = getParetoFront(remaining, uncoveredFitnessFunctions);
 
-            // only look at fitness functions which have not been covered yet
-            if (!coveredFitnessFunctions.contains(fitnessFunction)) {
-                IChromosome<T> best = population.get(0);
-                double bestFitness = fitnessFunction.getFitness(best);
-                for (IChromosome<T> chrom : population) {
-                    final double chromFitness = fitnessFunction.getFitness(chrom);
-                    if (chromFitness > bestFitness) {
-                        best = chrom;
-                        bestFitness = chromFitness;
-                    }
-                }
-
-                // fitness function is covered
-                if (bestFitness == 1) {
-                    coveredFitnessFunctions.add(fitnessFunction);
-                }
-                // Rank 0
-                rankMap.put(best, 0);
-
-                firstNonDominatedFront.add(best);
+            for (IChromosome<T> chromosome : paretoFront) {
+                remaining.remove(chromosome);
+                rankMap.put(chromosome, rank);
             }
-        }
 
-        remaining.removeAll(firstNonDominatedFront);
-
-        if (!remaining.isEmpty()) {
-            int rank = 1;
-
-            // apply rank and crowding distance values
-            while (!remaining.isEmpty()) {
-                List<IChromosome<T>> paretoFront = getParetoFront(remaining, fitnessFunctions);
-
-                for (IChromosome<T> chromosome : paretoFront) {
-                    remaining.remove(chromosome);
-                    rankMap.put(chromosome, rank);
-                }
-
-                updateCrowdingDistance(paretoFront, fitnessFunctions, crowdingDistanceMap);
-                rank++;
-            }
+            updateCrowdingDistance(paretoFront, uncoveredFitnessFunctions, crowdingDistanceMap);
+            rank++;
         }
 
         // Sort all by rank and if rank is equal by crowding distance
         Collections.sort(population, new NSGAII.RankComparator<>(rankMap, crowdingDistanceMap));
 
+        population = population.subList(0, populationSize);
+
+        updateArchive(population);
+
         return population;
+    }
+
+    /**
+     * Extract the best chromosomes for uncovered fitness functions for given population
+     * based on <a href="https://ieeexplore.ieee.org/abstract/document/7102604">MOSA Algorithm 2 lines 1 - 6</a>.
+     * <p>
+     * If one chromosome fulfills one fitness function, the fitness function is removed from the
+     * {@link #uncoveredFitnessFunctions uncovered fitness functions}.
+     *
+     * @return a list of current chromosomes that fit a uncovered fitness functions best.
+     */
+    private List<IChromosome<T>> extractPreferred(List<IChromosome<T>> population) {
+        if (population.isEmpty()) {
+            return new ArrayList<>();
+        }
+        final Set<IChromosome<T>> firstNonDominatedFront = new HashSet<>();
+
+        // only look at fitness functions which have not been covered yet
+        for (IFitnessFunction<T> fitnessFunction : uncoveredFitnessFunctions) {
+            IChromosome<T> best = population.get(0);
+            double bestFitness = fitnessFunction.getFitness(best);
+            for (IChromosome<T> chrom : population) {
+                final double chromFitness = fitnessFunction.getFitness(chrom);
+                if (chromFitness > bestFitness) {
+                    best = chrom;
+                    bestFitness = chromFitness;
+                }
+            }
+
+            // fitness function is now covered
+            if (bestFitness == 1) {
+                uncoveredFitnessFunctions.remove(fitnessFunction);
+            }
+
+            firstNonDominatedFront.add(best);
+        }
+        return new ArrayList<>(firstNonDominatedFront);
     }
 
     /**
@@ -138,13 +145,16 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
      * @param possibleAdditions a list of possible additions to the archive.
      */
     private void updateArchive(List<IChromosome<T>> possibleAdditions) {
-        possibleAdditions.addAll(archive.values());
+        final List<IChromosome<T>> allChromosomes = new ArrayList<>();
+        allChromosomes.addAll(archive.values());
+        allChromosomes.addAll(possibleAdditions);
 
+        // Look at all fitness functions, even covered ones.
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
             double bestLength = Double.POSITIVE_INFINITY;
             IChromosome<T> best = null;
 
-            for (IChromosome<T> survivor : possibleAdditions) {
+            for (IChromosome<T> survivor : allChromosomes) {
                 final double score = fitnessFunction.getFitness(survivor);
                 final double length = survivor.getValue().getEventSequence().size();
 
