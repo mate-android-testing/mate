@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.ui.EnvironmentManager;
@@ -10,6 +11,16 @@ import java.util.List;
 
 public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSuite> {
     public static final String CROSSOVER_FUNCTION_ID = "uniform_suite_crossover_function";
+    private final boolean storeCoverage;
+
+    public UniformSuiteCrossoverFunction() {
+        this(true);
+    }
+
+    public UniformSuiteCrossoverFunction(boolean storeCoverage) {
+        this.storeCoverage = storeCoverage;
+    }
+
     @Override
     public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {
         TestSuite t1 = parents.get(0).getValue();
@@ -24,6 +35,8 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
 
         TestSuite offspringSuite = new TestSuite();
         IChromosome<TestSuite> offspring = new Chromosome<>(offspringSuite);
+        MATE.log_acc("Uniform Suite Cross Over: crossing over chromosome: " + parents.get(0) + " and chromosome: " + parents.get(1));
+        MATE.log_acc("cross over result chromosome: " + offspring);
 
         List<TestCase> copyTestCasesFromParent1 = new ArrayList<>();
         List<TestCase> copyTestCasesFromParent2 = new ArrayList<>();
@@ -40,12 +53,16 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
             testCasePool.remove(choice);
         }
 
-        if (!copyTestCasesFromParent1.isEmpty()) {
-            EnvironmentManager.copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
-        }
+        if (storeCoverage) {
+            if (!copyTestCasesFromParent1.isEmpty()) {
+                MATE.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
+                EnvironmentManager.copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
+            }
 
-        if (!copyTestCasesFromParent2.isEmpty()) {
-            EnvironmentManager.copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
+            if (!copyTestCasesFromParent2.isEmpty()) {
+                MATE.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
+                EnvironmentManager.copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
+            }
         }
 
         return offspring;

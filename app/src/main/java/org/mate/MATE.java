@@ -67,7 +67,7 @@ public class MATE {
 
     public static UiDevice device;
     public static UIAbstractionLayer uiAbstractionLayer;
-    private String packageName;
+    public static String packageName;
     public static IGUIModel guiModel;
     private Vector<Action> actions;
     private DeviceMgr deviceMgr;

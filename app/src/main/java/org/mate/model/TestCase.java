@@ -115,7 +115,9 @@ public class TestCase {
         }
     }
 
+    //TODO: Load test case from cache if it was executed before
     public static TestCase fromDummy(TestCase testCase) {
+        MATE.uiAbstractionLayer.resetApp();
         TestCase resultingTc = newInitializedTestCase();
 
         int finalSize = testCase.eventSequence.size();
@@ -128,7 +130,9 @@ public class TestCase {
         for (Action action : testCase.eventSequence) {
             if (count < finalSize) {
                 if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
-                    resultingTc.updateTestCase(action, String.valueOf(count));
+                    if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                        break;
+                    }
                     count++;
                 }
             } else {

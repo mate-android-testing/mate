@@ -76,6 +76,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
             }
         }
         */
+        //remove this line, if lines above get uncommented
+        afterInternalMutation.addAll(afterOnePointCrossover);
 
         List<TestCase> copyTestCases = new ArrayList<>();
         for (TestCase testCase : afterInternalMutation) {
