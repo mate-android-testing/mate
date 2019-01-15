@@ -3,7 +3,6 @@ package org.mate.exploration.genetic;
 import org.mate.MATE;
 import org.mate.utils.Randomness;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +68,6 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             individual = chromosomeFactory.createChromosome();
         } else {
             // Sample individual from archive
-            //IFitnessFunction<T> key = Randomness.randomElement(new ArrayList<>(archive.keySet()));
             IFitnessFunction<T> key = getBestTarget();
 
             IndividualFitnessTuple tuple = Randomness.randomElement(archive.get(key));
@@ -112,7 +110,6 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
                 if (archive.get(fitnessFunction).size() > populationSize) {
                     // Remove worst if we reached limit population limit
-//                    removeWorstTest(archive.get(fitnessFunction));
                     archive.get(fitnessFunction).remove(worstTest);
                 }
             }
@@ -151,21 +148,6 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         return worstTuple;
-    }
-
-    private void removeWorstTest(List<IndividualFitnessTuple> tuples) {
-        if (tuples == null || tuples.isEmpty()) {
-            throw new IllegalArgumentException("Cannot remove worst test if list is empty");
-        }
-
-        IndividualFitnessTuple worstTuple = tuples.get(0);
-        for (IndividualFitnessTuple tuple : tuples) {
-            if (worstTuple.getFitness() > tuple.getFitness()) {
-                worstTuple = tuple;
-            }
-        }
-
-        tuples.remove(worstTuple);
     }
 
     private IFitnessFunction<T> getBestTarget() {
