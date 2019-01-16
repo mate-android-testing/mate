@@ -24,6 +24,8 @@ import org.mate.exploration.genetic.MOSA;
 import org.mate.exploration.genetic.RandomSelectionFunction;
 import org.mate.exploration.genetic.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
+import org.mate.exploration.genetic.MOSA;
+import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestCaseMergeCrossOverFunction;
