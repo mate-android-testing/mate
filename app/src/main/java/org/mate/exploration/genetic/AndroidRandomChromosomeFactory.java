@@ -52,6 +52,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
                         .getCoverage(chromosome));
                 MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+
+                //TODO: remove hack, when better solution implemented
+                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         }
 

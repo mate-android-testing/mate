@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -145,7 +146,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     private void logCurrentFitness() {
         MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
-        for (int i = 0; i < fitnessFunctions.size(); i++) {
+        for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
             MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
             IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
             for (int j = 0; j < population.size(); j++) {
@@ -154,6 +155,13 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                         + fitnessFunction.getFitness(chromosome));
             }
         }
+
+        if (fitnessFunctions.size() > 5) {
+            MATE.log_acc("Omitted other fitness function because there are to many (" + fitnessFunctions.size() + ")");
+        }
+
+        MATE.log_acc("Combined coverage until now: " + EnvironmentManager.getCombinedCoverage());
+        MATE.log_acc("Combined coverage of current population: " + EnvironmentManager.getCombinedCoverage(population));
     }
 
 }

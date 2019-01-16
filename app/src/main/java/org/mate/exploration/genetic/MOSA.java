@@ -58,6 +58,12 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
     }
 
     @Override
+    public void evolve() {
+        super.evolve();
+        updateArchive(population);
+    }
+
+    @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
         List<IChromosome<T>> population = new ArrayList<>(this.population);
 
@@ -95,11 +101,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         // Sort all by rank and if rank is equal by crowding distance
         Collections.sort(population, new NSGAII.RankComparator<>(rankMap, crowdingDistanceMap));
 
-        population = population.subList(0, populationSize);
-
-        updateArchive(population);
-
-        return population;
+        return population.subList(0, generationSurvivorCount);
     }
 
     /**
@@ -118,6 +120,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         final Set<IChromosome<T>> firstNonDominatedFront = new HashSet<>();
 
         // only look at fitness functions which have not been covered yet
+        List<IFitnessFunction<T>> toRemove = new ArrayList<>();
         for (IFitnessFunction<T> fitnessFunction : uncoveredFitnessFunctions) {
             IChromosome<T> best = population.get(0);
             double bestFitness = fitnessFunction.getFitness(best);
@@ -131,11 +134,14 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
 
             // fitness function is now covered
             if (bestFitness == 1) {
-                uncoveredFitnessFunctions.remove(fitnessFunction);
+                toRemove.add(fitnessFunction);
             }
 
             firstNonDominatedFront.add(best);
         }
+
+        uncoveredFitnessFunctions.removeAll(toRemove);
+
         return new ArrayList<>(firstNonDominatedFront);
     }
 

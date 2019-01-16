@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.model.TestCase;
 import org.mate.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class GeneticAlgorithmProvider {
                 return initializeOnePlusOne();
             case NSGAII.ALGORITHM_NAME:
                 return initializeNSGAII();
+            case MOSA.ALGORITHM_NAME:
+                return (GeneticAlgorithm<T>) initializeMOSA();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -61,6 +64,20 @@ public class GeneticAlgorithmProvider {
 
     private <T> NSGAII<T> initializeNSGAII() {
         return new NSGAII<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate());
+    }
+
+    private <T extends TestCase> MOSA<T> initializeMOSA() {
+        return new MOSA<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
                 this.<T>initializeCrossOverFunction(),
@@ -222,6 +239,10 @@ public class GeneticAlgorithmProvider {
                         new SuiteActivityFitnessFunction();
             case StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID:
                 return new StatementCoverageFitnessFunction<>();
+            case LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

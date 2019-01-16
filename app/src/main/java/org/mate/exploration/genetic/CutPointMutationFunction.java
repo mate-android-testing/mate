@@ -5,6 +5,7 @@ import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -13,11 +14,17 @@ import java.util.UUID;
 
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     public static final String MUTATION_FUNCTION_ID = "cut_point_mutation_function";
+    private final boolean storeCoverage;
 
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
     public CutPointMutationFunction(int maxNumEvents) {
+        this(true, maxNumEvents);
+    }
+
+    public CutPointMutationFunction(boolean storeCoverage, int maxNumEvents) {
+        this.storeCoverage = storeCoverage;
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
     }
@@ -29,11 +36,10 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
         int cutPoint = chooseCutPoint(chromosome.getValue());
 
-        TestCase mutant = new TestCase(UUID.randomUUID().toString());
+        TestCase mutant = TestCase.newInitializedTestCase();
+        IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
 
-        mutations.add(new Chromosome<>(mutant));
-
-        updateTestCase(mutant, "init");
+        mutations.add(mutatedChromosome);
 
         for (int i = 0; i < maxNumEvents; i++) {
             Action newAction;
@@ -42,35 +48,25 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             } else {
                 newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
             }
-            mutant.addEvent(newAction);
-            UIAbstractionLayer.ActionResult actionResult = uiAbstractionLayer.executeAction(newAction);
-
-            switch (actionResult) {
-                case SUCCESS:
-                case SUCCESS_NEW_STATE:
-                    updateTestCase(mutant, String.valueOf(i));
-                    break;
-                case FAILURE_APP_CRASH:
-                    mutant.setCrashDetected();
-                case SUCCESS_OUTBOUND: return mutations;
-                case FAILURE_UNKNOWN:
-                case FAILURE_EMULATOR_CRASH: throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
-                default: throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+            if (!uiAbstractionLayer.getExecutableActions().contains(newAction) || !mutant.updateTestCase(newAction, String.valueOf(i))) {
+                break;
             }
         }
 
+        if (storeCoverage) {
+            EnvironmentManager.storeCoverageData(mutatedChromosome, null);
+
+            MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + EnvironmentManager
+                    .getCoverage(mutatedChromosome));
+            MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
+
+            //TODO: remove hack, when better solution implemented
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
+        }
         return mutations;
     }
 
     private int chooseCutPoint(TestCase testCase) {
         return Randomness.getRnd().nextInt(testCase.getEventSequence().size());
-    }
-
-    private void updateTestCase(TestCase testCase, String event) {
-        IScreenState currentScreenstate = uiAbstractionLayer.getCurrentScreenState();
-
-        testCase.updateVisitedStates(currentScreenstate);
-        testCase.updateVisitedActivities(currentScreenstate.getActivityName());
-        testCase.updateStatesMap(currentScreenstate.getId(), event);
     }
 }
