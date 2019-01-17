@@ -3,10 +3,10 @@ package org.mate.exploration.genetic;
 import org.mate.MATE;
 import org.mate.utils.Randomness;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Mio<T> extends GeneticAlgorithm<T> {
 
@@ -16,6 +16,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private final float pSampleRandomStart;
     private final float focusedSearchStart;
     private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> archive;
+    private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -52,9 +53,14 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         this.focusedSearchStart = focusedSearchStart;
         this.pSampleRandom = pSampleRandom;
         this.archive = new HashMap<>();
+        this.samplingCounters = new HashMap<>();
         this.startTime = System.currentTimeMillis();
         this.pSampleRandomStart = pSampleRandom;
         this.populationSizeStart = populationSize;
+
+        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
+            samplingCounters.put(fitnessFunction, 0);
+        }
     }
 
 
@@ -66,34 +72,62 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             individual = chromosomeFactory.createChromosome();
         } else {
             // Sample individual from archive
-            IFitnessFunction<T> key = Randomness.randomElement(new ArrayList<>(archive.keySet()));
+            IFitnessFunction<T> key = getBestTarget();
+
             IndividualFitnessTuple tuple = Randomness.randomElement(archive.get(key));
             individual = tuple.getIndividual();
+
+            //Increase Counter
+            Integer value = samplingCounters.get(key);
+            samplingCounters.put(key, value + 1);
+
             List<IChromosome<T>> mutated = mutationFunction.mutate(individual);
             individual = mutated.get(0);
         }
 
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
-            if (archive.get(fitnessFunction) == null ) {
-                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
-            }
-
             double fitness = fitnessFunction.getFitness(individual);
             IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
             if (fitness == 1) {
                 // check population size
                 archive.get(fitnessFunction).clear();
                 archive.get(fitnessFunction).add(tuple);
-            } else if (fitness > 0){
+            } else if (fitness > 0) {
+
+                IndividualFitnessTuple worstTest = getWorstTest(archive.get(fitnessFunction));
                 archive.get(fitnessFunction).add(tuple);
-                if (archive.get(fitnessFunction).size() > populationSize){
+
+                if (worstTest.fitness < tuple.getFitness()) {
+                    //Reset counter
+                    samplingCounters.put(fitnessFunction, 0);
+                } else {
+                    worstTest = tuple;
+                }
+
+                if (archive.get(fitnessFunction).size() > populationSize) {
                     // Remove worst if we reached limit population limit
-                    removeWorstTest(archive.get(fitnessFunction));
+                    archive.get(fitnessFunction).remove(worstTest);
                 }
             }
         }
 
         updateParameters();
+    }
+
+    @Override
+    public void createInitialPopulation() {
+        super.createInitialPopulation();
+        for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
+            if (archive.get(fitnessFunction) == null) {
+                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
+            }
+
+            for (IChromosome<T> individual : this.population) {
+                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitnessFunction.getFitness(individual));
+                archive.get(fitnessFunction).add(tuple);
+
+            }
+        }
     }
 
     private void updateParameters() {
@@ -111,21 +145,32 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             populationSize = (int) (populationSizeStart * (1 - decreasePercent));
             pSampleRandom = (int) pSampleRandomStart * (1 - decreasePercent);
         }
-   }
+    }
 
-    private void removeWorstTest(List<IndividualFitnessTuple> tuples) {
+    private IndividualFitnessTuple getWorstTest(List<IndividualFitnessTuple> tuples) {
         if (tuples == null || tuples.isEmpty()) {
-            throw new IllegalArgumentException("Cannot remove worst test if list is empty");
+            throw new IllegalArgumentException("Cannot find worst test if list is empty");
         }
 
         IndividualFitnessTuple worstTuple = tuples.get(0);
-        for (IndividualFitnessTuple tuple:  tuples) {
+        for (IndividualFitnessTuple tuple : tuples) {
             if (worstTuple.getFitness() > tuple.getFitness()) {
                 worstTuple = tuple;
             }
         }
 
-        tuples.remove(worstTuple);
+        return worstTuple;
+    }
+
+    private IFitnessFunction<T> getBestTarget() {
+        Map.Entry<IFitnessFunction<T>, Integer> bestEntry = null;
+        for (Map.Entry<IFitnessFunction<T>, Integer> entry : samplingCounters.entrySet()) {
+            if (bestEntry == null || bestEntry.getValue() > entry.getValue()) {
+                bestEntry = entry;
+            }
+        }
+
+        return bestEntry.getKey();
     }
 
     private class IndividualFitnessTuple {
