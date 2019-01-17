@@ -16,7 +16,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private final float pSampleRandomStart;
     private final float focusedSearchStart;
     private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> archive;
-    private HashMap<IFitnessFunction<T>, Integer> counters;
+    private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -53,10 +53,14 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         this.focusedSearchStart = focusedSearchStart;
         this.pSampleRandom = pSampleRandom;
         this.archive = new HashMap<>();
-        this.counters = new HashMap<>();
+        this.samplingCounters = new HashMap<>();
         this.startTime = System.currentTimeMillis();
         this.pSampleRandomStart = pSampleRandom;
         this.populationSizeStart = populationSize;
+
+        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
+            samplingCounters.put(fitnessFunction, 0);
+        }
     }
 
 
@@ -74,22 +78,14 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             individual = tuple.getIndividual();
 
             //Increase Counter
-            if (counters.containsKey(key)) {
-                Integer value = counters.get(key);
-                counters.put(key, value + 1);
-            } else {
-                counters.put(key, 0);
-            }
+            Integer value = samplingCounters.get(key);
+            samplingCounters.put(key, value + 1);
 
             List<IChromosome<T>> mutated = mutationFunction.mutate(individual);
             individual = mutated.get(0);
         }
 
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
-            if (archive.get(fitnessFunction) == null) {
-                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
-            }
-
             double fitness = fitnessFunction.getFitness(individual);
             IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
             if (fitness == 1) {
@@ -103,7 +99,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
                 if (worstTest.fitness < tuple.getFitness()) {
                     //Reset counter
-                    counters.put(fitnessFunction, 0);
+                    samplingCounters.put(fitnessFunction, 0);
                 } else {
                     worstTest = tuple;
                 }
@@ -116,6 +112,22 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         updateParameters();
+    }
+
+    @Override
+    public void createInitialPopulation() {
+        super.createInitialPopulation();
+        for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
+            if (archive.get(fitnessFunction) == null) {
+                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
+            }
+
+            for (IChromosome<T> individual : this.population) {
+                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitnessFunction.getFitness(individual));
+                archive.get(fitnessFunction).add(tuple);
+
+            }
+        }
     }
 
     private void updateParameters() {
@@ -152,7 +164,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
     private IFitnessFunction<T> getBestTarget() {
         Map.Entry<IFitnessFunction<T>, Integer> bestEntry = null;
-        for (Map.Entry<IFitnessFunction<T>, Integer> entry : counters.entrySet()) {
+        for (Map.Entry<IFitnessFunction<T>, Integer> entry : samplingCounters.entrySet()) {
             if (bestEntry == null || bestEntry.getValue() > entry.getValue()) {
                 bestEntry = entry;
             }
