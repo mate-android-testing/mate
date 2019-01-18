@@ -27,8 +27,10 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
     public IChromosome<TestSuite> createChromosome() {
         TestSuite ts = new TestSuite();
         IChromosome<TestSuite> chromosome = new Chromosome<>(ts);
+        MATE.log_acc("Android Suite Random Chromosome Factory: creating chromosome: " + chromosome);
         for (int i = 0; i < numTestCases; i++) {
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
+            MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
             if (storeCoverage) {
                 EnvironmentManager.storeCoverageData(chromosome, tc);

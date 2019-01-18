@@ -1,11 +1,16 @@
 package org.mate.model;
 
+import org.mate.MATE;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.utils.Optional;
+import org.mate.utils.Randomness;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 
 public class TestCase {
@@ -18,6 +23,7 @@ public class TestCase {
     private double sparseness;
     private HashMap<String, String> statesMap;
     private HashMap<String, Integer> featureVector;
+    private Optional<Integer> desiredSize = Optional.none();
 
 
     public TestCase(String id){
@@ -30,6 +36,14 @@ public class TestCase {
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
 
+    }
+
+    public void setDesiredSize(Optional<Integer> desiredSize) {
+        this.desiredSize = desiredSize;
+    }
+
+    public Optional<Integer> getDesiredSize() {
+        return desiredSize;
     }
 
     public String getId() {
@@ -99,5 +113,85 @@ public class TestCase {
                 featureVector.put(state.getId(),0);
             }
         }
+    }
+
+    //TODO: Load test case from cache if it was executed before
+    public static TestCase fromDummy(TestCase testCase) {
+        MATE.uiAbstractionLayer.resetApp();
+        TestCase resultingTc = newInitializedTestCase();
+
+        int finalSize = testCase.eventSequence.size();
+
+        if (testCase.desiredSize.hasValue()) {
+            finalSize = testCase.desiredSize.getValue();
+        }
+
+        int count = 0;
+        for (Action action : testCase.eventSequence) {
+            if (count < finalSize) {
+                if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
+                    if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                        break;
+                    }
+                    count++;
+                }
+            } else {
+                break;
+            }
+        }
+        for (int i = count; i < finalSize; i++) {
+            Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+            resultingTc.updateTestCase(action, String.valueOf(count));
+        }
+
+        return resultingTc;
+    }
+
+    /**
+     * Initializes
+     * @return
+     */
+    public static TestCase newInitializedTestCase() {
+        TestCase tc = new TestCase(UUID.randomUUID().toString());
+        tc.updateTestCase("init");
+        return tc;
+    }
+
+    /**
+     * Perform action and update TestCase accordingly.
+     * @param a Action to perform
+     * @param event Event name
+     * @return True if action successful inbound false if outbound or crash
+     */
+    public boolean updateTestCase(Action a, String event) {
+        if (!MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
+            throw new IllegalStateException("Action not applicable to current state");
+        }
+        addEvent(a);
+        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(a);
+
+        switch (actionResult) {
+            case SUCCESS:
+            case SUCCESS_NEW_STATE:
+                updateTestCase(event);
+                return true;
+            case FAILURE_APP_CRASH:
+                setCrashDetected();
+            case SUCCESS_OUTBOUND:
+                return false;
+            case FAILURE_UNKNOWN:
+            case FAILURE_EMULATOR_CRASH:
+                throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
+            default:
+                throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+        }
+    }
+
+    private void updateTestCase(String event) {
+        IScreenState currentScreenstate = MATE.uiAbstractionLayer.getCurrentScreenState();
+
+        updateVisitedStates(currentScreenstate);
+        updateVisitedActivities(currentScreenstate.getActivityName());
+        updateStatesMap(currentScreenstate.getId(), event);
     }
 }

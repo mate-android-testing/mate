@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 public class Mio<T> extends GeneticAlgorithm<T> {
+    public static final String ALGORITHM_NAME = "Mio";
 
     private final int populationSizeStart;
     private final long startTime;
-    private float pSampleRandom;
-    private final float pSampleRandomStart;
-    private final float focusedSearchStart;
+    private double pSampleRandom;
+    private final double pSampleRandomStart;
+    private final double focusedSearchStart;
     private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> archive;
     private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
 
@@ -42,10 +43,10 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                ITerminationCondition terminationCondition,
                int populationSize,
                int generationSurvivorCount,
-               float pCrossover,
-               float pMutate,
-               float pSampleRandom,
-               float focusedSearchStart) {
+               double pCrossover,
+               double pMutate,
+               double pSampleRandom,
+               double focusedSearchStart) {
 
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions,
                 terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
@@ -112,6 +113,15 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         updateParameters();
+
+        population.clear();
+        for (List<IndividualFitnessTuple> individualFitnessTuples : archive.values()) {
+            for (IndividualFitnessTuple individualFitnessTuple : individualFitnessTuples) {
+                population.add(individualFitnessTuple.getIndividual());
+            }
+        }
+        currentGenerationNumber++;
+        logCurrentFitness();
     }
 
     @Override
@@ -137,11 +147,12 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         long focusedStartAbsolute = (long) (MATE.TIME_OUT * focusedSearchStart);
 
         if (expiredTime >= focusedStartAbsolute) {
+            MATE.log_acc("Starting focused search.");
             pSampleRandom = 0;
             populationSize = 1;
         } else {
-            float expiredTimePercent = expiredTime / (MATE.TIME_OUT / 100);
-            float decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
+            double expiredTimePercent = expiredTime / (MATE.TIME_OUT / 100);
+            double decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
             populationSize = (int) (populationSizeStart * (1 - decreasePercent));
             pSampleRandom = (int) pSampleRandomStart * (1 - decreasePercent);
         }

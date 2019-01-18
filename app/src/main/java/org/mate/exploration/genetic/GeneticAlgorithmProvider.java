@@ -1,10 +1,12 @@
 package org.mate.exploration.genetic;
 
+import org.mate.model.TestCase;
 import org.mate.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 public class GeneticAlgorithmProvider {
@@ -32,14 +34,34 @@ public class GeneticAlgorithmProvider {
             throw new IllegalArgumentException("No algorithm specified");
         }
         switch (algorithmName) {
+            case GenericGeneticAlgorithm.ALGORITHM_NAME:
+                return initializeGenericGeneticAlgorithm();
             case OnePlusOne.ALGORITHM_NAME:
                 return initializeOnePlusOne();
             case NSGAII.ALGORITHM_NAME:
                 return initializeNSGAII();
+            case MOSA.ALGORITHM_NAME:
+                return (GeneticAlgorithm<T>) initializeMOSA();
+            case Mio.ALGORITHM_NAME:
+                return initializeMio();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
 
+    }
+
+    private <T> GenericGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+        return new GenericGeneticAlgorithm<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate());
     }
 
     private <T> NSGAII<T> initializeNSGAII() {
@@ -54,6 +76,36 @@ public class GeneticAlgorithmProvider {
                 getGenerationSurvivorCount(),
                 getPCrossOver(),
                 getPMutate());
+    }
+
+    private <T extends TestCase> MOSA<T> initializeMOSA() {
+        return new MOSA<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate());
+    }
+
+    private <T> Mio<T> initializeMio() {
+        return new Mio<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate(),
+                0.3,
+                0.1);
     }
 
     private <T> OnePlusOne<T> initializeOnePlusOne() {
@@ -100,6 +152,8 @@ public class GeneticAlgorithmProvider {
             switch (selectionFunctionId) {
                 case FitnessSelectionFunction.SELECTION_FUNCTION_ID:
                     return new FitnessSelectionFunction<T>();
+                case RandomSelectionFunction.SELECTION_FUNCTION_ID:
+                    return new RandomSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
@@ -114,6 +168,12 @@ public class GeneticAlgorithmProvider {
             return null;
         } else {
             switch (crossOverFunctionId) {
+                case TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
+                case UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID:
+                    return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
@@ -136,6 +196,10 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
+                case SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID:
+                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -144,28 +208,24 @@ public class GeneticAlgorithmProvider {
     }
 
     private <T> List<IFitnessFunction<T>> initializeFitnessFunctions() {
-        String fitnessFunctionIds
-                = properties.getProperty(GeneticAlgorithmBuilder.FITNESS_FUNCTIONS_KEY);
-        if (fitnessFunctionIds == null) {
+        int amountFitnessFunctions = Integer.valueOf(properties.getProperty
+                (GeneticAlgorithmBuilder.AMOUNT_FITNESS_FUNCTIONS_KEY));
+        if (amountFitnessFunctions == 0) {
             return null;
-        } else if (fitnessFunctionIds.isEmpty()) {
-            return new ArrayList<>();
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
-            for (String fitnessFunctionSerialized
-                    : fitnessFunctionIds.split(
-                            StringUtils.regexEscape(GeneticAlgorithmBuilder.SEPARATOR))) {
-                String[] argSplit = fitnessFunctionSerialized.split(
-                        StringUtils.regexEscape(GeneticAlgorithmBuilder.ARG_SEPARATOR));
-                fitnessFunctions.add(this.<T>initializeFitnessFunction(
-                        argSplit[0], Arrays.asList(argSplit).subList(1, argSplit.length)));
+            for (int i = 0; i < amountFitnessFunctions; i++) {
+                fitnessFunctions.add(this.<T>initializeFitnessFunction(i));
             }
             return fitnessFunctions;
         }
     }
 
-    private <T> IFitnessFunction<T> initializeFitnessFunction(
-            String fitnessFunctionId, List<String> args) {
+    private <T> IFitnessFunction<T> initializeFitnessFunction(int index) {
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
+                .FITNESS_FUNCTION_KEY_FORMAT, index);
+        String fitnessFunctionId = properties.getProperty(key);
+
         switch (fitnessFunctionId) {
             case AndroidStateFitnessFunction.FITNESS_FUNCTION_ID:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
@@ -176,15 +236,10 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new ActivityFitnessFunction();
             case SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID:
-                if (args.size() == 0) {
-                    throw new IllegalArgumentException("Required argument activityName for "
-                            + SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID
-                            + " not specified");
-                }
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
-                        new SpecificActivityCoveredFitnessFunction(args.get(0));
+                        new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
             case AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
@@ -202,10 +257,20 @@ public class GeneticAlgorithmProvider {
                         new SuiteActivityFitnessFunction();
             case StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID:
                 return new StatementCoverageFitnessFunction<>();
+            case LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
         }
+    }
+
+    private String getFitnessFunctionArgument(int index) {
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
+                .FITNESS_FUNCTION_ARG_KEY_FORMAT, index);
+        return properties.getProperty(key);
     }
 
     private ITerminationCondition initializeTerminationCondition() {
@@ -283,14 +348,50 @@ public class GeneticAlgorithmProvider {
     }
 
     private int getGenerationSurvivorCount() {
-        return 2;
+        String generationSurvivorCount
+                = properties.getProperty(GeneticAlgorithmBuilder.GENERATION_SURVIVOR_COUNT_KEY);
+        if (generationSurvivorCount == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 2;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Integer.valueOf(generationSurvivorCount);
+        }
     }
 
-    private float getPCrossOver() {
-        return 0;
+    private double getPCrossOver() {
+        String pCrossover
+                = properties.getProperty(GeneticAlgorithmBuilder.P_CROSSOVER_KEY);
+        if (pCrossover == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 0;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Double.valueOf(pCrossover);
+        }
     }
 
-    private float getPMutate() {
-        return 1;
+    private double getPMutate() {
+        String pMutate
+                = properties.getProperty(GeneticAlgorithmBuilder.P_MUTATE_KEY);
+        if (pMutate == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 1;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Double.valueOf(pMutate);
+        }
     }
 }
