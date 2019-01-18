@@ -12,9 +12,9 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
     private final int populationSizeStart;
     private final long startTime;
-    private float pSampleRandom;
-    private final float pSampleRandomStart;
-    private final float focusedSearchStart;
+    private double pSampleRandom;
+    private final double pSampleRandomStart;
+    private final double focusedSearchStart;
     private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> archive;
     private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
 
@@ -44,8 +44,8 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                int generationSurvivorCount,
                double pCrossover,
                double pMutate,
-               float pSampleRandom,
-               float focusedSearchStart) {
+               double pSampleRandom,
+               double focusedSearchStart) {
 
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions,
                 terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
@@ -140,8 +140,8 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             pSampleRandom = 0;
             populationSize = 1;
         } else {
-            float expiredTimePercent = expiredTime / (MATE.TIME_OUT / 100);
-            float decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
+            double expiredTimePercent = expiredTime / (MATE.TIME_OUT / 100);
+            double decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
             populationSize = (int) (populationSizeStart * (1 - decreasePercent));
             pSampleRandom = (int) pSampleRandomStart * (1 - decreasePercent);
         }
