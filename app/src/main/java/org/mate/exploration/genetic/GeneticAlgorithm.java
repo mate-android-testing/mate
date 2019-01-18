@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -26,8 +27,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected int generationSurvivorCount;
     protected List<IChromosome<T>> population;
     protected int currentGenerationNumber;
-    protected float pCrossover;
-    protected float pMutate;
+    protected double pCrossover;
+    protected double pMutate;
 
 
     /**
@@ -44,7 +45,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      * @param pMutate probability that mutation occurs (between 0 and 1)
      */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T>
-            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, float pCrossover, float pMutate) {
+            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
         this.chromosomeFactory = chromosomeFactory;
         this.selectionFunction = selectionFunction;
         this.crossOverFunction = crossOverFunction;
@@ -143,16 +144,26 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         return survivors.subList(0, generationSurvivorCount);
     }
 
-    private void logCurrentFitness() {
-        MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
-        for (int i = 0; i < fitnessFunctions.size(); i++) {
-            MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
-            IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
-            for (int j = 0; j < population.size(); j++) {
-                IChromosome<T> chromosome = population.get(j);
-                MATE.log_acc("Chromosome " + (j + 1) + ": "
-                        + fitnessFunction.getFitness(chromosome));
+    protected void logCurrentFitness() {
+        if (population.size() <= 10 ) {
+            MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
+            for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
+                MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
+                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                for (int j = 0; j < population.size(); j++) {
+                    IChromosome<T> chromosome = population.get(j);
+                    MATE.log_acc("Chromosome " + (j + 1) + ": "
+                            + fitnessFunction.getFitness(chromosome));
+                }
             }
+            if (fitnessFunctions.size() > 5) {
+                MATE.log_acc("Omitted other fitness function because there are to many (" + fitnessFunctions.size() + ")");
+            }
+        }
+
+            MATE.log_acc("Combined coverage until now: " + EnvironmentManager.getCombinedCoverage());
+        if (population.size() <= 10) {
+            MATE.log_acc("Combined coverage of current population: " + EnvironmentManager.getCombinedCoverage(population));
         }
     }
 
