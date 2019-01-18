@@ -145,23 +145,26 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     }
 
     protected void logCurrentFitness() {
-        MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
-        for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
-            MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
-            IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
-            for (int j = 0; j < population.size(); j++) {
-                IChromosome<T> chromosome = population.get(j);
-                MATE.log_acc("Chromosome " + (j + 1) + ": "
-                        + fitnessFunction.getFitness(chromosome));
+        if (population.size() <= 10 ) {
+            MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
+            for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
+                MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
+                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                for (int j = 0; j < population.size(); j++) {
+                    IChromosome<T> chromosome = population.get(j);
+                    MATE.log_acc("Chromosome " + (j + 1) + ": "
+                            + fitnessFunction.getFitness(chromosome));
+                }
+            }
+            if (fitnessFunctions.size() > 5) {
+                MATE.log_acc("Omitted other fitness function because there are to many (" + fitnessFunctions.size() + ")");
             }
         }
 
-        if (fitnessFunctions.size() > 5) {
-            MATE.log_acc("Omitted other fitness function because there are to many (" + fitnessFunctions.size() + ")");
+            MATE.log_acc("Combined coverage until now: " + EnvironmentManager.getCombinedCoverage());
+        if (population.size() <= 10) {
+            MATE.log_acc("Combined coverage of current population: " + EnvironmentManager.getCombinedCoverage(population));
         }
-
-        MATE.log_acc("Combined coverage until now: " + EnvironmentManager.getCombinedCoverage());
-        MATE.log_acc("Combined coverage of current population: " + EnvironmentManager.getCombinedCoverage(population));
     }
 
 }

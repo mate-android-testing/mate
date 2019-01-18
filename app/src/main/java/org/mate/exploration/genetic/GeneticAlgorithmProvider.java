@@ -42,6 +42,8 @@ public class GeneticAlgorithmProvider {
                 return initializeNSGAII();
             case MOSA.ALGORITHM_NAME:
                 return (GeneticAlgorithm<T>) initializeMOSA();
+            case Mio.ALGORITHM_NAME:
+                return initializeMio();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -88,6 +90,22 @@ public class GeneticAlgorithmProvider {
                 getGenerationSurvivorCount(),
                 getPCrossOver(),
                 getPMutate());
+    }
+
+    private <T> Mio<T> initializeMio() {
+        return new Mio<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getGenerationSurvivorCount(),
+                getPCrossOver(),
+                getPMutate(),
+                0.3,
+                0.1);
     }
 
     private <T> OnePlusOne<T> initializeOnePlusOne() {

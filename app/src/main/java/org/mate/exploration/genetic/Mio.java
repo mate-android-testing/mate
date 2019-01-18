@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Mio<T> extends GeneticAlgorithm<T> {
+    public static final String ALGORITHM_NAME = "Mio";
 
     private final int populationSizeStart;
     private final long startTime;
@@ -146,6 +147,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         long focusedStartAbsolute = (long) (MATE.TIME_OUT * focusedSearchStart);
 
         if (expiredTime >= focusedStartAbsolute) {
+            MATE.log_acc("Starting focused search.");
             pSampleRandom = 0;
             populationSize = 1;
         } else {

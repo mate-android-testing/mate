@@ -22,6 +22,7 @@ import org.mate.exploration.genetic.IGeneticAlgorithm;
 import org.mate.exploration.genetic.IterTerminationCondition;
 import org.mate.exploration.genetic.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.MOSA;
+import org.mate.exploration.genetic.Mio;
 import org.mate.exploration.genetic.RandomSelectionFunction;
 import org.mate.exploration.genetic.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
@@ -325,6 +326,48 @@ public class MATE {
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withPopulationSize(4)
+                            .withGenerationSurvivorCount(2)
+                            .withMaxNumEvents(4)
+                            .withNumberIterations(Integer.MAX_VALUE)
+                            .withPMutate(0.75)
+                            .withPCrossover(0.75);
+
+                    // add specific fitness functions for all activities of the Application Under Test
+                    MATE.log_acc("Retrieving source lines...");
+                    List<String> lines = EnvironmentManager.getSourceLines();
+                    MATE.log_acc("Retrieved " + lines.size() + " lines.");
+                    MATE.log_acc("Processing lines...");
+                    int count = 1;
+                    for (String line : lines) {
+                        if (count % (lines.size() / 10) == 0) {
+                            MATE.log_acc(Math.ceil(count * 100 / lines.size()) + "%");
+                        }
+                        builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, line);
+                        count++;
+                    }
+                    MATE.log_acc("done processing lines");
+
+                    final IGeneticAlgorithm<TestCase> mosa = builder.build();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            mosa.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+                } else if (explorationStrategy.equals("Mio")) {
+                    guiModel = new GraphGUIModel();
+                    guiModel.updateModel(null, state);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+
+                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(Mio.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
