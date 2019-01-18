@@ -112,6 +112,15 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         updateParameters();
+
+        population.clear();
+        for (List<IndividualFitnessTuple> individualFitnessTuples : archive.values()) {
+            for (IndividualFitnessTuple individualFitnessTuple : individualFitnessTuples) {
+                population.add(individualFitnessTuple.getIndividual());
+            }
+        }
+        currentGenerationNumber++;
+        logCurrentFitness();
     }
 
     @Override

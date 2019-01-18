@@ -144,7 +144,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         return survivors.subList(0, generationSurvivorCount);
     }
 
-    private void logCurrentFitness() {
+    protected void logCurrentFitness() {
         MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
         for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
             MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
