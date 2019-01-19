@@ -426,23 +426,23 @@ public class EnvironmentManager {
         sendCommandToServer(cmd);
     }
 
-    public static void clearAppData(String packageName) {
-        try {
-            Socket cliente = new Socket(SERVER_IP, port);
-            PrintStream saida = new PrintStream(cliente.getOutputStream());
-            saida.println("adb -s "+emulator+" shell pm clear "+packageName);
+    public static void clearAppData() {
+        String cmd = "clearApp:" + emulator;
 
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    break;
-                }
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
             }
-            cliente.close();
-            saida.close();
+
+            server.close();
+            output.close();
+            in.close();
         } catch (IOException e) {
-            MATE.log_acc("socket error: clear");
+            MATE.log("socket error sending");
             e.printStackTrace();
         }
     }

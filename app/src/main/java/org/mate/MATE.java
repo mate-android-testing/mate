@@ -41,6 +41,7 @@ import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
+import org.mate.model.TestSuite;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -224,7 +225,13 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPCrossover(1)
+                            .withPopulationSize(80)
+                            .withGenerationSurvivorCount(40)
+                            .withMaxNumEvents(200)
+                            .withNumberIterations(Integer.MAX_VALUE)
+                            .withPMutate(0.75)
+                            .withPCrossover(0.75)
+                            .withNumTestCases(8)
                             .build();
                     genericGA.run();
                 } else if (explorationStrategy.equals("Sapienz")) {
@@ -236,19 +243,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    List<Integer> asdf = new ArrayList<>();
-                    asdf.add(1);
-                    asdf.add(2);
-                    asdf.add(3);
-                    asdf.add(4);
-                    System.out.println(asdf.size());
-                    Randomness.shuffleList(asdf);
-                    System.out.println(asdf.size());
-                    for (Integer integer : asdf) {
-                        System.out.println(integer);
-                    }
-
-                    final IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
+                    final IGeneticAlgorithm<TestSuite> nsga = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
@@ -258,13 +253,13 @@ public class MATE {
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(4)
-                            .withGenerationSurvivorCount(2)
-                            .withMaxNumEvents(4)
+                            .withPopulationSize(10)
+                            .withGenerationSurvivorCount(5)
+                            .withMaxNumEvents(200)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75)
-                            .withNumTestCases(2)
+                            .withNumTestCases(8)
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -331,9 +326,9 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(4)
-                            .withGenerationSurvivorCount(2)
-                            .withMaxNumEvents(4)
+                            .withPopulationSize(80)
+                            .withGenerationSurvivorCount(40)
+                            .withMaxNumEvents(200)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75);
@@ -373,9 +368,9 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(4)
-                            .withGenerationSurvivorCount(2)
-                            .withMaxNumEvents(4)
+                            .withPopulationSize(80)
+                            .withGenerationSurvivorCount(40)
+                            .withMaxNumEvents(200)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75);

@@ -335,7 +335,7 @@ public class DeviceMgr implements IApp {
 
     public void reinstallApp(){
         MATE.log("Reinstall app");
-        EnvironmentManager.clearAppData(packageName);
+        EnvironmentManager.clearAppData();
         //sleep(1000);
     }
 
