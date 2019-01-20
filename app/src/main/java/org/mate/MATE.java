@@ -176,9 +176,7 @@ public class MATE {
                     OnePlusOne onePlusOne = new OnePlusOne(deviceMgr, packageName, guiModel);
                     onePlusOne.startEvolutionaryExploration(state);
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.OnePlusOne.ALGORITHM_NAME)
@@ -190,9 +188,7 @@ public class MATE {
                             .build();
                     onePlusOneNew.run();
                 } else if (explorationStrategy.equals("NSGA-II")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
                     for (String s : EnvironmentManager.getActivityNames()) {
                         MATE.log_acc("\t" + s);
@@ -209,9 +205,7 @@ public class MATE {
                             .build();
                     nsga.run();
                 } else if (explorationStrategy.equals("GenericGeneticAlgorithm")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
                     for (String s : EnvironmentManager.getActivityNames()) {
                         MATE.log_acc("\t" + s);
@@ -243,9 +237,7 @@ public class MATE {
                     EnvironmentManager.storeCoverageData(genericGA, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("Sapienz")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
                     for (String s : EnvironmentManager.getActivityNames()) {
                         MATE.log_acc("\t" + s);
@@ -281,9 +273,7 @@ public class MATE {
                     EnvironmentManager.storeCoverageData(nsga, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("HeuristicRandom")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
                     for (String s : EnvironmentManager.getActivityNames()) {
                         MATE.log_acc("\t" + s);
@@ -302,9 +292,7 @@ public class MATE {
                     EnvironmentManager.storeCoverageData(heuristicExploration, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("RandomExploration")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
                     for (String s : EnvironmentManager.getActivityNames()) {
                         MATE.log_acc("\t" + s);
@@ -323,9 +311,7 @@ public class MATE {
                     EnvironmentManager.storeCoverageData(randomExploration, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
@@ -368,9 +354,7 @@ public class MATE {
                     EnvironmentManager.storeCoverageData(mosa, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("Mio")) {
-                    guiModel = new GraphGUIModel();
-                    guiModel.updateModel(null, state);
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName, (GraphGUIModel) guiModel);
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(Mio.ALGORITHM_NAME)
@@ -413,9 +397,6 @@ public class MATE {
                     EnvironmentManager.storeCoverageData(mio, null);
                     MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 }
-
-                checkVisitedActivities(explorationStrategy);
-                EnvironmentManager.releaseEmulator();
             } else
                 MATE.log("Emulator is null");
         } catch (Exception e) {

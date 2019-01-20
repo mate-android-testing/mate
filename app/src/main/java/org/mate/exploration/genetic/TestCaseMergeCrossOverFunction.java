@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.GraphGUIModel;
@@ -52,15 +53,14 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         boolean right = choice != l1.size() - 1;
         int d = 0;
         boolean matched = false;
-        StateGraph sg = ((GraphGUIModel) MATE.guiModel).getStateGraph();
 
         //traverse the list from chosen start point to the right and to the left in an alternating pattern
         for (int i = 0; i < l1.size(); i++) {
             int idx = choice + d;
-            EventEdge e1 = sg.getEdgeByAction(l1.get(idx));
+            UIAbstractionLayer.Edge e1 = MATE.uiAbstractionLayer.getEdge(l1.get(idx));
 
             //don't consider actions that result in leaving the app
-            if (e1 != null && e1.getTarget().getScreenState().getPackageName().equals(MATE.packageName)) {
+            if (e1 != null && e1.getTarget().getPackageName().equals(MATE.packageName)) {
                 int cc = l2.size() / 2 + (l1.size() + 1) / 2 - idx;
                 // keep starting index within list bounds
                 cc = Math.min(Math.max(0, cc), l1.size() - 1);
@@ -97,17 +97,16 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
     private Optional<Integer> findMatch(Action from, List<Action> l, int start) {
         boolean right = start == 0;
         int d = 0;
-        StateGraph sg = ((GraphGUIModel) MATE.guiModel).getStateGraph();
 
         //traverse the list from chosen start point to the left and to the right in an alternating pattern
         for (int i = 0; i < l.size(); i++) {
             int idx = start + d;
 
-            EventEdge e1 = sg.getEdgeByAction(from);
-            EventEdge e2 = sg.getEdgeByAction(l.get(idx));
+            UIAbstractionLayer.Edge e1 = MATE.uiAbstractionLayer.getEdge(from);
+            UIAbstractionLayer.Edge e2 = MATE.uiAbstractionLayer.getEdge(l.get(idx));
 
             if (e1 != null && e2 != null
-                    && e1.getTarget().getScreenState().equals(e2.getSource().getScreenState())) {
+                    && e1.getTarget().equals(e2.getSource())) {
                 return Optional.some(idx);
             }
 

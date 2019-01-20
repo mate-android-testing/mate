@@ -2,15 +2,15 @@ package org.mate.interaction;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
-import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import static org.mate.MATE.device;
@@ -24,12 +24,14 @@ import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBO
 public class UIAbstractionLayer {
     private String packageName;
     private DeviceMgr deviceMgr;
-    private GraphGUIModel guiModel;
+    private Map<Action, Edge> edges;
+    private IScreenState currentScreenState;
 
-    public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName, GraphGUIModel guiModel) {
+    public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
-        this.guiModel = guiModel;
+        edges = new HashMap<>();
+        currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
     }
 
     public List<Action> getExecutableActions() {
@@ -58,6 +60,9 @@ public class UIAbstractionLayer {
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
+            IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            edges.put(action, new Edge(action, currentScreenState, state));
+            currentScreenState = state;
 
             return FAILURE_APP_CRASH;
         }
@@ -94,6 +99,9 @@ public class UIAbstractionLayer {
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log_acc("current package different from app package: " + currentPackageName);
 
+            edges.put(action, new Edge(action, currentScreenState, state));
+            currentScreenState = state;
+
             return SUCCESS_OUTBOUND;
         } else {
             //if the app under test is running
@@ -105,16 +113,21 @@ public class UIAbstractionLayer {
 
 
             //update model with new state
-            if (guiModel.updateModel(action, state)) {
+            edges.put(action, new Edge(action, currentScreenState, state));
+            currentScreenState = state;
+
+            /* Ignore this for now
+            if (edges.put(action, state)) {
                 MATE.log("New State found:" + state.getId());
                 return SUCCESS_NEW_STATE;
-            }
+            }*/
+
             return SUCCESS;
         }
     }
 
     public IScreenState getCurrentScreenState() {
-        return guiModel.getStateById(guiModel.getCurrentStateId());
+        return currentScreenState;
     }
 
     private long waitForProgressBar(IScreenState state) {
@@ -184,13 +197,13 @@ public class UIAbstractionLayer {
         sleep(5000);
         deviceMgr.restartApp();
         sleep(2000);
-        guiModel.updateModelEVO(null, ScreenStateFactory.getScreenState("ActionsScreenState"));
+        currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
     }
 
     public void restartApp() {
         deviceMgr.restartApp();
         sleep(2000);
-        guiModel.updateModelEVO(null, ScreenStateFactory.getScreenState("ActionsScreenState"));
+        currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
     }
 
     private void sleep(int millis) {
@@ -201,7 +214,35 @@ public class UIAbstractionLayer {
         }
     }
 
+    public Edge getEdge(Action action) {
+        return edges.get(action);
+    }
+
     public enum ActionResult {
         FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
+    }
+
+    public static class Edge {
+        private Action action;
+        private IScreenState source;
+        private IScreenState target;
+
+        public Edge(Action action, IScreenState source, IScreenState target) {
+            this.action = action;
+            this.source = source;
+            this.target = target;
+        }
+
+        public Action getAction() {
+            return action;
+        }
+
+        public IScreenState getSource() {
+            return source;
+        }
+
+        public IScreenState getTarget() {
+            return target;
+        }
     }
 }
