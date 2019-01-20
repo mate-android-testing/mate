@@ -217,7 +217,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
+                    final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.GenericGeneticAlgorithm.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
@@ -225,15 +225,23 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(80)
-                            .withGenerationSurvivorCount(40)
-                            .withMaxNumEvents(200)
+                            .withPopulationSize(50)
+                            .withGenerationSurvivorCount(25)
+                            .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75)
-                            .withNumTestCases(8)
                             .build();
-                    genericGA.run();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            genericGA.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                    EnvironmentManager.storeCoverageData(genericGA, null);
+                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("Sapienz")) {
                     guiModel = new GraphGUIModel();
                     guiModel.updateModel(null, state);
@@ -253,13 +261,13 @@ public class MATE {
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(10)
-                            .withGenerationSurvivorCount(5)
-                            .withMaxNumEvents(200)
+                            .withPopulationSize(8)
+                            .withGenerationSurvivorCount(4)
+                            .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75)
-                            .withNumTestCases(8)
+                            .withNumTestCases(6)
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -281,7 +289,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final HeuristicExploration heuristicExploration = new HeuristicExploration(1000);
+                    final HeuristicExploration heuristicExploration = new HeuristicExploration(200);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -302,7 +310,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final RandomExploration randomExploration = new RandomExploration(1000);
+                    final RandomExploration randomExploration = new RandomExploration(200);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -326,9 +334,9 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(80)
-                            .withGenerationSurvivorCount(40)
-                            .withMaxNumEvents(200)
+                            .withPopulationSize(50)
+                            .withGenerationSurvivorCount(25)
+                            .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75);
@@ -356,6 +364,9 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+
+                    EnvironmentManager.storeCoverageData(mosa, null);
+                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 } else if (explorationStrategy.equals("Mio")) {
                     guiModel = new GraphGUIModel();
                     guiModel.updateModel(null, state);
@@ -368,9 +379,9 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(80)
-                            .withGenerationSurvivorCount(40)
-                            .withMaxNumEvents(200)
+                            .withPopulationSize(50)
+                            .withGenerationSurvivorCount(25)
+                            .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.75)
                             .withPCrossover(0.75);
@@ -390,14 +401,17 @@ public class MATE {
                     }
                     MATE.log_acc("done processing lines");
 
-                    final IGeneticAlgorithm<TestCase> mosa = builder.build();
+                    final IGeneticAlgorithm<TestCase> mio = builder.build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {
-                            mosa.run();
+                            mio.run();
                             return null;
                         }
                     }, MATE.TIME_OUT);
+
+                    EnvironmentManager.storeCoverageData(mio, null);
+                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                 }
 
                 checkVisitedActivities(explorationStrategy);

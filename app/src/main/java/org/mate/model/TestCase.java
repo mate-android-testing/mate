@@ -141,7 +141,9 @@ public class TestCase {
         }
         for (int i = count; i < finalSize; i++) {
             Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
-            resultingTc.updateTestCase(action, String.valueOf(count));
+            if(!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                break;
+            }
         }
 
         return resultingTc;
