@@ -25,11 +25,7 @@ import org.mate.exploration.genetic.MOSA;
 import org.mate.exploration.genetic.Mio;
 import org.mate.exploration.genetic.RandomSelectionFunction;
 import org.mate.exploration.genetic.SapienzSuiteMutationFunction;
-import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
-import org.mate.exploration.genetic.MOSA;
-import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
-import org.mate.exploration.genetic.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.UniformSuiteCrossoverFunction;
@@ -47,14 +43,12 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
-import org.mate.utils.Randomness;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -313,6 +307,7 @@ public class MATE {
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
+                    int size = 50;
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
@@ -320,11 +315,11 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(50)
+                            .withPopulationSize(size)
                             .withGenerationSurvivorCount(25)
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(0.75)
+                            .withPMutate(1.0/size)
                             .withPCrossover(0.75);
 
                     // add specific fitness functions for all activities of the Application Under Test
