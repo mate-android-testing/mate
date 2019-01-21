@@ -1,5 +1,7 @@
 package org.mate.exploration.genetic;
 
+import org.mate.MATE;
+
 import java.util.Locale;
 import java.util.Properties;
 
@@ -134,6 +136,13 @@ public class GeneticAlgorithmBuilder {
     }
 
     public <T> IGeneticAlgorithm<T> build() {
+        MATE.log_acc("Building genetic algorithm with properties:");
+        for (String key : properties.stringPropertyNames()) {
+            if (key.startsWith("fitness_function") && Integer.valueOf(properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY)) > 5) {
+                continue;
+            }
+            MATE.log_acc("Key: " + key + ", Value: " + properties.getProperty(key));
+        }
         return GeneticAlgorithmProvider.getGeneticAlgorithm(properties);
     }
 }

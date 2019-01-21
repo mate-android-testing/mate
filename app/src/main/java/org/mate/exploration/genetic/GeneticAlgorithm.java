@@ -119,10 +119,14 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
+        //todo: beautify later when more time
         population.clear();
-        population.addAll(getGenerationSurvivors());
-        currentGenerationNumber++;
+        population.addAll(newGeneration);
         logCurrentFitness();
+        List<IChromosome<T>> tmp = getGenerationSurvivors();
+        population.clear();
+        population.addAll(tmp);
+        currentGenerationNumber++;
     }
 
     @Override
