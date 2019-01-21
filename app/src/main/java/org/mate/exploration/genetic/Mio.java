@@ -30,7 +30,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
      * @param fitnessFunctions        see {@link IFitnessFunction}
      * @param terminationCondition    see {@link ITerminationCondition}
      * @param populationSize          size of population kept by the genetic algorithm
-     * @param generationSurvivorCount amount of survivors of each generation
+     * @param bigPopulationSize amount of survivors of each generation
      * @param pCrossover              probability that crossover occurs (between 0 and 1)
      * @param pMutate                 probability that mutation occurs (between 0 and 1)
      * @param pSampleRandom           probability that a random individual is sampled
@@ -43,14 +43,14 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
                int populationSize,
-               int generationSurvivorCount,
+               int bigPopulationSize,
                double pCrossover,
                double pMutate,
                double pSampleRandom,
                double focusedSearchStart) {
 
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions,
-                terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
+                terminationCondition, populationSize, bigPopulationSize, pCrossover, pMutate);
 
         this.focusedSearchStart = focusedSearchStart;
         this.pSampleRandom = pSampleRandom;

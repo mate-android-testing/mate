@@ -45,8 +45,8 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
      */
     private List<IFitnessFunction<T>> uncoveredFitnessFunctions = new ArrayList<>();
 
-    public MOSA(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T> selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions, terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
+    public MOSA(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T> selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int bigPopulationSize, double pCrossover, double pMutate) {
+        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions, terminationCondition, populationSize, bigPopulationSize, pCrossover, pMutate);
 
         uncoveredFitnessFunctions.addAll(fitnessFunctions);
     }
@@ -101,7 +101,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         // Sort all by rank and if rank is equal by crowding distance
         Collections.sort(population, new NSGAII.RankComparator<>(rankMap, crowdingDistanceMap));
 
-        return population.subList(0, generationSurvivorCount);
+        return population.subList(0, populationSize);
     }
 
     /**

@@ -1,12 +1,9 @@
 package org.mate.exploration.genetic;
 
 import org.mate.model.TestCase;
-import org.mate.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 
 public class GeneticAlgorithmProvider {
@@ -59,7 +56,7 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
-                getGenerationSurvivorCount(),
+                getBigPopulationSize(),
                 getPCrossOver(),
                 getPMutate());
     }
@@ -73,7 +70,7 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
-                getGenerationSurvivorCount(),
+                getBigPopulationSize(),
                 getPCrossOver(),
                 getPMutate());
     }
@@ -87,7 +84,7 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
-                getGenerationSurvivorCount(),
+                getBigPopulationSize(),
                 getPCrossOver(),
                 getPMutate());
     }
@@ -101,7 +98,7 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
-                getGenerationSurvivorCount(),
+                getBigPopulationSize(),
                 getPCrossOver(),
                 getPMutate(),
                 0.3,
@@ -339,7 +336,7 @@ public class GeneticAlgorithmProvider {
         if (populationSize == null) {
             if (useDefaults) {
                 //todo: add property
-                return 4;
+                return 2;
             } else {
                 throw new IllegalArgumentException(
                         "Without using defaults: number of iterations not specified");
@@ -349,19 +346,19 @@ public class GeneticAlgorithmProvider {
         }
     }
 
-    private int getGenerationSurvivorCount() {
-        String generationSurvivorCount
-                = properties.getProperty(GeneticAlgorithmBuilder.GENERATION_SURVIVOR_COUNT_KEY);
-        if (generationSurvivorCount == null) {
+    private int getBigPopulationSize() {
+        String bigPopulationSize
+                = properties.getProperty(GeneticAlgorithmBuilder.BIG_POPULATION_SIZE_KEY);
+        if (bigPopulationSize == null) {
             if (useDefaults) {
                 //todo: add property
-                return 2;
+                return 4;
             } else {
                 throw new IllegalArgumentException(
                         "Without using defaults: number of iterations not specified");
             }
         } else {
-            return Integer.valueOf(generationSurvivorCount);
+            return Integer.valueOf(bigPopulationSize);
         }
     }
 

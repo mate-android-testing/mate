@@ -24,7 +24,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected ITerminationCondition terminationCondition;
 
     protected int populationSize;
-    protected int generationSurvivorCount;
+    protected int bigPopulationSize;
     protected List<IChromosome<T>> population;
     protected int currentGenerationNumber;
     protected double pCrossover;
@@ -40,12 +40,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      * @param fitnessFunctions see {@link IFitnessFunction}
      * @param terminationCondition see {@link ITerminationCondition}
      * @param populationSize size of population kept by the genetic algorithm
-     * @param generationSurvivorCount amount of survivors of each generation
+     * @param bigPopulationSize size which population will temporarily be after creating offspring
      * @param pCrossover probability that crossover occurs (between 0 and 1)
      * @param pMutate probability that mutation occurs (between 0 and 1)
      */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T>
-            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
+            selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int bigPopulationSize, double pCrossover, double pMutate) {
         this.chromosomeFactory = chromosomeFactory;
         this.selectionFunction = selectionFunction;
         this.crossOverFunction = crossOverFunction;
@@ -54,7 +54,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         this.terminationCondition = terminationCondition;
 
         this.populationSize = populationSize;
-        this.generationSurvivorCount = generationSurvivorCount;
+        this.bigPopulationSize = bigPopulationSize;
         population = new ArrayList<>();
         this.pCrossover = pCrossover;
         this.pMutate = pMutate;
@@ -78,10 +78,10 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     @Override
     public void createInitialPopulation() {
         MATE.log_acc("Creating initial population (1st generation)");
-        currentGenerationNumber++;
         for (int i = 0; i < populationSize; i++) {
             population.add(chromosomeFactory.createChromosome());
         }
+        currentGenerationNumber++;
 
         logCurrentFitness();
     }
@@ -89,11 +89,10 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     @Override
     public void evolve() {
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
-        List<IChromosome<T>> survivors = getGenerationSurvivors();
-        List<IChromosome<T>> newGeneration = new ArrayList<>(survivors);
+        List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
-        while (newGeneration.size() < populationSize) {
-            List<IChromosome<T>> parents = selectionFunction.select(survivors, fitnessFunctions);
+        while (newGeneration.size() < bigPopulationSize) {
+            List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
 
             IChromosome<T> parent;
 
@@ -111,8 +110,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
 
             for (IChromosome<T> chromosome : offspring) {
-                if (newGeneration.size() == populationSize)
+                if (newGeneration.size() == bigPopulationSize) {
                     break;
+                }
 
                 newGeneration.add(chromosome);
 
@@ -120,7 +120,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         }
 
         population.clear();
-        population.addAll(newGeneration);
+        population.addAll(getGenerationSurvivors());
         currentGenerationNumber++;
         logCurrentFitness();
     }
@@ -141,7 +141,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 return -1;
             }
         });
-        return survivors.subList(0, generationSurvivorCount);
+        return survivors.subList(0, populationSize);
     }
 
     protected void logCurrentFitness() {
