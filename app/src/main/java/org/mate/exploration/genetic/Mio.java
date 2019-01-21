@@ -13,11 +13,12 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
     private final int populationSizeStart;
     private final long startTime;
+    private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> populations;
     private double pSampleRandom;
     private final double pSampleRandomStart;
     private final double focusedSearchStart;
-    private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> archive;
     private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
+    private LinkedList<IChromosome<T>> archive;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -53,8 +54,9 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
         this.focusedSearchStart = focusedSearchStart;
         this.pSampleRandom = pSampleRandom;
-        this.archive = new HashMap<>();
+        this.populations = new HashMap<>();
         this.samplingCounters = new HashMap<>();
+        this.archive = new LinkedList<>();
         this.startTime = System.currentTimeMillis();
         this.pSampleRandomStart = pSampleRandom;
         this.populationSizeStart = populationSize;
@@ -72,10 +74,10 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             // Sample Random
             individual = chromosomeFactory.createChromosome();
         } else {
-            // Sample individual from archive
+            // Sample individual from populations
             IFitnessFunction<T> key = getBestTarget();
 
-            IndividualFitnessTuple tuple = Randomness.randomElement(archive.get(key));
+            IndividualFitnessTuple tuple = Randomness.randomElement(populations.get(key));
             individual = tuple.getIndividual();
 
             //Increase Counter
@@ -89,14 +91,22 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
             double fitness = fitnessFunction.getFitness(individual);
             IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
+
+            if (isTargetCovered(fitnessFunction)) {
+                // Todo: We should actually check whether the new test could still be better by being
+                // shorter.
+                continue;
+            }
+
             if (fitness == 1) {
-                // check population size
-                archive.get(fitnessFunction).clear();
-                archive.get(fitnessFunction).add(tuple);
+                // TODO: Can we check if one of them is better?
+                populations.get(fitnessFunction).clear();
+                populations.get(fitnessFunction).add(tuple);
+                archive.add(tuple.individual);
             } else if (fitness > 0) {
 
-                IndividualFitnessTuple worstTest = getWorstTest(archive.get(fitnessFunction));
-                archive.get(fitnessFunction).add(tuple);
+                IndividualFitnessTuple worstTest = getWorstTest(populations.get(fitnessFunction));
+                populations.get(fitnessFunction).add(tuple);
 
                 if (worstTest.fitness < tuple.getFitness()) {
                     //Reset counter
@@ -105,9 +115,9 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                     worstTest = tuple;
                 }
 
-                if (archive.get(fitnessFunction).size() > populationSize) {
+                if (populations.get(fitnessFunction).size() > populationSize) {
                     // Remove worst if we reached limit population limit
-                    archive.get(fitnessFunction).remove(worstTest);
+                    populations.get(fitnessFunction).remove(worstTest);
                 }
             }
         }
@@ -115,7 +125,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         updateParameters();
 
         population.clear();
-        for (List<IndividualFitnessTuple> individualFitnessTuples : archive.values()) {
+        for (List<IndividualFitnessTuple> individualFitnessTuples : populations.values()) {
             for (IndividualFitnessTuple individualFitnessTuple : individualFitnessTuples) {
                 population.add(individualFitnessTuple.getIndividual());
             }
@@ -124,17 +134,31 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
     }
 
+    private boolean isTargetCovered(IFitnessFunction<T> target) {
+        if (populations.get(target) == null) {
+            throw new IllegalArgumentException("Cannot find population for Target");
+        }
+
+        if (populations.get(target).size() != 1) {
+            //If we have more or less than one individual we cannot have this covered yet.
+            //Covered targets only retain one individual
+            return false;
+        }
+
+        return populations.get(target).get(0).fitness == 1;
+    }
+
     @Override
     public void createInitialPopulation() {
         super.createInitialPopulation();
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
-            if (archive.get(fitnessFunction) == null) {
-                archive.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
+            if (populations.get(fitnessFunction) == null) {
+                populations.put(fitnessFunction, new LinkedList<IndividualFitnessTuple>());
             }
 
             for (IChromosome<T> individual : this.population) {
                 IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitnessFunction.getFitness(individual));
-                archive.get(fitnessFunction).add(tuple);
+                populations.get(fitnessFunction).add(tuple);
 
             }
         }
@@ -176,7 +200,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private IFitnessFunction<T> getBestTarget() {
         Map.Entry<IFitnessFunction<T>, Integer> bestEntry = null;
         for (Map.Entry<IFitnessFunction<T>, Integer> entry : samplingCounters.entrySet()) {
-            if (bestEntry == null || bestEntry.getValue() > entry.getValue()) {
+            if (bestEntry == null || (bestEntry.getValue() > entry.getValue() && !isTargetCovered(entry.getKey()))) {
                 bestEntry = entry;
             }
         }
