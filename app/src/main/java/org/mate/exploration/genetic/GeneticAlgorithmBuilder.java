@@ -20,6 +20,7 @@ public class GeneticAlgorithmBuilder {
     public static final String NUM_TEST_CASES_KEY = "num_test_cases";
     public static final String POPULATION_SIZE_KEY = "population_size";
     public static final String P_MUTATE_KEY = "p_mutate";
+    public static final String P_INNER_MUTATE_KEY = "p_inner_mutate";
     public static final String P_CROSSOVER_KEY = "p_crossover";
     public static final String AMOUNT_FITNESS_FUNCTIONS_KEY = "amount_fitness_functions";
     public static final String GENERATION_SURVIVOR_COUNT_KEY = "generation_survivor_count";
@@ -119,6 +120,11 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withPMutate(double pMutate) {
         properties.setProperty(P_MUTATE_KEY, String.valueOf(pMutate));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withPInnerMutate(double pInnerMutate) {
+        properties.setProperty(P_INNER_MUTATE_KEY, String.valueOf(pInnerMutate));
         return this;
     }
 

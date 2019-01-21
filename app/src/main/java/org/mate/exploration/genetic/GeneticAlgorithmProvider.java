@@ -201,7 +201,7 @@ public class GeneticAlgorithmProvider {
                 case SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
-                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
+                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPInnerMutate());
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -394,6 +394,22 @@ public class GeneticAlgorithmProvider {
             }
         } else {
             return Double.valueOf(pMutate);
+        }
+    }
+
+    private double getPInnerMutate() {
+        String pInnerMutate
+                = properties.getProperty(GeneticAlgorithmBuilder.P_INNER_MUTATE_KEY);
+        if (pInnerMutate == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 1;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: number of iterations not specified");
+            }
+        } else {
+            return Double.valueOf(pInnerMutate);
         }
     }
 }

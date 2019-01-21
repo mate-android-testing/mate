@@ -258,7 +258,8 @@ public class MATE {
                             .withGenerationSurvivorCount(4)
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(0.75)
+                            .withPMutate(1)
+                            .withPInnerMutate(0.75)
                             .withPCrossover(0.75)
                             .withNumTestCases(6)
                             .build();
