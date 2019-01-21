@@ -154,6 +154,8 @@ public class GeneticAlgorithmProvider {
                     return new FitnessSelectionFunction<T>();
                 case RandomSelectionFunction.SELECTION_FUNCTION_ID:
                     return new RandomSelectionFunction<>();
+                case FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID:
+                    return new FitnessProportionateSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);

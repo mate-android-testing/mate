@@ -16,6 +16,7 @@ import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.AndroidStateFitnessFunction;
 import org.mate.exploration.genetic.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.CutPointMutationFunction;
+import org.mate.exploration.genetic.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.FitnessSelectionFunction;
 import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.IGeneticAlgorithm;
@@ -214,7 +215,7 @@ public class MATE {
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.GenericGeneticAlgorithm.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
