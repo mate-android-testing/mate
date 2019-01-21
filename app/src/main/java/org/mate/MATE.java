@@ -218,8 +218,8 @@ public class MATE {
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(0.75)
-                            .withPCrossover(0.75)
+                            .withPMutate(0.3)
+                            .withPCrossover(0.7)
                             .build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -248,14 +248,14 @@ public class MATE {
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(4)
-                            .withBigPopulationSize(8)
+                            .withPopulationSize(50)
+                            .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(1)
-                            .withPInnerMutate(0.75)
-                            .withPCrossover(0.75)
-                            .withNumTestCases(6)
+                            .withPInnerMutate(0.3)
+                            .withPCrossover(0.7)
+                            .withNumTestCases(5)
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -275,7 +275,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final HeuristicExploration heuristicExploration = new HeuristicExploration(200);
+                    final HeuristicExploration heuristicExploration = new HeuristicExploration(50);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -294,7 +294,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final RandomExploration randomExploration = new RandomExploration(200);
+                    final RandomExploration randomExploration = new RandomExploration(50);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -309,7 +309,6 @@ public class MATE {
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    int size = 50;
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
@@ -317,12 +316,12 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(size)
-                            .withBigPopulationSize(2*size)
+                            .withPopulationSize(50)
+                            .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(1.0/size)
-                            .withPCrossover(0.75);
+                            .withPMutate(0.3)
+                            .withPCrossover(0.7);
 
                     // add specific fitness functions for all activities of the Application Under Test
                     MATE.log_acc("Retrieving source lines...");
@@ -364,8 +363,8 @@ public class MATE {
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(0.75)
-                            .withPCrossover(0.75);
+                            .withPMutate(0.3)
+                            .withPCrossover(0.7);
 
                     // add specific fitness functions for all activities of the Application Under Test
                     MATE.log_acc("Retrieving source lines...");
