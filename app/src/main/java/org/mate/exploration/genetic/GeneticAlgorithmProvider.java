@@ -101,8 +101,8 @@ public class GeneticAlgorithmProvider {
                 getBigPopulationSize(),
                 getPCrossOver(),
                 getPMutate(),
-                0.3,
-                0.1);
+                getPSampleRandom(),
+                getFocusedSearchStart());
     }
 
     private <T> OnePlusOne<T> initializeOnePlusOne() {
@@ -339,7 +339,7 @@ public class GeneticAlgorithmProvider {
                 return 2;
             } else {
                 throw new IllegalArgumentException(
-                        "Without using defaults: number of iterations not specified");
+                        "Without using defaults: population size not specified");
             }
         } else {
             return Integer.valueOf(populationSize);
@@ -355,7 +355,7 @@ public class GeneticAlgorithmProvider {
                 return 4;
             } else {
                 throw new IllegalArgumentException(
-                        "Without using defaults: number of iterations not specified");
+                        "Without using defaults: big population size not specified");
             }
         } else {
             return Integer.valueOf(bigPopulationSize);
@@ -371,7 +371,7 @@ public class GeneticAlgorithmProvider {
                 return 0;
             } else {
                 throw new IllegalArgumentException(
-                        "Without using defaults: number of iterations not specified");
+                        "Without using defaults: p cross over not specified");
             }
         } else {
             return Double.valueOf(pCrossover);
@@ -387,7 +387,7 @@ public class GeneticAlgorithmProvider {
                 return 1;
             } else {
                 throw new IllegalArgumentException(
-                        "Without using defaults: number of iterations not specified");
+                        "Without using defaults: p mutate not specified");
             }
         } else {
             return Double.valueOf(pMutate);
@@ -403,10 +403,42 @@ public class GeneticAlgorithmProvider {
                 return 1;
             } else {
                 throw new IllegalArgumentException(
-                        "Without using defaults: number of iterations not specified");
+                        "Without using defaults: p inner mutate not specified");
             }
         } else {
             return Double.valueOf(pInnerMutate);
+        }
+    }
+
+    private double getPSampleRandom() {
+        String pSampleRandom
+                = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
+        if (pSampleRandom == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 0.5;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: p sample random not specified");
+            }
+        } else {
+            return Double.valueOf(pSampleRandom);
+        }
+    }
+
+    private double getFocusedSearchStart() {
+        String focusedSearchStart
+                = properties.getProperty(GeneticAlgorithmBuilder.FOCUSED_SEARCH_START_KEY);
+        if (focusedSearchStart == null) {
+            if (useDefaults) {
+                //todo: add property
+                return 0.5;
+            } else {
+                throw new IllegalArgumentException(
+                        "Without using defaults: focused search start not specified");
+            }
+        } else {
+            return Double.valueOf(focusedSearchStart);
         }
     }
 }

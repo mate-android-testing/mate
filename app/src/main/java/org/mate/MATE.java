@@ -364,7 +364,9 @@ public class MATE {
                             .withMaxNumEvents(50)
                             .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.3)
-                            .withPCrossover(0.7);
+                            .withPCrossover(0.7)
+                            .withPSampleRandom(0.5)
+                            .withFocusedSearchStart(0.5);
 
                     // add specific fitness functions for all activities of the Application Under Test
                     MATE.log_acc("Retrieving source lines...");

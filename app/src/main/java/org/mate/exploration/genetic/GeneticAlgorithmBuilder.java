@@ -26,6 +26,8 @@ public class GeneticAlgorithmBuilder {
     public static final String P_CROSSOVER_KEY = "p_crossover";
     public static final String AMOUNT_FITNESS_FUNCTIONS_KEY = "amount_fitness_functions";
     public static final String BIG_POPULATION_SIZE_KEY = "big_population_size";
+    public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
+    public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
 
     private Properties properties;
 
@@ -132,6 +134,16 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withPCrossover(double pCrossover) {
         properties.setProperty(P_CROSSOVER_KEY, String.valueOf(pCrossover));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withPSampleRandom(double pSampleRandom) {
+        properties.setProperty(P_SAMPLE_RANDOM_KEY, String.valueOf(pSampleRandom));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withFocusedSearchStart(double focusedSearchStart) {
+        properties.setProperty(FOCUSED_SEARCH_START_KEY, String.valueOf(focusedSearchStart));
         return this;
     }
 
