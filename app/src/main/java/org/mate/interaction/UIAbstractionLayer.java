@@ -48,6 +48,10 @@ public class UIAbstractionLayer {
     }
 
     private ActionResult executeActionUnsafe(Action action) {
+        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+        if (state == null || state.getPackageName() == null || !state.getPackageName().equals(this.packageName)) {
+            return SUCCESS_OUTBOUND;
+        }
         try {
             //execute this selected action
             deviceMgr.executeAction(action);
@@ -60,14 +64,14 @@ public class UIAbstractionLayer {
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
-            IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState("ActionsScreenState");
             edges.put(action, new Edge(action, currentScreenState, state));
             currentScreenState = state;
 
             return FAILURE_APP_CRASH;
         }
 
-        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+        state = ScreenStateFactory.getScreenState("ActionsScreenState");
 
         //check whether there is a progress bar on the screen
         long timeToWait = waitForProgressBar(state);
