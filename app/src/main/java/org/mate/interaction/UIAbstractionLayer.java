@@ -1,5 +1,7 @@
 package org.mate.interaction;
 
+import android.util.Log;
+
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.state.IScreenState;
@@ -41,8 +43,8 @@ public class UIAbstractionLayer {
     public ActionResult executeAction(Action action) {
         try {
             return executeActionUnsafe(action);
-        } catch (Exception ignored) {
-            //MATE.log();
+        } catch (Exception e) {
+            Log.e("acc", "", e);
         }
         return FAILURE_UNKNOWN;
     }
@@ -202,12 +204,22 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         sleep(2000);
         currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        String currentPackageName = currentScreenState.getPackageName();
+        if (currentPackageName != null && currentPackageName.contains("com.google.android.packageinstaller")) {
+            currentPackageName = handleAuth(deviceMgr, currentPackageName);
+            currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        }
     }
 
     public void restartApp() {
         deviceMgr.restartApp();
         sleep(2000);
         currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        String currentPackageName = currentScreenState.getPackageName();
+        if (currentPackageName != null && currentPackageName.contains("com.google.android.packageinstaller")) {
+            currentPackageName = handleAuth(deviceMgr, currentPackageName);
+            currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        }
     }
 
     private void sleep(int millis) {

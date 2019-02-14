@@ -163,7 +163,7 @@ public class TestCase {
      * Perform action and update TestCase accordingly.
      * @param a Action to perform
      * @param event Event name
-     * @return True if action successful inbound false if outbound or crash
+     * @return True if action successful inbound false if outbound, crash, or some unkown failure
      */
     public boolean updateTestCase(Action a, String event) {
         if (!MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
@@ -183,7 +183,7 @@ public class TestCase {
                 return false;
             case FAILURE_UNKNOWN:
             case FAILURE_EMULATOR_CRASH:
-                throw new IllegalStateException("Emulator seems to have crashed. Cannot recover.");
+                return false;
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
