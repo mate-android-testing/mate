@@ -26,6 +26,7 @@ import org.mate.exploration.genetic.MOSA;
 import org.mate.exploration.genetic.Mio;
 import org.mate.exploration.genetic.RandomSelectionFunction;
 import org.mate.exploration.genetic.SapienzSuiteMutationFunction;
+import org.mate.exploration.genetic.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.TestLengthFitnessFunction;
@@ -212,7 +213,7 @@ public class MATE {
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
@@ -246,7 +247,7 @@ public class MATE {
                             .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
@@ -332,6 +333,7 @@ public class MATE {
                             .withPCrossover(0.7);
 
                     // add specific fitness functions for all activities of the Application Under Test
+                    /*
                     MATE.log_acc("Retrieving source lines...");
                     List<String> lines = EnvironmentManager.getSourceLines();
                     MATE.log_acc("Retrieved " + lines.size() + " lines.");
@@ -345,6 +347,10 @@ public class MATE {
                         count++;
                     }
                     MATE.log_acc("done processing lines");
+                    */
+                    for (String activityName : EnvironmentManager.getActivityNames()) {
+                        builder.withFitnessFunction(SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID, activityName);
+                    }
 
                     final IGeneticAlgorithm<TestCase> mosa = builder.build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -379,6 +385,7 @@ public class MATE {
                             .withFocusedSearchStart(0.5);
 
                     // add specific fitness functions for all activities of the Application Under Test
+                    /*
                     MATE.log_acc("Retrieving source lines...");
                     List<String> lines = EnvironmentManager.getSourceLines();
                     MATE.log_acc("Retrieved " + lines.size() + " lines.");
@@ -392,6 +399,10 @@ public class MATE {
                         count++;
                     }
                     MATE.log_acc("done processing lines");
+                    */
+                    for (String activityName : EnvironmentManager.getActivityNames()) {
+                        builder.withFitnessFunction(SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID, activityName);
+                    }
 
                     final IGeneticAlgorithm<TestCase> mio = builder.build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
