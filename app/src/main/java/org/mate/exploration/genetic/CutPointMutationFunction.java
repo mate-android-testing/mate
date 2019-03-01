@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
@@ -20,7 +21,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     private int maxNumEvents;
 
     public CutPointMutationFunction(int maxNumEvents) {
-        this(true, maxNumEvents);
+        this(Properties.STORE_COVERAGE, maxNumEvents);
     }
 
     public CutPointMutationFunction(boolean storeCoverage, int maxNumEvents) {

@@ -229,8 +229,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(genericGA, null);
-                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(genericGA, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals("Sapienz")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -266,8 +268,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(nsga, null);
-                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(nsga, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals("HeuristicRandom")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -285,8 +289,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(heuristicExploration, null);
-                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(heuristicExploration, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -304,8 +310,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(randomExploration, null);
-                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(randomExploration, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
@@ -347,8 +355,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(mosa, null);
-                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(mosa, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals("Mio")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
@@ -392,8 +402,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    EnvironmentManager.storeCoverageData(mio, null);
-                    MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(mio, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 }
             } else
                 MATE.log("Emulator is null");

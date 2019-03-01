@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.ui.EnvironmentManager;
@@ -20,7 +21,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
     }
 
     public AndroidSuiteRandomChromosomeFactory(int numTestCases, int maxNumEvents) {
-        this(true, numTestCases, maxNumEvents);
+        this(Properties.STORE_COVERAGE, numTestCases, maxNumEvents);
     }
 
     @Override

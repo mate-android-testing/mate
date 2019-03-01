@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 import org.mate.model.graph.EventEdge;
@@ -22,7 +23,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
     private boolean executeActions;
 
     public TestCaseMergeCrossOverFunction() {
-        this(true);
+        this(Properties.STORE_COVERAGE);
     }
 
     public TestCaseMergeCrossOverFunction(boolean storeCoverage) {

@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
@@ -19,7 +20,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     private boolean resetApp;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
-        this(true, true, maxNumEvents);
+        this(Properties.STORE_COVERAGE, true, maxNumEvents);
     }
 
     public AndroidRandomChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {

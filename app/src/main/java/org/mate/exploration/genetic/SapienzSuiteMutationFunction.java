@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.ui.EnvironmentManager;
@@ -19,7 +20,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     private final boolean storeCoverage;
 
     public SapienzSuiteMutationFunction(double pMutate) {
-        this(true, pMutate);
+        this(Properties.STORE_COVERAGE, pMutate);
     }
 
     public SapienzSuiteMutationFunction(boolean storeCoverage, double pMutate) {

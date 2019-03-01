@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic;
 
+import org.mate.Properties;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.ui.EnvironmentManager;
@@ -13,9 +14,15 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
     public static final String MUTATION_FUNCTION_ID = "suite_cut_point_mutation_function";
 
     private final CutPointMutationFunction cutPointMutationFunction;
+    private final boolean storeCoverage;
+
+    public SuiteCutPointMutationFunction(boolean storeCoverage, int maxNumEvents) {
+        this.storeCoverage = storeCoverage;
+        cutPointMutationFunction = new CutPointMutationFunction(false, maxNumEvents);
+    }
 
     public SuiteCutPointMutationFunction(int maxNumEvents) {
-        cutPointMutationFunction = new CutPointMutationFunction(maxNumEvents);
+        this(Properties.STORE_COVERAGE, maxNumEvents);
     }
 
     @Override
@@ -29,6 +36,7 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
         copyCoverageDataFor.remove(randomElementIndex);
         EnvironmentManager.copyCoverageData(chromosome, mutatedChromosome, copyCoverageDataFor);
 
+        //Todo: handle coverage
         for (int i = 0; i < chromosome.getValue().getTestCases().size(); i++) {
             if (i == randomElementIndex) {
                 TestCase mutatedTestCase = cutPointMutationFunction.mutate(new Chromosome<>(

@@ -42,4 +42,10 @@ public class Properties {
     public static Long RANDOM_SEED = null;
 
     public static double GREEDY_EPSILON = 0.7;//10;
+
+    /**
+     * Coverage related
+     */
+
+    public static final boolean STORE_COVERAGE = false;
 }
