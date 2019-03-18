@@ -431,7 +431,7 @@ public class MATE {
 
     public void handleAuth(UiDevice device) {
 
-        if (this.packageName != null && this.packageName.contains("com.android.packageinstaller")) {
+        if (this.packageName != null && this.packageName.contains("com.google.android.packageinstaller")) {
             long timeA = new Date().getTime();
 
 
