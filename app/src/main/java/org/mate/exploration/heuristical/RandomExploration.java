@@ -1,6 +1,7 @@
 package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.HeuristicalChromosomeFactory;
 
@@ -8,7 +9,11 @@ public class RandomExploration {
     private AndroidRandomChromosomeFactory randomChromosomeFactory;
 
     public RandomExploration(int maxNumEvents) {
-        randomChromosomeFactory = new AndroidRandomChromosomeFactory(true, false, maxNumEvents);
+        this(Properties.STORE_COVERAGE, maxNumEvents);
+    }
+
+    public RandomExploration(boolean storeCoverage, int maxNumEvents) {
+        randomChromosomeFactory = new AndroidRandomChromosomeFactory(storeCoverage, false, maxNumEvents);
     }
 
     public void run() {

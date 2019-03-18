@@ -1,6 +1,7 @@
 package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.HeuristicalChromosomeFactory;
 import org.mate.ui.EnvironmentManager;
 
@@ -8,7 +9,11 @@ public class HeuristicExploration {
     private HeuristicalChromosomeFactory heuristicChromosomeFactory;
 
     public HeuristicExploration(int maxNumEvents) {
-        heuristicChromosomeFactory = new HeuristicalChromosomeFactory(true, false, maxNumEvents);
+        this(Properties.STORE_COVERAGE, maxNumEvents);
+    }
+
+    public HeuristicExploration(boolean storeCoverage, int maxNumEvents) {
+        heuristicChromosomeFactory = new HeuristicalChromosomeFactory(storeCoverage, false, maxNumEvents);
     }
 
     public void run() {
