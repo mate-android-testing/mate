@@ -117,10 +117,10 @@ public class MATE {
 
         //get the name of the package of the app currently running
         this.packageName = device.getCurrentPackageName();
-        MATE.log("Package name: " + this.packageName);
 
         //checks whether user needs to authorize access to something on the device/emulator
         handleAuth(device);
+        MATE.log("Package name: " + this.packageName);
 
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
