@@ -3,9 +3,11 @@ package org.mate.exploration.genetic;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +63,12 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
     public void evolve() {
         super.evolve();
         updateArchive(population);
+
+        // Todo: remove. Memory issue dirty quick fix
+        List<Object> activeChromosomes = new ArrayList<>();
+        activeChromosomes.addAll(population);
+        activeChromosomes.addAll(archive.values());
+        LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
     }
 
     @Override

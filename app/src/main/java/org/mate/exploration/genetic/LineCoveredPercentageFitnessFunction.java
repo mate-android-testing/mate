@@ -48,4 +48,30 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
             cache.get(lines.get(i)).put(chromosome, coveredPercentage.get(i));
         }
     }
+
+    /**
+     * remove chromosome from cache that are no longer in use. (to avoid memory issues)
+     */
+    public static void cleanCache(List<Object> activeChromosomesAnon) {
+        if (lines.size() == 0 || cache.size() == 0) {
+            return;
+        }
+
+        List<IChromosome<TestCase>> activeChromosomes = new ArrayList<>();
+        for (Object o : activeChromosomesAnon) {
+            activeChromosomes.add((IChromosome<TestCase>) o);
+        }
+
+        int count = 0;
+        for (String line : lines) {
+            Map<IChromosome<TestCase>, Double> lineCache =  cache.get(line);
+            for (IChromosome<TestCase> chromosome: new ArrayList<>(lineCache.keySet())) {
+                if (!activeChromosomes.contains(chromosome)) {
+                    lineCache.remove(chromosome);
+                    count++;
+                }
+            }
+        }
+        MATE.log_acc("Cleaning cache: " + count + " inactive chromosome removed");
+    }
 }

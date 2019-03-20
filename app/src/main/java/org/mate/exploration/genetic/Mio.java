@@ -1,8 +1,12 @@
 package org.mate.exploration.genetic;
 
+import org.junit.Test;
 import org.mate.MATE;
+import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +22,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private final double pSampleRandomStart;
     private final double focusedSearchStart;
     private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
-    private LinkedList<IChromosome<T>> archive;
+    private List<IChromosome<T>> archive;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -132,6 +136,13 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
         currentGenerationNumber++;
         logCurrentFitness();
+
+        // Todo: remove. Memory issue dirty quick fix
+        List<Object> activeChromosomes = new ArrayList<>();
+        activeChromosomes.addAll(population);
+        activeChromosomes.addAll(archive);
+        LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+
     }
 
     private boolean isTargetCovered(IFitnessFunction<T> target) {

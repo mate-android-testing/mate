@@ -56,22 +56,22 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
         public int compare(IChromosome<T> o1, IChromosome<T> o2) {
             final Integer o1Rank = rankMap.get(o1);
             if (o1Rank == null) {
-                return 1;
+                throw new IllegalStateException("Rank value not in rank map");
             }
             final Integer o2Rank = rankMap.get(o2);
             if (o2Rank == null) {
-                return -1;
+                throw new IllegalStateException("Rank value not in rank map");
             }
 
             int c = o1Rank.compareTo(o2Rank);
             if (c == 0) {
                 final Double o1CrowdDistance = crowdingDistanceMap.get(o1);
                 if (o1CrowdDistance == null) {
-                    return 1;
+                    throw new IllegalStateException("Crowding distance not in crowding distance map");
                 }
                 final Double o2CrowdDistance = crowdingDistanceMap.get(o2);
                 if (o2CrowdDistance == null) {
-                    return -1;
+                    throw new IllegalStateException("Crowding distance not in crowding distance map");
                 }
 
                 double cd = o1CrowdDistance - o2CrowdDistance;
