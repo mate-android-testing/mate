@@ -76,6 +76,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         List<IChromosome<T>> population = new ArrayList<>(this.population);
 
         final Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
+        final Map<IChromosome<T>, Double> crowdingDistanceMap = new HashMap<>();
 
         // List of chromosomes that fulfill a certain testing target best.
         final List<IChromosome<T>> preferredChromosomes = extractPreferred(population);
@@ -83,13 +84,12 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
             // MOSA best possible rank
             rankMap.put(chromosome, 0);
         }
+        updateCrowdingDistance(preferredChromosomes, uncoveredFitnessFunctions, crowdingDistanceMap);
 
         // The following represents Algorithm 2 (lines 7-12) and algorithm 1 (lines 10-17):
         // Apply rank and crowding distance values for all non-preference sorted chromosomes
         final List<IChromosome<T>> remaining = new ArrayList<>(population);
         remaining.removeAll(preferredChromosomes);
-
-        final Map<IChromosome<T>, Double> crowdingDistanceMap = new HashMap<>();
 
         // Start at best possible rank in NSGA-II
         int rank = 1;

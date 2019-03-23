@@ -47,5 +47,5 @@ public class Properties {
      * Coverage related
      */
 
-    public static final boolean STORE_COVERAGE = false;
+    public static final boolean STORE_COVERAGE = true;
 }
