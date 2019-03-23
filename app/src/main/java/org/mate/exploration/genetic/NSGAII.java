@@ -74,17 +74,10 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
                     throw new IllegalStateException("Crowding distance not in crowding distance map");
                 }
 
-                double cd = o1CrowdDistance - o2CrowdDistance;
-                if (isEpsEq(cd)) {
+                if (isEpsEq(o1CrowdDistance, o2CrowdDistance)) {
                     return 0;
                 }
-                if (cd < 0) {
-                    // o1 is smaller than o2
-                    return 1;
-                }
-
-                // o1 is bigger than o2
-                return -1;
+                return 0 - o1CrowdDistance.compareTo(o2CrowdDistance);
             }
             return c;
         }
