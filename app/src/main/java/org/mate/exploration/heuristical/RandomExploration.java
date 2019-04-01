@@ -2,8 +2,7 @@ package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.HeuristicalChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 
 public class RandomExploration {
     private AndroidRandomChromosomeFactory randomChromosomeFactory;

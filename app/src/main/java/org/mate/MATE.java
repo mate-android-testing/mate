@@ -10,26 +10,28 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
-import org.mate.exploration.genetic.ActivityFitnessFunction;
-import org.mate.exploration.genetic.AmountCrashesFitnessFunction;
-import org.mate.exploration.genetic.AndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.AndroidStateFitnessFunction;
-import org.mate.exploration.genetic.AndroidSuiteRandomChromosomeFactory;
-import org.mate.exploration.genetic.CutPointMutationFunction;
-import org.mate.exploration.genetic.FitnessProportionateSelectionFunction;
-import org.mate.exploration.genetic.FitnessSelectionFunction;
-import org.mate.exploration.genetic.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.IGeneticAlgorithm;
-import org.mate.exploration.genetic.IterTerminationCondition;
-import org.mate.exploration.genetic.LineCoveredPercentageFitnessFunction;
-import org.mate.exploration.genetic.MOSA;
-import org.mate.exploration.genetic.Mio;
-import org.mate.exploration.genetic.RandomSelectionFunction;
-import org.mate.exploration.genetic.SapienzSuiteMutationFunction;
-import org.mate.exploration.genetic.StatementCoverageFitnessFunction;
-import org.mate.exploration.genetic.TestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.TestLengthFitnessFunction;
-import org.mate.exploration.genetic.UniformSuiteCrossoverFunction;
+import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.core.GenericGeneticAlgorithm;
+import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
+import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
+import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
+import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
+import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
+import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
+import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.termination.IterTerminationCondition;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
+import org.mate.exploration.genetic.algorithm.MOSA;
+import org.mate.exploration.genetic.algorithm.Mio;
+import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
+import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
 import org.mate.exploration.novelty.NoveltyBased;
@@ -174,7 +176,7 @@ public class MATE {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.OnePlusOne.ALGORITHM_NAME)
+                            .withAlgorithm(org.mate.exploration.genetic.algorithm.OnePlusOne.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
@@ -190,7 +192,7 @@ public class MATE {
                     }
 
                     IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
+                            .withAlgorithm(NSGAII.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
@@ -207,7 +209,7 @@ public class MATE {
                     }
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.GenericGeneticAlgorithm.ALGORITHM_NAME)
+                            .withAlgorithm(GenericGeneticAlgorithm.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
@@ -241,7 +243,7 @@ public class MATE {
                     }
 
                     final IGeneticAlgorithm<TestSuite> nsga = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.NSGAII.ALGORITHM_NAME)
+                            .withAlgorithm(NSGAII.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)

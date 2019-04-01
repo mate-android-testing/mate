@@ -3,7 +3,7 @@ package org.mate;
 import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.genetic.MOSA;
+import org.mate.exploration.genetic.algorithm.MOSA;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEwithMOSA {

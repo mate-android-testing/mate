@@ -2,8 +2,7 @@ package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.exploration.genetic.HeuristicalChromosomeFactory;
-import org.mate.ui.EnvironmentManager;
+import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 
 public class HeuristicExploration {
     private HeuristicalChromosomeFactory heuristicChromosomeFactory;
