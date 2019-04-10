@@ -10,7 +10,7 @@ import java.util.Vector;
  * Created by marceloeler on 21/06/17.
  */
 
-public abstract class AbstractScreenState{
+public abstract class AbstractScreenState implements IScreenState {
 
     protected String activityName;
     protected String packageName;
@@ -70,6 +70,4 @@ public abstract class AbstractScreenState{
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
-
-    public abstract boolean equals(IScreenState state);
 }

@@ -17,8 +17,6 @@ public interface IScreenState {
 
     public String getId();
     public void setId(String stateId);
-    //Todo: Ugly: don't define equals like that in the interface. Fix.
-    public boolean equals(IScreenState state);
     public Vector<Widget> getWidgets();
     public Vector<Action> getActions();
     public String getActivityName();

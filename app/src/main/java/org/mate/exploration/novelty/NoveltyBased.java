@@ -872,38 +872,12 @@ public class NoveltyBased {
         p.setSparseness(distance/Properties.K_VALUE);
     }
 
-    private float calculateSparseness2(TestCase p) {
-        //if(archive.isEmpty()){
-        //TODO: compare with population only
-        //} else {
-        //TODO: compare with archive (and population?)
-        //}
-        /*
-         * TODO
-         * Returns the sparseness of the given point p as defined by equation 1 on page 13 of the paper.
-         * Recall that sparseness is a measure of how unique this point is relative to the archive of saved examples.
-         * Use the method distFromkNearest as a helper in calculating this value.
-         *
-         *  In addition,  if the evolutionary algorithm is steady state (i.e. one individual is replaced at a time)
-         *  then the current population can also supplement the archive
-         *  by representing the most recently visited points.
-         */
-        float totalSparseness = 0;
-        Set<String> coveredGUIStates = p.getVisitedStates();
-        for (String GUIState : coveredGUIStates){
-            totalSparseness=totalSparseness+(float)1/coverageArchive.get(GUIState).size();
-        }
-
-        //MATE.log_acc("Sparseness of TestCase "+p.getId()+" = "+totalSparseness);
-        return totalSparseness;
-    }
-
+    /**
+     * If the size of the archive is less than the limit, then always add the point p.
+     * Otherwise, when the archive is full, check if the given sparseness of point p is greater than the threshold.
+     * If so, add this point and also remove the oldest point in the archive.
+     */
     private void addToArchive(TestCase tc) {
-        /*
-        * If the size of the archive is less than the limit, then always add the point p.
-        * Otherwise, when the archive is full, check if the given sparseness of point p is greater than the threshold.
-        * If so, add this point and also remove the oldest point in the archive.
-         */
 
 
         if(archive.size()< Properties.ARCHIVE_SIZE){

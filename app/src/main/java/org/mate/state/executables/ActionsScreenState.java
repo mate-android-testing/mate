@@ -10,6 +10,7 @@ import org.mate.ui.Widget;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Vector;
 
@@ -17,7 +18,7 @@ import java.util.Vector;
  * Created by marceloeler on 21/06/17.
  */
 
-public class ActionsScreenState extends AbstractScreenState implements IScreenState {
+public class ActionsScreenState extends AbstractScreenState {
 
     private Vector<Action> actions;
     private static Hashtable<String,Hashtable<String,Vector<Integer>>> idSizes = new Hashtable<String,Hashtable<String,Vector<Integer>>>();
@@ -252,23 +253,27 @@ public class ActionsScreenState extends AbstractScreenState implements IScreenSt
         return executables;
     }
 
+     //Todo: add hashcode method
 
     @Override
-    public boolean equals(IScreenState object) {
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ActionsScreenState that = (ActionsScreenState) o;
 
-        if (!this.activityName.equals(object.getActivityName())){
+        if (!this.activityName.equals(that.getActivityName())){
             //MATE.log_acc("Strobe 1: State "+this.id+"different from State: "+object.getId());
             return false;
         }
 
 
-        if (!this.packageName.equals(object.getPackageName())){
+        if (!this.packageName.equals(that.getPackageName())){
             //MATE.log_acc("Strobe 2: State "+this.id+"different from State: "+object.getId());
             return false;
         }
 
 
-        ActionsScreenState screenState = (ActionsScreenState) object;
+        ActionsScreenState screenState = (ActionsScreenState) that;
 
         Vector<Action> actionsThis = this.getActions();
         Vector<Action> actionsOther = screenState.getActions();
