@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
+
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.NSGAII;
@@ -22,6 +23,7 @@ import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunct
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.selection.NewestOffspringSelectionFunction;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.algorithm.MOSA;
@@ -408,6 +410,34 @@ public class MATE {
                         EnvironmentManager.storeCoverageData(mio, null);
                         MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
                     }
+                } else if (explorationStrategy.equals("RandomWalk")) {
+                    // ensure that inside Properties.java flag STORE_COVERAGE is set to false for random walk
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    MATE.log("Starting random walk now ...");
+
+                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(GenericGeneticAlgorithm.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withSelectionFunction(NewestOffspringSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
+                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withPopulationSize(1)
+                            .withBigPopulationSize(2)
+                            .withMaxNumEvents(50)
+                            .withNumberIterations(Integer.MAX_VALUE)
+                            .withPMutate(1)
+                            .withPCrossover(0);
+
+
+                    final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            randomWalk.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
                 }
             } else
                 MATE.log("Emulator is null");

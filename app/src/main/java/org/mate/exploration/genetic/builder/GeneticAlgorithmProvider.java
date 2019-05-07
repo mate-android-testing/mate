@@ -29,6 +29,7 @@ import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
+import org.mate.exploration.genetic.selection.NewestOffspringSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
@@ -185,6 +186,8 @@ public class GeneticAlgorithmProvider {
                     return new RandomSelectionFunction<>();
                 case FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID:
                     return new FitnessProportionateSelectionFunction<>();
+                case NewestOffspringSelectionFunction.SELECTION_FUNCTION_ID:
+                    return new NewestOffspringSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
