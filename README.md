@@ -30,7 +30,7 @@ To run a test use the project browser to find the unit tests (either
 Install the Android Sdk and set the $ANDROID_HOME environment variable.
 Clone the git repository
 ```
-git clone https://gitlab.infosun.fim.uni-passau.de/fraser/mate.git
+git clone https://github.com/mate-android-testing/mate.git
 ```
 Change into the project folder
 ```
