@@ -4,7 +4,7 @@ algorithms. The project is divided into two parts: the MATE framework and unit
 tests for android managed in this repository and a server that runs on a host
 machine which is responsible for some analysis that can not be performed by the
 instrumentation tests themselves. The repository containing the MATE server can be found
-[here](https://gitlab.infosun.fim.uni-passau.de/fraser/mate-server).
+[here](https://github.com/mate-android-testing/mate-server).
 
 ## How to run MATE
 ### 1) Start the device
@@ -12,13 +12,13 @@ Setup the emulator or attach your device via USB and enable USB-Debugging.
 Install and open(!) the app you want to test.
 
 ### 2) Build and run MATE server
-Refer to the [instructions](https://gitlab.infosun.fim.uni-passau.de/fraser/mate-server/blob/master/README.md)
+Refer to the [instructions](https://github.com/mate-android-testing/mate-server/blob/master/README.md)
 from the MATE server repository.
 
 ### 3) Installing and running MATE
 #### a) Android Studio (for Developers)
 Open Android Studio. Select "Check out project from Version Control" and click
-through the wizard (use git with url https://gitlab.infosun.fim.uni-passau.de/fraser/mate.git).
+through the wizard (use git with url https://github.com/mate-android-testing/mate.git).
 Install Android Sdk when prompted. 
 
 To run a test use the project browser to find the unit tests (either
