@@ -2,6 +2,7 @@ import com.github.spotbugs.SpotBugsTask
 
 apply plugin: 'com.android.application'
 apply plugin: "com.github.spotbugs"
+apply plugin: 'checkstyle'
 
 sourceSets {
     // we define `main` sourceSet here, so SpotBugs Gradle Plugin generates `spotbugsMain` task
@@ -22,6 +23,10 @@ spotbugs {
     reportLevel = "high"
 }
 
+checkstyle {
+    toolVersion = '8.20'
+}
+
 tasks.withType(SpotBugsTask) {
     dependsOn 'assembleDebug'
     group = "verification"
@@ -34,6 +39,24 @@ tasks.withType(SpotBugsTask) {
         html.enabled = true
         html.destination file("$project.buildDir/reports/spotbugs/spotbugs.html")
     }
+}
+
+task checkstyle(type: Checkstyle) {
+
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+    //configProperties.checkstyleSuppressionsPath = file("$configPath/checkstyle/suppressions.xml").absolutePath
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**', 'androidTest/**', 'test/**'
+    reports {
+        html.enabled = true
+        xml.enabled = false
+        html {
+            destination file("$project.buildDir/reports/checkstyle/checkstyle.html")
+        }
+    }
+
+    classpath = files()
 }
 
 android {
