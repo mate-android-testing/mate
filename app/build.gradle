@@ -1,4 +1,40 @@
+import com.github.spotbugs.SpotBugsTask
+
 apply plugin: 'com.android.application'
+apply plugin: "com.github.spotbugs"
+
+sourceSets {
+    // we define `main` sourceSet here, so SpotBugs Gradle Plugin generates `spotbugsMain` task
+    main {
+        java.srcDirs = ['src/main/java']
+    }
+}
+
+task compileJava(overwrite: true) {
+    dependsOn 'compileDebugJavaWithJavac'
+    group = "build"
+}
+
+spotbugs {
+    toolVersion = '3.1.12'
+    ignoreFailures = true
+    effort = "max"
+    reportLevel = "high"
+}
+
+tasks.withType(SpotBugsTask) {
+    dependsOn 'assembleDebug'
+    group = "verification"
+    classes = files("${project.buildDir}/intermediates/javac")
+    ignoreFailures = true
+
+    // configure automatically generated tasks
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        html.destination file("$project.buildDir/reports/spotbugs/spotbugs.html")
+    }
+}
 
 android {
     compileSdkVersion 28
@@ -23,6 +59,7 @@ android {
 
         }
     }
+
 }
 
 dependencies {
