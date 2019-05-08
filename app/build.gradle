@@ -3,6 +3,7 @@ import com.github.spotbugs.SpotBugsTask
 apply plugin: 'com.android.application'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'checkstyle'
+apply plugin: 'pmd'
 
 sourceSets {
     // we define `main` sourceSet here, so SpotBugs Gradle Plugin generates `spotbugsMain` task
@@ -27,6 +28,10 @@ checkstyle {
     toolVersion = '8.20'
 }
 
+pmd {
+    ignoreFailures true
+}
+
 tasks.withType(SpotBugsTask) {
     dependsOn 'assembleDebug'
     group = "verification"
@@ -42,7 +47,6 @@ tasks.withType(SpotBugsTask) {
 }
 
 task checkstyle(type: Checkstyle) {
-
     configFile = rootProject.file("config/checkstyle/checkstyle.xml")
     //configProperties.checkstyleSuppressionsPath = file("$configPath/checkstyle/suppressions.xml").absolutePath
     source 'src'
@@ -83,6 +87,12 @@ android {
         }
     }
 
+    lintOptions {
+        abortOnError true
+        xmlReport false
+        htmlReport true
+        htmlOutput file("$project.buildDir/reports/lint/lint.html")
+    }
 }
 
 dependencies {
