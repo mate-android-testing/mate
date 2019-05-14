@@ -89,9 +89,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         for (int i = 0; i < populationSize; i++) {
             population.add(chromosomeFactory.createChromosome());
         }
-        currentGenerationNumber++;
 
         logCurrentFitness();
+        currentGenerationNumber++;
     }
 
     @Override
@@ -158,7 +158,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     protected void logCurrentFitness() {
         if (population.size() <= 10 ) {
-            MATE.log_acc("Fitness of generation #" + currentGenerationNumber + " :");
+            MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
                 IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
