@@ -12,6 +12,7 @@ import android.util.Log;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.evolutionary.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.core.GenericGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
@@ -23,7 +24,6 @@ import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunct
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.selection.NewestOffspringSelectionFunction;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.algorithm.MOSA;
@@ -415,18 +415,13 @@ public class MATE {
                     MATE.log("Starting random walk now ...");
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(GenericGeneticAlgorithm.ALGORITHM_NAME)
+                            .withAlgorithm(RandomWalk.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withSelectionFunction(NewestOffspringSelectionFunction.SELECTION_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withPopulationSize(1)
-                            .withBigPopulationSize(2)
                             .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(1)
-                            .withPCrossover(0);
+                            .withNumberIterations(Integer.MAX_VALUE);
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
@@ -442,18 +437,13 @@ public class MATE {
                     MATE.log("Starting random walk now ...");
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(GenericGeneticAlgorithm.ALGORITHM_NAME)
+                            .withAlgorithm(RandomWalk.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withSelectionFunction(NewestOffspringSelectionFunction.SELECTION_FUNCTION_ID)
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withPopulationSize(1)
-                            .withBigPopulationSize(2)
                             .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE)
-                            .withPMutate(1)
-                            .withPCrossover(0);
+                            .withNumberIterations(Integer.MAX_VALUE);
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
