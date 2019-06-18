@@ -107,14 +107,6 @@ public class UIAbstractionLayer {
 
             return SUCCESS_OUTBOUND;
         } else {
-            //if the app under test is running
-            //try to update GUI model with the current screen state
-            //it the current screen is a screen not explored before,
-            //   then a new state is created (newstate = true)
-            //TODO: is this useless?
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
-
-
             //update model with new state
             edges.put(action, new Edge(action, currentScreenState, state));
             currentScreenState = state;
