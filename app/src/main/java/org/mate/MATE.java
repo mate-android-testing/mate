@@ -141,40 +141,7 @@ public class MATE {
             if (emulator != null && !emulator.equals("")) {
                 this.deviceMgr = new DeviceMgr(device, packageName);
 
-                //TODO: reinstall the app to make it start from scratch
-                deviceMgr.reinstallApp();
-                Thread.sleep(5000);
-                deviceMgr.restartApp();
-                Thread.sleep(5000);
-
-
-                //Analyses the screen and gets an object that represents the screen state (configuration of widgets)
-                IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
-
-                if (explorationStrategy.equals("AccRandom")) {
-                    //creates the graph that represents the GUI model
-                    this.guiModel = new GraphGUIModel();
-                    //first state (root node - action ==null)
-                    this.guiModel.updateModel(null, state);
-                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr, packageName, guiModel, true);
-                    unirandomacc.startUniformRandomExploration(state, runningTime);
-                } else if (explorationStrategy.equals("Novelty")) {
-                    //creates the graph that represents the GUI model
-                    this.guiModel = new GraphGUIModel();
-                    //first state (root node - action ==null)
-
-                    boolean updated = this.guiModel.updateModel(null, state);
-
-                    NoveltyBased noveltyExploration = new NoveltyBased(deviceMgr, packageName, guiModel);
-                    noveltyExploration.startEvolutionaryExploration(state);
-                } else if (explorationStrategy.equals("OnePlusOne")) {
-                    this.guiModel = new GraphGUIModel();
-
-                    boolean updated = this.guiModel.updateModel(null, state);
-
-                    OnePlusOne onePlusOne = new OnePlusOne(deviceMgr, packageName, guiModel);
-                    onePlusOne.startEvolutionaryExploration(state);
-                } else if (explorationStrategy.equals("OnePlusOneNew")) {
+                if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
