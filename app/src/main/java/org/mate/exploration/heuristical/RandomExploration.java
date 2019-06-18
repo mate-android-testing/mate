@@ -5,22 +5,28 @@ import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 
 public class RandomExploration {
-    private AndroidRandomChromosomeFactory randomChromosomeFactory;
+    private final AndroidRandomChromosomeFactory randomChromosomeFactory;
+    private final boolean alwaysReset;
 
     public RandomExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, maxNumEvents);
+        this(Properties.STORE_COVERAGE, false, maxNumEvents);
     }
 
-    public RandomExploration(boolean storeCoverage, int maxNumEvents) {
-        randomChromosomeFactory = new AndroidRandomChromosomeFactory(storeCoverage, false, maxNumEvents);
+    public RandomExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents) {
+        this.alwaysReset = alwaysReset;
+        randomChromosomeFactory = new AndroidRandomChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents);
     }
 
     public void run() {
-        MATE.uiAbstractionLayer.resetApp();
+        if (!alwaysReset) {
+            MATE.uiAbstractionLayer.resetApp();
+        }
         for (int i = 0; true; i++) {
-            MATE.uiAbstractionLayer.restartApp();
             MATE.log_acc("Exploration #" + (i + 1));
             randomChromosomeFactory.createChromosome();
+            if (!alwaysReset) {
+                MATE.uiAbstractionLayer.restartApp();
+            }
         }
     }
 }

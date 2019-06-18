@@ -5,22 +5,28 @@ import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 
 public class HeuristicExploration {
-    private HeuristicalChromosomeFactory heuristicChromosomeFactory;
+    private final HeuristicalChromosomeFactory heuristicChromosomeFactory;
+    private final boolean alwaysReset;
 
     public HeuristicExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, maxNumEvents);
+        this(Properties.STORE_COVERAGE, false, maxNumEvents);
     }
 
-    public HeuristicExploration(boolean storeCoverage, int maxNumEvents) {
-        heuristicChromosomeFactory = new HeuristicalChromosomeFactory(storeCoverage, false, maxNumEvents);
+    public HeuristicExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents) {
+        this.alwaysReset = alwaysReset;
+        heuristicChromosomeFactory = new HeuristicalChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents);
     }
 
     public void run() {
-        MATE.uiAbstractionLayer.resetApp();
+        if (!alwaysReset) {
+            MATE.uiAbstractionLayer.resetApp();
+        }
         for (int i = 0; true; i++) {
-            MATE.uiAbstractionLayer.restartApp();
             MATE.log_acc("Exploration #" + (i + 1));
             heuristicChromosomeFactory.createChromosome();
+            if (!alwaysReset) {
+                MATE.uiAbstractionLayer.restartApp();
+            }
         }
     }
 }
