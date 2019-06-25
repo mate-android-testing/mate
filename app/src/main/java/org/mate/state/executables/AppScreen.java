@@ -44,10 +44,10 @@ public class AppScreen {
     public AppScreen(){
         this.widgets = new Vector<Widget>();
         this.activityName = EnvironmentManager.getCurrentActivityName();
+        this.packageName = activityName.split("/")[0];
 
         Instrumentation instrumentation =  getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
-        this.packageName = device.getCurrentPackageName();
         AccessibilityNodeInfo ninfo= InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
         if (ninfo==null) {
             MATE.log("APP DISCONNECTED");
