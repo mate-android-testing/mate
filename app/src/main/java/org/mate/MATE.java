@@ -308,7 +308,7 @@ public class MATE {
                     int count = 1;
                     for (String line : lines) {
                         if (count % (lines.size() / 10) == 0) {
-                            MATE.log_acc(Math.ceil(count * 100 / lines.size()) + "%");
+                            MATE.log_acc(Math.ceil(count * 100.0 / lines.size()) + "%");
                         }
                         builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, line);
                         count++;
@@ -354,7 +354,7 @@ public class MATE {
                     int count = 1;
                     for (String line : lines) {
                         if (count % (lines.size() / 10) == 0) {
-                            MATE.log_acc(Math.ceil(count * 100 / lines.size()) + "%");
+                            MATE.log_acc(Math.ceil(count * 100.0 / lines.size()) + "%");
                         }
                         builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, line);
                         count++;
@@ -405,6 +405,27 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withMaxNumEvents(50);
+
+
+                    final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            randomWalk.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+                } else if (explorationStrategy.equals("RandomWalkStateCoverage")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    MATE.log("Starting random walk now ...");
+
+                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(RandomWalk.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
                             .withMaxNumEvents(50);
 
 
