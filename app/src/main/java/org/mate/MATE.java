@@ -34,6 +34,7 @@ import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
+import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
 import org.mate.exploration.novelty.NoveltyBased;
@@ -184,11 +185,10 @@ public class MATE {
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
@@ -220,11 +220,10 @@ public class MATE {
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                             .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(1)
                             .withPInnerMutate(0.3)
                             .withPCrossover(0.7)
@@ -294,11 +293,10 @@ public class MATE {
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
 
@@ -339,11 +337,10 @@ public class MATE {
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE)
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .withPSampleRandom(0.5)
@@ -385,10 +382,9 @@ public class MATE {
                             .withAlgorithm(RandomWalk.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE);
+                            .withMaxNumEvents(50);
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
@@ -407,10 +403,9 @@ public class MATE {
                             .withAlgorithm(RandomWalk.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50)
-                            .withNumberIterations(Integer.MAX_VALUE);
+                            .withMaxNumEvents(50);
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
