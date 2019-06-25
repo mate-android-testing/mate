@@ -50,10 +50,7 @@ public class UIAbstractionLayer {
     }
 
     private ActionResult executeActionUnsafe(Action action) {
-        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
-        if (state == null || state.getPackageName() == null || !state.getPackageName().equals(this.packageName)) {
-            return SUCCESS_OUTBOUND;
-        }
+        IScreenState state;
         try {
             //execute this selected action
             deviceMgr.executeAction(action);
@@ -63,7 +60,7 @@ public class UIAbstractionLayer {
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState("ActionsScreenState"); //TODO: maybe not needed
             edges.put(action, new Edge(action, currentScreenState, state));
             currentScreenState = state;
 
