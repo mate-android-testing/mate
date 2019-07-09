@@ -25,27 +25,48 @@ public class Properties {
      *  Added by vin on 24/05/2018
      */
 
-    public static int MAX_NUM_TCS = 2;// 10;
-
-    public static int MAX_NUM_EVENTS = 5;
-
     public static float NOVELTY_THRESHOLD = 0; // if 0 any point will be added to the archive
 
     public static int K_VALUE = 2;
 
-    public static int ARCHIVE_SIZE = 10;
-
-    public static int EVO_ITERATIONS_NUMBER = 10;//10;
-
     public static double RANK_BIAS = 1.7;//10;
 
-    public static Long RANDOM_SEED = null;
+    public static int ARCHIVE_SIZE = 10;
+
 
     public static double GREEDY_EPSILON = 0.7;//10;
 
-    /**
-     * Coverage related
+    /*
+     * Misc properties
      */
 
-    public static final boolean STORE_COVERAGE = true;
+    public static Long RANDOM_SEED = null;
+
+    /*
+     * Genetic Algorithm properties
+     */
+
+    public static int POPULATION_SIZE = 20;
+
+    public static int NUMBER_TESTCASES = 2;
+
+    public static int MAX_NUMBER_EVENTS = 5;
+
+    public static double P_CROSSOVER = 0.7;
+
+    public static double P_MUTATE = 0.3;
+
+    public static double P_INNER_MUTATE = 0.3; // for mutation functions that apply multiple mutations based on the given probability
+
+    public static double P_SAMPLE_RANDOM = 0.5;
+
+    public static double P_FOCUSED_SEARCH_START = 0.5;
+
+    public static int EVO_ITERATIONS_NUMBER = 10;
+
+    /*
+     * Coverage properties
+     */
+
+    public static boolean STORE_COVERAGE = true;
 }

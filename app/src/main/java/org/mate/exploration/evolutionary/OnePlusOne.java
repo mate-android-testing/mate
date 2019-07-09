@@ -1,6 +1,4 @@
 package org.mate.exploration.evolutionary;
-import android.app.Instrumentation;
-import android.support.test.uiautomator.UiDevice;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
@@ -11,7 +9,6 @@ import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.Date;
@@ -22,12 +19,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.mate.MATE.device;
-import static org.mate.MATE.log_acc;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.GREEDY_EPSILON;
-import static org.mate.Properties.MAX_NUM_EVENTS;
+import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 
 public class OnePlusOne {
@@ -57,7 +52,7 @@ public class OnePlusOne {
         this.currentActivityName = "";
 
         this.maxNumTCs = 1;
-        this.maxNumEvents = MAX_NUM_EVENTS;
+        this.maxNumEvents = MAX_NUMBER_EVENTS;
         testsuite = new LinkedHashMap<>();
         this.TCcounter = 0;
 
@@ -334,7 +329,7 @@ public class OnePlusOne {
 
         isApp = true;
         int numberOfActions = 0;
-        while ((numberOfActions < MAX_NUM_EVENTS) && (isApp)) {
+        while ((numberOfActions < MAX_NUMBER_EVENTS) && (isApp)) {
 
             mutantTestCase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
             mutantTestCase.updateVisitedStates(this.guiModel.getStateById(this.guiModel.getCurrentStateId()));

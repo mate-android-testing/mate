@@ -31,8 +31,8 @@ import java.util.Vector;
 import static org.mate.MATE.device;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.GREEDY_EPSILON;
-import static org.mate.Properties.MAX_NUM_EVENTS;
-import static org.mate.Properties.MAX_NUM_TCS;
+import static org.mate.Properties.MAX_NUMBER_EVENTS;
+import static org.mate.Properties.NUMBER_TESTCASES;
 
 public class NoveltyBased {
     private int TCcounter;
@@ -61,8 +61,8 @@ public class NoveltyBased {
         this.guiModel = (GraphGUIModel) guiModel;
         this.currentActivityName="";
 
-        this.maxNumTCs = MAX_NUM_TCS;
-        this.maxNumEvents= MAX_NUM_EVENTS;
+        this.maxNumTCs = NUMBER_TESTCASES;
+        this.maxNumEvents= MAX_NUMBER_EVENTS;
         testsuite = new LinkedHashMap<>();
         this.TCcounter = 0;
 
@@ -599,7 +599,7 @@ public class NoveltyBased {
 
         //MATE.log_acc("Current number of TEST CASES: "+numberOfTCs);
         //while (currentTime - runningTime <= MATE.TIME_OUT){
-        while ((numberOfActions < MAX_NUM_EVENTS)&&(isApp)) {
+        while ((numberOfActions < MAX_NUMBER_EVENTS)&&(isApp)) {
 
             //EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+TCcounter+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
             EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");

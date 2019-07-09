@@ -337,12 +337,12 @@ public class GeneticAlgorithmProvider {
     }
 
     private int getNumTestCases() {
-        String numTestCases = properties.getProperty(GeneticAlgorithmBuilder.NUM_TEST_CASES_KEY);
+        String numTestCases = properties.getProperty(GeneticAlgorithmBuilder.NUM_TESTCASES_KEY);
         if (numTestCases == null) {
             if (useDefaults) {
-                return org.mate.Properties.MAX_NUM_TCS;
+                return org.mate.Properties.NUMBER_TESTCASES;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: number of test cases not specified");
             }
         } else {
@@ -354,9 +354,9 @@ public class GeneticAlgorithmProvider {
         String numEvents = properties.getProperty(GeneticAlgorithmBuilder.MAX_NUM_EVENTS_KEY);
         if (numEvents == null) {
             if (useDefaults) {
-                return org.mate.Properties.MAX_NUM_EVENTS;
+                return org.mate.Properties.MAX_NUMBER_EVENTS;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: maximum number of events not specified");
             }
         } else {
@@ -371,7 +371,7 @@ public class GeneticAlgorithmProvider {
             if (useDefaults) {
                 return org.mate.Properties.EVO_ITERATIONS_NUMBER;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: number of iterations not specified");
             }
         } else {
@@ -384,10 +384,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.POPULATION_SIZE_KEY);
         if (populationSize == null) {
             if (useDefaults) {
-                //todo: add property
-                return 2;
+                return org.mate.Properties.POPULATION_SIZE;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: population size not specified");
             }
         } else {
@@ -400,10 +399,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.BIG_POPULATION_SIZE_KEY);
         if (bigPopulationSize == null) {
             if (useDefaults) {
-                //todo: add property
-                return 4;
+                return 2 * getPopulationSize();
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: big population size not specified");
             }
         } else {
@@ -416,10 +414,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_CROSSOVER_KEY);
         if (pCrossover == null) {
             if (useDefaults) {
-                //todo: add property
-                return 0;
+                return org.mate.Properties.P_CROSSOVER;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: p cross over not specified");
             }
         } else {
@@ -432,10 +429,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_MUTATE_KEY);
         if (pMutate == null) {
             if (useDefaults) {
-                //todo: add property
-                return 1;
+                return org.mate.Properties.P_MUTATE;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: p mutate not specified");
             }
         } else {
@@ -448,10 +444,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_INNER_MUTATE_KEY);
         if (pInnerMutate == null) {
             if (useDefaults) {
-                //todo: add property
-                return 1;
+                return org.mate.Properties.P_INNER_MUTATE;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: p inner mutate not specified");
             }
         } else {
@@ -464,10 +459,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
         if (pSampleRandom == null) {
             if (useDefaults) {
-                //todo: add property
-                return 0.5;
+                return org.mate.Properties.P_SAMPLE_RANDOM;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: p sample random not specified");
             }
         } else {
@@ -480,10 +474,9 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.FOCUSED_SEARCH_START_KEY);
         if (focusedSearchStart == null) {
             if (useDefaults) {
-                //todo: add property
-                return 0.5;
+                return org.mate.Properties.P_FOCUSED_SEARCH_START;
             } else {
-                throw new IllegalArgumentException(
+                throw new IllegalStateException(
                         "Without using defaults: focused search start not specified");
             }
         } else {

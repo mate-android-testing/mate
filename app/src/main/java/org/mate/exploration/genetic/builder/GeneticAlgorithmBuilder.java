@@ -20,7 +20,7 @@ public class GeneticAlgorithmBuilder {
     public static final String SELECTION_FUNCTION_KEY = "selection_function";
     public static final String CROSSOVER_FUNCTION_KEY = "crossover_function";
     public static final String MUTATION_FUNCTION_KEY = "mutation_function";
-    public static final String NUM_TEST_CASES_KEY = "num_test_cases";
+    public static final String NUM_TESTCASES_KEY = "num_test_cases";
     public static final String POPULATION_SIZE_KEY = "population_size";
     public static final String P_MUTATE_KEY = "p_mutate";
     public static final String P_INNER_MUTATE_KEY = "p_inner_mutate";
@@ -99,7 +99,7 @@ public class GeneticAlgorithmBuilder {
     }
 
     public GeneticAlgorithmBuilder withNumTestCases(int numTestCases) {
-        properties.setProperty(NUM_TEST_CASES_KEY, String.valueOf(numTestCases));
+        properties.setProperty(NUM_TESTCASES_KEY, String.valueOf(numTestCases));
         return this;
     }
 
