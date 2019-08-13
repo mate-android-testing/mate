@@ -10,6 +10,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Select chromosomes proportionate to the first
+ * {@link org.mate.exploration.genetic.fitness.IFitnessFunction} given with an additional random
+ * factor
+ * @param <T> Type wrapped by the chromosome implementation
+ */
 public class FitnessProportionateSelectionFunction<T> implements ISelectionFunction<T> {
     public static final String SELECTION_FUNCTION_ID = "fitness_proportionate_selection_function";
 

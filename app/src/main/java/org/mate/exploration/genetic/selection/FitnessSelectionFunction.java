@@ -8,6 +8,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Select chromosomes strictly by the first
+ * {@link org.mate.exploration.genetic.fitness.IFitnessFunction} given
+ * @param <T> Type wrapped by the chromosome implementation
+ */
 public class FitnessSelectionFunction<T> implements ISelectionFunction<T> {
     public static final String SELECTION_FUNCTION_ID = "fitness_selection_function";
 

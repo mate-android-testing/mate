@@ -7,6 +7,10 @@ import org.mate.utils.Randomness;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Randomly select chromosomes from the population
+ * @param <T> Type wrapped by the chromosome implementation
+ */
 public class RandomSelectionFunction<T> implements ISelectionFunction<T> {
     public static final String SELECTION_FUNCTION_ID = "random_selection_function";
 

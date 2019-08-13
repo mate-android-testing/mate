@@ -1,7 +1,8 @@
 package org.mate.exploration.genetic.termination;
 
 /**
- * Interface that determines if the termination condition is met
+ * Interface that determines if the termination condition of an
+ * {@link org.mate.exploration.genetic.core.IGeneticAlgorithm} is met
  */
 public interface ITerminationCondition {
     /**
