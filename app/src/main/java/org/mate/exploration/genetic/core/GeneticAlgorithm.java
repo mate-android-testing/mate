@@ -13,11 +13,7 @@ import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import static org.mate.utils.MathUtils.isEpsEq;
 
 /**
  * Abstract class that serves as a basis for genetic algorithms
@@ -130,37 +126,23 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         //todo: beautify later when more time
         population.clear();
         population.addAll(newGeneration);
-        logCurrentFitness();
         List<IChromosome<T>> tmp = getGenerationSurvivors();
         population.clear();
         population.addAll(tmp);
+        logCurrentFitness();
         currentGenerationNumber++;
     }
 
     @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
-        List<IChromosome<T>> survivors = new ArrayList<>(population);
-        Collections.sort(survivors, new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                double c = fitnessFunctions.get(0).getFitness(o2) - fitnessFunctions.get(0).getFitness(o1);
-                if (isEpsEq(c)) {
-                    return 0;
-                }
-                if (c > 0) {
-                    return 1;
-                }
-                return -1;
-            }
-        });
-        return survivors.subList(0, populationSize);
+        return population.subList(population.size() - populationSize, population.size());
     }
 
     protected void logCurrentFitness() {
         if (population.size() <= 10 ) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
-                MATE.log_acc("Fitness of initial population (Fitness function " + (i + 1) + "):");
+                MATE.log_acc("Fitness function " + (i + 1) + ":");
                 IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);

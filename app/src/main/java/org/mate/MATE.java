@@ -10,10 +10,9 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
-import org.mate.exploration.evolutionary.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
-import org.mate.exploration.genetic.core.GenericGeneticAlgorithm;
+import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
@@ -37,8 +36,6 @@ import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
-import org.mate.exploration.novelty.NoveltyBased;
-import org.mate.exploration.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.IGUIModel;
@@ -171,7 +168,7 @@ public class MATE {
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
                     nsga.run();
-                } else if (explorationStrategy.equals("GenericGeneticAlgorithm")) {
+                } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
                     for (String s : EnvironmentManager.getActivityNames()) {
@@ -179,7 +176,7 @@ public class MATE {
                     }
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(GenericGeneticAlgorithm.ALGORITHM_NAME)
+                            .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)

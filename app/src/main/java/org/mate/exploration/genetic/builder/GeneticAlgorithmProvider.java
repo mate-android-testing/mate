@@ -9,7 +9,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
-import org.mate.exploration.genetic.core.GenericGeneticAlgorithm;
+import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
@@ -66,7 +66,7 @@ public class GeneticAlgorithmProvider {
             throw new IllegalArgumentException("No algorithm specified");
         }
         switch (algorithmName) {
-            case GenericGeneticAlgorithm.ALGORITHM_NAME:
+            case StandardGeneticAlgorithm.ALGORITHM_NAME:
                 return initializeGenericGeneticAlgorithm();
             case OnePlusOne.ALGORITHM_NAME:
                 return initializeOnePlusOne();
@@ -84,8 +84,8 @@ public class GeneticAlgorithmProvider {
 
     }
 
-    private <T> GenericGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
-        return new GenericGeneticAlgorithm<>(
+    private <T> StandardGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+        return new StandardGeneticAlgorithm<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
                 this.<T>initializeCrossOverFunction(),
