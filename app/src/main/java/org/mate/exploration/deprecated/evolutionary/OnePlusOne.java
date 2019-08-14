@@ -1,4 +1,4 @@
-package org.mate.exploration.evolutionary;
+package org.mate.exploration.deprecated.evolutionary;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
@@ -26,6 +26,7 @@ import static org.mate.Properties.GREEDY_EPSILON;
 import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 
+@Deprecated
 public class OnePlusOne {
     private int TCcounter;
     private int maxNumIterations = EVO_ITERATIONS_NUMBER;

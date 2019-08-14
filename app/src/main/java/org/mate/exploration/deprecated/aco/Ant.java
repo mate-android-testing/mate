@@ -1,4 +1,4 @@
-package org.mate.exploration.aco;
+package org.mate.exploration.deprecated.aco;
 
 import org.mate.model.graph.EventEdge;
 
@@ -10,6 +10,7 @@ import java.util.List;
  * Created by marceloeler on 22/06/17.
  */
 
+@Deprecated
 public class Ant {
     private List<EventEdge> traversedEventEdge;
     private List<EventEdge> benefitForFitnessEventEdge;

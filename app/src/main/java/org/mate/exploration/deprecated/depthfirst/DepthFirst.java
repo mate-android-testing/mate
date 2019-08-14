@@ -1,9 +1,4 @@
-package org.mate.exploration.depthfirst;
-
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.support.test.InstrumentationRegistry;
-import android.view.View;
+package org.mate.exploration.deprecated.depthfirst;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
@@ -28,6 +23,7 @@ import static org.mate.MATE.log;
  * Created by geyan on 10/06/2017.
  */
 
+@Deprecated
 public class DepthFirst {
     private IApp deviceMgr;
     private String packageName;

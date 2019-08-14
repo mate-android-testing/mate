@@ -23,7 +23,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.accessibility.AccessibilityUtils;
 import org.mate.accessibility.AccessibilitySummaryResults;
-import org.mate.exploration.random.UniformRandomForAccessibility;
+import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
 import java.util.HashMap;

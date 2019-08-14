@@ -1,8 +1,8 @@
-package org.mate.exploration.aco;
+package org.mate.exploration.deprecated.aco;
 
 import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
-import org.mate.exploration.Fitness.ActivityCoverage;
+import org.mate.exploration.deprecated.Fitness.ActivityCoverage;
 import org.mate.interaction.IApp;
 import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.GraphGUIModel;
@@ -21,6 +21,7 @@ import java.util.Random;
  * Created by marceloeler on 21/06/17.
  */
 
+@Deprecated
 public class ACO {
 
     private IApp deviceMgr;

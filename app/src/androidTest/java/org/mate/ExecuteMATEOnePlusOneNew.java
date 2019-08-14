@@ -5,8 +5,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.evolutionary.OnePlusOne;
-import org.mate.model.TestCase;
 
 
 @RunWith(AndroidJUnit4.class)

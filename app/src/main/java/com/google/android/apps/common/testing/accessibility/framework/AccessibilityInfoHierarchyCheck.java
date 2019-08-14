@@ -25,8 +25,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.google.eyesfree.utils.AccessibilityNodeInfoUtils;
 import com.google.eyesfree.utils.NodeFilter;
 
-import org.mate.exploration.random.UniformRandomForAccessibility;
-
 import java.util.List;
 
 /**

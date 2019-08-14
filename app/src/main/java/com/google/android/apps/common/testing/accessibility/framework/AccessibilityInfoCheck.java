@@ -21,9 +21,7 @@ import android.os.Bundle;
 import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityUtils;
-import org.mate.exploration.random.UniformRandomForAccessibility;
 
 import java.util.ArrayList;
 import java.util.List;

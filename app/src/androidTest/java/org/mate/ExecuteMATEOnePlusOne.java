@@ -5,7 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.evolutionary.OnePlusOne;
+import org.mate.exploration.deprecated.evolutionary.OnePlusOne;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;

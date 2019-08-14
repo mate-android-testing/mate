@@ -1,4 +1,4 @@
-package org.mate.exploration.random;
+package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
@@ -22,6 +22,7 @@ import static org.mate.MATE.device;
  * Created by geyan on 11/06/2017.
  */
 
+@Deprecated
 public class ManualExploration {
     private DeviceMgr deviceMgr;
     private String packageName;

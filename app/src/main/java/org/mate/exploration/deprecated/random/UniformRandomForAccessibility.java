@@ -1,4 +1,4 @@
-package org.mate.exploration.random;
+package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
@@ -20,6 +20,7 @@ import java.util.Random;
 
 import static org.mate.MATE.device;
 
+@Deprecated
 public class UniformRandomForAccessibility {
     private DeviceMgr deviceMgr;
     private String packageName;

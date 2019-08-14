@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.novelty.NoveltyBased;
+import org.mate.exploration.deprecated.novelty.NoveltyBased;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;

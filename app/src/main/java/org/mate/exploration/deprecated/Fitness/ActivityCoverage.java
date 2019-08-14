@@ -1,6 +1,6 @@
-package org.mate.exploration.Fitness;
+package org.mate.exploration.deprecated.Fitness;
 
-import org.mate.exploration.aco.Ant;
+import org.mate.exploration.deprecated.aco.Ant;
 import org.mate.model.graph.EventEdge;
 import org.mate.state.IScreenState;
 
@@ -8,6 +8,7 @@ import org.mate.state.IScreenState;
  * Created by geyan on 03/07/2017.
  */
 
+@Deprecated
 public class ActivityCoverage {
 
     public void updateAntFitness(IScreenState state, Ant ant) {

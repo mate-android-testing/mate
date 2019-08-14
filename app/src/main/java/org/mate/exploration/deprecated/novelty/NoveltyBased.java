@@ -1,4 +1,4 @@
-package org.mate.exploration.novelty;
+package org.mate.exploration.deprecated.novelty;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -33,6 +33,7 @@ import static org.mate.Properties.GREEDY_EPSILON;
 import static org.mate.Properties.MAX_NUMBER_EVENTS;
 import static org.mate.Properties.NUMBER_TESTCASES;
 
+@Deprecated
 public class NoveltyBased {
     private int TCcounter;
     private int maxNumIterations=EVO_ITERATIONS_NUMBER;

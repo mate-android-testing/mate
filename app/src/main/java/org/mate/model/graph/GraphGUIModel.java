@@ -2,7 +2,7 @@ package org.mate.model.graph;
 
 import org.mate.MATE;
 import org.mate.exceptions.InvalidScreenStateException;
-import org.mate.exploration.aco.Ant;
+import org.mate.exploration.deprecated.aco.Ant;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
