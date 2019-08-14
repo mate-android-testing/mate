@@ -4,8 +4,8 @@ import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 
-
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marceloeler on 26/07/17.
@@ -13,10 +13,10 @@ import java.util.Vector;
 
 public class MultipleContentDescCheck implements IWidgetAccessibilityCheck {
 
-    private Vector<String> allDescsAndHints;
+    private List<String> allDescsAndHints;
 
     public MultipleContentDescCheck(IScreenState state){
-        allDescsAndHints = new Vector<String>();
+        allDescsAndHints = new ArrayList<>();
         for (Widget widget: state.getWidgets()){
 
                 if (!widget.getContentDesc().equals(""))

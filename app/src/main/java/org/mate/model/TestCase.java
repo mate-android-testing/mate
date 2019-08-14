@@ -7,17 +7,18 @@ import org.mate.ui.Action;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
 
 public class TestCase {
     private String id;
     private Set<String> visitedActivities;
     private Set<String> visitedStates;
-    private Vector<Action> eventSequence;
+    private List<Action> eventSequence;
     private float novelty;
     private boolean crashDetected;
     private double sparseness;
@@ -31,7 +32,7 @@ public class TestCase {
         crashDetected = false;
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
-        eventSequence = new Vector<>();
+        eventSequence = new ArrayList<>();
         sparseness = 0;
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
@@ -68,7 +69,7 @@ public class TestCase {
         return visitedStates;
     }
 
-    public Vector<Action> getEventSequence(){return this.eventSequence;};
+    public List<Action> getEventSequence(){return this.eventSequence;};
 
     public boolean getCrashDetected(){return this.crashDetected;};
 
@@ -105,7 +106,7 @@ public class TestCase {
     }
 
     public void updateFeatureVector(IGUIModel guiModel) {
-        Vector<IScreenState> guiStates = guiModel.getStates();
+        List<IScreenState> guiStates = guiModel.getStates();
         for(IScreenState state : guiStates){
             if(this.visitedStates.contains(state.getId())){
                 featureVector.put(state.getId(),1);

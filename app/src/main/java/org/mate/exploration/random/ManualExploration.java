@@ -14,7 +14,7 @@ import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
 
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import static org.mate.MATE.device;
 
@@ -27,7 +27,7 @@ public class ManualExploration {
     private String packageName;
     private MATE mate;
     private IScreenState launchState;
-    private Vector<Action> executableActions;
+    private List<Action> executableActions;
     private IGUIModel guiModel;
 
     public ManualExploration(DeviceMgr deviceMgr,
@@ -38,7 +38,7 @@ public class ManualExploration {
         this.guiModel = guiModel;
     }
 
-    public Action getActionSplash(Vector<Action> actions){
+    public Action getActionSplash(List<Action> actions){
         Action action = null;
         for (Action act: actions){
             if (act.getWidget().getClazz().contains("ImageButton")) {

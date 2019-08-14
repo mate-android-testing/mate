@@ -2,25 +2,26 @@ package org.mate.exploration.aco;
 
 import org.mate.model.graph.EventEdge;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Created by marceloeler on 22/06/17.
  */
 
 public class Ant {
-    private Vector<EventEdge> traversedEventEdge;
-    private Vector<EventEdge> benefitForFitnessEventEdge;
+    private List<EventEdge> traversedEventEdge;
+    private List<EventEdge> benefitForFitnessEventEdge;
     private float antFitness;
     private EventEdge currentEventEdge;
 
     public Ant(){
         antFitness = 0;
-        coveredActivity = new Vector<>();
+        coveredActivity = new ArrayList<>();
         currentEventEdge = new EventEdge();
-        traversedEventEdge = new Vector<>();
-        benefitForFitnessEventEdge = new Vector<>();
+        traversedEventEdge = new ArrayList<>();
+        benefitForFitnessEventEdge = new ArrayList<>();
     }
 
 
@@ -32,32 +33,32 @@ public class Ant {
         this.currentEventEdge = currentEventEdge;
     }
 
-    private Vector<String> coveredActivity;
+    private List<String> coveredActivity;
 
-    public Vector<EventEdge> getTraversedEventEdge() {
+    public List<EventEdge> getTraversedEventEdge() {
         return traversedEventEdge;
     }
 
-    public void setTraversedEventEdge(Vector<EventEdge> traversedEventEdge) {
+    public void setTraversedEventEdge(List<EventEdge> traversedEventEdge) {
         this.traversedEventEdge = traversedEventEdge;
     }
 
-    public Vector<EventEdge> getBenefitForFitnessEventEdge() {
+    public List<EventEdge> getBenefitForFitnessEventEdge() {
         return benefitForFitnessEventEdge;
     }
 
-    public void setBenefitForFitnessEventEdge(Vector<EventEdge> benefitForFitnessEventEdge) {
+    public void setBenefitForFitnessEventEdge(List<EventEdge> benefitForFitnessEventEdge) {
         this.benefitForFitnessEventEdge = benefitForFitnessEventEdge;
     }
 
     public float getAntFitness() {
         return coveredActivity.size();
     }
-    public Vector<String> getCoveredActivity() {
+    public List<String> getCoveredActivity() {
         return coveredActivity;
     }
 
-    public void setCoveredActivity(Vector<String> coveredActivity) {
+    public void setCoveredActivity(List<String> coveredActivity) {
         this.coveredActivity = coveredActivity;
     }
     public void setAntFitness(float antFitness) {

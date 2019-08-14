@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import static org.mate.MATE.device;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
@@ -159,7 +158,7 @@ public class UIAbstractionLayer {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                Vector<Action> actions = screenState.getActions();
+                List<Action> actions = screenState.getActions();
                 for (Action action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {

@@ -3,8 +3,9 @@ package org.mate.state.executables;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Created by marceloeler on 21/06/17.
@@ -14,15 +15,15 @@ public abstract class AbstractScreenState implements IScreenState {
 
     protected String activityName;
     protected String packageName;
-    protected Vector<Widget> widgets;
+    protected List<Widget> widgets;
 
     public AbstractScreenState(String packageName, String activityName){
-        widgets = new Vector<Widget>();
+        widgets = new ArrayList<>();
         this.packageName = packageName;
         this.activityName = activityName;
     }
 
-    public Vector<Widget> getWidgets(){
+    public List<Widget> getWidgets(){
         return widgets;
     }
 

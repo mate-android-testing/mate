@@ -14,7 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marceloeler on 27/07/17.
@@ -22,7 +23,7 @@ import java.util.Vector;
 
 public class Dictionary {
     //https://github.com/dwyl/english-words
-    private static Vector<String> words = null;
+    private static List<String> words = null;
 
     private static void loadWords(){
         AssetManager assetManager = InstrumentationRegistry.getTargetContext().getResources().getAssets();
@@ -35,7 +36,7 @@ public class Dictionary {
             e.printStackTrace();
         }
 
-        words = new Vector<String> ();
+        words = new ArrayList<>();
         InputStream file = null;
         try {
             file = InstrumentationRegistry.getTargetContext().getResources().getAssets().open("words.txt");
@@ -61,7 +62,7 @@ public class Dictionary {
 
     }
 
-    public static Vector<String> getWords(){
+    public static List<String> getWords(){
         if (words == null)
             loadWords();
         return words;

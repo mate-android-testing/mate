@@ -7,7 +7,8 @@ import org.junit.runner.RunWith;
 import org.mate.exploration.novelty.NoveltyBased;
 import org.mate.model.TestCase;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marceloeler on 11/07/17.
@@ -25,7 +26,7 @@ public class ExecuteMATENovelty {
         mate.testApp("Novelty");
 
         //Report
-        Vector<TestCase> ts = new Vector<>(NoveltyBased.testsuite.values());
+        List<TestCase> ts = new ArrayList<>(NoveltyBased.testsuite.values());
         MATE.log_acc("Final Report: test cases number = "+ts.size());
 
         MATE.log_acc(NoveltyBased.coverageArchive.keySet().toString());

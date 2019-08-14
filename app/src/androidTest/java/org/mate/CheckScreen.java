@@ -8,7 +8,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
 
-import java.util.Vector;
+import java.util.List;
 
 
 /**
@@ -20,7 +20,7 @@ public class CheckScreen {
     @Test
     public void useAppContext() throws Exception {
         IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        Vector<Action> actions = screenState.getActions();
+        List<Action> actions = screenState.getActions();
 
         MATE.log("Widgets: " );
         for (Widget w: screenState.getWidgets()){

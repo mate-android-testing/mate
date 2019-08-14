@@ -6,9 +6,10 @@ import org.mate.MATE;
 import org.mate.ui.Action;
 import org.mate.state.IScreenState;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Created by marceloe on 08/12/16.
@@ -18,12 +19,12 @@ public class StateGraph {
     private ScreenNode rootNode;
     private Hashtable<String,ScreenNode> screenNodes;
     private Hashtable<String,EventEdge> eventEdges;
-    private Hashtable<String,Vector<Vector<Action>>> savedPaths;
+    private Hashtable<String,List<List<Action>>> savedPaths;
     private long pathTimeout;
-    public Vector<String> allStrPaths = null;
+    public List<String> allStrPaths = null;
 
     public StateGraph(){
-        savedPaths=new Hashtable<String, Vector<Vector<Action>>>();
+        savedPaths=new Hashtable<String, List<List<Action>>>();
         screenNodes = new Hashtable<String,ScreenNode>();
         eventEdges = new Hashtable<String,EventEdge>();
         rootNode = null;
@@ -99,24 +100,24 @@ public class StateGraph {
     }
 
     //poor algorithm - quick implementation
-    public Vector<Vector<Action>> pathFromTo(String sourceStr, String targetStr){
+    public List<List<Action>> pathFromTo(String sourceStr, String targetStr){
         ScreenNode source = getScreenNodes().get(sourceStr);
         ScreenNode target = getScreenNodes().get(targetStr);
 
         String pathID =source.getId()+"-"+target.getId();
 
-        Vector<Vector<Action>> multPaths  = new Vector<Vector<Action>>();
+        List<List<Action>> multPaths  = new ArrayList<>();
         long ts1 = new Date().getTime();
-        Vector<Action> path = new Vector<Action>();
-        allStrPaths = new Vector<String>();
+        List<Action> path = new ArrayList<>();
+        allStrPaths = new ArrayList<>();
         String newPath = "";
-        searchGraph(new Vector<ScreenNode>(), source,newPath,ts1);
+        searchGraph(new ArrayList<ScreenNode>(), source,newPath,ts1);
 
-        Vector<String> selectedPaths = new Vector<String>();
+        List<String> selectedPaths = new ArrayList<>();
         String selected = "";
         int distance=32000;
         if (allStrPaths==null){
-            allStrPaths = new Vector<String>();
+            allStrPaths = new ArrayList<>();
         }
         else{
             //busca no grafo existente - se nao tiver atualiza e procura
@@ -138,7 +139,7 @@ public class StateGraph {
 
         if (selectedPaths.size()!=0){
             for (String selectedPath: selectedPaths){
-                path = new Vector<Action>();
+                path = new ArrayList<>();
                 String[] pieces = selectedPath.split("-");
                 boolean targetNodeReached = false;
                 for (int i=0; i<pieces.length-1 && !targetNodeReached; i++){
@@ -152,9 +153,9 @@ public class StateGraph {
                 if (targetNodeReached) {
                     multPaths.add(path);
 
-                    Vector<Vector<Action>> svpths = savedPaths.get(pathID);
+                    List<List<Action>> svpths = savedPaths.get(pathID);
                     if (svpths==null)
-                        svpths=new Vector<Vector<Action>>();
+                        svpths=new ArrayList<>();
                     svpths.add(path);
                     savedPaths.put(pathID,svpths);
                 }
@@ -173,14 +174,14 @@ public class StateGraph {
                        max = multPaths.get(j).size();
                    }
                 }
-                Vector<Action> pth = multPaths.remove(pos);
+                List<Action> pth = multPaths.remove(pos);
                 multPaths.add(i,pth);
             }
         }
 
         if (multPaths.size()>1){
             MATE.log("paths: "+multPaths.size());
-            for (Vector<Action> actions : multPaths)
+            for (List<Action> actions : multPaths)
                 MATE.log("... "+actions.size() + " actions");
         }
 
@@ -190,7 +191,7 @@ public class StateGraph {
 
 
 
-    private void searchGraph(Vector<ScreenNode> visitedNodes, ScreenNode node, String path, long t1){
+    private void searchGraph(List<ScreenNode> visitedNodes, ScreenNode node, String path, long t1){
         long t2 = new Date().getTime();
         if ( (t2-t1)>pathTimeout) {
             return;
@@ -199,7 +200,7 @@ public class StateGraph {
         if (!path.equals(""))
             path+="-";
         path+=node.getId();
-        Vector<ScreenNode> neightbors = node.getNeighbors();
+        List<ScreenNode> neightbors = node.getNeighbors();
         if (neightbors.isEmpty()) {
             if (!allStrPaths.contains(path))
                 allStrPaths.add(path);

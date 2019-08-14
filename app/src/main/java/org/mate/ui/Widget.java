@@ -1,9 +1,10 @@
 package org.mate.ui;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 /**
  * Created by marceloe on 08/12/16.
@@ -42,7 +43,7 @@ public class Widget {
     private int inputType;
     private boolean hasChildren;
 
-    private Vector<Widget> children;
+    private List<Widget> children;
 
     private boolean usedAsStateDiff;
 
@@ -55,7 +56,7 @@ public class Widget {
         setBounds("[0,0][0,0]");
         setContentDesc("");
         setText("");
-        children = new Vector<Widget>();
+        children = new ArrayList<>();
         maxLength=-1;
         this.idByActivity=idByActivity;
         usedAsStateDiff=false;
@@ -323,8 +324,8 @@ public class Widget {
     }
 
 
-    public Vector<Widget> getNextChildWithText(){
-        Vector<Widget> ws = new Vector<Widget>();
+    public List<Widget> getNextChildWithText(){
+        List<Widget> ws = new ArrayList<>();
         for (Widget child: children){
             //System.out.println("has children: " + child.getText());
             if (!child.getText().equals("")){
@@ -336,8 +337,8 @@ public class Widget {
         return ws;
     }
 
-    public Vector<Widget> getNextChildWithDescContentText(){
-        Vector<Widget> ws = new Vector<Widget>();
+    public List<Widget> getNextChildWithDescContentText(){
+        List<Widget> ws = new ArrayList<>();
 
         for (Widget child: children){
             //System.out.println("has children: " + child.getText());
@@ -481,7 +482,7 @@ public class Widget {
         return true;
     }
 
-    public Vector<Widget> getChildren() {
+    public List<Widget> getChildren() {
         return children;
     }
 }

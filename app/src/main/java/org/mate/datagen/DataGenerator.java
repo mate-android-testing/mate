@@ -4,8 +4,8 @@ package org.mate.datagen;
  * Created by marceloe on 14/10/16.
  */
 
+import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 
 /**
@@ -17,7 +17,7 @@ import java.util.Vector;
  */
 public class DataGenerator {
 
-    public static Vector<String> words = null;
+    public static List<String> words = null;
 
     public DataGenerator(){
 

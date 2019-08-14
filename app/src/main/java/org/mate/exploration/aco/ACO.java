@@ -11,10 +11,11 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Vector;
 
 /**
  * Created by marceloeler on 21/06/17.
@@ -25,10 +26,10 @@ public class ACO {
     private IApp deviceMgr;
     private String packageName;
     private GraphGUIModel wholeModel;
-    private Vector<String> statesVisited;
+    private List<String> statesVisited;
     private int indexOfBestAction = 0;
     private int currentGeneration = 0;
-    private Vector<Ant> allAntsInOneGeneration;
+    private List<Ant> allAntsInOneGeneration;
     private boolean isFirstNodeOfCompleteModel = true;
     private IScreenState screenState = null;
     private String currentNodeId = null;
@@ -41,7 +42,7 @@ public class ACO {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.wholeModel = completeModel;
-        statesVisited = new Vector<>();
+        statesVisited = new ArrayList<>();
         activityCoverage = new ActivityCoverage();
     }
 
@@ -51,7 +52,7 @@ public class ACO {
             currentGeneration = g;
             IScreenState state = null;
             //create a model for all ants in one generation
-            allAntsInOneGeneration = new Vector<>();
+            allAntsInOneGeneration = new ArrayList<>();
             for (int n = 0;n<Properties.ANT_NUMBER;n++){
                 Ant ant = new Ant();
                 deviceMgr.restartApp();
@@ -124,7 +125,7 @@ public class ACO {
             // We will select the action randomly if this explored node is new or
             // this is the first generation
             if (isFirstExplored|| currentGeneration == 0){
-                Vector<Action> executableActions = state.getActions();
+                List<Action> executableActions = state.getActions();
                 //random select
                 int randNum = selectRandomAction(state.getActions().size());
                 action = executableActions.get(randNum);
@@ -137,7 +138,7 @@ public class ACO {
             }else {
                 //find the node from history
                 IScreenState historyScreenState = wholeModel.getStateById(currentStateId);
-                Vector<Action> executableActions = historyScreenState.getActions();
+                List<Action> executableActions = historyScreenState.getActions();
 
                 //select the best action at this state
                 action = selectBestWidget(executableActions);
@@ -153,8 +154,8 @@ public class ACO {
                         e.printStackTrace();
                     }
                 }else {
-                    Vector<Action> copyOfExecutableActions = null;
-                    copyOfExecutableActions = (Vector<Action>) executableActions.clone();
+                    List<Action> copyOfExecutableActions = null;
+                    copyOfExecutableActions = new ArrayList<>(executableActions);
                     //if only one action is available, we won't delete any action
                     if (executableActions.size()>1){
                         //we don't want to remove this best action from real screen state,
@@ -211,7 +212,7 @@ public class ACO {
         isExitApp = true;
     }
 
-    public Action fillFrom(Action action, Vector<Action> executableActions) throws AUTCrashException {
+    public Action fillFrom(Action action, List<Action> executableActions) throws AUTCrashException {
         int eacount = this.numberOfEditableWidgets(executableActions);
         int count = 0;
         //let the last action out because it is executed after this block of instructions
@@ -237,7 +238,7 @@ public class ACO {
         return rand.nextInt(executionActionSize);
     }
 
-    public Action selectBestWidget(Vector<Action> executableActions){
+    public Action selectBestWidget(List<Action> executableActions){
         float tempPheromone = 0;
         float bestPheromone = 0;
         Action bestAction = null;
@@ -252,7 +253,7 @@ public class ACO {
         return bestAction;
     }
 
-    public Action proportionalSelection(Vector<Action> executableActions){
+    public Action proportionalSelection(List<Action> executableActions){
         float sumPheromone = 0;
         for (Action action:executableActions){
             sumPheromone+=action.getPheromone();
@@ -283,11 +284,11 @@ public class ACO {
         for (int indexOfCurrentAnt = 0;indexOfCurrentAnt<allAntsInOneGeneration.size();indexOfCurrentAnt++){
             Ant ant = allAntsInOneGeneration.get(indexOfCurrentAnt);
             //get a set of EventEdge from current ant
-            Vector<EventEdge> BenefitForFitnessEventEdge = ant.getBenefitForFitnessEventEdge();
+            List<EventEdge> BenefitForFitnessEventEdge = ant.getBenefitForFitnessEventEdge();
 
             for (int i = 0;i<BenefitForFitnessEventEdge.size();i++){
                 //store one type of eventEdge in one ant
-                Vector<EventEdge> oneTypeEdgeInAllAnts = new Vector<>();
+                List<EventEdge> oneTypeEdgeInAllAnts = new ArrayList<>();
 
                 EventEdge currentComparedEventEdge = BenefitForFitnessEventEdge.get(i);
                 oneTypeEdgeInAllAnts.add(currentComparedEventEdge);
@@ -307,20 +308,20 @@ public class ACO {
         }
     }
 
-    public void selectBestAnts(Vector<Ant> allAntsInOneGeneration,Ant ant){
+    public void selectBestAnts(List<Ant> allAntsInOneGeneration,Ant ant){
         Collections.sort(allAntsInOneGeneration,ant.compareAnt());
-        Vector<Ant> copyAllAntOneGeneration = (Vector<Ant>) allAntsInOneGeneration.clone();
+        List<Ant> copyAllAntOneGeneration = new ArrayList<>(allAntsInOneGeneration);
         for (int i = 0;i<copyAllAntOneGeneration.size()-Properties.BEST_ANT;i++){
             this.allAntsInOneGeneration.remove(allAntsInOneGeneration.size()-1);
         }
     }
 
-    public int searchEventEdgeInOtherAnts(Vector<Ant> allAntsInOneGeneration,Vector<EventEdge> oneTypeEdgeInAllAnts,EventEdge currentComparedEventEdge,int indexOfCurrentAnt){
+    public int searchEventEdgeInOtherAnts(List<Ant> allAntsInOneGeneration,List<EventEdge> oneTypeEdgeInAllAnts,EventEdge currentComparedEventEdge,int indexOfCurrentAnt){
         int numberOfAnt = 0;
         //search next ant
         for (int i = indexOfCurrentAnt+1;i<allAntsInOneGeneration.size();i++){
             //preventing concurrency exception
-            Vector<EventEdge> removedEventEdges = new Vector<>();
+            List<EventEdge> removedEventEdges = new ArrayList<>();
             Ant ant = allAntsInOneGeneration.get(i);
             boolean isFound = true;
             //iterate all eventEdges of ant
@@ -341,7 +342,7 @@ public class ACO {
         return numberOfAnt;
     }
 
-    public void updatePheromone(Vector<EventEdge> oneTypeEdgeInAllAnts,int numOfAnts,EventEdge currentComparedEventEdge){
+    public void updatePheromone(List<EventEdge> oneTypeEdgeInAllAnts,int numOfAnts,EventEdge currentComparedEventEdge){
         float accumulatedFitnessOfEventEdge = 0.f;
         for (EventEdge eventEdge:oneTypeEdgeInAllAnts){
             accumulatedFitnessOfEventEdge += eventEdge.getFitness();
@@ -353,7 +354,7 @@ public class ACO {
         EventEdge updatedEventEdge = wholeModel.getStateGraph().getEdge(source,target);
         updatedEventEdge.setPheromone(updatedEventEdge.getPheromone()+actualPheromone);
     }
-    int numberOfEditableWidgets(Vector<Action> actions){
+    int numberOfEditableWidgets(List<Action> actions){
         int count=0;
         for (Action action: actions)
             if (action.getWidget().isEditable())

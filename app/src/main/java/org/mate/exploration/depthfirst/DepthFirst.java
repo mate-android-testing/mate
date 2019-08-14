@@ -17,8 +17,9 @@ import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
 import org.mate.ui.Action;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import static org.mate.MATE.device;
 import static org.mate.MATE.log;
@@ -31,13 +32,13 @@ public class DepthFirst {
     private IApp deviceMgr;
     private String packageName;
     private IGUIModel guiModel;
-    Vector<String> statesVisited;
+    List<String> statesVisited;
 
     public DepthFirst(DeviceMgr deviceMgr, String packageName, IGUIModel guiModel){
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.guiModel = guiModel;
-        statesVisited = new Vector<String>();
+        statesVisited = new ArrayList<>();
     }
 
     public void startExploreDepthFirst(String selectedStateId, long t1){
@@ -47,7 +48,7 @@ public class DepthFirst {
 
         //gets a list of all executable actions
         //TODO: how about selectState.getactions
-        Vector<Action> executableActions = selectedState.getActions();
+        List<Action> executableActions = selectedState.getActions();
         MATE.log(selectedStateId + " - activity: " + selectedState.getActivityName());
         for (Action act: executableActions){
             Widget widget = act.getWidget();
@@ -58,7 +59,7 @@ public class DepthFirst {
             MATE.log("..act: " + act.getActionType()+ " on "+ widgetStr);
         }
 
-        Vector<Action> adjActions = new Vector<Action>();
+        List<Action> adjActions = new ArrayList<>();
         boolean deviceClosed=false;
         boolean stateFound=true;
         long t2 = new Date().getTime();

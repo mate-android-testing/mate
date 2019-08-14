@@ -7,10 +7,11 @@ import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 /**
  * Created by marceloeler on 26/07/17.
@@ -31,9 +32,9 @@ public class AccessibilitySummaryResults {
             "EDITABLE_CONTENT_DESC_FLAW","DUPLICATE_CLICKABLE_BOUNDS_FLAW",
             "CLICKABLE_SPAN_FLAW","REDUNDANT_CONTENT_DESC_INFO","ACC_FLAW"};
 
-    public static Vector<String> size_flaws = new Vector<String>();
-    public static Vector<String> contrast_flaws = new Vector<String>();
-    public static Vector<String> all_flaws = new Vector<String>();
+    public static List<String> size_flaws = new ArrayList<>();
+    public static List<String> contrast_flaws = new ArrayList<>();
+    public static List<String> all_flaws = new ArrayList<>();
 
     public static void addAccessibilityFlaw(String checkType, AccessibilityNodeInfo node, String extraInfo){
 

@@ -7,12 +7,15 @@ import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Vector;
 
 /**
  * Created by marceloeler on 21/06/17.
@@ -20,11 +23,11 @@ import java.util.Vector;
 
 public class ActionsScreenState extends AbstractScreenState {
 
-    private Vector<Action> actions;
-    private static Hashtable<String,Hashtable<String,Vector<Integer>>> idSizes = new Hashtable<String,Hashtable<String,Vector<Integer>>>();
-    private Vector<Float> pheromone;
-    private HashMap<Action,Float> actionsWithPheromone;
-    private HashMap<Action,Float> actionWithFitness;
+    private List<Action> actions;
+    private static Hashtable<String,Hashtable<String,List<Integer>>> idSizes = new Hashtable<>();
+    private List<Float> pheromone;
+    private Map<Action,Float> actionsWithPheromone;
+    private Map<Action,Float> actionWithFitness;
     private String id;
     private AppScreen appScreen;
     private AccessibilityNodeInfo rootNodeInfo;
@@ -48,10 +51,10 @@ public class ActionsScreenState extends AbstractScreenState {
 
     }
 
-    private int getMaxAmountOfID(Hashtable<String,Vector<Integer>> sameIDWidgets, String wid){
-        Vector<Integer> amounts = sameIDWidgets.get(wid);
+    private int getMaxAmountOfID(Hashtable<String, List<Integer>> sameIDWidgets, String wid){
+         List<Integer> amounts = sameIDWidgets.get(wid);
         if (amounts==null) {
-            amounts = new Vector<Integer> ();
+            amounts = new ArrayList<>();
             sameIDWidgets.put(wid,amounts);
             return 0;
         }
@@ -69,17 +72,17 @@ public class ActionsScreenState extends AbstractScreenState {
         return max;
     }
 
-    public Vector<Action> getActions(){
+    public List<Action> getActions(){
         if (actions!=null)
             return actions;
 
-        Hashtable<String,Vector<Integer>> sameIDWidgets = idSizes.get(activityName);
+        Hashtable<String,List<Integer>> sameIDWidgets = idSizes.get(activityName);
         if (sameIDWidgets==null){
-            sameIDWidgets = new Hashtable<String,Vector<Integer>>();
+            sameIDWidgets = new Hashtable<>();
             idSizes.put(activityName,sameIDWidgets);
         }
 
-        Vector<Action> executables = new Vector<Action>();
+        List<Action> executables = new ArrayList<>();
         int editables = 0;
         boolean enterAdded = false;
         Hashtable<String,Integer> idAmount = new Hashtable<String,Integer>();
@@ -220,7 +223,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         //update number of ids
         for (String id: idAmount.keySet()){
-            Vector<Integer> amounts = sameIDWidgets.get(id);
+            List<Integer> amounts = sameIDWidgets.get(id);
             if (amounts.size()<2){
                 boolean sameAmount=false;
                 for (int i=0; i<amounts.size(); i++)
@@ -245,7 +248,7 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         if (activityName.contains("GoogleOAuthActivity"))
-            executables = new Vector<Action>();
+            executables = new ArrayList<>();
         executables.add(new Action(ActionType.BACK));
         executables.add(new Action(ActionType.MENU));
 
@@ -275,11 +278,11 @@ public class ActionsScreenState extends AbstractScreenState {
 
         ActionsScreenState screenState = (ActionsScreenState) that;
 
-        Vector<Action> actionsThis = this.getActions();
-        Vector<Action> actionsOther = screenState.getActions();
+        List<Action> actionsThis = this.getActions();
+        List<Action> actionsOther = screenState.getActions();
 
-        Vector<String> setActThis = new Vector<String>();
-        Vector<String> setActOther = new Vector<String>();
+        List<String> setActThis = new ArrayList<>();
+        List<String> setActOther = new ArrayList<>();
         for (Action act: actionsThis) {
             if (act.getWidget()!=null) {
                 if (act.getWidget().getClazz().contains("Button"))
@@ -356,7 +359,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
     //yan
     @Override
-    public HashMap<Action, Float> getActionsWithPheromone() {
+    public Map<Action, Float> getActionsWithPheromone() {
         return actionsWithPheromone;
     }
 

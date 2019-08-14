@@ -11,7 +11,8 @@ import org.mate.ui.Action;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -59,7 +60,7 @@ public class GUIWalker {
 
         MATE.log("Going from " + guiModelMgr.getCurrentStateId() +" to " + targetScreenStateId);
 //        MATE.log("         >>> 1st attempt");
-        Vector<Vector<Action>> paths = guiModelMgr.pathFromTo(guiModelMgr.getCurrentStateId(),targetScreenStateId);
+        List<List<Action>> paths = guiModelMgr.pathFromTo(guiModelMgr.getCurrentStateId(),targetScreenStateId);
         if (paths.size()>0){
             executePaths(paths, targetScreenStateId);
             stateFound = this.checkStateReached(targetScreenStateId);
@@ -109,20 +110,20 @@ public class GUIWalker {
     }
 
 
-    private void executePaths(Vector<Vector<Action>> paths, String targetScreenStateId) {
+    private void executePaths(List<List<Action>> paths, String targetScreenStateId) {
         boolean desiredStateReached = false;
         for (int ev = 0; ev < paths.size() && !desiredStateReached; ev++) {
-            Vector<Action> path = paths.get(ev);
+            List<Action> path = paths.get(ev);
             goToState(guiModelMgr.getCurrentStateId());
             executePath(path, targetScreenStateId);
             desiredStateReached = checkStateReached(targetScreenStateId);
         }
     }
 
-    private void executePath(Vector<Action> path, String targetScreenStateId){
+    private void executePath(List<Action> path, String targetScreenStateId){
 
         boolean desiredStateReached=false;
-        Vector<Action> actions = new Vector<Action>();
+        List<Action> actions = new ArrayList<>();
         if (!path.isEmpty()){
             boolean targetReached = false;
             for (int i=0; i< path.size() && !targetReached; i++){

@@ -15,15 +15,15 @@ import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import static org.mate.MATE.device;
 
 public class UniformRandomForAccessibility {
     private DeviceMgr deviceMgr;
     private String packageName;
-    private Vector<Action> executableActions;
+    private List<Action> executableActions;
     private IGUIModel guiModel;
     public static String currentActivityName;
     private boolean runAccChecks;
@@ -245,7 +245,7 @@ public class UniformRandomForAccessibility {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                Vector<Action> actions = screenState.getActions();
+                List<Action> actions = screenState.getActions();
                 for (Action action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {

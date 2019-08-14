@@ -18,9 +18,9 @@ import org.mate.MATE;
 import org.mate.ui.Widget;
 import org.mate.ui.EnvironmentManager;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -32,7 +32,7 @@ public class AppScreen {
 
     private String activityName;
     private String packageName;
-    private Vector<Widget> widgets;
+    private List<Widget> widgets;
     private static Hashtable<String,String> editTextHints = new Hashtable<String,String>();
     private UiDevice device;
     private boolean hasToScrollUp;
@@ -42,7 +42,7 @@ public class AppScreen {
     private AccessibilityNodeInfo rootNodeInfo;
 
     public AppScreen(){
-        this.widgets = new Vector<Widget>();
+        this.widgets = new ArrayList<>();
         this.activityName = EnvironmentManager.getCurrentActivityName();
         this.packageName = activityName.split("/")[0];
 
@@ -243,7 +243,7 @@ public class AppScreen {
         return activityName;
     }
 
-    public Vector<Widget> getWidgets(){
+    public List<Widget> getWidgets(){
         return widgets;
     }
 

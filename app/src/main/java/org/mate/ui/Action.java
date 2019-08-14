@@ -1,7 +1,8 @@
 package org.mate.ui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
 
 /**
  * Created by marceloe on 12/12/16.
@@ -20,9 +21,9 @@ public class Action {
     private float proportionalPheromone;
 
 
-    private Vector<Action> adjActions;
+    private List<Action> adjActions;
 
-    public Vector<Action> getAdjActions() {
+    public List<Action> getAdjActions() {
         return adjActions;
     }
 
@@ -36,7 +37,7 @@ public class Action {
         setWidget(widget);
         setActionType(actionType);
         setExtraInfo("");
-        adjActions = new Vector<Action>();
+        adjActions = new ArrayList<>();
         setExecuted(false);
     }
 

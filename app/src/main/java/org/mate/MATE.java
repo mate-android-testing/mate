@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
@@ -71,7 +70,7 @@ public class MATE {
     public static UIAbstractionLayer uiAbstractionLayer;
     public static String packageName;
     public static IGUIModel guiModel;
-    private Vector<Action> actions;
+    private List<Action> actions;
     private DeviceMgr deviceMgr;
     public static long total_time;
     public static long RANDOM_LENGH;
@@ -468,7 +467,7 @@ public class MATE {
 
                 DeviceMgr dmgr = new DeviceMgr(device, "");
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                Vector<Action> actions = screenState.getActions();
+                List<Action> actions = screenState.getActions();
                 for (Action action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {

@@ -6,12 +6,10 @@ import org.mate.exploration.aco.Ant;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
-import java.io.File;
-import java.util.Date;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marceloeler on 22/06/17.
@@ -247,7 +245,7 @@ public class GraphGUIModel implements IGUIModel {
         return historyScreenState;
     }
 
-    public Vector<Vector<Action>> pathFromTo(String source, String target){
+    public List<List<Action>> pathFromTo(String source, String target){
         return stateGraph.pathFromTo(source,target);
     }
 
@@ -279,8 +277,8 @@ public class GraphGUIModel implements IGUIModel {
         return stateGraph;
     }
 
-    public Vector<IScreenState> getStates(){
-        Vector<IScreenState> states = new Vector<IScreenState>();
+    public List<IScreenState> getStates(){
+        List<IScreenState> states = new ArrayList<>();
         for (ScreenNode node: stateGraph.getScreenNodes().values())
             states.add(node.getScreenState());
         return states;

@@ -8,7 +8,8 @@ import org.junit.runner.RunWith;
 import org.mate.exploration.evolutionary.OnePlusOne;
 import org.mate.model.TestCase;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEOnePlusOne {
@@ -24,7 +25,7 @@ public class ExecuteMATEOnePlusOne {
         mate.testApp("OnePlusOne");
 
         //Report
-        Vector<TestCase> ts = new Vector<>(OnePlusOne.testsuite.values());
+        List<TestCase> ts = new ArrayList<>(OnePlusOne.testsuite.values());
         MATE.log_acc("Final Report: test cases number = "+ts.size());
 
         //MATE.log_acc(OnePlusOne.coverageArchive.keySet().toString());

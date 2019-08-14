@@ -4,7 +4,8 @@ import org.mate.Properties;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by marceloe on 08/12/16.
@@ -13,11 +14,11 @@ public class ScreenNode {
 
     private String id;
     private IScreenState screenState;
-    private Vector<EventEdge> eventEdges;
+    private List<EventEdge> eventEdges;
 
     public void initPheromone(){
         //TODO: how about selectState.getactions
-        Vector<Action> executableActions = screenState.getActions();
+        List<Action> executableActions = screenState.getActions();
         for (Action action:executableActions){
             action.setPheromone(Properties.INITIALIZATION_PHEROMONE);
         }
@@ -26,7 +27,7 @@ public class ScreenNode {
     public ScreenNode(String id, IScreenState screenState){
         setId(id);
         setScreenState(screenState);
-        eventEdges = new Vector<EventEdge>();
+        eventEdges = new ArrayList<>();
         //init pheromone when creating a new node
         initPheromone();
     }
@@ -47,7 +48,7 @@ public class ScreenNode {
         this.screenState = screenState;
     }
 
-    public Vector<EventEdge> getEventEdges() {
+    public List<EventEdge> getEventEdges() {
         return eventEdges;
     }
 
@@ -56,8 +57,8 @@ public class ScreenNode {
         eventEdges.add(eventEdge);
     }
 
-    public Vector<ScreenNode> getNeighbors(){
-        Vector<ScreenNode> neighbors = new Vector<ScreenNode>();
+    public List<ScreenNode> getNeighbors(){
+        List<ScreenNode> neighbors = new ArrayList<>();
         for (EventEdge edge: eventEdges){
             neighbors.add(edge.getTarget());
         }

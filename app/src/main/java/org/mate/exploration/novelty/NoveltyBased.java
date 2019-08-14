@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.Vector;
 
 import static org.mate.MATE.device;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
@@ -42,14 +41,14 @@ public class NoveltyBased {
     private final int maxNumTCs;
     private final int maxNumEvents;
     public static LinkedHashMap<String, TestCase> testsuite;
-    private Vector<TestCase> crashArchive;
-    private Vector<TestCase> noveltyArchive;
+    private List<TestCase> crashArchive;
+    private List<TestCase> noveltyArchive;
     public static HashMap<String,Set<String>> coverageArchive;
     private LinkedHashMap<String, TestCase> archive;
 
     private DeviceMgr deviceMgr;
     private String packageName;
-    private Vector<Action> executableActions;
+    private List<Action> executableActions;
     private GraphGUIModel guiModel;
     public static String currentActivityName;
     private boolean isApp = true;
@@ -67,7 +66,7 @@ public class NoveltyBased {
         this.TCcounter = 0;
 
         //TODO: does the crash archive need to take into account also any information of the crash in order to detect different crashes?
-        this.crashArchive= new Vector<>();
+        this.crashArchive= new ArrayList<>();
         NoveltyBased.coverageArchive = new HashMap<>();
         this.archive = new LinkedHashMap<>();
     }
@@ -512,7 +511,7 @@ public class NoveltyBased {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                Vector<Action> actions = screenState.getActions();
+                List<Action> actions = screenState.getActions();
                 for (Action action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {

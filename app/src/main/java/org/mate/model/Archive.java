@@ -1,7 +1,7 @@
 package org.mate.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class Archive {
 
@@ -9,7 +9,7 @@ public class Archive {
     private List<TestCase> archivedTCs;
 
     private Archive(){
-        archivedTCs = new Vector<>();
+        archivedTCs = new ArrayList<>();
     }
 
     public void updateArchive(TestCase tc){
