@@ -9,6 +9,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,12 +28,15 @@ public class UIAbstractionLayer {
     private DeviceMgr deviceMgr;
     private Map<Action, Edge> edges;
     private IScreenState currentScreenState;
+    private int screenStateEnumeration;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         edges = new HashMap<>();
         currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        currentScreenState.setId("S" + 0);
+        screenStateEnumeration = 1;
     }
 
     public List<Action> getExecutableActions() {
@@ -60,6 +64,7 @@ public class UIAbstractionLayer {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
             state = ScreenStateFactory.getScreenState("ActionsScreenState"); //TODO: maybe not needed
+            state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, currentScreenState, state));
             currentScreenState = state;
 
@@ -98,12 +103,14 @@ public class UIAbstractionLayer {
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log_acc("current package different from app package: " + currentPackageName);
 
+            state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, currentScreenState, state));
             currentScreenState = state;
 
             return SUCCESS_OUTBOUND;
         } else {
             //update model with new state
+            state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, currentScreenState, state));
             currentScreenState = state;
 
@@ -217,6 +224,31 @@ public class UIAbstractionLayer {
 
     public Edge getEdge(Action action) {
         return edges.get(action);
+    }
+
+    public List<IScreenState> getRecordedScreenStates() {
+        List<IScreenState> screenStates = new ArrayList<>();
+        for (Edge edge : edges.values()) {
+            if (!screenStates.contains(edge.source)) {
+                screenStates.add(edge.source);
+            }
+            if (!screenStates.contains(edge.target)) {
+                screenStates.add(edge.target);
+            }
+        }
+        return screenStates;
+    }
+
+    public IScreenState toRecordedScreenState(IScreenState screenState) {
+        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
+        for (IScreenState recordedScreenState : recordedScreenStates) {
+            if (recordedScreenState.equals(screenState)) {
+                return recordedScreenState;
+            }
+        }
+        screenState.setId("S"+screenStateEnumeration);
+        screenStateEnumeration++;
+        return screenState;
     }
 
     public enum ActionResult {
