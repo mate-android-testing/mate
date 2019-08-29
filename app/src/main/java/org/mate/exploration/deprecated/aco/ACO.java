@@ -10,6 +10,7 @@ import org.mate.model.graph.ScreenNode;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +38,7 @@ public class ACO {
     private boolean isFirstExplored = false;
     private ActivityCoverage activityCoverage;
     private boolean isExitApp = false;
-    private Action exitAction = null;
+    private WidgetAction exitAction = null;
 
     public ACO(IApp deviceMgr,String packageName,GraphGUIModel completeModel){
         this.deviceMgr = deviceMgr;
@@ -122,11 +123,11 @@ public class ACO {
 
     public void evolve(IScreenState state,Ant ant,String currentStateId,boolean isFirstExplored) {
 
-        Action action = null;
+        WidgetAction action = null;
             // We will select the action randomly if this explored node is new or
             // this is the first generation
             if (isFirstExplored|| currentGeneration == 0){
-                List<Action> executableActions = state.getActions();
+                List<WidgetAction> executableActions = state.getActions();
                 //random select
                 int randNum = selectRandomAction(state.getActions().size());
                 action = executableActions.get(randNum);
@@ -139,7 +140,7 @@ public class ACO {
             }else {
                 //find the node from history
                 IScreenState historyScreenState = wholeModel.getStateById(currentStateId);
-                List<Action> executableActions = historyScreenState.getActions();
+                List<WidgetAction> executableActions = historyScreenState.getActions();
 
                 //select the best action at this state
                 action = selectBestWidget(executableActions);
@@ -155,7 +156,7 @@ public class ACO {
                         e.printStackTrace();
                     }
                 }else {
-                    List<Action> copyOfExecutableActions = null;
+                    List<WidgetAction> copyOfExecutableActions = null;
                     copyOfExecutableActions = new ArrayList<>(executableActions);
                     //if only one action is available, we won't delete any action
                     if (executableActions.size()>1){
@@ -206,14 +207,14 @@ public class ACO {
         }
     }
 
-    public void restartACO(Action action) {
+    public void restartACO(WidgetAction action) {
         deviceMgr.restartApp();
         exitAction = action;
         System.out.println("restart on ACO");
         isExitApp = true;
     }
 
-    public Action fillFrom(Action action, List<Action> executableActions) throws AUTCrashException {
+    public Action fillFrom(WidgetAction action, List<WidgetAction> executableActions) throws AUTCrashException {
         int eacount = this.numberOfEditableWidgets(executableActions);
         int count = 0;
         //let the last action out because it is executed after this block of instructions
@@ -239,11 +240,11 @@ public class ACO {
         return rand.nextInt(executionActionSize);
     }
 
-    public Action selectBestWidget(List<Action> executableActions){
+    public WidgetAction selectBestWidget(List<WidgetAction> executableActions){
         float tempPheromone = 0;
         float bestPheromone = 0;
-        Action bestAction = null;
-        for (Action action:executableActions){
+        WidgetAction bestAction = null;
+        for (WidgetAction action:executableActions){
             tempPheromone = action.getPheromone();
             if (tempPheromone >= bestPheromone){
                 bestAction = action;
@@ -254,19 +255,19 @@ public class ACO {
         return bestAction;
     }
 
-    public Action proportionalSelection(List<Action> executableActions){
+    public WidgetAction proportionalSelection(List<WidgetAction> executableActions){
         float sumPheromone = 0;
-        for (Action action:executableActions){
+        for (WidgetAction action:executableActions){
             sumPheromone+=action.getPheromone();
         }
 
-        for (Action action:executableActions){
+        for (WidgetAction action:executableActions){
             action.setProportionalPheromone(action.getPheromone()/sumPheromone);
         }
         float sum1 = 0.f;
         double f = Math.random();
 
-        for (Action action:executableActions){
+        for (WidgetAction action:executableActions){
             sum1 += action.getProportionalPheromone();
             if (sum1>=f){
                 return action;
@@ -355,9 +356,9 @@ public class ACO {
         EventEdge updatedEventEdge = wholeModel.getStateGraph().getEdge(source,target);
         updatedEventEdge.setPheromone(updatedEventEdge.getPheromone()+actualPheromone);
     }
-    int numberOfEditableWidgets(List<Action> actions){
+    int numberOfEditableWidgets(List<WidgetAction> actions){
         int count=0;
-        for (Action action: actions)
+        for (WidgetAction action: actions)
             if (action.getWidget().isEditable())
                 count++;
         return count;

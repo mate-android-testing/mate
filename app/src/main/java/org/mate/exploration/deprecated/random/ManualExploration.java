@@ -12,6 +12,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.Date;
 import java.util.List;
@@ -39,9 +40,9 @@ public class ManualExploration {
         this.guiModel = guiModel;
     }
 
-    public Action getActionSplash(List<Action> actions){
+    public Action getActionSplash(List<WidgetAction> actions){
         Action action = null;
-        for (Action act: actions){
+        for (WidgetAction act: actions){
             if (act.getWidget().getClazz().contains("ImageButton")) {
                 if (act.getWidget().getId().contains("next") ||  act.getWidget().getId().contains("done"))
                     return act;
@@ -72,7 +73,7 @@ public class ManualExploration {
                  return;
             }
 
-            boolean newState = guiModel.updateModel(new Action(new Widget("","",""), ActionType.CLICK),state);
+            boolean newState = guiModel.updateModel(new WidgetAction(new Widget("","",""), ActionType.CLICK),state);
             if (newState || cont==1){
                 MATE.logactivity(state.getActivityName());
                 AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();

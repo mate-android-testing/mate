@@ -18,7 +18,9 @@ import org.mate.model.IGUIModel;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.List;
 
@@ -37,6 +39,22 @@ public class DeviceMgr implements IApp {
     }
 
     public void executeAction(Action action) throws AUTCrashException{
+        if (action instanceof WidgetAction) {
+            executeAction((WidgetAction) action);
+        } else if (action instanceof PrimitiveAction) {
+            executeAction((PrimitiveAction) action);
+        }
+        else {
+            throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
+        }
+    }
+
+    public void executeAction(PrimitiveAction action) throws AUTCrashException{
+        throw new UnsupportedOperationException("Handling of primitive actions not yet implemented");
+
+    }
+
+    public void executeAction(WidgetAction action) throws AUTCrashException{
         MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
         Widget selectedWidget = action.getWidget();
         int typeOfAction = action.getActionType();
@@ -203,7 +221,7 @@ public class DeviceMgr implements IApp {
         return null;
     }
 
-    public void handleEdit(Action action){
+    public void handleEdit(WidgetAction action){
 
         Widget widget = action.getWidget();
         String textData = generateTextData(action);
@@ -255,7 +273,7 @@ public class DeviceMgr implements IApp {
 
     }
 
-    private String generateTextData(Action action) {
+    private String generateTextData(WidgetAction action) {
         Widget widget = action.getWidget();
 
         String widgetText = widget.getText();

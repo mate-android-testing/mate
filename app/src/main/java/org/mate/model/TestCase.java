@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
@@ -128,7 +129,9 @@ public class TestCase {
         }
 
         int count = 0;
-        for (Action action : testCase.eventSequence) {
+        //Todo test that actions are widget actions beforehand
+        for (Action action0 : testCase.eventSequence) {
+            WidgetAction action = (WidgetAction) action0;
             if (count < finalSize) {
                 if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
                     if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
@@ -141,7 +144,7 @@ public class TestCase {
             }
         }
         for (int i = count; i < finalSize; i++) {
-            Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+            WidgetAction action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
             if(!resultingTc.updateTestCase(action, String.valueOf(count))) {
                 break;
             }

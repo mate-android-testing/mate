@@ -8,6 +8,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +21,6 @@ import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_C
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
 public class UIAbstractionLayer {
@@ -39,7 +39,7 @@ public class UIAbstractionLayer {
         screenStateEnumeration = 1;
     }
 
-    public List<Action> getExecutableActions() {
+    public List<WidgetAction> getExecutableActions() {
         return getCurrentScreenState().getActions();
     }
 
@@ -73,6 +73,7 @@ public class UIAbstractionLayer {
 
         state = ScreenStateFactory.getScreenState("ActionsScreenState");
 
+        //Todo: assess if timeout should be added to primitive actions as well
         //check whether there is a progress bar on the screen
         long timeToWait = waitForProgressBar(state);
         //if there is a progress bar
@@ -80,7 +81,10 @@ public class UIAbstractionLayer {
             //add 2 sec just to be sure
             timeToWait += 2000;
             //set that the current action needs to wait before new action
-            action.setTimeToWait(timeToWait);
+            if (action instanceof WidgetAction) {
+                WidgetAction wa = (WidgetAction) action;
+                wa.setTimeToWait(timeToWait);
+            }
             //get a new state
             state = ScreenStateFactory.getScreenState("ActionsScreenState");
         }
@@ -165,8 +169,8 @@ public class UIAbstractionLayer {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<Action> actions = screenState.getActions();
-                for (Action action : actions) {
+                List<WidgetAction> actions = screenState.getActions();
+                for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
                             dmgr.executeAction(action);

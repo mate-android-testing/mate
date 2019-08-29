@@ -3,6 +3,7 @@ package org.mate.model.graph;
 import org.mate.Properties;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,8 @@ public class ScreenNode {
 
     public void initPheromone(){
         //TODO: how about selectState.getactions
-        List<Action> executableActions = screenState.getActions();
-        for (Action action:executableActions){
+        List<WidgetAction> executableActions = screenState.getActions();
+        for (WidgetAction action:executableActions){
             action.setPheromone(Properties.INITIALIZATION_PHEROMONE);
         }
     }

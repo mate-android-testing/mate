@@ -3,6 +3,7 @@ package org.mate.model;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.ui.Action;
 import org.mate.state.IScreenState;
+import org.mate.ui.WidgetAction;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public interface IGUIModel {
 
     public void moveToState(IScreenState screenState) throws InvalidScreenStateException;
-    public boolean updateModel(Action event, IScreenState screenState);
+    public boolean updateModel(WidgetAction event, IScreenState screenState);
     public String getCurrentStateId();
     public IScreenState getStateById(String id);
     public List<List<Action>> pathFromTo(String source, String target);

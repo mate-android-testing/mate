@@ -7,6 +7,7 @@ import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class GraphGUIModel implements IGUIModel {
         }
     }
 
-    public boolean updateModel(Action event, IScreenState screenState){
+    public boolean updateModel(WidgetAction event, IScreenState screenState){
         boolean updated = false;
 
         if (event == null) {
@@ -150,7 +151,7 @@ public class GraphGUIModel implements IGUIModel {
 
 
     //VIN
-    public boolean updateModelEVO(Action event, IScreenState screenState){
+    public boolean updateModelEVO(WidgetAction event, IScreenState screenState){
         boolean updated = false;
 
         if (event == null) {
@@ -203,7 +204,7 @@ public class GraphGUIModel implements IGUIModel {
 
 
     //yan
-    public IScreenState updateModelForACO(Action event, IScreenState screenState, Ant ant){
+    public IScreenState updateModelForACO(WidgetAction event, IScreenState screenState, Ant ant){
         IScreenState historyScreenState = null;
         if (event == null)
             addRootNode(screenState);

@@ -1,7 +1,6 @@
 package org.mate.interaction;
 
 import android.app.Instrumentation;
-import android.support.test.uiautomator.UiDevice;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
@@ -10,6 +9,7 @@ import org.mate.model.IGUIModel;
 import org.mate.ui.Action;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,9 +137,12 @@ public class GUIWalker {
                     targetReached = this.checkStateReached(targetScreenStateId);
                     lastActionExecuted=action;
 
-                    if (action.getWidget().isEditable()){
-                        for (Action act: action.getAdjActions())
-                            deviceMgr.executeAction(act);
+                    if (action instanceof WidgetAction) {
+                        WidgetAction wa = (WidgetAction) action;
+                        if (wa.getWidget().isEditable()) {
+                            for (WidgetAction act : wa.getAdjActions())
+                                deviceMgr.executeAction(act);
+                        }
                     }
 
                 } catch (AUTCrashException e) {

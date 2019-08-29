@@ -1,6 +1,7 @@
 package org.mate.model.graph;
 
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 
 /**
  * Created by marceloe on 08/12/16.
@@ -8,7 +9,7 @@ import org.mate.ui.Action;
 public class EventEdge implements Cloneable{
 
     private String id;
-    private Action event;
+    private WidgetAction event;
     private ScreenNode source;
     private ScreenNode target;
 
@@ -31,7 +32,7 @@ public class EventEdge implements Cloneable{
 
     public EventEdge(){}
 
-    public EventEdge(ScreenNode source, ScreenNode target, Action event) {
+    public EventEdge(ScreenNode source, ScreenNode target, WidgetAction event) {
         setSource(source);
         setTarget(target);
         setEvent(event);
@@ -52,7 +53,7 @@ public class EventEdge implements Cloneable{
         return event;
     }
 
-    public void setEvent(Action event) {
+    public void setEvent(WidgetAction event) {
         this.event = event;
     }
 

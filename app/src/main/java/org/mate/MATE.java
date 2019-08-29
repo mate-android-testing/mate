@@ -46,6 +46,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
@@ -467,8 +468,8 @@ public class MATE {
 
                 DeviceMgr dmgr = new DeviceMgr(device, "");
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<Action> actions = screenState.getActions();
-                for (Action action : actions) {
+                List<WidgetAction> actions = screenState.getActions();
+                for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
                             dmgr.executeAction(action);

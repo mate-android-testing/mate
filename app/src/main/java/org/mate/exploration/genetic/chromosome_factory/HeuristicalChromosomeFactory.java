@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.chromosome_factory;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -64,17 +65,17 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     }
 
     @Override
-    protected Action selectAction() {
-        List<Action> executableActions = uiAbstractionLayer.getExecutableActions();
+    protected WidgetAction selectAction() {
+        List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
 
         //compute unvisited Actions of previous action (if there is a previous action)
        computeUnvisitedWidgets(executableActions);
 
         //store all candidates with (same) highest weight in list
-        List<Action> candidateActions = new ArrayList<>();
+        List<WidgetAction> candidateActions = new ArrayList<>();
         double maxWeight = 0.0;
 
-        for (Action action : executableActions) {
+        for (WidgetAction action : executableActions) {
             //create list of actions with the highest weight
             double weight = computeExecutionWeight(action);
             if( weight > maxWeight){
@@ -98,7 +99,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         }
 
         //select random element form candidates
-        Action selectedAction = Randomness.randomElement(candidateActions);
+        WidgetAction selectedAction = Randomness.randomElement(candidateActions);
 
         //update frequency
         if (executionCounter.containsKey(selectedAction)) {
@@ -130,7 +131,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
      * @param action for which the weight should be computed
      * @return  computed weight for given action
      */
-    private double computeExecutionWeight(Action action) {
+    private double computeExecutionWeight(WidgetAction action) {
 
         //compute weight for selected event type
         double eventTypeWeight;
@@ -173,10 +174,10 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
      * Computes the number of unvisited widgets of the selected action in the previous selection
      * @param executableActions List of available actions on current screen
      */
-    private void computeUnvisitedWidgets(List<Action> executableActions) {
+    private void computeUnvisitedWidgets(List<WidgetAction> executableActions) {
         if (previousAction != null) {
             int count = 0;
-            for (Action action : executableActions) {
+            for (WidgetAction action : executableActions) {
                 if (!visitedWidgetIds.contains(action.getWidget().getIdByActivity())) {
                    count++;
                 }

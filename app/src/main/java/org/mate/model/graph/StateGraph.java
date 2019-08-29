@@ -1,10 +1,9 @@
 package org.mate.model.graph;
 
-import android.view.accessibility.AccessibilityNodeInfo;
-
 import org.mate.MATE;
 import org.mate.ui.Action;
 import org.mate.state.IScreenState;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -55,7 +54,7 @@ public class StateGraph {
         eventEdge.getSource().addEdge(eventEdge);
     }
 
-    public void addEventEdge(ScreenNode source, ScreenNode target, Action event){
+    public void addEventEdge(ScreenNode source, ScreenNode target, WidgetAction event){
         EventEdge eventEdge = new EventEdge(source,target,event);
         addEventEdge(eventEdge);
     }

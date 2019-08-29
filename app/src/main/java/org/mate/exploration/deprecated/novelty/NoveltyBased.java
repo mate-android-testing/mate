@@ -12,6 +12,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.MersenneTwister;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class NoveltyBased {
 
     private DeviceMgr deviceMgr;
     private String packageName;
-    private List<Action> executableActions;
+    private List<WidgetAction> executableActions;
     private GraphGUIModel guiModel;
     public static String currentActivityName;
     private boolean isApp = true;
@@ -324,7 +325,7 @@ public class NoveltyBased {
                     executableActions = selectedScreenState.getActions();
 
                     //select one action randomly
-                    Action action = executableActions.get(selectRandomAction(executableActions.size()));
+                    WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
                     testcase.addEvent(action);
                     numberOfActions++;
 
@@ -512,8 +513,8 @@ public class NoveltyBased {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<Action> actions = screenState.getActions();
-                for (Action action : actions) {
+                List<WidgetAction> actions = screenState.getActions();
+                for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
                             dmgr.executeAction(action);
@@ -616,11 +617,11 @@ public class NoveltyBased {
 
             mutantTestCase.updateStatesMap(this.guiModel.getCurrentStateId(), String.valueOf(numberOfActions));
 
-            Action action;
+            WidgetAction action;
 
             if (numberOfActions < cutpoint) {
                 MATE.log("Replay Action number: "+numberOfActions);
-                action = originalTestCase.getEventSequence().get(numberOfActions);
+                action = (WidgetAction) originalTestCase.getEventSequence().get(numberOfActions);
                 //TODO: Add an event to the test case before its execution?
             } else {
                 MATE.log("Random Action number: "+numberOfActions);
