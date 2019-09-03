@@ -13,12 +13,15 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
+import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
@@ -168,6 +171,39 @@ public class MATE {
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
                     nsga.run();
+                } else if (explorationStrategy.equals("PrimitiveStandardGeneticAlgorithm")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    MATE.log_acc("Activities");
+                    for (String s : EnvironmentManager.getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
+                    final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
+                            .withChromosomeFactory(PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
+                            .withCrossoverFunction(PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
+                            .withMutationFunction(PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID)
+                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withPopulationSize(10)
+                            .withBigPopulationSize(20)
+                            .withMaxNumEvents(50)
+                            .withPMutate(0.3)
+                            .withPCrossover(0.7)
+                            .build();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            genericGA.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                    if (Properties.STORE_COVERAGE) {
+                        EnvironmentManager.storeCoverageData(genericGA, null);
+                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");

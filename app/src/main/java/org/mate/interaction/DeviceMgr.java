@@ -50,8 +50,16 @@ public class DeviceMgr implements IApp {
     }
 
     public void executeAction(PrimitiveAction action) throws AUTCrashException{
-        throw new UnsupportedOperationException("Handling of primitive actions not yet implemented");
+        MATE.log(" ____ execute primitive action at " + action.getX() + ", " + action.getY());
+        device.click(action.getX(), action.getY());
 
+        //handle app crashes
+        UiObject window = new UiObject(new UiSelector().packageName("android")
+                .textContains("has stopped"));
+        if (window.exists()) {
+            MATE.log("CRASH");
+            throw new AUTCrashException("App crashed");
+        }
     }
 
     public void executeAction(WidgetAction action) throws AUTCrashException{

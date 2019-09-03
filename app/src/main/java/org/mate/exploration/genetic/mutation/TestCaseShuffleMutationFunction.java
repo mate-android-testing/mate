@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -14,7 +15,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
     private boolean executeActions;
 
     public TestCaseShuffleMutationFunction() {
-        this(true);
+        this(Properties.STORE_COVERAGE);
     }
 
     public TestCaseShuffleMutationFunction(boolean storeCoverage) {

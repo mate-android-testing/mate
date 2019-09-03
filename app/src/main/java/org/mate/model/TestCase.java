@@ -117,6 +117,10 @@ public class TestCase {
         }
     }
 
+    public static TestCase newDummy() {
+        return new TestCase("dummy");
+    }
+
     //TODO: Load test case from cache if it was executed before
     public static TestCase fromDummy(TestCase testCase) {
         MATE.uiAbstractionLayer.resetApp();
@@ -131,10 +135,9 @@ public class TestCase {
         int count = 0;
         //Todo test that actions are widget actions beforehand
         for (Action action0 : testCase.eventSequence) {
-            WidgetAction action = (WidgetAction) action0;
             if (count < finalSize) {
-                if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
-                    if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
+                    if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
                         break;
                     }
                     count++;
@@ -170,7 +173,8 @@ public class TestCase {
      * @return True if action successful inbound false if outbound, crash, or some unkown failure
      */
     public boolean updateTestCase(Action a, String event) {
-        if (!MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
+        if (a instanceof WidgetAction
+                && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
             throw new IllegalStateException("Action not applicable to current state");
         }
         addEvent(a);
