@@ -11,6 +11,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,9 +45,9 @@ public class DepthFirst {
 
         //gets a list of all executable actions
         //TODO: how about selectState.getactions
-        List<Action> executableActions = selectedState.getActions();
+        List<WidgetAction> executableActions = selectedState.getActions();
         MATE.log(selectedStateId + " - activity: " + selectedState.getActivityName());
-        for (Action act: executableActions){
+        for (WidgetAction act: executableActions){
             Widget widget = act.getWidget();
             String widgetStr ="";
             if (widget!=null)
@@ -65,7 +66,7 @@ public class DepthFirst {
         for (int i=0; i<executableActions.size() && !stopExecution; i++){
 
             //gets an action to execute
-            Action action = executableActions.get(i);
+            WidgetAction action = executableActions.get(i);
 
             //reaches the screen node/state being explored (backtrack)
             stateFound = deviceMgr.goToState(guiModel,selectedStateId);
@@ -77,7 +78,7 @@ public class DepthFirst {
                 try {
 
                     if (action.getActionType()==ActionType.TYPE_TEXT) {
-                        Action firstAction = action;
+                        WidgetAction firstAction = action;
                         int contEditActions = 0;
                         boolean exit = false;
                         while (i<executableActions.size() && action.getActionType() == ActionType.TYPE_TEXT) {

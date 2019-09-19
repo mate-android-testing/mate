@@ -135,7 +135,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
-        return population.subList(population.size() - populationSize, population.size());
+        return new ArrayList<>(population.subList(population.size() - populationSize, population.size()));
     }
 
     protected void logCurrentFitness() {

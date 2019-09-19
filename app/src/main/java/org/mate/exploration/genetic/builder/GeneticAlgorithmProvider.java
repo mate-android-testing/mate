@@ -10,8 +10,10 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromos
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
+import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
@@ -25,6 +27,7 @@ import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
@@ -157,7 +160,7 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
-                this.<T>initializeTerminationCondition());
+                this.initializeTerminationCondition());
     }
 
     private <T> IChromosomeFactory<T> initializeChromosomeFactory() {
@@ -179,6 +182,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new HeuristicalChromosomeFactory(getNumEvents());
+            case PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -220,6 +227,8 @@ public class GeneticAlgorithmProvider {
                     return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
                 case UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID:
                     return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
+                case PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+                    return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
@@ -246,6 +255,10 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPInnerMutate());
+                case PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID:
+                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);

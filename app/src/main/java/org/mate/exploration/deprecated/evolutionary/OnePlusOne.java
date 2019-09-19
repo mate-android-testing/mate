@@ -10,6 +10,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +38,7 @@ public class OnePlusOne {
 
     private DeviceMgr deviceMgr;
     private String packageName;
-    private List<Action> executableActions;
+    private List<WidgetAction> executableActions;
     private GraphGUIModel guiModel;
     public static String currentActivityName;
     private boolean isApp = true;
@@ -126,7 +127,7 @@ public class OnePlusOne {
                     executableActions = selectedScreenState.getActions();
 
                     //select one action randomly
-                    Action action = executableActions.get(selectRandomAction(executableActions.size()));
+                    WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
                     testcase.addEvent(action);
                     numberOfActions++;
                     //MATE.log("EVENT: " + action.getActionType() + "; GUI OBJECT: " + action.getWidget().getClazz());
@@ -285,8 +286,8 @@ public class OnePlusOne {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<Action> actions = screenState.getActions();
-                for (Action action : actions) {
+                List<WidgetAction> actions = screenState.getActions();
+                for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
                             dmgr.executeAction(action);
@@ -338,11 +339,11 @@ public class OnePlusOne {
             updateCoverageArchive(this.guiModel.getCurrentStateId(), mutantTestCase.getId());
             mutantTestCase.updateStatesMap(this.guiModel.getCurrentStateId(), String.valueOf(numberOfActions));
 
-            Action action;
+            WidgetAction action;
 
             if (numberOfActions < cutpoint) {
                 MATE.log("Replay Action number: " + numberOfActions);
-                action = originalTestCase.getEventSequence().get(numberOfActions);
+                action = (WidgetAction) originalTestCase.getEventSequence().get(numberOfActions);
             } else {
                 MATE.log("Random Action number: " + numberOfActions);
                 //get a list of all executable actions as long as this state is different from last state

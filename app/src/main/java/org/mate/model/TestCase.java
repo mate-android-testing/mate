@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
@@ -116,6 +117,10 @@ public class TestCase {
         }
     }
 
+    public static TestCase newDummy() {
+        return new TestCase("dummy");
+    }
+
     //TODO: Load test case from cache if it was executed before
     public static TestCase fromDummy(TestCase testCase) {
         MATE.uiAbstractionLayer.resetApp();
@@ -128,10 +133,11 @@ public class TestCase {
         }
 
         int count = 0;
-        for (Action action : testCase.eventSequence) {
+        //Todo test that actions are widget actions beforehand
+        for (Action action0 : testCase.eventSequence) {
             if (count < finalSize) {
-                if (MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
-                    if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
+                    if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
                         break;
                     }
                     count++;
@@ -141,7 +147,7 @@ public class TestCase {
             }
         }
         for (int i = count; i < finalSize; i++) {
-            Action action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+            WidgetAction action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
             if(!resultingTc.updateTestCase(action, String.valueOf(count))) {
                 break;
             }
@@ -167,7 +173,8 @@ public class TestCase {
      * @return True if action successful inbound false if outbound, crash, or some unkown failure
      */
     public boolean updateTestCase(Action a, String event) {
-        if (!MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
+        if (a instanceof WidgetAction
+                && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
             throw new IllegalStateException("Action not applicable to current state");
         }
         addEvent(a);

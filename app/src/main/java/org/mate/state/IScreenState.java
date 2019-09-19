@@ -4,6 +4,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public interface IScreenState {
     public String getId();
     public void setId(String stateId);
     public List<Widget> getWidgets();
-    public List<Action> getActions();
+    public List<WidgetAction> getActions();
     public String getActivityName();
     public String getPackageName();
     public String getType();

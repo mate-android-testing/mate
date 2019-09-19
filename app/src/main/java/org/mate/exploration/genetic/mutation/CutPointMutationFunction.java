@@ -6,9 +6,9 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -44,9 +44,10 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         mutations.add(mutatedChromosome);
 
         for (int i = 0; i < maxNumEvents; i++) {
-            Action newAction;
+            WidgetAction newAction;
             if (i < cutPoint) {
-                newAction = chromosome.getValue().getEventSequence().get(i);
+                //Todo: highlight that this class can only be used for widget based execution
+                newAction = (WidgetAction) chromosome.getValue().getEventSequence().get(i);
             } else {
                 newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
             }

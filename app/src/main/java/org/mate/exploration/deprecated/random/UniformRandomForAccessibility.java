@@ -13,6 +13,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,7 @@ import static org.mate.MATE.device;
 public class UniformRandomForAccessibility {
     private DeviceMgr deviceMgr;
     private String packageName;
-    private List<Action> executableActions;
+    private List<WidgetAction> executableActions;
     private IGUIModel guiModel;
     public static String currentActivityName;
     private boolean runAccChecks;
@@ -54,7 +55,7 @@ public class UniformRandomForAccessibility {
                 executableActions = selectedScreenState.getActions();
 
                 //select one action randomly
-                Action action = executableActions.get(selectRandomAction(executableActions.size()));
+                WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
 
                 try {
                     //execute this selected action
@@ -249,8 +250,8 @@ public class UniformRandomForAccessibility {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<Action> actions = screenState.getActions();
-                for (Action action : actions) {
+                List<WidgetAction> actions = screenState.getActions();
+                for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
                             dmgr.executeAction(action);

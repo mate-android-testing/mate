@@ -2,7 +2,7 @@ package org.mate.interaction;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.model.IGUIModel;
-import org.mate.ui.Action;
+import org.mate.ui.WidgetAction;
 
 /**
  * Created by marceloeler on 22/06/17.
@@ -10,7 +10,7 @@ import org.mate.ui.Action;
 
 public interface IApp {
 
-    public void executeAction(Action action) throws AUTCrashException;
+    public void executeAction(WidgetAction action) throws AUTCrashException;
     public void reinstallApp();
     public void restartApp();
     public void handleCrashDialog();

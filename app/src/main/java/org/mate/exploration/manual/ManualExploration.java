@@ -14,6 +14,7 @@ import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.Date;
 import java.util.List;
@@ -26,6 +27,7 @@ import static org.mate.MATE.device;
 
 public class ManualExploration {
 
+
     public ManualExploration(){
 
     }
@@ -35,7 +37,7 @@ public class ManualExploration {
         long currentTime = new Date().getTime();
 
         MATE.log("MATE TIMEOUT: " + MATE.TIME_OUT);
-        Action manualAction = new Action(ActionType.MANUAL_ACTION);
+        Action manualAction = new WidgetAction(ActionType.MANUAL_ACTION);
         while (currentTime - runningTime <= MATE.TIME_OUT){
             try {
                 Thread.sleep(1000);
@@ -56,6 +58,7 @@ public class ManualExploration {
                 MATE.uiAbstractionLayer.executeAction(manualAction);
                 state = MATE.uiAbstractionLayer.getCurrentScreenState();
                 EnvironmentManager.screenShot(state.getPackageName(),state.getId());
+
 
                 MATE.logactivity(state.getActivityName());
 

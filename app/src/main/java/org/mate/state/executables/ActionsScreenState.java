@@ -2,20 +2,15 @@ package org.mate.state.executables;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.MATE;
-import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Created by marceloeler on 21/06/17.
@@ -23,7 +18,7 @@ import java.util.Set;
 
 public class ActionsScreenState extends AbstractScreenState {
 
-    private List<Action> actions;
+    private List<WidgetAction> actions;
     private static Hashtable<String,Hashtable<String,List<Integer>>> idSizes = new Hashtable<>();
     private List<Float> pheromone;
     private Map<Action,Float> actionsWithPheromone;
@@ -72,7 +67,7 @@ public class ActionsScreenState extends AbstractScreenState {
         return max;
     }
 
-    public List<Action> getActions(){
+    public List<WidgetAction> getActions(){
         if (actions!=null)
             return actions;
 
@@ -82,7 +77,7 @@ public class ActionsScreenState extends AbstractScreenState {
             idSizes.put(activityName,sameIDWidgets);
         }
 
-        List<Action> executables = new ArrayList<>();
+        List<WidgetAction> executables = new ArrayList<>();
         int editables = 0;
         boolean enterAdded = false;
         Hashtable<String,Integer> idAmount = new Hashtable<String,Integer>();
@@ -166,29 +161,29 @@ public class ActionsScreenState extends AbstractScreenState {
                 selected=false;
 
             if (selected){
-                Action event;
+                WidgetAction event;
                 if (!widget.isEditable()){
-                    event = new Action(widget, ActionType.CLICK);
+                    event = new WidgetAction(widget, ActionType.CLICK);
                     executables.add(event);
                     widget.setClickable(true);
                 }
 
                 if (widget.isEditable() || widget.getClazz().contains("Edit")){
-                    event = new Action(widget,ActionType.TYPE_TEXT);
+                    event = new WidgetAction(widget,ActionType.TYPE_TEXT);
                     executables.add(0,event);
                     editables++;
                 }
 
 
                 if (widget.isLongClickable()&&!widget.isEditable()){
-                    event = new Action(widget, ActionType.LONG_CLICK);
+                    event = new WidgetAction(widget, ActionType.LONG_CLICK);
                     executables.add(event);
                     widget.setLongClickable(true);
                 }
                 else
                 {
                     if ((widget.isSonOfLongClickable()) && (!widget.isEditable()&& !widget.getClazz().contains("TextView"))){
-                        event = new Action(widget, ActionType.LONG_CLICK);
+                        event = new WidgetAction(widget, ActionType.LONG_CLICK);
                         executables.add(event);
                         widget.setLongClickable(true);
                     }
@@ -198,16 +193,16 @@ public class ActionsScreenState extends AbstractScreenState {
                 if (widget.isScrollable()){
 
                     if (!widget.getClazz().contains("Spinner")&&!widget.isSonOf("Spinner")){
-                        event = new Action(widget,ActionType.SWIPE_LEFT);
+                        event = new WidgetAction(widget,ActionType.SWIPE_LEFT);
                         executables.add(event);
 
-                        event = new Action(widget,ActionType.SWIPE_RIGHT);
+                        event = new WidgetAction(widget,ActionType.SWIPE_RIGHT);
                         executables.add(event);
 
-                        event = new Action(widget,ActionType.SWIPE_UP);
+                        event = new WidgetAction(widget,ActionType.SWIPE_UP);
                         executables.add(event);
 
-                        event = new Action(widget,ActionType.SWIPE_DOWN);
+                        event = new WidgetAction(widget,ActionType.SWIPE_DOWN);
                         executables.add(event);
 
                         widget.setScrollable(true);
@@ -216,7 +211,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             if (editables>0 && !enterAdded){
-                executables.add(editables,new Action(ActionType.ENTER));
+                executables.add(editables,new WidgetAction(ActionType.ENTER));
                 enterAdded=true;
             }
         }
@@ -235,22 +230,22 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         if (executables.size()==0)
-            executables.add(new Action(ActionType.BACK));
+            executables.add(new WidgetAction(ActionType.BACK));
 
         if (appScreen.isHastoScrollDown()||appScreen.isHasToScrollUp()){
-            executables.add(new Action(ActionType.SWIPE_DOWN));
-            executables.add(new Action(ActionType.SWIPE_UP));
+            executables.add(new WidgetAction(ActionType.SWIPE_DOWN));
+            executables.add(new WidgetAction(ActionType.SWIPE_UP));
         }
 
         if (appScreen.isHasToScrollLeft()||appScreen.isHasToScrollRight()){
-            executables.add(new Action(ActionType.SWIPE_LEFT));
-            executables.add(new Action(ActionType.SWIPE_RIGHT));
+            executables.add(new WidgetAction(ActionType.SWIPE_LEFT));
+            executables.add(new WidgetAction(ActionType.SWIPE_RIGHT));
         }
 
         if (activityName.contains("GoogleOAuthActivity"))
             executables = new ArrayList<>();
-        executables.add(new Action(ActionType.BACK));
-        executables.add(new Action(ActionType.MENU));
+        executables.add(new WidgetAction(ActionType.BACK));
+        executables.add(new WidgetAction(ActionType.MENU));
 
         actions = executables;
         return executables;
@@ -278,12 +273,12 @@ public class ActionsScreenState extends AbstractScreenState {
 
         ActionsScreenState screenState = (ActionsScreenState) that;
 
-        List<Action> actionsThis = this.getActions();
-        List<Action> actionsOther = screenState.getActions();
+        List<WidgetAction> actionsThis = this.getActions();
+        List<WidgetAction> actionsOther = screenState.getActions();
 
         List<String> setActThis = new ArrayList<>();
         List<String> setActOther = new ArrayList<>();
-        for (Action act: actionsThis) {
+        for (WidgetAction act: actionsThis) {
             if (act.getWidget()!=null) {
                 if (act.getWidget().getClazz().contains("Button"))
                     setActThis.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
@@ -292,7 +287,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
         }
-        for (Action act: actionsOther) {
+        for (WidgetAction act: actionsOther) {
             if (act.getWidget()!=null) {
                 if (act.getWidget().getClazz().contains("Button"))
                     setActOther.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());

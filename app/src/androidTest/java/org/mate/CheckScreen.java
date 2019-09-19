@@ -7,6 +7,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.List;
 
@@ -20,12 +21,21 @@ public class CheckScreen {
     @Test
     public void useAppContext() throws Exception {
 
-        MATE.log("start checking screen");
-        MATE mate = new MATE();
-        //run mate for timeout minutes
-        mate.testApp("checkScreen");
+        IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        List<WidgetAction> actions = screenState.getActions();
 
+        MATE.log("Widgets: " );
+        for (Widget w: screenState.getWidgets()){
+            MATE.log(w.getId()+ " " + w.getClazz());
+        }
+        MATE.log("ACTIONS: " );
+        for (WidgetAction action: actions){
+            MATE.log(action.getActionType() + " - " + action.getWidget().getId() + " - " + action.getWidget().getText());
+        }
 
+        MATE.log("");
+        MATE.log("");
+        
     }
 
 }
