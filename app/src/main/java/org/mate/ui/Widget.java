@@ -30,6 +30,7 @@ public class Widget {
     private boolean longClickable;
     private boolean password;
     private boolean selected;
+    private boolean visibleToUser;
     private String bounds;
     private String originalBounds;
     private int X;
@@ -48,6 +49,7 @@ public class Widget {
     private boolean usedAsStateDiff;
 
     private String hint;
+    private boolean heading;
 
     public Widget(String id, String clazz, String idByActivity){
         setId(id);
@@ -90,6 +92,14 @@ public class Widget {
 
     public String getClazz() {
         return clazz;
+    }
+
+    public void setVisibleToUser(boolean visibleToUser){
+        this.visibleToUser = visibleToUser;
+    }
+
+    public boolean isVisibleToUser(){
+        return visibleToUser;
     }
 
     public void setClazz(String clazz) {
@@ -484,5 +494,13 @@ public class Widget {
 
     public List<Widget> getChildren() {
         return children;
+    }
+
+    public void setHeading(boolean heading) {
+        this.heading = heading;
+    }
+
+    public boolean isHeading(){
+        return heading;
     }
 }

@@ -23,4 +23,5 @@ public class ActionType {
     public static final int REINSTALL=12;
     public static final int CLEAR_WIDGET=13;
     public static final int ENTER=14;
+    public static final int MANUAL_ACTION = 15;
 }

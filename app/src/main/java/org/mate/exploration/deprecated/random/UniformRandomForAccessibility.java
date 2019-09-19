@@ -182,12 +182,15 @@ public class UniformRandomForAccessibility {
 
             if (!contrastRatioOK) {
                 //report accessibility flaw found
+                MATE.log("ADD CONTRAST FLAW");
                 AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",
                         widget, String.valueOf(contrastChecker.contratio));
 
-                EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
-                        selectedScreenState.getId(), "ACCESSIBILITY_CONTRAST_FLAW",
-                        String.valueOf(contrastChecker.contratio));
+
+
+               // EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
+                 //       selectedScreenState.getId(), "ACCESSIBILITY_CONTRAST_FLAW",
+                    //    String.valueOf(contrastChecker.contratio));
             }
 
             //run multiple desc check
@@ -196,9 +199,9 @@ public class UniformRandomForAccessibility {
                 //report accessibility flaw found
                 AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW", widget, "");
 
-                EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
-                        selectedScreenState.getId(), "DUPLICATE_SPEAKABLE_TEXT_FLAW",
-                        "");
+                //EnvironmentManager.markScreenshot(widget, selectedScreenState.getPackageName(),
+                  //      selectedScreenState.getId(), "DUPLICATE_SPEAKABLE_TEXT_FLAW",
+                    //    "");
             }
         }
         MATE.log("finish ACCESSIBILITY CHECKS: " );

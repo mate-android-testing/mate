@@ -460,7 +460,7 @@ public class EnvironmentManager {
             int x2=widget.getX2();
             int y1=widget.getY1();
             int y2=widget.getY2();
-            int borderExpanded=5;
+            int borderExpanded=0;
             if (x1-borderExpanded>=0)
                 x1-=borderExpanded;
             if (x2+borderExpanded<=maxw)
@@ -472,6 +472,8 @@ public class EnvironmentManager {
             cmd+=x1+","+y1+","+x2+","+y2;
 
             saida.println(cmd);
+            MATE.log(cmd);
+            MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
 
             String serverResponse="";
             BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
@@ -489,6 +491,7 @@ public class EnvironmentManager {
             }
             cliente.close();
             saida.close();
+            MATE.log(serverResponse);
         } catch (IOException e) {
             MATE.log_acc("socket error: contrast");
             e.printStackTrace();
@@ -600,5 +603,11 @@ public class EnvironmentManager {
             MATE.log_acc("socket error sending: screenshot");
             e.printStackTrace();
         }
+    }
+
+    public static void sendFlawToServer(String msg) {
+        String cmd = "reportFlaw:"+emulator+":"+msg;
+        MATE.log("reportFlaw: " + cmd);
+        sendCommandToServer(cmd);
     }
 }

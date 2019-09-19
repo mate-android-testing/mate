@@ -110,7 +110,7 @@ public class AppScreen {
 
             if (parent!=null && !parentResourceId.equals("")){
 
-                id = parentResourceId+"-child-"+parent.getChildren().size()+":"+clazz;
+                id = parentResourceId+"-child-"+parent.getChildren().size()+"#"+clazz;
             }
             else
                 id = clazz+"-"+text;
@@ -175,6 +175,13 @@ public class AppScreen {
         widget.setSelected(obj.isSelected());
         widget.setMaxLength(obj.getMaxTextLength());
         widget.setInputType(obj.getInputType());
+        widget.setVisibleToUser(obj.isVisibleToUser());
+
+        AccessibilityNodeInfo.CollectionItemInfo cinfo = obj.getCollectionItemInfo();
+        if (cinfo!=null)
+            widget.setHeading(cinfo.isHeading());
+        else
+            widget.setHeading(false);
 
         AccessibilityNodeInfo lb = obj.getLabeledBy();
         if (lb!=null){
@@ -183,8 +190,6 @@ public class AppScreen {
                 lbstr = "";
             widget.setLabeledBy(lbstr);
         }
-
-
 
         if (widget.isEditable()){
 

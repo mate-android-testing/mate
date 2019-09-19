@@ -10,6 +10,8 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
+import org.mate.exploration.manual.ManualExploration;
+import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
@@ -46,6 +48,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.Widget;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
@@ -137,6 +140,8 @@ public class MATE {
         try {
             if (emulator != null && !emulator.equals("")) {
                 this.deviceMgr = new DeviceMgr(device, packageName);
+
+
 
                 if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
@@ -433,6 +438,43 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+                }
+                if (explorationStrategy.equals("AccManual")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    ManualExploration manualExploration = new ManualExploration();
+                    manualExploration.startManualExploration(runningTime);
+                }
+                else
+                if (explorationStrategy.equals("AccRandom")) {
+                    IScreenState initialScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    //creates the graph that represents the GUI model
+                    this.guiModel = new GraphGUIModel();
+                    //first state (root node - action ==null)
+                    this.guiModel.updateModel(null,initialScreenState);
+                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,guiModel,true);
+                    unirandomacc.startUniformRandomExploration(initialScreenState,runningTime);
+                }
+                else{
+                    if (explorationStrategy.equals("checkScreen")){
+
+                        uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                        IScreenState screenState = uiAbstractionLayer.getCurrentScreenState();
+
+                        MATE.log("Current screen state: " + screenState.getId());
+
+
+                        MATE.log("Widgets: " );
+                        for (Widget w: screenState.getWidgets()){
+                            MATE.log(w.getId()+ " " + w.getClazz()+ " " + w.getBounds() + " " + w.isVisibleToUser() + " " + w.isHeading());
+                        }
+
+                        MATE.log("");
+                        MATE.log("");
+                        //iguiModel.updateModel(null,screenState);
+                        //screenState.setId(String.valueOf(time.getTime()));
+                        //EnvironmentManager.screenShot(screenState.getPackageName(),screenState.getId());
+                        //AccessibilityChecker.checkAccessibility(screenState.getPackageName(),iguiModel);
+                    }
                 }
             } else
                 MATE.log("Emulator is null");

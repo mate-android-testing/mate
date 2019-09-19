@@ -43,6 +43,9 @@ public class DeviceMgr implements IApp {
 
         switch (typeOfAction){
 
+            case ActionType.MANUAL_ACTION:
+                break;
+
             case ActionType.CLICK:
                 handleClick(selectedWidget);
                 break;

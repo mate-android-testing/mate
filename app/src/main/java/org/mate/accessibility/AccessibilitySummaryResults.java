@@ -1,10 +1,12 @@
 package org.mate.accessibility;
 
+import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
+import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ public class AccessibilitySummaryResults {
         }
     }
 
-    public static void addAccessibilityFlaw(String checkType, Widget node, String extraInfo){
+    public static void addAccessibilityFlaw(String checkType, Widget widget, String extraInfo){
 
         String activityName = currentActivityName;
         String packageName = currentPackageName;
@@ -81,11 +83,15 @@ public class AccessibilitySummaryResults {
             flawsByType.put(activityName,flawsByActivity);
         }
 
-        if (!flawsByActivity.contains(node.getId())){
-            flawsByActivity.add(node.getId());
+        if (!flawsByActivity.contains(widget.getId())){
+            flawsByActivity.add(widget.getId());
             flawsByType.put(activityName,flawsByActivity);
-            reportFlaw(packageName,activityName,checkType,node,extraInfo);
+            reportFlaw(packageName,activityName,checkType,widget,extraInfo);
+
+
         }
+
+
     }
 
     private static void reportFlaw(String packageName, String activityName, String checkType, AccessibilityNodeInfo node, String extraInfo) {
@@ -110,6 +116,46 @@ public class AccessibilitySummaryResults {
         all_flaws.add("ACC_FLAW:"+activityName.replace(packageName,"") + ","+nodeId.replace(packageName,"")+","+clazz+","+text.replace(",","-")+","+checkType+","+extraInfo);
 
         MATE.log(checkType+" - " + nodeId + " - " + text);
+
+
+        activityName = activityName.replace(packageName+"/","");
+        String widgetid = nodeId.replace(packageName+":id/","");
+        widgetid = widgetid.replace(":","#");
+
+        String widgetText = text.replace(":","--");
+        widgetText = widgetText.replace(",","x");
+
+        extraInfo = extraInfo.replace(",","x");
+
+        if (widgetText.equals(""))
+            widgetText=" ";
+        if (extraInfo.equals(""))
+            extraInfo=" ";
+
+        Rect rec = new Rect();
+        node.getBoundsInScreen(rec);
+
+        String value = rec.toShortString();
+        value = value.replace("][","|");
+        value = value.replace("[","");
+        value = value.replace("]","");
+        String[] twoPos = value.split("\\|");
+        String[] first = twoPos[0].split(",");
+        String[] second = twoPos[1].split(",");
+        int x1 = Integer.valueOf(first[0]);
+        int y1 = Integer.valueOf(first[1]);
+
+        int x2 = Integer.valueOf(second[0]);
+        int y2 = Integer.valueOf(second[1]);
+
+
+        String stateId = MATE.uiAbstractionLayer.getCurrentScreenState().getId();
+        //INCLUDE COORDINATES
+        String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + clazz + ":" + widgetid + ":"+ widgetText+":"+extraInfo;
+        flawMsg+=":"+x1+":"+y1+":"+x2+":"+y2;
+        MATE.log("SEND FLAW TO SERVER");
+        EnvironmentManager.sendFlawToServer(flawMsg);
+
     }
 
     private static void reportFlaw(String packageName, String activityName, String checkType, Widget widget, String extraInfo) {
@@ -122,6 +168,27 @@ public class AccessibilitySummaryResults {
         all_flaws.add("ACC_FLAW:"+activityName.replace(packageName,"") + ","+widget.getId().replace(packageName,"")+","+widget.getClazz()+","+text.replace(",","-")+","+checkType+","+extraInfo);
 
         MATE.log(checkType+" - " + widget.getClazz() + " - " + widget.getId() + " - "+ widget.getText());
+
+        activityName = activityName.replace(packageName+"/","");
+        String widgetid = widget.getId().replace(packageName+":id/","");
+        widgetid = widgetid.replace(":","#");
+
+        String widgetText = widget.getText().replace(":","--");
+
+
+        widget.getBounds();
+        if (widgetText.equals(""))
+            widgetText=" ";
+        if (extraInfo.equals(""))
+            extraInfo=" ";
+
+        String stateId = MATE.uiAbstractionLayer.getCurrentScreenState().getId();
+
+        String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
+        flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
+        EnvironmentManager.sendFlawToServer(flawMsg);
+
+
     }
 
     public static void printSummary(IGUIModel guiModel){

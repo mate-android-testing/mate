@@ -239,6 +239,8 @@ public class UIAbstractionLayer {
         return screenStates;
     }
 
+
+
     public IScreenState toRecordedScreenState(IScreenState screenState) {
         List<IScreenState> recordedScreenStates = getRecordedScreenStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
@@ -249,6 +251,16 @@ public class UIAbstractionLayer {
         screenState.setId("S"+screenStateEnumeration);
         screenStateEnumeration++;
         return screenState;
+    }
+
+    public boolean checkIfNewState(IScreenState screenState) {
+        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
+        for (IScreenState recordedScreenState : recordedScreenStates) {
+            if (recordedScreenState.equals(screenState)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public enum ActionResult {
