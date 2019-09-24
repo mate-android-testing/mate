@@ -20,6 +20,7 @@ import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
@@ -332,6 +333,16 @@ public class MATE {
                             .withMaxNumEvents(50)
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
+
+                    /*
+                    // get the set of branches (branch == objective)
+                    Set<String> branches = EnvironmentManager.getBranches();
+
+                    // we need to associate with each branch a fitness function
+                    for (String branch : branches) {
+                        builder.withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID, branch);
+                    }
+                    */
 
                     // add specific fitness functions for all activities of the Application Under Test
                     MATE.log_acc("Retrieving source lines...");
