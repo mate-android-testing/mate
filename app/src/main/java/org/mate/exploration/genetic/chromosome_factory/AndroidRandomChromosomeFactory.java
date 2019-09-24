@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
@@ -55,6 +56,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 
                 //TODO: remove hack, when better solution implemented
+                BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         }

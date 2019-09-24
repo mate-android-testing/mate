@@ -9,8 +9,10 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by marceloeler on 12/05/17.
@@ -252,6 +254,36 @@ public class EnvironmentManager {
         return activities;
     }
 
+    public static Set<String> getBranches() {
+
+        // is the insertion order important ???
+        Set<String> branches = new HashSet<>();
+
+        String cmd = "getBranches:"+emulator;
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
+                branches.add(line);
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+
+        return branches;
+
+    }
+
     public static List<String> getSourceLines() {
         List<String> lines = new ArrayList<>();
 
@@ -380,6 +412,51 @@ public class EnvironmentManager {
         }
 
         throw new IllegalStateException("Coverage could not be retrieved");
+    }
+
+    /**
+     * Computes the branch distance fitness vector for a given test case (chromosome).
+     * In particular, the given test case is evaluated against each branch.
+     *
+     * @param chromosome The given test case.
+     * @param branches The set of branches.
+     * @return Returns the branch distance vector for a given test case.
+     */
+    public static List<Double> getBranchDistanceVector(Object chromosome, List<String> branches) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("getBranchDistanceVector:"+emulator+":"+chromosome.toString()+":");
+        for (String branch : branches) {
+            sb.append(branch);
+            sb.append("*");
+        }
+        if (!branches.isEmpty()) {
+            sb.setLength(sb.length() - 1);
+        }
+
+        String cmd = sb.toString();
+        List<Double> branchDistanceVector = new ArrayList<>();
+
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
+                branchDistanceVector.add(Double.valueOf(line));
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+            return branchDistanceVector;
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+        throw new IllegalStateException("Couldn't retrieve branch distance vector!");
     }
 
     public static List<Double> getLineCoveredPercentage(Object o, List<String> lines){
