@@ -5,9 +5,6 @@ import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
-import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.UIAbstractionLayer;
-import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
@@ -17,7 +14,6 @@ import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
 import java.util.Date;
-import java.util.List;
 
 import static org.mate.MATE.device;
 
@@ -56,7 +52,7 @@ public class ManualExploration {
             if (foundNewState){
 
                 MATE.uiAbstractionLayer.executeAction(manualAction);
-                state = MATE.uiAbstractionLayer.getCurrentScreenState();
+                state = MATE.uiAbstractionLayer.getLastScreenState();
                 EnvironmentManager.screenShot(state.getPackageName(),state.getId());
 
 

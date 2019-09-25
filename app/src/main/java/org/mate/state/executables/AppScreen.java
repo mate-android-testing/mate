@@ -42,12 +42,16 @@ public class AppScreen {
     private AccessibilityNodeInfo rootNodeInfo;
 
     public AppScreen(){
+        Instrumentation instrumentation = getInstrumentation();
+        device = UiDevice.getInstance(instrumentation);
+
         this.widgets = new ArrayList<>();
         this.activityName = EnvironmentManager.getCurrentActivityName();
-        this.packageName = activityName.split("/")[0];
-
-        Instrumentation instrumentation =  getInstrumentation();
-        device = UiDevice.getInstance(instrumentation);
+        if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
+            this.packageName = device.getCurrentPackageName();
+        } else {
+            this.packageName = activityName.split("/")[0];
+        }
         AccessibilityNodeInfo ninfo= InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
         if (ninfo==null) {
             MATE.log("APP DISCONNECTED");

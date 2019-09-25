@@ -198,7 +198,7 @@ public class TestCase {
     }
 
     private void updateTestCase(String event) {
-        IScreenState currentScreenstate = MATE.uiAbstractionLayer.getCurrentScreenState();
+        IScreenState currentScreenstate = MATE.uiAbstractionLayer.getLastScreenState();
 
         updateVisitedStates(currentScreenstate);
         updateVisitedActivities(currentScreenstate.getActivityName());

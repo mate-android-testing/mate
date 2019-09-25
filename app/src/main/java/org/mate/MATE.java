@@ -22,7 +22,6 @@ import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
@@ -124,11 +123,12 @@ public class MATE {
         instrumentation = getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
 
-        //get the name of the package of the app currently running
-        this.packageName = device.getCurrentPackageName();
 
         //checks whether user needs to authorize access to something on the device/emulator
-        handleAuth(device);
+        UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
+
+        //get the name of the package of the app currently running
+        this.packageName = device.getCurrentPackageName();
         MATE.log("Package name: " + this.packageName);
 
         //list the activities of the app under test
@@ -506,7 +506,7 @@ public class MATE {
                     if (explorationStrategy.equals("checkScreen")){
 
                         uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                        IScreenState screenState = uiAbstractionLayer.getCurrentScreenState();
+                        IScreenState screenState = uiAbstractionLayer.getLastScreenState();
 
                         MATE.log("Current screen state: " + screenState.getId());
 
@@ -544,43 +544,6 @@ public class MATE {
         MATE.log(explorationStrategy + " visited activities " + visitedActivities.size());
         for (String act : visitedActivities)
             MATE.log("   " + act);
-    }
-
-    public void handleAuth(UiDevice device) {
-
-        if (this.packageName != null && this.packageName.contains("com.google.android.packageinstaller")) {
-            long timeA = new Date().getTime();
-
-
-            boolean goOn = true;
-            while (goOn) {
-
-                DeviceMgr dmgr = new DeviceMgr(device, "");
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<WidgetAction> actions = screenState.getActions();
-                for (WidgetAction action : actions) {
-                    if (action.getWidget().getId().contains("allow")) {
-                        try {
-                            dmgr.executeAction(action);
-                        } catch (AUTCrashException e) {
-                            MATE.log_acc(e.getStackTrace().toString());
-                            e.printStackTrace();
-                        }
-                        break;
-                    }
-                }
-
-                this.packageName = device.getCurrentPackageName();
-                MATE.log("new package name: " + this.packageName);
-                long timeB = new Date().getTime();
-                if (timeB - timeA > 30000)
-                    goOn = false;
-                if (!this.packageName.contains("com.android.packageinstaller"))
-                    goOn = false;
-            }
-        }
-
-
     }
 
     public static void log(String msg) {

@@ -149,7 +149,7 @@ public class AccessibilitySummaryResults {
         int y2 = Integer.valueOf(second[1]);
 
 
-        String stateId = MATE.uiAbstractionLayer.getCurrentScreenState().getId();
+        String stateId = MATE.uiAbstractionLayer.getLastScreenState().getId();
         //INCLUDE COORDINATES
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + clazz + ":" + widgetid + ":"+ widgetText+":"+extraInfo;
         flawMsg+=":"+x1+":"+y1+":"+x2+":"+y2;
@@ -182,7 +182,7 @@ public class AccessibilitySummaryResults {
         if (extraInfo.equals(""))
             extraInfo=" ";
 
-        String stateId = MATE.uiAbstractionLayer.getCurrentScreenState().getId();
+        String stateId = MATE.uiAbstractionLayer.getLastScreenState().getId();
 
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
         flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
