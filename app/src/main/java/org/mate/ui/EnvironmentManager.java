@@ -1,5 +1,8 @@
 package org.mate.ui;
 
+import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
+
 import org.mate.MATE;
 
 import java.io.BufferedReader;
@@ -254,17 +257,62 @@ public class EnvironmentManager {
         return activities;
     }
 
-    public static Set<String> getBranches() {
+    /**
+     * Initializes the CFG; the path to the APK file is given
+     * as command line argument (key: apk). If no argument was specified,
+     * {@code false} is returned.
+     *
+     * @return Returns whether the CFG can be initialised.
+     */
+    public static boolean initCFG() {
 
-        // is the insertion order important ???
-        Set<String> branches = new HashSet<>();
+        Bundle arguments = InstrumentationRegistry.getArguments();
+        String apkPath = arguments.getString("apk");
+        MATE.log("Path to APK file: " + apkPath);
 
-        String cmd = "getBranches:"+emulator;
+        boolean isInit = false;
+
+        if (apkPath != null) {
+            String cmd = "initCFG:" + apkPath;
+
+            try {
+                Socket server = new Socket(SERVER_IP, port);
+                PrintStream output = new PrintStream(server.getOutputStream());
+                output.println(cmd);
+
+                String serverResponse="";
+                BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+                while(true) {
+                    if ((serverResponse = in.readLine()) != null) {
+                        isInit = Boolean.parseBoolean(serverResponse);
+                        break;
+                    }
+                }
+
+                server.close();
+                output.close();
+                in.close();
+            } catch (IOException e) {
+                MATE.log("socket error sending");
+                e.printStackTrace();
+            }
+        }
+        return isInit;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static List<String> getBranches() {
+
+        List<String> branches = new LinkedList<>();
+
+        String cmd = "getBranches";
         try {
             Socket server = new Socket(SERVER_IP, port);
             PrintStream output = new PrintStream(server.getOutputStream());
             output.println(cmd);
-
 
             BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
             for (String line = in.readLine(); line != null; line = in.readLine()) {
@@ -274,14 +322,11 @@ public class EnvironmentManager {
             server.close();
             output.close();
             in.close();
-
         } catch (IOException e) {
             MATE.log("socket error sending");
             e.printStackTrace();
         }
-
         return branches;
-
     }
 
     public static List<String> getSourceLines() {

@@ -56,7 +56,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 
                 //TODO: remove hack, when better solution implemented
-                BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+                // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         }

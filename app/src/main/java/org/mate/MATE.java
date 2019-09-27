@@ -326,6 +326,14 @@ public class MATE {
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
+                    // init the CFG
+                    boolean isInit = EnvironmentManager.initCFG();
+
+                    if (!isInit) {
+                        MATE.log("Couldn't initialise CFG! Aborting.");
+                        return;
+                    }
+
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
@@ -339,10 +347,11 @@ public class MATE {
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
 
-                    /*
                     // get the set of branches (branch == objective)
-                    Set<String> branches = EnvironmentManager.getBranches();
+                    List<String> branches = EnvironmentManager.getBranches();
+                    MATE.log("Branches: " + branches);
 
+                    /*
                     // we need to associate with each branch a fitness function
                     for (String branch : branches) {
                         builder.withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID, branch);
