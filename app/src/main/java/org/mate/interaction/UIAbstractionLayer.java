@@ -1,6 +1,9 @@
 package org.mate.interaction;
 
+import android.support.test.uiautomator.UiObject;
+import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
+import android.widget.TextView;
 
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
@@ -27,20 +30,21 @@ public class UIAbstractionLayer {
     private String packageName;
     private DeviceMgr deviceMgr;
     private Map<Action, Edge> edges;
-    private IScreenState currentScreenState;
+    private IScreenState lastScreenState;
     private int screenStateEnumeration;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         edges = new HashMap<>();
-        currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        currentScreenState.setId("S" + 0);
+        clearScreen();
+        lastScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        lastScreenState.setId("S" + 0);
         screenStateEnumeration = 1;
     }
 
     public List<WidgetAction> getExecutableActions() {
-        return getCurrentScreenState().getActions();
+        return getLastScreenState().getActions();
     }
 
     public ActionResult executeAction(Action action) {
@@ -65,12 +69,13 @@ public class UIAbstractionLayer {
             deviceMgr.handleCrashDialog();
             state = ScreenStateFactory.getScreenState("ActionsScreenState"); //TODO: maybe not needed
             state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, currentScreenState, state));
-            currentScreenState = state;
+            edges.put(action, new Edge(action, lastScreenState, state));
+            lastScreenState = state;
 
             return FAILURE_APP_CRASH;
         }
 
+        clearScreen();
         state = ScreenStateFactory.getScreenState("ActionsScreenState");
 
         //Todo: assess if timeout should be added to primitive actions as well
@@ -85,16 +90,14 @@ public class UIAbstractionLayer {
                 WidgetAction wa = (WidgetAction) action;
                 wa.setTimeToWait(timeToWait);
             }
+            clearScreen();
             //get a new state
             state = ScreenStateFactory.getScreenState("ActionsScreenState");
         }
 
         //get the package name of the app currently running
         String currentPackageName = state.getPackageName();
-        //check whether it is an installation package
-        if (currentPackageName != null && currentPackageName.contains("com.google.android.packageinstaller")) {
-            currentPackageName = handleAuth(deviceMgr, currentPackageName);
-        }
+
         //if current package is null, emulator has crashed/closed
         if (currentPackageName == null) {
             MATE.log_acc("CURRENT PACKAGE: NULL");
@@ -108,15 +111,15 @@ public class UIAbstractionLayer {
             MATE.log_acc("current package different from app package: " + currentPackageName);
 
             state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, currentScreenState, state));
-            currentScreenState = state;
+            edges.put(action, new Edge(action, lastScreenState, state));
+            lastScreenState = state;
 
             return SUCCESS_OUTBOUND;
         } else {
             //update model with new state
             state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, currentScreenState, state));
-            currentScreenState = state;
+            edges.put(action, new Edge(action, lastScreenState, state));
+            lastScreenState = state;
 
             /* Ignore this for now
             if (edges.put(action, state)) {
@@ -128,8 +131,77 @@ public class UIAbstractionLayer {
         }
     }
 
-    public IScreenState getCurrentScreenState() {
-        return currentScreenState;
+    public IScreenState getLastScreenState() {
+        return lastScreenState;
+    }
+
+    private void clearScreen() {
+        clearScreen(deviceMgr);
+    }
+
+    /**
+     * Accept all permissions and ignore build for old android version warning.
+     */
+    public static void clearScreen(DeviceMgr deviceMgr) {
+        boolean change = true;
+
+        while (change) {
+            change = false;
+            // check for crash messages
+            UiObject window = new UiObject(new UiSelector().packageName("android")
+                    .textContains("has stopped"));
+            if (window.exists()) {
+                deviceMgr.handleCrashDialog();
+                change = true;
+                continue;
+            } else {
+                window = new UiObject(new UiSelector().packageName("android")
+                    .textContains("keeps stopping"));
+                if (window.exists()) {
+                    deviceMgr.handleCrashDialog();
+                    change = true;
+                    continue;
+                }
+            }
+
+            // check for outdated build warnings
+            IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            for (Widget widget : screenState.getWidgets()) {
+                if(widget.getText().equals("This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.")) {
+                    for (WidgetAction action : screenState.getActions()) {
+                        if (action.getWidget().getText().equals("OK")) {
+                            try {
+                                deviceMgr.executeAction(action);
+                                break;
+                            } catch (AUTCrashException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    change = true;
+                }
+            }
+            if (change) {
+                continue;
+            }
+
+            // check for permission dialog
+            if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
+                List<WidgetAction> actions = screenState.getActions();
+                for (WidgetAction action : actions) {
+                    if (action.getWidget().getId().contains("allow")) {
+                        try {
+                            deviceMgr.executeAction(action);
+                        } catch (AUTCrashException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                }
+                change = true;
+                continue;
+            }
+        }
     }
 
     private long waitForProgressBar(IScreenState state) {
@@ -159,63 +231,20 @@ public class UIAbstractionLayer {
         return end - ini;
     }
 
-    private String handleAuth(DeviceMgr dmgr, String currentPackage) {
-
-        if (currentPackage.contains("com.google.android.packageinstaller")) {
-            long timeA = new Date().getTime();
-
-
-            boolean goOn = true;
-            while (goOn) {
-
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<WidgetAction> actions = screenState.getActions();
-                for (WidgetAction action : actions) {
-                    if (action.getWidget().getId().contains("allow")) {
-                        try {
-                            dmgr.executeAction(action);
-                        } catch (AUTCrashException e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    }
-                }
-
-                currentPackage = device.getCurrentPackageName();
-                MATE.log("new package name: " + currentPackage);
-                long timeB = new Date().getTime();
-                if (timeB - timeA > 30000)
-                    goOn = false;
-                if (!currentPackage.contains("com.google.android.packageinstaller"))
-                    goOn = false;
-            }
-            return currentPackage;
-        } else
-            return currentPackage;
-    }
-
     public void resetApp() {
         deviceMgr.reinstallApp();
         sleep(5000);
         deviceMgr.restartApp();
         sleep(2000);
-        currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        String currentPackageName = currentScreenState.getPackageName();
-        if (currentPackageName != null && currentPackageName.contains("com.google.android.packageinstaller")) {
-            currentPackageName = handleAuth(deviceMgr, currentPackageName);
-            currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        }
+        clearScreen();
+        lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
     }
 
     public void restartApp() {
         deviceMgr.restartApp();
         sleep(2000);
-        currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        String currentPackageName = currentScreenState.getPackageName();
-        if (currentPackageName != null && currentPackageName.contains("com.google.android.packageinstaller")) {
-            currentPackageName = handleAuth(deviceMgr, currentPackageName);
-            currentScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        }
+        clearScreen();
+        lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
     }
 
     private void sleep(int millis) {
