@@ -28,6 +28,7 @@ public class EnvironmentManager {
     //public static String SERVER_IP = "192.168.1.26";
 
     public static String emulator=null;
+    public static final String ACTIVITY_UNKNOWN = "unknown";
 
     public static void releaseEmulator(){
         String cmd = "releaseEmulator:"+emulator;
@@ -197,6 +198,9 @@ public class EnvironmentManager {
 
     public static String getCurrentActivityName(){
         String currentActivity = "current_activity";
+        if (emulator == null || emulator.isEmpty()) {
+            return ACTIVITY_UNKNOWN;
+        }
 
         //String cmd = "adb shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6 | cut -d / -f 2";
         String cmd = "getActivity:"+emulator;
