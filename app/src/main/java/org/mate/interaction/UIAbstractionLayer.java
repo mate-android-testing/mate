@@ -1,5 +1,7 @@
 package org.mate.interaction;
 
+import android.support.test.uiautomator.UiObject;
+import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -145,6 +147,24 @@ public class UIAbstractionLayer {
 
         while (change) {
             change = false;
+            // check for crash messages
+            UiObject window = new UiObject(new UiSelector().packageName("android")
+                    .textContains("has stopped"));
+            if (window.exists()) {
+                deviceMgr.handleCrashDialog();
+                change = true;
+                continue;
+            } else {
+                window = new UiObject(new UiSelector().packageName("android")
+                    .textContains("keeps stopping"));
+                if (window.exists()) {
+                    deviceMgr.handleCrashDialog();
+                    change = true;
+                    continue;
+                }
+            }
+
+            // check for outdated build warnings
             IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
             for (Widget widget : screenState.getWidgets()) {
                 if(widget.getText().equals("This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.")) {
@@ -159,9 +179,13 @@ public class UIAbstractionLayer {
                         }
                     }
                     change = true;
-                    continue;
                 }
             }
+            if (change) {
+                continue;
+            }
+
+            // check for permission dialog
             if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
                 List<WidgetAction> actions = screenState.getActions();
                 for (WidgetAction action : actions) {
