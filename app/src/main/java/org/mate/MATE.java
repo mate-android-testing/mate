@@ -10,6 +10,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.manual.ManualExploration;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 import org.mate.exploration.genetic.algorithm.NSGAII;
