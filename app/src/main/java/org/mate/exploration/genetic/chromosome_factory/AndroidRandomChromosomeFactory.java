@@ -47,6 +47,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
+
+            BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+
             //store coverage in an case
             if (storeCoverage) {
                 EnvironmentManager.storeCoverageData(chromosome, null);
@@ -56,7 +59,6 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 
                 //TODO: remove hack, when better solution implemented
-                // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         }

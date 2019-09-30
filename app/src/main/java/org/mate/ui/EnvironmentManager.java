@@ -301,8 +301,9 @@ public class EnvironmentManager {
     }
 
     /**
+     * Returns the list of branches of the AUT.
      *
-     * @return
+     * @return Returns the set of branches.
      */
     public static List<String> getBranches() {
 
@@ -325,6 +326,7 @@ public class EnvironmentManager {
         } catch (IOException e) {
             MATE.log("socket error sending");
             e.printStackTrace();
+            throw new IllegalStateException("Couldn't retrieve branches!");
         }
         return branches;
     }
@@ -500,8 +502,8 @@ public class EnvironmentManager {
         } catch (IOException e) {
             MATE.log("socket error sending");
             e.printStackTrace();
+            throw new IllegalStateException("Couldn't retrieve branch distance vector!");
         }
-        throw new IllegalStateException("Couldn't retrieve branch distance vector!");
     }
 
     public static List<Double> getLineCoveredPercentage(Object o, List<String> lines){

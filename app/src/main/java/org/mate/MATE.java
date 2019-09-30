@@ -331,7 +331,7 @@ public class MATE {
 
                     if (!isInit) {
                         MATE.log("Couldn't initialise CFG! Aborting.");
-                        return;
+                        throw new IllegalStateException("Graph initialisation failed!");
                     }
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
@@ -349,15 +349,20 @@ public class MATE {
 
                     // get the set of branches (branch == objective)
                     List<String> branches = EnvironmentManager.getBranches();
+
+                    // if there are no branches, we can stop
+                    if (branches.isEmpty()) {
+                        throw new IllegalStateException("No branches available! Aborting.");
+                    }
+
                     MATE.log("Branches: " + branches);
 
-                    /*
                     // we need to associate with each branch a fitness function
                     for (String branch : branches) {
                         builder.withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID, branch);
                     }
-                    */
 
+                    /*
                     // add specific fitness functions for all activities of the Application Under Test
                     MATE.log_acc("Retrieving source lines...");
                     List<String> lines = EnvironmentManager.getSourceLines();
@@ -372,6 +377,7 @@ public class MATE {
                         count++;
                     }
                     MATE.log_acc("done processing lines");
+                    */
 
                     final IGeneticAlgorithm<TestCase> mosa = builder.build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
