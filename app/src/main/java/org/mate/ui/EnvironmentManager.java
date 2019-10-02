@@ -466,6 +466,48 @@ public class EnvironmentManager {
     }
 
     /**
+     * Stores the branch coverage information of the given test case.
+     *
+     * @param chromosome The given test case.
+     */
+    public static void storeBranchCoverage(Object chromosome) {
+        storeBranchCoverage("storeBranchCoverage:" + chromosome.toString());
+    }
+
+    /**
+     * Stores the total branch coverage information.
+     */
+    public static void storeBranchCoverage() {
+        storeBranchCoverage("storeBranchCoverage");
+    }
+
+    /**
+     * Stores the obtained branch coverage information. Depending on the given
+     * command string, either the total branch coverage is stored or only the
+     * branch coverage of a single test case.
+     *
+     * @param cmd The command string specifying which branch coverage
+     *            should be stored.
+     */
+    private static void storeBranchCoverage(String cmd) {
+
+        cmd += ":" + emulator;
+
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            server.close();
+            output.close();
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+            throw new IllegalStateException("Couldn't store branch coverage information!");
+        }
+    }
+
+    /**
      * Returns the branch coverage.
      *
      * @param cmd The command string specifying the branch coverage

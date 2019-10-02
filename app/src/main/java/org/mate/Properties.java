@@ -1,5 +1,7 @@
 package org.mate;
 
+import org.mate.utils.Coverage;
+
 /**
  * Created by geyan on 27/06/2017.
  */
@@ -68,5 +70,8 @@ public class Properties {
      * Coverage properties
      */
 
-    public static boolean STORE_COVERAGE = false;
+    public static boolean STORE_COVERAGE = true;
+
+    // use LINE_COVERAGE as default
+    public static Coverage COVERAGE = Coverage.BRANCH_COVERAGE;
 }

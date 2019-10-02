@@ -54,6 +54,7 @@ import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
@@ -373,8 +374,13 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        // EnvironmentManager.storeCoverageData(mosa, null);
-                        MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+                        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                            EnvironmentManager.storeBranchCoverage();
+                            MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+                        } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+                            EnvironmentManager.storeCoverageData(mosa, null);
+                            MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        }
                     }
                 } else if (explorationStrategy.equals("Mio")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);

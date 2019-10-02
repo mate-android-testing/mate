@@ -10,6 +10,7 @@ import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
@@ -48,22 +49,29 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             }
         } finally {
 
+            //TODO: remove hack, when better solution implemented (query fitness function)
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
 
             //store coverage in any case
             if (storeCoverage) {
-                EnvironmentManager.storeCoverageData(chromosome, null);
 
-                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
-                        .getCoverage(chromosome));
+                if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+                    EnvironmentManager.storeCoverageData(chromosome, null);
+
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                            .getCoverage(chromosome));
+
+                } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    EnvironmentManager.storeBranchCoverage(chromosome);
+
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                            .getBranchCoverage(chromosome));
+                }
+
                 MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
-
-                //TODO: remove hack, when better solution implemented
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         }
-
-
         return chromosome;
     }
 
