@@ -363,23 +363,6 @@ public class MATE {
                         builder.withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID, branch);
                     }
 
-                    /*
-                    // add specific fitness functions for all activities of the Application Under Test
-                    MATE.log_acc("Retrieving source lines...");
-                    List<String> lines = EnvironmentManager.getSourceLines();
-                    MATE.log_acc("Retrieved " + lines.size() + " lines.");
-                    MATE.log_acc("Processing lines...");
-                    int count = 1;
-                    for (String line : lines) {
-                        if (count % (lines.size() / 10) == 0) {
-                            MATE.log_acc(Math.ceil(count * 100.0 / lines.size()) + "%");
-                        }
-                        builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, line);
-                        count++;
-                    }
-                    MATE.log_acc("done processing lines");
-                    */
-
                     final IGeneticAlgorithm<TestCase> mosa = builder.build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
@@ -390,8 +373,8 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(mosa, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        // EnvironmentManager.storeCoverageData(mosa, null);
+                        MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
                     }
                 } else if (explorationStrategy.equals("Mio")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);

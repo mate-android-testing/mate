@@ -466,26 +466,73 @@ public class EnvironmentManager {
     }
 
     /**
+     * Returns the branch coverage.
+     *
+     * @param cmd The command string specifying the branch coverage
+     *            either for a given test case or the (global) branch coverage.
+     * @return Returns the branch coverage.
+     */
+    private static double getBranchCoverage(String cmd) {
+
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            String coverageString;
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    coverageString = serverResponse;
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+            return Double.valueOf(coverageString);
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+            throw new IllegalStateException("BranchCoverage could not be retrieved!");
+        }
+    }
+
+    /**
+     * Returns the (global) branch coverage.
+     *
+     * @return Returns the (global) branch coverage.
+     */
+    public static double getBranchCoverage() {
+        String cmd = "getBranchCoverage";
+        return getBranchCoverage(cmd);
+    }
+
+    /**
+     * Returns the branch coverage of a given test case.
+     *
+     * @param chromosome The given test case.
+     * @return Returns the branch coverage for the specified test case.
+     */
+    public static double getBranchCoverage(Object chromosome) {
+        String cmd = "getBranchCoverage" + ":" + chromosome.toString();
+        return getBranchCoverage(cmd);
+    }
+
+    /**
      * Computes the branch distance fitness vector for a given test case (chromosome).
      * In particular, the given test case is evaluated against each branch.
      *
      * @param chromosome The given test case.
-     * @param branches The set of branches.
      * @return Returns the branch distance vector for a given test case.
      */
-    public static List<Double> getBranchDistanceVector(Object chromosome, List<String> branches) {
+    public static List<Double> getBranchDistanceVector(Object chromosome) {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("getBranchDistanceVector:"+emulator+":"+chromosome.toString()+":");
-        for (String branch : branches) {
-            sb.append(branch);
-            sb.append("*");
-        }
-        if (!branches.isEmpty()) {
-            sb.setLength(sb.length() - 1);
-        }
-
-        String cmd = sb.toString();
+        String cmd = "getBranchDistanceVector:"+emulator+":"+chromosome.toString();
         List<Double> branchDistanceVector = new ArrayList<>();
 
         try {
@@ -495,7 +542,12 @@ public class EnvironmentManager {
 
             BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
             for (String line = in.readLine(); line != null; line = in.readLine()) {
-                branchDistanceVector.add(Double.valueOf(line));
+                try {
+                    branchDistanceVector.add(Double.valueOf(line));
+                } catch (NumberFormatException e) {
+                    MATE.log_acc("Branch Distance Response: " + line);
+                    e.printStackTrace();
+                }
             }
 
             server.close();

@@ -74,7 +74,7 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
 
         // computes the branch distance fitness vector for a given test case
         MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> branchDistanceVector = EnvironmentManager.getBranchDistanceVector(chromosome, branches);
+        List<Double> branchDistanceVector = EnvironmentManager.getBranchDistanceVector(chromosome);
 
         // if there is no branch distance vector available, we can abort
         if (branchDistanceVector.isEmpty()) {

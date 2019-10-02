@@ -50,7 +50,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
 
             BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
 
-            //store coverage in an case
+            //store coverage in any case
             if (storeCoverage) {
                 EnvironmentManager.storeCoverageData(chromosome, null);
 
