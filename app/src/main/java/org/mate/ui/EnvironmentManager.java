@@ -566,6 +566,45 @@ public class EnvironmentManager {
     }
 
     /**
+     * Returns the branch distance for a given test case.
+     *
+     * @param chromosome The given test case.
+     * @return Returns the branch distance for the given test case.
+     */
+    public static double getBranchDistance(Object chromosome) {
+
+        String cmd = "getBranchDistance:"+emulator+":"+chromosome.toString();
+        double branchDistance = 1;
+
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            for (String line = in.readLine(); line != null; line = in.readLine()) {
+                try {
+                    branchDistance = Double.valueOf(line);
+                    break;
+                } catch (NumberFormatException e) {
+                    MATE.log_acc("Branch Distance Response: " + line);
+                    e.printStackTrace();
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+            return branchDistance;
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+            throw new IllegalStateException("Couldn't retrieve branch distance vector!");
+        }
+    }
+
+    /**
      * Computes the branch distance fitness vector for a given test case (chromosome).
      * In particular, the given test case is evaluated against each branch.
      *

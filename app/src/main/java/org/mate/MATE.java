@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.manual.ManualExploration;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 import org.mate.exploration.genetic.algorithm.NSGAII;
@@ -219,13 +220,21 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    // init the CFG
+                    boolean isInit = EnvironmentManager.initCFG();
+
+                    if (!isInit) {
+                        MATE.log("Couldn't initialise CFG! Aborting.");
+                        throw new IllegalStateException("Graph initialisation failed!");
+                    }
+
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
@@ -242,8 +251,13 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(genericGA, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                            EnvironmentManager.storeBranchCoverage();
+                            MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+                        } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+                            EnvironmentManager.storeCoverageData(genericGA, null);
+                            MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        }
                     }
                 } else if (explorationStrategy.equals("Sapienz")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
@@ -361,7 +375,7 @@ public class MATE {
 
                     // we need to associate with each branch a fitness function
                     for (String branch : branches) {
-                        builder.withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID, branch);
+                        builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, branch);
                     }
 
                     final IGeneticAlgorithm<TestCase> mosa = builder.build();

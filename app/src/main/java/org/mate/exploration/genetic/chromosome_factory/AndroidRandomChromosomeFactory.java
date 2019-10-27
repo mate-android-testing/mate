@@ -5,6 +5,7 @@ import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
@@ -51,7 +52,11 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
 
             //TODO: remove hack, when better solution implemented (query fitness function)
             LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+            BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
+
+            // TODO: remove when evolve()/logFitness() method is fixed
+            double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
+            MATE.log("Branch Distance: " + branchDistance);
 
             //store coverage in any case
             if (storeCoverage) {
