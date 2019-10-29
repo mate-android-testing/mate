@@ -51,7 +51,43 @@ public class DeviceMgr implements IApp {
 
     public void executeAction(PrimitiveAction action) throws AUTCrashException{
         MATE.log(" ____ execute primitive action at " + action.getX() + ", " + action.getY());
-        device.click(action.getX(), action.getY());
+
+        switch (action.getActionType()) {
+            case CLICK:
+                device.click(action.getX(), action.getY());
+                break;
+
+            case LONG_CLICK:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(),120);
+                break;
+
+            case SWIPE_DOWN:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() - 300, 15);
+                break;
+
+            case SWIPE_UP:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() + 300, 15);
+                break;
+
+            case SWIPE_LEFT:
+                device.swipe(action.getX(), action.getY(), action.getX() + 300, action.getY(), 15);
+                break;
+
+            case SWIPE_RIGHT:
+                device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
+                break;
+
+            case BACK:
+                device.pressBack();;
+                break;
+
+            case MENU:
+                device.pressMenu();
+                break;
+
+            default:
+                throw new IllegalArgumentException("Action type " + action.getActionType() + " not implemented for primitive actions.");
+        }
 
         //handle app crashes
         UiObject window = new UiObject(new UiSelector().packageName("android")
@@ -65,60 +101,53 @@ public class DeviceMgr implements IApp {
     public void executeAction(WidgetAction action) throws AUTCrashException{
         MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
         Widget selectedWidget = action.getWidget();
-        int typeOfAction = action.getActionType();
+        ActionType typeOfAction = action.getActionType();
 
         switch (typeOfAction){
 
-            case ActionType.MANUAL_ACTION:
-                break;
-
-            case ActionType.CLICK:
+            case CLICK:
                 handleClick(selectedWidget);
                 break;
 
-            case ActionType.LONG_CLICK:
+            case LONG_CLICK:
                 handleLongPress(selectedWidget);
                 break;
 
-            case ActionType.TYPE_TEXT:
+            case TYPE_TEXT:
                 handleEdit(action);
                 break;
 
-            case ActionType.CLEAR_WIDGET:
+            case CLEAR_WIDGET:
                 handleClear(selectedWidget);
                 break;
 
-            case ActionType.SWIPE_DOWN:
+            case SWIPE_DOWN:
                 handleSwipe(selectedWidget, 0);
                 break;
 
-            case ActionType.SWIPE_UP:
+            case SWIPE_UP:
                 handleSwipe(selectedWidget, 1);
                 break;
 
-            case ActionType.SWIPE_LEFT:
+            case SWIPE_LEFT:
                 handleSwipe(selectedWidget, 2);
                 break;
 
-            case ActionType.SWIPE_RIGHT:
+            case SWIPE_RIGHT:
                 handleSwipe(selectedWidget, 3);
                 break;
 
-            case ActionType.WAIT:
-                break;
-
-            case ActionType.BACK:
+            case BACK:
                 device.pressBack();;
                 break;
 
-            case ActionType.MENU:
+            case MENU:
                 device.pressMenu();
                 break;
 
-            case ActionType.ENTER:
+            case ENTER:
                 device.pressEnter();
                 break;
-
         }
 
         //if there is a progress bar associated to that action
