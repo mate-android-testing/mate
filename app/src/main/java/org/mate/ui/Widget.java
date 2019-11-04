@@ -21,6 +21,7 @@ public class Widget {
     private String packageName;
     private String contentDesc;
     private String labeledBy;
+    private String labelFor;
     private boolean checkable;
     private boolean checked;
     private boolean enabled;
@@ -51,18 +52,18 @@ public class Widget {
     private String hint;
     private boolean heading;
 
-    public Widget(String id, String clazz, String idByActivity){
+    public Widget(String id, String clazz, String idByActivity) {
         setId(id);
         setClazz(clazz);
-        originalBounds="";
+        originalBounds = "";
         setBounds("[0,0][0,0]");
         setContentDesc("");
         setText("");
         children = new ArrayList<>();
-        maxLength=-1;
-        this.idByActivity=idByActivity;
-        usedAsStateDiff=false;
-        hint="";
+        maxLength = -1;
+        this.idByActivity = idByActivity;
+        usedAsStateDiff = false;
+        hint = "";
 
     }
 
@@ -94,11 +95,11 @@ public class Widget {
         return clazz;
     }
 
-    public void setVisibleToUser(boolean visibleToUser){
+    public void setVisibleToUser(boolean visibleToUser) {
         this.visibleToUser = visibleToUser;
     }
 
-    public boolean isVisibleToUser(){
+    public boolean isVisibleToUser() {
         return visibleToUser;
     }
 
@@ -230,7 +231,7 @@ public class Widget {
         Y = y;
     }
 
-    public boolean isEditable(){
+    public boolean isEditable() {
 
         if (clazz.contains("android.widget.EditText"))
             return true;
@@ -255,7 +256,7 @@ public class Widget {
         return false;
     }
 
-    public boolean isExecutable(){
+    public boolean isExecutable() {
         return clickable || longClickable || scrollable || isEditable();
     }
 
@@ -294,13 +295,13 @@ public class Widget {
     public void setBounds(String bounds) {
         this.bounds = bounds;
 
-        if (originalBounds!=null && originalBounds.equals(""))
-            originalBounds=bounds;
+        if (originalBounds != null && originalBounds.equals(""))
+            originalBounds = bounds;
 
         String value = bounds;
-        value = value.replace("][","|");
-        value = value.replace("[","");
-        value = value.replace("]","");
+        value = value.replace("][", "|");
+        value = value.replace("[", "");
+        value = value.replace("]", "");
         String[] twoPos = value.split("\\|");
         String[] first = twoPos[0].split(",");
         String[] second = twoPos[1].split(",");
@@ -310,13 +311,13 @@ public class Widget {
         x2 = Integer.valueOf(second[0]);
         y2 = Integer.valueOf(second[1]);
 
-        setX((x1+x2)/2);
-        setY((y1+y2)/2);
+        setX((x1 + x2) / 2);
+        setY((y1 + y2) / 2);
     }
 
-    public boolean directSonOf(String type){
+    public boolean directSonOf(String type) {
         Widget wparent = this.parent;
-        if (wparent!=null)
+        if (wparent != null)
             if (wparent.getClazz().contains(type))
                 return true;
         return false;
@@ -324,7 +325,7 @@ public class Widget {
 
     public boolean isSonOf(String type) {
         Widget wparent = this.parent;
-        while (wparent!=null){
+        while (wparent != null) {
             if (wparent.getClazz().contains(type))
                 return true;
             else
@@ -334,11 +335,11 @@ public class Widget {
     }
 
 
-    public List<Widget> getNextChildWithText(){
+    public List<Widget> getNextChildWithText() {
         List<Widget> ws = new ArrayList<>();
-        for (Widget child: children){
+        for (Widget child : children) {
             //System.out.println("has children: " + child.getText());
-            if (!child.getText().equals("")){
+            if (!child.getText().equals("")) {
                 ws.add(child);
             }
             ws.addAll(child.getNextChildWithText());
@@ -347,12 +348,12 @@ public class Widget {
         return ws;
     }
 
-    public List<Widget> getNextChildWithDescContentText(){
+    public List<Widget> getNextChildWithDescContentText() {
         List<Widget> ws = new ArrayList<>();
 
-        for (Widget child: children){
+        for (Widget child : children) {
             //System.out.println("has children: " + child.getText());
-            if (!child.getContentDesc().equals("")){
+            if (!child.getContentDesc().equals("")) {
                 ws.add(child);
 
             }
@@ -368,8 +369,8 @@ public class Widget {
 
     public String getNextChildsText() {
         String childText = "";
-        for (Widget wg: getNextChildWithText())
-            childText+=wg.getText()+" ";
+        for (Widget wg : getNextChildWithText())
+            childText += wg.getText() + " ";
         return childText;
     }
 
@@ -389,9 +390,9 @@ public class Widget {
         this.resourceID = resourceID;
     }
 
-    public boolean isSonOfLongClickable(){
+    public boolean isSonOfLongClickable() {
         Widget wparent = this.parent;
-        while (wparent!=null){
+        while (wparent != null) {
             if (wparent.isLongClickable())
                 return true;
             else
@@ -400,9 +401,9 @@ public class Widget {
         return false;
     }
 
-    public boolean isSonOfScrollable(){
+    public boolean isSonOfScrollable() {
         Widget wparent = this.parent;
-        while (wparent!=null){
+        while (wparent != null) {
             if (wparent.isScrollable())
                 return true;
             else
@@ -439,11 +440,11 @@ public class Widget {
         this.hint = hint;
     }
 
-    public String getHint(){
+    public String getHint() {
         return hint;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         if (hint.equals(text))
             return true;
         if (text.equals(""))
@@ -455,8 +456,16 @@ public class Widget {
         this.labeledBy = labeledBy;
     }
 
-    public String getLabeledBy(){
+    public String getLabeledBy() {
         return this.labeledBy;
+    }
+
+    public void setLabelFor(String labelFor){
+        this.labelFor = labelFor;
+    }
+
+    public String getLabelFor(){
+        return this.labelFor;
     }
 
     public boolean needsContrastChecked() {
@@ -475,17 +484,17 @@ public class Widget {
         if (this.isEditable() && this.text.equals(""))
             return false;
 
-        if (this.getClazz().contains("Text")&&this.getText().equals(""))
+        if (this.getClazz().contains("Text") && this.getText().equals(""))
             return false;
 
-        if (this.getClazz().contains("Image")&&!this.isExecutable())
+        if (this.getClazz().contains("Image") && !this.isExecutable())
             return false;
 
-        for (String excluded: excludedClasses){
+        for (String excluded : excludedClasses) {
             if (this.clazz.contains(excluded))
                 return false;
         }
-        if (!this.isExecutable()&&!this.getClazz().contains("Text"))
+        if (!this.isExecutable() && !this.getClazz().contains("Text"))
             return false;
 
 
@@ -500,7 +509,7 @@ public class Widget {
         this.heading = heading;
     }
 
-    public boolean isHeading(){
+    public boolean isHeading() {
         return heading;
     }
 }

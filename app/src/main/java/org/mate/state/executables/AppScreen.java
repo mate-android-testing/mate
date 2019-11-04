@@ -187,6 +187,16 @@ public class AppScreen {
         else
             widget.setHeading(false);
 
+        AccessibilityNodeInfo lf = obj.getLabelFor();
+        if (lf!=null){
+            String lfstr = lf.getViewIdResourceName();
+            if (lfstr==null)
+                lfstr="";
+            widget.setLabelFor(lfstr);
+        }
+        else
+            widget.setLabelFor("");
+
         AccessibilityNodeInfo lb = obj.getLabeledBy();
         if (lb!=null){
             String lbstr = lb.getViewIdResourceName();
@@ -194,6 +204,7 @@ public class AppScreen {
                 lbstr = "";
             widget.setLabeledBy(lbstr);
         }
+        else widget.setLabeledBy("");
 
         if (widget.isEditable()){
 
