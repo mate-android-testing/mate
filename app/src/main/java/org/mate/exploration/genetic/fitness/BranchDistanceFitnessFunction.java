@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.fitness;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
@@ -47,9 +48,13 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
         Intent intent = new Intent("STORE_TRACES");
         Bundle bundle = new Bundle();
         bundle.putString("packageName", MATE.packageName);
+        intent.setComponent(new ComponentName(MATE.packageName,
+                "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer"));
         intent.putExtras(bundle);
 
-        InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+        MATE.log("Sending Broadcast to AUT " + MATE.packageName + " in order to store collected traces!");
+        InstrumentationRegistry.getContext().sendBroadcast(intent);
+        // InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
 
         double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
         MATE.log("Branch Distance: " + branchDistance);
