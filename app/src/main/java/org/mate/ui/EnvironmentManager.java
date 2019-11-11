@@ -272,12 +272,13 @@ public class EnvironmentManager {
 
         Bundle arguments = InstrumentationRegistry.getArguments();
         String apkPath = arguments.getString("apk");
+        String packageName = arguments.getString("packageName");
         MATE.log("Path to APK file: " + apkPath);
 
         boolean isInit = false;
 
-        if (apkPath != null) {
-            String cmd = "initCFG:" + apkPath;
+        if (apkPath != null && packageName != null) {
+            String cmd = "initCFG:" + packageName + ":" + apkPath;
 
             try {
                 Socket server = new Socket(SERVER_IP, port);
