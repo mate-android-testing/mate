@@ -9,9 +9,13 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
+import org.mate.accessibility.AccessibilitySummaryResults;
+import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.MultipleContentDescCheck;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.exploration.manual.ManualExploration;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 import org.mate.exploration.genetic.algorithm.NSGAII;
@@ -142,7 +146,7 @@ public class MATE {
     public void testApp(String explorationStrategy) {
 
         String emulator = EnvironmentManager.detectEmulator(this.packageName);
-        MATE.log("EMULATOR: " + emulator);
+        //MATE.log("EMULATOR: " + emulator);
 
         runningTime = new Date().getTime();
         try {
@@ -523,24 +527,10 @@ public class MATE {
                 }
                 else{
                     if (explorationStrategy.equals("checkScreen")){
-
                         uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                        IScreenState screenState = uiAbstractionLayer.getLastScreenState();
+                        CheckCurrentScreen checkScreen = new CheckCurrentScreen();
+                        checkScreen.scanScreen();
 
-                        MATE.log("Current screen state: " + screenState.getId());
-
-
-                        MATE.log("Widgets: " );
-                        for (Widget w: screenState.getWidgets()){
-                            MATE.log(w.getId()+ " " + w.getClazz()+ " " + w.getBounds() + " " + w.isVisibleToUser() + " " + w.isHeading());
-                        }
-
-                        MATE.log("");
-                        MATE.log("");
-                        //iguiModel.updateModel(null,screenState);
-                        //screenState.setId(String.valueOf(time.getTime()));
-                        //EnvironmentManager.screenShot(screenState.getPackageName(),screenState.getId());
-                        //AccessibilityChecker.checkAccessibility(screenState.getPackageName(),iguiModel);
                     }
                 }
             } else
@@ -593,7 +583,7 @@ public class MATE {
             PackageInfo pinfo = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
             ActivityInfo[] activities = pinfo.activities;
             for (int i = 0; i < activities.length; i++) {
-                log("Activity " + (i + 1) + ": " + activities[i].name);
+                //log("Activity " + (i + 1) + ": " + activities[i].name);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
