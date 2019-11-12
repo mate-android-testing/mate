@@ -1,9 +1,11 @@
 package org.mate.model;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.ui.PrimitiveAction;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
@@ -133,23 +135,29 @@ public class TestCase {
         }
 
         int count = 0;
-        //Todo test that actions are widget actions beforehand
         for (Action action0 : testCase.eventSequence) {
             if (count < finalSize) {
                 if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
                     if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
-                        break;
+                        return resultingTc;
                     }
                     count++;
+                } else {
+                    break;
                 }
             } else {
-                break;
+                return resultingTc;
             }
         }
-        for (int i = count; i < finalSize; i++) {
-            WidgetAction action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+        for (; count < finalSize; count++) {
+            Action action;
+            if (Properties.WIDGET_BASED_ACTIONS) {
+                action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+            } else {
+                action = PrimitiveAction.randomAction();
+            }
             if(!resultingTc.updateTestCase(action, String.valueOf(count))) {
-                break;
+                return resultingTc;
             }
         }
 
