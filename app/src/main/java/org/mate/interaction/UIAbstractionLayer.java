@@ -6,10 +6,12 @@ import android.util.Log;
 import android.widget.TextView;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
+import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
@@ -67,12 +69,19 @@ public class UIAbstractionLayer {
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
+            if (action instanceof PrimitiveAction) {
+                return FAILURE_APP_CRASH;
+            }
             state = ScreenStateFactory.getScreenState("ActionsScreenState"); //TODO: maybe not needed
             state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, lastScreenState, state));
             lastScreenState = state;
 
             return FAILURE_APP_CRASH;
+        }
+
+        if (action instanceof PrimitiveAction) {
+            return SUCCESS;
         }
 
         clearScreen();
@@ -237,14 +246,18 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         sleep(2000);
         clearScreen();
-        lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+        if (Properties.WIDGET_BASED_ACTIONS) {
+            lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+        }
     }
 
     public void restartApp() {
         deviceMgr.restartApp();
         sleep(2000);
         clearScreen();
-        lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+        if (Properties.WIDGET_BASED_ACTIONS) {
+            lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+        }
     }
 
     private void sleep(int millis) {

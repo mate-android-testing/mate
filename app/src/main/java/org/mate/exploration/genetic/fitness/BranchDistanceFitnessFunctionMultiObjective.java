@@ -113,4 +113,3 @@ public class BranchDistanceFitnessFunctionMultiObjective implements IFitnessFunc
         MATE.log_acc("Cleaning cache: " + count + " inactive chromosome(s) removed");
     }
 }
-

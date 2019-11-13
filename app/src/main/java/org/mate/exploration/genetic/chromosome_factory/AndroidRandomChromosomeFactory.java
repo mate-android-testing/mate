@@ -54,10 +54,6 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
 
-            // TODO: remove when evolve()/logFitness() method is fixed
-            double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
-            MATE.log("Branch Distance: " + branchDistance);
-
             //store coverage in any case
             if (storeCoverage) {
 
@@ -68,6 +64,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                             .getCoverage(chromosome));
 
                 } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+
+                    // TODO: this should be depended on which fitness function is used
+                    BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+
                     EnvironmentManager.storeBranchCoverage(chromosome);
 
                     MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager

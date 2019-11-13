@@ -408,6 +408,7 @@ public class DeviceMgr implements IApp {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             }
             catch(Exception e){
+                e.printStackTrace();
                 MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
             }
             context.startActivity(intent);
