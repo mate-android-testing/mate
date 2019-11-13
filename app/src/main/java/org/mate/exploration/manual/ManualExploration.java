@@ -2,6 +2,7 @@ package org.mate.exploration.manual;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
+import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.screenbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
@@ -68,14 +69,14 @@ public class ManualExploration {
                 ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck();
                 for (Widget widget: state.getWidgets()) {
 
-                    boolean contrastRatioViolationFound = contrastChecker.check(state, widget);
+                    AccessibilityViolation contrastRatioViolationFound = contrastChecker.check(state, widget);
                     //MATE.log("Check contrast of "+widget.getId() + ": " + contrastChecker.contratio);
 
-                    if (contrastRatioViolationFound)
-                        AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,contrastChecker.getInfo());
+                    if (contrastRatioViolationFound!=null)
+                        AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,contrastRatioViolationFound.getInfo());
 
-                    boolean multDescViolationFound = multDescChecker.check(state, widget);
-                    if (multDescViolationFound)
+                    AccessibilityViolation multDescViolationFound = multDescChecker.check(state, widget);
+                    if (multDescViolationFound!=null)
                         AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
 
                 }

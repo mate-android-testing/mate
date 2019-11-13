@@ -1,6 +1,7 @@
 package org.mate.accessibility.check.widgetbased;
 
 import org.mate.accessibility.AccessibilitySettings;
+import org.mate.accessibility.AccessibilityViolation;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -13,10 +14,10 @@ public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck {
     public int w=0;
     public int h=0;
     @Override
-    public boolean check(IScreenState state, Widget widget) {
+    public AccessibilityViolation check(IScreenState state, Widget widget) {
 
         if (!widget.isExecutable())
-            return true;
+            return null;
 
         w=0;
         h=0;
@@ -33,16 +34,7 @@ public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck {
             if (targetHeight < AccessibilitySettings.MIN_HEIGHT || targetWidth < AccessibilitySettings.MIN_WIDTH)
                 dimensionOK = false;
         }
-        return dimensionOK;
+        return null;
     }
 
-    @Override
-    public String getType() {
-        return "TOUCH TARGET SIZE";
-    }
-
-    @Override
-    public String getInfo() {
-        return "";
-    }
 }

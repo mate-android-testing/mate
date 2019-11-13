@@ -2,6 +2,7 @@ package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
+import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.screenbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
@@ -174,13 +175,13 @@ public class UniformRandomForAccessibility {
         for (Widget widget: state.getWidgets()) {
 
             //run constrast check
-            boolean contrastRatioViolationFound = contrastChecker.check(state, widget);
+            AccessibilityViolation contrastRatioViolationFound = contrastChecker.check(state, widget);
 
-            if (contrastRatioViolationFound) {
+            if (contrastRatioViolationFound!=null) {
                 //report accessibility flaw found
                 MATE.log("ADD CONTRAST FLAW");
                 AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",
-                        widget, contrastChecker.getInfo());
+                        widget, contrastRatioViolationFound.getInfo());
 
 
 
@@ -190,8 +191,8 @@ public class UniformRandomForAccessibility {
             }
 
             //run multiple desc check
-            boolean multDescViolationFound = multDescChecker.check(state,widget);
-            if (multDescViolationFound) {
+            AccessibilityViolation multViolation = multDescChecker.check(state,widget);
+            if (multViolation!=null) {
                 //report accessibility flaw found
                 AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW", widget, "");
 

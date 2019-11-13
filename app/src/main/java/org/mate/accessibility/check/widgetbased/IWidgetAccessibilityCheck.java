@@ -1,5 +1,6 @@
 package org.mate.accessibility.check.widgetbased;
 
+import org.mate.accessibility.AccessibilityViolation;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -9,7 +10,5 @@ import org.mate.ui.Widget;
 
 public interface IWidgetAccessibilityCheck {
 
-    public boolean check(IScreenState state, Widget widget);
-    public String getType();
-    public String getInfo();
+    public AccessibilityViolation check(IScreenState state, Widget widget);
 }

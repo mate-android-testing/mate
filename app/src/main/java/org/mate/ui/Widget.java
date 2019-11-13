@@ -21,6 +21,9 @@ public class Widget {
     private String packageName;
     private String contentDesc;
     private String labeledBy;
+
+    private boolean importantForAccessibility;
+    private boolean accessibilityFocused;
     private String labelFor;
     private boolean checkable;
     private boolean checked;
@@ -41,6 +44,8 @@ public class Widget {
     private int y1;
     private int y2;
     private int maxLength;
+
+    private boolean screenReaderFocusable;
 
     private int inputType;
     private boolean hasChildren;
@@ -253,6 +258,19 @@ public class Widget {
             return true;
         if (clazz.contains("TextInputEditText"))
             return true;
+
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(this.getClazz());
+            boolean editType = 	android.widget.EditText.class.isAssignableFrom(clazz);
+            if (editType)
+                return true;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+
         return false;
     }
 
@@ -501,6 +519,38 @@ public class Widget {
         return true;
     }
 
+    public String getOriginalBounds() {
+        return originalBounds;
+    }
+
+    public void setOriginalBounds(String originalBounds) {
+        this.originalBounds = originalBounds;
+    }
+
+    public boolean isScreenReaderFocusable() {
+        return screenReaderFocusable;
+    }
+
+    public void setScreenReaderFocusable(boolean screenReaderFocusable) {
+        this.screenReaderFocusable = screenReaderFocusable;
+    }
+
+    public boolean isImportantForAccessibility() {
+        return importantForAccessibility;
+    }
+
+    public void setImportantForAccessibility(boolean importantForAccessibility) {
+        this.importantForAccessibility = importantForAccessibility;
+    }
+
+    public boolean isAccessibilityFocused() {
+        return accessibilityFocused;
+    }
+
+    public void setAccessibilityFocused(boolean accessibilityFocused) {
+        this.accessibilityFocused = accessibilityFocused;
+    }
+
     public List<Widget> getChildren() {
         return children;
     }
@@ -512,4 +562,81 @@ public class Widget {
     public boolean isHeading() {
         return heading;
     }
+
+    public boolean isButtonType(){
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            boolean buttonType = android.widget.Button.class.isAssignableFrom(clazz);
+            return buttonType;
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isImageButtonType(){
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            boolean imageButtonType = android.widget.ImageButton.class.isAssignableFrom(clazz);
+            return imageButtonType;
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isImageSwitcherType(){
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            boolean imageSwitcherType = android.widget.ImageSwitcher.class.isAssignableFrom(clazz);
+            return imageSwitcherType;
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isImageType(){
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            boolean imageType = android.widget.ImageView.class.isAssignableFrom(clazz);
+            return imageType;
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isSpinnerType(){
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            boolean spinnerType = android.widget.AbsSpinner.class.isAssignableFrom(clazz);
+            return spinnerType;
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isTextViewType(){
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            boolean textViewType = android.widget.TextView.class.isAssignableFrom(clazz);
+            return textViewType;
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+
+
+
 }

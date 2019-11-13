@@ -5,23 +5,23 @@ import org.mate.ui.Widget;
 
 public class AccessibilityViolation {
 
-    private String type;
+    private int type;
     private Widget widget;
     private IScreenState state;
     private String info;
 
-    public AccessibilityViolation(String type, Widget widget, IScreenState state, String info) {
+    public AccessibilityViolation(int type, Widget widget, IScreenState state, String info) {
         this.type = type;
         this.widget = widget;
         this.state = state;
         this.info = info;
     }
 
-    public String getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
 
