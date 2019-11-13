@@ -3,12 +3,16 @@ package org.mate;
 import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.interaction.DeviceMgr;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
+import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -18,24 +22,16 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class CheckScreen {
 
+    private DeviceMgr deviceMgr;
+
+
     @Test
     public void useAppContext() throws Exception {
 
-        IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        List<WidgetAction> actions = screenState.getActions();
-
-        MATE.log("Widgets: " );
-        for (Widget w: screenState.getWidgets()){
-            MATE.log(w.getId()+ " " + w.getClazz());
-        }
-        MATE.log("ACTIONS: " );
-        for (WidgetAction action: actions){
-            MATE.log(action.getActionType() + " - " + action.getWidget().getId() + " - " + action.getWidget().getText());
-        }
-
-        MATE.log("");
-        MATE.log("");
-        
+        MATE.log("start checkscreenstate");
+        MATE mate = new MATE();
+        //run mate for timeout minutes
+        mate.testApp("checkScreen");
     }
 
 }

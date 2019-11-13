@@ -74,4 +74,8 @@ public class Properties {
 
     // use LINE_COVERAGE as default
     public static Coverage COVERAGE = Coverage.BRANCH_COVERAGE;
+
+
+    // Primitive actions or widget based actions?
+    public static boolean WIDGET_BASED_ACTIONS = true;
 }
