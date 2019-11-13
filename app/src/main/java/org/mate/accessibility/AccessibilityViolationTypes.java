@@ -9,6 +9,7 @@ public class AccessibilityViolationTypes {
     public static final int SMALL_TOUCH_AREA = 5;
     public static final int DUPLICATE_CONTENT_DESCRIPTION = 6;
     public static final int NON_CLICKABLE_SPAN = 7;
+    public static final int MISSING_INPUT_TYPE = 8;
 
 
 

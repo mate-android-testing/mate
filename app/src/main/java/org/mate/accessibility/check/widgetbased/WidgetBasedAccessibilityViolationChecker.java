@@ -17,6 +17,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks = new ArrayList<IWidgetAccessibilityCheck>();
             widgetBasedChecks.add(new FormControlLabelCheck());
             widgetBasedChecks.add(new ContrastRatioAccessibilityCheck());
+            widgetBasedChecks.add(new InputTypeCheck());
         }
 
         return widgetBasedChecks;
