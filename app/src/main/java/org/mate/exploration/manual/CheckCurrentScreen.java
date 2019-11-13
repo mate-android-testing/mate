@@ -1,16 +1,11 @@
 package org.mate.exploration.manual;
 
 import org.mate.MATE;
-import org.mate.accessibility.AccessibilitySummaryResults;
-import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.FormControlLabelCheck;
-import org.mate.accessibility.check.MultipleContentDescCheck;
-import org.mate.interaction.UIAbstractionLayer;
+import org.mate.accessibility.AccessibilityViolationChecker;
+import org.mate.accessibility.check.widgetbased.FormControlLabelCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
-
-import static org.mate.MATE.device;
 
 public class CheckCurrentScreen {
 
@@ -31,11 +26,14 @@ public class CheckCurrentScreen {
 
         MATE.log("");
 
+        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+
 
         //MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(screenState);
         //ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck(screenState.getPackageName(),screenState.getActivityName(),screenState.getId(),device
           //      .getDisplayWidth(),device.getDisplayHeight());
-        FormControlLabelCheck formCheck = new FormControlLabelCheck(screenState.getWidgets());
+        /*
+        FormControlLabelCheck formCheck = new FormControlLabelCheck();
         for (Widget widget: screenState.getWidgets()) {
 
             //boolean contrastRatioOK = contrastChecker.check(widget);
@@ -48,12 +46,12 @@ public class CheckCurrentScreen {
             //if (!multDescOK)
                 //AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
 
-            boolean formLabelOK = formCheck.check(widget);
+            boolean formLabelOK = formCheck.check(screenState, widget);
             if (!formLabelOK) {
                 MATE.log("FORM CONTROL LABEL ERROR: " + " - " + widget.getClazz() + " - " + widget.getId() + " - " + widget.getText());
             }
 
-        }
+        }*/
 
 
     }

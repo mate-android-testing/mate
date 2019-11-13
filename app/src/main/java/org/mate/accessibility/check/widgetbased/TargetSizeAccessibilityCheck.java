@@ -1,18 +1,19 @@
-package org.mate.accessibility.check;
+package org.mate.accessibility.check.widgetbased;
 
 import org.mate.accessibility.AccessibilitySettings;
+import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 /**
  * Created by marceloeler on 26/06/17.
  */
 
-public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck{
+public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck {
 
     public int w=0;
     public int h=0;
     @Override
-    public boolean check(Widget widget) {
+    public boolean check(IScreenState state, Widget widget) {
 
         if (!widget.isExecutable())
             return true;
@@ -33,5 +34,15 @@ public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck{
                 dimensionOK = false;
         }
         return dimensionOK;
+    }
+
+    @Override
+    public String getType() {
+        return "TOUCH TARGET SIZE";
+    }
+
+    @Override
+    public String getInfo() {
+        return "";
     }
 }

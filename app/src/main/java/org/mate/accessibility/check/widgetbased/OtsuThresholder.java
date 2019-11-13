@@ -1,4 +1,4 @@
-package org.mate.accessibility.check;
+package org.mate.accessibility.check.widgetbased;
 
 /**
  * Created by marceloeler on 19/02/17.

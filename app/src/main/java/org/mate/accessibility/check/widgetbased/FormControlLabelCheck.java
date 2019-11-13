@@ -1,6 +1,7 @@
-package org.mate.accessibility.check;
+package org.mate.accessibility.check.widgetbased;
 
 import org.mate.MATE;
+import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
@@ -11,12 +12,8 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
     private List<Widget> widgets;
     private List<String> labeledBy;
 
-    public FormControlLabelCheck(List<Widget> widgets){
-        this.widgets = widgets;
-        labeledBy = new ArrayList<String>();
-        for (Widget w: this.widgets){
-            labeledBy.add(w.getLabelFor());
-        }
+    public FormControlLabelCheck(){
+
     }
 
     private boolean applicable(Widget widget){
@@ -38,7 +35,12 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
     }
 
     @Override
-    public boolean check(Widget widget) {
+    public boolean check(IScreenState state, Widget widget) {
+
+        labeledBy = new ArrayList<String>();
+        for (Widget w: state.getWidgets()){
+            labeledBy.add(w.getLabelFor());
+        }
 
         if (!applicable(widget)){
             return true;
@@ -62,5 +64,15 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
         }
 
         return false;
+    }
+
+    @Override
+    public String getType() {
+        return "FORM CONTROL LABEL";
+    }
+
+    @Override
+    public String getInfo() {
+        return "";
     }
 }

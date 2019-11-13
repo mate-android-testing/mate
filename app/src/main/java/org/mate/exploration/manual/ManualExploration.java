@@ -2,8 +2,8 @@ package org.mate.exploration.manual;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
-import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.MultipleContentDescCheck;
+import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.screenbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -65,18 +65,17 @@ public class ManualExploration {
                 //MATE.log_acc("CHECK CONTRAST");
 
                 MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
-                ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck(state.getPackageName(),state.getActivityName(),state.getId(),device
-                        .getDisplayWidth(),device.getDisplayHeight());
+                ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck();
                 for (Widget widget: state.getWidgets()) {
 
-                    boolean contrastRatioOK = contrastChecker.check(widget);
+                    boolean contrastRatioViolationFound = contrastChecker.check(state, widget);
                     //MATE.log("Check contrast of "+widget.getId() + ": " + contrastChecker.contratio);
 
-                    if (!contrastRatioOK)
-                        AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,String.valueOf(contrastChecker.contratio));
+                    if (contrastRatioViolationFound)
+                        AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",widget,contrastChecker.getInfo());
 
-                    boolean multDescOK = multDescChecker.check(widget);
-                    if (!multDescOK)
+                    boolean multDescViolationFound = multDescChecker.check(state, widget);
+                    if (multDescViolationFound)
                         AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
 
                 }

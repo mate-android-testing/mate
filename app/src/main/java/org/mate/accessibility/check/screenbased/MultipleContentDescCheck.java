@@ -1,5 +1,6 @@
-package org.mate.accessibility.check;
+package org.mate.accessibility.check.screenbased;
 
+import org.mate.accessibility.check.widgetbased.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -40,20 +41,30 @@ public class MultipleContentDescCheck implements IWidgetAccessibilityCheck {
     }
 
     @Override
-    public boolean check(Widget widget) {
+    public boolean check(IScreenState state, Widget widget) {
         if (widget.getContentDesc().equals("") && widget.getHint().equals(""))
-            return true;
+            return false;
 
         if (!widget.getContentDesc().equals("")) {
             if (count(widget.getContentDesc()) > 1)
-                return false;
+                return true;
         }
 
         if (!widget.getHint().equals("")){
             if(count(widget.getHint())>1)
-                return false;
+                return true;
         }
 
-        return true;
+        return false;
+    }
+
+    @Override
+    public String getType() {
+        return "DUPLICATE LABEL";
+    }
+
+    @Override
+    public String getInfo() {
+        return "";
     }
 }

@@ -1,16 +1,17 @@
-package org.mate.accessibility.check;
+package org.mate.accessibility.check.widgetbased;
 
 import org.mate.MATE;
+import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 /**
  * Created by marceloeler on 26/06/17.
  */
 
-public class ContentDescAccessibilityCheck implements IWidgetAccessibilityCheck{
+public class ContentDescAccessibilityCheck implements IWidgetAccessibilityCheck {
 
     @Override
-    public boolean check(Widget widget) {
+    public boolean check(IScreenState state, Widget widget) {
 
         boolean contentDesc=true;
         if (widget.getClazz().contains("Image")&&widget.isExecutable()){
@@ -55,5 +56,15 @@ public class ContentDescAccessibilityCheck implements IWidgetAccessibilityCheck{
             }
         }
         return contentDesc;
+    }
+
+    @Override
+    public String getType() {
+        return "MISSING LABEL";
+    }
+
+    @Override
+    public String getInfo() {
+        return "";
     }
 }
