@@ -56,13 +56,6 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
         InstrumentationRegistry.getContext().sendBroadcast(intent);
         // InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
 
-        // wait some threshold until traces are written out
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
         MATE.log("Branch Distance: " + branchDistance);
     }
