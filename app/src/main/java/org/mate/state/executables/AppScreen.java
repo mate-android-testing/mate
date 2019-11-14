@@ -3,8 +3,10 @@ package org.mate.state.executables;
 import android.app.Instrumentation;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.StaleObjectException;
@@ -180,6 +182,18 @@ public class AppScreen {
         widget.setMaxLength(obj.getMaxTextLength());
         widget.setInputType(obj.getInputType());
         widget.setVisibleToUser(obj.isVisibleToUser());
+        widget.setAccessibilityFocused(obj.isAccessibilityFocused());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            widget.setImportantForAccessibility(obj.isImportantForAccessibility());
+        }
+        else
+            widget.setImportantForAccessibility(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            widget.setScreenReaderFocusable(obj.isScreenReaderFocusable());
+        }
+        else
+            widget.setScreenReaderFocusable(true);
 
         AccessibilityNodeInfo.CollectionItemInfo cinfo = obj.getCollectionItemInfo();
         if (cinfo!=null)

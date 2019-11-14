@@ -709,7 +709,9 @@ public class EnvironmentManager {
         }
     }
 
-    public static double getContrastRatio(String packageName, String stateId, Widget widget, int maxw, int maxh){
+    public static double getContrastRatio(String packageName, String stateId, Widget widget){
+        int maxw = MATE.device.getDisplayWidth();
+        int maxh = MATE.device.getDisplayHeight();
         double contrastRatio = 21;
         try {
             Socket cliente = new Socket(SERVER_IP, port);
@@ -722,7 +724,7 @@ public class EnvironmentManager {
             int x2=widget.getX2();
             int y1=widget.getY1();
             int y2=widget.getY2();
-            int borderExpanded=0;
+            int borderExpanded=1;
             if (x1-borderExpanded>=0)
                 x1-=borderExpanded;
             if (x2+borderExpanded<=maxw)

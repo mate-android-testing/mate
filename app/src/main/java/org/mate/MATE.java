@@ -9,10 +9,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
-import org.mate.accessibility.AccessibilitySummaryResults;
-import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.MultipleContentDescCheck;
-import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.manual.CheckCurrentScreen;
@@ -57,8 +53,6 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.TimeoutRun;
 

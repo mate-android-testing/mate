@@ -2,15 +2,15 @@ package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityInfoChecker;
-import org.mate.accessibility.check.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.MultipleContentDescCheck;
+import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.screenbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -169,23 +169,19 @@ public class UniformRandomForAccessibility {
         MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
         //create checker for contrast issues
         ContrastRatioAccessibilityCheck contrastChecker =
-                new ContrastRatioAccessibilityCheck(state.getPackageName(),
-                        state.getActivityName(),
-                        state.getId(),
-                        device.getDisplayWidth(),
-                        device.getDisplayHeight());
+                new ContrastRatioAccessibilityCheck();
 
         //run checks for each widget on the screen
         for (Widget widget: state.getWidgets()) {
 
             //run constrast check
-            boolean contrastRatioOK = contrastChecker.check(widget);
+            AccessibilityViolation contrastRatioViolationFound = contrastChecker.check(state, widget);
 
-            if (!contrastRatioOK) {
+            if (contrastRatioViolationFound!=null) {
                 //report accessibility flaw found
                 MATE.log("ADD CONTRAST FLAW");
                 AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",
-                        widget, String.valueOf(contrastChecker.contratio));
+                        widget, contrastRatioViolationFound.getInfo());
 
 
 
@@ -195,8 +191,8 @@ public class UniformRandomForAccessibility {
             }
 
             //run multiple desc check
-            boolean multDescOK = multDescChecker.check(widget);
-            if (!multDescOK) {
+            AccessibilityViolation multViolation = multDescChecker.check(state,widget);
+            if (multViolation!=null) {
                 //report accessibility flaw found
                 AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW", widget, "");
 

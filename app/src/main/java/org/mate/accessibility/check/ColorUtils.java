@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 
 import org.mate.MATE;
+import org.mate.accessibility.check.widgetbased.OtsuThresholder;
 
 import java.util.Hashtable;
 
