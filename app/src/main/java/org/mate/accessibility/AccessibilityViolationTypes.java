@@ -10,6 +10,9 @@ public class AccessibilityViolationTypes {
     public static final int DUPLICATE_CONTENT_DESCRIPTION = 6;
     public static final int NON_CLICKABLE_SPAN = 7;
     public static final int MISSING_INPUT_TYPE = 8;
+    public static final int LABEL_NOT_DEFINED = 9;
+    public static final int LABEL_FAR_FROM_INPUTTEXT = 10;
+
 
 
 

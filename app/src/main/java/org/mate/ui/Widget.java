@@ -21,6 +21,7 @@ public class Widget {
     private String packageName;
     private String contentDesc;
     private String labeledBy;
+    private boolean showingHintText;
 
     private boolean importantForAccessibility;
     private boolean accessibilityFocused;
@@ -234,6 +235,14 @@ public class Widget {
 
     public void setY(int y) {
         Y = y;
+    }
+
+    public boolean isShowingHintText() {
+        return showingHintText;
+    }
+
+    public void setShowingHintText(boolean showingHintText) {
+        this.showingHintText = showingHintText;
     }
 
     public boolean isEditable() {
