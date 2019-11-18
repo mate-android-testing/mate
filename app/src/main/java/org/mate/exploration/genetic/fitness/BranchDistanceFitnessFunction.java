@@ -7,6 +7,7 @@ import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.ui.EnvironmentManager;
 
@@ -60,6 +61,11 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
             double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
             cache.put(chromosome, branchDistance);
             MATE.log("Branch Distance: " + branchDistance);
+
+            // we can end execution if we covered the target vertex
+            if (branchDistance == 1.0) {
+                ConditionalTerminationCondition.satisfiedCondition();
+            }
         }
     }
 }

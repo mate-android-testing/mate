@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.exploration.manual.ManualExploration;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
@@ -166,7 +167,7 @@ public class MATE {
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {

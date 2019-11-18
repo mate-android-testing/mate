@@ -37,6 +37,7 @@ import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
@@ -349,6 +350,8 @@ public class GeneticAlgorithmProvider {
                 return new IterTerminationCondition(getNumberIterations());
             case NeverTerminationCondition.TERMINATION_CONDITION_ID:
                 return new NeverTerminationCondition();
+            case ConditionalTerminationCondition.TERMINATION_CONDITION_ID:
+                return new ConditionalTerminationCondition();
             default:
                 throw new UnsupportedOperationException("Unknown termination condition: "
                         + terminationConditionId);
