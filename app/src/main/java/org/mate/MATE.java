@@ -152,15 +152,31 @@ public class MATE {
                 if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
+                    // init the CFG
+                    boolean isInit = EnvironmentManager.initCFG();
+
+                    if (!isInit) {
+                        MATE.log("Couldn't initialise CFG! Aborting.");
+                        throw new IllegalStateException("Graph initialisation failed!");
+                    }
+
+                    final IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.algorithm.OnePlusOne.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
-                    onePlusOneNew.run();
+
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            onePlusOneNew.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
                 } else if (explorationStrategy.equals("NSGA-II")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");

@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -9,6 +10,7 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OnePlusOne<T> extends GeneticAlgorithm<T> {
@@ -20,8 +22,8 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
                       IMutationFunction<T> mutationFunction,
                       List<IFitnessFunction<T>> fitnessFunctions,
                       ITerminationCondition terminationCondition) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
-                fitnessFunctions, terminationCondition, 1, 1,
+        super(chromosomeFactory, selectionFunction, null, mutationFunction,
+                fitnessFunctions, terminationCondition, 1, 2,
                 0, 1);
     }
 

@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -155,7 +156,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        if (Properties.STORE_COVERAGE) {
+        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+            MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+        } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
             MATE.log_acc("Combined coverage until now: " + EnvironmentManager.getCombinedCoverage());
             if (population.size() <= 10) {
                 MATE.log_acc("Combined coverage of current population: " + EnvironmentManager.getCombinedCoverage(population));

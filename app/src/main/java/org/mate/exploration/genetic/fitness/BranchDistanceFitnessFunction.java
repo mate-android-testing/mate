@@ -17,22 +17,18 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
 
     public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function";
 
-    private final Map<IChromosome<TestCase>, Double> cache;
-
-    public BranchDistanceFitnessFunction() {
-        cache = new HashMap<>();
-    }
+    private static final Map<IChromosome<TestCase>, Double> cache = new HashMap<>();
 
     @Override
     public double getFitness(IChromosome<TestCase> chromosome) {
         MATE.log("Retrieving Branch Distance...");
         if (cache.containsKey(chromosome)) {
             return cache.get(chromosome);
+        } else {
+            retrieveFitnessValues(chromosome);
+            // should be cached now
+            return cache.get(chromosome);
         }
-        double fitness = EnvironmentManager.getBranchDistance(chromosome);
-        MATE.log("Branch Distance: " + fitness);
-        cache.put(chromosome, fitness);
-        return fitness;
     }
 
     /**
@@ -45,18 +41,25 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
      */
     public static void retrieveFitnessValues(IChromosome<TestCase> chromosome) {
 
-        Intent intent = new Intent("STORE_TRACES");
-        Bundle bundle = new Bundle();
-        bundle.putString("packageName", MATE.packageName);
-        intent.setComponent(new ComponentName(MATE.packageName,
-                "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer"));
-        intent.putExtras(bundle);
+        if (cache.containsKey(chromosome)) {
+            double branchDistance = cache.get(chromosome);
+            MATE.log("Branch Distance: " + branchDistance);
+        } else {
 
-        MATE.log("Sending Broadcast to AUT " + MATE.packageName + " in order to store collected traces!");
-        InstrumentationRegistry.getContext().sendBroadcast(intent);
-        // InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+            Intent intent = new Intent("STORE_TRACES");
+            Bundle bundle = new Bundle();
+            bundle.putString("packageName", MATE.packageName);
+            intent.setComponent(new ComponentName(MATE.packageName,
+                    "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer"));
+            intent.putExtras(bundle);
 
-        double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
-        MATE.log("Branch Distance: " + branchDistance);
+            MATE.log("Sending Broadcast to AUT " + MATE.packageName + " in order to store collected traces!");
+            InstrumentationRegistry.getContext().sendBroadcast(intent);
+            // InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+
+            double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
+            cache.put(chromosome, branchDistance);
+            MATE.log("Branch Distance: " + branchDistance);
+        }
     }
 }
