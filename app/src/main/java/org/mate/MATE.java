@@ -9,6 +9,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
+import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
@@ -148,9 +149,34 @@ public class MATE {
             if (emulator != null && !emulator.equals("")) {
                 this.deviceMgr = new DeviceMgr(device, packageName);
 
+                if (explorationStrategy.equals("RandomSearchGA")) {
 
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                if (explorationStrategy.equals("OnePlusOneNew")) {
+                    // init the CFG
+                    boolean isInit = EnvironmentManager.initCFG();
+
+                    if (!isInit) {
+                        MATE.log("Couldn't initialise CFG! Aborting.");
+                        throw new IllegalStateException("Graph initialisation failed!");
+                    }
+
+                    final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
+                            .withAlgorithm(RandomSearch.ALGORITHM_NAME)
+                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
+                            .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withMaxNumEvents(50)
+                            .build();
+
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            randomSearchGA.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     // init the CFG

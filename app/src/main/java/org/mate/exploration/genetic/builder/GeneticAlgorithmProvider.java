@@ -4,6 +4,7 @@ import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
+import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
@@ -84,6 +85,8 @@ public class GeneticAlgorithmProvider {
                 return initializeMio();
             case RandomWalk.ALGORITHM_NAME:
                 return initializeRandomWalk();
+            case RandomSearch.ALGORITHM_NAME:
+                return initializeRandomSearch();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -102,6 +105,13 @@ public class GeneticAlgorithmProvider {
                 getBigPopulationSize(),
                 getPCrossOver(),
                 getPMutate());
+    }
+
+    private <T> RandomSearch<T> initializeRandomSearch() {
+        return new RandomSearch<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeFitnessFunctions(),
+                this.<T>initializeTerminationCondition());
     }
 
     private <T> NSGAII<T> initializeNSGAII() {
