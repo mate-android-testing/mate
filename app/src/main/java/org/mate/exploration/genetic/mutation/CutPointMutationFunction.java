@@ -4,11 +4,13 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -57,14 +59,26 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         }
 
         if (storeCoverage) {
-            EnvironmentManager.storeCoverageData(mutatedChromosome, null);
 
-            MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + EnvironmentManager
-                    .getCoverage(mutatedChromosome));
-            MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
+            if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
 
-            //TODO: remove hack, when better solution implemented
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
+                EnvironmentManager.storeCoverageData(mutatedChromosome, null);
+
+                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + EnvironmentManager
+                        .getCoverage(mutatedChromosome));
+                MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
+
+                //TODO: remove hack, when better solution implemented
+                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
+
+            } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+
+                EnvironmentManager.storeBranchCoverage(mutatedChromosome);
+
+                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + EnvironmentManager
+                        .getBranchCoverage(mutatedChromosome));
+                MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
+            }
         }
         return mutations;
     }

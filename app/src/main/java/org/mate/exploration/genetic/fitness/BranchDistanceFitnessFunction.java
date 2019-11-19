@@ -24,7 +24,9 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
     public double getFitness(IChromosome<TestCase> chromosome) {
         MATE.log("Retrieving Branch Distance...");
         if (cache.containsKey(chromosome)) {
-            return cache.get(chromosome);
+            double branchDistance = cache.get(chromosome);
+            MATE.log("Branch Distance: " + branchDistance);
+            return branchDistance;
         } else {
             retrieveFitnessValues(chromosome);
             // should be cached now

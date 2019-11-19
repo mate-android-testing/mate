@@ -575,7 +575,7 @@ public class EnvironmentManager {
     public static double getBranchDistance(Object chromosome) {
 
         String cmd = "getBranchDistance:"+emulator+":"+chromosome.toString();
-        double branchDistance = 1;
+        double branchDistance = 0;
 
         try {
             Socket server = new Socket(SERVER_IP, port);
@@ -601,7 +601,7 @@ public class EnvironmentManager {
         } catch (IOException e) {
             MATE.log("socket error sending");
             e.printStackTrace();
-            throw new IllegalStateException("Couldn't retrieve branch distance vector!");
+            throw new IllegalStateException("Couldn't retrieve branch distance!");
         }
     }
 

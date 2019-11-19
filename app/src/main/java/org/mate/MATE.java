@@ -168,6 +168,7 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withMaxNumEvents(50)
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
