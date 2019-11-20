@@ -13,4 +13,5 @@ public class AccessibilitySettings {
     public static double minContrastLarge=3;
     public static double minContrastMed=4.5;
     public static double minConstrastSmall=7;
+    public static int maxLabelDistance = 12;
 }

@@ -18,7 +18,9 @@ public class CheckCurrentScreen {
 
         //MATE.log("Widgets: " );
         for (Widget w: screenState.getWidgets()){
-            MATE.log(w.getId()+ " " + w.getClazz()+ " " + w.getText() + " " + w.isVisibleToUser() + " " + w.isHeading());
+            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  - hint: " + w.getHint() + "  showing hint: " +  w.isShowingHintText());
+            if (w.getParent()!=null)
+                MATE.log("------ son of " + w.getParent().getClazz());
             if (w.isEditable())
                 MATE.log("INPUT TYPE: " + w.getInputType());
             MATE.log("\n");

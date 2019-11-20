@@ -78,10 +78,14 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
         }
 
         if (!widget.getLabeledBy().equals("")) {
+            MATE.log(" ACC CHECK LABEL: has label by: " + widget.getLabeledBy());
             return null;
         }
 
         if (labeledBy.contains(widget.getResourceID())) {
+            MATE.log(" ACC CHECK LABEL: has label by: id)");
+            int index = labeledBy.indexOf(widget.getResourceID());
+            MATE.log("   label: " + labeledBy.get(index));
             return null;
         }
 
