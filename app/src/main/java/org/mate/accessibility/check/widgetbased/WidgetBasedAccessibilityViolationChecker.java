@@ -10,6 +10,9 @@ import java.util.List;
 
 public class WidgetBasedAccessibilityViolationChecker {
 
+    public WidgetBasedAccessibilityViolationChecker(){}
+
+
     private static List<IWidgetAccessibilityCheck> widgetBasedChecks = null;
 
     public static List<IWidgetAccessibilityCheck> createWidgetBasedAccessibilityList(){
@@ -18,6 +21,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks.add(new FormControlLabelCheck());
             widgetBasedChecks.add(new ContrastRatioAccessibilityCheck());
             widgetBasedChecks.add(new InputTypeCheck());
+            widgetBasedChecks.add(new FormLayoutAccessibilityCheck());
         }
 
         return widgetBasedChecks;
@@ -33,8 +37,10 @@ public class WidgetBasedAccessibilityViolationChecker {
             for (IWidgetAccessibilityCheck widgetCheck: widgetBasedChecks){
                 MATE.log("Check: " + widget.getId() + " - " + widget.getText());
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
-                if (violation!=null)
-                    MATE.log("VIOLATION FOUND: "+violation.getType() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + " - " + violation.getInfo() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: "+widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                if (violation!=null) {
+                    MATE.log("VIOLATION FOUND: " + violation.getType() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + " - " + violation.getInfo() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                    MATE.log(" -- extra info: " + violation.getInfo());
+                }
             }
 
         }
