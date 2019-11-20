@@ -49,11 +49,20 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
             MATE.log("Branch Distance: " + branchDistance);
         } else {
 
+            /*
+            * API level 23 and higher requires that permissions are also granted
+            * at runtime, i.e. it is not sufficient to specify them only in
+            * the AndroidManifest file. However, a reset/restart of the app
+            * causes the loss of the granted runtime permissions. Thus, we
+            * need to grant those permissions after each reset/restart.
+             */
+            EnvironmentManager.grantRuntimePermissions(MATE.packageName);
+
             Intent intent = new Intent("STORE_TRACES");
             Bundle bundle = new Bundle();
             bundle.putString("packageName", MATE.packageName);
             intent.setComponent(new ComponentName(MATE.packageName,
-                    "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer"));
+                   "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer"));
             intent.putExtras(bundle);
 
             MATE.log("Sending Broadcast to AUT " + MATE.packageName + " in order to store collected traces!");

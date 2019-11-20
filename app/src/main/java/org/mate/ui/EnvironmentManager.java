@@ -262,6 +262,47 @@ public class EnvironmentManager {
     }
 
     /**
+     * API level 23 and higher requires that permissions are also granted
+     * at runtime. This can be done at install time with the flag -g,
+     * i.e. adb install -g apk, or via adb shell pm grant packageName permission.
+     * However, the intermediate reset/restart of the app causes the
+     * loss of those runtime permissions.
+     *
+     * @param packageName The app that requires the permissions.
+     * @return Returns {@code true} if the granting permissions succeeded,
+     *          otherwise {@code false}.
+     */
+    public static boolean grantRuntimePermissions(String packageName) {
+
+        String cmd = "grantPermissions:" + packageName + ":" + emulator;
+
+        boolean granted = false;
+
+        try {
+            Socket server = new Socket(SERVER_IP, port);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    granted = Boolean.parseBoolean(serverResponse);
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+        return granted;
+    }
+
+    /**
      * Initializes the CFG; the path to the APK file is given
      * as command line argument (key: apk). If no argument was specified,
      * {@code false} is returned.
