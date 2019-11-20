@@ -66,7 +66,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
 
                     // TODO: this should be depended on which fitness function is used
-                    BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+                    // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
 
                     EnvironmentManager.storeBranchCoverage(chromosome);
 

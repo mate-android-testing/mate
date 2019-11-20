@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
@@ -11,6 +12,8 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
+import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Coverage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +37,41 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
         // Discard old chromosome if not better than new one.
         double compared = fitnessFunctions.get(0).getFitness(population.get(0))
                 - fitnessFunctions.get(0).getFitness(population.get(1));
+
+        logCurrentFitness();
+
         if (compared > 0) {
             population.remove(1);
         } else {
             population.remove(0);
+        }
+
+        currentGenerationNumber++;
+    }
+
+    @Override
+    protected void logCurrentFitness() {
+
+        for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
+            MATE.log_acc("Fitness function " + (i + 1) + ":");
+            IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+            for (int j = 0; j < population.size(); j++) {
+                IChromosome<T> chromosome = population.get(j);
+                MATE.log_acc("Chromosome " + (j + 1) + " Fitness: "
+                        + fitnessFunction.getFitness(chromosome));
+
+                if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+
+                    EnvironmentManager.storeBranchCoverage(chromosome);
+
+                    MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
+                            + EnvironmentManager.getBranchCoverage(chromosome));
+                }
+            }
+        }
+
+        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+            MATE.log_acc("Accumulated Coverage: " + EnvironmentManager.getBranchCoverage());
         }
     }
 

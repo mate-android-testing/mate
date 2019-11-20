@@ -163,6 +163,7 @@ public class MATE {
 
                     final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(RandomSearch.ALGORITHM_NAME)
+                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
                             .withMaxNumEvents(50)
