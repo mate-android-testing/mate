@@ -15,7 +15,6 @@ public class InputTypeCheck implements IWidgetAccessibilityCheck {
                 return new AccessibilityViolation(AccessibilityViolationTypes.MISSING_INPUT_TYPE,widget,state,"");
             }
         }
-
         return null;
     }
 }

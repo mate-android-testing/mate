@@ -17,6 +17,13 @@ public class AccessibilityViolation {
         this.info = info;
     }
 
+    public AccessibilityViolation(int type, IScreenState state, String info) {
+        this.type = type;
+        this.widget = null;
+        this.state = state;
+        this.info = info;
+    }
+
     public int getType() {
         return type;
     }

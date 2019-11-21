@@ -43,14 +43,24 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
-
         distance = 0;
         Widget label = null;
         String labelID = "";
 
-        if (!widget.isEditable()){
+
+        MATE.log(widget.getClazz() + " " + widget.isCheckable() + " " + widget.isEditable() + " "+widget.isSpinnerType());
+        //only checks for checkable, editable and spinner type widgets
+        if (!widget.isCheckable() && !widget.isEditable() && !widget.isSpinnerType()){
             return null;
         }
+
+        //only proceed if the target widget has a label defined
+        FormControlLabelCheck formLabelCheck = new FormControlLabelCheck();
+        AccessibilityViolation violation = formLabelCheck.check(state,widget);
+        if (violation!=null){
+            return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_NOT_DEFINED, widget, state, "");
+        }
+
 
         labeledBy = new ArrayList<String>();
         for (Widget w: state.getWidgets()){
@@ -59,6 +69,10 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
 
         boolean hasLabel = false;
         boolean hasHint = false;
+
+        if (!widget.getHint().equals("")){
+            hasHint = true;
+        }
 
         if (!widget.getLabeledBy().equals("")) {
             hasLabel=true;
@@ -79,58 +93,97 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
             }
         }
 
-        if (!hasLabel) {
-            MATE.log(" NO LABEL");
-            return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_NOT_DEFINED, widget, state, "");
+        if (hasLabel){
+            //check proximity
+            //boolean isAbove = false;
+            boolean isAtLeft = checkLeft(label,widget);
+            boolean isAtRight = checkRight(label,widget);
+            boolean isAbove = checkAbove(label,widget);
+
+            if (!isAtLeft && !isAbove) {
+
+                if (widget.isCheckable() || widget.getClazz().contains("android.widget.RadioButton")){
+                    if (isAtRight)
+                        return null;
+                }
+
+                return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_FAR_FROM_INPUTTEXT, widget, state, String.valueOf(distance));
+            }
         }
         else{
-            //check proximity
-            MATE.log("  CHECK LABEL PROXIMITY: " );
-            MATE.log(" Label: " + label.getBounds() + "    : edit text: " + widget.getBounds());
-
-
-            //boolean isAbove = false;
-
-            boolean isAtLeft = checkLeft(label,widget);
-            if (!isAtLeft)
-                return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_FAR_FROM_INPUTTEXT,widget,state,String.valueOf(distance));
+            if (hasHint){
+                MATE.log("NEEDS TO CHECK IF IT IS A FLOATING HINT");
+            }
         }
-
-        if (!widget.getHint().equals("")){
-            hasHint = true;
-        }
-
-
-
-
         return null;
     }
 
-    private boolean checkLeft(Widget label, Widget editbox) {
+    private boolean checkRight(Widget label, Widget widget) {
 
         int x1l=label.getX1();
         int x2l=label.getX2();
         int y1l=label.getY1();
         int y2l=label.getY2();
 
-        int x1e=editbox.getX1();
-        int x2e=editbox.getX2();
-        int y1e=editbox.getY1();
-        int y2e=editbox.getY2();
+        int x1e=widget.getX1();
+        int x2e=widget.getX2();
+        int y1e=widget.getY1();
+        int y2e=widget.getY2();
 
-        if (x2l<=x1e){
-            //check if they are in the same line
 
-            if ((y1l >= y1e && y1l<=y2e) || (y2l >= y1e && y2l<=y2e) ||
-                (y1e >= y1l && y1e<=y2l) || (y2e >= y1l && y2e<=y2l)) {
+        distance = Math.abs(x1l-x2e);
+        if (distance<=AccessibilitySettings.maxLabelDistance){
+            distance = Math.abs(y1l-y1e);
+            if (distance<=AccessibilitySettings.maxLabelDistance){
+                return true;
+            }
+        }
+        return false;
+    }
 
-                //check distance
+    private boolean checkAbove(Widget label, Widget widget) {
+        int x1l=label.getX1();
+        int x2l=label.getX2();
+        int y1l=label.getY1();
+        int y2l=label.getY2();
 
-                distance = x1e - x2l;
-                if (distance <= AccessibilitySettings.maxLabelDistance) {
+        int x1e=widget.getX1();
+        int x2e=widget.getX2();
+        int y1e=widget.getY1();
+        int y2e=widget.getY2();
 
-                    return true;
-                }
+
+        //absolute difference between the beginning of the label and the widget cannot exceed a certain amount
+
+        distance = Math.abs(y1e-y2l);
+        if (distance<=AccessibilitySettings.maxLabelDistance){
+            distance = Math.abs(x1l-x1e);
+            if (distance<=AccessibilitySettings.maxLabelDistance){
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+    private boolean checkLeft(Widget label, Widget widget) {
+
+        int x1l=label.getX1();
+        int x2l=label.getX2();
+        int y1l=label.getY1();
+        int y2l=label.getY2();
+
+        int x1e=widget.getX1();
+        int x2e=widget.getX2();
+        int y1e=widget.getY1();
+        int y2e=widget.getY2();
+
+
+        distance = Math.abs(x1e-x2l);
+        if (distance<=AccessibilitySettings.maxLabelDistance){
+            distance = Math.abs(y1l-y1e);
+            if (distance<=AccessibilitySettings.maxLabelDistance){
+                return true;
             }
         }
         return false;

@@ -1,5 +1,7 @@
 package org.mate.accessibility;
 
+import android.os.strictmode.Violation;
+
 import org.mate.MATE;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.widgetbased.FormControlLabelCheck;
@@ -12,9 +14,7 @@ import java.util.List;
 
 public class AccessibilityViolationChecker {
 
-
-
-
+    public static List<AccessibilityViolation> violations = new ArrayList<>();
 
     public static void runAccessibilityChecks(IScreenState state){
 

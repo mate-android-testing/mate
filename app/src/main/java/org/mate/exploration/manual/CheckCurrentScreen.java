@@ -18,7 +18,7 @@ public class CheckCurrentScreen {
 
         //MATE.log("Widgets: " );
         for (Widget w: screenState.getWidgets()){
-            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  - hint: " + w.getHint() + "  showing hint: " +  w.isShowingHintText());
+            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  - hint: " + w.getHint() + "  showing hint: " +  w.isShowingHintText() + " EDITABLE: " + w.isEditable());
             if (w.getParent()!=null)
                 MATE.log("------ son of " + w.getParent().getClazz());
             if (w.isEditable())
@@ -56,6 +56,6 @@ public class CheckCurrentScreen {
 
         }*/
 
-
+        MATE.log("END OF CURRENT SCREEN VALIDATION");
     }
 }

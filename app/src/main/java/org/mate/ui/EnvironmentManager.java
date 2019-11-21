@@ -805,6 +805,62 @@ public class EnvironmentManager {
         return contrastRatio;
     }
 
+
+    public static String getLuminances(String packageName, String stateId, Widget widget){
+        int maxw = MATE.device.getDisplayWidth();
+        int maxh = MATE.device.getDisplayHeight();
+        String luminances = "0,0";
+        try {
+            Socket cliente = new Socket(SERVER_IP, port);
+            PrintStream saida = new PrintStream(cliente.getOutputStream());
+
+            String cmd = "luminance:";
+            cmd+=emulator+"_"+packageName+":";
+            cmd+=stateId+":";
+            int x1=widget.getX1();
+            int x2=widget.getX2();
+            int y1=widget.getY1();
+            int y2=widget.getY2();
+            int borderExpanded=1;
+            if (x1-borderExpanded>=0)
+                x1-=borderExpanded;
+            if (x2+borderExpanded<=maxw)
+                x2+=borderExpanded;
+            if (y1-borderExpanded>=0)
+                y1-=borderExpanded;
+            if (y2+borderExpanded<=maxh)
+                y2+=borderExpanded;
+            cmd+=x1+","+y1+","+x2+","+y2;
+
+            saida.println(cmd);
+            MATE.log(cmd);
+            MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
+            long ta = new Date().getTime();
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    luminances = serverResponse;
+                    break;
+                }
+                long tb = new Date().getTime();
+                if (tb-ta>5000) {
+                    MATE.logsum("timeout - luminance");
+                    break;
+                }
+            }
+            cliente.close();
+            saida.close();
+            MATE.log(serverResponse);
+        } catch (IOException e) {
+            MATE.log_acc("socket error: luminance");
+            e.printStackTrace();
+        }
+
+        return luminances;
+    }
+
     public static void deleteAllScreenShots(String packageName) {
         MATE.log("DELETE SCREENSHOTS");
         try {
