@@ -3,7 +3,8 @@ package org.mate.accessibility;
 public class AccessibilityViolationTypes {
 
 
-    public static final String[] NAMES = new String[14];
+    public static final String[] NAMES = new String[15];
+
 
 
     static {
@@ -20,6 +21,7 @@ public class AccessibilityViolationTypes {
         NAMES[11] = "COLOUR-AND-MEANING";
         NAMES[12] = "SPACING";
         NAMES[13] = "HIDDEN-DECORATIVE-CONTENT";
+        NAMES[14] = "DESCRIPTIVE-LINK";
     }
 
     public static final int EDITABLE_CONTENT_DESC = 1;
@@ -35,6 +37,7 @@ public class AccessibilityViolationTypes {
     public static final int COLOUR_MEANING = 11;
     public static final int SPACING = 12;
     public static final int HIDDEN_DECORATIVE_CONTENT = 13;
+    public static final int DESCRIPTIVE_LINKS = 14;
 
 
 

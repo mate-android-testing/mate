@@ -3,7 +3,6 @@ package org.mate.accessibility.check.widgetbased;
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
-import org.mate.accessibility.check.screenbased.ColourMeaningAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -27,6 +26,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks.add(new FormLayoutAccessibilityCheck());
             widgetBasedChecks.add(new MultipleContentDescCheck());
             widgetBasedChecks.add(new SpacingAccessibilityCheck());
+            widgetBasedChecks.add(new DescriptiveLinksCheck());
         }
 
         return widgetBasedChecks;
@@ -42,7 +42,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             for (IWidgetAccessibilityCheck widgetCheck: widgetBasedChecks){
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
                 if (violation!=null) {
-                    MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + " - " + violation.getInfo() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                    MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     MATE.log(" -- extra info: " + violation.getInfo());
                 }
             }

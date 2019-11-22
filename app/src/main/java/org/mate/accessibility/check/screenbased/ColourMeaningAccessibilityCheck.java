@@ -109,5 +109,14 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             return new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
         }
         return null;
+
+
+        //IDEA
+        //COMPARE
+        //   A- THE COLOUR OF THE TEXT ASSOCIATED WITH AN OBJECT
+        //   WITH
+        //   B - THE COLOUR OF THE TEXT ASSOCIATED WITH OBJECTS OF THE SAME TYPE (CHECK PARENT/CONTAINER/BUTTON)
+
+
     }
 }

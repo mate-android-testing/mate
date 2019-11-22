@@ -1,6 +1,7 @@
 package org.mate.exploration.manual;
 
 import org.mate.MATE;
+import org.mate.accessibility.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
@@ -17,7 +18,7 @@ public class CheckCurrentScreen {
         //MATE.log("Widgets: " );
 
         for (Widget w: screenState.getWidgets()){
-            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  IFA: " + w.isImportantForAccessibility() + "  AFOC: " + w.isAccessibilityFocused() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " hint: " + w.getHint() + "  "+w.getContentDesc() + " visible: " + w.isVisibleToUser()+ " ");
+            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  IFA: " + w.isImportantForAccessibility() + "  AFOC: " + w.isAccessibilityFocused() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " hint: " + w.getHint() + "  "+w.getContentDesc() + " visible: " + w.isVisibleToUser()+ " selected: " + w.isSelected() + " - " + w.isChecked());
             //if (w.getParent()!=null)
                 //MATE.log("------ son of " + w.getParent().getClazz());
             //if (w.isEditable())
@@ -28,7 +29,7 @@ public class CheckCurrentScreen {
 
         MATE.log("");
 
-       // AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
         //ContentResizingAccessibilityCheck contentResizingAccessibilityCheck = new ContentResizingAccessibilityCheck();
         //contentResizingAccessibilityCheck.check(screenState);
