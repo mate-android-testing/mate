@@ -6,6 +6,7 @@ import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.PrimitiveAction;
+import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,6 +41,39 @@ public class TestCase {
         sparseness = 0;
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
+
+    }
+
+    /**
+     * Prints how often each widget has been triggered by a certain action.
+     */
+    public void print() {
+
+        // count how many actions per widgets have been executed
+        Map<Widget, Integer> widgetActions = new HashMap<>();
+
+        // TODO: filter out those actions that are not coupled to a widget, e.g., PRESS_BACK
+
+        for (Action action : eventSequence) {
+            if (action instanceof WidgetAction) {
+
+                Widget widget = ((WidgetAction) action).getWidget();
+
+                // with API level 24 (Java 8): Map.merge(key, 1, Integer::sum)
+                if (widgetActions.containsKey(widget)) {
+                    int currentCount = widgetActions.get(widget);
+                    widgetActions.put(widget, currentCount+1);
+                } else {
+                    widgetActions.put(widget, 1);
+                }
+            }
+        }
+
+        // print how often each widget has been triggered
+        for (Map.Entry<Widget, Integer> widgetEntry : widgetActions.entrySet()) {
+            MATE.log_acc("Widget " + widgetEntry.getKey().getClazz()
+                    + " has been triggered: " + widgetEntry.getValue() + " times!");
+        }
 
     }
 
