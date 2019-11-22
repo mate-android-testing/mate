@@ -43,6 +43,9 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
+        if (!widget.isImportantForAccessibility())
+            return null;
+
         distance = 0;
         Widget label = null;
         String labelID = "";
@@ -54,13 +57,13 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
             return null;
         }
 
+
         //only proceed if the target widget has a label defined
         FormControlLabelCheck formLabelCheck = new FormControlLabelCheck();
         AccessibilityViolation violation = formLabelCheck.check(state,widget);
         if (violation!=null){
             return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_NOT_DEFINED, widget, state, "");
         }
-
 
         labeledBy = new ArrayList<String>();
         for (Widget w: state.getWidgets()){

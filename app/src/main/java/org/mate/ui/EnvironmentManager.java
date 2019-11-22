@@ -24,7 +24,7 @@ import java.util.Set;
 public class EnvironmentManager {
 
     public static String SERVER_IP = "10.0.2.2";
-    public static int port = 12345;
+    public static int port = 12344;
     //public static String SERVER_IP = "192.168.1.26";
 
     public static String emulator=null;
@@ -725,6 +725,13 @@ public class EnvironmentManager {
     public static void screenShot(String packageName,String nodeId){
 
         String cmd = "screenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
+
+        sendCommandToServer(cmd);
+    }
+
+    public static void screenShotForFlickerDetection(String packageName,String nodeId){
+
+        String cmd = "flickerScreenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
 
         sendCommandToServer(cmd);
     }

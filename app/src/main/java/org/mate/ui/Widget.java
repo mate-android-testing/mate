@@ -23,6 +23,7 @@ public class Widget {
     private String labeledBy;
     private boolean showingHintText;
 
+    private boolean contextClickable;
     private boolean importantForAccessibility;
     private boolean accessibilityFocused;
     private String labelFor;
@@ -71,6 +72,14 @@ public class Widget {
         usedAsStateDiff = false;
         hint = "";
 
+    }
+
+    public boolean isContextClickable() {
+        return contextClickable;
+    }
+
+    public void setContextClickable(boolean contextClickable) {
+        this.contextClickable = contextClickable;
     }
 
     public boolean isHasChildren() {
@@ -497,13 +506,16 @@ public class Widget {
 
     public boolean needsContrastChecked() {
         Set<String> excludedClasses = new HashSet<String>();
-        excludedClasses.add("Layout");
-        excludedClasses.add("ViewGroup");
-        excludedClasses.add("ScrollView");
-        excludedClasses.add("Spinner");
-        excludedClasses.add("TableRow");
-        excludedClasses.add("ListView");
-        excludedClasses.add("GridView");
+       // excludedClasses.add("Layout");
+        //excludedClasses.add("ViewGroup");
+        //excludedClasses.add("ScrollView");
+        //excludedClasses.add("Spinner");
+        //excludedClasses.add("TableRow");
+        //excludedClasses.add("ListView");
+        //excludedClasses.add("GridView");
+
+        if (!this.isImportantForAccessibility())
+            return false;
 
         if (this.bounds.equals("[0,0][0,0]"))
             return false;
@@ -511,17 +523,17 @@ public class Widget {
         if (this.isEditable() && this.text.equals(""))
             return false;
 
-        if (this.getClazz().contains("Text") && this.getText().equals(""))
-            return false;
+        //if (this.getClazz().contains("Text") && this.getText().equals(""))
+          //  return false;
 
-        if (this.getClazz().contains("Image") && !this.isExecutable())
+        if (this.getClazz().contains("Image") && !this.isActionable())
             return false;
 
         for (String excluded : excludedClasses) {
             if (this.clazz.contains(excluded))
                 return false;
         }
-        if (!this.isExecutable() && !this.getClazz().contains("Text"))
+        if (!this.isActionable() && !this.getClazz().contains("Text"))
             return false;
 
 
@@ -645,7 +657,7 @@ public class Widget {
     }
 
 
-
-
-
+    public boolean isActionable() {
+        return this.isEditable()||this.isClickable()||this.isLongClickable()||this.isSpinnerType()||this.isCheckable();
+    }
 }

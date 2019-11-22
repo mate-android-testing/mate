@@ -1,14 +1,11 @@
 package org.mate.accessibility.check.screenbased;
 
-import android.graphics.Color;
 import android.os.Build;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
-import org.mate.accessibility.check.widgetbased.IScreenAccessibilityCheck;
-import org.mate.accessibility.check.widgetbased.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
@@ -47,11 +44,11 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
                         List<String> lumList = luminancesByType.get(widget.getClazz());
                         if (lumList == null){
                             lumList = new ArrayList<String>();
-                            lumList.add(luminances+" " + widget.getText());
+                            lumList.add(luminances);
                             luminancesByType.put(widget.getClazz(),lumList);
                         }
                         else{
-                            lumList.add(luminances+" " + widget.getText());
+                            lumList.add(luminances);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 luminancesByType.replace(widget.getClazz(),lumList);
                             }

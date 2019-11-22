@@ -20,7 +20,7 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
     private List<Widget> widgets;
 
     private void loadMatrix(IScreenState state){
-        MATE.log("LLLOOOOADDD MATRIX");
+        //MATE.log("LLLOOOOADDD MATRIX");
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
         matrix = new int[maxw][maxh];
@@ -32,14 +32,16 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
         widgets = new ArrayList<Widget>();
         int index = -1;
         for (Widget w: state.getWidgets()){
-            if (w.isCheckable() || w.isClickable() || w.isLongClickable() || w.isSonOfLongClickable() || w.isEditable() || w.isSpinnerType()){
-                index++;
-                MATE.log("->"+w.getId()+" index: " + index);
+            if (w.isImportantForAccessibility()&&w.isActionable()) {
+                if (w.isCheckable() || w.isClickable() || w.isLongClickable() || w.isSonOfLongClickable() || w.isEditable() || w.isSpinnerType()) {
+                    index++;
+                    //MATE.log("->"+w.getId()+" index: " + index);
 
-                widgets.add(w);
-                for (int i=w.getX1(); i<=w.getX2()&&i<maxw; i++){
-                    for (int j=w.getY1(); j<=w.getY2()&&j<maxh; j++)
-                        matrix[i][j] = index;
+                    widgets.add(w);
+                    for (int i = w.getX1(); i <= w.getX2() && i < maxw; i++) {
+                        for (int j = w.getY1(); j <= w.getY2() && j < maxh; j++)
+                            matrix[i][j] = index;
+                    }
                 }
             }
         }
@@ -47,6 +49,10 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
 
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
+
+        if (!widget.isImportantForAccessibility())
+            return null;
+
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
 
@@ -55,7 +61,7 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
 
         int index = widgets.indexOf(widget);
 
-        MATE.log(" CHECKING SPACE FOR "+ widget.getId() +"  index: " + index);
+        //MATE.log(" CHECKING SPACE FOR "+ widget.getId() +"  index: " + index);
         List<Widget> conflicts = new ArrayList<Widget>();
         int conflictIndex = -1;
         if (index>=0){
@@ -67,7 +73,7 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
             if (x1>0){
                 int count = 0;
                 for (int j=y1; j<y2; j++){
-                    MATE.log("x1-1: " + String.valueOf(matrix[x1-1][j]));
+                    //MATE.log("x1-1: " + String.valueOf(matrix[x1-1][j]));
                     if (matrix[x1-1][j]!=-1){
                         count++;
                         conflictIndex = matrix[x1-1][j];
@@ -81,11 +87,11 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
             }
 
             if (x2<maxw){
-                MATE.log("y1: " + y1 + " y2: " + y2);
+                // MATE.log("y1: " + y1 + " y2: " + y2);
                 int count = 0;
                 for (int j=y1; j<y2; j++){
-                    MATE.log("j: " + j);
-                    MATE.log("x2+1: " + String.valueOf(matrix[x2+1][j]));
+                    //MATE.log("j: " + j);
+                    //MATE.log("x2+1: " + String.valueOf(matrix[x2+1][j]));
                     if (matrix[x2+1][j]!=-1){
                         count++;
                         conflictIndex = matrix[x2+1][j];

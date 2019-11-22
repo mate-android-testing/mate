@@ -1,4 +1,4 @@
-package org.mate.accessibility.check.widgetbased;
+package org.mate.accessibility.check.screenbased;
 
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.state.IScreenState;

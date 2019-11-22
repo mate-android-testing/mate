@@ -3,7 +3,8 @@ package org.mate.accessibility;
 public class AccessibilityViolationTypes {
 
 
-    public static final String[] NAMES = new String[13];
+    public static final String[] NAMES = new String[14];
+
 
     static {
         NAMES[1] = "EDITABLE-CONTENT-DESC";
@@ -18,6 +19,7 @@ public class AccessibilityViolationTypes {
         NAMES[10] = "LABEL-FAR-FROM-FORM-CONTROL";
         NAMES[11] = "COLOUR-AND-MEANING";
         NAMES[12] = "SPACING";
+        NAMES[13] = "HIDDEN-DECORATIVE-CONTENT";
     }
 
     public static final int EDITABLE_CONTENT_DESC = 1;
@@ -32,6 +34,7 @@ public class AccessibilityViolationTypes {
     public static final int LABEL_FAR_FROM_INPUTTEXT = 10;
     public static final int COLOUR_MEANING = 11;
     public static final int SPACING = 12;
+    public static final int HIDDEN_DECORATIVE_CONTENT = 13;
 
 
 
