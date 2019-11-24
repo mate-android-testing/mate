@@ -5,6 +5,7 @@ import org.mate.Properties;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
+import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -12,6 +13,7 @@ import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,31 +52,46 @@ public class TestCase {
     public void print() {
 
         // count how many actions per widgets have been executed
-        Map<Widget, Integer> widgetActions = new HashMap<>();
+        Map<String, Integer> widgetActions = new HashMap<>();
 
-        // TODO: filter out those actions that are not coupled to a widget, e.g., PRESS_BACK
+        EnumSet<ActionType> widgetRelatedActions = EnumSet.of(ActionType.CLICK, ActionType.LONG_CLICK,
+                ActionType.CLEAR_WIDGET, ActionType.TYPE_TEXT);
+
+        // track the number of unrelated widget actions
+        int widgetUnrelatedActions = 0;
 
         for (Action action : eventSequence) {
             if (action instanceof WidgetAction) {
 
+                ActionType actionType = ((WidgetAction) action).getActionType();
+
+                if (!widgetRelatedActions.contains(actionType)) {
+                    widgetUnrelatedActions++;
+                    continue;
+                }
+
                 Widget widget = ((WidgetAction) action).getWidget();
 
+                String widgetName = widget.getClazz() + ":" + widget.getId();
+
                 // with API level 24 (Java 8): Map.merge(key, 1, Integer::sum)
-                if (widgetActions.containsKey(widget)) {
-                    int currentCount = widgetActions.get(widget);
-                    widgetActions.put(widget, currentCount+1);
+                if (widgetActions.containsKey(widgetName)) {
+                    int currentCount = widgetActions.get(widgetName);
+                    widgetActions.put(widgetName, currentCount+1);
                 } else {
-                    widgetActions.put(widget, 1);
+                    widgetActions.put(widgetName, 1);
                 }
             }
         }
 
         // print how often each widget has been triggered
-        for (Map.Entry<Widget, Integer> widgetEntry : widgetActions.entrySet()) {
-            MATE.log_acc("Widget " + widgetEntry.getKey().getClazz()
+        for (Map.Entry<String, Integer> widgetEntry : widgetActions.entrySet()) {
+            MATE.log_acc("Widget " + widgetEntry.getKey()
                     + " has been triggered: " + widgetEntry.getValue() + " times!");
         }
 
+        // print the number of unrelated widget actions
+        MATE.log_acc("Number of unrelated widget actions: " + widgetUnrelatedActions);
     }
 
     public void setDesiredSize(Optional<Integer> desiredSize) {

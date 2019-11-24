@@ -373,6 +373,7 @@ public class DeviceMgr implements IApp {
 
             if (inputType.contains("phone") || inputType.contains("number") || inputType.contains("Phone") || inputType.contains("Number")) {
                 textData = dataGen.getRandomValidNumber(maxLengthInt);
+                // textData = dataGen.getRandomValidNumber();
             }
             else
             if (inputType.contains("Email") || inputType.contains("email")) {
