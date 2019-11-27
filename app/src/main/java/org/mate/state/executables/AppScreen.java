@@ -73,6 +73,10 @@ public class AppScreen {
     public void readNodes(AccessibilityNodeInfo obj, Widget parent){
         Widget widget = null;
         if (obj!=null) {
+
+            //obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            //obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            ///obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
             try {
                 widget = createWidget(obj, parent, activityName);
             }
@@ -275,6 +279,10 @@ public class AppScreen {
         }
         if (parent!=null)
             parent.addChild(widget);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            widget.setContextClickable(obj.isContextClickable());
+        }
         return widget;
     }
 

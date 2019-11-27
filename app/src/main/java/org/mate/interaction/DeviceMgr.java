@@ -36,6 +36,9 @@ public class DeviceMgr implements IApp {
     public DeviceMgr(UiDevice device, String packageName){
         this.device = device;
         this.packageName = packageName;
+
+
+
     }
 
     public void executeAction(Action action) throws AUTCrashException{

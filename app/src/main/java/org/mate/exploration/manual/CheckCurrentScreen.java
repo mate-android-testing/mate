@@ -2,7 +2,6 @@ package org.mate.exploration.manual;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolationChecker;
-import org.mate.accessibility.check.widgetbased.FormControlLabelCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
@@ -17,12 +16,13 @@ public class CheckCurrentScreen {
         MATE.log("Current screen state: " + screenState.getId());
 
         //MATE.log("Widgets: " );
+
         for (Widget w: screenState.getWidgets()){
-            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  - hint: " + w.getHint() + "  showing hint: " +  w.isShowingHintText());
-            if (w.getParent()!=null)
-                MATE.log("------ son of " + w.getParent().getClazz());
-            if (w.isEditable())
-                MATE.log("INPUT TYPE: " + w.getInputType());
+            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  IFA: " + w.isImportantForAccessibility() + "  AFOC: " + w.isAccessibilityFocused() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " hint: " + w.getHint() + "  "+w.getContentDesc() + " visible: " + w.isVisibleToUser()+ " selected: " + w.isSelected() + " - " + w.isChecked());
+            //if (w.getParent()!=null)
+                //MATE.log("------ son of " + w.getParent().getClazz());
+            //if (w.isEditable())
+                //MATE.log("INPUT TYPE: " + w.getInputType());
             MATE.log("\n");
             MATE.log("");
         }
@@ -30,6 +30,9 @@ public class CheckCurrentScreen {
         MATE.log("");
 
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+
+        //ContentResizingAccessibilityCheck contentResizingAccessibilityCheck = new ContentResizingAccessibilityCheck();
+        //contentResizingAccessibilityCheck.check(screenState);
 
 
         //MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(screenState);
@@ -56,6 +59,6 @@ public class CheckCurrentScreen {
 
         }*/
 
-
+        MATE.log("END OF CURRENT SCREEN VALIDATION");
     }
 }

@@ -1,0 +1,49 @@
+package org.mate.accessibility.check.widgetbased;
+
+import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.state.IScreenState;
+import org.mate.ui.Widget;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class DescriptiveLinksCheck implements IWidgetAccessibilityCheck {
+
+
+
+    @Override
+    public AccessibilityViolation check(IScreenState state, Widget widget) {
+
+        if (widget.isActionable() && !widget.getText().equals("") && widget.isImportantForAccessibility()){
+            boolean foundViolation = false;
+            String conflictantIds = "";
+            for (Widget other: state.getWidgets()){
+                if (!widget.getId().equals(other.getId())){
+                    if (widget.getText().equals(other.getText())){
+                        String widgetCD = widget.getContentDesc();
+                        String widgetHint = widget.getHint();
+                        String otherCD = other.getContentDesc();
+                        String otherHint = other.getHint();
+
+                        if (widgetCD.equals("")&&widgetHint.equals("")&&otherCD.equals("")&&otherHint.equals("")){
+                            foundViolation = true;
+                            conflictantIds+=other.getId()+" ";
+                        }
+                        else{
+                            if (widgetCD.equals(otherCD) && widgetHint.equals(otherHint) && widgetCD.equals(otherHint) && widgetHint.equals(otherCD)){
+                                foundViolation = true;
+                                conflictantIds+=other.getId()+" ";
+                            }
+                        }
+                    }
+                }
+            }
+            if (foundViolation)
+                return new AccessibilityViolation(AccessibilityViolationTypes.DESCRIPTIVE_LINKS,widget,state,conflictantIds);
+
+        }
+
+        return null;
+    }
+}

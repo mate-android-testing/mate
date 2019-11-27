@@ -1,6 +1,9 @@
 package org.mate.accessibility;
 
+import android.os.strictmode.Violation;
+
 import org.mate.MATE;
+import org.mate.accessibility.check.screenbased.ScreenBasedAccessibilityViolationChecker;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.widgetbased.FormControlLabelCheck;
 import org.mate.accessibility.check.widgetbased.IWidgetAccessibilityCheck;
@@ -12,9 +15,7 @@ import java.util.List;
 
 public class AccessibilityViolationChecker {
 
-
-
-
+    public static List<AccessibilityViolation> violations = new ArrayList<>();
 
     public static void runAccessibilityChecks(IScreenState state){
 
@@ -33,6 +34,7 @@ public class AccessibilityViolationChecker {
 
         //widget based
         WidgetBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
+        ScreenBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
     }
 
 

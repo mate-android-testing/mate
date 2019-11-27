@@ -1,4 +1,4 @@
-package org.mate.accessibility.check.screenbased;
+package org.mate.accessibility.check.widgetbased;
 
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
@@ -18,19 +18,8 @@ public class MultipleContentDescCheck implements IWidgetAccessibilityCheck {
 
     private List<String> allDescsAndHints;
 
-    public MultipleContentDescCheck(IScreenState state){
-        allDescsAndHints = new ArrayList<>();
-        for (Widget widget: state.getWidgets()){
-
-                if (!widget.getContentDesc().equals(""))
-                    allDescsAndHints.add(widget.getContentDesc());
-
-                if (!widget.getHint().equals("")) {
-                    if (!widget.getContentDesc().equals(widget.getHint()))
-                        allDescsAndHints.add(widget.getHint());
-                }
-        }
-
+    public MultipleContentDescCheck(){
+        allDescsAndHints = null;
     }
 
     private int count(String text){
@@ -44,6 +33,10 @@ public class MultipleContentDescCheck implements IWidgetAccessibilityCheck {
 
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
+
+        if (allDescsAndHints==null)
+            detectLabels(state);
+
         if (widget.getContentDesc().equals("") && widget.getHint().equals(""))
             return null;
 
@@ -58,6 +51,20 @@ public class MultipleContentDescCheck implements IWidgetAccessibilityCheck {
         }
 
         return null;
+    }
+
+    private void detectLabels(IScreenState state) {
+        allDescsAndHints = new ArrayList<>();
+        for (Widget widget: state.getWidgets()){
+
+            if (!widget.getContentDesc().equals(""))
+                allDescsAndHints.add(widget.getContentDesc());
+
+            if (!widget.getHint().equals("")) {
+                if (!widget.getContentDesc().equals(widget.getHint()))
+                    allDescsAndHints.add(widget.getHint());
+            }
+        }
     }
 
 }
