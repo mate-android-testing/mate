@@ -1,6 +1,8 @@
 package org.mate.ui;
 
 
+import org.mate.MATE;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +24,7 @@ public class Widget {
     private String contentDesc;
     private String labeledBy;
     private boolean showingHintText;
+    private String color;
 
     private boolean contextClickable;
     private boolean importantForAccessibility;
@@ -71,7 +74,7 @@ public class Widget {
         this.idByActivity = idByActivity;
         usedAsStateDiff = false;
         hint = "";
-
+        color = "";
     }
 
     public boolean isContextClickable() {
@@ -80,6 +83,14 @@ public class Widget {
 
     public void setContextClickable(boolean contextClickable) {
         this.contextClickable = contextClickable;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public boolean isHasChildren() {
@@ -255,7 +266,7 @@ public class Widget {
     }
 
     public boolean isEditable() {
-
+        //MATE.log("--Analyse if class i/s editable: " + clazz);
         if (clazz.contains("android.widget.EditText"))
             return true;
         if (clazz.contains("AppCompatEditText"))
@@ -277,14 +288,17 @@ public class Widget {
         if (clazz.contains("TextInputEditText"))
             return true;
 
-        Class<?> clazz = null;
+
+        Class<?> clazzx = null;
+        //MATE.log("Analyse if class is editable: " + clazzx);
         try {
-            clazz = Class.forName(this.getClazz());
-            boolean editType = 	android.widget.EditText.class.isAssignableFrom(clazz);
+            clazzx = Class.forName(clazz);
+            //MATE.log("Analyse if class is editable: " + clazzx);
+            boolean editType = 	android.widget.EditText.class.isAssignableFrom(clazzx);
             if (editType)
                 return true;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            MATE.log("ERRO - class not found: " + clazzx);
         }
 
 
@@ -533,6 +547,7 @@ public class Widget {
             if (this.clazz.contains(excluded))
                 return false;
         }
+
         if (!this.isActionable() && !this.getClazz().contains("Text"))
             return false;
 

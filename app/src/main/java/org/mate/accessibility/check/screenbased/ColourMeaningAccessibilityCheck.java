@@ -7,6 +7,7 @@ import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
@@ -16,6 +17,8 @@ import java.util.List;
 
 public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityCheck {
 
+    private List<IScreenState> visitedStates;
+
     private List<Double> luminancesLow;
     private List<Double> luminancesHigh;
 
@@ -24,6 +27,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
     public ColourMeaningAccessibilityCheck(){
         luminancesLow= null;
         luminancesHigh = null;
+        visitedStates = new ArrayList<IScreenState>();
     }
 
     private void detectColours(IScreenState state){
@@ -36,6 +40,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             if (!widget.getText().equals("")){
                 String luminances = EnvironmentManager.getLuminances(state.getPackageName(),state.getId(),widget);
                 if (!luminances.equals("0,0")) {
+                    widget.setColor(luminances);
                     //luminances.add(luminance);
                     MATE.log("##Luminance: " + luminances);
                     String parts[] = luminances.split(",");
@@ -67,12 +72,33 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             }
         }
 
+
     }
 
     @Override
     public AccessibilityViolation check(IScreenState state) {
-        detectColours(state);
         String extraInfo = "";
+
+        IScreenState visitedState =stateHasBeenVisited(state);
+        if (visitedState!=null){
+            EnvironmentManager.screenShot(state.getPackageName(),visitedState.getId()+"_");
+            state.setId(visitedState.getId()+"_");
+            detectColours(state);
+            MATE.log("CHECK IF COLOR CHANGED");
+            //if state has been visited
+            //   check whether any of their colors have changed
+            if (state.differentColor(visitedState)){
+                extraInfo = "Same state, different colors for some widgets!";
+                return new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
+                //MATE.log("COR DIFERENTE");
+            }
+        }
+        else{
+            detectColours(state);
+            MATE.log("ADD STATE TO LIST");
+            visitedStates.add(state);
+        }
+
 
         boolean exceedNumberColorsByType = false;
 
@@ -81,8 +107,9 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             MATE.log("LL " + widgetType);
             List<String> distinctCombinations = new ArrayList<String>();
             for (String lum: luminances){
-                String parts[] = lum.split(",");
 
+                /*
+                String parts[] = lum.split(",");
                 String lowparts[] = parts[0].split(":");
                 String highparts[] = parts[1].split(":");
 
@@ -93,7 +120,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
                 int rl = Integer.valueOf(lowparts[0]);
                 int gl = Integer.valueOf(lowparts[1]);
                 int bl = Integer.valueOf(lowparts[2]);
-
+*/
                 MATE.log("   # "+lum);
                 if (!distinctCombinations.contains(lum))
                     distinctCombinations.add(lum);
@@ -118,5 +145,16 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         //   B - THE COLOUR OF THE TEXT ASSOCIATED WITH OBJECTS OF THE SAME TYPE (CHECK PARENT/CONTAINER/BUTTON)
 
 
+    }
+
+
+    private IScreenState stateHasBeenVisited(IScreenState currentScreenState) {
+        List<IScreenState> recordedScreenStates = visitedStates;
+        for (IScreenState recordedScreenState : recordedScreenStates) {
+            if (recordedScreenState.equals(currentScreenState)) {
+                return recordedScreenState;
+            }
+        }
+        return null;
     }
 }

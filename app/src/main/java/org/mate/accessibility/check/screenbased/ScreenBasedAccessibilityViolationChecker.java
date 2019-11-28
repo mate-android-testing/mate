@@ -31,7 +31,7 @@ public class ScreenBasedAccessibilityViolationChecker {
     public static void runAccessibilityChecks(IScreenState state) {
 
         screenBasedChecks = createScreenBasedAccessibilityList();
-        MATE.log("RUN WIDGET BASED CHECKS");
+        MATE.log(">>SCREEN BASED CHECKS");
 
         for (IScreenAccessibilityCheck screenCheck: screenBasedChecks){
             AccessibilityViolation violation = screenCheck.check(state);
@@ -41,6 +41,8 @@ public class ScreenBasedAccessibilityViolationChecker {
             }
 
         }
+
+        MATE.log("<<SCREEN BASED CHECKS");
 
     }
 }

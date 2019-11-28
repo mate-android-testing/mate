@@ -26,4 +26,5 @@ public interface IScreenState {
     public void updatePheromone(Action triggeredAction);
     public Map<Action,Float> getActionsWithPheromone();
     public AccessibilityNodeInfo getRootAccessibilityNodeInfo();
+    public boolean differentColor(IScreenState visitedState);
 }

@@ -3,19 +3,23 @@ package org.mate.exploration.manual;
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 public class CheckCurrentScreen {
 
     public void scanScreen(){
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
+
         EnvironmentManager.screenShot(screenState.getPackageName(),screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
-
-        //MATE.log("Widgets: " );
 
         for (Widget w: screenState.getWidgets()){
             MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  IFA: " + w.isImportantForAccessibility() + "  AFOC: " + w.isAccessibilityFocused() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " hint: " + w.getHint() + "  "+w.getContentDesc() + " visible: " + w.isVisibleToUser()+ " selected: " + w.isSelected() + " - " + w.isChecked());
@@ -27,9 +31,20 @@ public class CheckCurrentScreen {
             MATE.log("");
         }
 
-        MATE.log("");
-
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+
+        try {
+            MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            MATE.log("WAIT WAIT WAIT");
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+
+
 
         //ContentResizingAccessibilityCheck contentResizingAccessibilityCheck = new ContentResizingAccessibilityCheck();
         //contentResizingAccessibilityCheck.check(screenState);
@@ -61,4 +76,5 @@ public class CheckCurrentScreen {
 
         MATE.log("END OF CURRENT SCREEN VALIDATION");
     }
+
 }

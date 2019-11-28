@@ -322,6 +322,16 @@ public class UIAbstractionLayer {
         return true;
     }
 
+    public IScreenState getStateFromModel(IScreenState screenState) {
+        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
+        for (IScreenState recordedScreenState : recordedScreenStates) {
+            if (recordedScreenState.equals(screenState)) {
+                return recordedScreenState;
+            }
+        }
+        return null;
+    }
+
     public enum ActionResult {
         FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
     }

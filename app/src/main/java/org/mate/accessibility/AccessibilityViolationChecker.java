@@ -33,7 +33,9 @@ public class AccessibilityViolationChecker {
         //new checks
 
         //widget based
+        MATE.log("Widget based checks");
         WidgetBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
+        MATE.log("Screen based checks");
         ScreenBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
     }
 

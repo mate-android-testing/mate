@@ -40,6 +40,7 @@ public class WidgetBasedAccessibilityViolationChecker {
         for (Widget widget: state.getWidgets()){
 
             for (IWidgetAccessibilityCheck widgetCheck: widgetBasedChecks){
+                MATE.log("RUN "+widgetCheck.getClass());
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
                 if (violation!=null) {
                     MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
