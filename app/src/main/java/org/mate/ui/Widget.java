@@ -25,6 +25,8 @@ public class Widget {
     private String labeledBy;
     private boolean showingHintText;
     private String color;
+    private String maxminLum;
+    private boolean focused;
 
     private boolean contextClickable;
     private boolean importantForAccessibility;
@@ -89,8 +91,28 @@ public class Widget {
         return color;
     }
 
+    public String getMaxminLum() {
+        return maxminLum;
+    }
+
+    public void setMaxminLum(String maxminLum) {
+        this.maxminLum = maxminLum;
+    }
+
     public void setColor(String color) {
-        this.color = color;
+
+        String parts[] = color.split("#");
+        if (parts.length==2) {
+            this.color = parts[0];
+            setMaxminLum(parts[1]);
+        }
+        else{
+            this.color = color;
+            setMaxminLum("");
+        }
+
+
+
     }
 
     public boolean isHasChildren() {
@@ -674,5 +696,13 @@ public class Widget {
 
     public boolean isActionable() {
         return this.isEditable()||this.isClickable()||this.isLongClickable()||this.isSpinnerType()||this.isCheckable();
+    }
+
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
+    public boolean isFocused(){
+        return focused;
     }
 }

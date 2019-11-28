@@ -27,6 +27,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks.add(new MultipleContentDescCheck());
             widgetBasedChecks.add(new SpacingAccessibilityCheck());
             widgetBasedChecks.add(new DescriptiveLinksCheck());
+            widgetBasedChecks.add(new VisibleFocusCheck());
         }
 
         return widgetBasedChecks;

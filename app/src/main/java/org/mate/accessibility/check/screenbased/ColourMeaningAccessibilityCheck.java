@@ -37,7 +37,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         luminancesLow = new ArrayList<Double>();
         luminancesHigh = new ArrayList<Double>();
         for (Widget widget: state.getWidgets()){
-            if (!widget.getText().equals("")){
+            if (widget.isActionable()){
                 String luminances = EnvironmentManager.getLuminances(state.getPackageName(),state.getId(),widget);
                 if (!luminances.equals("0,0")) {
                     widget.setColor(luminances);
@@ -87,7 +87,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             MATE.log("CHECK IF COLOR CHANGED");
             //if state has been visited
             //   check whether any of their colors have changed
-            if (state.differentColor(visitedState)){
+            if (visitedState.differentColor(state)){
                 extraInfo = "Same state, different colors for some widgets!";
                 return new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
                 //MATE.log("COR DIFERENTE");
