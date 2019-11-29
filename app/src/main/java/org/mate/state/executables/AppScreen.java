@@ -263,20 +263,6 @@ public class AppScreen {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 widget.setShowingHintText(obj.isShowingHintText());
             }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-                MATE.log(widget.getClazz() + " " + widget.getText() + "  " + widget.getHint());
-                MATE.log("EXTRA INFO");
-                if (obj.getAvailableExtraData()!=null){
-                    for (String st: obj.getAvailableExtraData()){
-                        MATE.log(st);
-                    }
-                }
-                MATE.log("####");
-            }
-
-
         }
 
         widget.setFocused(obj.isFocused());
