@@ -337,6 +337,12 @@ public class EnvironmentManager {
         return coveredPercentages;
     }
 
+    public String getLastCrashStackTrace() {
+        return sendMessage(new Message.MessageBuilder("/crash/stacktrace")
+                .withParameter("deviceId", emulator)
+                .build()).getParameter("stacktrace");
+    }
+
     public void screenShot(String packageName, String nodeId) {
         String cmd = "screenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
         tunnelLegacyCmd(cmd);

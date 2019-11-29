@@ -2,6 +2,7 @@ package org.mate.model;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
@@ -32,6 +33,7 @@ public class TestCase {
     private HashMap<String, String> statesMap;
     private HashMap<String, Integer> featureVector;
     private Optional<Integer> desiredSize = Optional.none();
+    private String crashStackTrace = null;
 
 
     public TestCase(String id){
@@ -110,25 +112,41 @@ public class TestCase {
         this.id = id;
     }
 
-    public void addEvent(Action event){this.eventSequence.add(event);};
+    public void addEvent(Action event) {
+        this.eventSequence.add(event);
+    }
 
-    public void updateVisitedActivities(String activity){this.visitedActivities.add(activity);};
+    public void updateVisitedActivities(String activity) {
+        this.visitedActivities.add(activity);
+    }
 
     public Set<String> getVisitedActivities() {
         return visitedActivities;
     }
 
-    public void updateVisitedStates(IScreenState GUIState){this.visitedStates.add(GUIState.getId());};
+    public void updateVisitedStates(IScreenState GUIState) {
+        this.visitedStates.add(GUIState.getId());
+    }
 
     public Set<String> getVisitedStates() {
         return visitedStates;
     }
 
-    public List<Action> getEventSequence(){return this.eventSequence;};
+    public List<Action> getEventSequence() {
+        return this.eventSequence;
+    }
 
-    public boolean getCrashDetected(){return this.crashDetected;};
+    public boolean getCrashDetected() {
+        return this.crashDetected;
+    }
 
-    public void setCrashDetected(){this.crashDetected=true;};
+    public void setCrashDetected() {
+        this.crashDetected=true;
+    }
+
+    public String getCrashStackTrace() {
+        return crashStackTrace;
+    }
 
     public void setNovelty(float novelty) {
         this.novelty = novelty;
@@ -247,6 +265,9 @@ public class TestCase {
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
+                if (Properties.RECORD_STACK_TRACE) {
+                    crashStackTrace = Registry.getEnvironmentManager().getLastCrashStackTrace();
+                }
             case SUCCESS_OUTBOUND:
                 return false;
             case FAILURE_UNKNOWN:
