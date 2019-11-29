@@ -73,7 +73,7 @@ public class Properties {
     public static boolean STORE_COVERAGE = true;
 
     // use LINE_COVERAGE as default
-    public static Coverage COVERAGE = Coverage.BRANCH_COVERAGE;
+    public static Coverage COVERAGE = Coverage.LINE_COVERAGE;
 
 
     // Primitive actions or widget based actions?
