@@ -66,11 +66,11 @@ public class EnvironmentManager {
     }
 
     public String tunnelLegacyCmd(String cmd) {
-        Message message = new Message.MessageBuilder("wrapped legacy command")
+        Message message = new Message.MessageBuilder("/legacy")
                 .withParameter("cmd", cmd)
                 .build();
         Message response = sendMessage(message);
-        if (!response.getSubject().equals("wrapped legacy response")) {
+        if (!response.getSubject().equals("/legacy")) {
             StringBuilder sb = new StringBuilder("Receive unexpected message with subject: <");
             sb.append(response.getSubject());
             for (Map.Entry<String, String> parameterEntry : response.getParameters().entrySet()) {
