@@ -37,7 +37,7 @@ public class EnvironmentManager {
     }
 
     public void close() throws IOException {
-        sendMessage(new Message("close connection"));
+        sendMessage(new Message("/close"));
         active = false;
         server.close();
     }
