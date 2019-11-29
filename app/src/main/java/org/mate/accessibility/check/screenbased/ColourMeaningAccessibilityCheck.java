@@ -3,6 +3,7 @@ package org.mate.accessibility.check.screenbased;
 import android.os.Build;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
@@ -38,7 +39,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         luminancesHigh = new ArrayList<Double>();
         for (Widget widget: state.getWidgets()){
             if (widget.isActionable()){
-                String luminances = EnvironmentManager.getLuminances(state.getPackageName(),state.getId(),widget);
+                String luminances = Registry.getEnvironmentManager().getLuminances(state.getPackageName(),state.getId(),widget);
                 if (!luminances.equals("0,0")) {
                     widget.setColor(luminances);
                     //luminances.add(luminance);
@@ -81,7 +82,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
 
         IScreenState visitedState =stateHasBeenVisited(state);
         if (visitedState!=null){
-            EnvironmentManager.screenShot(state.getPackageName(),visitedState.getId()+"_");
+            Registry.getEnvironmentManager().screenShot(state.getPackageName(),visitedState.getId()+"_");
             state.setId(visitedState.getId()+"_");
             detectColours(state);
             MATE.log("CHECK IF COLOR CHANGED");
