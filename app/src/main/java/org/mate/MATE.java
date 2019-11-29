@@ -1,13 +1,19 @@
 package org.mate;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
@@ -112,6 +118,18 @@ public class MATE {
             throw new IllegalStateException("Unable to setup EnvironmentManager", e);
         }
         Registry.registerEnvironmentManager(environmentManager);
+
+        Context context = InstrumentationRegistry.getTargetContext();
+        AccessibilityManager accMger = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        MATE.log("AccMger is enabled: " + accMger.isEnabled());
+        MATE.log("AccMger is touch exp enabled: " + accMger.isTouchExplorationEnabled());
+
+
+
+        List<AccessibilityServiceInfo> accServices = accMger.getInstalledAccessibilityServiceList();
+        for (AccessibilityServiceInfo accInfo: accServices){
+            MATE.log(accInfo.getId() + " " + accInfo.getSettingsActivityName());
+        }
 
         //get timeout from server using EnvironmentManager
         long timeout = Registry.getEnvironmentManager().getTimeout();

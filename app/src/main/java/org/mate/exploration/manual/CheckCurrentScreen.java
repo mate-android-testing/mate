@@ -1,5 +1,10 @@
 package org.mate.exploration.manual;
 
+import android.app.UiAutomation;
+import android.os.Build;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
+
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolationChecker;
@@ -12,9 +17,30 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+
 public class CheckCurrentScreen {
 
     public void scanScreen(){
+
+
+        UiAutomation uiAutomation = getInstrumentation().getUiAutomation();
+        List<AccessibilityWindowInfo> windowsInfo = uiAutomation.getWindows();
+        MATE.log("windows: " + windowsInfo.size());
+        AccessibilityNodeInfo ani = uiAutomation.getRootInActiveWindow();
+        if (ani!=null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                MATE.log("--" + String.valueOf(ani.getPaneTitle()) + " - " + ani.getViewIdResourceName());
+                MATE.log(String.valueOf(ani.getChildCount()));
+            }
+            for (AccessibilityWindowInfo awi : windowsInfo) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    MATE.log(String.valueOf(awi.getTitle()));
+                }
+
+            }
+        }
+
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
