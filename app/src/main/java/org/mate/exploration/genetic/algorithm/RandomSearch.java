@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
@@ -62,16 +63,16 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
 
                 if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
 
-                    EnvironmentManager.storeBranchCoverage(chromosome);
+                    Registry.getEnvironmentManager().storeBranchCoverage(chromosome);
 
                     MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
-                            + EnvironmentManager.getBranchCoverage(chromosome));
+                            + Registry.getEnvironmentManager().getBranchCoverage(chromosome));
                 }
             }
         }
 
         if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
-            MATE.log_acc("Accumulated Coverage: " + EnvironmentManager.getBranchCoverage());
+            MATE.log_acc("Accumulated Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
         }
     }
 
