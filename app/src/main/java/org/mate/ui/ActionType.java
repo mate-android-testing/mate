@@ -4,6 +4,7 @@ public enum ActionType {
     CLICK,
     LONG_CLICK,
     TYPE_TEXT,
+    TYPE_SPECIFIC_TEXT,
     SWIPE_UP,
     SWIPE_DOWN,
     SWIPE_LEFT,

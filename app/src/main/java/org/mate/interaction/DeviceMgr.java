@@ -55,6 +55,7 @@ public class DeviceMgr implements IApp {
     public void executeAction(PrimitiveAction action) throws AUTCrashException{
         MATE.log(" ____ execute primitive action at " + action.getX() + ", " + action.getY());
 
+
         switch (action.getActionType()) {
             case CLICK:
                 device.click(action.getX(), action.getY());
@@ -88,6 +89,7 @@ public class DeviceMgr implements IApp {
                 device.pressMenu();
                 break;
 
+
             default:
                 throw new IllegalArgumentException("Action type " + action.getActionType() + " not implemented for primitive actions.");
         }
@@ -119,6 +121,9 @@ public class DeviceMgr implements IApp {
             case TYPE_TEXT:
                 handleEdit(action);
                 break;
+
+            case TYPE_SPECIFIC_TEXT:
+                handleEdit(action);
 
             case CLEAR_WIDGET:
                 handleClear(selectedWidget);
@@ -267,7 +272,14 @@ public class DeviceMgr implements IApp {
     public void handleEdit(WidgetAction action){
 
         Widget widget = action.getWidget();
-        String textData = generateTextData(action);
+        String textData = "";
+
+        if (action.getExtraInfo().equals(""))
+           textData = generateTextData(action);
+        else
+            textData = action.getExtraInfo();
+
+        MATE.log("TEXT DATA: " + textData);
 
         if (widget.getResourceID().equals("")){
             if (!widget.getText().equals("")) {
