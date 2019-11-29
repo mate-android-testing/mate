@@ -3,6 +3,7 @@ package org.mate.accessibility.check.widgetbased;
 import android.os.Build;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
@@ -38,10 +39,10 @@ public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
             if (!sameStatesID.contains(newID)){
                 sameStatesID.add(newID);
                 state.setId(newID);
-                EnvironmentManager.screenShot(state.getPackageName(),visitedState.getId());
+                Registry.getEnvironmentManager().screenShot(state.getPackageName(),visitedState.getId());
             }
 
-            String luminances = EnvironmentManager.getLuminances(state.getPackageName(),state.getId(),widget);
+            String luminances = Registry.getEnvironmentManager().getLuminances(state.getPackageName(),state.getId(),widget);
             if (!luminances.equals("0,0")) {
                 widget.setColor(luminances);
             }
