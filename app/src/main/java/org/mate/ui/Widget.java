@@ -1,6 +1,8 @@
 package org.mate.ui;
 
 
+import org.mate.MATE;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +24,9 @@ public class Widget {
     private String contentDesc;
     private String labeledBy;
     private boolean showingHintText;
+    private String color;
+    private String maxminLum;
+    private boolean focused;
 
     private boolean contextClickable;
     private boolean importantForAccessibility;
@@ -71,7 +76,7 @@ public class Widget {
         this.idByActivity = idByActivity;
         usedAsStateDiff = false;
         hint = "";
-
+        color = "";
     }
 
     public boolean isContextClickable() {
@@ -80,6 +85,34 @@ public class Widget {
 
     public void setContextClickable(boolean contextClickable) {
         this.contextClickable = contextClickable;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public String getMaxminLum() {
+        return maxminLum;
+    }
+
+    public void setMaxminLum(String maxminLum) {
+        this.maxminLum = maxminLum;
+    }
+
+    public void setColor(String color) {
+
+        String parts[] = color.split("#");
+        if (parts.length==2) {
+            this.color = parts[0];
+            setMaxminLum(parts[1]);
+        }
+        else{
+            this.color = color;
+            setMaxminLum("");
+        }
+
+
+
     }
 
     public boolean isHasChildren() {
@@ -255,7 +288,7 @@ public class Widget {
     }
 
     public boolean isEditable() {
-
+        //MATE.log("--Analyse if class i/s editable: " + clazz);
         if (clazz.contains("android.widget.EditText"))
             return true;
         if (clazz.contains("AppCompatEditText"))
@@ -277,14 +310,17 @@ public class Widget {
         if (clazz.contains("TextInputEditText"))
             return true;
 
-        Class<?> clazz = null;
+
+        Class<?> clazzx = null;
+        //MATE.log("Analyse if class is editable: " + clazzx);
         try {
-            clazz = Class.forName(this.getClazz());
-            boolean editType = 	android.widget.EditText.class.isAssignableFrom(clazz);
+            clazzx = Class.forName(clazz);
+            //MATE.log("Analyse if class is editable: " + clazzx);
+            boolean editType = 	android.widget.EditText.class.isAssignableFrom(clazzx);
             if (editType)
                 return true;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            MATE.log("ERRO - class not found: " + clazzx);
         }
 
 
@@ -533,6 +569,7 @@ public class Widget {
             if (this.clazz.contains(excluded))
                 return false;
         }
+
         if (!this.isActionable() && !this.getClazz().contains("Text"))
             return false;
 
@@ -659,5 +696,13 @@ public class Widget {
 
     public boolean isActionable() {
         return this.isEditable()||this.isClickable()||this.isLongClickable()||this.isSpinnerType()||this.isCheckable();
+    }
+
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
+    public boolean isFocused(){
+        return focused;
     }
 }

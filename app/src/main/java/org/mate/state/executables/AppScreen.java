@@ -278,6 +278,9 @@ public class AppScreen {
 
 
         }
+
+        widget.setFocused(obj.isFocused());
+
         if (parent!=null)
             parent.addChild(widget);
 

@@ -2,6 +2,8 @@ package org.mate.state.executables;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import org.mate.MATE;
+import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
@@ -362,6 +364,59 @@ public class ActionsScreenState extends AbstractScreenState {
     @Override
     public AccessibilityNodeInfo getRootAccessibilityNodeInfo() {
         return rootNodeInfo;
+    }
+
+    @Override
+    public boolean differentColor(IScreenState visitedState) {
+        if (visitedState==null) {
+            MATE.log("visited state = null");
+            return true;
+        }
+        ActionsScreenState that = (ActionsScreenState) visitedState;
+
+        List<Widget> thisWidgets = this.getWidgets();
+        List<Widget> otherWidgets = visitedState.getWidgets();
+
+        boolean found = false;
+        for (Widget wThis: thisWidgets){
+            //search by id
+            for (Widget wOther: otherWidgets){
+                if (wThis.getId().equals(wOther.getId())){
+                    if (wThis.getText().equals(wOther.getText())){
+                        if (!wThis.getColor().equals("")) {
+                            MATE.log("byID compare: " + wThis.getId() + "-" + wThis.getText() + ": " + wThis.getColor() + "  vs  " + wOther.getId() + "-" + wOther.getText() + ": " + wOther.getColor());
+                            MATE.log(" foc: " + wThis.isFocused() + "  foc: "+ wOther.isFocused());
+                        }
+
+                        found = true;
+                        if (!wOther.getColor().equals(wThis.getColor())) {
+                            if (!wOther.isFocused()&& wThis.isFocused()==wOther.isFocused())
+                                return true;
+                        }
+                    }
+                }
+            }
+
+            if (!found){
+                //search by text
+                for (Widget wOther: otherWidgets){
+                    if (wThis.getText().equals(wOther.getText())){
+                        found = true;
+                        if (!wThis.getColor().equals("")) {
+                            MATE.log("by text compare: " + wThis.getId() + "-" + wThis.getText() + ": " + wThis.getColor() + "  vs  " + wOther.getId() + "-" + wOther.getText() + ": " + wOther.getColor());
+                            MATE.log(" foc: " + wThis.isFocused() + "  foc: "+ wOther.isFocused());
+                        }
+                        //MATE.log("compare: " + wThis.getId()+"-"+wThis.getClazz()+": "+wThis.getColor()+"  vs  " + wOther.getId()+"-"+wOther.getClazz()+": " + wOther.getColor());
+                        if (!wOther.getColor().equals(wThis.getColor())){
+                            if (!wOther.isFocused() && wThis.isFocused()==wOther.isFocused())
+                                return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+
     }
 
 }

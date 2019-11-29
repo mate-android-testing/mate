@@ -3,9 +3,7 @@ package org.mate.accessibility;
 public class AccessibilityViolationTypes {
 
 
-    public static final String[] NAMES = new String[15];
-
-
+    public static final String[] NAMES = new String[16];
 
     static {
         NAMES[1] = "EDITABLE-CONTENT-DESC";
@@ -22,6 +20,7 @@ public class AccessibilityViolationTypes {
         NAMES[12] = "SPACING";
         NAMES[13] = "HIDDEN-DECORATIVE-CONTENT";
         NAMES[14] = "DESCRIPTIVE-LINK";
+        NAMES[14] = "VISIBLE-FOCUS";
     }
 
     public static final int EDITABLE_CONTENT_DESC = 1;
@@ -38,7 +37,7 @@ public class AccessibilityViolationTypes {
     public static final int SPACING = 12;
     public static final int HIDDEN_DECORATIVE_CONTENT = 13;
     public static final int DESCRIPTIVE_LINKS = 14;
-
+    public static final int VISIBLE_FOCUS = 15;
 
 
 
