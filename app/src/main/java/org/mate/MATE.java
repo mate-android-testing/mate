@@ -179,12 +179,14 @@ public class MATE {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    // init the CFG
-                    boolean isInit = Registry.getEnvironmentManager().initCFG();
+                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                        // init the CFG
+                        boolean isInit = Registry.getEnvironmentManager().initCFG();
 
-                    if (!isInit) {
-                        MATE.log("Couldn't initialise CFG! Aborting.");
-                        throw new IllegalStateException("Graph initialisation failed!");
+                        if (!isInit) {
+                            MATE.log("Couldn't initialise CFG! Aborting.");
+                            throw new IllegalStateException("Graph initialisation failed!");
+                        }
                     }
 
                     final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
@@ -206,12 +208,14 @@ public class MATE {
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    // init the CFG
-                    boolean isInit = Registry.getEnvironmentManager().initCFG();
+                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                        // init the CFG
+                        boolean isInit = Registry.getEnvironmentManager().initCFG();
 
-                    if (!isInit) {
-                        MATE.log("Couldn't initialise CFG! Aborting.");
-                        throw new IllegalStateException("Graph initialisation failed!");
+                        if (!isInit) {
+                            MATE.log("Couldn't initialise CFG! Aborting.");
+                            throw new IllegalStateException("Graph initialisation failed!");
+                        }
                     }
 
                     final IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
@@ -289,12 +293,14 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    // init the CFG
-                    boolean isInit = Registry.getEnvironmentManager().initCFG();
+                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                        // init the CFG
+                        boolean isInit = Registry.getEnvironmentManager().initCFG();
 
-                    if (!isInit) {
-                        MATE.log("Couldn't initialise CFG! Aborting.");
-                        throw new IllegalStateException("Graph initialisation failed!");
+                        if (!isInit) {
+                            MATE.log("Couldn't initialise CFG! Aborting.");
+                            throw new IllegalStateException("Graph initialisation failed!");
+                        }
                     }
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
@@ -411,12 +417,14 @@ public class MATE {
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    // init the CFG
-                    boolean isInit = Registry.getEnvironmentManager().initCFG();
+                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                        // init the CFG
+                        boolean isInit = Registry.getEnvironmentManager().initCFG();
 
-                    if (!isInit) {
-                        MATE.log("Couldn't initialise CFG! Aborting.");
-                        throw new IllegalStateException("Graph initialisation failed!");
+                        if (!isInit) {
+                            MATE.log("Couldn't initialise CFG! Aborting.");
+                            throw new IllegalStateException("Graph initialisation failed!");
+                        }
                     }
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
