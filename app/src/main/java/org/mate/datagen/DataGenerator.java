@@ -4,6 +4,8 @@ package org.mate.datagen;
  * Created by marceloe on 14/10/16.
  */
 
+import org.mate.MATE;
+
 import java.util.List;
 import java.util.Random;
 
@@ -82,6 +84,16 @@ public class DataGenerator {
 
         return getRandomText(size);
 
+    }
+
+    public String getRandomValidNumber() {
+
+        Random random = new Random();
+
+        // produce a number between 0-1000
+        int number = Math.abs((int) (random.nextGaussian() * 1000));
+        MATE.log_acc("Generated Random number: " + number);
+        return String.valueOf(number);
     }
 
     public String getRandomNumber(int size){

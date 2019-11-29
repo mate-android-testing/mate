@@ -11,6 +11,7 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
+import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -191,6 +192,18 @@ public class UIAbstractionLayer {
                 }
             }
             if (change) {
+                continue;
+            }
+
+            // check for google sign in dialog
+            if (screenState.getPackageName().equals("com.google.android.gms")) {
+                try {
+                    // press BACK to return to AUT
+                    deviceMgr.executeAction(new WidgetAction(ActionType.BACK));
+                } catch (AUTCrashException e) {
+                    e.printStackTrace();
+                }
+                change = true;
                 continue;
             }
 

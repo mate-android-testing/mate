@@ -2,6 +2,7 @@ package org.mate.accessibility.check.widgetbased;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WidgetBasedAccessibilityViolationChecker {
+
 
     public WidgetBasedAccessibilityViolationChecker(){}
 
@@ -22,6 +24,9 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks.add(new ContrastRatioAccessibilityCheck());
             widgetBasedChecks.add(new InputTypeCheck());
             widgetBasedChecks.add(new FormLayoutAccessibilityCheck());
+            widgetBasedChecks.add(new MultipleContentDescCheck());
+            widgetBasedChecks.add(new SpacingAccessibilityCheck());
+            widgetBasedChecks.add(new DescriptiveLinksCheck());
         }
 
         return widgetBasedChecks;
@@ -35,10 +40,9 @@ public class WidgetBasedAccessibilityViolationChecker {
         for (Widget widget: state.getWidgets()){
 
             for (IWidgetAccessibilityCheck widgetCheck: widgetBasedChecks){
-                MATE.log("Check: " + widget.getId() + " - " + widget.getText());
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
                 if (violation!=null) {
-                    MATE.log("VIOLATION FOUND: " + violation.getType() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + " - " + violation.getInfo() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                    MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     MATE.log(" -- extra info: " + violation.getInfo());
                 }
             }

@@ -51,6 +51,8 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             }
         } finally {
 
+            testCase.print();
+
             //TODO: remove hack, when better solution implemented (query fitness function)
             LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
@@ -67,7 +69,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
 
                     // TODO: this should be depended on which fitness function is used
-                    BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+                    // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
 
                     Registry.getEnvironmentManager().storeBranchCoverage(chromosome);
 

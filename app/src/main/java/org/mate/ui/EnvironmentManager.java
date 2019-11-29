@@ -342,6 +342,11 @@ public class EnvironmentManager {
         tunnelLegacyCmd(cmd);
     }
 
+    public void screenShotForFlickerDetection(String packageName,String nodeId){
+        String cmd = "flickerScreenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
+        tunnelLegacyCmd(cmd);
+    }
+
     public void clearAppData() {
         String cmd = "clearApp:" + emulator;
         tunnelLegacyCmd(cmd);
@@ -372,6 +377,32 @@ public class EnvironmentManager {
         MATE.log(cmd);
         MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
         return Double.valueOf(tunnelLegacyCmd(cmd));
+    }
+
+    public String getLuminances(String packageName, String stateId, Widget widget){
+        int maxw = MATE.device.getDisplayWidth();
+        int maxh = MATE.device.getDisplayHeight();
+        String cmd = "luminance:";
+        cmd+=emulator+"_"+packageName+":";
+        cmd+=stateId+":";
+        int x1=widget.getX1();
+        int x2=widget.getX2();
+        int y1=widget.getY1();
+        int y2=widget.getY2();
+        int borderExpanded=1;
+        if (x1-borderExpanded>=0)
+            x1-=borderExpanded;
+        if (x2+borderExpanded<=maxw)
+            x2+=borderExpanded;
+        if (y1-borderExpanded>=0)
+            y1-=borderExpanded;
+        if (y2+borderExpanded<=maxh)
+            y2+=borderExpanded;
+        cmd+=x1+","+y1+","+x2+","+y2;
+
+        MATE.log(cmd);
+        MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
+        return tunnelLegacyCmd(cmd);
     }
 
     public void deleteAllScreenShots(String packageName) {

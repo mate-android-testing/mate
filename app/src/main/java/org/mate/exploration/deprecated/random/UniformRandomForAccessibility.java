@@ -5,7 +5,7 @@ import org.mate.Registry;
 import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.screenbased.MultipleContentDescCheck;
+import org.mate.accessibility.check.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
@@ -167,7 +167,7 @@ public class UniformRandomForAccessibility {
         //run accessibility checks implemented by MATE team
 
         //create checker for multiple (duplicate) content description
-        MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
+        MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck();
         //create checker for contrast issues
         ContrastRatioAccessibilityCheck contrastChecker =
                 new ContrastRatioAccessibilityCheck();

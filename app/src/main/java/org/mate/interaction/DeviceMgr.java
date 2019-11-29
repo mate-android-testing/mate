@@ -37,6 +37,9 @@ public class DeviceMgr implements IApp {
     public DeviceMgr(UiDevice device, String packageName){
         this.device = device;
         this.packageName = packageName;
+
+
+
     }
 
     public void executeAction(Action action) throws AUTCrashException{
@@ -374,6 +377,7 @@ public class DeviceMgr implements IApp {
 
             if (inputType.contains("phone") || inputType.contains("number") || inputType.contains("Phone") || inputType.contains("Number")) {
                 textData = dataGen.getRandomValidNumber(maxLengthInt);
+                // textData = dataGen.getRandomValidNumber();
             }
             else
             if (inputType.contains("Email") || inputType.contains("email")) {

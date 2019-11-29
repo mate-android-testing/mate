@@ -5,7 +5,7 @@ import org.mate.Registry;
 import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.screenbased.MultipleContentDescCheck;
+import org.mate.accessibility.check.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -16,8 +16,6 @@ import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
 import java.util.Date;
-
-import static org.mate.MATE.device;
 
 /**
  * Created by geyan on 11/06/2017.
@@ -66,7 +64,7 @@ public class ManualExploration {
                 accChecker.runAccessibilityTests(state);
                 //MATE.log_acc("CHECK CONTRAST");
 
-                MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(state);
+                MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck();
                 ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck();
                 for (Widget widget: state.getWidgets()) {
 

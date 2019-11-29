@@ -23,10 +23,10 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
 
     @Override
     public double getFitness(IChromosome<TestCase> chromosome) {
-        MATE.log("Retrieving Branch Distance...");
+        MATE.log("Retrieving Branch Distance for testcase: " + chromosome.getValue().getId());
         if (cache.containsKey(chromosome)) {
             double branchDistance = cache.get(chromosome);
-            MATE.log("Branch Distance: " + branchDistance);
+            MATE.log("Branch Distance (cached): " + branchDistance);
             return branchDistance;
         } else {
             retrieveFitnessValues(chromosome);
