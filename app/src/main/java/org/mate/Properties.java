@@ -78,4 +78,7 @@ public class Properties {
 
     // Primitive actions or widget based actions?
     public static boolean WIDGET_BASED_ACTIONS = true;
+
+    // stack trace
+    public static boolean RECORD_STACK_TRACE = false;
 }
