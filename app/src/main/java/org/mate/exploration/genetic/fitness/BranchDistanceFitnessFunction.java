@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.model.TestCase;
@@ -56,7 +57,7 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
             * causes the loss of the granted runtime permissions. Thus, we
             * need to grant those permissions after each reset/restart.
              */
-            EnvironmentManager.grantRuntimePermissions(MATE.packageName);
+            Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
 
             Intent intent = new Intent("STORE_TRACES");
             Bundle bundle = new Bundle();
@@ -69,7 +70,7 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
             InstrumentationRegistry.getContext().sendBroadcast(intent);
             // InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
 
-            double branchDistance = EnvironmentManager.getBranchDistance(chromosome);
+            double branchDistance = Registry.getEnvironmentManager().getBranchDistance(chromosome);
             cache.put(chromosome, branchDistance);
             MATE.log("Branch Distance: " + branchDistance);
 

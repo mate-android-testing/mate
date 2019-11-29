@@ -76,10 +76,6 @@ import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
-/**
- * Created by marceloe on 07/03/17.
- */
-
 public class MATE {
 
     public static UiDevice device;
@@ -103,13 +99,25 @@ public class MATE {
     public static Set<String> visitedActivities = new HashSet<String>();
 
     public MATE() {
+        Integer serverPort = null;
         try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
-            EnvironmentManager.port = Integer.valueOf(reader.readLine());
-            MATE.log_acc("Using server port: " + EnvironmentManager.port);
+            serverPort = Integer.valueOf(reader.readLine());
+            MATE.log_acc("Using server port: " + serverPort);
         } catch (IOException e) {
             //ignore: use default port if file does not exists
         }
+        EnvironmentManager environmentManager;
+        try {
+            if (serverPort == null) {
+                environmentManager = new EnvironmentManager();
+            } else {
+                environmentManager = new EnvironmentManager(serverPort);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to setup EnvironmentManager", e);
+        }
+        Registry.registerEnvironmentManager(environmentManager);
 
         Context context = InstrumentationRegistry.getTargetContext();
         AccessibilityManager accMger = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
@@ -124,14 +132,14 @@ public class MATE {
         }
 
         //get timeout from server using EnvironmentManager
-        long timeout = EnvironmentManager.getTimeout();
+        long timeout = Registry.getEnvironmentManager().getTimeout();
         if (timeout == 0)
             timeout = 30; //set default - 30 minutes
         MATE.TIME_OUT = timeout * 60 * 1000;
         MATE.log("TIMEOUT : " + timeout);
 
         //get random length = number of actions before restarting the app
-        long rlength = EnvironmentManager.getRandomLength();
+        long rlength = Registry.getEnvironmentManager().getRandomLength();
         if (rlength == 0)
             rlength = 1000; //default
         MATE.RANDOM_LENGH = rlength;
@@ -159,7 +167,7 @@ public class MATE {
 
     public void testApp(String explorationStrategy) {
 
-        String emulator = EnvironmentManager.detectEmulator(this.packageName);
+        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
         //MATE.log("EMULATOR: " + emulator);
 
         runningTime = new Date().getTime();
@@ -172,7 +180,7 @@ public class MATE {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     // init the CFG
-                    boolean isInit = EnvironmentManager.initCFG();
+                    boolean isInit = Registry.getEnvironmentManager().initCFG();
 
                     if (!isInit) {
                         MATE.log("Couldn't initialise CFG! Aborting.");
@@ -199,7 +207,7 @@ public class MATE {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     // init the CFG
-                    boolean isInit = EnvironmentManager.initCFG();
+                    boolean isInit = Registry.getEnvironmentManager().initCFG();
 
                     if (!isInit) {
                         MATE.log("Couldn't initialise CFG! Aborting.");
@@ -227,7 +235,7 @@ public class MATE {
                 } else if (explorationStrategy.equals("NSGA-II")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
-                    for (String s : EnvironmentManager.getActivityNames()) {
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
                         MATE.log_acc("\t" + s);
                     }
 
@@ -244,7 +252,7 @@ public class MATE {
                 } else if (explorationStrategy.equals("PrimitiveStandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
-                    for (String s : EnvironmentManager.getActivityNames()) {
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
                         MATE.log_acc("\t" + s);
                     }
 
@@ -271,18 +279,18 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(genericGA, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        Registry.getEnvironmentManager().storeCoverageData(genericGA, null);
+                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
                 } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
-                    for (String s : EnvironmentManager.getActivityNames()) {
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
                         MATE.log_acc("\t" + s);
                     }
 
                     // init the CFG
-                    boolean isInit = EnvironmentManager.initCFG();
+                    boolean isInit = Registry.getEnvironmentManager().initCFG();
 
                     if (!isInit) {
                         MATE.log("Couldn't initialise CFG! Aborting.");
@@ -313,17 +321,17 @@ public class MATE {
 
                     if (Properties.STORE_COVERAGE) {
                         if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
-                            EnvironmentManager.storeBranchCoverage();
-                            MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+                            Registry.getEnvironmentManager().storeBranchCoverage();
+                            MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
                         } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
-                            EnvironmentManager.storeCoverageData(genericGA, null);
-                            MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                            Registry.getEnvironmentManager().storeCoverageData(genericGA, null);
+                            MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                         }
                     }
                 } else if (explorationStrategy.equals("Sapienz")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
-                    for (String s : EnvironmentManager.getActivityNames()) {
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
                         MATE.log_acc("\t" + s);
                     }
 
@@ -355,13 +363,13 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(nsga, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        Registry.getEnvironmentManager().storeCoverageData(nsga, null);
+                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
                 } else if (explorationStrategy.equals("HeuristicRandom")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
-                    for (String s : EnvironmentManager.getActivityNames()) {
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
                         MATE.log_acc("\t" + s);
                     }
 
@@ -376,13 +384,13 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(heuristicExploration, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        Registry.getEnvironmentManager().storeCoverageData(heuristicExploration, null);
+                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
-                    for (String s : EnvironmentManager.getActivityNames()) {
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
                         MATE.log_acc("\t" + s);
                     }
 
@@ -397,14 +405,14 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(randomExploration, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
+                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
                     // init the CFG
-                    boolean isInit = EnvironmentManager.initCFG();
+                    boolean isInit = Registry.getEnvironmentManager().initCFG();
 
                     if (!isInit) {
                         MATE.log("Couldn't initialise CFG! Aborting.");
@@ -425,7 +433,7 @@ public class MATE {
                             .withPCrossover(0.7);
 
                     // get the set of branches (branch == objective)
-                    List<String> branches = EnvironmentManager.getBranches();
+                    List<String> branches = Registry.getEnvironmentManager().getBranches();
 
                     // if there are no branches, we can stop
                     if (branches.isEmpty()) {
@@ -450,11 +458,11 @@ public class MATE {
 
                     if (Properties.STORE_COVERAGE) {
                         if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
-                            EnvironmentManager.storeBranchCoverage();
-                            MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+                            Registry.getEnvironmentManager().storeBranchCoverage();
+                            MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
                         } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
-                            EnvironmentManager.storeCoverageData(mosa, null);
-                            MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                            Registry.getEnvironmentManager().storeCoverageData(mosa, null);
+                            MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                         }
                     }
                 } else if (explorationStrategy.equals("Mio")) {
@@ -477,7 +485,7 @@ public class MATE {
 
                     // add specific fitness functions for all activities of the Application Under Test
                     MATE.log_acc("Retrieving source lines...");
-                    List<String> lines = EnvironmentManager.getSourceLines();
+                    List<String> lines = Registry.getEnvironmentManager().getSourceLines();
                     MATE.log_acc("Retrieved " + lines.size() + " lines.");
                     MATE.log_acc("Processing lines...");
                     int count = 1;
@@ -500,8 +508,8 @@ public class MATE {
                     }, MATE.TIME_OUT);
 
                     if (Properties.STORE_COVERAGE) {
-                        EnvironmentManager.storeCoverageData(mio, null);
-                        MATE.log_acc("Total coverage: " + EnvironmentManager.getCombinedCoverage());
+                        Registry.getEnvironmentManager().storeCoverageData(mio, null);
+                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
                 } else if (explorationStrategy.equals("RandomWalk")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
@@ -595,10 +603,14 @@ public class MATE {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            EnvironmentManager.releaseEmulator();
+            Registry.getEnvironmentManager().releaseEmulator();
             //EnvironmentManager.deleteAllScreenShots(packageName);
+            try {
+                Registry.unregisterEnvironmentManager();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
     }
 
     private void checkVisitedActivities(String explorationStrategy) {

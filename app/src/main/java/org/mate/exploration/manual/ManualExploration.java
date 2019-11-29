@@ -1,6 +1,7 @@
 package org.mate.exploration.manual;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
@@ -52,7 +53,7 @@ public class ManualExploration {
 
                 MATE.uiAbstractionLayer.executeAction(manualAction);
                 state = MATE.uiAbstractionLayer.getLastScreenState();
-                EnvironmentManager.screenShot(state.getPackageName(),state.getId());
+                Registry.getEnvironmentManager().screenShot(state.getPackageName(),state.getId());
 
 
                 MATE.logactivity(state.getActivityName());

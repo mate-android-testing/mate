@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
@@ -60,9 +61,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             if (storeCoverage) {
 
                 if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
-                    EnvironmentManager.storeCoverageData(chromosome, null);
+                    Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
 
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getCoverage(chromosome));
 
                 } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
@@ -70,9 +71,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                     // TODO: this should be depended on which fitness function is used
                     // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
 
-                    EnvironmentManager.storeBranchCoverage(chromosome);
+                    Registry.getEnvironmentManager().storeBranchCoverage(chromosome);
 
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getBranchCoverage(chromosome));
                 }
 

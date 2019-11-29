@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.crossover;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -58,12 +59,12 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
         if (storeCoverage) {
             if (!copyTestCasesFromParent1.isEmpty()) {
                 MATE.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
-                EnvironmentManager.copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
+                Registry.getEnvironmentManager().copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
             }
 
             if (!copyTestCasesFromParent2.isEmpty()) {
                 MATE.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
-                EnvironmentManager.copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
+                Registry.getEnvironmentManager().copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
             }
         }
 

@@ -4,9 +4,9 @@ import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
@@ -154,7 +154,7 @@ public class AccessibilitySummaryResults {
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + clazz + ":" + widgetid + ":"+ widgetText+":"+extraInfo;
         flawMsg+=":"+x1+":"+y1+":"+x2+":"+y2;
         MATE.log("SEND FLAW TO SERVER");
-        EnvironmentManager.sendFlawToServer(flawMsg);
+        Registry.getEnvironmentManager().sendFlawToServer(flawMsg);
 
     }
 
@@ -186,7 +186,7 @@ public class AccessibilitySummaryResults {
 
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
         flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
-        EnvironmentManager.sendFlawToServer(flawMsg);
+        Registry.getEnvironmentManager().sendFlawToServer(flawMsg);
 
 
     }

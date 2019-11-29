@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
@@ -62,9 +63,9 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
             if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
 
-                EnvironmentManager.storeCoverageData(mutatedChromosome, null);
+                Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, null);
 
-                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + EnvironmentManager
+                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + Registry.getEnvironmentManager()
                         .getCoverage(mutatedChromosome));
                 MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
 
@@ -73,9 +74,9 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
             } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
 
-                EnvironmentManager.storeBranchCoverage(mutatedChromosome);
+                Registry.getEnvironmentManager().storeBranchCoverage(mutatedChromosome);
 
-                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + EnvironmentManager
+                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + Registry.getEnvironmentManager()
                         .getBranchCoverage(mutatedChromosome));
                 MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
             }

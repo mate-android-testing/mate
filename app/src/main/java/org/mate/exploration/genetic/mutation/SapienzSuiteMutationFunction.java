@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -89,9 +90,9 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
                 if (storeCoverage) {
-                    EnvironmentManager.storeCoverageData(mutatedChromosome, mutatedTestCase);
+                    Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, mutatedTestCase);
 
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getCoverage(chromosome));
                     MATE.log_acc("Found crash: " + String.valueOf(mutatedTestCase.getCrashDetected()));
                 }
@@ -104,7 +105,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         }
 
         if (!copyTestCases.isEmpty()) {
-            EnvironmentManager.copyCoverageData(chromosome, mutatedChromosome, copyTestCases);
+            Registry.getEnvironmentManager().copyCoverageData(chromosome, mutatedChromosome, copyTestCases);
         }
 
         mutatedTestSuite.getTestCases().addAll(executedTestCases);

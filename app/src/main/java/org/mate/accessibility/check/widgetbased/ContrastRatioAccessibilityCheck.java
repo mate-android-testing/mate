@@ -1,5 +1,6 @@
 package org.mate.accessibility.check.widgetbased;
 
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationTypes;
@@ -32,7 +33,7 @@ public class ContrastRatioAccessibilityCheck implements IWidgetAccessibilityChec
         if (!widget.needsContrastChecked())
                 return null;
         contratio=21;
-        double contrastRatio = EnvironmentManager.getContrastRatio(packageName,stateId,widget);
+        double contrastRatio = Registry.getEnvironmentManager().getContrastRatio(packageName,stateId,widget);
         contratio=contrastRatio;
         if (contrastRatio< AccessibilitySettings.MIN_CONTRAST_RATIO)
             return new AccessibilityViolation(AccessibilityViolationTypes.LOW_CONTRAST_RATIO,widget,state,String.valueOf(contrastRatio));

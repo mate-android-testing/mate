@@ -6,6 +6,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -43,7 +44,7 @@ public class CheckCurrentScreen {
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
-        EnvironmentManager.screenShot(screenState.getPackageName(),screenState.getId());
+        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(),screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 
@@ -102,5 +103,4 @@ public class CheckCurrentScreen {
 
         MATE.log("END OF CURRENT SCREEN VALIDATION");
     }
-
 }

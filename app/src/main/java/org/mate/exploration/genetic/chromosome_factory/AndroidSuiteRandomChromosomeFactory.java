@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -36,12 +37,12 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
             if (storeCoverage) {
-                EnvironmentManager.storeCoverageData(chromosome, tc);
+                Registry.getEnvironmentManager().storeCoverageData(chromosome, tc);
             }
         }
 
         if (storeCoverage) {
-            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                     .getCoverage(chromosome));
         }
 

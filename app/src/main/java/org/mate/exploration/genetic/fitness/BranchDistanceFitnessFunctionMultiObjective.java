@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.ui.EnvironmentManager;
@@ -74,7 +75,7 @@ public class BranchDistanceFitnessFunctionMultiObjective implements IFitnessFunc
 
         // computes the branch distance fitness vector for a given test case
         MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> branchDistanceVector = EnvironmentManager.getBranchDistanceVector(chromosome);
+        List<Double> branchDistanceVector = Registry.getEnvironmentManager().getBranchDistanceVector(chromosome);
 
         // if there is no branch distance vector available, we can abort
         if (branchDistanceVector.isEmpty()) {

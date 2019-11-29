@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.mutation;
 
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -36,7 +37,7 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
 
         List<TestCase> copyCoverageDataFor = new ArrayList<>(chromosome.getValue().getTestCases());
         copyCoverageDataFor.remove(randomElementIndex);
-        EnvironmentManager.copyCoverageData(chromosome, mutatedChromosome, copyCoverageDataFor);
+        Registry.getEnvironmentManager().copyCoverageData(chromosome, mutatedChromosome, copyCoverageDataFor);
 
         //Todo: handle coverage
         for (int i = 0; i < chromosome.getValue().getTestCases().size(); i++) {
@@ -44,7 +45,7 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
                 TestCase mutatedTestCase = cutPointMutationFunction.mutate(new Chromosome<>(
                         chromosome.getValue().getTestCases().get(i))).get(0).getValue();
                 mutatedTestSuite.getTestCases().add(mutatedTestCase);
-                EnvironmentManager.storeCoverageData(mutatedChromosome, mutatedTestCase);
+                Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, mutatedTestCase);
             } else {
                 mutatedTestSuite.getTestCases().add(chromosome.getValue().getTestCases().get(i));
             }
