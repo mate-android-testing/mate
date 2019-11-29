@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.crossover;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -152,10 +153,10 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
             if (storeCoverage) {
-                EnvironmentManager.storeCoverageData(chromosome, null);
+                Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
 
                 MATE.log_acc("After test case merge crossover:");
-                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                         .getCoverage(chromosome));
                 MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 

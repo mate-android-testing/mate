@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.fitness;
 
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.ui.EnvironmentManager;
@@ -21,7 +22,7 @@ public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> 
         if (cache.containsKey(chromosome)) {
             return cache.get(chromosome);
         }
-        double fitness = EnvironmentManager.getCoverage(chromosome);
+        double fitness = Registry.getEnvironmentManager().getCoverage(chromosome);
         cache.put(chromosome, fitness);
         return fitness;
     }

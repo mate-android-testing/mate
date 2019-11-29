@@ -17,6 +17,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.content.Context;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.ui.Widget;
 import org.mate.ui.EnvironmentManager;
 
@@ -48,7 +49,7 @@ public class AppScreen {
         device = UiDevice.getInstance(instrumentation);
 
         this.widgets = new ArrayList<>();
-        this.activityName = EnvironmentManager.getCurrentActivityName();
+        this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();
         } else {

@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.core;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -157,11 +158,11 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         }
 
         if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
-            MATE.log_acc("Total Coverage: " + EnvironmentManager.getBranchCoverage());
+            MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
         } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
-            MATE.log_acc("Combined coverage until now: " + EnvironmentManager.getCombinedCoverage());
+            MATE.log_acc("Combined coverage until now: " + Registry.getEnvironmentManager().getCombinedCoverage());
             if (population.size() <= 10) {
-                MATE.log_acc("Combined coverage of current population: " + EnvironmentManager.getCombinedCoverage(population));
+                MATE.log_acc("Combined coverage of current population: " + Registry.getEnvironmentManager().getCombinedCoverage(population));
             }
         }
     }

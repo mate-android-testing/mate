@@ -12,6 +12,7 @@ import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.model.IGUIModel;
@@ -393,7 +394,7 @@ public class DeviceMgr implements IApp {
 
     public void reinstallApp(){
         MATE.log("Reinstall app");
-        EnvironmentManager.clearAppData();
+        Registry.getEnvironmentManager().clearAppData();
         //sleep(1000);
     }
 

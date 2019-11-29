@@ -1,6 +1,7 @@
 package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
@@ -134,7 +135,7 @@ public class UniformRandomForAccessibility {
             currentTime = new Date().getTime();
         }
 
-        EnvironmentManager.sendCommandToServer("FINISH"+ "_" + EnvironmentManager.emulator
+        Registry.getEnvironmentManager().tunnelLegacyCmd("FINISH"+ "_" + Registry.getEnvironmentManager().getEmulator()
                 + selectedScreenState.getPackageName());
         MATE.log_acc("NUMBER_OF_ACTIONS: " + totalNumberOfActions);
     }
@@ -142,7 +143,7 @@ public class UniformRandomForAccessibility {
     private void runAccessibilityChecks(IScreenState state, IScreenState selectedScreenState) {
 
 
-        EnvironmentManager.screenShot(state.getPackageName(),state.getId());
+        Registry.getEnvironmentManager().screenShot(state.getPackageName(),state.getId());
 
         //updates the current activity name
         currentActivityName = state.getActivityName();

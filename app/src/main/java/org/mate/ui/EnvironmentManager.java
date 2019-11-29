@@ -4,135 +4,110 @@ import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
+import org.mate.message.Message;
+import org.mate.message.serialization.Parser;
+import org.mate.message.serialization.Serializer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-
-/**
- * Created by marceloeler on 12/05/17.
- */
+import java.util.Map;
 
 public class EnvironmentManager {
-
-    public static String SERVER_IP = "10.0.2.2";
-    public static int port = 12345;
-    //public static String SERVER_IP = "192.168.1.26";
-
-    public static String emulator=null;
     public static final String ACTIVITY_UNKNOWN = "unknown";
+    private static final String DEFAULT_SERVER_IP = "10.0.2.2";
+    private static final int DEFAULT_PORT = 12345;
+    //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
 
-    public static void releaseEmulator(){
-        String cmd = "releaseEmulator:"+emulator;
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
+    private String emulator = null;
+    private final Socket server;
+    private final Parser messageParser;
+    private boolean active;
 
-            String release="";
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    release = serverResponse;
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-
-        }
+    public EnvironmentManager() throws IOException {
+        this(DEFAULT_PORT);
     }
 
-    public static String detectEmulator(String packageName){
+    public EnvironmentManager(int port) throws IOException {
+        active = true;
+        server = new Socket(DEFAULT_SERVER_IP, port);
+        messageParser = new Parser(server.getInputStream());
+    }
 
-        String cmd = "getEmulator:"+packageName;
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
+    public void close() throws IOException {
+        sendMessage(new Message("close connection"));
+        active = false;
+        server.close();
+    }
 
-
-            String emulatorStr="";
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    emulatorStr = serverResponse;
-                    MATE.log(emulatorStr + " " + emulatorStr.length());
-                    MATE.log("server response: " + emulatorStr);
-                    break;
-                }
-            }
-
-            if (!emulatorStr.equals(""))
-                emulator=emulatorStr;
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-
-        }
-        if (emulator!=null)
-            emulator=emulator.replace(" ","");
-
+    public String getEmulator() {
         return emulator;
-
     }
 
-    public static long getTimeout(){
-        long timeout=0;
-
-        String cmd = "timeout";
+    /**
+     * Send a {@link org.mate.message.Message} to the server and return the response of the server
+     * @param message {@link org.mate.message.Message} that will be send to the server
+     * @return Response {@link org.mate.message.Message} of the server
+     */
+    public Message sendMessage(Message message) {
+        if (!active) {
+            throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
+        }
         try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            String timeoutStr="";
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    timeoutStr = serverResponse;
-                    break;
-                }
-            }
-
-            timeout = Long.valueOf(timeoutStr);
-
-            server.close();
-            output.close();
-            in.close();
-
+            server.getOutputStream().write(Serializer.serialize(message));
+            server.getOutputStream().flush();
         } catch (IOException e) {
             MATE.log("socket error sending");
-            e.printStackTrace();
-            timeout=0;
+            throw new IllegalStateException(e);
         }
-        return timeout;
+        return messageParser.nextMessage();
     }
 
-    public static void copyCoverageData(Object source, Object target, List<? extends Object> entities){
+    public String tunnelLegacyCmd(String cmd) {
+        Message message = new Message.MessageBuilder("wrapped legacy command")
+                .withParameter("cmd", cmd)
+                .build();
+        Message response = sendMessage(message);
+        if (!response.getSubject().equals("wrapped legacy response")) {
+            StringBuilder sb = new StringBuilder("Receive unexpected message with subject: <");
+            sb.append(response.getSubject());
+            for (Map.Entry<String, String> parameterEntry : response.getParameters().entrySet()) {
+                sb.append(">\n\tand parameter with key <")
+                        .append(parameterEntry.getKey())
+                        .append("> and value <")
+                        .append(parameterEntry.getValue());
+            }
+            sb.append(">");
+            throw new IllegalStateException(sb.toString());
+        }
+        return response.getParameter("response");
+    }
+
+    public void releaseEmulator() {
+        String cmd = "releaseEmulator:" + emulator;
+        tunnelLegacyCmd(cmd);
+    }
+
+    public String detectEmulator(String packageName) {
+        String cmd = "getEmulator:" + packageName;
+        String response = tunnelLegacyCmd(cmd);
+        if (response != null && !response.isEmpty()) {
+            emulator = response;
+        }
+        if (emulator != null)
+            emulator = emulator.replace(" ", "");
+        return emulator;
+    }
+
+    public long getTimeout() {
+        long timeout = 0;
+        String cmd = "timeout";
+        return Long.valueOf(tunnelLegacyCmd(cmd));
+    }
+
+    public void copyCoverageData(Object source, Object target, List<? extends Object> entities) {
         StringBuilder sb = new StringBuilder();
         String prefix = "";
         for (Object entity : entities) {
@@ -140,125 +115,35 @@ public class EnvironmentManager {
             prefix = ",";
             sb.append(entity.toString());
         }
-        String cmd = "copyCoverageData:"+emulator+":"+source.toString()+":"+target.toString()
-                +":"+sb.toString();
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
+        String cmd = "copyCoverageData:" + emulator + ":" + source.toString() + ":" + target.toString()
+                + ":" + sb.toString();
+        tunnelLegacyCmd(cmd);
     }
 
-    public static void storeCoverageData(Object o, Object o2){
-        String cmd = "storeCoverageData:"+emulator+":"+o.toString();
+    public void storeCoverageData(Object o, Object o2) {
+        String cmd = "storeCoverageData:" + emulator + ":" + o.toString();
         if (o2 != null) {
             cmd += ":" + o2.toString();
         }
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
+        tunnelLegacyCmd(cmd);
     }
 
 
-    public static String getCurrentActivityName(){
+    public String getCurrentActivityName() {
         String currentActivity = "current_activity";
         if (emulator == null || emulator.isEmpty()) {
             return ACTIVITY_UNKNOWN;
         }
 
-        //String cmd = "adb shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6 | cut -d / -f 2";
-        String cmd = "getActivity:"+emulator;
-        //String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    currentActivity = serverResponse;
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-
-        return currentActivity;
+        String cmd = "getActivity:" + emulator;
+        return tunnelLegacyCmd(cmd);
     }
 
-    public static List<String> getActivityNames() {
+    public List<String> getActivityNames() {
         List<String> activities = new ArrayList<>();
 
-        //String cmd = "adb shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6 | cut -d / -f 2";
-        String cmd = "getActivities:"+emulator;
-        //String cmd = "adb -s " + emulator+" shell dumpsys activity activities | grep mFocusedActivity | cut -d \" \" -f 6";
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-                activities.add(line);
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-
-        return activities;
+        String cmd = "getActivities:" + emulator;
+        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
     }
 
     /**
@@ -270,36 +155,12 @@ public class EnvironmentManager {
      *
      * @param packageName The app that requires the permissions.
      * @return Returns {@code true} if the granting permissions succeeded,
-     *          otherwise {@code false}.
+     * otherwise {@code false}.
      */
-    public static boolean grantRuntimePermissions(String packageName) {
-
+    public boolean grantRuntimePermissions(String packageName) {
         String cmd = "grantPermissions:" + packageName + ":" + emulator;
 
-        boolean granted = false;
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    granted = Boolean.parseBoolean(serverResponse);
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-        return granted;
+        return Boolean.parseBoolean(tunnelLegacyCmd(cmd));
     }
 
     /**
@@ -309,7 +170,7 @@ public class EnvironmentManager {
      *
      * @return Returns whether the CFG can be initialised.
      */
-    public static boolean initCFG() {
+    public boolean initCFG() {
 
         Bundle arguments = InstrumentationRegistry.getArguments();
         String apkPath = arguments.getString("apk");
@@ -321,27 +182,7 @@ public class EnvironmentManager {
         if (apkPath != null && packageName != null) {
             String cmd = "initCFG:" + packageName + ":" + apkPath;
 
-            try {
-                Socket server = new Socket(SERVER_IP, port);
-                PrintStream output = new PrintStream(server.getOutputStream());
-                output.println(cmd);
-
-                String serverResponse="";
-                BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-                while(true) {
-                    if ((serverResponse = in.readLine()) != null) {
-                        isInit = Boolean.parseBoolean(serverResponse);
-                        break;
-                    }
-                }
-
-                server.close();
-                output.close();
-                in.close();
-            } catch (IOException e) {
-                MATE.log("socket error sending");
-                e.printStackTrace();
-            }
+            isInit = Boolean.parseBoolean(tunnelLegacyCmd(cmd));
         }
         return isInit;
     }
@@ -351,94 +192,27 @@ public class EnvironmentManager {
      *
      * @return Returns the set of branches.
      */
-    public static List<String> getBranches() {
-
-        List<String> branches = new LinkedList<>();
-
+    public List<String> getBranches() {
         String cmd = "getBranches";
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-                branches.add(line);
-            }
-
-            server.close();
-            output.close();
-            in.close();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-            throw new IllegalStateException("Couldn't retrieve branches!");
-        }
-        return branches;
+        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
     }
 
-    public static List<String> getSourceLines() {
+    public List<String> getSourceLines() {
         List<String> lines = new ArrayList<>();
 
-        String cmd = "getSourceLines:"+emulator;
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-                lines.add(line);
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-
-        return lines;
+        String cmd = "getSourceLines:" + emulator;
+        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
     }
 
-    public static double getCombinedCoverage(){
-        String cmd = "getCombinedCoverage:"+emulator;
+    public double getCombinedCoverage() {
+        String cmd = "getCombinedCoverage:" + emulator;
 
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            String coverageString;
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    coverageString = serverResponse;
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return Double.valueOf(coverageString);
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-
-        throw new IllegalStateException("Coverage could not be retrieved");
+        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public static double getCombinedCoverage(List<? extends Object> os){
+    public double getCombinedCoverage(List<? extends Object> os) {
         StringBuilder sb = new StringBuilder();
-        sb.append("getCombinedCoverage:"+emulator + ":");
+        sb.append("getCombinedCoverage:" + emulator + ":");
         for (Object o : os) {
             sb.append(o);
             sb.append("+");
@@ -446,65 +220,13 @@ public class EnvironmentManager {
         sb.setLength(sb.length() - 1);
         String cmd = sb.toString();
 
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            String coverageString;
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    coverageString = serverResponse;
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return Double.valueOf(coverageString);
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-
-        throw new IllegalStateException("Coverage could not be retrieved");
+        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public static double getCoverage(Object o){
-        String cmd = "getCoverage:"+emulator+":"+o.toString();
+    public double getCoverage(Object o) {
+        String cmd = "getCoverage:" + emulator + ":" + o.toString();
 
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            String coverageString;
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    coverageString = serverResponse;
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return Double.valueOf(coverageString);
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
-
-        throw new IllegalStateException("Coverage could not be retrieved");
+        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
     /**
@@ -512,14 +234,14 @@ public class EnvironmentManager {
      *
      * @param chromosome The given test case.
      */
-    public static void storeBranchCoverage(Object chromosome) {
+    public void storeBranchCoverage(Object chromosome) {
         storeBranchCoverage("storeBranchCoverage:" + chromosome.toString());
     }
 
     /**
      * Stores the total branch coverage information.
      */
-    public static void storeBranchCoverage() {
+    public void storeBranchCoverage() {
         storeBranchCoverage("storeBranchCoverage");
     }
 
@@ -531,22 +253,9 @@ public class EnvironmentManager {
      * @param cmd The command string specifying which branch coverage
      *            should be stored.
      */
-    private static void storeBranchCoverage(String cmd) {
-
+    private void storeBranchCoverage(String cmd) {
         cmd += ":" + emulator;
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            server.close();
-            output.close();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-            throw new IllegalStateException("Couldn't store branch coverage information!");
-        }
+        tunnelLegacyCmd(cmd);
     }
 
     /**
@@ -556,34 +265,8 @@ public class EnvironmentManager {
      *            either for a given test case or the (global) branch coverage.
      * @return Returns the branch coverage.
      */
-    private static double getBranchCoverage(String cmd) {
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            String coverageString;
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    coverageString = serverResponse;
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return Double.valueOf(coverageString);
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-            throw new IllegalStateException("BranchCoverage could not be retrieved!");
-        }
+    private double getBranchCoverage(String cmd) {
+        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
     /**
@@ -591,7 +274,7 @@ public class EnvironmentManager {
      *
      * @return Returns the (global) branch coverage.
      */
-    public static double getBranchCoverage() {
+    public double getBranchCoverage() {
         String cmd = "getBranchCoverage";
         return getBranchCoverage(cmd);
     }
@@ -602,7 +285,7 @@ public class EnvironmentManager {
      * @param chromosome The given test case.
      * @return Returns the branch coverage for the specified test case.
      */
-    public static double getBranchCoverage(Object chromosome) {
+    public double getBranchCoverage(Object chromosome) {
         String cmd = "getBranchCoverage" + ":" + chromosome.toString();
         return getBranchCoverage(cmd);
     }
@@ -613,37 +296,9 @@ public class EnvironmentManager {
      * @param chromosome The given test case.
      * @return Returns the branch distance for the given test case.
      */
-    public static double getBranchDistance(Object chromosome) {
-
-        String cmd = "getBranchDistance:"+emulator+":"+chromosome.toString();
-        double branchDistance = 0;
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-                try {
-                    branchDistance = Double.valueOf(line);
-                    break;
-                } catch (NumberFormatException e) {
-                    MATE.log_acc("Branch Distance Response: " + line);
-                    e.printStackTrace();
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return branchDistance;
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-            throw new IllegalStateException("Couldn't retrieve branch distance!");
-        }
+    public double getBranchDistance(Object chromosome) {
+        String cmd = "getBranchDistance:" + emulator + ":" + chromosome.toString();
+        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
     /**
@@ -653,41 +308,18 @@ public class EnvironmentManager {
      * @param chromosome The given test case.
      * @return Returns the branch distance vector for a given test case.
      */
-    public static List<Double> getBranchDistanceVector(Object chromosome) {
-
-        String cmd = "getBranchDistanceVector:"+emulator+":"+chromosome.toString();
-        List<Double> branchDistanceVector = new ArrayList<>();
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-                try {
-                    branchDistanceVector.add(Double.valueOf(line));
-                } catch (NumberFormatException e) {
-                    MATE.log_acc("Branch Distance Response: " + line);
-                    e.printStackTrace();
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return branchDistanceVector;
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-            throw new IllegalStateException("Couldn't retrieve branch distance vector!");
+    public List<Double> getBranchDistanceVector(Object chromosome) {
+        String cmd = "getBranchDistanceVector:" + emulator + ":" + chromosome.toString();
+        List<Double> branchDistanceVectors = new ArrayList<>();
+        for (String branchDistanceVectorStr : tunnelLegacyCmd(cmd).split("\n")) {
+            branchDistanceVectors.add(Double.valueOf(branchDistanceVectorStr));
         }
+        return branchDistanceVectors;
     }
 
-    public static List<Double> getLineCoveredPercentage(Object o, List<String> lines){
+    public List<Double> getLineCoveredPercentage(Object o, List<String> lines) {
         StringBuilder sb = new StringBuilder();
-        sb.append("getLineCoveredPercentage:"+emulator+":"+o.toString()+":");
+        sb.append("getLineCoveredPercentage:" + emulator + ":" + o.toString() + ":");
         for (String line : lines) {
             sb.append(line);
             sb.append("*");
@@ -697,178 +329,69 @@ public class EnvironmentManager {
         }
 
         String cmd = sb.toString();
-        List<Double> coveredPercentage = new ArrayList<>();
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-                coveredPercentage.add(Double.valueOf(line));
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-            return coveredPercentage;
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
+        List<Double> coveredPercentages = new ArrayList<>();
+        for (String coveredPercentageStr : tunnelLegacyCmd(cmd).split("\n")) {
+            coveredPercentages.add(Double.valueOf(coveredPercentageStr));
         }
 
-        throw new IllegalStateException("Coverage could not be retrieved");
+        return coveredPercentages;
     }
 
-    public static void screenShot(String packageName,String nodeId){
-
-        String cmd = "screenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
-
-        sendCommandToServer(cmd);
+    public void screenShot(String packageName, String nodeId) {
+        String cmd = "screenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
+        tunnelLegacyCmd(cmd);
     }
 
-    public static void clearAppData() {
+    public void clearAppData() {
         String cmd = "clearApp:" + emulator;
-
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            for (String line = in.readLine(); line != null; line = in.readLine()) {
-            }
-
-            server.close();
-            output.close();
-            in.close();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-        }
+        tunnelLegacyCmd(cmd);
     }
 
-    public static double getContrastRatio(String packageName, String stateId, Widget widget){
+    public double getContrastRatio(String packageName, String stateId, Widget widget) {
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
         double contrastRatio = 21;
-        try {
-            Socket cliente = new Socket(SERVER_IP, port);
-            PrintStream saida = new PrintStream(cliente.getOutputStream());
+        String cmd = "contrastratio:";
+        cmd += emulator + "_" + packageName + ":";
+        cmd += stateId + ":";
+        int x1 = widget.getX1();
+        int x2 = widget.getX2();
+        int y1 = widget.getY1();
+        int y2 = widget.getY2();
+        int borderExpanded = 1;
+        if (x1 - borderExpanded >= 0)
+            x1 -= borderExpanded;
+        if (x2 + borderExpanded <= maxw)
+            x2 += borderExpanded;
+        if (y1 - borderExpanded >= 0)
+            y1 -= borderExpanded;
+        if (y2 + borderExpanded <= maxh)
+            y2 += borderExpanded;
+        cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
-            String cmd = "contrastratio:";
-            cmd+=emulator+"_"+packageName+":";
-            cmd+=stateId+":";
-            int x1=widget.getX1();
-            int x2=widget.getX2();
-            int y1=widget.getY1();
-            int y2=widget.getY2();
-            int borderExpanded=1;
-            if (x1-borderExpanded>=0)
-                x1-=borderExpanded;
-            if (x2+borderExpanded<=maxw)
-                x2+=borderExpanded;
-            if (y1-borderExpanded>=0)
-                y1-=borderExpanded;
-            if (y2+borderExpanded<=maxh)
-                y2+=borderExpanded;
-            cmd+=x1+","+y1+","+x2+","+y2;
-
-            saida.println(cmd);
-            MATE.log(cmd);
-            MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
-            long ta = new Date().getTime();
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    contrastRatio = Double.valueOf(serverResponse);
-                    break;
-                }
-                long tb = new Date().getTime();
-                if (tb-ta>5000) {
-                    MATE.logsum("timeout - contrast");
-                    break;
-                }
-            }
-            cliente.close();
-            saida.close();
-            MATE.log(serverResponse);
-        } catch (IOException e) {
-            MATE.log_acc("socket error: contrast");
-            e.printStackTrace();
-        }
-
-        return contrastRatio;
+        MATE.log(cmd);
+        MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
+        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public static void deleteAllScreenShots(String packageName) {
+    public void deleteAllScreenShots(String packageName) {
         MATE.log("DELETE SCREENSHOTS");
-        try {
-            Socket cliente = new Socket(SERVER_IP, port);
-            PrintStream saida = new PrintStream(cliente.getOutputStream());
-            saida.println("rm "+emulator+"_"+packageName+"*.png");
-
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    break;
-                }
-            }
-            cliente.close();
-            saida.close();
-        } catch (IOException e) {
-            MATE.log_acc("socket error: delete png");
-            e.printStackTrace();
-        }
+        tunnelLegacyCmd("rm " + emulator + "_" + packageName + "*.png");
     }
 
-    public static long getRandomLength(){
-        long length = 0;
-
+    public long getRandomLength() {
         String cmd = "randomlength";
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            String randomLengthStr="";
-            String serverResponse="";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    randomLengthStr = serverResponse;
-                    break;
-                }
-            }
-
-            length = Long.valueOf(randomLengthStr);
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            e.printStackTrace();
-            length=0;
-        }
-        return length;
+        return Long.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public static void markScreenshot(final Widget widget, final String packageName,
-                                      final String nodeId, final String flawDescription,
-                                      final String extraInfo) {
+    public void markScreenshot(final Widget widget, final String packageName,
+                               final String nodeId, final String flawDescription,
+                               final String extraInfo) {
 
-        final String imageName = emulator +  "_" + packageName + "_" +
-                String.valueOf(Math.abs(System.currentTimeMillis())) +".png";
+        final String imageName = emulator + "_" + packageName + "_" +
+                String.valueOf(Math.abs(System.currentTimeMillis())) + ".png";
 
-        String cmd = "screenshot:"+emulator+":"+imageName;
+        String cmd = "screenshot:" + emulator + ":" + imageName;
 
         //for now I'm keeping this command commented so it can speed up the process
         //sendCommandToServer(cmd);
@@ -881,38 +404,8 @@ public class EnvironmentManager {
         //sendCommandToServer(cmd);
     }
 
-    public static void sendCommandToServer(String cmd) {
-        String response;
-        MATE.log(cmd);
-        try {
-            Socket server = new Socket(SERVER_IP, port);
-            PrintStream output = new PrintStream(server.getOutputStream());
-            output.println(cmd);
-
-
-            String serverResponse = "";
-            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-            while(true) {
-                if ((serverResponse = in.readLine()) != null) {
-                    response = serverResponse;
-                    MATE.log("screenshot response: " + response);
-                    break;
-                }
-            }
-
-            server.close();
-            output.close();
-            in.close();
-
-        } catch (IOException e) {
-            MATE.log_acc("socket error sending: screenshot");
-            e.printStackTrace();
-        }
-    }
-
-    public static void sendFlawToServer(String msg) {
-        String cmd = "reportFlaw:"+emulator+":"+msg;
-        MATE.log("reportFlaw: " + cmd);
-        sendCommandToServer(cmd);
+    public void sendFlawToServer(String msg) {
+        String cmd = "reportFlaw:" + emulator + ":" + msg;
+        tunnelLegacyCmd(cmd);
     }
 }

@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -38,10 +39,10 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
 
         if (storeCoverage) {
-            EnvironmentManager.storeCoverageData(chromosome, null);
+            Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
 
             MATE.log_acc("After primitive test case shuffle mutation:");
-            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + EnvironmentManager
+            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                     .getCoverage(chromosome));
             MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 

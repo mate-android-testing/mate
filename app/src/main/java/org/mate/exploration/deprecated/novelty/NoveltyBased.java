@@ -2,6 +2,7 @@ package org.mate.exploration.deprecated.novelty;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
@@ -9,8 +10,6 @@ import org.mate.model.TestCase;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.MersenneTwister;
@@ -289,10 +288,10 @@ public class NoveltyBased {
 
 
             //FUNZIONA
-            //EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getStateId()+"_TC"+numberOfTCs+"_initial");
+            //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getStateId()+"_TC"+numberOfTCs+"_initial");
 
-            //EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_initial");
-            //EnvironmentManager.screenShot((ScreenStateFactory.getScreenState("ActionsScreenState")).getPackageName(),ScreenStateFactory.getScreenState("ActionsScreenState").getId()+"_TC"+numberOfTCs+"_initial_difference");
+            //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_initial");
+            //Registry.getEnvironmentManager().screenShot((ScreenStateFactory.getScreenState("ActionsScreenState")).getPackageName(),ScreenStateFactory.getScreenState("ActionsScreenState").getId()+"_TC"+numberOfTCs+"_initial_difference");
 
             int numberOfActions = 0;
             isApp=true;
@@ -306,8 +305,8 @@ public class NoveltyBased {
                         */
 
 
-                //EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
-                EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_");
+                //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
+                Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_");
 
                 //TODO: is it necessary?
                 testcase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
@@ -411,8 +410,8 @@ public class NoveltyBased {
                             testcase.updateVisitedStates(state);
                             updateCoverageArchive(state.getId(),testcase.getId());
 
-                            //EnvironmentManager.screenShot(state.getPackageName(),"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
-                            EnvironmentManager.screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter");
+                            //Registry.getEnvironmentManager().screenShot(state.getPackageName(),"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
+                            Registry.getEnvironmentManager().screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter");
 
 
 
@@ -540,7 +539,7 @@ public class NoveltyBased {
 
     private TestCase mutate(TestCase originalTestCase) throws InterruptedException {
         //Reinstall the app
-        //String emulator = EnvironmentManager.detectEmulator(packageName);
+        //String emulator = Registry.getEnvironmentManager().detectEmulator(packageName);
         //Instrumentation instrumentation = getInstrumentation();
         //UiDevice device = UiDevice.getInstance(instrumentation);
         //DeviceMgr deviceMgr = new DeviceMgr(device, packageName);
@@ -602,8 +601,8 @@ public class NoveltyBased {
         //while (currentTime - runningTime <= MATE.TIME_OUT){
         while ((numberOfActions < MAX_NUMBER_EVENTS)&&(isApp)) {
 
-            //EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+TCcounter+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
-            EnvironmentManager.screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
+            //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+TCcounter+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
+            Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
 
 
             //MATE.log("Mutation Iteration number: " + numberOfActions +
@@ -716,8 +715,8 @@ public class NoveltyBased {
                         mutantTestCase.updateVisitedStates(state);
                         updateCoverageArchive(state.getId(),mutantTestCase.getId());
 
-                        //EnvironmentManager.screenShot(state.getPackageName(),"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
-                        EnvironmentManager.screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
+                        //Registry.getEnvironmentManager().screenShot(state.getPackageName(),"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
+                        Registry.getEnvironmentManager().screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
 
 
                         //if it is a new state or the initial screen (first action)

@@ -1,6 +1,7 @@
 package org.mate.exploration.manual;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolationChecker;
 import org.mate.accessibility.check.widgetbased.FormControlLabelCheck;
 import org.mate.state.IScreenState;
@@ -12,7 +13,7 @@ public class CheckCurrentScreen {
     public void scanScreen(){
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
-        EnvironmentManager.screenShot(screenState.getPackageName(),screenState.getId());
+        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(),screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 
