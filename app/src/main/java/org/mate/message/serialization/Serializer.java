@@ -20,7 +20,9 @@ public class Serializer {
 
     public static byte[] serialize(Message message) {
         StringBuilder sb = new StringBuilder(escapeParameterValue(message.getSubject()));
-        sb.append(END_PARAMETER_CHAR);
+        if (!message.getParameters().isEmpty()) {
+            sb.append(END_PARAMETER_CHAR);
+        }
         for (Map.Entry<String, String> parameter : message.getParameters().entrySet()) {
             sb.append(parameter.getKey());
             sb.append(RELATION_SEPARATOR_CHAR);
