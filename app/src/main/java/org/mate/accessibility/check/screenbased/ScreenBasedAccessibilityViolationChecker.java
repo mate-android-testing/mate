@@ -20,8 +20,8 @@ public class ScreenBasedAccessibilityViolationChecker {
     public static List<IScreenAccessibilityCheck> createScreenBasedAccessibilityList(){
         if (screenBasedChecks==null){
             screenBasedChecks = new ArrayList<IScreenAccessibilityCheck>();
-
             screenBasedChecks.add(new ColourMeaningAccessibilityCheck());
+            screenBasedChecks.add(new RadioGroupCheck());
         }
 
         return screenBasedChecks;
