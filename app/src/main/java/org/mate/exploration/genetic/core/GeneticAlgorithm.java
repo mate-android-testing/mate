@@ -157,9 +157,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
             MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
-        } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
             MATE.log_acc("Combined coverage until now: " + Registry.getEnvironmentManager().getCombinedCoverage());
             if (population.size() <= 10) {
                 MATE.log_acc("Combined coverage of current population: " + Registry.getEnvironmentManager().getCombinedCoverage(population));

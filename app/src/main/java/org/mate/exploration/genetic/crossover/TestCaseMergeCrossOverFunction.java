@@ -23,7 +23,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
     private boolean executeActions;
 
     public TestCaseMergeCrossOverFunction() {
-        this(Properties.STORE_COVERAGE);
+        this(Properties.STORE_COVERAGE());
     }
 
     public TestCaseMergeCrossOverFunction(boolean storeCoverage) {

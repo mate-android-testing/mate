@@ -221,7 +221,7 @@ public class TestCase {
         }
         for (; count < finalSize; count++) {
             Action action;
-            if (Properties.WIDGET_BASED_ACTIONS) {
+            if (Properties.WIDGET_BASED_ACTIONS()) {
                 action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
             } else {
                 action = PrimitiveAction.randomAction();
@@ -265,7 +265,7 @@ public class TestCase {
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
-                if (Properties.RECORD_STACK_TRACE) {
+                if (Properties.RECORD_STACK_TRACE()) {
                     crashStackTrace = Registry.getEnvironmentManager().getLastCrashStackTrace();
                 }
             case SUCCESS_OUTBOUND:

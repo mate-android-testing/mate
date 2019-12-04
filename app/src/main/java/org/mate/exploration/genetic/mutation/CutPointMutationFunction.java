@@ -25,7 +25,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     private int maxNumEvents;
 
     public CutPointMutationFunction(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), maxNumEvents);
     }
 
     public CutPointMutationFunction(boolean storeCoverage, int maxNumEvents) {
@@ -61,7 +61,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
         if (storeCoverage) {
 
-            if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
 
                 Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, null);
 
@@ -72,7 +72,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                 //TODO: remove hack, when better solution implemented
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
 
-            } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
 
                 Registry.getEnvironmentManager().storeBranchCoverage(mutatedChromosome);
 

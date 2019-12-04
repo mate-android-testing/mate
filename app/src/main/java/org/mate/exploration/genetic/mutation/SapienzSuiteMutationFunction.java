@@ -24,7 +24,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     private final boolean storeCoverage;
 
     public SapienzSuiteMutationFunction(double pMutate) {
-        this(Properties.STORE_COVERAGE, pMutate);
+        this(Properties.STORE_COVERAGE(), pMutate);
     }
 
     public SapienzSuiteMutationFunction(boolean storeCoverage, double pMutate) {

@@ -18,7 +18,7 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
     private boolean executeActions;
 
     public PrimitiveTestCaseMergeCrossOverFunction() {
-        this(Properties.STORE_COVERAGE);
+        this(Properties.STORE_COVERAGE());
     }
 
     public PrimitiveTestCaseMergeCrossOverFunction(boolean storeCoverage) {

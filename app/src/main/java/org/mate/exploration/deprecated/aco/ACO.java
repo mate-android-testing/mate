@@ -50,16 +50,16 @@ public class ACO {
 
     public void startExploreACO(){
 
-        for (int g = 0; g< Properties.ANT_GENERATION; g++){
+        for (int g = 0; g< Properties.ANT_GENERATION(); g++){
             currentGeneration = g;
             IScreenState state = null;
             //create a model for all ants in one generation
             allAntsInOneGeneration = new ArrayList<>();
-            for (int n = 0;n<Properties.ANT_NUMBER;n++){
+            for (int n = 0;n<Properties.ANT_NUMBER();n++){
                 Ant ant = new Ant();
                 deviceMgr.restartApp();
                 //only design for the first node of this whole model
-                    for (int l = 0;l<Properties.ANT_LENGTH;l++){
+                    for (int l = 0;l<Properties.ANT_LENGTH();l++){
                         state = handleFirstNodeOfAnt(state, ant, l);
                         wholeEvolveProcess(state, ant,isExitApp);
                     }
@@ -144,7 +144,7 @@ public class ACO {
 
                 //select the best action at this state
                 action = selectBestWidget(executableActions);
-                if (Math.random()<=Properties.PROBABILITY_SELECT_BEST_ACTION){
+                if (Math.random()<=Properties.PROBABILITY_SELECT_BEST_ACTION()){
                     try {
                         //fill all forms first
 //                        if (action.getWidget().isEditable()){
@@ -279,7 +279,7 @@ public class ACO {
     public void searchEventEdgeInAllAnts(){
         //all of the pheromone value of EventEdges should be decrease firstly
         for (Map.Entry<String,EventEdge> entry:wholeModel.getStateGraph().getEventEdges().entrySet()){
-            entry.getValue().setPheromone((entry.getValue().getPheromone())*(1 - Properties.EVAPORATION_RATE));
+            entry.getValue().setPheromone((entry.getValue().getPheromone())*(1 - Properties.EVAPORATION_RATE()));
         }
 
         //iterate each best ants
@@ -313,7 +313,7 @@ public class ACO {
     public void selectBestAnts(List<Ant> allAntsInOneGeneration,Ant ant){
         Collections.sort(allAntsInOneGeneration,ant.compareAnt());
         List<Ant> copyAllAntOneGeneration = new ArrayList<>(allAntsInOneGeneration);
-        for (int i = 0;i<copyAllAntOneGeneration.size()-Properties.BEST_ANT;i++){
+        for (int i = 0;i<copyAllAntOneGeneration.size()-Properties.BEST_ANT();i++){
             this.allAntsInOneGeneration.remove(allAntsInOneGeneration.size()-1);
         }
     }
