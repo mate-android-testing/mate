@@ -20,6 +20,9 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
+    private static final String METADATA_PREFIX = "__meta__";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.0";
+    private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
     private final Socket server;
@@ -55,6 +58,7 @@ public class EnvironmentManager {
         if (!active) {
             throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
         }
+        addMetadata(message);
         try {
             server.getOutputStream().write(Serializer.serialize(message));
             server.getOutputStream().flush();
@@ -62,7 +66,15 @@ public class EnvironmentManager {
             MATE.log("socket error sending");
             throw new IllegalStateException(e);
         }
-        return messageParser.nextMessage();
+        Message response = messageParser.nextMessage();
+        verifyMetadata(message);
+        if (response.getSubject().equals("/error")) {
+            MATE.log("Receive error message from mate-server: "
+                    + response.getParameter("info"));
+            return null;
+        }
+        stripMetadata(message);
+        return message;
     }
 
     public String tunnelLegacyCmd(String cmd) {
@@ -83,6 +95,37 @@ public class EnvironmentManager {
             throw new IllegalStateException(sb.toString());
         }
         return response.getParameter("response");
+    }
+
+    private void addMetadata(Message message) {
+        message.addParameter(
+                METADATA_PREFIX + MESSAGE_PROTOCOL_VERSION_KEY, MESSAGE_PROTOCOL_VERSION);
+    }
+
+    private void stripMetadata(Message message) {
+        List<String> metadataKeys = new ArrayList<>();
+        Map<String, String> parameters = message.getParameters();
+        for (String parameterKey: parameters.keySet()) {
+            if (parameterKey.startsWith(METADATA_PREFIX)) {
+                metadataKeys.add(parameterKey);
+            }
+        }
+        for (String metadataKey : metadataKeys) {
+            parameters.remove(metadataKey);
+        }
+    }
+
+    private void verifyMetadata(Message message) {
+        String protocolVersion = message.getParameter(
+                METADATA_PREFIX + MESSAGE_PROTOCOL_VERSION_KEY);
+        if (!protocolVersion.equals(MESSAGE_PROTOCOL_VERSION)) {
+            MATE.log(
+                    "WARNING: Message protocol version used by MATE ("
+                            + MESSAGE_PROTOCOL_VERSION
+                            + ") does not match with the version used by MATE-Server ("
+                            + protocolVersion
+                            + ")");
+        }
     }
 
     public void releaseEmulator() {
