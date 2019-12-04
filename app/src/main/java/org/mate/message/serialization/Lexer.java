@@ -35,12 +35,12 @@ public class Lexer {
         tokens.add(new Token(Type.END_PARAM));
 
         while (true) {
-            lexResult = lexParamKey();
+            lexResult = lexValue(Type.PARAM_KEY);
             panicOnFailure(lexResult);
             tokens.add(lexResult.token);
             tokens.add(new Token(Type.RELATION_SEPARATOR));
 
-            lexResult = lexValue();
+            lexResult = lexValue(Type.VALUE);
             panicOnFailure(lexResult);
             tokens.add(lexResult.token);
 
@@ -53,20 +53,19 @@ public class Lexer {
     }
 
     public LexResult lexSubject() {
-        LexResult lexResult = lexValue();
+        LexResult lexResult = lexValue(Type.SUBJECT);
         if (lexResult.failed) {
             return LexResult.failure("Lexing subject failed: " + lexResult.failureMessage);
         }
 
-        return LexResult.success(lexResult.endsMessage, new Token(Type.SUBJECT, lexResult.token.contents));
+        return LexResult.success(lexResult.endsMessage, lexResult.token);
     }
 
-    public LexResult lexValue() {
+    public LexResult lexValue(Type type) {
         int nextChar;
         StringBuilder value = new StringBuilder();
         boolean escapedCharacter = false;
         while (true) {
-
             try {
                 nextChar = reader.read();
             } catch (IOException e) {
@@ -74,7 +73,7 @@ public class Lexer {
             }
 
             if (nextChar == -1) {
-                return LexResult.failure("Lexing value key failed: unexpected EOF");
+                return LexResult.failure("Lexing value failed: unexpected EOF");
             }
 
             char chr = (char) nextChar;
@@ -88,42 +87,22 @@ public class Lexer {
             if (chr == ESCAPE_CHAR) {
                 escapedCharacter = true;
             } else if (chr == END_MESSAGE_CHAR) {
-                return LexResult.success(true, new Token(Type.VALUE, value.toString()));
+                if (type == Type.PARAM_KEY) {
+                    return LexResult.failure("Illegal END_MESSAGE_CHAR encountered while lexing parameter key");
+                }
+                return LexResult.success(true, new Token(type, value.toString()));
             } else if (chr == END_PARAMETER_CHAR) {
-                return LexResult.success(false, new Token(Type.VALUE, value.toString()));
+                if (type == Type.PARAM_KEY) {
+                    return LexResult.failure("Illegal END_PARAMETER_CHAR encountered while lexing parameter key");
+                }
+                return LexResult.success(false, new Token(type, value.toString()));
+            } else if (chr == RELATION_SEPARATOR_CHAR) {
+                if (type != Type.PARAM_KEY) {
+                    return LexResult.failure("Illegal RELATION_SEPARATOR_CHAR encountered while lexing non parameter key");
+                }
+                return LexResult.success(false, new Token(type, value.toString()));
             } else {
                 value.append(chr);
-            }
-        }
-    }
-
-    public LexResult lexParamKey() {
-        int nextChar;
-        StringBuilder paramKey = new StringBuilder();
-        while (true) {
-
-            try {
-                nextChar = reader.read();
-            } catch (IOException e) {
-                return LexResult.failure("Lexing param key failed: IO error while reading from input: " + e.getLocalizedMessage());
-            }
-
-            if (nextChar == -1) {
-                return LexResult.failure("Lexing param key failed: unexpected EOF");
-            }
-
-            char chr = (char) nextChar;
-
-            if (Character.isLetterOrDigit(chr)) {
-                paramKey.append(chr);
-            } else if (chr == END_MESSAGE_CHAR) {
-                return LexResult.failure("Lexing param key failed: unexpected end of message character.");
-            } else if (chr == END_PARAMETER_CHAR) {
-                return LexResult.failure("Lexing param key failed: unexpected end of parameter character.");
-            } else if (chr == RELATION_SEPARATOR_CHAR) {
-                return LexResult.success(false, new Token(Type.PARAM_KEY, paramKey.toString()));
-            } else {
-                return LexResult.failure("Lexing param key failed: unexpected non alpha numeric character: '" + chr + "'");
             }
         }
     }

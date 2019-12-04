@@ -20,9 +20,6 @@ public class Message {
         if (key == null || value == null) {
             throw new IllegalArgumentException("Parameter key and value must not be null");
         }
-        if (!key.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Parameter key cannot be empty and can only contain alphanumerical characters");
-        }
         parameters.put(key, value);
     }
 

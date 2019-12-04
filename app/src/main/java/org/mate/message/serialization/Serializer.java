@@ -10,7 +10,7 @@ public class Serializer {
     public static String escapeParameterValue(String unescaped) {
         StringBuilder sb = new StringBuilder();
         for (char c : unescaped.toCharArray()) {
-            if (c == ESCAPE_CHAR || c == END_PARAMETER_CHAR || c == END_MESSAGE_CHAR) {
+            if (c == ESCAPE_CHAR || c == END_PARAMETER_CHAR || c == END_MESSAGE_CHAR || c == RELATION_SEPARATOR_CHAR) {
                 sb.append(ESCAPE_CHAR);
             }
             sb.append(c);
@@ -24,7 +24,7 @@ public class Serializer {
             sb.append(END_PARAMETER_CHAR);
         }
         for (Map.Entry<String, String> parameter : message.getParameters().entrySet()) {
-            sb.append(parameter.getKey());
+            sb.append(escapeParameterValue(parameter.getKey()));
             sb.append(RELATION_SEPARATOR_CHAR);
             sb.append(escapeParameterValue(parameter.getValue()));
             sb.append(END_PARAMETER_CHAR);
