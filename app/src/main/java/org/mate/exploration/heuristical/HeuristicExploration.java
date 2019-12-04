@@ -9,7 +9,7 @@ public class HeuristicExploration {
     private final boolean alwaysReset;
 
     public HeuristicExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, false, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), false, maxNumEvents);
     }
 
     public HeuristicExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents) {

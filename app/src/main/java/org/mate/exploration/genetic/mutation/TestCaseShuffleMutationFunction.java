@@ -15,7 +15,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
     private boolean executeActions;
 
     public TestCaseShuffleMutationFunction() {
-        this(Properties.STORE_COVERAGE);
+        this(Properties.STORE_COVERAGE());
     }
 
     public TestCaseShuffleMutationFunction(boolean storeCoverage) {

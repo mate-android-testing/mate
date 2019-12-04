@@ -25,7 +25,7 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
     }
 
     public SuiteCutPointMutationFunction(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), maxNumEvents);
     }
 
     @Override

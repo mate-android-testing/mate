@@ -372,7 +372,7 @@ public class GeneticAlgorithmProvider {
         String numTestCases = properties.getProperty(GeneticAlgorithmBuilder.NUM_TESTCASES_KEY);
         if (numTestCases == null) {
             if (useDefaults) {
-                return org.mate.Properties.NUMBER_TESTCASES;
+                return org.mate.Properties.NUMBER_TESTCASES();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: number of test cases not specified");
@@ -386,7 +386,7 @@ public class GeneticAlgorithmProvider {
         String numEvents = properties.getProperty(GeneticAlgorithmBuilder.MAX_NUM_EVENTS_KEY);
         if (numEvents == null) {
             if (useDefaults) {
-                return org.mate.Properties.MAX_NUMBER_EVENTS;
+                return org.mate.Properties.MAX_NUMBER_EVENTS();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: maximum number of events not specified");
@@ -401,7 +401,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.NUMBER_ITERATIONS_KEY);
         if (numberIterations == null) {
             if (useDefaults) {
-                return org.mate.Properties.EVO_ITERATIONS_NUMBER;
+                return org.mate.Properties.EVO_ITERATIONS_NUMBER();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: number of iterations not specified");
@@ -416,7 +416,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.POPULATION_SIZE_KEY);
         if (populationSize == null) {
             if (useDefaults) {
-                return org.mate.Properties.POPULATION_SIZE;
+                return org.mate.Properties.POPULATION_SIZE();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: population size not specified");
@@ -446,7 +446,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_CROSSOVER_KEY);
         if (pCrossover == null) {
             if (useDefaults) {
-                return org.mate.Properties.P_CROSSOVER;
+                return org.mate.Properties.P_CROSSOVER();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: p cross over not specified");
@@ -461,7 +461,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_MUTATE_KEY);
         if (pMutate == null) {
             if (useDefaults) {
-                return org.mate.Properties.P_MUTATE;
+                return org.mate.Properties.P_MUTATE();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: p mutate not specified");
@@ -476,7 +476,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_INNER_MUTATE_KEY);
         if (pInnerMutate == null) {
             if (useDefaults) {
-                return org.mate.Properties.P_INNER_MUTATE;
+                return org.mate.Properties.P_INNER_MUTATE();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: p inner mutate not specified");
@@ -491,7 +491,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
         if (pSampleRandom == null) {
             if (useDefaults) {
-                return org.mate.Properties.P_SAMPLE_RANDOM;
+                return org.mate.Properties.P_SAMPLE_RANDOM();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: p sample random not specified");
@@ -506,7 +506,7 @@ public class GeneticAlgorithmProvider {
                 = properties.getProperty(GeneticAlgorithmBuilder.FOCUSED_SEARCH_START_KEY);
         if (focusedSearchStart == null) {
             if (useDefaults) {
-                return org.mate.Properties.P_FOCUSED_SEARCH_START;
+                return org.mate.Properties.P_FOCUSED_SEARCH_START();
             } else {
                 throw new IllegalStateException(
                         "Without using defaults: focused search start not specified");

@@ -30,7 +30,7 @@ import static org.mate.Properties.MAX_NUMBER_EVENTS;
 @Deprecated
 public class OnePlusOne {
     private int TCcounter;
-    private int maxNumIterations = EVO_ITERATIONS_NUMBER;
+    private int maxNumIterations = EVO_ITERATIONS_NUMBER();
     private final int maxNumTCs;
     private final int maxNumEvents;
     public static LinkedHashMap<String, TestCase> testsuite;
@@ -55,7 +55,7 @@ public class OnePlusOne {
         this.currentActivityName = "";
 
         this.maxNumTCs = 1;
-        this.maxNumEvents = MAX_NUMBER_EVENTS;
+        this.maxNumEvents = MAX_NUMBER_EVENTS();
         testsuite = new LinkedHashMap<>();
         this.TCcounter = 0;
 
@@ -332,7 +332,7 @@ public class OnePlusOne {
 
         isApp = true;
         int numberOfActions = 0;
-        while ((numberOfActions < MAX_NUMBER_EVENTS) && (isApp)) {
+        while ((numberOfActions < MAX_NUMBER_EVENTS()) && (isApp)) {
 
             mutantTestCase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
             mutantTestCase.updateVisitedStates(this.guiModel.getStateById(this.guiModel.getCurrentStateId()));
@@ -462,7 +462,7 @@ public class OnePlusOne {
     private int chooseCutpointEpsilonGreedy(TestCase tc) {
         Random rand = new Random();
         int cutpoint = 0;
-        if(rand.nextDouble()<=1-GREEDY_EPSILON){
+        if(rand.nextDouble()<=1-GREEDY_EPSILON()){
             MATE.log_acc("choose best cutpoint");
             HashMap<String, String> statesMap = tc.getStatesMap();
             float bestSparseness = 0;

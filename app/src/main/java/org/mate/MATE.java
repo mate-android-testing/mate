@@ -62,6 +62,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
+import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
@@ -71,6 +72,7 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -118,6 +120,14 @@ public class MATE {
             throw new IllegalStateException("Unable to setup EnvironmentManager", e);
         }
         Registry.registerEnvironmentManager(environmentManager);
+        Registry.registerProperties(new Properties(environmentManager.getProperties()));
+        Random rnd;
+        if (Properties.RANDOM_SEED() != null) {
+            rnd = new MersenneTwister(Properties.RANDOM_SEED());
+        } else {
+            rnd = new MersenneTwister();
+        }
+        Registry.registerRandom(rnd);
 
         //get timeout from server using EnvironmentManager
         long timeout = Registry.getEnvironmentManager().getTimeout();
@@ -167,7 +177,7 @@ public class MATE {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                         // init the CFG
                         boolean isInit = Registry.getEnvironmentManager().initCFG();
 
@@ -196,7 +206,7 @@ public class MATE {
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                         // init the CFG
                         boolean isInit = Registry.getEnvironmentManager().initCFG();
 
@@ -270,7 +280,7 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(genericGA, null);
                         MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
@@ -281,7 +291,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                         // init the CFG
                         boolean isInit = Registry.getEnvironmentManager().initCFG();
 
@@ -313,11 +323,11 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
-                        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
+                        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                             Registry.getEnvironmentManager().storeBranchCoverage();
                             MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
-                        } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+                        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                             Registry.getEnvironmentManager().storeCoverageData(genericGA, null);
                             MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                         }
@@ -356,7 +366,7 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(nsga, null);
                         MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
@@ -377,7 +387,7 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(heuristicExploration, null);
                         MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
@@ -398,14 +408,14 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
                         MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                         // init the CFG
                         boolean isInit = Registry.getEnvironmentManager().initCFG();
 
@@ -452,11 +462,11 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
-                        if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
+                        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                             Registry.getEnvironmentManager().storeBranchCoverage();
                             MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
-                        } else if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+                        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                             Registry.getEnvironmentManager().storeCoverageData(mosa, null);
                             MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                         }
@@ -503,7 +513,7 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.STORE_COVERAGE) {
+                    if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(mio, null);
                         MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
@@ -603,6 +613,8 @@ public class MATE {
             //EnvironmentManager.deleteAllScreenShots(packageName);
             try {
                 Registry.unregisterEnvironmentManager();
+                Registry.unregisterProperties();
+                Registry.unregisterRandom();
             } catch (IOException e) {
                 e.printStackTrace();
             }

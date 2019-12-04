@@ -36,7 +36,7 @@ import static org.mate.Properties.NUMBER_TESTCASES;
 @Deprecated
 public class NoveltyBased {
     private int TCcounter;
-    private int maxNumIterations=EVO_ITERATIONS_NUMBER;
+    private int maxNumIterations=EVO_ITERATIONS_NUMBER();
 
 
     private final int maxNumTCs;
@@ -61,8 +61,8 @@ public class NoveltyBased {
         this.guiModel = (GraphGUIModel) guiModel;
         this.currentActivityName="";
 
-        this.maxNumTCs = NUMBER_TESTCASES;
-        this.maxNumEvents= MAX_NUMBER_EVENTS;
+        this.maxNumTCs = NUMBER_TESTCASES();
+        this.maxNumEvents= MAX_NUMBER_EVENTS();
         testsuite = new LinkedHashMap<>();
         this.TCcounter = 0;
 
@@ -599,7 +599,7 @@ public class NoveltyBased {
 
         //MATE.log_acc("Current number of TEST CASES: "+numberOfTCs);
         //while (currentTime - runningTime <= MATE.TIME_OUT){
-        while ((numberOfActions < MAX_NUMBER_EVENTS)&&(isApp)) {
+        while ((numberOfActions < MAX_NUMBER_EVENTS())&&(isApp)) {
 
             //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+TCcounter+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
             Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
@@ -844,7 +844,7 @@ public class NoveltyBased {
         Collections.sort(distances);
 
         //get the distance from the knn only
-        for(int i=0;i<Properties.K_VALUE;i++){
+        for(int i=0;i<Properties.K_VALUE();i++){
             sumDistances+=distances.get(i);
         }
         //MATE.log_acc("distances of: "+p.getId()+" = "+distances+", sum = "+sumDistances+" distance from KNNs: "+sumDistances/Properties.K_VALUE);
@@ -869,7 +869,7 @@ public class NoveltyBased {
         *  by representing the most recently visited points.
          */
         double distance = measureDistanceFromKNNs(p);
-        p.setSparseness(distance/Properties.K_VALUE);
+        p.setSparseness(distance/Properties.K_VALUE());
     }
 
     /**
@@ -880,7 +880,7 @@ public class NoveltyBased {
     private void addToArchive(TestCase tc) {
 
 
-        if(archive.size()< Properties.ARCHIVE_SIZE){
+        if(archive.size()< Properties.ARCHIVE_SIZE()){
             MATE.log_acc("Added to Archive the test case number: "+tc.getId());
             this.archive.put(tc.getId(), tc);
         }
@@ -973,7 +973,7 @@ public class NoveltyBased {
     }
 
     public int getIndex(List<Object> population) {
-        Long seed_parameter = Properties.RANDOM_SEED;
+        Long seed_parameter = Properties.RANDOM_SEED();
         long seed = 0;
         if (seed_parameter != null) {
             seed = seed_parameter;
@@ -985,13 +985,13 @@ public class NoveltyBased {
         Random random = new MersenneTwister(seed);
 
         double r = random.nextDouble();
-        double d = Properties.RANK_BIAS
-                - Math.sqrt((Properties.RANK_BIAS * Properties.RANK_BIAS)
-                - (4.0 * (Properties.RANK_BIAS - 1.0) * r));
+        double d = Properties.RANK_BIAS()
+                - Math.sqrt((Properties.RANK_BIAS() * Properties.RANK_BIAS())
+                - (4.0 * (Properties.RANK_BIAS() - 1.0) * r));
 
         int length = population.size();
 
-        d = d / 2.0 / (Properties.RANK_BIAS - 1.0);
+        d = d / 2.0 / (Properties.RANK_BIAS() - 1.0);
 
         //this is not needed because population is sorted based on Maximization
         //if(maximize)
@@ -1071,7 +1071,7 @@ public class NoveltyBased {
     private int chooseCutpointEpsilonGreedy(TestCase tc) {
         Random rand = new Random();
         int cutpoint = 0;
-        if(rand.nextDouble()<=1-GREEDY_EPSILON){
+        if(rand.nextDouble()<=1-GREEDY_EPSILON()){
             MATE.log_acc("choose best cutpoint");
             HashMap<String, String> statesMap = tc.getStatesMap();
             float bestSparseness = 0;

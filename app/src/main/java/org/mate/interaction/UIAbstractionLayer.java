@@ -259,7 +259,7 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         sleep(2000);
         clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS) {
+        if (Properties.WIDGET_BASED_ACTIONS()) {
             lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
         }
     }
@@ -268,7 +268,7 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         sleep(2000);
         clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS) {
+        if (Properties.WIDGET_BASED_ACTIONS()) {
             lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
         }
     }

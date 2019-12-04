@@ -21,7 +21,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.0";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.1";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -69,7 +69,7 @@ public class EnvironmentManager {
         Message response = messageParser.nextMessage();
         verifyMetadata(response);
         if (response.getSubject().equals("/error")) {
-            MATE.log("Receive error message from mate-server: "
+            MATE.log("Received error message from mate-server: "
                     + response.getParameter("info"));
             return null;
         }
@@ -83,7 +83,7 @@ public class EnvironmentManager {
                 .build();
         Message response = sendMessage(message);
         if (!response.getSubject().equals("/legacy")) {
-            StringBuilder sb = new StringBuilder("Receive unexpected message with subject: <");
+            StringBuilder sb = new StringBuilder("Received unexpected message with subject: <");
             sb.append(response.getSubject());
             for (Map.Entry<String, String> parameterEntry : response.getParameters().entrySet()) {
                 sb.append(">\n\tand parameter with key <")
@@ -384,6 +384,10 @@ public class EnvironmentManager {
         return sendMessage(new Message.MessageBuilder("/crash/stacktrace")
                 .withParameter("deviceId", emulator)
                 .build()).getParameter("stacktrace");
+    }
+
+    public Map<String, String> getProperties() {
+        return sendMessage(new Message("/properties")).getParameters();
     }
 
     public void screenShot(String packageName, String nodeId) {

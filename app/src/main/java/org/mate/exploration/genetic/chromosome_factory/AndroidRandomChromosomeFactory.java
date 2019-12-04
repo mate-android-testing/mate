@@ -24,7 +24,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     private boolean resetApp;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, true, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), true, maxNumEvents);
     }
 
     public AndroidRandomChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {
@@ -54,22 +54,22 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             testCase.print();
 
             //TODO: remove hack, when better solution implemented (query fitness function)
-            if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                 BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
             }
 
             //store coverage in any case
             if (storeCoverage) {
 
-                if (Properties.COVERAGE == Coverage.LINE_COVERAGE) {
+                if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                     Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
 
                     MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getCoverage(chromosome));
 
-                } else if (Properties.COVERAGE == Coverage.BRANCH_COVERAGE) {
+                } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
 
                     // TODO: this should be depended on which fitness function is used
                     // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);

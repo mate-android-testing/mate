@@ -21,7 +21,7 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
     private boolean storeCoverage;
 
     public PrimitiveTestCaseShuffleMutationFunction() {
-        this(Properties.STORE_COVERAGE);
+        this(Properties.STORE_COVERAGE());
     }
 
     public PrimitiveTestCaseShuffleMutationFunction(boolean storeCoverage) {

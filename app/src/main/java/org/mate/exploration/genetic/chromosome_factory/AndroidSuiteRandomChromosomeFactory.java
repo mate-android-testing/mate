@@ -24,7 +24,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
     }
 
     public AndroidSuiteRandomChromosomeFactory(int numTestCases, int maxNumEvents) {
-        this(Properties.STORE_COVERAGE, numTestCases, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), numTestCases, maxNumEvents);
     }
 
     @Override
