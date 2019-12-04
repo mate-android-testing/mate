@@ -67,14 +67,14 @@ public class EnvironmentManager {
             throw new IllegalStateException(e);
         }
         Message response = messageParser.nextMessage();
-        verifyMetadata(message);
+        verifyMetadata(response);
         if (response.getSubject().equals("/error")) {
             MATE.log("Receive error message from mate-server: "
                     + response.getParameter("info"));
             return null;
         }
-        stripMetadata(message);
-        return message;
+        stripMetadata(response);
+        return response;
     }
 
     public String tunnelLegacyCmd(String cmd) {
