@@ -119,18 +119,6 @@ public class MATE {
         }
         Registry.registerEnvironmentManager(environmentManager);
 
-        Context context = InstrumentationRegistry.getTargetContext();
-        AccessibilityManager accMger = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        MATE.log("AccMger is enabled: " + accMger.isEnabled());
-        MATE.log("AccMger is touch exp enabled: " + accMger.isTouchExplorationEnabled());
-
-
-
-        List<AccessibilityServiceInfo> accServices = accMger.getInstalledAccessibilityServiceList();
-        for (AccessibilityServiceInfo accInfo: accServices){
-            MATE.log(accInfo.getId() + " " + accInfo.getSettingsActivityName());
-        }
-
         //get timeout from server using EnvironmentManager
         long timeout = Registry.getEnvironmentManager().getTimeout();
         if (timeout == 0)
