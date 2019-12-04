@@ -320,7 +320,7 @@ public class Widget {
             if (editType)
                 return true;
         } catch (ClassNotFoundException e) {
-            MATE.log("ERRO - class not found: " + clazzx);
+            //MATE.log("ERRO - class not found: " + clazzx);
         }
 
 
