@@ -15,6 +15,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.model.IGUIModel;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
@@ -51,6 +52,14 @@ public class DeviceMgr implements IApp {
         else {
             throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
         }
+    }
+
+    public void executeAction(IntentBasedAction action) throws AUTCrashException {
+
+        MATE.log(" ___ execute intent based action: " + action);
+
+        // TODO: implement actual execution of intent based action using environment manager or directly create intents
+
     }
 
     public void executeAction(PrimitiveAction action) throws AUTCrashException{
