@@ -1,11 +1,7 @@
 package org.mate.accessibility;
 
-import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.google.eyesfree.utils.AccessibilityNodeInfoUtils;
-
-import org.mate.ui.Widget;
 
 /**
  * Created by marceloeler on 26/07/17.

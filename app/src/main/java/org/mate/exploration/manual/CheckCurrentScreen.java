@@ -107,9 +107,9 @@ public class CheckCurrentScreen {
             }
         }
 
-        */
 
-        /*
+
+        */
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 

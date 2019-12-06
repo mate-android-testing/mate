@@ -2,8 +2,8 @@ package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.AccessibilityViolationChecker;
 import org.mate.accessibility.check.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
@@ -160,8 +160,7 @@ public class UniformRandomForAccessibility {
         //   ClickableSpan
         //   TouchTargetSize
         //   DuplicateClickableBounds
-        AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();
-        accChecker.runAccessibilityTests(state);
+        AccessibilityViolationChecker.runAccessibilityChecks(state);
 
         //run accessibility checks implemented by MATE team
 
