@@ -1,12 +1,7 @@
 package org.mate.accessibility;
 
-import android.os.strictmode.Violation;
-
 import org.mate.MATE;
 import org.mate.accessibility.check.screenbased.ScreenBasedAccessibilityViolationChecker;
-import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.widgetbased.FormControlLabelCheck;
-import org.mate.accessibility.check.widgetbased.IWidgetAccessibilityCheck;
 import org.mate.accessibility.check.widgetbased.WidgetBasedAccessibilityViolationChecker;
 import org.mate.state.IScreenState;
 

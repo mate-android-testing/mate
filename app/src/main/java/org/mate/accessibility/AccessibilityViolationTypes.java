@@ -3,13 +3,14 @@ package org.mate.accessibility;
 public class AccessibilityViolationTypes {
 
 
-    public static final String[] NAMES = new String[18];
+    public static final String[] NAMES = new String[19];
+
 
 
     static {
         NAMES[1] = "EDITABLE-CONTENT-DESC";
         NAMES[2] = "MISSING-FORM-CONTROL-LABEL";
-        NAMES[3] = "MISSING ALTERNATIVE TEXT";
+        NAMES[3] = "MISSING-ALTERNATIVE-TEXT";
         NAMES[4] = "LOW-CONTRAST-RATIO";
         NAMES[5] = "SMALL-TOUCH-AREA";
         NAMES[6] = "DUPLICATE-CONTENT-DESCRIPTION-OR-HINT";
@@ -24,6 +25,7 @@ public class AccessibilityViolationTypes {
         NAMES[15] = "VISIBLE-FOCUS";
         NAMES[16] = "MANAGING-FOCUS";
         NAMES[17] = "RADIO-GROUP";
+        NAMES[18] = "ACTIONABLE-ELEMENT";
     }
 
     public static final int EDITABLE_CONTENT_DESC = 1;
@@ -43,7 +45,7 @@ public class AccessibilityViolationTypes {
     public static final int VISIBLE_FOCUS = 15;
     public static final int MANAGING_FOCUS = 16;
     public static final int RADIOGROUPCHECK = 17;
-
+    public static final int ACTIONABLE_ELEMENTS = 18;
 
 
 

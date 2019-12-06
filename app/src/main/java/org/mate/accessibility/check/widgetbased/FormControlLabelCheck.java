@@ -35,6 +35,7 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
         boolean editType = 	widget.isEditable();
         boolean textViewType = widget.isTextViewType();
 
+
         if (buttonType || imageButtonType || imageSwitcherType || imageType || spinnerType || editType || textViewType){
             if (widget.isImportantForAccessibility())
                 return true;
@@ -92,7 +93,7 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
             return null;
         }
 
-        if (widget.isImageType() || widget.isImageSwitcherType()){
+        if (widget.isImageType() || widget.isImageSwitcherType() || widget.mightBeImage()){
             return new AccessibilityViolation(AccessibilityViolationTypes.MISSING_ALTERNATIVE_TEXT,widget,state,"");
         }
 

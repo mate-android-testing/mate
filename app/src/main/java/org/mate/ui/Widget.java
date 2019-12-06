@@ -28,6 +28,8 @@ public class Widget {
     private String maxminLum;
     private boolean focused;
 
+    private String errorText;
+
     private boolean contextClickable;
     private boolean importantForAccessibility;
     private boolean accessibilityFocused;
@@ -113,6 +115,14 @@ public class Widget {
 
 
 
+    }
+
+    public String getErrorText() {
+        return errorText;
+    }
+
+    public void setErrorText(String errorText) {
+        this.errorText = errorText;
     }
 
     public boolean isHasChildren() {
@@ -657,7 +667,23 @@ public class Widget {
         return false;
     }
 
+    public boolean mightBeImage(){
+        //android.widget.TextView components are drawables - they can contain images
+        if (this.getClazz().contains("android.widget.TextView") && this.isClickable()){
+            if (this.getText().equals("")){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isImageType(){
+
+        if (this.clazz.contains("Image"))
+            return true;
+        if (this.mightBeImage())
+            return true;
+
         try {
             Class<?> clazz = Class.forName(this.getClazz());
             boolean imageType = android.widget.ImageView.class.isAssignableFrom(clazz);
@@ -705,4 +731,9 @@ public class Widget {
     public boolean isFocused(){
         return focused;
     }
+
+
+
+
+
 }

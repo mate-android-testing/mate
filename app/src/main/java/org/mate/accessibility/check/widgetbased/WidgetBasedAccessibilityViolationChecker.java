@@ -21,13 +21,14 @@ public class WidgetBasedAccessibilityViolationChecker {
         if (widgetBasedChecks==null){
             widgetBasedChecks = new ArrayList<IWidgetAccessibilityCheck>();
             widgetBasedChecks.add(new FormControlLabelCheck());
-            widgetBasedChecks.add(new ContrastRatioAccessibilityCheck());
+            widgetBasedChecks.add(new TextContrastRatioAccessibilityCheck());
             widgetBasedChecks.add(new InputTypeCheck());
             widgetBasedChecks.add(new FormLayoutAccessibilityCheck());
             widgetBasedChecks.add(new MultipleContentDescCheck());
             widgetBasedChecks.add(new SpacingAccessibilityCheck());
             widgetBasedChecks.add(new DescriptiveLinksCheck());
             widgetBasedChecks.add(new VisibleFocusCheck());
+            widgetBasedChecks.add(new TargetSizeAccessibilityCheck());
             //widgetBasedChecks.add(new ManagingFocusCheck());
         }
 
@@ -45,7 +46,8 @@ public class WidgetBasedAccessibilityViolationChecker {
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
                 if (violation!=null) {
                     MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
-                    MATE.log(" -- extra info: " + violation.getInfo());
+                    if (!violation.getInfo().equals(""))
+                        MATE.log(" -- extra info: " + violation.getInfo());
                 }
             }
         }
