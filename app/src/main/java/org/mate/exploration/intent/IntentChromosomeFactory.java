@@ -2,6 +2,7 @@ package org.mate.exploration.intent;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.interaction.intent.IntentProvider;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.PrimitiveAction;
@@ -12,6 +13,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     // stores the relative amount ([0,1]) of intent based actions that should be used
     private final float relativeIntentAmount;
+
+    private final IntentProvider intentProvider = new IntentProvider();
 
     public IntentChromosomeFactory(int maxNumEvents, float relativeIntentAmount) {
         super(maxNumEvents);

@@ -292,7 +292,9 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    /*
                     if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+
                         // init the CFG
                         boolean isInit = Registry.getEnvironmentManager().initCFG();
 
@@ -301,6 +303,7 @@ public class MATE {
                             throw new IllegalStateException("Graph initialisation failed!");
                         }
                     }
+                    */
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)

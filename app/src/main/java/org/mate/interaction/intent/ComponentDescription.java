@@ -20,6 +20,21 @@ class ComponentDescription {
         intentFilters.add(intentFilter);
     }
 
+    @Override
+    public String toString() {
+       StringBuilder builder = new StringBuilder();
+       builder.append("Component: " + name + System.lineSeparator());
+       builder.append("Type: " + type + System.lineSeparator());
+
+       builder.append("Intent Filters: " + System.lineSeparator());
+       builder.append("-------------------------------------------");
+       for (IntentFilterDescription intentFilter : intentFilters) {
+           builder.append(intentFilter + System.lineSeparator());
+       }
+       builder.append("-------------------------------------------");
+       return builder.toString();
+    }
+
     private enum ComponentType {
 
         ACTIVITY,
