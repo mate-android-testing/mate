@@ -36,6 +36,8 @@ public class Properties {
         return propertyOr(3);
     }
 
+    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
+
 
     /**
      *  Added by vin on 24/05/2018

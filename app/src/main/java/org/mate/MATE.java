@@ -19,6 +19,7 @@ import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.exploration.manual.ManualExploration;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
@@ -303,7 +304,8 @@ public class MATE {
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withChromosomeFactory(IntentChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            // .withRelativeIntentAmount(0.3f)
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
