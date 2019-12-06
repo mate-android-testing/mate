@@ -43,7 +43,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
                 if (!luminances.equals("0,0")) {
                     widget.setColor(luminances);
                     //luminances.add(luminance);
-                    MATE.log("##Luminance: " + luminances);
+                    //MATE.log("##Luminance: " + luminances);
                     String parts[] = luminances.split(",");
                     if (parts.length>1) {
 
@@ -85,7 +85,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             Registry.getEnvironmentManager().screenShot(state.getPackageName(),visitedState.getId()+"_");
             state.setId(visitedState.getId()+"_");
             detectColours(state);
-            MATE.log("CHECK IF COLOR CHANGED");
+            //MATE.log("CHECK IF COLOR CHANGED");
             //if state has been visited
             //   check whether any of their colors have changed
             if (visitedState.differentColor(state)){
@@ -96,7 +96,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         }
         else{
             detectColours(state);
-            MATE.log("ADD STATE TO LIST");
+            //MATE.log("ADD STATE TO LIST");
             visitedStates.add(state);
         }
 
@@ -105,7 +105,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
 
         for (String widgetType: luminancesByType.keySet()){
             List<String> luminances = luminancesByType.get(widgetType);
-            MATE.log("LL " + widgetType);
+            //MATE.log("LL " + widgetType);
             List<String> distinctCombinations = new ArrayList<String>();
             for (String lum: luminances){
 
@@ -122,7 +122,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
                 int gl = Integer.valueOf(lowparts[1]);
                 int bl = Integer.valueOf(lowparts[2]);
 */
-                MATE.log("   # "+lum);
+                //MATE.log("   # "+lum);
                 if (!distinctCombinations.contains(lum))
                     distinctCombinations.add(lum);
 
