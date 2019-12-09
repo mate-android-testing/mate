@@ -1,11 +1,21 @@
 package org.mate.exploration.intent;
 
+import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
+import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentProvider;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.PrimitiveAction;
+import org.mate.utils.Coverage;
+
+import java.util.Random;
 
 public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
@@ -33,11 +43,85 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     @Override
     public IChromosome<TestCase> createChromosome() {
-        return null;
+
+        if (resetApp) {
+            uiAbstractionLayer.resetApp();
+        }
+
+        TestCase testCase = TestCase.newInitializedTestCase();
+        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
+
+        try {
+            for (int i = 0; i < maxNumEvents; i++) {
+                if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
+                    return chromosome;
+                }
+            }
+        } finally {
+
+            //TODO: remove hack, when better solution implemented (query fitness function)
+            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+                BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
+            }
+
+            //store coverage in any case
+            if (storeCoverage) {
+
+                if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                    Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
+
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
+                            .getCoverage(chromosome));
+
+                } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+
+                    // TODO: this should be depended on which fitness function is used
+                    // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
+
+                    Registry.getEnvironmentManager().storeBranchCoverage(chromosome);
+
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
+                            .getBranchCoverage(chromosome));
+                }
+
+                MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+            }
+        }
+        return chromosome;
     }
 
+    /**
+     * Selects the next action to be executed. This can be either an
+     * an Intent-based action or a UI action depending
+     * on the probability specified by {@code relativeIntentAmount}.
+     *
+     * @return Returns the action to be performed next.
+     */
     @Override
     protected Action selectAction() {
-        return PrimitiveAction.randomAction();
+
+        double random = Math.random();
+
+        if (random < relativeIntentAmount) {
+            // generate an Intent-based action
+
+            if (intentProvider.hasService() && random < Properties.SERVICE_SELECTION_PROBABILITY()) {
+                // select a service
+                return intentProvider.getAction(ComponentType.SERVICE);
+            } else if (intentProvider.hasBroadcastReceiver()
+                    && random < Properties.BROADCAST_RECEIVER_SELECTION_PROBABILITY()) {
+                // select a broadcast receiver
+                return intentProvider.getAction(ComponentType.BROADCAST_RECEIVER);
+            } else {
+                // select an activity
+                return intentProvider.getAction(ComponentType.ACTIVITY);
+                // TODO: may integrate probability to swap activity
+            }
+        } else {
+            // select a UI action
+            return super.selectAction();
+        }
     }
 }

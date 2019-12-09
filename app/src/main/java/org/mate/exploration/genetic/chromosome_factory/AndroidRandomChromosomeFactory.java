@@ -19,9 +19,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     public static final String CHROMOSOME_FACTORY_ID = "android_random_chromosome_factory";
 
     protected UIAbstractionLayer uiAbstractionLayer;
-    private int maxNumEvents;
-    private boolean storeCoverage;
-    private boolean resetApp;
+    protected int maxNumEvents;
+    protected boolean storeCoverage;
+    protected boolean resetApp;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
         this(Properties.STORE_COVERAGE(), true, maxNumEvents);

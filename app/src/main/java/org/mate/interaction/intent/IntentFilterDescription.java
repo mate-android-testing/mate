@@ -31,6 +31,12 @@ class IntentFilterDescription {
         data.add(new Data(scheme, host, port, path, pathPattern, pathPrefix, mimeType));
     }
 
+    Set<String> getActions() { return actions; }
+
+    Set<String> getCategories() { return categories; }
+
+    Set<Data> getData() { return data; }
+
     @Override
     public String toString() {
 

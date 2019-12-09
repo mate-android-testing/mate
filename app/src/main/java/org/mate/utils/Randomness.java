@@ -3,8 +3,10 @@ package org.mate.utils;
 import org.mate.Registry;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class Randomness {
     public static Random getRnd() {
@@ -17,6 +19,20 @@ public class Randomness {
 
     public static <T> int randomIndex(List<T> list) {
         return Registry.getRandom().nextInt(list.size());
+    }
+
+    public static <T> T randomElement(Set<T> set) {
+        int index = new Random().nextInt(set.size());
+        Iterator<T> iter = set.iterator();
+        for (int i = 0; i < index; i++) {
+            iter.next();
+        }
+
+        if (iter.hasNext()) {
+            return null;
+        } else {
+            return iter.next();
+        }
     }
 
     public static int getInRangeStd(int range) {
