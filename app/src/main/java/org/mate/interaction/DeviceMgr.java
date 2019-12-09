@@ -35,34 +35,50 @@ public class DeviceMgr implements IApp {
     private UiDevice device;
     private String packageName;
 
-    public DeviceMgr(UiDevice device, String packageName){
+    public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
 
 
-
     }
 
-    public void executeAction(Action action) throws AUTCrashException{
+    public void executeAction(Action action) throws AUTCrashException {
         if (action instanceof WidgetAction) {
             executeAction((WidgetAction) action);
         } else if (action instanceof PrimitiveAction) {
             executeAction((PrimitiveAction) action);
-        }
-        else {
+        } else if (action instanceof IntentBasedAction) {
+            executeAction((IntentBasedAction) action);
+        } else {
             throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
         }
     }
 
-    public void executeAction(IntentBasedAction action) throws AUTCrashException {
+    public void executeAction(IntentBasedAction action) {
+
+        // TODO: check if we can react to a crash
 
         MATE.log(" ___ execute intent based action: " + action);
 
-        // TODO: implement actual execution of intent based action using environment manager or directly create intents
+        Intent intent = action.getIntent();
 
+        // TODO: implement actual execution of intent based action using environment manager or directly create intents
+        switch (action.getComponentType()) {
+            case ACTIVITY:
+                InstrumentationRegistry.getTargetContext().startActivity(intent);
+                break;
+            case SERVICE:
+                InstrumentationRegistry.getTargetContext().startService(intent);
+                break;
+            case BROADCAST_RECEIVER:
+                InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+                break;
+            default:
+                throw new UnsupportedOperationException("Component type not supported yet!");
+        }
     }
 
-    public void executeAction(PrimitiveAction action) throws AUTCrashException{
+    public void executeAction(PrimitiveAction action) throws AUTCrashException {
         MATE.log(" ____ execute primitive action at " + action.getX() + ", " + action.getY());
 
 
@@ -72,7 +88,7 @@ public class DeviceMgr implements IApp {
                 break;
 
             case LONG_CLICK:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(),120);
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
                 break;
 
             case SWIPE_DOWN:
@@ -92,7 +108,8 @@ public class DeviceMgr implements IApp {
                 break;
 
             case BACK:
-                device.pressBack();;
+                device.pressBack();
+                ;
                 break;
 
             case MENU:
@@ -115,12 +132,12 @@ public class DeviceMgr implements IApp {
         }
     }
 
-    public void executeAction(WidgetAction action) throws AUTCrashException{
+    public void executeAction(WidgetAction action) throws AUTCrashException {
         MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
         Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
 
-        switch (typeOfAction){
+        switch (typeOfAction) {
 
             case CLICK:
                 handleClick(selectedWidget);
@@ -158,7 +175,8 @@ public class DeviceMgr implements IApp {
                 break;
 
             case BACK:
-                device.pressBack();;
+                device.pressBack();
+                ;
                 break;
 
             case MENU:
@@ -182,53 +200,55 @@ public class DeviceMgr implements IApp {
         }
     }
 
-    public void handleClick(Widget widget){
-        device.click(widget.getX(),widget.getY());
+    public void handleClick(Widget widget) {
+        device.click(widget.getX(), widget.getY());
     }
 
-    public void handleClear(Widget widget){
+    public void handleClear(Widget widget) {
         UiObject2 obj = findObject(widget);
-        if (obj!=null)
+        if (obj != null)
             obj.setText("");
     }
 
-    public void handleSwipe(Widget widget, int direction){
+    public void handleSwipe(Widget widget, int direction) {
 
-        int pixelsmove=300;
+        int pixelsmove = 300;
         int X = 0;
         int Y = 0;
         int steps = 15;
 
-        if (!widget.getClazz().equals("")){
+        if (!widget.getClazz().equals("")) {
             UiObject2 obj = findObject(widget);
-            if (obj!=null){
+            if (obj != null) {
                 X = obj.getVisibleBounds().centerX();
                 Y = obj.getVisibleBounds().centerY();
-            }
-            else {
+            } else {
                 X = widget.getX();
                 Y = widget.getY();
             }
-        }
-        else{
-            X = device.getDisplayWidth()/2;
-            Y = device.getDisplayHeight()/2;
-            if (direction==0 || direction==1)
-                pixelsmove=Y;
+        } else {
+            X = device.getDisplayWidth() / 2;
+            Y = device.getDisplayHeight() / 2;
+            if (direction == 0 || direction == 1)
+                pixelsmove = Y;
             else
-                pixelsmove=X;
+                pixelsmove = X;
         }
 
         //50 pixels has been arbitrarily selected - create a properties file in the future
-        switch (direction){
-            case 0: device.swipe(X, Y, X, Y-pixelsmove,steps);
+        switch (direction) {
+            case 0:
+                device.swipe(X, Y, X, Y - pixelsmove, steps);
                 break;
 
-            case 1: device.swipe(X, Y, X, Y+pixelsmove,steps);
+            case 1:
+                device.swipe(X, Y, X, Y + pixelsmove, steps);
                 break;
-            case 2: device.swipe(X, Y, X+pixelsmove, Y,steps);
+            case 2:
+                device.swipe(X, Y, X + pixelsmove, Y, steps);
                 break;
-            case 3: device.swipe(X, Y, X-pixelsmove, Y,steps);
+            case 3:
+                device.swipe(X, Y, X - pixelsmove, Y, steps);
                 break;
         }
     }
@@ -237,14 +257,14 @@ public class DeviceMgr implements IApp {
         UiObject2 obj = findObject(widget);
         int X = widget.getX();
         int Y = widget.getY();
-        if (obj!=null){
+        if (obj != null) {
             X = obj.getVisibleBounds().centerX();
             Y = obj.getVisibleBounds().centerY();
         }
-        device.swipe(X, Y, X, Y,120);
+        device.swipe(X, Y, X, Y, 120);
     }
 
-    public void sleep(long time){
+    public void sleep(long time) {
         try {
             Thread.sleep(time);
         } catch (InterruptedException e) {
@@ -252,14 +272,14 @@ public class DeviceMgr implements IApp {
         }
     }
 
-    private UiObject2 findObject(Widget widget){
+    private UiObject2 findObject(Widget widget) {
         List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
-        if (objs!=null){
-            if (objs.size()==1)
+        if (objs != null) {
+            if (objs.size() == 1)
                 return objs.get(0);
             else {
-                for (UiObject2 uiObject2: objs){
-                    if (uiObject2.getText()!=null && uiObject2.getText().equals(widget.getText()))
+                for (UiObject2 uiObject2 : objs) {
+                    if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
                         return uiObject2;
                 }
             }
@@ -267,13 +287,13 @@ public class DeviceMgr implements IApp {
 
         //if no obj has been found by id, and then text if there is more than one object with the same id
         objs = device.findObjects(By.text(widget.getText()));
-        if (objs!=null){
-            if (objs.size()==1)
+        if (objs != null) {
+            if (objs.size() == 1)
                 return objs.get(0);
             else {
-                for (UiObject2 uiObject2: objs){
-                    if (uiObject2.getContentDescription()!=null && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
-                            (uiObject2.getVisibleBounds()!=null && uiObject2.getVisibleBounds().centerX()==widget.getX() && uiObject2.getVisibleBounds().centerY()==widget.getY()))
+                for (UiObject2 uiObject2 : objs) {
+                    if (uiObject2.getContentDescription() != null && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
+                            (uiObject2.getVisibleBounds() != null && uiObject2.getVisibleBounds().centerX() == widget.getX() && uiObject2.getVisibleBounds().centerY() == widget.getY()))
                         return uiObject2;
                 }
             }
@@ -281,58 +301,55 @@ public class DeviceMgr implements IApp {
         return null;
     }
 
-    public void handleEdit(WidgetAction action){
+    public void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
         String textData = "";
 
         if (action.getExtraInfo().equals(""))
-           textData = generateTextData(action);
+            textData = generateTextData(action);
         else
             textData = action.getExtraInfo();
 
         MATE.log("TEXT DATA: " + textData);
 
-        if (widget.getResourceID().equals("")){
+        if (widget.getResourceID().equals("")) {
             if (!widget.getText().equals("")) {
                 UiObject2 obj = device.findObject(By.text(widget.getText()));
                 if (obj != null) {
                     obj.setText(textData);
                 }
-            }
-            else{
-                device.click(widget.getX(),widget.getY());
+            } else {
+                device.click(widget.getX(), widget.getY());
                 UiObject2 obj = device.findObject(By.focused(true));
-                if (obj!=null){
+                if (obj != null) {
                     obj.setText(textData);
                 }
             }
-        }
-        else{
+        } else {
             List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
-            if (objs!=null && objs.size()>0){
-                int i=0;
+            if (objs != null && objs.size() > 0) {
+                int i = 0;
                 int size = objs.size();
-                boolean objfound=false;
-                while (i<size && !objfound){
+                boolean objfound = false;
+                while (i < size && !objfound) {
                     UiObject2 obj = objs.get(i);
-                    if (obj!=null) {
+                    if (obj != null) {
                         String objText = "";
-                        if (obj.getText()!=null)
+                        if (obj.getText() != null)
                             objText = obj.getText();
                         if (objText.equals(widget.getText())) {
                             obj.setText(textData);
-                            objfound=true;
+                            objfound = true;
 
                         }
                     }
                     i++;
                 }
                 if (!objfound)
-                    MATE.log("  ********* obj "+widget.getId()+ "  not found");
-            }
-            else{
-                MATE.log("  ********* obj "+widget.getId()+ "  not found");
+                    MATE.log("  ********* obj " + widget.getId() + "  not found");
+            } else {
+                MATE.log("  ********* obj " + widget.getId() + "  not found");
             }
         }
 
@@ -348,45 +365,44 @@ public class DeviceMgr implements IApp {
             widgetText = widget.getHint();
 
         String textData = "";
-        String inputType ="";
-        int maxLengthInt=widget.getMaxLength();
-        if (action.getExtraInfo().equals("")){
+        String inputType = "";
+        int maxLengthInt = widget.getMaxLength();
+        if (action.getExtraInfo().equals("")) {
 
-            if (maxLengthInt<0)
-                maxLengthInt=15;
-            if (maxLengthInt>15)
-                maxLengthInt=15;
+            if (maxLengthInt < 0)
+                maxLengthInt = 15;
+            if (maxLengthInt > 15)
+                maxLengthInt = 15;
 
             if (widget.getInputType() == (InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER))
-                inputType="number";
-            if (widget.getInputType()==InputType.TYPE_CLASS_PHONE)
-                inputType="phone";
-            if (widget.getInputType()==InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-                inputType="email";
-            if (widget.getInputType()==InputType.TYPE_TEXT_VARIATION_URI)
-                inputType="uri";
+                inputType = "number";
+            if (widget.getInputType() == InputType.TYPE_CLASS_PHONE)
+                inputType = "phone";
+            if (widget.getInputType() == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+                inputType = "email";
+            if (widget.getInputType() == InputType.TYPE_TEXT_VARIATION_URI)
+                inputType = "uri";
 
 
-            widgetText = widgetText.replace(".","");
-            widgetText = widgetText.replace(",","");
+            widgetText = widgetText.replace(".", "");
+            widgetText = widgetText.replace(",", "");
             if (inputType.equals("") && !widgetText.equals("") && android.text.TextUtils.isDigitsOnly(widgetText)) {
                 inputType = "number";
             }
 
-            if (inputType.equals("")){
+            if (inputType.equals("")) {
                 String desc = widget.getContentDesc();
-                if (desc!=null){
-                    if (desc.contains("email")||desc.contains("e-mail")||desc.contains("E-mail")||desc.contains("Email"))
-                        inputType="email";
+                if (desc != null) {
+                    if (desc.contains("email") || desc.contains("e-mail") || desc.contains("E-mail") || desc.contains("Email"))
+                        inputType = "email";
                 }
             }
             if (inputType.equals(""))
-                inputType="text";
+                inputType = "text";
 
 
-            textData = getRandomData(inputType,maxLengthInt);
-        }
-        else{
+            textData = getRandomData(inputType, maxLengthInt);
+        } else {
             textData = action.getExtraInfo();
         }
         return textData;
@@ -396,51 +412,44 @@ public class DeviceMgr implements IApp {
         //need to also generate random invalid string, number, email, uri, ...
         String textData = "";
         DataGenerator dataGen = new DataGenerator();
-        if (inputType!=null){
+        if (inputType != null) {
 
             if (inputType.contains("phone") || inputType.contains("number") || inputType.contains("Phone") || inputType.contains("Number")) {
                 textData = dataGen.getRandomValidNumber(maxLengthInt);
                 // textData = dataGen.getRandomValidNumber();
-            }
-            else
-            if (inputType.contains("Email") || inputType.contains("email")) {
+            } else if (inputType.contains("Email") || inputType.contains("email")) {
                 textData = dataGen.getRandomValidEmail(maxLengthInt);
-            }
-            else
-            if (inputType.contains("uri") || inputType.contains("URI")) {
+            } else if (inputType.contains("uri") || inputType.contains("URI")) {
                 textData = dataGen.getRandomUri(maxLengthInt);
-            }
-            else {
+            } else {
                 textData = dataGen.getRandomValidString(maxLengthInt);
             }
-        }
-        else
+        } else
             textData = dataGen.getRandomValidString(maxLengthInt);
         return textData;
     }
 
-    public void reinstallApp(){
+    public void reinstallApp() {
         MATE.log("Reinstall app");
         Registry.getEnvironmentManager().clearAppData();
         //sleep(1000);
     }
 
     public void restartApp() {
-            MATE.log("Restarting app");
-            // Launch the app
-            Context context = InstrumentationRegistry.getContext();
-            final Intent intent = context.getPackageManager()
-                    .getLaunchIntentForPackage(packageName);
-            // Clear out any previous instances
-            try{
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            }
-            catch(Exception e){
-                e.printStackTrace();
-                MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
-            }
-            context.startActivity(intent);
-           // sleep(1000);
+        MATE.log("Restarting app");
+        // Launch the app
+        Context context = InstrumentationRegistry.getContext();
+        final Intent intent = context.getPackageManager()
+                .getLaunchIntentForPackage(packageName);
+        // Clear out any previous instances
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
+        }
+        context.startActivity(intent);
+        // sleep(1000);
 
     }
 
@@ -468,9 +477,8 @@ public class DeviceMgr implements IApp {
     }
 
 
-
-    public boolean goToState(IGUIModel guiModel, String targetScreenStateId){
-        return new GUIWalker(guiModel, packageName,this).goToState(targetScreenStateId);
+    public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
+        return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
     }
 
 }

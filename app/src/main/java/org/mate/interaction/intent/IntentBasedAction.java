@@ -4,7 +4,7 @@ import android.content.Intent;
 
 import org.mate.ui.Action;
 
-class IntentBasedAction extends Action {
+public class IntentBasedAction extends Action {
 
     private final Intent intent;
     private final ComponentType componentType;
@@ -12,6 +12,14 @@ class IntentBasedAction extends Action {
     IntentBasedAction(Intent intent, ComponentType componentType) {
         this.intent = intent;
         this.componentType = componentType;
+    }
+
+    public ComponentType getComponentType() {
+        return componentType;
+    }
+
+    public Intent getIntent() {
+        return intent;
     }
 
     @Override
