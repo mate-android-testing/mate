@@ -27,6 +27,7 @@ class IntentFilterDescription {
 
     void addData(String scheme, String host, String port, String path, String pathPattern,
                  String pathPrefix, String mimeType) {
+        // TODO: if already some data tag has been added, may merge with new data tag or keep them separat as right now
         data.add(new Data(scheme, host, port, path, pathPattern, pathPrefix, mimeType));
     }
 
@@ -72,12 +73,12 @@ class IntentFilterDescription {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("Scheme: " + scheme);
-            builder.append("Host: " + host);
-            builder.append("Port: " + port);
-            builder.append("Path: " + path);
-            builder.append("PathPattern: " + pathPattern);
-            builder.append("PathPrefix: " + pathPrefix);
+            builder.append("Scheme: " + scheme + ", ");
+            builder.append("Host: " + host + ", ");
+            builder.append("Port: " + port + ", ");
+            builder.append("Path: " + path + ", ");
+            builder.append("PathPattern: " + pathPattern + ", ");
+            builder.append("PathPrefix: " + pathPrefix + ", ");
             builder.append("MimeType: " + mimeType);
             return builder.toString();
         }
