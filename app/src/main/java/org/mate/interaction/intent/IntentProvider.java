@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -124,16 +125,18 @@ public class IntentProvider {
         // add a random action if present
         if (intentFilter.hasAction()) {
             String action = Randomness.randomElement(intentFilter.getActions());
-            intent = new Intent(action);
+            intent.setAction(action);
         }
 
 
         // add a random category if present
+        // TODO: add decreasing probability for adding multiple categories
         if (intentFilter.hasCategory()) {
             String category = Randomness.randomElement(intentFilter.getCategories());
             intent.addCategory(category);
         }
 
+        // TODO: add decreasing probability for adding multiple data
         if (intentFilter.hasData()) {
             IntentFilterDescription.Data data = Randomness.randomElement(intentFilter.getData());
         }
@@ -158,7 +161,7 @@ public class IntentProvider {
             }
         }
         MATE.log_acc("Found " + targetComponents.size() + " " + componentType);
-        return targetComponents;
+        return Collections.unmodifiableList(targetComponents);
     }
 
     /**

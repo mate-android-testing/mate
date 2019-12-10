@@ -2,6 +2,7 @@ package org.mate.interaction.intent;
 
 import org.mate.MATE;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,7 +60,7 @@ class ComponentDescription {
     }
 
     Set<IntentFilterDescription> getIntentFilters() {
-        return intentFilters;
+        return Collections.unmodifiableSet(intentFilters);
     }
 
     @Override

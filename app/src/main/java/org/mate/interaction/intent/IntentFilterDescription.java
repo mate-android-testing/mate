@@ -1,6 +1,9 @@
 package org.mate.interaction.intent;
 
+import android.net.Uri;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,11 +46,11 @@ class IntentFilterDescription {
         return !data.isEmpty();
     }
 
-    Set<String> getActions() { return actions; }
+    Set<String> getActions() { return Collections.unmodifiableSet(actions); }
 
-    Set<String> getCategories() { return categories; }
+    Set<String> getCategories() { return Collections.unmodifiableSet(categories); }
 
-    Set<Data> getData() { return data; }
+    Set<Data> getData() { return Collections.unmodifiableSet(data); }
 
     @Override
     public String toString() {
