@@ -1,5 +1,6 @@
 package org.mate.interaction.intent;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.util.Xml;
@@ -28,6 +29,7 @@ public class IntentProvider {
     public IntentProvider() {
         try {
             components = parseManifest();
+            MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse AndroidManifest file!");
             MATE.log_acc(e.getMessage());
@@ -40,7 +42,7 @@ public class IntentProvider {
      * that can be invoked.
      *
      * @return Returns {@code true} if a service component is contained
-     *      in the set of components, otherwise {@code false}.
+     * in the set of components, otherwise {@code false}.
      */
     public boolean hasService() {
 
@@ -53,16 +55,33 @@ public class IntentProvider {
     }
 
     /**
-     * Returns whether the set of components contains a service
+     * Returns whether the set of components contains a broadcast receiver
      * that can be invoked.
      *
-     * @return Returns {@code true} if a service component is contained
-     *      in the set of components, otherwise {@code false}.
+     * @return Returns {@code true} if a broadcast receiver component is contained
+     * in the set of components, otherwise {@code false}.
      */
     public boolean hasBroadcastReceiver() {
 
         for (ComponentDescription component : components) {
             if (component.isBroadcastReceiver()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the set of components contains an activity
+     * that can be invoked.
+     *
+     * @return Returns {@code true} if an activity component is contained
+     * in the set of components, otherwise {@code false}.
+     */
+    public boolean hasActivity() {
+
+        for (ComponentDescription component : components) {
+            if (component.isActivity()) {
                 return true;
             }
         }
@@ -90,22 +109,37 @@ public class IntentProvider {
      */
     private Intent fillIntent(ComponentDescription component) {
 
-        // TODO: handle a non-existing or empty intent filter
+        if (!component.hasIntentFilter()) {
+            MATE.log_acc("Component " + component + " doesn't declare any intent-filter!");
+            throw new IllegalStateException("Component without intent-filter!");
+        }
+
         Set<IntentFilterDescription> intentFilters = component.getIntentFilters();
 
         // select a random intent filter
         IntentFilterDescription intentFilter = Randomness.randomElement(intentFilters);
 
-        // add a random action
-        String action = Randomness.randomElement(intentFilter.getActions());
-        Intent intent = new Intent(action);
+        Intent intent = new Intent();
+
+        // add a random action if present
+        if (intentFilter.hasAction()) {
+            String action = Randomness.randomElement(intentFilter.getActions());
+            intent = new Intent(action);
+        }
+
 
         // add a random category if present
-        String category = Randomness.randomElement(intentFilter.getCategories());
-
-        if (category != null) {
+        if (intentFilter.hasCategory()) {
+            String category = Randomness.randomElement(intentFilter.getCategories());
             intent.addCategory(category);
         }
+
+        if (intentFilter.hasData()) {
+            IntentFilterDescription.Data data = Randomness.randomElement(intentFilter.getData());
+        }
+
+        // make every intent explicit
+        intent.setComponent(new ComponentName(MATE.packageName, component.getFullyQualifiedName()));
 
         // TODO: add data + extras + component name + outsource in method
         return intent;
@@ -117,13 +151,14 @@ public class IntentProvider {
      * @return Returns the list of service components.
      */
     private List<ComponentDescription> getComponents(ComponentType componentType) {
-        List<ComponentDescription> components = new ArrayList<>();
+        List<ComponentDescription> targetComponents = new ArrayList<>();
         for (ComponentDescription component : components) {
             if (component.getType() == componentType) {
-                components.add(component);
+                targetComponents.add(component);
             }
         }
-        return components;
+        MATE.log_acc("Found " + targetComponents.size() + " " + componentType);
+        return targetComponents;
     }
 
     /**
@@ -133,7 +168,7 @@ public class IntentProvider {
      *
      * @return Returns a list of exported and enabled components.
      * @throws XmlPullParserException Should never happen.
-     * @throws IOException Should never happen.
+     * @throws IOException            Should never happen.
      */
     private List<ComponentDescription> parseManifest() throws XmlPullParserException, IOException {
 
@@ -211,8 +246,9 @@ public class IntentProvider {
                     case "activity":
                     case "service":
                     case "receiver":
-                        if (currentComponent != null) {
-                            MATE.log_acc(currentComponent.toString());
+                        // only add components that define an intent-filter
+                        if (currentComponent != null && currentComponent.hasIntentFilter()) {
+                            // MATE.log_acc(currentComponent.toString());
                             components.add(currentComponent);
                             currentComponent = null;
                         }

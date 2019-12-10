@@ -33,7 +33,9 @@ public class IntentBasedAction extends Action {
         builder.append("IntentBasedAction" + System.lineSeparator());
         builder.append("------------------------");
         builder.append("ComponentType: " + componentType + System.lineSeparator());
-        builder.append("Receiver of Intent: " + intent.getComponent());
+        builder.append("Receiver of Intent: " + intent.getComponent() + System.lineSeparator());
+        builder.append("Action: " + intent.getAction() + System.lineSeparator());
+        builder.append("Category: " + intent.getCategories() + System.lineSeparator());
         builder.append("------------------------");
         return builder.toString();
     }

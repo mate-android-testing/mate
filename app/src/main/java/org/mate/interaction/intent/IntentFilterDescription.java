@@ -27,8 +27,20 @@ class IntentFilterDescription {
 
     void addData(String scheme, String host, String port, String path, String pathPattern,
                  String pathPrefix, String mimeType) {
-        // TODO: if already some data tag has been added, may merge with new data tag or keep them separat as right now
+        // TODO: if already some data tag has been added, may merge with new data tag or keep them separate as right now
         data.add(new Data(scheme, host, port, path, pathPattern, pathPrefix, mimeType));
+    }
+
+    boolean hasAction() {
+        return !actions.isEmpty();
+    }
+
+    boolean hasCategory() {
+        return !categories.isEmpty();
+    }
+
+    boolean hasData() {
+        return !data.isEmpty();
     }
 
     Set<String> getActions() { return actions; }
@@ -55,7 +67,7 @@ class IntentFilterDescription {
      * A representation for the data tag potentially contained
      * in an intent-filter tag.
      */
-    private class Data {
+    public class Data {
 
         private final String scheme;
         private final String host;

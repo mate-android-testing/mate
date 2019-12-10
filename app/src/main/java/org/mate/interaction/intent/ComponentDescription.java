@@ -1,5 +1,7 @@
 package org.mate.interaction.intent;
 
+import org.mate.MATE;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,12 +34,28 @@ class ComponentDescription {
         return  type == ComponentType.CONTENT_PROVIDER;
     }
 
+    boolean hasIntentFilter() { return !intentFilters.isEmpty(); }
+
     ComponentType getType() {
         return type;
     }
 
     void addIntentFilter(IntentFilterDescription intentFilter) {
         intentFilters.add(intentFilter);
+    }
+
+    /**
+     * Returns the FQN of the component. That is package name + class name.
+     *
+     * @return Returns the FQN of the component.
+     */
+    String getFullyQualifiedName() {
+
+        if (name.startsWith(".")) {
+            return MATE.packageName + name;
+        } else {
+            return name;
+        }
     }
 
     Set<IntentFilterDescription> getIntentFilters() {

@@ -1,5 +1,6 @@
 package org.mate.utils;
 
+import org.mate.MATE;
 import org.mate.Registry;
 
 import java.util.ArrayList;
@@ -21,6 +22,13 @@ public class Randomness {
         return Registry.getRandom().nextInt(list.size());
     }
 
+    /**
+     * Randomly retrieves an element from a given set.
+     *
+     * @param set The input set.
+     * @param <T> The element type.
+     * @return Returns a random element from a given set.
+     */
     public static <T> T randomElement(Set<T> set) {
         int index = new Random().nextInt(set.size());
         Iterator<T> iter = set.iterator();
@@ -28,11 +36,7 @@ public class Randomness {
             iter.next();
         }
 
-        if (iter.hasNext()) {
-            return null;
-        } else {
-            return iter.next();
-        }
+        return iter.next();
     }
 
     public static int getInRangeStd(int range) {
