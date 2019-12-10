@@ -161,7 +161,7 @@ public class CheckCurrentScreen {
             new AccessibilityViolation(AccessibilityViolationTypes.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(),true);
         }
 
-        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+//        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
 
 

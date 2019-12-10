@@ -30,6 +30,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks.add(new VisibleFocusCheck());
             widgetBasedChecks.add(new TargetSizeAccessibilityCheck());
             widgetBasedChecks.add(new ErrorMessageCheck());
+            widgetBasedChecks.add(new AcionableElementsCheck());
             //widgetBasedChecks.add(new ManagingFocusCheck());
         }
 

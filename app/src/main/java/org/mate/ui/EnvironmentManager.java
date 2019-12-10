@@ -405,6 +405,26 @@ public class EnvironmentManager {
         tunnelLegacyCmd(cmd);
     }
 
+    public double matchesSurroundingColor(String packageName, String stateId, Widget widget){
+
+        int maxw = MATE.device.getDisplayWidth();
+        int maxh = MATE.device.getDisplayHeight();
+        boolean matches = false;
+        String cmd = "surroundingColor:";
+        cmd += emulator + "_" + packageName + ":";
+        cmd += stateId + ":";
+        int x1 = widget.getX1();
+        int x2 = widget.getX2();
+        int y1 = widget.getY1();
+        int y2 = widget.getY2();
+        cmd += x1 + "," + y1 + "," + x2 + "," + y2;
+
+        //MATE.log(cmd);
+        //MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
+        return Double.valueOf(tunnelLegacyCmd(cmd));
+
+    }
+
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
@@ -416,7 +436,7 @@ public class EnvironmentManager {
         int x2 = widget.getX2();
         int y1 = widget.getY1();
         int y2 = widget.getY2();
-        int borderExpanded = 1;
+        int borderExpanded = 0;
         if (x1 - borderExpanded >= 0)
             x1 -= borderExpanded;
         if (x2 + borderExpanded <= maxw)
