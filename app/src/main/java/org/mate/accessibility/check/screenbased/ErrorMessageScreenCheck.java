@@ -57,11 +57,12 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck{
 
 
 
-                    if (!wThis.getErrorText().equals(wOther.getErrorText())){
+                    //if (!wThis.getErrorText().equals(wOther.getErrorText())){
                         if (wOther.getContentDesc().equals(wThis.getContentDesc()) && wOther.getHint().equals(wThis.getHint())) {
                             return true;
                         }
-                    }
+                    //}
+
                 }
             }
         }
