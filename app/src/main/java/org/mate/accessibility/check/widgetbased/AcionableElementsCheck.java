@@ -13,6 +13,9 @@ public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
             return new AccessibilityViolation(AccessibilityViolationTypes.ACTIONABLE_ELEMENTS,widget,state,"");
         }
 
+        //if (check whether background color of the button is the same as the screen background)
+
+
         return null;
     }
 }

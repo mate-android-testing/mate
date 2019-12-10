@@ -22,6 +22,7 @@ public class ScreenBasedAccessibilityViolationChecker {
             screenBasedChecks = new ArrayList<IScreenAccessibilityCheck>();
             screenBasedChecks.add(new ColourMeaningAccessibilityCheck());
             screenBasedChecks.add(new RadioGroupCheck());
+            screenBasedChecks.add(new ErrorMessageScreenCheck());
         }
 
         return screenBasedChecks;

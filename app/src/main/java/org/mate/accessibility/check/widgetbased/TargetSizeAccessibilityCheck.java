@@ -37,7 +37,7 @@ public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck {
         float relativeHeight = height/density;
         float relativeWidth = width/density;
         String sizeInfo = relativeHeight+"x"+relativeWidth;
-        MATE.log("Size info: " + sizeInfo + " of "+widget.getText() + " " + widget.getId() + " " + widget.getClazz());
+        //MATE.log("Size info: " + sizeInfo + " of "+widget.getText() + " " + widget.getId() + " " + widget.getClazz());
         if (relativeHeight < AccessibilitySettings.MIN_HEIGHT || relativeWidth < AccessibilitySettings.MIN_WIDTH) {
 
             return new AccessibilityViolation(AccessibilityViolationTypes.SMALL_TOUCH_AREA, widget, state, sizeInfo);

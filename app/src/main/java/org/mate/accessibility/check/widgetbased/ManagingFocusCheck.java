@@ -54,11 +54,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                             textSpecific.setExtraInfo(widget.getText());
                             MATE.uiAbstractionLayer.executeAction(textSpecific);
                         }
-
-
-
                     }
-
                 }
 
 

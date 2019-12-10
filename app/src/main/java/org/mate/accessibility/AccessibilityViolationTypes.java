@@ -3,7 +3,7 @@ package org.mate.accessibility;
 public class AccessibilityViolationTypes {
 
 
-    public static final String[] NAMES = new String[19];
+    public static final String[] NAMES = new String[21];
 
 
 
@@ -26,6 +26,8 @@ public class AccessibilityViolationTypes {
         NAMES[16] = "MANAGING-FOCUS";
         NAMES[17] = "RADIO-GROUP";
         NAMES[18] = "ACTIONABLE-ELEMENT";
+        NAMES[19] = "LINK-TO-ALTERNATIVE-FORMAT";
+        NAMES[20] = "ERROR-MESSAGE";
     }
 
     public static final int EDITABLE_CONTENT_DESC = 1;
@@ -46,6 +48,8 @@ public class AccessibilityViolationTypes {
     public static final int MANAGING_FOCUS = 16;
     public static final int RADIOGROUPCHECK = 17;
     public static final int ACTIONABLE_ELEMENTS = 18;
+    public static final int LINK_TO_ALTERNATIVE_FORMAT = 19;
+    public static final int ERROR_MESSAGE = 20;
 
 
 

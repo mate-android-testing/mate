@@ -20,23 +20,15 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
 
     private List<IScreenState> visitedStates;
 
-    private List<Double> luminancesLow;
-    private List<Double> luminancesHigh;
-
     private Hashtable<String,List<String>> luminancesByType;
 
     public ColourMeaningAccessibilityCheck(){
-        luminancesLow= null;
-        luminancesHigh = null;
         visitedStates = new ArrayList<IScreenState>();
     }
 
     private void detectColours(IScreenState state){
 
         luminancesByType = new Hashtable<String,List<String>>();
-
-        luminancesLow = new ArrayList<Double>();
-        luminancesHigh = new ArrayList<Double>();
         for (Widget widget: state.getWidgets()){
             if (widget.isActionable()){
                 String luminances = Registry.getEnvironmentManager().getLuminances(state.getPackageName(),state.getId(),widget);
@@ -134,7 +126,9 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         }
 
         if (exceedNumberColorsByType){
-            return new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
+            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
+            violation.setWarning(true);
+            return violation;
         }
         return null;
 

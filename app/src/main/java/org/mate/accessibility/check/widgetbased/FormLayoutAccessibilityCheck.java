@@ -115,7 +115,11 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
         }
         else{
             if (hasHint){
-                //MATE.log("NEEDS TO CHECK IF IT IS A FLOATING HINT");
+                //MATE.log("NEEDS TO CHECK IF IT IS A FLOATING HINT, OR HIT IS VISIBLE - "+widget.getId()+" " + widget.getText()+ " " + widget.getClazz());
+                if (widget.isShowingHintText())
+                    return null;
+                else
+                    return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_NOT_DEFINED, widget, state, "");
             }
         }
         return null;

@@ -18,11 +18,16 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationChecker;
+import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.ui.Action;
+import org.mate.ui.ActionType;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -113,13 +118,18 @@ public class CheckCurrentScreen {
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
+        String currentPackageName = screenState.getPackageName();
+
         Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 
         for (Widget w : screenState.getWidgets()) {
-            if (w.isImportantForAccessibility())
-                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc()+ " ht: " + w.getHint() + " error: " + w.getErrorText());
+            if (w.isImportantForAccessibility()) {
+                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
+                MATE.log("---showing hint: " + w.isShowingHintText());
+            }
+
             //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
             //if (w.getParent()!=null)
             //MATE.log("------ son of " + w.getParent().getClazz());
@@ -131,6 +141,8 @@ public class CheckCurrentScreen {
 
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
+
+
         try {
             //MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             MATE.log("WAIT WAIT WAIT");
@@ -139,9 +151,17 @@ public class CheckCurrentScreen {
             e.printStackTrace();
         }
 
-        //screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
 
-       // AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+        WidgetAction manualAction = new WidgetAction(ActionType.MANUAL_ACTION);
+
+        MATE.uiAbstractionLayer.executeAction(manualAction);
+        screenState = MATE.uiAbstractionLayer.getLastScreenState();
+
+        if (!screenState.getPackageName().equals(currentPackageName)){
+            new AccessibilityViolation(AccessibilityViolationTypes.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(),true);
+        }
+
+        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
 
 

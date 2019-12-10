@@ -9,12 +9,22 @@ public class AccessibilityViolation {
     private Widget widget;
     private IScreenState state;
     private String info;
+    private boolean warning;
 
     public AccessibilityViolation(int type, Widget widget, IScreenState state, String info) {
         this.type = type;
         this.widget = widget;
         this.state = state;
         this.info = info;
+        this.warning = false;
+    }
+
+    public AccessibilityViolation(int type, Widget widget, boolean warning){
+        this.type = type;
+        this.widget = widget;
+        this.warning = warning;
+        this.state = null;
+        this.info = "";
     }
 
     public AccessibilityViolation(int type, IScreenState state, String info) {
@@ -22,6 +32,7 @@ public class AccessibilityViolation {
         this.widget = null;
         this.state = state;
         this.info = info;
+        this.warning = false;
     }
 
     public int getType() {
@@ -54,5 +65,13 @@ public class AccessibilityViolation {
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    public boolean isWarning() {
+        return warning;
+    }
+
+    public void setWarning(boolean warning) {
+        this.warning = warning;
     }
 }
