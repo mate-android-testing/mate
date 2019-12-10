@@ -22,10 +22,20 @@ public class IntentBasedAction extends Action {
         return intent;
     }
 
+    /**
+     * A custom string representation for an Intent-based action.
+     *
+     * @return Returns a string representation for an Intent-based action.
+     */
     @Override
     public String toString() {
-        // TODO: find useful representation
-        return null;
+        StringBuilder builder = new StringBuilder();
+        builder.append("IntentBasedAction" + System.lineSeparator());
+        builder.append("------------------------");
+        builder.append("ComponentType: " + componentType + System.lineSeparator());
+        builder.append("Receiver of Intent: " + intent.getComponent());
+        builder.append("------------------------");
+        return builder.toString();
     }
 
 
