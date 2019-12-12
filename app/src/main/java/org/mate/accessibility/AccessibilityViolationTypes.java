@@ -3,8 +3,8 @@ package org.mate.accessibility;
 public class AccessibilityViolationTypes {
 
 
-    public static final String[] NAMES = new String[21];
-
+    public static final String[] NAMES = new String[22];
+    public static final int PHANTOM_ELEMENT = 21;
 
 
     static {
@@ -28,6 +28,7 @@ public class AccessibilityViolationTypes {
         NAMES[18] = "ACTIONABLE-ELEMENT";
         NAMES[19] = "LINK-TO-ALTERNATIVE-FORMAT";
         NAMES[20] = "ERROR-MESSAGE";
+        NAMES[21] = "PHANTOM-ELEMENT";
     }
 
     public static final int EDITABLE_CONTENT_DESC = 1;

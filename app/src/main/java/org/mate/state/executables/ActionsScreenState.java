@@ -390,8 +390,10 @@ public class ActionsScreenState extends AbstractScreenState {
 
                         found = true;
                         if (!wOther.getColor().equals(wThis.getColor())) {
-                            if (!wOther.isFocused()&& wThis.isFocused()==wOther.isFocused())
-                                return true;
+                            if (!wOther.isFocused()&& wThis.isFocused()==wOther.isFocused()) {
+                                if (wOther.getHint().equals(wThis.getHint()) && wOther.getContentDesc().equals(wThis.getContentDesc()))
+                                    return true;
+                            }
                         }
                     }
                 }
@@ -410,7 +412,8 @@ public class ActionsScreenState extends AbstractScreenState {
                         //MATE.log("compare: " + wThis.getId()+"-"+wThis.getClazz()+": "+wThis.getColor()+"  vs  " + wOther.getId()+"-"+wOther.getClazz()+": " + wOther.getColor());
                         if (!wOther.getColor().equals(wThis.getColor())){
                             if (!wOther.isFocused() && wThis.isFocused()==wOther.isFocused())
-                                return true;
+                                if (wOther.getHint().equals(wThis.getHint()) && wOther.getContentDesc().equals(wThis.getContentDesc()))
+                                    return true;
                         }
                     }
                 }

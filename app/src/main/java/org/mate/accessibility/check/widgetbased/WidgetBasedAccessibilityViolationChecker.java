@@ -31,6 +31,7 @@ public class WidgetBasedAccessibilityViolationChecker {
             widgetBasedChecks.add(new TargetSizeAccessibilityCheck());
             widgetBasedChecks.add(new ErrorMessageCheck());
             widgetBasedChecks.add(new AcionableElementsCheck());
+            widgetBasedChecks.add(new PhantomElementCheck());
             //widgetBasedChecks.add(new ManagingFocusCheck());
         }
 
@@ -49,7 +50,7 @@ public class WidgetBasedAccessibilityViolationChecker {
                 if (violation!=null) {
                     MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     if (!violation.getInfo().equals(""))
-                        MATE.log(" -- extra info: " + violation.getInfo());
+                        MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());
                 }
             }
         }

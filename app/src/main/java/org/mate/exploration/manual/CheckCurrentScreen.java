@@ -146,7 +146,7 @@ public class CheckCurrentScreen {
         try {
             //MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             MATE.log("WAIT WAIT WAIT");
-            Thread.sleep(5000);
+            Thread.sleep(50);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -155,13 +155,15 @@ public class CheckCurrentScreen {
         WidgetAction manualAction = new WidgetAction(ActionType.MANUAL_ACTION);
 
         MATE.uiAbstractionLayer.executeAction(manualAction);
+        IScreenState previousScreenState = screenState;
         screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
         if (!screenState.getPackageName().equals(currentPackageName)){
-            new AccessibilityViolation(AccessibilityViolationTypes.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(),true);
+            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationTypes.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(), previousScreenState,"");
+            violation.setWarning(true);
         }
 
-//        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+        //AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
 
 

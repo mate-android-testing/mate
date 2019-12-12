@@ -632,6 +632,7 @@ public class Widget {
     }
 
     public boolean isButtonType(){
+
         try {
             Class<?> clazz = Class.forName(this.getClazz());
             boolean buttonType = android.widget.Button.class.isAssignableFrom(clazz);

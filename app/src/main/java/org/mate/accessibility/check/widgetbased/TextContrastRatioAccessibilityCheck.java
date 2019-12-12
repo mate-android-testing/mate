@@ -53,7 +53,13 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
         if (widget.getClazz().contains(("Image")))
             return false;
 
-        if (widget.isEditable() && widget.getText().equals(""))
+        if (widget.getText().equals(""))
+            return false;
+
+        if (widget.getClazz().contains("android.widget.Switch"))
+            return false;
+
+        if (widget.getClazz().contains("android.widget.ProgressBar"))
             return false;
 
         if (widget.mightBeImage())

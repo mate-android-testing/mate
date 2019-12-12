@@ -110,7 +110,8 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
                         return null;
                 }
 
-                return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_FAR_FROM_INPUTTEXT, widget, state, String.valueOf(distance));
+                if (hasHint)
+                    return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_FAR_FROM_INPUTTEXT, widget, state, String.valueOf(distance));
             }
         }
         else{

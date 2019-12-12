@@ -1,5 +1,7 @@
 package org.mate.accessibility;
 
+import org.mate.Registry;
+import org.mate.accessibility.check.screenbased.IScreenAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -11,12 +13,36 @@ public class AccessibilityViolation {
     private String info;
     private boolean warning;
 
+    public void reportFlaw(int type, Widget widget, IScreenState state, String info){
+        if (widget==null){
+            widget = new Widget("artificialId","artificialClass","artificialIdByActivity");
+            widget.setX1(0);
+            widget.setY1(0);
+            widget.setX2(10);
+            widget.setY2(10);
+        }
+        String checkType = AccessibilityViolationTypes.NAMES[type];
+        String packageName = state.getPackageName();
+        String activityName = state.getActivityName();
+        String stateId = state.getId();
+        String widgetid = widget.getId();
+        widgetid = widgetid.replace(":","/");
+        info = info.replace(":","- ");
+        String widgetText = widget.getText();
+        String extraInfo = info;
+
+        String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
+        flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
+        Registry.getEnvironmentManager().sendFlawToServer(flawMsg);
+    }
+
     public AccessibilityViolation(int type, Widget widget, IScreenState state, String info) {
         this.type = type;
         this.widget = widget;
         this.state = state;
         this.info = info;
         this.warning = false;
+        reportFlaw(type,widget,state,info);
     }
 
     public AccessibilityViolation(int type, Widget widget, boolean warning){
@@ -25,6 +51,8 @@ public class AccessibilityViolation {
         this.warning = warning;
         this.state = null;
         this.info = "";
+        reportFlaw(type,widget,state,info);
+
     }
 
     public AccessibilityViolation(int type, IScreenState state, String info) {
@@ -33,6 +61,7 @@ public class AccessibilityViolation {
         this.state = state;
         this.info = info;
         this.warning = false;
+        reportFlaw(type,widget,state,info);
     }
 
     public int getType() {

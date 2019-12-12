@@ -12,14 +12,23 @@ public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
+        if (!widget.isImportantForAccessibility())
+            return null;
+
+        boolean checkClickableText=false;
         if (widget.getClazz().equals("android.widget.TextView") && widget.isClickable() && !widget.isEditable() && !widget.mightBeImage()){
-            return new AccessibilityViolation(AccessibilityViolationTypes.ACTIONABLE_ELEMENTS,widget,state,"Clickable text, not button");
+            checkClickableText=true;
+            //return new AccessibilityViolation(AccessibilityViolationTypes.ACTIONABLE_ELEMENTS,widget,state,"Clickable text, not button");
         }
 
         //if (check whether background color of the button is the same as the screen background)
-        double matchesBackgroundColor = Registry.getEnvironmentManager().matchesSurroundingColor(state.getPackageName(),state.getId(),widget);
+        double matchesBackgroundColor = 0;
 
-        if (widget.isClickable() && widget.isButtonType()) {
+        try{ matchesBackgroundColor = Registry.getEnvironmentManager().matchesSurroundingColor(state.getPackageName(),state.getId(),widget);}
+        catch(Exception e){}
+
+
+        if ((widget.isClickable() && widget.getClazz().contains("Button")&& !widget.getText().equals(""))|| checkClickableText) {
             MATE.log("CHECKS BACKGROUND COLOR = " + widget.getClazz() + " " + widget.getText());
             MATE.log("   matching: " + matchesBackgroundColor);
             if (matchesBackgroundColor>0.5) {
