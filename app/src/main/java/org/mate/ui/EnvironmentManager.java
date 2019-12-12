@@ -20,7 +20,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "localhost";
-    //private static final String DEFAULT_SERVER_IP = "172.16.12.103";
+    //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
     private static final String MESSAGE_PROTOCOL_VERSION = "1.1";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
