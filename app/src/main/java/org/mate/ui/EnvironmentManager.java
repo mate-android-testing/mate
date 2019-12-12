@@ -407,23 +407,11 @@ public class EnvironmentManager {
     }
 
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget){
-
-        int maxw = MATE.device.getDisplayWidth();
-        int maxh = MATE.device.getDisplayHeight();
-        boolean matches = false;
         String cmd = "surroundingColor:";
         cmd += emulator + "_" + packageName + ":";
         cmd += stateId + ":";
-        int x1 = widget.getX1();
-        int x2 = widget.getX2();
-        int y1 = widget.getY1();
-        int y2 = widget.getY2();
-        cmd += x1 + "," + y1 + "," + x2 + "," + y2;
-
-        //MATE.log(cmd);
-        //MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
+        cmd += widget.getX1() + "," + widget.getY1() + "," + widget.getX2() + "," + widget.getY2();
         return Double.valueOf(tunnelLegacyCmd(cmd));
-
     }
 
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
@@ -448,8 +436,6 @@ public class EnvironmentManager {
             y2 += borderExpanded;
         cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
-        //MATE.log(cmd);
-        //MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
         return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
@@ -479,35 +465,11 @@ public class EnvironmentManager {
         return tunnelLegacyCmd(cmd);
     }
 
-    public void deleteAllScreenShots(String packageName) {
-        MATE.log("DELETE SCREENSHOTS");
-        tunnelLegacyCmd("rm " + emulator + "_" + packageName + "*.png");
-    }
-
     public long getRandomLength() {
         String cmd = "randomlength";
         return Long.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public void markScreenshot(final Widget widget, final String packageName,
-                               final String nodeId, final String flawDescription,
-                               final String extraInfo) {
-
-        final String imageName = emulator + "_" + packageName + "_" +
-                String.valueOf(Math.abs(System.currentTimeMillis())) + ".png";
-
-        String cmd = "screenshot:" + emulator + ":" + imageName;
-
-        //for now I'm keeping this command commented so it can speed up the process
-        //sendCommandToServer(cmd);
-
-        cmd = "mark-image:" + imageName + ":x-" + widget.getX1() + ":y-"
-                + widget.getY1() + ":width-" + (widget.getX2() - widget.getX1())
-                + ":heigth-" + (widget.getY2() - widget.getY1()) + ":" + flawDescription + ":" + extraInfo;
-
-        //for now I'm keeping this command commented so it can speed up the process
-        //sendCommandToServer(cmd);
-    }
 
     public void sendFlawToServer(String msg) {
         String cmd = "reportFlaw:" + emulator + ":" + msg;
