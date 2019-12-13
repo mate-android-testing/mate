@@ -3,6 +3,7 @@ package org.mate.interaction.intent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
+import android.support.v4.view.KeyEventDispatcher;
 import android.util.Xml;
 
 import org.mate.MATE;
@@ -16,26 +17,38 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 public class IntentProvider {
 
     private static final String MANIFEST_FILE = "/data/data/org.mate/AndroidManifest.xml";
+    private static final String STATIC_INFO_FILE = "/data/data/org.mate/staticIntentInfo.xml";
 
     private List<ComponentDescription> components;
 
     public IntentProvider() {
+        parseXMLFiles();
+    }
+
+    private void parseXMLFiles() {
+
         try {
             components = parseManifest();
+            parseXMLFiles();
             MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
-            MATE.log_acc("Couldn't parse AndroidManifest file!");
+            MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             MATE.log_acc(e.getMessage());
             throw new IllegalStateException("Couldn't initialise IntentProvider! Aborting.");
         }
+
+
     }
 
     /**
@@ -162,6 +175,83 @@ public class IntentProvider {
         }
         MATE.log_acc("Found " + targetComponents.size() + " " + componentType);
         return Collections.unmodifiableList(targetComponents);
+    }
+
+    /**
+     * Parses additional information, i.e. string constants and bundle entries, for a component.
+     * This information has been retrieved by a pre-conducted static analysis on the classes.dex
+     * files contained in an APK file. Prior to the execution of this method, the AndroidManifest.xml
+     * needs to be parsed by {@link #parseManifest()}. This method assumes that the XML file
+     * specified by the constant {@code STATIC_INFO_FILE} has been pushed to the app internal
+     * storage of MATE.
+     *
+     * @throws XmlPullParserException Should never happen.
+     * @throws IOException Should never happen.
+     */
+    private void parseIntentInfoFile() throws XmlPullParserException, IOException {
+
+        XmlPullParser parser = Xml.newPullParser();
+
+        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+
+        InputStream inputStream = new FileInputStream(new File(STATIC_INFO_FILE));
+
+        // the AndroidManifest.xml has to be pushed in advance to the app internal storage of MATE
+        parser.setInput(inputStream, null);
+
+        // for each component, we parse the name, the strings and extras used in bundle objects
+        String componentName = null;
+        Set<String> stringConstants = new HashSet<>();
+        Map<String, String> extras = new HashMap<>();
+
+        while(parser.next() != XmlPullParser.END_DOCUMENT) {
+            if(parser.getEventType() == XmlPullParser.START_TAG) {
+
+                // check whether we found a new component tag
+                if(parser.getName().equals("activity")
+                        || parser.getName().equals("service")
+                        || parser.getName().equals("receiver")) {
+
+                    // new component -> reset
+                    extras = new HashMap<>();
+                    stringConstants = new HashSet<>();
+                    componentName = parser.getAttributeValue(null, "name");
+
+                    // we found a string constant tag
+                } else if(parser.getName().equals("string")) {
+                    stringConstants.add(parser.getAttributeValue(null, "value"));
+
+                    // we found an extra tag
+                } else if(parser.getName().equals("extra")) {
+                    extras.put(parser.getAttributeValue(null, "key"),
+                            parser.getAttributeValue(null, "type"));
+                    // TODO: try to specify the expected type already in the DexAnalyzer
+                    // identifyExtraType(parser.getAttributeValue(null, "type")));
+                }
+
+            } else if(parser.getEventType() == XmlPullParser.END_TAG) {
+
+                // check whether we found a the component's end tag
+                if(parser.getName().equals("activity")
+                        || parser.getName().equals("service")
+                        || parser.getName().equals("receiver")) {
+
+                    // add collected information
+                    for (ComponentDescription component : components) {
+                        if (component.getFullyQualifiedName().equals(componentName)) {
+                            component.addStringConstants(stringConstants);
+                            component.addExtras(extras);
+                            break;
+                        }
+                    }
+
+                    // reset component information
+                    componentName = null;
+                    stringConstants = new HashSet<>();
+                    extras = new HashMap<>();
+                }
+            }
+        }
     }
 
     /**

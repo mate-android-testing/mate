@@ -3,7 +3,9 @@ package org.mate.interaction.intent;
 import org.mate.MATE;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 class ComponentDescription {
@@ -14,9 +16,21 @@ class ComponentDescription {
     // a component may define optionally intent filter tags
     private Set<IntentFilterDescription> intentFilters = new HashSet<>();
 
+    // additional information used in combination with intents
+    private Set<String> stringConstants = new HashSet<>();
+    private Map<String, String> extras = new HashMap<>();
+
     ComponentDescription(String name, String type) {
         this.name = name;
         this.type = ComponentType.mapStringToComponent(type);
+    }
+
+    void addStringConstants(Set<String> stringConstants) {
+        this.stringConstants.addAll(stringConstants);
+    }
+
+    void addExtras(Map<String,String> extras) {
+        this.extras.putAll(extras);
     }
 
     boolean isActivity() {
