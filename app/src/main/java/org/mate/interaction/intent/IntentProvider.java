@@ -40,7 +40,7 @@ public class IntentProvider {
 
         try {
             components = parseManifest();
-            parseXMLFiles();
+            parseIntentInfoFile();
             MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");

@@ -84,11 +84,14 @@ class ComponentDescription {
        builder.append("Type: " + type + System.lineSeparator());
 
        builder.append("Intent Filters: " + System.lineSeparator());
-       builder.append("-------------------------------------------");
+       builder.append("-------------------------------------------" + System.lineSeparator());
        for (IntentFilterDescription intentFilter : intentFilters) {
            builder.append(intentFilter + System.lineSeparator());
        }
-       builder.append("-------------------------------------------");
+       builder.append("-------------------------------------------" + System.lineSeparator());
+
+       builder.append("Strings: " + stringConstants + System.lineSeparator());
+       builder.append("Extras: " + extras + System.lineSeparator());
        return builder.toString();
     }
 }
