@@ -122,14 +122,14 @@ class ComponentDescription {
 
             // depending on the type we need to select a value out of a pre-defined pool
             switch (extra.getValue()) {
-                case "Integer":
+                case "Int":
                     bundle.putInt(extra.getKey(),
                             Randomness.randomIndex(DataPool.INTEGER_LIST_WITH_NULL));
                     break;
-                case "Integer[]":
+                case "Int[]":
                     bundle.putIntArray(extra.getKey(), Randomness.getRandomIntArray(COUNT, BOUND));
                     break;
-                case "Integer<>":
+                case "Integer<>": // note Integer vs Int
                     bundle.putIntegerArrayList(extra.getKey(),
                             new ArrayList<>(Randomness.getRandomIntegers(COUNT, BOUND)));
                     break;
