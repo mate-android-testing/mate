@@ -120,4 +120,79 @@ public class Randomness {
 
         return result;
     }
+
+    public static double[] getRandomDoubleArray(int count) {
+
+        Random random = new Random();
+        double[] result = new double[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = random.nextDouble();
+        }
+
+        return result;
+    }
+
+    public static long[] getRandomLongArray(int count) {
+
+        Random random = new Random();
+        long[] result = new long[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = random.nextLong();
+        }
+
+        return result;
+    }
+
+    public static short[] getRandomShortArray(int count) {
+
+        Random random = new Random();
+        short[] result = new short[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            https://stackoverflow.com/a/10189329/6110448
+            result[i] = (short) random.nextInt(1 << 16);
+        }
+
+        return result;
+    }
+
+    public static byte[] getRandomByteArray(int count) {
+
+        Random random = new Random();
+        byte[] result = new byte[count];
+        random.nextBytes(result);
+        return result;
+    }
+
+    public static boolean[] getRandomBooleanArray(int count) {
+
+        Random random = new Random();
+        boolean[] result = new boolean[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = random.nextBoolean();
+        }
+
+        return result;
+    }
+
+    public static char[] getRandomCharArray(int count) {
+
+        Random random = new Random();
+        char[] result = new char[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            // a-z: https://stackoverflow.com/a/2627801/6110448
+            result[i] = (char)(random.nextInt(26) + 'a');
+        }
+
+        return result;
+    }
 }

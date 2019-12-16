@@ -1,6 +1,7 @@
 package org.mate.interaction.intent;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 
 import org.mate.MATE;
 import org.mate.utils.DataPool;
@@ -36,7 +37,7 @@ class ComponentDescription {
         this.stringConstants.addAll(stringConstants);
     }
 
-    void addExtras(Map<String,String> extras) {
+    void addExtras(Map<String, String> extras) {
         this.extras.putAll(extras);
     }
 
@@ -53,12 +54,16 @@ class ComponentDescription {
     }
 
     boolean isContentProvider() {
-        return  type == ComponentType.CONTENT_PROVIDER;
+        return type == ComponentType.CONTENT_PROVIDER;
     }
 
-    boolean hasIntentFilter() { return !intentFilters.isEmpty(); }
+    boolean hasIntentFilter() {
+        return !intentFilters.isEmpty();
+    }
 
-    boolean hasExtra() { return !extras.isEmpty(); }
+    boolean hasExtra() {
+        return !extras.isEmpty();
+    }
 
     ComponentType getType() {
         return type;
@@ -88,20 +93,20 @@ class ComponentDescription {
 
     @Override
     public String toString() {
-       StringBuilder builder = new StringBuilder();
-       builder.append("Component: " + name + System.lineSeparator());
-       builder.append("Type: " + type + System.lineSeparator());
+        StringBuilder builder = new StringBuilder();
+        builder.append("Component: " + name + System.lineSeparator());
+        builder.append("Type: " + type + System.lineSeparator());
 
-       builder.append("Intent Filters: " + System.lineSeparator());
-       builder.append("-------------------------------------------" + System.lineSeparator());
-       for (IntentFilterDescription intentFilter : intentFilters) {
-           builder.append(intentFilter + System.lineSeparator());
-       }
-       builder.append("-------------------------------------------" + System.lineSeparator());
+        builder.append("Intent Filters: " + System.lineSeparator());
+        builder.append("-------------------------------------------" + System.lineSeparator());
+        for (IntentFilterDescription intentFilter : intentFilters) {
+            builder.append(intentFilter + System.lineSeparator());
+        }
+        builder.append("-------------------------------------------" + System.lineSeparator());
 
-       builder.append("Strings: " + stringConstants + System.lineSeparator());
-       builder.append("Extras: " + extras + System.lineSeparator());
-       return builder.toString();
+        builder.append("Strings: " + stringConstants + System.lineSeparator());
+        builder.append("Extras: " + extras + System.lineSeparator());
+        return builder.toString();
     }
 
     Bundle generateRandomBundle() {
@@ -173,16 +178,67 @@ class ComponentDescription {
                     bundle.putFloatArray(extra.getKey(), Randomness.getRandomFloatArray((COUNT)));
                     break;
                 case "Double":
+                    bundle.putDouble(extra.getKey(),
+                            Randomness.randomElement(DataPool.DOUBLE_LIST_WITH_NULL));
+                    break;
+                case "Double[]":
+                    bundle.putDoubleArray(extra.getKey(), Randomness.getRandomDoubleArray(COUNT));
+                    break;
                 case "Long":
+                    bundle.putLong(extra.getKey(), Randomness.randomElement(DataPool.LONG_LIST_WITH_NULL));
+                    break;
+                case "Long[]":
+                    bundle.putLongArray(extra.getKey(), Randomness.getRandomLongArray(COUNT));
+                    break;
                 case "Short":
+                    bundle.putShort(extra.getKey(), Randomness.randomElement(DataPool.SHORT_LIST_WITH_NULL));
+                    break;
+                case "Short[]":
+                    bundle.putShortArray(extra.getKey(), Randomness.getRandomShortArray(COUNT));
+                    break;
                 case "Byte":
+                    bundle.putByte(extra.getKey(), Randomness.randomElement(DataPool.BYTE_LIST_WITH_NULL));
+                    break;
+                case "Byte[]":
+                    bundle.putByteArray(extra.getKey(), Randomness.getRandomByteArray(COUNT));
+                    break;
                 case "Boolean":
+                    bundle.putBoolean(extra.getKey(), Randomness.randomElement(DataPool.BOOLEAN_LIST_WITH_NULL));
+                    break;
+                case "Boolean[]":
+                    bundle.putBooleanArray(extra.getKey(), Randomness.getRandomBooleanArray(COUNT));
+                    break;
                 case "Char":
-                case "Serializable":
-                case "Parceable":
-
+                    bundle.putChar(extra.getKey(), Randomness.randomElement(DataPool.CHAR_LIST_WITH_NULL));
+                    break;
+                case "Char[]":
+                    bundle.putCharArray(extra.getKey(), Randomness.getRandomCharArray(COUNT));
+                    break;
+                case "Serializable": // strings are serializable
+                    if (!stringConstants.isEmpty()) {
+                        // choose randomly constant from extracted strings
+                        bundle.putSerializable(extra.getKey(),
+                                Randomness.randomElement(stringConstants));
+                    } else {
+                        // generate random string
+                        bundle.putSerializable(extra.getKey(),
+                                Randomness.randomElement(DataPool.STRING_LIST_WITH_NULL));
+                    }
+                    break;
+                case "Parcelable": // bundle is parcelable
+                    bundle.putParcelable(extra.getKey(), new Bundle());
+                    break;
+                case "Parcelable[]":
+                    bundle.putParcelableArray(extra.getKey(), new Parcelable[]{new Bundle()});
+                    break;
+                case "Parcelable<>":
+                    List<Parcelable> parcelables = new ArrayList<>();
+                    parcelables.add(new Bundle());
+                    bundle.putParcelableArrayList(extra.getKey(), new ArrayList<>(parcelables));
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Data type not yet supported!");
             }
-
         }
         return bundle;
     }
