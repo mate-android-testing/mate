@@ -26,6 +26,8 @@ import org.mate.ui.WidgetAction;
 
 import java.util.List;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 /**
  * Created by marceloeler on 08/03/17.
  */
@@ -54,27 +56,38 @@ public class DeviceMgr implements IApp {
         }
     }
 
+    /**
+     * Executes an Intent-based action. Depending on the target component, either
+     * startActivity(), startService() or sendBroadcast() is invoked.
+     *
+     * @param action The action which contains the Intent to be sent.
+     */
     public void executeAction(IntentBasedAction action) {
 
         // TODO: check if we can react to a crash
-
-        MATE.log(" ___ execute intent based action: " + action);
+        MATE.log(" ___ execute intent based action: " + action
+            + " Extras: " + action.getIntent().getExtras());
 
         Intent intent = action.getIntent();
 
-        // TODO: implement actual execution of intent based action using environment manager or directly create intents
-        switch (action.getComponentType()) {
-            case ACTIVITY:
-                InstrumentationRegistry.getTargetContext().startActivity(intent);
-                break;
-            case SERVICE:
-                InstrumentationRegistry.getTargetContext().startService(intent);
-                break;
-            case BROADCAST_RECEIVER:
-                InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
-                break;
-            default:
-                throw new UnsupportedOperationException("Component type not supported yet!");
+        try {
+            switch (action.getComponentType()) {
+                case ACTIVITY:
+                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                    break;
+                case SERVICE:
+                    InstrumentationRegistry.getTargetContext().startService(intent);
+                    break;
+                case BROADCAST_RECEIVER:
+                    InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Component type not supported yet!");
+            }
+        } catch (Exception e) {
+            MATE.log("Executing Intent-based action failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

@@ -124,7 +124,7 @@ class ComponentDescription {
             switch (extra.getValue()) {
                 case "Int":
                     bundle.putInt(extra.getKey(),
-                            Randomness.randomIndex(DataPool.INTEGER_LIST_WITH_NULL));
+                            Randomness.randomIndex(DataPool.INTEGER_LIST));
                     break;
                 case "Int[]":
                     bundle.putIntArray(extra.getKey(), Randomness.getRandomIntArray(COUNT, BOUND));
@@ -172,44 +172,44 @@ class ComponentDescription {
                     break;
                 case "Float":
                     bundle.putFloat(extra.getKey(),
-                            Randomness.randomElement(DataPool.FLOAT_LIST_WITH_NULL));
+                            Randomness.randomElement(DataPool.FLOAT_LIST));
                     break;
                 case "Float[]":
                     bundle.putFloatArray(extra.getKey(), Randomness.getRandomFloatArray((COUNT)));
                     break;
                 case "Double":
                     bundle.putDouble(extra.getKey(),
-                            Randomness.randomElement(DataPool.DOUBLE_LIST_WITH_NULL));
+                            Randomness.randomElement(DataPool.DOUBLE_LIST));
                     break;
                 case "Double[]":
                     bundle.putDoubleArray(extra.getKey(), Randomness.getRandomDoubleArray(COUNT));
                     break;
                 case "Long":
-                    bundle.putLong(extra.getKey(), Randomness.randomElement(DataPool.LONG_LIST_WITH_NULL));
+                    bundle.putLong(extra.getKey(), Randomness.randomElement(DataPool.LONG_LIST));
                     break;
                 case "Long[]":
                     bundle.putLongArray(extra.getKey(), Randomness.getRandomLongArray(COUNT));
                     break;
                 case "Short":
-                    bundle.putShort(extra.getKey(), Randomness.randomElement(DataPool.SHORT_LIST_WITH_NULL));
+                    bundle.putShort(extra.getKey(), Randomness.randomElement(DataPool.SHORT_LIST));
                     break;
                 case "Short[]":
                     bundle.putShortArray(extra.getKey(), Randomness.getRandomShortArray(COUNT));
                     break;
                 case "Byte":
-                    bundle.putByte(extra.getKey(), Randomness.randomElement(DataPool.BYTE_LIST_WITH_NULL));
+                    bundle.putByte(extra.getKey(), Randomness.randomElement(DataPool.BYTE_LIST));
                     break;
                 case "Byte[]":
                     bundle.putByteArray(extra.getKey(), Randomness.getRandomByteArray(COUNT));
                     break;
                 case "Boolean":
-                    bundle.putBoolean(extra.getKey(), Randomness.randomElement(DataPool.BOOLEAN_LIST_WITH_NULL));
+                    bundle.putBoolean(extra.getKey(), Randomness.randomElement(DataPool.BOOLEAN_LIST));
                     break;
                 case "Boolean[]":
                     bundle.putBooleanArray(extra.getKey(), Randomness.getRandomBooleanArray(COUNT));
                     break;
                 case "Char":
-                    bundle.putChar(extra.getKey(), Randomness.randomElement(DataPool.CHAR_LIST_WITH_NULL));
+                    bundle.putChar(extra.getKey(), Randomness.randomElement(DataPool.CHAR_LIST));
                     break;
                 case "Char[]":
                     bundle.putCharArray(extra.getKey(), Randomness.getRandomCharArray(COUNT));
