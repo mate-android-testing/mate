@@ -2,6 +2,7 @@ package org.mate.interaction.intent;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.v4.view.KeyEventDispatcher;
 import android.util.Xml;
@@ -141,7 +142,6 @@ public class IntentProvider {
             intent.setAction(action);
         }
 
-
         // add a random category if present
         // TODO: add decreasing probability for adding multiple categories
         if (intentFilter.hasCategory()) {
@@ -149,13 +149,21 @@ public class IntentProvider {
             intent.addCategory(category);
         }
 
-        // TODO: add decreasing probability for adding multiple data
+        // add a data tag
         if (intentFilter.hasData()) {
-            IntentFilterDescription.Data data = Randomness.randomElement(intentFilter.getData());
+            // TODO: consider integration of mimeType -> should be derived automatically otherwise
+            Uri uri = intentFilter.getData().generateRandomUri();
+            intent.setData(uri);
         }
 
         // make every intent explicit
         intent.setComponent(new ComponentName(MATE.packageName, component.getFullyQualifiedName()));
+
+        if (component.hasExtra()) {
+
+
+
+        }
 
         // TODO: add data + extras + component name + outsource in method
         return intent;

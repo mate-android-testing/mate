@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 public class Randomness {
     public static Random getRnd() {
@@ -39,6 +40,23 @@ public class Randomness {
         return iter.next();
     }
 
+    /**
+     * Randomly retrieves {@param count} elements from a given set.
+     *
+     * @param set The input set.
+     * @param count The number of elements that should be retrieved.
+     * @param <T> The element type.
+     * @return Returns a list with {@param count} random elements from a given set.
+     */
+    public static <T> List<T> randomElements(Set<T> set, int count) {
+
+        List<T> result = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            result.add(randomElement(set));
+        }
+        return result;
+    }
+
     public static int getInRangeStd(int range) {
         return getInRangeStd(range, 2.0/15.0 * range);
     }
@@ -61,5 +79,45 @@ public class Randomness {
             list.add(pickList.get(choice));
             pickList.remove(choice);
         }
+    }
+
+    public static List<Integer> getRandomIntegers(int count, int bound) {
+
+        // API 28: IntStream.generate(() -> new Random().nextInt(100)).limit(100).toArray();
+        Random random = new Random();
+        List<Integer> result = new ArrayList<>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            result.add(random.nextInt(bound));
+        }
+
+        return result;
+    }
+
+    public static int[] getRandomIntArray(int count, int bound) {
+
+        Random random = new Random();
+        int[] result = new int[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = random.nextInt(bound);
+        }
+
+        return result;
+    }
+
+    public static float[] getRandomFloatArray(int count) {
+
+        Random random = new Random();
+        float[] result = new float[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = random.nextFloat();
+        }
+
+        return result;
     }
 }
