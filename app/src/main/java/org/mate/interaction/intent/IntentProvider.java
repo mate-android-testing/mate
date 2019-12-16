@@ -159,13 +159,12 @@ public class IntentProvider {
         // make every intent explicit
         intent.setComponent(new ComponentName(MATE.packageName, component.getFullyQualifiedName()));
 
+        // construct suitable key-value pairs
         if (component.hasExtra()) {
-
-
-
+            intent.putExtras(component.generateRandomBundle());
         }
 
-        // TODO: add data + extras + component name + outsource in method
+        // TODO: may add flags, e.g. FLAG_ACTIVITY_NEW_TASK
         return intent;
     }
 
