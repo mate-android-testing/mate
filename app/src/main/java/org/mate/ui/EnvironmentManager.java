@@ -207,6 +207,16 @@ public class EnvironmentManager {
     }
 
     /**
+     * Pushes dummy files for various data types, e.g. video, onto
+     * the external storage. This method should be only used in combination
+     * with the intent fuzzing functionality.
+     */
+    public void pushDummyFiles() {
+        String cmd = "pushDummyFiles:" + emulator;
+        tunnelLegacyCmd(cmd);
+    }
+
+    /**
      * Initializes the CFG; the path to the APK file is given
      * as command line argument (key: apk). If no argument was specified,
      * {@code false} is returned.
