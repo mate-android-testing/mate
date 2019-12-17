@@ -13,6 +13,7 @@ import org.mate.interaction.intent.IntentProvider;
 import org.mate.model.TestCase;
 import org.mate.serialization.TestCaseSerializer;
 import org.mate.ui.Action;
+import org.mate.ui.EnvironmentManager;
 import org.mate.ui.PrimitiveAction;
 import org.mate.utils.Coverage;
 
@@ -47,22 +48,37 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         if (resetApp) {
             uiAbstractionLayer.resetApp();
+            //  reset flushes the app-internal storage
+            // Registry.getEnvironmentManager().pushDummyFiles();
         }
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
+        if (Properties.REPLAY_TEST_CASE()) {
+            testCase = TestCaseSerializer.deserializeTestCase();
+        }
+
         try {
             for (int i = 0; i < maxNumEvents; i++) {
-                if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
+
+                Action nextAction = null;
+
+                if (Properties.REPLAY_TEST_CASE()) {
+                    nextAction = testCase.getEventSequence().get(i);
+                } else {
+                    nextAction = selectAction();
+                }
+
+                if (!testCase.updateTestCase(nextAction, String.valueOf(i))) {
                     return chromosome;
                 }
             }
         } finally {
 
-            // TODO: add boolean flag for record/replay
-            // record test case
-            TestCaseSerializer.serializeTestCase(testCase);
+            if (Properties.RECORD_TEST_CASE()) {
+                TestCaseSerializer.serializeTestCase(testCase);
+            }
 
             /*
             //TODO: remove hack, when better solution implemented (query fitness function)

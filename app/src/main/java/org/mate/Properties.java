@@ -46,6 +46,12 @@ public class Properties {
 
     public static float BROADCAST_RECEIVER_SELECTION_PROBABILITY() { return propertyOr( 0.2f); }
 
+    /*
+    * Record/Replay test case.
+     */
+    public static boolean RECORD_TEST_CASE() { return propertyOr(false); }
+
+    public static boolean REPLAY_TEST_CASE() { return propertyOr(true); }
 
     /**
      *  Added by vin on 24/05/2018

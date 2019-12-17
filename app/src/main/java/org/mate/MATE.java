@@ -151,7 +151,6 @@ public class MATE {
         instrumentation = getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
 
-
         //checks whether user needs to authorize access to something on the device/emulator
         UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
 
