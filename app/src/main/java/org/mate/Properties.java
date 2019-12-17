@@ -126,7 +126,7 @@ public class Properties {
      * Coverage properties
      */
     public static boolean STORE_COVERAGE() {
-        return propertyOr(true);
+        return propertyOr(false);
     }
 
 
