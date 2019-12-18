@@ -307,7 +307,7 @@ public class MATE {
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                             .withChromosomeFactory(IntentChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            // .withRelativeIntentAmount(0.3f)
+                            .withRelativeIntentAmount(0.5f)
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)

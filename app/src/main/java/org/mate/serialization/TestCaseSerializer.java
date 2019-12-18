@@ -79,6 +79,7 @@ public final class TestCaseSerializer {
 
         MATE.log("Deserializing TestCase " + replayCounter);
 
+        // TODO: is it really necessary to load the test case files every time
         File testCaseDir = new File(TEST_CASES_DIR);
 
         if (!testCaseDir.exists() && !testCaseDir.isDirectory()) {
