@@ -6,6 +6,9 @@ import org.mate.ui.Action;
 
 public class IntentBasedAction extends Action {
 
+    // TODO: implement custom serialization
+    // https://www.tutorialspoint.com/xstream/xstream_custom_converter.htm
+
     private final Intent intent;
     private final ComponentType componentType;
 

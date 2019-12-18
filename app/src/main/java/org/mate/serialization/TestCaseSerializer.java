@@ -1,6 +1,8 @@
 package org.mate.serialization;
 
 
+import android.content.Intent;
+
 import com.thoughtworks.xstream.XStream;
 
 import org.mate.MATE;
@@ -125,7 +127,10 @@ public final class TestCaseSerializer {
 
         // convert xml to test case
         XStream xstream = new XStream();
+        // xstream.ignoreUnknownElements();
         TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
+
+        System.out.println("Number of actions: " + testCase.getEventSequence().size());
 
         // update counter
         replayCounter++;
