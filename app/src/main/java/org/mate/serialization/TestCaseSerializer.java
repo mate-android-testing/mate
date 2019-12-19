@@ -6,6 +6,8 @@ import android.content.Intent;
 import com.thoughtworks.xstream.XStream;
 
 import org.mate.MATE;
+import org.mate.interaction.intent.IntentBasedAction;
+import org.mate.interaction.intent.IntentBasedActionConverter;
 import org.mate.model.TestCase;
 
 import java.io.File;
@@ -58,6 +60,7 @@ public final class TestCaseSerializer {
 
             // convert test case to xml
             XStream xstream = new XStream();
+            xstream.registerConverter(new IntentBasedActionConverter());
             String testCaseXML = xstream.toXML(testCase);
 
             fileWriter.write(testCaseXML);

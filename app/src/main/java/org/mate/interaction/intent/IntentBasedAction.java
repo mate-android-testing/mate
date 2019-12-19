@@ -2,6 +2,12 @@ package org.mate.interaction.intent;
 
 import android.content.Intent;
 
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
 import org.mate.ui.Action;
 
 public class IntentBasedAction extends Action {
@@ -16,6 +22,7 @@ public class IntentBasedAction extends Action {
         this.intent = intent;
         this.componentType = componentType;
     }
+
 
     public ComponentType getComponentType() {
         return componentType;

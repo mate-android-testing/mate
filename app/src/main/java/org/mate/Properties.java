@@ -1,5 +1,8 @@
 package org.mate;
 
+import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
+
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
 
@@ -49,9 +52,21 @@ public class Properties {
     /*
     * Record/Replay test case.
      */
-    public static boolean RECORD_TEST_CASE() { return propertyOr(false); }
+    public static boolean RECORD_TEST_CASE() {
 
-    public static boolean REPLAY_TEST_CASE() { return propertyOr(true); }
+        Bundle arguments = InstrumentationRegistry.getArguments();
+        return Boolean.parseBoolean(arguments.getString("record", "false"));
+    }
+
+    public static boolean REPLAY_TEST_CASE() {
+
+        Bundle arguments = InstrumentationRegistry.getArguments();
+        return Boolean.parseBoolean(arguments.getString("replay", "false"));
+    }
+
+    // public static boolean RECORD_TEST_CASE() { return propertyOr(false); }
+
+    // public static boolean REPLAY_TEST_CASE() { return propertyOr(true); }
 
     /**
      *  Added by vin on 24/05/2018
