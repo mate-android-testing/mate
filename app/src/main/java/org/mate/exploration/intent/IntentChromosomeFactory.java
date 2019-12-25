@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiOb
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentProvider;
+import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
 import org.mate.serialization.TestCaseSerializer;
 import org.mate.ui.Action;
@@ -117,7 +118,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
      * Selects the next action to be executed. This can be either an
-     * an Intent-based action or a UI action depending
+     * an Intent-based action, a system event notification or a UI action depending
      * on the probability specified by {@code relativeIntentAmount}.
      *
      * @return Returns the action to be performed next.
@@ -125,33 +126,34 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     @Override
     protected Action selectAction() {
 
-        // TODO: make each case equally-probably (activity,service,broadcast-receiver)
-        // integrate certain system-level events, e.g. screen_rotate into UI actions via UIDevice-API
-
         double random = Math.random();
+        final float EQUAL_INTERVAL_PROBABILITY = relativeIntentAmount / 4;
 
         if (random < relativeIntentAmount) {
-            // generate an Intent-based action
+            // generate an Intent-based action or a system event notification with equal probability
 
-            if (intentProvider.hasService() && random < Properties.SERVICE_SELECTION_PROBABILITY()) {
+            if (random < EQUAL_INTERVAL_PROBABILITY && intentProvider.hasService()) {
                 // select a service
                 MATE.log_acc("Selecting a service as target component!");
                 return intentProvider.getAction(ComponentType.SERVICE);
 
-            } else if (intentProvider.hasBroadcastReceiver()
-                    && random < Properties.BROADCAST_RECEIVER_SELECTION_PROBABILITY()) {
+            } else if (random < 2 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasBroadcastReceiver()) {
                 // select a broadcast receiver
                 MATE.log_acc("Selecting a broadcast receiver as target component!");
                 return intentProvider.getAction(ComponentType.BROADCAST_RECEIVER);
 
-            } else if (intentProvider.hasActivity()) {
+            } else if (random < 3 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasActivity()) {
                 // select an activity
                 MATE.log_acc("Selecting an activity as target component!");
                 return intentProvider.getAction(ComponentType.ACTIVITY);
                 // TODO: may integrate probability to swap activity
 
+            } else if (intentProvider.hasSystemEvent()) {
+                // select a system event
+                MATE.log_acc("Selecting a system action!");
+                return intentProvider.getSystemEvent();
             } else {
-                // fall back to UI action
+                // fall back to a UI action
                 MATE.log_acc("Fallback to UI action!");
                 return super.selectAction();
             }

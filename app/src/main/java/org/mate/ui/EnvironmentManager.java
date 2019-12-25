@@ -190,6 +190,18 @@ public class EnvironmentManager {
     }
 
     /**
+     * Simulates a system event by broadcasting the notification of the occurrence of
+     * a system event to a certain receiver.
+     *
+     * @param receiver The receiver listening for the system event.
+     * @param action The system event.
+     */
+    public void executeSystemEvent(String receiver, String action) {
+        String cmd = "executeSystemEvent:" + MATE.packageName + ":" + receiver + ":" + action + ":" + emulator;
+        tunnelLegacyCmd(cmd);
+    }
+
+    /**
      * API level 23 and higher requires that permissions are also granted
      * at runtime. This can be done at install time with the flag -g,
      * i.e. adb install -g apk, or via adb shell pm grant packageName permission.

@@ -2,6 +2,7 @@ package org.mate.interaction;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
@@ -16,6 +17,7 @@ import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.intent.IntentBasedAction;
+import org.mate.interaction.intent.SystemAction;
 import org.mate.model.IGUIModel;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
@@ -51,9 +53,21 @@ public class DeviceMgr implements IApp {
             executeAction((PrimitiveAction) action);
         } else if (action instanceof IntentBasedAction) {
             executeAction((IntentBasedAction) action);
+        } else if (action instanceof SystemAction) {
+            executeAction((SystemAction) action);
         } else {
             throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
         }
+    }
+
+    /**
+     * Simulates the occurrence of a system event.
+     *
+     * @param event The system event.
+     */
+    public void executeAction(SystemAction event) {
+        MATE.log(" ___ execute system action: " + event);
+        Registry.getEnvironmentManager().executeSystemEvent(event.getReceiver(), event.getAction());
     }
 
     /**
@@ -189,7 +203,6 @@ public class DeviceMgr implements IApp {
 
             case BACK:
                 device.pressBack();
-                ;
                 break;
 
             case MENU:
@@ -198,6 +211,84 @@ public class DeviceMgr implements IApp {
 
             case ENTER:
                 device.pressEnter();
+                break;
+
+            case HOME:
+                device.pressHome();
+                break;
+
+            case QUICK_SETTINGS:
+                device.openQuickSettings();
+                break;
+
+            case SEARCH:
+                device.pressSearch();
+                break;
+
+                // dunno if this makes sense
+            case SLEEP:
+                try {
+                    device.sleep();
+                } catch (RemoteException e) {
+                    MATE.log("Sleep couldn't be performed");
+                    e.printStackTrace();
+                }
+                break;
+
+            // dunno if this makes sense
+            case WAKE_UP:
+                try {
+                    device.wakeUp();
+                } catch (RemoteException e) {
+                    MATE.log("Wake up couldn't be performed");
+                    e.printStackTrace();
+                }
+                break;
+
+            case DELETE:
+                device.pressDelete();
+                break;
+
+            case DPAP_UP:
+                device.pressDPadUp();
+                break;
+
+            case DPAD_DOWN:
+                device.pressDPadDown();
+                break;
+
+            case DPAD_LEFT:
+                device.pressDPadLeft();
+                break;
+
+            case DPAD_RIGHT:
+                device.pressDPadRight();
+                break;
+
+            case DPAD_CENTER:
+                device.pressDPadCenter();
+                break;
+
+            case NOTIFICATIONS:
+                device.openNotification();
+                break;
+
+            case ROTATE_LEFT:
+                try {
+                    device.setOrientationLeft();
+                } catch (RemoteException e) {
+                    MATE.log("Left Rotation couldn't be performed");
+                    e.printStackTrace();
+                }
+                break;
+
+            case ROTATE_RIGHT:
+                try {
+                    device.setOrientationRight();
+                } catch (RemoteException e) {
+                    MATE.log("Right Rotation couldn't be performed");
+                    e.printStackTrace();
+                }
                 break;
         }
 

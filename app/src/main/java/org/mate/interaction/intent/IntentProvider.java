@@ -12,10 +12,15 @@ import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,13 +35,44 @@ public class IntentProvider {
 
     private static final String MANIFEST_FILE = "/data/data/org.mate/AndroidManifest.xml";
     private static final String STATIC_INFO_FILE = "/data/data/org.mate/staticIntentInfo.xml";
+    private static final String SYSTEM_EVENTS_FILE = "data/data/org.mate/broadcast_actions.txt";
 
     private List<ComponentDescription> components;
+
+    private static final List<String> systemEvents = loadSystemEvents();
+    private List<ComponentDescription> systemEventReceivers = new ArrayList<>();
 
     public IntentProvider() {
         parseXMLFiles();
     }
 
+    /**
+     * Reads the list of system events, in particular the name of the corresponding actions.
+     *
+     * @return Returns a list of system events that can be received by broadcast receivers.
+     */
+    private static List<String> loadSystemEvents() {
+
+        try(BufferedReader br = new BufferedReader(new FileReader(SYSTEM_EVENTS_FILE))) {
+
+            List<String> systemEvents = new ArrayList<>();
+            String line = br.readLine();
+
+            while (line != null) {
+                systemEvents.add(line);
+                line = br.readLine();
+            }
+
+            return systemEvents;
+        } catch (IOException e) {
+            MATE.log("Reading system events from file failed!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Parses both the AndroidManifest.xml and the static intent info file.
+     */
     private void parseXMLFiles() {
 
         try {
@@ -45,11 +81,8 @@ public class IntentProvider {
             MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
-            MATE.log_acc(e.getMessage());
-            throw new IllegalStateException("Couldn't initialise IntentProvider! Aborting.");
+            throw new IllegalStateException(e);
         }
-
-
     }
 
     /**
@@ -104,6 +137,33 @@ public class IntentProvider {
     }
 
     /**
+     * Checks  whether we have a broadcast receivers that reacts to
+     * system events.
+     *
+     * @return Returns {@code true} if a receiver listens for a system event,
+     *      otherwise {@code false}.
+     */
+    public boolean hasSystemEvent() {
+        return !systemEventReceivers.isEmpty();
+    }
+
+    /**
+     * Generates a random system event that is received by at least one broadcast receiver.
+     *
+     * @return Returns the corresponding action describing the system event.
+     */
+    public SystemAction getSystemEvent() {
+        if (!hasSystemEvent()) {
+            throw new IllegalStateException("No broadcast receiver is listening for system events!");
+        } else {
+            ComponentDescription component = Randomness.randomElement(systemEventReceivers);
+            IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
+            String action = Randomness.randomElement(intentFilter.getActions());
+            return new SystemAction(component.getFullyQualifiedName(), action);
+        }
+    }
+
+    /**
      * Returns an Intent-based action representing the invocation of a certain component.
      *
      * @param componentType The component type.
@@ -142,18 +202,35 @@ public class IntentProvider {
             intent.setAction(action);
         }
 
-        // add a random category if present
-        // TODO: add decreasing probability for adding multiple categories
+        // add random categories if present
         if (intentFilter.hasCategory()) {
-            String category = Randomness.randomElement(intentFilter.getCategories());
-            intent.addCategory(category);
+
+            Set<String> categories = intentFilter.getCategories();
+
+            final double ALPHA = 1;
+            double decreasingFactor = ALPHA;
+            Random random = new Random();
+
+            // add with decreasing probability categories (at least one)
+            while (random.nextDouble() < ALPHA / decreasingFactor) {
+                String category = Randomness.randomElement(categories);
+                intent.addCategory(category);
+                decreasingFactor /= 2;
+
+                // we reached the maximal amount of categories we can add
+                if (intent.getCategories().size() == categories.size()) {
+                    break;
+                }
+            }
         }
 
         // add a data tag
         if (intentFilter.hasData()) {
             // TODO: consider integration of mimeType -> should be derived automatically otherwise
             Uri uri = intentFilter.getData().generateRandomUri();
-            intent.setData(uri);
+            if (uri != null) {
+                intent.setData(uri);
+            }
         }
 
         // make every intent explicit
@@ -193,7 +270,7 @@ public class IntentProvider {
      * storage of MATE.
      *
      * @throws XmlPullParserException Should never happen.
-     * @throws IOException Should never happen.
+     * @throws IOException            Should never happen.
      */
     private void parseIntentInfoFile() throws XmlPullParserException, IOException {
 
@@ -211,11 +288,11 @@ public class IntentProvider {
         Set<String> stringConstants = new HashSet<>();
         Map<String, String> extras = new HashMap<>();
 
-        while(parser.next() != XmlPullParser.END_DOCUMENT) {
-            if(parser.getEventType() == XmlPullParser.START_TAG) {
+        while (parser.next() != XmlPullParser.END_DOCUMENT) {
+            if (parser.getEventType() == XmlPullParser.START_TAG) {
 
                 // check whether we found a new component tag
-                if(parser.getName().equals("activity")
+                if (parser.getName().equals("activity")
                         || parser.getName().equals("service")
                         || parser.getName().equals("receiver")) {
 
@@ -225,21 +302,21 @@ public class IntentProvider {
                     componentName = parser.getAttributeValue(null, "name");
 
                     // we found a string constant tag
-                } else if(parser.getName().equals("string")) {
+                } else if (parser.getName().equals("string")) {
                     stringConstants.add(parser.getAttributeValue(null, "value"));
 
                     // we found an extra tag
-                } else if(parser.getName().equals("extra")) {
+                } else if (parser.getName().equals("extra")) {
                     extras.put(parser.getAttributeValue(null, "key"),
                             parser.getAttributeValue(null, "type"));
                     // TODO: try to specify the expected type already in the DexAnalyzer
                     // identifyExtraType(parser.getAttributeValue(null, "type")));
                 }
 
-            } else if(parser.getEventType() == XmlPullParser.END_TAG) {
+            } else if (parser.getEventType() == XmlPullParser.END_TAG) {
 
                 // check whether we found a the component's end tag
-                if(parser.getName().equals("activity")
+                if (parser.getName().equals("activity")
                         || parser.getName().equals("service")
                         || parser.getName().equals("receiver")) {
 
@@ -355,7 +432,19 @@ public class IntentProvider {
                         break;
                     case "intent-filter":
                         if (currentComponent != null && currentIntentFilter != null) {
-                            currentComponent.addIntentFilter(currentIntentFilter);
+
+                            if (currentComponent.isBroadcastReceiver()
+                                    && describesSystemEvent(currentIntentFilter)) {
+                                // system event -> needs to be handled via ADB
+                                System.out.println("System Event Intent-Filter: " + currentIntentFilter);
+                                ComponentDescription systemEventReceiver =
+                                        new ComponentDescription(currentComponent.getFullyQualifiedName(), "receiver");
+                                systemEventReceiver.addIntentFilter(currentIntentFilter);
+                                systemEventReceivers.add(systemEventReceiver);
+                            } else {
+                                // no system event -> can be targeted by MATE
+                                currentComponent.addIntentFilter(currentIntentFilter);
+                            }
                             currentIntentFilter = null;
                         }
                         break;
@@ -365,6 +454,24 @@ public class IntentProvider {
             }
         }
         return components;
+    }
+
+    /**
+     * Checks whether an intent-filter describes a system event by comparing
+     * the included actions against the list of system event actions.
+     *
+     * @param intentFilter The given intent-filter.
+     * @return Returns {@code true} if the intent-filter describes a system event,
+     *      otherwise {@code false}.
+     */
+    private boolean describesSystemEvent(IntentFilterDescription intentFilter) {
+
+        for(String action : intentFilter.getActions()) {
+            if (systemEvents.contains(action)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

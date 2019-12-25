@@ -1,6 +1,8 @@
 package org.mate.interaction.intent;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.net.Uri;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -8,12 +10,12 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
+import org.mate.MATE;
 import org.mate.ui.Action;
 
-public class IntentBasedAction extends Action {
+import java.util.Set;
 
-    // TODO: implement custom serialization
-    // https://www.tutorialspoint.com/xstream/xstream_custom_converter.htm
+public class IntentBasedAction extends Action {
 
     private final Intent intent;
     private final ComponentType componentType;
@@ -22,7 +24,6 @@ public class IntentBasedAction extends Action {
         this.intent = intent;
         this.componentType = componentType;
     }
-
 
     public ComponentType getComponentType() {
         return componentType;
@@ -45,7 +46,9 @@ public class IntentBasedAction extends Action {
         builder.append("ComponentType: " + componentType + System.lineSeparator());
         builder.append("Receiver of Intent: " + intent.getComponent() + System.lineSeparator());
         builder.append("Action: " + intent.getAction() + System.lineSeparator());
-        builder.append("Category: " + intent.getCategories() + System.lineSeparator());
+        builder.append("Categories: " + intent.getCategories() + System.lineSeparator());
+        builder.append("Data: " + intent.getData() + System.lineSeparator());
+        builder.append("Extras: " + intent.getExtras() + System.lineSeparator());
         builder.append("------------------------");
         return builder.toString();
     }

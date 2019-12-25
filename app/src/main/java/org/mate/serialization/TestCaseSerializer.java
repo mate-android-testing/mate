@@ -9,10 +9,16 @@ import org.mate.MATE;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.IntentBasedActionConverter;
 import org.mate.model.TestCase;
+import org.mate.ui.Action;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -84,7 +90,7 @@ public final class TestCaseSerializer {
 
         MATE.log("Deserializing TestCase " + replayCounter);
 
-        // TODO: is it really necessary to load the test case files every time
+        // TODO: is it really necessary to load and sort the test case files every time
         File testCaseDir = new File(TEST_CASES_DIR);
 
         if (!testCaseDir.exists() && !testCaseDir.isDirectory()) {
@@ -130,10 +136,12 @@ public final class TestCaseSerializer {
 
         // convert xml to test case
         XStream xstream = new XStream();
-        // xstream.ignoreUnknownElements();
-        TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
 
-        System.out.println("Number of actions: " + testCase.getEventSequence().size());
+        // convert xml to test case
+        xstream.ignoreUnknownElements();
+        xstream.registerConverter(new IntentBasedActionConverter());
+        System.out.println("Deserialize TestCase!");
+        TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
 
         // update counter
         replayCounter++;

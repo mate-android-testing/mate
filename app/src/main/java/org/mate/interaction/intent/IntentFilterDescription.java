@@ -184,6 +184,13 @@ class IntentFilterDescription {
             return !ports.isEmpty();
         }
 
+        /**
+         * Retrieves the element specified by {@param index} in a given collection.
+         *
+         * @param collection The collection from which an element is requested.
+         * @param index The position of the desired element in the given collection.
+         * @return Returns the element located at the given index from a collection.
+         */
         private String getElementAtIndex(Set<String> collection, int index) {
 
             int counter = 0;
@@ -199,6 +206,11 @@ class IntentFilterDescription {
                     + " from collection with size: " + collection.size());
         }
 
+        /**
+         * Generates a random but valid URI.
+         *
+         * @return Returns the generated URI.
+         */
         Uri generateRandomUri() {
             Random rand = new Random();
             StringBuilder uriBuilder = new StringBuilder();
@@ -237,13 +249,18 @@ class IntentFilterDescription {
                 if(possibleFile == null) {
                     uriBuilder.append(scheme).append("://").append(host).append(port).append("/").append(path);
                 } else {
-                    String[] pathParts = Uri.fromFile(new File(InstrumentationRegistry.getTargetContext().getFilesDir(), possibleFile)).toString().split("/");
-                    pathParts[pathParts.length - 3] = MATE.packageName; // aut packagename
+                    uriBuilder.append(Uri.fromFile(new File("/sdcard/", possibleFile)).toString());
+                    // String[] pathParts = Uri.fromFile(new File("/sdcard/", possibleFile)).toString().split("/");
+                    // String[] pathParts = Uri.fromFile(new File(InstrumentationRegistry.getTargetContext().getFilesDir(), possibleFile)).toString().split("/");
+                    /*
+                    pathParts[pathParts.length - 3] = MATE.packageName; // AUT package name
                     for(int i = 0; i < pathParts.length - 1; i++) {
                         uriBuilder.append(pathParts[i]).append("/");
                     }
                     uriBuilder.append(pathParts[pathParts.length -1]);
+                    */
                 }
+                System.out.println("Generated URI: " + Uri.parse(uriBuilder.toString()));
                 return Uri.parse(uriBuilder.toString());
             } else {
                 if(!mimeTypes.isEmpty()) {
