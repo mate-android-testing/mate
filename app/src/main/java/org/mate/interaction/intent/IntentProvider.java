@@ -77,6 +77,7 @@ public class IntentProvider {
 
         try {
             components = parseManifest();
+            // TODO: consider to parse dynamically registered broadcast receivers
             parseIntentInfoFile();
             MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
