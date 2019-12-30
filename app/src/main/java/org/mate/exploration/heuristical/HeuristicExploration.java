@@ -17,6 +17,7 @@ public class HeuristicExploration {
     }
 
     // TODO: we need some sort of combined factory that makes use of heuristic exploration with intent based actions
+    // that is we need to assign weights to actions, but how to different between UI, system and intent based actions
     public HeuristicExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents, float relativeIntentAmount) {
         this.alwaysReset = alwaysReset;
         heuristicChromosomeFactory = new IntentChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents, relativeIntentAmount);

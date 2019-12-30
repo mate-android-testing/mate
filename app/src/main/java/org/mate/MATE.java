@@ -402,7 +402,8 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final RandomExploration randomExploration = new RandomExploration(50);
+                    final RandomExploration randomExploration
+                            = new RandomExploration(Properties.STORE_COVERAGE(), false, 50, 0.5f);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
