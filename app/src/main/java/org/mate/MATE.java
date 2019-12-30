@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
@@ -102,6 +103,11 @@ public class MATE {
     public static Set<String> visitedActivities = new HashSet<String>();
 
     public MATE() {
+
+        // should resolve android.os.FileUriExposedException
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
         Integer serverPort = null;
         try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
