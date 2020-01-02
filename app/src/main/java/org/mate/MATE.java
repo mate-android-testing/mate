@@ -412,7 +412,8 @@ public class MATE {
                     MATE.log_acc("Store Coverage: " + Properties.STORE_COVERAGE());
 
                     final RandomExploration randomExploration
-                            = new RandomExploration(Properties.STORE_COVERAGE(), false, 50, 0.5f);
+                            = new RandomExploration(Properties.STORE_COVERAGE(), false, 50,
+                            Properties.RELATIVE_INTENT_AMOUNT());
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
