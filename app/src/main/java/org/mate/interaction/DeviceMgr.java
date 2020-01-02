@@ -8,7 +8,6 @@ import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
 
@@ -21,7 +20,6 @@ import org.mate.interaction.intent.SystemAction;
 import org.mate.model.IGUIModel;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -148,15 +146,7 @@ public class DeviceMgr implements IApp {
                 throw new IllegalArgumentException("Action type " + action.getActionType() + " not implemented for primitive actions.");
         }
 
-        //handle app crashes
-        UiObject window = new UiObject(new UiSelector().packageName("android")
-                .textContains("has stopped"));
-        UiObject window2 = new UiObject(new UiSelector().packageName("android")
-                .textContains("keeps stopping"));
-        if (window.exists() || window2.exists()) {
-            MATE.log("CRASH");
-            throw new AUTCrashException("App crashed");
-        }
+        checkForCrash();
     }
 
     public void executeAction(WidgetAction action) throws AUTCrashException {
@@ -295,10 +285,16 @@ public class DeviceMgr implements IApp {
         //if there is a progress bar associated to that action
         sleep(action.getTimeToWait());
 
+        checkForCrash();
+    }
+
+    private void checkForCrash() throws AUTCrashException {
         //handle app crashes
         UiObject window = new UiObject(new UiSelector().packageName("android")
                 .textContains("has stopped"));
-        if (window.exists()) {
+        UiObject window2 = new UiObject(new UiSelector().packageName("android")
+                .textContains("keeps stopping"));
+        if (window.exists() || window2.exists()) {
             MATE.log("CRASH");
             throw new AUTCrashException("App crashed");
         }
@@ -558,26 +554,7 @@ public class DeviceMgr implements IApp {
     }
 
     public void handleCrashDialog() {
-        UiObject button = null;
-        String[] COMMON_BUTTONS = {
-                "OK", "Cancel", "Yes", "No", "Dismiss"
-        };
-        for (String keyword : COMMON_BUTTONS) {
-            button = device.findObject(new UiSelector().text(keyword).enabled(true));
-            if (button != null && button.exists()) {
-                break;
-            }
-        }
-        try {
-            // sometimes it takes a while for the OK button to become enabled
-            if (button != null && button.exists()) {
-                button.waitForExists(1000);
-                button.click();
-                sleep(1000);
-                restartApp();
-            }
-        } catch (UiObjectNotFoundException e) {
-        }
+        device.pressHome();
     }
 
 

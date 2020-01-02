@@ -18,38 +18,38 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
 
             if (widget.isEditable()){
 
-                MATE.log("Focused before: " + widget.isFocused());
+                //MATE.log("Focused before: " + widget.isFocused());
                 WidgetAction wclick = new WidgetAction(widget, ActionType.CLICK);
-                MATE.log(" CLICK on : " + widget.getId() + " " + widget.getClazz() + " " + widget.getText());
+                //MATE.log(" CLICK on : " + widget.getId() + " " + widget.getClazz() + " " + widget.getText());
                 MATE.uiAbstractionLayer.executeAction(wclick);
-                MATE.log("AFTER CLICK");
+                //MATE.log("AFTER CLICK");
                 IScreenState nState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                MATE.log("AFTER NEW STATE");
-                MATE.log("nstate widgets: " + nState.getWidgets().size());
+                //MATE.log("AFTER NEW STATE");
+                //MATE.log("nstate widgets: " + nState.getWidgets().size());
                 Widget wd = findWidget(nState, widget);
                 if (wd != null) {
-                    MATE.log("Focused after: " + wd.isFocused());
+                    //MATE.log("Focused after: " + wd.isFocused());
                     if (!wd.isFocused())
                         return new AccessibilityViolation(AccessibilityViolationTypes.MANAGING_FOCUS,widget,state,"");
 
                     WidgetAction editAction = new WidgetAction(widget,ActionType.TYPE_TEXT);
                     MATE.uiAbstractionLayer.executeAction(editAction);
-                    MATE.log("AFTER EDIT TEXT");
+                    //MATE.log("AFTER EDIT TEXT");
                     nState = ScreenStateFactory.getScreenState("ActionsScreenState");
                     wd = findWidget(nState, widget);
                     if (wd!=null){
-                        MATE.log("Focused after: " + wd.isFocused());
+                        //MATE.log("Focused after: " + wd.isFocused());
                         if (!wd.isFocused())
                             return new AccessibilityViolation(AccessibilityViolationTypes.MANAGING_FOCUS,widget,state,"");
 
 
                         if (widget.getText().equals(widget.getHint())|| widget.getText().equals(widget.getContentDesc())){
-                            MATE.log("MUST CLEAR");
+                            //MATE.log("MUST CLEAR");
                             WidgetAction clearField = new WidgetAction(wd,ActionType.CLEAR_WIDGET);
                             MATE.uiAbstractionLayer.executeAction(clearField);
                         }
                         else{
-                            MATE.log("MUST INSERT SP TEXT");
+                            //MATE.log("MUST INSERT SP TEXT");
                             WidgetAction textSpecific = new WidgetAction(wd,ActionType.TYPE_SPECIFIC_TEXT);
                             textSpecific.setExtraInfo(widget.getText());
                             MATE.uiAbstractionLayer.executeAction(textSpecific);

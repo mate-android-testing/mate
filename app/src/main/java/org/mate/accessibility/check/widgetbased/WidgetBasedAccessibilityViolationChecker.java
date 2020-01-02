@@ -38,7 +38,7 @@ public class WidgetBasedAccessibilityViolationChecker {
     public static void runAccessibilityChecks(IScreenState state) {
 
         widgetBasedChecks = createWidgetBasedAccessibilityList();
-        MATE.log("RUN WIDGET BASED CHECKS");
+        MATE.log(">>WIDGET BASED CHECKS");
         for (Widget widget: state.getWidgets()){
 
             for (IWidgetAccessibilityCheck widgetCheck: widgetBasedChecks){
@@ -48,8 +48,8 @@ public class WidgetBasedAccessibilityViolationChecker {
                     MATE.log(" -- extra info: " + violation.getInfo());
                 }
             }
-
         }
+        MATE.log("<<WIDGET BASED CHECKS");
 
     }
 }

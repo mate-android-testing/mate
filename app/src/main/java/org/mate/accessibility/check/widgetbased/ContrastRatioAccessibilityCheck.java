@@ -1,5 +1,6 @@
 package org.mate.accessibility.check.widgetbased;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;

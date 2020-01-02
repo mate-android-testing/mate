@@ -74,7 +74,7 @@ public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
 
         }
         else{
-            MATE.log("ADD STATE TO LIST");
+            //MATE.log("ADD STATE TO LIST");
             visitedStates.add(state);
         }
 
