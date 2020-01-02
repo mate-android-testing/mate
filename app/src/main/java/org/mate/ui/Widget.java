@@ -628,7 +628,7 @@ public class Widget {
             return buttonType;
         }
         catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return false;
     }
@@ -640,7 +640,7 @@ public class Widget {
             return imageButtonType;
         }
         catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return false;
     }
@@ -652,7 +652,7 @@ public class Widget {
             return imageSwitcherType;
         }
         catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return false;
     }
@@ -664,7 +664,7 @@ public class Widget {
             return imageType;
         }
         catch (ClassNotFoundException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
         return false;
     }
@@ -676,7 +676,7 @@ public class Widget {
             return spinnerType;
         }
         catch (ClassNotFoundException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
         return false;
     }
@@ -688,7 +688,7 @@ public class Widget {
             return textViewType;
         }
         catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return false;
     }
