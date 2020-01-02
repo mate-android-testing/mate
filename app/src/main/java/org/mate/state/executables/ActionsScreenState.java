@@ -369,7 +369,7 @@ public class ActionsScreenState extends AbstractScreenState {
     @Override
     public boolean differentColor(IScreenState visitedState) {
         if (visitedState==null) {
-            MATE.log("visited state = null");
+            //MATE.log("visited state = null");
             return true;
         }
         ActionsScreenState that = (ActionsScreenState) visitedState;
@@ -383,10 +383,10 @@ public class ActionsScreenState extends AbstractScreenState {
             for (Widget wOther: otherWidgets){
                 if (wThis.getId().equals(wOther.getId())){
                     if (wThis.getText().equals(wOther.getText())){
-                        if (!wThis.getColor().equals("")) {
-                            MATE.log("byID compare: " + wThis.getId() + "-" + wThis.getText() + ": " + wThis.getColor() + "  vs  " + wOther.getId() + "-" + wOther.getText() + ": " + wOther.getColor());
-                            MATE.log(" foc: " + wThis.isFocused() + "  foc: "+ wOther.isFocused());
-                        }
+                        //if (!wThis.getColor().equals("")) {
+                            //MATE.log("byID compare: " + wThis.getId() + "-" + wThis.getText() + ": " + wThis.getColor() + "  vs  " + wOther.getId() + "-" + wOther.getText() + ": " + wOther.getColor());
+                            //MATE.log(" foc: " + wThis.isFocused() + "  foc: "+ wOther.isFocused());
+                        //}
 
                         found = true;
                         if (!wOther.getColor().equals(wThis.getColor())) {
@@ -402,10 +402,11 @@ public class ActionsScreenState extends AbstractScreenState {
                 for (Widget wOther: otherWidgets){
                     if (wThis.getText().equals(wOther.getText())){
                         found = true;
-                        if (!wThis.getColor().equals("")) {
-                            MATE.log("by text compare: " + wThis.getId() + "-" + wThis.getText() + ": " + wThis.getColor() + "  vs  " + wOther.getId() + "-" + wOther.getText() + ": " + wOther.getColor());
-                            MATE.log(" foc: " + wThis.isFocused() + "  foc: "+ wOther.isFocused());
-                        }
+                        //if (!wThis.getColor().equals("")) {
+                            //MATE.log("by text compare: " + wThis.getId() + "-" + wThis.getText() + ": " + wThis.getColor() + "  vs  " + wOther.getId() + "-" + wOther.getText() + ": " + wOther.getColor());
+                            //MATE.log(" foc: " + wThis.isFocused() + "  foc: "+ wOther.isFocused());
+
+                        //}
                         //MATE.log("compare: " + wThis.getId()+"-"+wThis.getClazz()+": "+wThis.getColor()+"  vs  " + wOther.getId()+"-"+wOther.getClazz()+": " + wOther.getColor());
                         if (!wOther.getColor().equals(wThis.getColor())){
                             if (!wOther.isFocused() && wThis.isFocused()==wOther.isFocused())

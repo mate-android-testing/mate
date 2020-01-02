@@ -1,7 +1,15 @@
 package org.mate.exploration.manual;
 
+import android.app.ActivityManager;
+import android.app.Instrumentation;
 import android.app.UiAutomation;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Build;
+import android.support.test.uiautomator.UiDevice;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
@@ -23,11 +31,49 @@ public class CheckCurrentScreen {
 
     public void scanScreen(){
 
+        Context context = getInstrumentation().getContext();
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        MATE.log("Sound active: " +audioManager.isMusicActive());
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+        /*
+        Instrumentation instrumentation =  getInstrumentation();
+        instrumentation = getInstrumentation();
+        UiDevice device = UiDevice.getInstance(instrumentation);
+        String packageName = device.getCurrentPackageName();
+
+        //list all activities of the application being executed
+        PackageManager pm = (PackageManager) context.getPackageManager();
+        try {
+            PackageInfo pinfo = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            ActivityInfo[] activities = pinfo.activities;
+            for (int i = 0; i < activities.length; i++) {
+                MATE.log("Activity " + (i + 1) + ": " + activities[i].name);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+        Context context = InstrumentationRegistry.getTargetContext();
+        AccessibilityManager accMger = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        MATE.log("AccMger is enabled: " + accMger.isEnabled());
+        MATE.log("AccMger is touch exp enabled: " + accMger.isTouchExplorationEnabled());
+
+        List<AccessibilityServiceInfo> accServices = accMger.getInstalledAccessibilityServiceList();
+        for (AccessibilityServiceInfo accInfo: accServices){
+            MATE.log(accInfo.getId() + " " + accInfo.getSettingsActivityName());
+        }
 
         UiAutomation uiAutomation = getInstrumentation().getUiAutomation();
         List<AccessibilityWindowInfo> windowsInfo = uiAutomation.getWindows();
-        MATE.log("windows: " + windowsInfo.size());
+
         AccessibilityNodeInfo ani = uiAutomation.getRootInActiveWindow();
+
+        AudioManager audioManager = (AudioManager) getInstrumentation().getContext().getSystemService(Context.AUDIO_SERVICE);
+        MATE.log("Sound active: " +audioManager.isMusicActive());
+
+
         if (ani!=null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 MATE.log("--" + String.valueOf(ani.getPaneTitle()) + " - " + ani.getViewIdResourceName());
@@ -41,27 +87,28 @@ public class CheckCurrentScreen {
             }
         }
 
+        */
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
-        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(),screenState.getId());
+        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 
-        for (Widget w: screenState.getWidgets()){
-            MATE.log(w.getId()+ " " + w.getClazz()+ " text: " + w.getText() + "  IFA: " + w.isImportantForAccessibility() + "  AFOC: " + w.isAccessibilityFocused() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " hint: " + w.getHint() + "  "+w.getContentDesc() + " visible: " + w.isVisibleToUser()+ " selected: " + w.isSelected() + " - " + w.isChecked());
+        for (Widget w : screenState.getWidgets()) {
+            //MATE.log(w.getId() + " " + w.getClazz() + "  IFA: " + w.isImportantForAccessibility() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
             //if (w.getParent()!=null)
-                //MATE.log("------ son of " + w.getParent().getClazz());
+            //MATE.log("------ son of " + w.getParent().getClazz());
             //if (w.isEditable())
-                //MATE.log("INPUT TYPE: " + w.getInputType());
-            MATE.log("\n");
-            MATE.log("");
+            //MATE.log("INPUT TYPE: " + w.getInputType());
+            //MATE.log("\n");
+            //MATE.log("");
         }
 
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
         try {
-            MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            //MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             MATE.log("WAIT WAIT WAIT");
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -69,6 +116,7 @@ public class CheckCurrentScreen {
         }
 
         screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
 

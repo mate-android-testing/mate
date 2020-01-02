@@ -427,8 +427,8 @@ public class EnvironmentManager {
             y2 += borderExpanded;
         cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
-        MATE.log(cmd);
-        MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
+        //MATE.log(cmd);
+        //MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
         return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
@@ -453,8 +453,8 @@ public class EnvironmentManager {
             y2+=borderExpanded;
         cmd+=x1+","+y1+","+x2+","+y2;
 
-        MATE.log(cmd);
-        MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
+        //MATE.log(cmd);
+        //MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
         return tunnelLegacyCmd(cmd);
     }
 

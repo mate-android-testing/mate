@@ -51,7 +51,7 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
         String labelID = "";
 
 
-        MATE.log(widget.getClazz() + " " + widget.isCheckable() + " " + widget.isEditable() + " "+widget.isSpinnerType());
+        //MATE.log(widget.getClazz() + " " + widget.isCheckable() + " " + widget.isEditable() + " "+widget.isSpinnerType());
         //only checks for checkable, editable and spinner type widgets
         if (!widget.isCheckable() && !widget.isEditable() && !widget.isSpinnerType()){
             return null;
@@ -115,7 +115,7 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
         }
         else{
             if (hasHint){
-                MATE.log("NEEDS TO CHECK IF IT IS A FLOATING HINT");
+                //MATE.log("NEEDS TO CHECK IF IT IS A FLOATING HINT");
             }
         }
         return null;
