@@ -53,6 +53,9 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             // Registry.getEnvironmentManager().pushDummyFiles();
         }
 
+        // grant runtime permissions (read/write external storage) which are dropped after each reset
+        Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
