@@ -498,7 +498,7 @@ class IntentFilterDescription {
                 } else {
                     path.append(pattern.charAt(i));
                 }
-                
+
                 consumed = false;
                 escaped = false;
             }
