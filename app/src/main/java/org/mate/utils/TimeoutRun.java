@@ -23,6 +23,13 @@ public class TimeoutRun {
             finishedWithoutTimeout = true;
         } catch (TimeoutException e) {
             future.cancel(true);
+            executor.shutdownNow();
+            try {
+                executor.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+                MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
+                e.printStackTrace();
+            }
             MATE.log_acc("Finshed run due to timeout.");
         } catch (InterruptedException | ExecutionException e) {
             MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
