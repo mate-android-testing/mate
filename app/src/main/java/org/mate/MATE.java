@@ -79,6 +79,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 public class MATE {
 
@@ -412,7 +413,7 @@ public class MATE {
                     MATE.log_acc("Store Coverage: " + Properties.STORE_COVERAGE());
 
                     final RandomExploration randomExploration
-                            = new RandomExploration(Properties.STORE_COVERAGE(), false, 50,
+                            = new RandomExploration(Properties.STORE_COVERAGE(), false, MAX_NUMBER_EVENTS(),
                             Properties.RELATIVE_INTENT_AMOUNT());
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {

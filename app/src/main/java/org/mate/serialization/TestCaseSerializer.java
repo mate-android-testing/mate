@@ -2,6 +2,7 @@ package org.mate.serialization;
 
 
 import android.content.Intent;
+import android.support.test.InstrumentationRegistry;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -90,63 +91,29 @@ public final class TestCaseSerializer {
 
         MATE.log("Deserializing TestCase " + replayCounter);
 
-        // TODO: is it really necessary to load and sort the test case files every time
-        File testCaseDir = new File(TEST_CASES_DIR);
+        try {
 
-        if (!testCaseDir.exists() && !testCaseDir.isDirectory()) {
-            throw new IllegalStateException("TestCase directory not present for replaying test cases!");
+            String testCaseName = "TestCase" + replayCounter + ".xml";
+
+            // retrieves the file from /data/data/org.mate/files/
+            FileInputStream testCaseFile = InstrumentationRegistry.getTargetContext().openFileInput(testCaseName);
+
+            XStream xstream = new XStream();
+            xstream.ignoreUnknownElements();
+            xstream.registerConverter(new IntentBasedActionConverter());
+
+            System.out.println("Deserialize TestCase!");
+            TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
+            System.out.println("Number of Actions: " + testCase.getEventSequence().size());
+
+            // update counter
+            replayCounter++;
+
+            return testCase;
+        } catch (FileNotFoundException e) {
+            MATE.log("TestCase file for deserialization not found!");
+            throw new IllegalStateException(e);
         }
-
-        // retrieve all test case files
-        File[] testCases = testCaseDir.listFiles();
-
-        if (testCases == null || testCases.length == 0) {
-            throw new IllegalStateException("TestCase directory is empty!");
-        }
-
-        // we replayed all test cases
-        if (replayCounter >= testCases.length) {
-            // TODO: find more graceful way to abort execution
-            throw new IllegalStateException("Replayed already every test case!");
-        }
-
-        // sort test cases based on file name, e.g. TestCase1 < TestCase2
-        Arrays.sort(testCases, new Comparator<File>() {
-            @Override
-            public int compare(File f1, File f2) {
-
-                // take filename as basis for comparison
-                String fileName1 = f1.getName();
-                String fileName2 = f2.getName();
-
-                // cut off '.xml' suffix
-                String prefix1 = fileName1.split("\\.")[0];
-                String prefix2 = fileName2.split("\\.")[0];
-
-                // cut off 'TestCase' suffix + convert to number
-                int file1 = Integer.parseInt(prefix1.split("TestCase")[1]);
-                int file2 = Integer.parseInt(prefix2.split("TestCase")[1]);
-
-                return Integer.compare(file1, file2);
-            }
-        });
-
-        // pick next recorded test case
-        File testCaseFile = testCases[replayCounter];
-
-        // convert xml to test case
-        XStream xstream = new XStream();
-
-        // convert xml to test case
-        xstream.ignoreUnknownElements();
-        xstream.registerConverter(new IntentBasedActionConverter());
-        System.out.println("Deserialize TestCase!");
-        TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
-
-        // update counter
-        replayCounter++;
-
-        return testCase;
     }
 
 }

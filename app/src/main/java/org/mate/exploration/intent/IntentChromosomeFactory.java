@@ -69,6 +69,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 Action nextAction = null;
 
                 if (Properties.REPLAY_TEST_CASE()) {
+                    MATE.log("Replaying Action " + i);
                     nextAction = testCase.getEventSequence().get(i);
                 } else {
                     nextAction = selectAction();
