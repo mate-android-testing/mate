@@ -9,7 +9,7 @@ import java.util.List;
 public final class DataPool {
 
     // int/Integer data type
-    public static final Integer[] INTEGER_ARRAY = {0,1,-1, Integer.MIN_VALUE, Integer.MAX_VALUE, null};
+    public static final Integer[] INTEGER_ARRAY = {0,1,-1, Integer.MIN_VALUE, Integer.MAX_VALUE};
     public static final Integer[] INTEGER_ARRAY_WITH_NULL = {0,1,-1, Integer.MIN_VALUE, Integer.MAX_VALUE, null};
     public static final List<Integer> INTEGER_LIST = Arrays.asList(INTEGER_ARRAY);
     public static final List<Integer> INTEGER_LIST_WITH_NULL = Arrays.asList(INTEGER_ARRAY_WITH_NULL);
