@@ -11,6 +11,7 @@ import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.IntentBasedActionConverter;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
+import org.mate.utils.TimeoutRun;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,6 +48,8 @@ public final class TestCaseSerializer {
      */
     public static void serializeTestCase(TestCase testCase) {
 
+        TimeoutRun.maskInterrupt();
+
         MATE.log("Serializing TestCase " + recordCounter);
 
         // create the test-cases folder if not yet present
@@ -80,6 +83,8 @@ public final class TestCaseSerializer {
 
         // update counter
         recordCounter++;
+
+        TimeoutRun.unmaskInterrupt();
     }
 
     /**

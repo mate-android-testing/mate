@@ -17,6 +17,7 @@ import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.PrimitiveAction;
 import org.mate.utils.Coverage;
+import org.mate.utils.TimeoutRun;
 
 import java.util.Random;
 
