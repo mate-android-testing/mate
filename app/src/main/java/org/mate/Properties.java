@@ -50,6 +50,11 @@ public class Properties {
     public static float BROADCAST_RECEIVER_SELECTION_PROBABILITY() { return propertyOr( 0.2f); }
 
     /*
+    * Whether to apply optimisation of test cases before replaying them.
+     */
+    public static boolean OPTIMISE_TEST_CASE() { return propertyOr(false);}
+
+    /*
     * Record/Replay test case.
      */
     public static boolean RECORD_TEST_CASE() {

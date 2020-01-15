@@ -9,6 +9,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.intent.ComponentType;
+import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.IntentProvider;
 import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
@@ -17,6 +18,7 @@ import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.PrimitiveAction;
 import org.mate.utils.Coverage;
+import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TimeoutRun;
 
 import java.util.Random;
@@ -62,6 +64,11 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         if (Properties.REPLAY_TEST_CASE()) {
             testCase = TestCaseSerializer.deserializeTestCase();
+
+            if (Properties.OPTIMISE_TEST_CASE()) {
+                testCase = TestCaseOptimizer.removeLastActions(testCase, 3, IntentBasedAction.class);
+            }
+
             // we can only replay the number of actually serialized actions
             maxNumEvents = testCase.getEventSequence().size();
         }
