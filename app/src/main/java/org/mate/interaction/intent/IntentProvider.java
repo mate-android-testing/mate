@@ -76,38 +76,16 @@ public class IntentProvider {
     private void parseXMLFiles() {
 
         try {
-
-            List<ComponentDescription> c = ComponentParser.parseManifest();
-
             // extract all exported and enabled components declared in the manifest
-            // components = ComponentParser.parseManifest();
-
-            List<ComponentDescription> s = ComponentParser.filterSystemEventIntentFilters(c, systemEvents);
+            components = ComponentParser.parseManifest();
 
             // filter out system event intent filters
-            // systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
-
-            IntentInfoParser.parseIntentInfoFile(c);
+            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
 
             // add information about bundle entries and extracted string constants
-            // IntentInfoParser.parseIntentInfoFile(components);
+            IntentInfoParser.parseIntentInfoFile(components);
 
-            components = parseManifest();
             // TODO: consider to parse dynamically registered broadcast receivers
-            parseIntentInfoFile();
-
-            for (ComponentDescription comp : c) {
-                if (!components.contains(comp)) {
-                    System.out.println("Component differs: " + comp);
-                }
-            }
-
-            for (ComponentDescription comp : s) {
-                if (!systemEventReceivers.contains(comp)) {
-                    System.out.println("Component differs: " + comp);
-                }
-            }
-
             MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");

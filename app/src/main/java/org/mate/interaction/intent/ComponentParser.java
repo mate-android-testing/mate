@@ -182,6 +182,7 @@ public final class ComponentParser {
 
         List<ComponentDescription> systemEventReceivers = new ArrayList<>();
 
+        // TODO: check whether ConcurrentModificationException can happen
         for (ComponentDescription component : components) {
 
             // intent filters that refer to system events
