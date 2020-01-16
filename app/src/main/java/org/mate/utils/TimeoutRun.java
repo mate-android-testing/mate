@@ -16,17 +16,31 @@ public class TimeoutRun {
     private static boolean wasInterrupted = false;
 
     public static void maskInterrupt() {
-        if (wasInterrupted) {
-            throw new IllegalStateException("Entering a new interrupt masked block in an already interrupted thread.");
-        }
-        interruptMasked = true;
+        withInterruptLock(new Runnable() {
+            @Override
+            public void run() {
+                if (wasInterrupted) {
+                    throw new IllegalStateException("Entering a new interrupt masked block in an already interrupted thread.");
+                }
+                interruptMasked = true;
+            }
+        });
     }
 
     public static void unmaskInterrupt() {
-        interruptMasked = false;
-        if (wasInterrupted) {
-            Thread.currentThread().interrupt();
-        }
+        withInterruptLock(new Runnable() {
+            @Override
+            public void run() {
+                interruptMasked = false;
+                if (wasInterrupted) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+    }
+
+    private static synchronized void withInterruptLock(Runnable r) {
+        r.run();
     }
 
     public static boolean timeoutRun(Callable<Void> c, long milliseconds) {
@@ -36,18 +50,10 @@ public class TimeoutRun {
         ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
-                return new Thread(r) {
-                    @Override
-                    public void interrupt() {
-                        if (interruptMasked) {
-                            wasInterrupted = true;
-                        } else {
-                            super.interrupt();
-                        }
-                    }
-                };
+                return new InterruptMaskableThread(r);
             }
         });
+
         Future<Void> future = executor.submit(c);
         boolean finishedWithoutTimeout = false;
 
@@ -72,5 +78,25 @@ public class TimeoutRun {
 
         executor.shutdownNow();
         return  finishedWithoutTimeout;
+    }
+
+    private static class InterruptMaskableThread extends Thread {
+        private InterruptMaskableThread(Runnable r) {
+            super(r);
+        }
+
+        @Override
+        public void interrupt() {
+            withInterruptLock(new Runnable() {
+                @Override
+                public void run() {
+                    if (interruptMasked) {
+                        wasInterrupted = true;
+                    } else {
+                        InterruptMaskableThread.super.interrupt();
+                    }
+                }
+            });
+        }
     }
 }
