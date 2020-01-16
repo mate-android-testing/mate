@@ -199,6 +199,7 @@ public class UIAbstractionLayer {
             if (screenState.getPackageName().equals("com.google.android.gms")) {
                 try {
                     // press BACK to return to AUT
+                    MATE.log("Google Sign Dialog detected! Returning.");
                     deviceMgr.executeAction(new WidgetAction(ActionType.BACK));
                 } catch (AUTCrashException e) {
                     e.printStackTrace();

@@ -39,7 +39,7 @@ public class IntentProvider {
 
     private List<ComponentDescription> components;
 
-    private static final List<String> systemEvents = loadSystemEvents();
+    private static final List<String> systemEvents = SystemEventParser.loadSystemEvents();
     private List<ComponentDescription> systemEventReceivers = new ArrayList<>();
 
     public IntentProvider() {
@@ -76,9 +76,38 @@ public class IntentProvider {
     private void parseXMLFiles() {
 
         try {
+
+            List<ComponentDescription> c = ComponentParser.parseManifest();
+
+            // extract all exported and enabled components declared in the manifest
+            // components = ComponentParser.parseManifest();
+
+            List<ComponentDescription> s = ComponentParser.filterSystemEventIntentFilters(c, systemEvents);
+
+            // filter out system event intent filters
+            // systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
+
+            IntentInfoParser.parseIntentInfoFile(c);
+
+            // add information about bundle entries and extracted string constants
+            // IntentInfoParser.parseIntentInfoFile(components);
+
             components = parseManifest();
             // TODO: consider to parse dynamically registered broadcast receivers
             parseIntentInfoFile();
+
+            for (ComponentDescription comp : c) {
+                if (!components.contains(comp)) {
+                    System.out.println("Component differs: " + comp);
+                }
+            }
+
+            for (ComponentDescription comp : s) {
+                if (!systemEventReceivers.contains(comp)) {
+                    System.out.println("Component differs: " + comp);
+                }
+            }
+
             MATE.log_acc("Derived the following components: " + components);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
@@ -247,9 +276,10 @@ public class IntentProvider {
     }
 
     /**
-     * Returns the components representing a service.
+     * Returns the components representing a specific type.
      *
-     * @return Returns the list of service components.
+     * @param componentType The type of component, e.g. an activity.
+     * @return Returns the list of components matching the given type.
      */
     private List<ComponentDescription> getComponents(ComponentType componentType) {
         List<ComponentDescription> targetComponents = new ArrayList<>();

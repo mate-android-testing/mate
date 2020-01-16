@@ -19,6 +19,7 @@ import org.mate.ui.EnvironmentManager;
 import org.mate.ui.PrimitiveAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.TestCaseOptimizer;
+import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.util.Random;
@@ -52,8 +53,6 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         if (resetApp) {
             uiAbstractionLayer.resetApp();
-            //  reset flushes the app-internal storage
-            // Registry.getEnvironmentManager().pushDummyFiles();
         }
 
         // grant runtime permissions (read/write external storage) which are dropped after each reset
@@ -94,6 +93,9 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             if (Properties.RECORD_TEST_CASE()) {
                 TestCaseSerializer.serializeTestCase(testCase);
             }
+
+            // record stats about test case, in particular intent based actions
+            TestCaseStatistics.recordStats(testCase);
 
             /*
             //TODO: remove hack, when better solution implemented (query fitness function)

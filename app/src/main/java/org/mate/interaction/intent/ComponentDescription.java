@@ -9,6 +9,7 @@ import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +64,10 @@ class ComponentDescription {
 
     boolean hasExtra() {
         return !extras.isEmpty();
+    }
+
+    void removeIntentFilters(Collection<IntentFilterDescription> intentFilters) {
+        this.intentFilters.removeAll(intentFilters);
     }
 
     ComponentType getType() {
