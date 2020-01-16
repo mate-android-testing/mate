@@ -63,6 +63,7 @@ public class TimeoutRun {
             MATE.log_acc("Finished run before timeout.");
             finishedWithoutTimeout = true;
         } catch (TimeoutException e) {
+            MATE.log_acc("Timeout. Requesting shutdown...");
             executor.shutdownNow();
             try {
                 executor.awaitTermination(30, TimeUnit.SECONDS);
