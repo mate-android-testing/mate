@@ -91,6 +91,7 @@ public final class IntentInfoParser {
                         || parser.getName().equals("service")
                         || parser.getName().equals("receiver")) {
 
+                    // TODO: may consider to add this information to system receivers as well
                     // add collected information
                     for (ComponentDescription component : components) {
                         if (component.getFullyQualifiedName().equals(componentName)) {

@@ -178,11 +178,18 @@ public final class ComponentParser {
     }
 
 
+    /**
+     * Filters out broadcast receivers' intent filters (actually removes them) that describe a system event.
+     *
+     * @param components The list of components attached with its intent filters.
+     * @param systemEvents A list of system events.
+     * @return Returns the removed receivers.
+     */
     public static List<ComponentDescription> filterSystemEventIntentFilters(List<ComponentDescription> components, List<String> systemEvents) {
 
         List<ComponentDescription> systemEventReceivers = new ArrayList<>();
+        List<ComponentDescription> receiversToBeRemoved = new ArrayList<>();
 
-        // TODO: check whether ConcurrentModificationException can happen
         for (ComponentDescription component : components) {
 
             // intent filters that refer to system events
@@ -210,11 +217,14 @@ public final class ComponentParser {
             component.removeIntentFilters(systemEventFilters);
 
             if (!component.hasIntentFilter()) {
-                // no more intent filters attached -> remove it
-                MATE.log("Removing component: " + component);
-                MATE.log("Removing of component succeeded: " + components.remove(component));
+                // no more intent filters attached -> remove components
+                receiversToBeRemoved.add(component);
             }
         }
+
+        // remove empty components
+        MATE.log("Removing components: " + components.removeAll(receiversToBeRemoved));
+
         return systemEventReceivers;
     }
 
