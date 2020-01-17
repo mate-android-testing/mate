@@ -21,7 +21,7 @@ import java.util.Set;
  * intent-filter is typically represent by an arbitrary combination
  * of action, category and data tags.
  */
-class IntentFilterDescription {
+public class IntentFilterDescription {
 
     private Set<String> actions = new HashSet<>();
     private Set<String> categories = new HashSet<>();
@@ -65,15 +65,15 @@ class IntentFilterDescription {
         return data != null;
     }
 
-    Set<String> getActions() {
+    public Set<String> getActions() {
         return Collections.unmodifiableSet(actions);
     }
 
-    Set<String> getCategories() {
+    public Set<String> getCategories() {
         return Collections.unmodifiableSet(categories);
     }
 
-    Data getData() {
+    public Data getData() {
         return data;
     }
 

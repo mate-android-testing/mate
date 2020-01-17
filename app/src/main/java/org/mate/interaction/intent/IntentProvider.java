@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,11 +53,11 @@ public class IntentProvider {
             // extract all exported and enabled components declared in the manifest
             components = ComponentParser.parseManifest();
 
-            // filter out system event intent filters
-            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
-
             // add information about bundle entries and extracted string constants
             IntentInfoParser.parseIntentInfoFile(components);
+
+            // filter out system event intent filters
+            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
 
             // TODO: consider to parse dynamically registered broadcast receivers
             MATE.log_acc("Derived the following components: " + components);
@@ -64,6 +65,34 @@ public class IntentProvider {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Returns the list of retrieved components.
+     *
+     * @return Returns the list of components.
+     */
+    public List<ComponentDescription> getComponents() {
+        return Collections.unmodifiableList(components);
+    }
+
+    /**
+     * Returns the list of system event actions.
+     *
+     * @return Returns the list of actions describing system events.
+     */
+    public static List<String> getSystemEvents() {
+        return Collections.unmodifiableList(systemEvents);
+    }
+
+
+    /**
+     * Returns the list of broadcast receivers handling system events.
+     *
+     * @return Returns the list of broadcast receivers handling system events.
+     */
+    public List<ComponentDescription> getSystemEventReceivers() {
+        return Collections.unmodifiableList(systemEventReceivers);
     }
 
     /**

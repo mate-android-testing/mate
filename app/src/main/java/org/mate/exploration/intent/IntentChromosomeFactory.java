@@ -95,7 +95,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
 
             // record stats about test case, in particular intent based actions
-            TestCaseStatistics.recordStats(testCase);
+            TestCaseStatistics.recordStats(testCase, intentProvider.getComponents());
 
             /*
             //TODO: remove hack, when better solution implemented (query fitness function)

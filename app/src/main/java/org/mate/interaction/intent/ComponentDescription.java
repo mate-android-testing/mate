@@ -1,5 +1,6 @@
 package org.mate.interaction.intent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class ComponentDescription {
+public class ComponentDescription {
 
     private final String name;
     private final ComponentType type;
@@ -29,7 +30,7 @@ class ComponentDescription {
     private Set<String> stringConstants = new HashSet<>();
     private Map<String, String> extras = new HashMap<>();
 
-    ComponentDescription(String name, String type) {
+    public ComponentDescription(String name, String type) {
         this.name = name;
         this.type = ComponentType.mapStringToComponent(type);
     }
@@ -38,35 +39,35 @@ class ComponentDescription {
         this.stringConstants.addAll(stringConstants);
     }
 
-    void addExtras(Map<String, String> extras) {
+    public void addExtras(Map<String, String> extras) {
         this.extras.putAll(extras);
     }
 
-    boolean isActivity() {
+    public boolean isActivity() {
         return type == ComponentType.ACTIVITY;
     }
 
-    boolean isService() {
+    public boolean isService() {
         return type == ComponentType.SERVICE;
     }
 
-    boolean isBroadcastReceiver() {
+    public boolean isBroadcastReceiver() {
         return type == ComponentType.BROADCAST_RECEIVER;
     }
 
-    boolean isContentProvider() {
+    public boolean isContentProvider() {
         return type == ComponentType.CONTENT_PROVIDER;
     }
 
-    boolean hasIntentFilter() {
+    public boolean hasIntentFilter() {
         return !intentFilters.isEmpty();
     }
 
-    boolean hasExtra() {
+    public boolean hasExtra() {
         return !extras.isEmpty();
     }
 
-    void removeIntentFilters(Collection<IntentFilterDescription> intentFilters) {
+    public void removeIntentFilters(Collection<IntentFilterDescription> intentFilters) {
         this.intentFilters.removeAll(intentFilters);
     }
 
@@ -74,7 +75,7 @@ class ComponentDescription {
         return type;
     }
 
-    void addIntentFilter(IntentFilterDescription intentFilter) {
+    public void addIntentFilter(IntentFilterDescription intentFilter) {
         intentFilters.add(intentFilter);
     }
 
@@ -83,7 +84,7 @@ class ComponentDescription {
      *
      * @return Returns the FQN of the component.
      */
-    String getFullyQualifiedName() {
+    public String getFullyQualifiedName() {
 
         if (name.startsWith(".")) {
             return MATE.packageName + name;
@@ -92,8 +93,116 @@ class ComponentDescription {
         }
     }
 
-    Set<IntentFilterDescription> getIntentFilters() {
+    /**
+     * Retrieves a component from a list of components by name.
+     *
+     * @param components The list of components.
+     * @param name The name of the component to be looked up.
+     * @return Returns the component matching the given name in the list of components.
+     */
+    public static ComponentDescription getComponentByName(final List<ComponentDescription> components, final String name) {
+
+        for (ComponentDescription component : components) {
+            if (component.getFullyQualifiedName().equals(name)) {
+                return component;
+            }
+        }
+        throw new IllegalArgumentException("Component with name " + name + " does not exist!");
+    }
+
+    /**
+     * Retrieves the intent-filter matching the corresponding intent based on a heuristical search.
+     *
+     * @param intent The intent for which the corresponding intent filter is searched.
+     * @return Returns the intent filter corresponding to the given intent.
+     */
+    public IntentFilterDescription getMatchingIntentFilter(Intent intent) {
+
+        Set<IntentFilterDescription> matchesOnAction = new HashSet<>();
+
+        // found matches based on action first
+        for (IntentFilterDescription intentFilter : intentFilters) {
+            if (intentFilter.hasAction()) {
+                if (intentFilter.getActions().contains(intent.getAction())) {
+                    matchesOnAction.add(intentFilter);
+                }
+            }
+        }
+
+        // check whether there is only a single match
+        if (matchesOnAction.size() == 1) {
+            return matchesOnAction.iterator().next();
+        }
+
+        Set<IntentFilterDescription> matchesOnCategory = new HashSet<>(matchesOnAction);
+
+        if (intent.getCategories() != null) {
+
+            // found matches based on category (and action)
+            for (IntentFilterDescription intentFilter : matchesOnAction) {
+                if (!intentFilter.hasCategory()) {
+                    // no match -> remove
+                    matchesOnCategory.remove(intentFilter);
+                } else {
+
+                    // check for sub set relation based on categories
+                    Set<String> categories = intentFilter.getCategories();
+
+                    if (!categories.containsAll(intent.getCategories())) {
+                        matchesOnCategory.remove(intentFilter);
+                    }
+                }
+            }
+        }
+
+        // check whether there is only a single match
+        if (matchesOnCategory.size() == 1) {
+            return matchesOnCategory.iterator().next();
+        }
+
+        Set<IntentFilterDescription> matchesOnData = new HashSet<>(matchesOnCategory);
+
+        if (intent.getDataString() != null) {
+
+            // found matches based on data URI
+            for (IntentFilterDescription intentFilter : matchesOnCategory) {
+
+                if (!intentFilter.hasData()) {
+                    // no match -> remove
+                    matchesOnData.remove(intentFilter);
+                } else {
+
+                    if (intentFilter.getData().generateRandomUri() == null) {
+                        matchesOnData.remove(intentFilter);
+                    }
+
+                    // TODO: check for sub set relation based on all fields of a data tag
+                }
+            }
+        }
+
+        // TODO: add further checks based on extras and may on string constants
+
+        MATE.log("Number of matches: (hopefully 1 match only) " + matchesOnData.size());
+        return matchesOnData.iterator().next();
+    }
+
+    /**
+     * Returns the set of attached intent filters.
+     *
+     * @return Returns the attached intent filters.
+     */
+    public Set<IntentFilterDescription> getIntentFilters() {
         return Collections.unmodifiableSet(intentFilters);
+    }
+
+    /**
+     * Returns a map describing the key-value entries of a possible attached bundle.
+     *
+     * @return Returns the extra (the bundle object).
+     */
+    public Map<String, String> getExtras() {
+        return Collections.unmodifiableMap(extras);
     }
 
     @Override
