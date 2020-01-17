@@ -14,8 +14,13 @@ import java.util.concurrent.TimeoutException;
 public class TimeoutRun {
     private static boolean interruptMasked = false;
     private static boolean wasInterrupted = false;
+    private static boolean activeRun = false;
 
     public static void maskInterrupt() {
+        if (!activeRun) {
+            return;
+        }
+
         withInterruptLock(new Runnable() {
             @Override
             public void run() {
@@ -28,6 +33,10 @@ public class TimeoutRun {
     }
 
     public static void unmaskInterrupt() {
+        if (!activeRun) {
+            return;
+        }
+
         withInterruptLock(new Runnable() {
             @Override
             public void run() {
@@ -54,6 +63,7 @@ public class TimeoutRun {
             }
         });
 
+        activeRun = true;
         Future<Void> future = executor.submit(c);
         boolean finishedWithoutTimeout = false;
 
@@ -75,6 +85,8 @@ public class TimeoutRun {
         } catch (InterruptedException | ExecutionException e) {
             MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            activeRun = false;
         }
 
         executor.shutdownNow();
