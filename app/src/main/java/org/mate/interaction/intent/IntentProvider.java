@@ -169,6 +169,7 @@ public class IntentProvider {
             ComponentDescription component = Randomness.randomElement(systemEventReceivers);
             IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
             String action = Randomness.randomElement(intentFilter.getActions());
+            // TODO: adjust system action to contain a ref to the component + selected intent filter
             return new SystemAction(component.getFullyQualifiedName(), action);
         }
     }
@@ -181,6 +182,8 @@ public class IntentProvider {
      */
     public IntentBasedAction getAction(ComponentType componentType) {
         ComponentDescription component = Randomness.randomElement(getComponents(componentType));
+        // TODO: adjust fillIntent to return the IntentBasedAction including a ref
+        // to the component + the selected intent filter
         Intent intent = fillIntent(component);
         return new IntentBasedAction(intent, componentType);
     }
