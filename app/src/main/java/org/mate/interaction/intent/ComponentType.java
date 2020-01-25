@@ -14,6 +14,12 @@ public enum ComponentType {
      * @return Returns the component type matching the given component.
      */
     static ComponentType mapStringToComponent(String component) {
+
+        // treat activity-alias as an activity
+        if (component.equals("activity-alias")) {
+            return ACTIVITY;
+        }
+
         for (ComponentType type : ComponentType.values()) {
             if (type.toString().equals(component)) {
                 return type;

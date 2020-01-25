@@ -35,6 +35,11 @@ public class ComponentDescription {
         this.type = ComponentType.mapStringToComponent(type);
     }
 
+    public ComponentDescription(String name, ComponentType type) {
+        this.name = name;
+        this.type = type;
+    }
+
     void addStringConstants(Set<String> stringConstants) {
         this.stringConstants.addAll(stringConstants);
     }

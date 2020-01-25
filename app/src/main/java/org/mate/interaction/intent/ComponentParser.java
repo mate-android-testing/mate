@@ -33,6 +33,7 @@ public final class ComponentParser {
     public static List<ComponentDescription> parseManifest() throws XmlPullParserException, IOException {
 
         // TODO: add parsing of activity-aliases!!!
+        // TODO: parse only components that do not define any required permissions
 
         XmlPullParser parser = Xml.newPullParser();
 
@@ -61,10 +62,20 @@ public final class ComponentParser {
 
                 switch (parser.getName()) {
                     case "activity":
+                    case "activity-alias":
                     case "service":
                     case "receiver":
 
-                        // check whether the component has been exported
+                        /*
+                        * Check whether the component has been exported. The default value of
+                        * this flag depends whether the component declares any intent filter(s), then
+                        * its value is assumed to be 'true', otherwise its value is assumed to be 'false'.
+                        * However, since potential intent filters are declared afterwards and thus parsed
+                        * later, we only check whether the flag is explicitly set to 'false' and assume
+                        * in any other case (e.g. the attribute has not been defined explicitly) its
+                        * default value to be 'true'. When we reach the end tag of the component, we check
+                        * whether the component defined any intent filters, thus this handling is valid.
+                         */
                         boolean isComponentExported = parser.getAttributeValue(null, "exported") == null
                                 || parser.getAttributeValue(null, "exported").equals("true");
 
@@ -106,6 +117,7 @@ public final class ComponentParser {
             } else if (parser.getEventType() == XmlPullParser.END_TAG) {
                 switch (parser.getName()) {
                     case "activity":
+                    case "activity-alias":
                     case "service":
                     case "receiver":
                         // only add components that define an intent-filter
@@ -142,7 +154,6 @@ public final class ComponentParser {
 
         // either an action, category or data tag
         String tagName = parser.getName();
-        MATE.log_acc("Found Tag: " + tagName);
 
         if (tagName.equals("action")) {
             intentFilter.addAction(parser.getAttributeValue(null, "name"));
@@ -205,7 +216,7 @@ public final class ComponentParser {
                     if (describesSystemEvent(systemEvents, intentFilter)) {
 
                         ComponentDescription systemEventReceiver =
-                                new ComponentDescription(component.getFullyQualifiedName(), "receiver");
+                                new ComponentDescription(component.getFullyQualifiedName(), ComponentType.BROADCAST_RECEIVER);
                         systemEventReceiver.addIntentFilter(intentFilter);
                         systemEventReceivers.add(systemEventReceiver);
 

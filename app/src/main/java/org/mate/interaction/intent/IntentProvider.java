@@ -61,6 +61,7 @@ public class IntentProvider {
 
             // TODO: consider to parse dynamically registered broadcast receivers
             MATE.log_acc("Derived the following components: " + components);
+            MATE.log_acc("Derived the following system event receivers: " + systemEventReceivers);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
