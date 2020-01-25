@@ -152,26 +152,19 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 // select a service
                 MATE.log_acc("Selecting a service as target component!");
                 return intentProvider.getAction(ComponentType.SERVICE);
-
             } else if (random < 2 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasBroadcastReceiver()) {
                 // select a broadcast receiver
                 MATE.log_acc("Selecting a broadcast receiver as target component!");
                 return intentProvider.getAction(ComponentType.BROADCAST_RECEIVER);
-
-            } else if (random < 3 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasActivity()) {
-                // select an activity
-                MATE.log_acc("Selecting an activity as target component!");
-                return intentProvider.getAction(ComponentType.ACTIVITY);
-                // TODO: may integrate probability to swap activity
-
-            } else if (intentProvider.hasSystemEvent()) {
+            } else if (random < 3 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasSystemEvent()) {
                 // select a system event
                 MATE.log_acc("Selecting a system action!");
                 return intentProvider.getSystemEvent();
             } else {
-                // fall back to a UI action
-                MATE.log_acc("Fallback to UI action!");
-                return super.selectAction();
+                // select an activity (there must be at least the main activity exported!
+                MATE.log_acc("Selecting an activity as target component!");
+                return intentProvider.getAction(ComponentType.ACTIVITY);
+                // TODO: may integrate probability to swap activity
             }
         } else {
             // select a UI action
