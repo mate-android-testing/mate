@@ -1,5 +1,6 @@
 package org.mate.interaction.intent;
 
+import android.content.BroadcastReceiver;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -58,6 +59,8 @@ public final class IntentInfoParser {
         String componentName = null;
         Set<String> stringConstants = new HashSet<>();
         Map<String, String> extras = new HashMap<>();
+        Set<IntentFilterDescription> intentFilters = new HashSet<>();
+        IntentFilterDescription intentFilter = new IntentFilterDescription();
 
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.getEventType() == XmlPullParser.START_TAG) {
@@ -70,6 +73,7 @@ public final class IntentInfoParser {
                     // new component -> reset
                     extras = new HashMap<>();
                     stringConstants = new HashSet<>();
+                    intentFilters = new HashSet<>();
                     componentName = parser.getAttributeValue(null, "name");
 
                     // we found a string constant tag
@@ -82,29 +86,59 @@ public final class IntentInfoParser {
                             parser.getAttributeValue(null, "type"));
                     // TODO: try to specify the expected type already in the DexAnalyzer
                     // identifyExtraType(parser.getAttributeValue(null, "type")));
+                } else if (parser.getName().equals("intent-filter")) {
+                    // reset intent-filter
+                    intentFilter = new IntentFilterDescription();
+                } else if (parser.getName().equals("action")) {
+                    intentFilter.addAction(parser.getAttributeValue(null, "name"));
+                } else if (parser.getName().equals("category")) {
+                    intentFilter.addCategory(parser.getAttributeValue(null, "name"));
                 }
 
             } else if (parser.getEventType() == XmlPullParser.END_TAG) {
+
+                if (parser.getName().equals("intent-filter")) {
+                    intentFilters.add(intentFilter);
+                }
 
                 // check whether we found a the component's end tag
                 if (parser.getName().equals("activity")
                         || parser.getName().equals("service")
                         || parser.getName().equals("receiver")) {
 
-                    // TODO: may consider to add this information to system receivers as well
+                    boolean foundComponent = false;
+
                     // add collected information
                     for (ComponentDescription component : components) {
                         if (component.getFullyQualifiedName().equals(componentName)) {
+                            foundComponent = true;
+
                             component.addStringConstants(stringConstants);
                             component.addExtras(extras);
+
+                            if (!intentFilters.isEmpty()) {
+                                component.addIntentFilters(intentFilters);
+                            }
                             break;
                         }
                     }
 
-                    // reset component information
-                    componentName = null;
-                    stringConstants = new HashSet<>();
-                    extras = new HashMap<>();
+                    // TODO: add only dynamic receivers
+                    if (!foundComponent) {
+                        // implies that the component is a dynamically registered broadcast receiver
+                        System.out.println("Dynamic Broadcast Receiver: " + componentName + " (" + parser.getName() + ")");
+
+                        ComponentDescription receiver = new ComponentDescription(componentName,
+                                ComponentType.BROADCAST_RECEIVER);
+                        receiver.addStringConstants(stringConstants);
+                        receiver.addExtras(extras);
+
+                        if (!intentFilters.isEmpty()) {
+                            receiver.addIntentFilters(intentFilters);
+                        }
+
+                        components.add(receiver);
+                    }
                 }
             }
         }

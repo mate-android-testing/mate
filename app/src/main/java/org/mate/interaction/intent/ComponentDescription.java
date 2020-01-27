@@ -44,6 +44,10 @@ public class ComponentDescription {
         this.stringConstants.addAll(stringConstants);
     }
 
+    public void addIntentFilters(Set<IntentFilterDescription> intentFilters) {
+        this.intentFilters.addAll(intentFilters);
+    }
+
     public void addExtras(Map<String, String> extras) {
         this.extras.putAll(extras);
     }
