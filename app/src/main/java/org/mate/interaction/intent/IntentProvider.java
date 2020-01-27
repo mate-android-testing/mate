@@ -56,10 +56,10 @@ public class IntentProvider {
             // add information about bundle entries and extracted string constants
             IntentInfoParser.parseIntentInfoFile(components);
 
+            // TODO: we need to distinguish dynamic broadcast receivers from usual receivers
             // filter out system event intent filters
             systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
 
-            // TODO: consider to parse dynamically registered broadcast receivers
             MATE.log_acc("Derived the following components: " + components);
             MATE.log_acc("Derived the following system event receivers: " + systemEventReceivers);
         } catch (XmlPullParserException | IOException e) {
