@@ -35,9 +35,9 @@ import java.util.Set;
 public class IntentProvider {
 
     private List<ComponentDescription> components;
-
     private static final List<String> systemEvents = SystemEventParser.loadSystemEvents();
     private List<ComponentDescription> systemEventReceivers = new ArrayList<>();
+    private List<ComponentDescription> dynamicReceivers = new ArrayList<>();
 
     public IntentProvider() {
         parseXMLFiles();
@@ -53,15 +53,15 @@ public class IntentProvider {
             // extract all exported and enabled components declared in the manifest
             components = ComponentParser.parseManifest();
 
-            // add information about bundle entries and extracted string constants
-            IntentInfoParser.parseIntentInfoFile(components);
+            // add information about bundle entries and extracted string constants + collect dynamic receivers
+            IntentInfoParser.parseIntentInfoFile(components, dynamicReceivers);
 
-            // TODO: we need to distinguish dynamic broadcast receivers from usual receivers
             // filter out system event intent filters
             systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
 
             MATE.log_acc("Derived the following components: " + components);
             MATE.log_acc("Derived the following system event receivers: " + systemEventReceivers);
+            MATE.log_acc("Derived the following dynamic receivers: " + dynamicReceivers);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);

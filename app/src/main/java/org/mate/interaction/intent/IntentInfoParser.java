@@ -32,7 +32,8 @@ public final class IntentInfoParser {
     /**
      * Parses additional information, i.e. string constants and bundle entries, for a component.
      * This information has been retrieved by a pre-conducted static analysis on the classes.dex
-     * files contained in an APK file. Prior to the execution of this method, the AndroidManifest.xml
+     * files contained in an APK file. In addition, we also collect up dynamic broadcast receivers.
+     * Prior to the execution of this method, the AndroidManifest.xml
      * needs to be parsed. This method assumes that the XML file
      * specified by the constant {@code STATIC_INFO_FILE} has been pushed to the app internal
      * storage of MATE.
@@ -41,7 +42,8 @@ public final class IntentInfoParser {
      * @throws XmlPullParserException Should never happen.
      * @throws IOException            Should never happen.
      */
-    public static void parseIntentInfoFile(List<ComponentDescription> components)
+    public static void parseIntentInfoFile(List<ComponentDescription> components,
+                                           List<ComponentDescription> dynamicReceivers)
             throws XmlPullParserException, IOException {
 
         Objects.requireNonNull(components, "Ensure that components have been parsed previously!");
@@ -61,6 +63,7 @@ public final class IntentInfoParser {
         Map<String, String> extras = new HashMap<>();
         Set<IntentFilterDescription> intentFilters = new HashSet<>();
         IntentFilterDescription intentFilter = new IntentFilterDescription();
+        boolean dynamicReceiver = false;
 
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.getEventType() == XmlPullParser.START_TAG) {
@@ -74,6 +77,7 @@ public final class IntentInfoParser {
                     extras = new HashMap<>();
                     stringConstants = new HashSet<>();
                     intentFilters = new HashSet<>();
+                    dynamicReceiver = false;
                     componentName = parser.getAttributeValue(null, "name");
 
                     // we found a string constant tag
@@ -93,6 +97,8 @@ public final class IntentInfoParser {
                     intentFilter.addAction(parser.getAttributeValue(null, "name"));
                 } else if (parser.getName().equals("category")) {
                     intentFilter.addCategory(parser.getAttributeValue(null, "name"));
+                } else if (parser.getName().equals("dynamic")) {
+                    dynamicReceiver = Boolean.parseBoolean(parser.getAttributeValue(null, "value"));
                 }
 
             } else if (parser.getEventType() == XmlPullParser.END_TAG) {
@@ -123,9 +129,8 @@ public final class IntentInfoParser {
                         }
                     }
 
-                    // TODO: add only dynamic receivers
-                    if (!foundComponent) {
-                        // implies that the component is a dynamically registered broadcast receiver
+                    // handle dynamically registered broadcast receivers
+                    if (!foundComponent && dynamicReceiver) {
                         System.out.println("Dynamic Broadcast Receiver: " + componentName + " (" + parser.getName() + ")");
 
                         ComponentDescription receiver = new ComponentDescription(componentName,
@@ -137,7 +142,7 @@ public final class IntentInfoParser {
                             receiver.addIntentFilters(intentFilters);
                         }
 
-                        components.add(receiver);
+                        dynamicReceivers.add(receiver);
                     }
                 }
             }
