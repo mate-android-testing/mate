@@ -7,6 +7,7 @@ import org.mate.MATE;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
+import org.mate.utils.TimeoutRun;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -60,14 +61,23 @@ public class EnvironmentManager {
             throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
         }
         addMetadata(message);
+
+        TimeoutRun.maskInterrupt();
         try {
             server.getOutputStream().write(Serializer.serialize(message));
             server.getOutputStream().flush();
         } catch (IOException e) {
+            TimeoutRun.unmaskInterrupt();
             MATE.log("socket error sending");
             throw new IllegalStateException(e);
+        } finally {
+            TimeoutRun.unmaskInterrupt();
         }
+
+        TimeoutRun.maskInterrupt();
         Message response = messageParser.nextMessage();
+        TimeoutRun.unmaskInterrupt();
+
         verifyMetadata(response);
         if (response.getSubject().equals("/error")) {
             MATE.log("Received error message from mate-server: "
