@@ -29,14 +29,16 @@ public class ScreenBasedAccessibilityViolationChecker {
     }
 
 
-    public static void runAccessibilityChecks(IScreenState state) {
+    public static List<AccessibilityViolation> runAccessibilityChecks(IScreenState state) {
 
+        List<AccessibilityViolation> violations = new ArrayList<AccessibilityViolation>();
         screenBasedChecks = createScreenBasedAccessibilityList();
         MATE.log(">>SCREEN BASED CHECKS");
 
         for (IScreenAccessibilityCheck screenCheck: screenBasedChecks){
             AccessibilityViolation violation = screenCheck.check(state);
             if (violation!=null) {
+                violations.add(violation);
                 MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " " + violation.getInfo() );
                 if (!violation.getInfo().equals(""))
                     MATE.log(" -- extra info: " + violation.getInfo());
@@ -45,6 +47,6 @@ public class ScreenBasedAccessibilityViolationChecker {
         }
 
         MATE.log("<<SCREEN BASED CHECKS");
-
+        return violations;
     }
 }

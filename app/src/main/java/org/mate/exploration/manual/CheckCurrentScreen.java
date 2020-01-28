@@ -146,7 +146,7 @@ public class CheckCurrentScreen {
         try {
             //MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             MATE.log("WAIT WAIT WAIT");
-            Thread.sleep(50);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -163,7 +163,7 @@ public class CheckCurrentScreen {
             violation.setWarning(true);
         }
 
-        //AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
 
 

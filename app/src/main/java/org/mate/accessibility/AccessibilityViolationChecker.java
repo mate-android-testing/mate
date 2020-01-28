@@ -12,8 +12,9 @@ public class AccessibilityViolationChecker {
 
     public static List<AccessibilityViolation> violations = new ArrayList<>();
 
-    public static void runAccessibilityChecks(IScreenState state){
+    public static List<AccessibilityViolation> runAccessibilityChecks(IScreenState state){
 
+        List<AccessibilityViolation> violations = new ArrayList<>();
         MATE.log("RUN ALL ACC CHECKS");
 
         //checks that came from Google Testing Framework
@@ -29,9 +30,13 @@ public class AccessibilityViolationChecker {
 
         //widget based
         MATE.log("Widget based checks");
-        WidgetBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
+        List<AccessibilityViolation> widgetViolations = WidgetBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
         MATE.log("Screen based checks");
-        ScreenBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
+        List<AccessibilityViolation> screenViolations = ScreenBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
+
+        violations.addAll(widgetViolations);
+        violations.addAll(screenViolations);
+        return violations;
     }
 
 
