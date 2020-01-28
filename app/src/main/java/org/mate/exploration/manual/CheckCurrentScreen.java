@@ -40,23 +40,23 @@ public class CheckCurrentScreen {
     public void scanScreen(){
 
         //Context appContext = getInstrumentation().getContext().getApplicationContext();
-        Context generalContext = getInstrumentation().getContext();
-        Context targetContext = getInstrumentation().getTargetContext();
+        //Context generalContext = getInstrumentation().getContext();
+        //Context targetContext = getInstrumentation().getTargetContext();
 
 
-        AudioManager audioManager = (AudioManager) targetContext.getSystemService(Context.AUDIO_SERVICE);
-        MATE.log("Sound active: " +audioManager.isMusicActive());
+        //AudioManager audioManager = (AudioManager) targetContext.getSystemService(Context.AUDIO_SERVICE);
+        //MATE.log("Sound active: " +audioManager.isMusicActive());
 
-        ActivityManager activityManager = (ActivityManager) targetContext.getSystemService(Context.ACTIVITY_SERVICE);
+        //ActivityManager activityManager = (ActivityManager) targetContext.getSystemService(Context.ACTIVITY_SERVICE);
 
 
-        DisplayManager displayManager = (DisplayManager) targetContext.getSystemService(Context.DISPLAY_SERVICE);
-        MATE.log("Length: " + displayManager.getDisplays().length);
-        Display display = displayManager.getDisplays()[0];
-        MATE.log("density: " + display.getName());
-        DisplayMetrics dm = new DisplayMetrics();
-        display.getMetrics(dm);
-        MATE.log("density: " + dm.density);
+        //DisplayManager displayManager = (DisplayManager) targetContext.getSystemService(Context.DISPLAY_SERVICE);
+        //MATE.log("Length: " + displayManager.getDisplays().length);
+        //Display display = displayManager.getDisplays()[0];
+        //MATE.log("density: " + display.getName());
+        //DisplayMetrics dm = new DisplayMetrics();
+        //display.getMetrics(dm);
+        //MATE.log("density: " + dm.density);
 
 
 
@@ -140,7 +140,7 @@ public class CheckCurrentScreen {
         }
 
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
-
+/*
 
 
         try {

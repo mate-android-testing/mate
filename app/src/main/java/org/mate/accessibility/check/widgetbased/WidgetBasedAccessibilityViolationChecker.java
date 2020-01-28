@@ -53,6 +53,7 @@ public class WidgetBasedAccessibilityViolationChecker {
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
                 if (violation!=null) {
                     violations.add(violation);
+                    violation.reportFlaw();
                     MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     if (!violation.getInfo().equals(""))
                         MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());

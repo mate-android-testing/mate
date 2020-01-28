@@ -39,6 +39,7 @@ public class ScreenBasedAccessibilityViolationChecker {
             AccessibilityViolation violation = screenCheck.check(state);
             if (violation!=null) {
                 violations.add(violation);
+                violation.reportFlaw();
                 MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " " + violation.getInfo() );
                 if (!violation.getInfo().equals(""))
                     MATE.log(" -- extra info: " + violation.getInfo());

@@ -24,9 +24,10 @@ public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
         //if (check whether background color of the button is the same as the screen background)
         double matchesBackgroundColor = 0;
 
+        MATE.log("BEFORE MATCHES SURROUNDING COLOR");
         try{ matchesBackgroundColor = Registry.getEnvironmentManager().matchesSurroundingColor(state.getPackageName(),state.getId(),widget);}
         catch(Exception e){}
-
+        MATE.log("AFTER MATCHES SURROUNDING COLOR");
 
         if ((widget.isClickable() && widget.getClazz().contains("Button")&& !widget.getText().equals(""))|| checkClickableText) {
             MATE.log("CHECKS BACKGROUND COLOR = " + widget.getClazz() + " " + widget.getText());

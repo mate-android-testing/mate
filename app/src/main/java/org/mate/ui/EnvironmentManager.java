@@ -421,7 +421,14 @@ public class EnvironmentManager {
         cmd += emulator + "_" + packageName + ":";
         cmd += stateId + ":";
         cmd += widget.getX1() + "," + widget.getY1() + "," + widget.getX2() + "," + widget.getY2();
-        return Double.valueOf(tunnelLegacyCmd(cmd));
+
+        Message message = new Message("/accessibility");
+        message.addParameter("cmd",cmd);
+
+        //will break commands in several parameters-values in the future.
+        //For now I'm sending the whole command with parameters in one single string
+        String response = sendMessage(message).getParameter("response");
+        return Double.valueOf(response);
     }
 
     public double getContrastRatio(String packageName, String stateId, Widget widget) {

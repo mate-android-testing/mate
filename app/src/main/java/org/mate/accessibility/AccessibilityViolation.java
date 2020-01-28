@@ -13,7 +13,7 @@ public class AccessibilityViolation {
     private String info;
     private boolean warning;
 
-    public void reportFlaw(int type, Widget widget, IScreenState state, String info){
+    public void reportFlaw(){
         if (widget==null){
             widget = new Widget("artificialId","artificialClass","artificialIdByActivity");
             widget.setX1(0);
@@ -42,7 +42,7 @@ public class AccessibilityViolation {
         this.state = state;
         this.info = info;
         this.warning = false;
-        reportFlaw(type,widget,state,info);
+        //reportFlaw(type,widget,state,info);
     }
 
     public AccessibilityViolation(int type, Widget widget, boolean warning){
@@ -51,7 +51,7 @@ public class AccessibilityViolation {
         this.warning = warning;
         this.state = null;
         this.info = "";
-        reportFlaw(type,widget,state,info);
+        //reportFlaw(type,widget,state,info);
 
     }
 
@@ -61,7 +61,7 @@ public class AccessibilityViolation {
         this.state = state;
         this.info = info;
         this.warning = false;
-        reportFlaw(type,widget,state,info);
+        //reportFlaw(type,widget,state,info);
     }
 
     public int getType() {
