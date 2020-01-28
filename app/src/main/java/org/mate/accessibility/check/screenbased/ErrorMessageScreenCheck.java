@@ -2,7 +2,7 @@ package org.mate.accessibility.check.screenbased;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -21,12 +21,12 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck{
     @Override
     public AccessibilityViolation check(IScreenState state) {
 
-        IScreenState visitedState =stateHasBeenVisited(state);
+        IScreenState visitedState = stateHasBeenVisited(state);
 
         if (visitedState!=null){
             MATE.log("same state");
             if (differentContext(state,visitedState)){
-                AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationTypes.ERROR_MESSAGE,state,"Content descriptions/hints do not changed after showing error message");
+                AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.ERROR_MESSAGE,state,"Content descriptions/hints do not changed after showing error message");
                 violation.setWarning(true);
                 return violation;
             }
@@ -48,21 +48,14 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck{
         for (Widget wThis: thisWidgets){
             //search by id
             for (Widget wOther: otherWidgets){
-                if (wThis.getId().contains("imageview_search)"))
-                {
+                if (wThis.getId().contains("imageview_search)")){
                     MATE.log("this: "+wThis.getText()+ " " + wThis.getContentDesc() + " " + wThis.getHint()+" " + wThis.getErrorText());
                     MATE.log("other: "+wOther.getText()+ " " + wOther.getContentDesc() + " " + wOther.getHint()+" " + wOther.getErrorText());
                 }
-                if (wThis.getId().equals(wOther.getId())){
-
-
-
-                    //if (!wThis.getErrorText().equals(wOther.getErrorText())){
-                        if (wOther.getContentDesc().equals(wThis.getContentDesc()) && wOther.getHint().equals(wThis.getHint())) {
-                            return true;
-                        }
-                    //}
-
+                if (wThis.getId().equals(wOther.getId())&&
+                        wOther.getContentDesc().equals(wThis.getContentDesc()) &&
+                        wOther.getHint().equals(wThis.getHint())) {
+                    return true;
                 }
             }
         }
@@ -70,11 +63,11 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck{
     }
 
     private IScreenState stateHasBeenVisited(IScreenState currentScreenState) {
-        List<IScreenState> recordedScreenStates = visitedStates;
-        for (IScreenState recordedScreenState : recordedScreenStates) {
-            if (recordedScreenState.equals(currentScreenState)) {
-                return recordedScreenState;
-            }
+
+        int index = visitedStates.indexOf(currentScreenState);
+        if (index>=0){
+            //stored state needs to be retrived to be compared to a different state
+            return visitedStates.get(index);
         }
         return null;
     }

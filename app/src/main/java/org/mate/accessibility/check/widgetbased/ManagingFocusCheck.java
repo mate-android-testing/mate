@@ -2,10 +2,9 @@ package org.mate.accessibility.check.widgetbased;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -30,7 +29,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                 if (wd != null) {
                     //MATE.log("Focused after: " + wd.isFocused());
                     if (!wd.isFocused())
-                        return new AccessibilityViolation(AccessibilityViolationTypes.MANAGING_FOCUS,widget,state,"");
+                        return new AccessibilityViolation(AccessibilityViolationType.MANAGING_FOCUS,widget,state,"");
 
                     WidgetAction editAction = new WidgetAction(widget,ActionType.TYPE_TEXT);
                     MATE.uiAbstractionLayer.executeAction(editAction);
@@ -40,7 +39,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                     if (wd!=null){
                         //MATE.log("Focused after: " + wd.isFocused());
                         if (!wd.isFocused())
-                            return new AccessibilityViolation(AccessibilityViolationTypes.MANAGING_FOCUS,widget,state,"");
+                            return new AccessibilityViolation(AccessibilityViolationType.MANAGING_FOCUS,widget,state,"");
 
 
                         if (widget.getText().equals(widget.getHint())|| widget.getText().equals(widget.getContentDesc())){

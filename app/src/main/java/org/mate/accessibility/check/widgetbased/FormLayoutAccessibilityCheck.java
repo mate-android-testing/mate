@@ -1,15 +1,13 @@
 package org.mate.accessibility.check.widgetbased;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
 
 
 /*
@@ -62,7 +60,7 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
         FormControlLabelCheck formLabelCheck = new FormControlLabelCheck();
         AccessibilityViolation violation = formLabelCheck.check(state,widget);
         if (violation!=null){
-            return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_NOT_DEFINED, widget, state, "");
+            return new AccessibilityViolation(AccessibilityViolationType.LABEL_NOT_DEFINED, widget, state, "");
         }
 
         labeledBy = new ArrayList<String>();
@@ -111,7 +109,7 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
                 }
 
                 if (hasHint)
-                    return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_FAR_FROM_INPUTTEXT, widget, state, String.valueOf(distance));
+                    return new AccessibilityViolation(AccessibilityViolationType.LABEL_FAR_FROM_INPUTTEXT, widget, state, String.valueOf(distance));
             }
         }
         else{
@@ -120,7 +118,7 @@ public class FormLayoutAccessibilityCheck implements IWidgetAccessibilityCheck {
                 if (widget.isShowingHintText())
                     return null;
                 else
-                    return new AccessibilityViolation(AccessibilityViolationTypes.LABEL_NOT_DEFINED, widget, state, "");
+                    return new AccessibilityViolation(AccessibilityViolationType.LABEL_NOT_DEFINED, widget, state, "");
             }
         }
         return null;

@@ -2,7 +2,6 @@ package org.mate.accessibility.check.screenbased;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
 
 import java.util.ArrayList;
@@ -40,7 +39,7 @@ public class ScreenBasedAccessibilityViolationChecker {
             if (violation!=null) {
                 violations.add(violation);
                 violation.reportFlaw();
-                MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " " + violation.getInfo() );
+                MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " " + violation.getInfo() );
                 if (!violation.getInfo().equals(""))
                     MATE.log(" -- extra info: " + violation.getInfo());
             }

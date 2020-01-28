@@ -1,7 +1,7 @@
 package org.mate.accessibility.check.widgetbased;
 
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -12,7 +12,7 @@ public class InputTypeCheck implements IWidgetAccessibilityCheck {
 
         if (widget.isEditable()){
             if (widget.getInputType()==131073){
-                return new AccessibilityViolation(AccessibilityViolationTypes.MISSING_INPUT_TYPE,widget,state,"");
+                return new AccessibilityViolation(AccessibilityViolationType.MISSING_INPUT_TYPE,widget,state,"");
             }
         }
         return null;

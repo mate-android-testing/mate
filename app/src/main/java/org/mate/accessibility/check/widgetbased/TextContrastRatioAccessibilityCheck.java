@@ -1,12 +1,10 @@
 package org.mate.accessibility.check.widgetbased;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 /**
@@ -38,7 +36,7 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
         contratio=contrastRatio;
         //MATE.log("Checked: " + widget.getClazz()+" txt:"+ widget.getText()+ " hint: " + widget.getHint()+":"+widget.getContentDesc()+" contrast ratio: " + contrastRatio);
         if (contrastRatio< AccessibilitySettings.MIN_CONTRAST_RATIO)
-            return new AccessibilityViolation(AccessibilityViolationTypes.LOW_CONTRAST_RATIO,widget,state,String.valueOf(contrastRatio));
+            return new AccessibilityViolation(AccessibilityViolationType.LOW_CONTRAST_RATIO,widget,state,String.valueOf(contrastRatio));
         return null;
     }
 

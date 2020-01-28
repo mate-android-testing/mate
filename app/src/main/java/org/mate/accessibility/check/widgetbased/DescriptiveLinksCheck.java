@@ -1,12 +1,9 @@
 package org.mate.accessibility.check.widgetbased;
 
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DescriptiveLinksCheck implements IWidgetAccessibilityCheck {
 
@@ -40,7 +37,7 @@ public class DescriptiveLinksCheck implements IWidgetAccessibilityCheck {
                 }
             }
             if (foundViolation)
-                return new AccessibilityViolation(AccessibilityViolationTypes.DESCRIPTIVE_LINKS,widget,state,conflictantIds);
+                return new AccessibilityViolation(AccessibilityViolationType.DESCRIPTIVE_LINKS,widget,state,conflictantIds);
 
         }
 

@@ -1,13 +1,12 @@
 package org.mate.accessibility;
 
 import org.mate.Registry;
-import org.mate.accessibility.check.screenbased.IScreenAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 public class AccessibilityViolation {
 
-    private int type;
+    private AccessibilityViolationType type;
     private Widget widget;
     private IScreenState state;
     private String info;
@@ -21,7 +20,7 @@ public class AccessibilityViolation {
             widget.setX2(10);
             widget.setY2(10);
         }
-        String checkType = AccessibilityViolationTypes.NAMES[type];
+        String checkType = type.getValue();
         String packageName = state.getPackageName();
         String activityName = state.getActivityName();
         String stateId = state.getId();
@@ -31,12 +30,26 @@ public class AccessibilityViolation {
         String widgetText = widget.getText();
         String extraInfo = info;
 
-        String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
-        flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
-        Registry.getEnvironmentManager().sendFlawToServer(flawMsg);
+        StringBuilder flawMessage = new StringBuilder();
+        flawMessage.append(packageName).append(":");
+        flawMessage.append(activityName).append(":");
+        flawMessage.append(stateId).append(":");
+        flawMessage.append(checkType).append(":");
+        flawMessage.append(widget.getClazz()).append(":");
+        flawMessage.append(widgetid).append(":");
+        flawMessage.append(widgetText).append(":");
+        flawMessage.append(extraInfo).append(":");
+        flawMessage.append(widget.getX1()).append(":");
+        flawMessage.append(widget.getY1()).append(":");
+        flawMessage.append(widget.getX2()).append(":");
+        flawMessage.append(widget.getY2()).append(":");
+
+        //String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
+        //flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
+        Registry.getEnvironmentManager().sendFlawToServer(flawMessage.toString());
     }
 
-    public AccessibilityViolation(int type, Widget widget, IScreenState state, String info) {
+    public AccessibilityViolation(AccessibilityViolationType type, Widget widget, IScreenState state, String info) {
         this.type = type;
         this.widget = widget;
         this.state = state;
@@ -45,7 +58,7 @@ public class AccessibilityViolation {
         //reportFlaw(type,widget,state,info);
     }
 
-    public AccessibilityViolation(int type, Widget widget, boolean warning){
+    public AccessibilityViolation(AccessibilityViolationType type, Widget widget, boolean warning){
         this.type = type;
         this.widget = widget;
         this.warning = warning;
@@ -55,7 +68,7 @@ public class AccessibilityViolation {
 
     }
 
-    public AccessibilityViolation(int type, IScreenState state, String info) {
+    public AccessibilityViolation(AccessibilityViolationType type, IScreenState state, String info) {
         this.type = type;
         this.widget = null;
         this.state = state;
@@ -64,11 +77,11 @@ public class AccessibilityViolation {
         //reportFlaw(type,widget,state,info);
     }
 
-    public int getType() {
+    public AccessibilityViolationType getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(AccessibilityViolationType type) {
         this.type = type;
     }
 

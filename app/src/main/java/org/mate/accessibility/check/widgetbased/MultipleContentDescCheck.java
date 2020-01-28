@@ -1,8 +1,7 @@
 package org.mate.accessibility.check.widgetbased;
 
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
-import org.mate.accessibility.check.widgetbased.IWidgetAccessibilityCheck;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -42,12 +41,12 @@ public class MultipleContentDescCheck implements IWidgetAccessibilityCheck {
 
         if (!widget.getContentDesc().equals("")) {
             if (count(widget.getContentDesc()) > 1)
-                return new AccessibilityViolation(AccessibilityViolationTypes.DUPLICATE_CONTENT_DESCRIPTION,widget,state,widget.getContentDesc());
+                return new AccessibilityViolation(AccessibilityViolationType.DUPLICATE_CONTENT_DESCRIPTION,widget,state,widget.getContentDesc());
         }
 
         if (!widget.getHint().equals("")){
             if(count(widget.getHint())>1)
-                return new AccessibilityViolation(AccessibilityViolationTypes.DUPLICATE_CONTENT_DESCRIPTION,widget,state,widget.getHint());
+                return new AccessibilityViolation(AccessibilityViolationType.DUPLICATE_CONTENT_DESCRIPTION,widget,state,widget.getHint());
         }
 
         return null;

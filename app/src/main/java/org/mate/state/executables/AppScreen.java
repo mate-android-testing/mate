@@ -180,8 +180,6 @@ public class AppScreen {
         String textError = "";
         if (obj.getError()!=null)
             textError=obj.getError().toString();
-        if (textError==null)
-            textError="";
         widget.setErrorText(textError);
 
         widget.setContentDesc(contentDesc);

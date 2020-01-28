@@ -2,14 +2,11 @@ package org.mate.accessibility.check.screenbased;
 
 import android.os.Build;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
@@ -82,7 +79,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             //   check whether any of their colors have changed
             if (visitedState.differentColor(state)){
                 extraInfo = "Same state, different colors for some widgets!";
-                return new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
+                return new AccessibilityViolation(AccessibilityViolationType.COLOUR_MEANING,state,extraInfo);
                 //MATE.log("COR DIFERENTE");
             }
         }
@@ -126,7 +123,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         }
 
         if (exceedNumberColorsByType){
-            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationTypes.COLOUR_MEANING,state,extraInfo);
+            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.COLOUR_MEANING,state,extraInfo);
             violation.setWarning(true);
             return violation;
         }

@@ -1,10 +1,7 @@
 package org.mate.accessibility.check.widgetbased;
 
-import android.os.strictmode.Violation;
-
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -54,7 +51,7 @@ public class WidgetBasedAccessibilityViolationChecker {
                 if (violation!=null) {
                     violations.add(violation);
                     violation.reportFlaw();
-                    MATE.log("VIOLATION FOUND: " + AccessibilityViolationTypes.NAMES[violation.getType()] + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                    MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     if (!violation.getInfo().equals(""))
                         MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());
                 }

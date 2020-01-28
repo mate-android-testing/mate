@@ -1,13 +1,9 @@
 package org.mate.accessibility.check.widgetbased;
 
-import android.os.Build;
-
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
@@ -67,7 +63,7 @@ public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
                 if (!wOther.isFocused()){
                     //checks difference between colours
                     if (widget.getColor().equals(wOther.getColor()) && widget.getMaxminLum().equals(wOther.getMaxminLum())){
-                        return new AccessibilityViolation(AccessibilityViolationTypes.VISIBLE_FOCUS,widget,state,widget.getId());
+                        return new AccessibilityViolation(AccessibilityViolationType.VISIBLE_FOCUS,widget,state,widget.getId());
                     }
                 }
             }

@@ -3,9 +3,8 @@ package org.mate.accessibility.check.widgetbased;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 
 public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
@@ -18,27 +17,23 @@ public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
         boolean checkClickableText=false;
         if (widget.getClazz().equals("android.widget.TextView") && widget.isClickable() && !widget.isEditable() && !widget.mightBeImage()){
             checkClickableText=true;
-            //return new AccessibilityViolation(AccessibilityViolationTypes.ACTIONABLE_ELEMENTS,widget,state,"Clickable text, not button");
+            //return new AccessibilityViolation(AccessibilityViolationType.ACTIONABLE_ELEMENTS,widget,state,"Clickable text, not button");
         }
 
         //if (check whether background color of the button is the same as the screen background)
         double matchesBackgroundColor = 0;
 
-        MATE.log("BEFORE MATCHES SURROUNDING COLOR");
-        try{ matchesBackgroundColor = Registry.getEnvironmentManager().matchesSurroundingColor(state.getPackageName(),state.getId(),widget);}
-        catch(Exception e){}
-        MATE.log("AFTER MATCHES SURROUNDING COLOR");
+        matchesBackgroundColor = Registry.getEnvironmentManager().matchesSurroundingColor(state.getPackageName(),state.getId(),widget);
 
         if ((widget.isClickable() && widget.getClazz().contains("Button")&& !widget.getText().equals(""))|| checkClickableText) {
             MATE.log("CHECKS BACKGROUND COLOR = " + widget.getClazz() + " " + widget.getText());
             MATE.log("   matching: " + matchesBackgroundColor);
             if (matchesBackgroundColor>0.5) {
-                AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationTypes.ACTIONABLE_ELEMENTS, widget, state, "Button background color is the same as the screen, match: " + matchesBackgroundColor);
+                AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.ACTIONABLE_ELEMENTS, widget, state, "Button background color is the same as the screen, match: " + matchesBackgroundColor);
                 violation.setWarning(true);
                 return violation;
             }
         }
-
 
         return null;
     }

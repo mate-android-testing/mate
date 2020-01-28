@@ -1,7 +1,7 @@
 package org.mate.accessibility.check.screenbased;
 
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -22,7 +22,7 @@ public class RadioGroupCheck implements IScreenAccessibilityCheck {
         }
 
         if (radioButtonCount>0 && radioGroupCount==0)
-            return new AccessibilityViolation(AccessibilityViolationTypes.RADIOGROUPCHECK,state,"");
+            return new AccessibilityViolation(AccessibilityViolationType.RADIOGROUPCHECK,state,"");
 
         return null;
     }

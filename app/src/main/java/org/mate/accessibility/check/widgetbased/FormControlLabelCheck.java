@@ -1,8 +1,7 @@
 package org.mate.accessibility.check.widgetbased;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -78,7 +77,7 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
             if (!widget.isEditable())
                 return null;
             else
-                return new AccessibilityViolation(AccessibilityViolationTypes.EDITABLE_CONTENT_DESC,widget,state,"");
+                return new AccessibilityViolation(AccessibilityViolationType.EDITABLE_CONTENT_DESC,widget,state,"");
         }
 
         if (!widget.getLabeledBy().equals("")) {
@@ -94,10 +93,10 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
         }
 
         if (widget.isImageType() || widget.isImageSwitcherType() || widget.mightBeImage()){
-            return new AccessibilityViolation(AccessibilityViolationTypes.MISSING_ALTERNATIVE_TEXT,widget,state,"");
+            return new AccessibilityViolation(AccessibilityViolationType.MISSING_ALTERNATIVE_TEXT,widget,state,"");
         }
 
-        return new AccessibilityViolation(AccessibilityViolationTypes.MISSING_FORM_CONTROL_LABEL,widget,state,"");
+        return new AccessibilityViolation(AccessibilityViolationType.MISSING_FORM_CONTROL_LABEL,widget,state,"");
     }
 
 }

@@ -4,15 +4,11 @@ import android.content.Context;
 import android.graphics.Rect;
 
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilitySettings;
-import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
-
-import java.util.Locale;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -40,7 +36,7 @@ public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck {
         //MATE.log("Size info: " + sizeInfo + " of "+widget.getText() + " " + widget.getId() + " " + widget.getClazz());
         if (relativeHeight < AccessibilitySettings.MIN_HEIGHT || relativeWidth < AccessibilitySettings.MIN_WIDTH) {
 
-            return new AccessibilityViolation(AccessibilityViolationTypes.SMALL_TOUCH_AREA, widget, state, sizeInfo);
+            return new AccessibilityViolation(AccessibilityViolationType.SMALL_TOUCH_AREA, widget, state, sizeInfo);
         }
          return null;
     }

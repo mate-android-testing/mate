@@ -1,11 +1,8 @@
 package org.mate.accessibility.check.widgetbased;
 
-import android.bluetooth.BluetoothClass;
-
 import org.mate.MATE;
-import org.mate.accessibility.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.AccessibilityViolationTypes;
+import org.mate.accessibility.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
@@ -140,7 +137,7 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck{
                 for (Widget wconf : conflicts) {
                     extraInfo += wconf.getId() + " ";
                 }
-                return new AccessibilityViolation(AccessibilityViolationTypes.SPACING, widget, state, extraInfo);
+                return new AccessibilityViolation(AccessibilityViolationType.SPACING, widget, state, extraInfo);
             }
 
         }

@@ -1,39 +1,10 @@
 package org.mate.exploration.manual;
 
-import android.app.ActivityManager;
-import android.app.Instrumentation;
-import android.app.UiAutomation;
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.hardware.display.DisplayManager;
-import android.media.AudioManager;
-import android.os.Build;
-import android.support.test.uiautomator.UiDevice;
-import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
-
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.AccessibilityViolationChecker;
-import org.mate.accessibility.AccessibilityViolationTypes;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.ActionType;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
-
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class CheckCurrentScreen {
 
@@ -159,7 +130,7 @@ public class CheckCurrentScreen {
         screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
         if (!screenState.getPackageName().equals(currentPackageName)){
-            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationTypes.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(), previousScreenState,"");
+            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(), previousScreenState,"");
             violation.setWarning(true);
         }
 
