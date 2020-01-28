@@ -3,40 +3,23 @@ package org.mate.interaction.intent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
-import android.support.v4.view.KeyEventDispatcher;
-import android.util.Xml;
 
 import org.mate.MATE;
 import org.mate.ui.Action;
 import org.mate.utils.Randomness;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 public class IntentProvider {
 
     private List<ComponentDescription> components;
-    private static final List<String> systemEvents = SystemEventParser.loadSystemEvents();
+    private static final List<String> systemEventActions = SystemActionParser.loadSystemEventActions();
     private List<ComponentDescription> systemEventReceivers = new ArrayList<>();
     private List<ComponentDescription> dynamicReceivers = new ArrayList<>();
 
@@ -58,7 +41,7 @@ public class IntentProvider {
             IntentInfoParser.parseIntentInfoFile(components, dynamicReceivers);
 
             // filter out system event intent filters
-            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
+            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEventActions);
 
             MATE.log("Derived the following components: " + components);
             MATE.log("Derived the following system event receivers: " + systemEventReceivers);
@@ -83,8 +66,8 @@ public class IntentProvider {
      *
      * @return Returns the list of actions describing system events.
      */
-    public static List<String> getSystemEvents() {
-        return Collections.unmodifiableList(systemEvents);
+    public static List<String> getSystemEventActions() {
+        return Collections.unmodifiableList(systemEventActions);
     }
 
 
@@ -138,17 +121,16 @@ public class IntentProvider {
             IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
 
             // we need to distinguish between a dynamic system receiver and dynamic receiver
-            if (describesSystemEvent(systemEvents, intentFilter)) {
+            if (describesSystemEvent(systemEventActions, intentFilter)) {
                 // use system event action
                 // TODO: adjust system action to contain a ref to the component + selected intent filter
                 String action = Randomness.randomElement(intentFilter.getActions());
-                SystemAction systemAction = new SystemAction(component.getFullyQualifiedName(), action);
+                SystemAction systemAction = new SystemAction(component, intentFilter, action);
                 systemAction.markAsDynamic();
                 return systemAction;
             } else {
                 // use intent based action
-                Intent intent = fillIntent(component, true);
-                return new IntentBasedAction(intent, ComponentType.BROADCAST_RECEIVER);
+                return generateIntentBasedAction(component, true);
             }
         }
     }
@@ -230,7 +212,7 @@ public class IntentProvider {
             IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
             String action = Randomness.randomElement(intentFilter.getActions());
             // TODO: adjust system action to contain a ref to the component + selected intent filter
-            return new SystemAction(component.getFullyQualifiedName(), action);
+            return new SystemAction(component, intentFilter, action);
         }
     }
 
@@ -242,21 +224,19 @@ public class IntentProvider {
      */
     public IntentBasedAction getAction(ComponentType componentType) {
         ComponentDescription component = Randomness.randomElement(getComponents(componentType));
-        // TODO: adjust fillIntent to return the IntentBasedAction including a ref
-        // to the component + the selected intent filter
-        Intent intent = fillIntent(component, false);
-        return new IntentBasedAction(intent, componentType);
+        return generateIntentBasedAction(component, false);
     }
 
     /**
      * Creates and fills an intent with information retrieved from the given component
-     * in a random fashion.
+     * in a random fashion. Returns the corresponding IntentBasedAction.
      *
      * @param component The component information.
      * @param dynamicReceiver Whether the component is a dynamic receiver.
-     * @return Returns an intent for a given component.
+     * @return Returns the corresponding IntentBasedAction encapsulating the component,
+     *          the selected intent-filter and the generated intent.
      */
-    private Intent fillIntent(ComponentDescription component, boolean dynamicReceiver) {
+    private IntentBasedAction generateIntentBasedAction(ComponentDescription component, boolean dynamicReceiver) {
 
         if (!component.hasIntentFilter()) {
             MATE.log("Component " + component + " doesn't declare any intent-filter!");
@@ -326,7 +306,7 @@ public class IntentProvider {
         }
 
         // TODO: may add flags, e.g. FLAG_ACTIVITY_NEW_TASK
-        return intent;
+        return new IntentBasedAction(intent, component, intentFilter);
     }
 
     /**

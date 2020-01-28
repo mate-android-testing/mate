@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SystemEventParser {
+public final class SystemActionParser {
 
     private static final String SYSTEM_EVENTS_FILE = "data/data/org.mate/broadcast_actions.txt";
 
-    private SystemEventParser() {
+    private SystemActionParser() {
         throw new UnsupportedOperationException("Utility class can't be instantiated!");
     }
 
@@ -21,7 +21,7 @@ public final class SystemEventParser {
      *
      * @return Returns a list of system events that can be received by broadcast receivers.
      */
-    public static List<String> loadSystemEvents() {
+    public static List<String> loadSystemEventActions() {
 
         try(BufferedReader br = new BufferedReader(new FileReader(SYSTEM_EVENTS_FILE))) {
 

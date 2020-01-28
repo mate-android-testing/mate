@@ -1,29 +1,20 @@
 package org.mate.serialization;
 
 
-import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 
 import com.thoughtworks.xstream.XStream;
 
 import org.mate.MATE;
-import org.mate.interaction.intent.IntentBasedAction;
-import org.mate.interaction.intent.IntentBasedActionConverter;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
 import org.mate.utils.TimeoutRun;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Provides the functionality to serialize and de-serialize a {@link org.mate.model.TestCase}.

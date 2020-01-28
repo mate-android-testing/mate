@@ -13,7 +13,7 @@ public enum ComponentType {
      * @param component The name of the component.
      * @return Returns the component type matching the given component.
      */
-    static ComponentType mapStringToComponent(String component) {
+    public static ComponentType mapStringToComponent(String component) {
 
         // treat activity-alias as an activity
         if (component.equals("activity-alias")) {

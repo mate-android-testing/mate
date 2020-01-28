@@ -18,19 +18,30 @@ import java.util.Set;
 public class IntentBasedAction extends Action {
 
     private final Intent intent;
-    private final ComponentType componentType;
+    private final ComponentDescription component;
+    private final IntentFilterDescription intentFilter;
 
-    IntentBasedAction(Intent intent, ComponentType componentType) {
+    public IntentBasedAction(Intent intent, ComponentDescription component,
+                             IntentFilterDescription intentFilter) {
         this.intent = intent;
-        this.componentType = componentType;
+        this.component = component;
+        this.intentFilter = intentFilter;
     }
 
     public ComponentType getComponentType() {
-        return componentType;
+        return component.getType();
     }
 
     public Intent getIntent() {
         return intent;
+    }
+
+    public ComponentDescription getComponent() {
+        return component;
+    }
+
+    public IntentFilterDescription getIntentFilter() {
+        return intentFilter;
     }
 
     /**
@@ -43,7 +54,7 @@ public class IntentBasedAction extends Action {
         StringBuilder builder = new StringBuilder();
         builder.append("IntentBasedAction" + System.lineSeparator());
         builder.append("------------------------");
-        builder.append("ComponentType: " + componentType + System.lineSeparator());
+        builder.append("ComponentType: " + getComponentType() + System.lineSeparator());
         builder.append("Receiver of Intent: " + intent.getComponent() + System.lineSeparator());
         builder.append("Action: " + intent.getAction() + System.lineSeparator());
         builder.append("Categories: " + intent.getCategories() + System.lineSeparator());

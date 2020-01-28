@@ -1,4 +1,4 @@
-package org.mate.interaction.intent;
+package org.mate.serialization;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -15,6 +15,10 @@ import com.thoughtworks.xstream.mapper.DefaultImplementationsMapper;
 import com.thoughtworks.xstream.mapper.DefaultMapper;
 
 import org.mate.MATE;
+import org.mate.interaction.intent.ComponentDescription;
+import org.mate.interaction.intent.ComponentType;
+import org.mate.interaction.intent.IntentBasedAction;
+import org.mate.interaction.intent.IntentFilterDescription;
 import org.mate.ui.Action;
 
 import java.util.Set;
@@ -78,6 +82,14 @@ public final class IntentBasedActionConverter implements Converter {
         }
 
         // end intent tag
+        writer.endNode();
+
+        writer.startNode("component");
+        context.convertAnother(intentBasedAction.getComponent());
+        writer.endNode();
+
+        writer.startNode("intent-filter");
+        context.convertAnother(intentBasedAction.getIntentFilter());
         writer.endNode();
     }
 
@@ -156,7 +168,33 @@ public final class IntentBasedActionConverter implements Converter {
         // leave 'intent' tag
         reader.moveUp();
 
-        return new IntentBasedAction(intent, componentType);
+        // enter 'component' tag
+        reader.moveDown();
+
+        ComponentDescription component = null;
+
+        if (reader.getNodeName().equals("component")) {
+            component = (ComponentDescription) context.convertAnother(null,
+                    ComponentDescription.class);
+        }
+
+        // leave 'component' tag
+        reader.moveUp();
+
+        // enter 'intent-filter' tag
+        reader.moveDown();
+
+        IntentFilterDescription intentFilter = new IntentFilterDescription();
+
+        if (reader.getNodeName().equals("intent-filter")) {
+            intentFilter = (IntentFilterDescription) context.convertAnother(null,
+                    IntentFilterDescription.class);
+        }
+
+        // leave 'intent-filter' tag
+        reader.moveUp();
+
+        return new IntentBasedAction(intent, component, intentFilter);
     }
 
     /**

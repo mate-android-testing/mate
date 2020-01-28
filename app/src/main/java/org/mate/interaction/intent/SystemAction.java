@@ -8,6 +8,9 @@ import org.mate.ui.Action;
  */
 public class SystemAction extends Action {
 
+    private final ComponentDescription component;
+    private final IntentFilterDescription intentFilter;
+
     private final String receiver;
     private boolean dynamic = false;
     private final String action;
@@ -18,11 +21,15 @@ public class SystemAction extends Action {
     /**
      * Initialises a system event.
      *
-     * @param receiver The name of the broadcast receiver listening for a system event.
+     * @param component The component definition representing the broadcast receiver.
+     * @param intentFilter The selected intent filter.
      * @param action The name of the system event the receiver is listening for.
      */
-    public SystemAction(String receiver, String action) {
-        this.receiver = receiver;
+    public SystemAction(ComponentDescription component,
+                        IntentFilterDescription intentFilter, String action) {
+        this.component = component;
+        this.intentFilter = intentFilter;
+        this.receiver = component.getFullyQualifiedName();
         this.action = action;
     }
 
