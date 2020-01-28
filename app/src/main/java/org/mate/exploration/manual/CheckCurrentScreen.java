@@ -2,7 +2,7 @@ package org.mate.exploration.manual;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityViolationChecker;
+import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 

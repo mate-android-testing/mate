@@ -1,6 +1,7 @@
 package org.mate.accessibility;
 
 import org.mate.Registry;
+import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
