@@ -254,14 +254,14 @@ public class ComponentDescription {
                     break;
                 case "Integer<>": // note Integer vs Int
                     bundle.putIntegerArrayList(extra.getKey(),
-                            new ArrayList<>(Randomness.getRandomIntegers(COUNT, BOUND)));
+                            new ArrayList<>(Randomness.getRandomIntegersWithNull(COUNT, BOUND)));
                     break;
                 case "String":
                 case "CharSequence": // interface typ of string class
                     if (!stringConstants.isEmpty()) {
                         // choose randomly constant from extracted strings
                         bundle.putCharSequence(extra.getKey(),
-                                Randomness.randomElement(stringConstants));
+                                Randomness.randomElementOrNull(stringConstants));
                     } else {
                         // generate random string
                         bundle.putCharSequence(extra.getKey(),
@@ -277,7 +277,7 @@ public class ComponentDescription {
                                         .toArray(new CharSequence[0]));
                     } else {
                         // TODO: generate random strings
-                        bundle.putCharSequenceArray(extra.getKey(), DataPool.STRING_ARRAY);
+                        bundle.putCharSequenceArray(extra.getKey(), DataPool.STRING_ARRAY_WITH_NULL);
                     }
                     break;
                 case "String<>":
@@ -290,7 +290,7 @@ public class ComponentDescription {
                     } else {
                         // TODO: generate random strings
                         bundle.putCharSequenceArrayList(extra.getKey(),
-                                new ArrayList<CharSequence>(DataPool.STRING_LIST));
+                                new ArrayList<CharSequence>(DataPool.STRING_LIST_WITH_NULL));
                     }
                     break;
                 case "Float":
@@ -341,7 +341,7 @@ public class ComponentDescription {
                     if (!stringConstants.isEmpty()) {
                         // choose randomly constant from extracted strings
                         bundle.putSerializable(extra.getKey(),
-                                Randomness.randomElement(stringConstants));
+                                Randomness.randomElementOrNull(stringConstants));
                     } else {
                         // generate random string
                         bundle.putSerializable(extra.getKey(),

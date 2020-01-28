@@ -41,6 +41,25 @@ public class Randomness {
     }
 
     /**
+     * Selects with a probability of 0.5 either a random element
+     * from a given set or {@code null}.
+     *
+     * @param set The input set.
+     * @param <T> The element type.
+     * @return Returns a random element from a given set or {@code null}.
+     */
+    public static <T> T randomElementOrNull(Set<T> set) {
+
+        double random = Math.random();
+
+        if (random < 0.5) {
+            return randomElement(set);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Randomly retrieves {@param count} elements from a given set.
      *
      * @param set The input set.
@@ -52,7 +71,7 @@ public class Randomness {
 
         List<T> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            result.add(randomElement(set));
+            result.add(randomElementOrNull(set));
         }
         return result;
     }
@@ -90,6 +109,27 @@ public class Randomness {
         for (int i = 0; i < count; i++)
         {
             result.add(random.nextInt(bound));
+        }
+
+        return result;
+    }
+
+    public static List<Integer> getRandomIntegersWithNull(int count, int bound) {
+
+        // API 28: IntStream.generate(() -> new Random().nextInt(100)).limit(100).toArray();
+        Random random = new Random();
+        List<Integer> result = new ArrayList<>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            result.add(random.nextInt(bound));
+
+            // insert with some probability null values between the other values
+            double rnd = Math.random();
+
+            if (rnd > 0.5) {
+                result.add(null);
+            }
         }
 
         return result;
