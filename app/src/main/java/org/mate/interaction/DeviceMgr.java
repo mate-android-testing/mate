@@ -65,7 +65,8 @@ public class DeviceMgr implements IApp {
      */
     public void executeAction(SystemAction event) {
         MATE.log(" ___ execute system action: " + event);
-        Registry.getEnvironmentManager().executeSystemEvent(event.getReceiver(), event.getAction());
+        Registry.getEnvironmentManager().executeSystemEvent(event.getReceiver(),
+                event.getAction(), event.isDynamicReceiver());
     }
 
     /**

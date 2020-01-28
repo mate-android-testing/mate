@@ -32,7 +32,6 @@ public final class ComponentParser {
      */
     public static List<ComponentDescription> parseManifest() throws XmlPullParserException, IOException {
 
-        // TODO: add parsing of activity-aliases!!!
         // TODO: parse only components that do not define any required permissions
 
         XmlPullParser parser = Xml.newPullParser();

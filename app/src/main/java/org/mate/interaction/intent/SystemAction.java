@@ -9,6 +9,7 @@ import org.mate.ui.Action;
 public class SystemAction extends Action {
 
     private final String receiver;
+    private boolean dynamic = false;
     private final String action;
 
     // TODO: certain system events may also require a category, which should be included in the intent
@@ -23,6 +24,23 @@ public class SystemAction extends Action {
     public SystemAction(String receiver, String action) {
         this.receiver = receiver;
         this.action = action;
+    }
+
+    /**
+     * Marks the receiver as a dynamic one.
+     */
+    public void markAsDynamic() {
+        dynamic = true;
+    }
+
+    /**
+     * Returns whether the encapsulated receiver is dynamic or not.
+     *
+     * @return Returns {@code true} if the receiver is a dynamic receiver,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isDynamicReceiver() {
+        return dynamic;
     }
 
     public String getReceiver() {

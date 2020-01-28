@@ -3,6 +3,7 @@ package org.mate.interaction.intent;
 import android.content.BroadcastReceiver;
 import android.util.Xml;
 
+import org.mate.MATE;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -88,8 +89,6 @@ public final class IntentInfoParser {
                 } else if (parser.getName().equals("extra")) {
                     extras.put(parser.getAttributeValue(null, "key"),
                             parser.getAttributeValue(null, "type"));
-                    // TODO: try to specify the expected type already in the DexAnalyzer
-                    // identifyExtraType(parser.getAttributeValue(null, "type")));
                 } else if (parser.getName().equals("intent-filter")) {
                     // reset intent-filter
                     intentFilter = new IntentFilterDescription();
@@ -129,19 +128,16 @@ public final class IntentInfoParser {
                         }
                     }
 
-                    // handle dynamically registered broadcast receivers
-                    if (!foundComponent && dynamicReceiver) {
-                        System.out.println("Dynamic Broadcast Receiver: " + componentName + " (" + parser.getName() + ")");
+                    // handle dynamically registered broadcast receivers (only those with intent-filters)
+                    if (!foundComponent && dynamicReceiver && !intentFilters.isEmpty()) {
+                        MATE.log("Discovered Dynamic Broadcast Receiver: " + componentName
+                                + " (" + parser.getName() + ")");
 
                         ComponentDescription receiver = new ComponentDescription(componentName,
                                 ComponentType.BROADCAST_RECEIVER);
                         receiver.addStringConstants(stringConstants);
                         receiver.addExtras(extras);
-
-                        if (!intentFilters.isEmpty()) {
-                            receiver.addIntentFilters(intentFilters);
-                        }
-
+                        receiver.addIntentFilters(intentFilters);
                         dynamicReceivers.add(receiver);
                     }
                 }

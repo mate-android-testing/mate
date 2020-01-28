@@ -8,6 +8,7 @@ import android.support.v4.view.KeyEventDispatcher;
 import android.util.Xml;
 
 import org.mate.MATE;
+import org.mate.ui.Action;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -59,11 +60,11 @@ public class IntentProvider {
             // filter out system event intent filters
             systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEvents);
 
-            MATE.log_acc("Derived the following components: " + components);
-            MATE.log_acc("Derived the following system event receivers: " + systemEventReceivers);
-            MATE.log_acc("Derived the following dynamic receivers: " + dynamicReceivers);
+            MATE.log("Derived the following components: " + components);
+            MATE.log("Derived the following system event receivers: " + systemEventReceivers);
+            MATE.log("Derived the following dynamic receivers: " + dynamicReceivers);
         } catch (XmlPullParserException | IOException e) {
-            MATE.log_acc("Couldn't parse the AndroidManifest/staticInfoIntent file!");
+            MATE.log("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
         }
     }
@@ -114,6 +115,64 @@ public class IntentProvider {
     }
 
     /**
+     * Checks whether there is a dynamically registered broadcast receiver available.
+     *
+     * @return Returns {@code true} if a dynamically registered receiver could be found,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean hasDynamicReceiver() {
+        return !dynamicReceivers.isEmpty();
+    }
+
+    /**
+     * Returns an action which triggers a dynamically registered broadcast receiver.
+     *
+     * @return Returns an action encapsulating a dynamic broadcast receiver.
+     */
+    public Action getDynamicReceiverAction() {
+        if (!hasDynamicReceiver()) {
+            throw new IllegalStateException("No dynamic broadcast receiver found!");
+        } else {
+            // select randomly dynamic receiver
+            ComponentDescription component = Randomness.randomElement(dynamicReceivers);
+            IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
+
+            // we need to distinguish between a dynamic system receiver and dynamic receiver
+            if (describesSystemEvent(systemEvents, intentFilter)) {
+                // use system event action
+                // TODO: adjust system action to contain a ref to the component + selected intent filter
+                String action = Randomness.randomElement(intentFilter.getActions());
+                SystemAction systemAction = new SystemAction(component.getFullyQualifiedName(), action);
+                systemAction.markAsDynamic();
+                return systemAction;
+            } else {
+                // use intent based action
+                Intent intent = fillIntent(component, true);
+                return new IntentBasedAction(intent, ComponentType.BROADCAST_RECEIVER);
+            }
+        }
+    }
+
+    /**
+     * Checks whether an intent-filter describes a system event by comparing
+     * the included actions against the list of system event actions.
+     *
+     * @param systemEvents The list of possible system events.
+     * @param intentFilter The given intent-filter.
+     * @return Returns {@code true} if the intent-filter describes a system event,
+     *      otherwise {@code false}.
+     */
+    private boolean describesSystemEvent(List<String> systemEvents, IntentFilterDescription intentFilter) {
+
+        for(String action : intentFilter.getActions()) {
+            if (systemEvents.contains(action)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns whether the set of components contains a broadcast receiver
      * that can be invoked.
      *
@@ -154,7 +213,7 @@ public class IntentProvider {
      * @return Returns {@code true} if a receiver listens for a system event,
      *      otherwise {@code false}.
      */
-    public boolean hasSystemEvent() {
+    public boolean hasSystemEventReceiver() {
         return !systemEventReceivers.isEmpty();
     }
 
@@ -163,8 +222,8 @@ public class IntentProvider {
      *
      * @return Returns the corresponding action describing the system event.
      */
-    public SystemAction getSystemEvent() {
-        if (!hasSystemEvent()) {
+    public SystemAction getSystemEventAction() {
+        if (!hasSystemEventReceiver()) {
             throw new IllegalStateException("No broadcast receiver is listening for system events!");
         } else {
             ComponentDescription component = Randomness.randomElement(systemEventReceivers);
@@ -185,7 +244,7 @@ public class IntentProvider {
         ComponentDescription component = Randomness.randomElement(getComponents(componentType));
         // TODO: adjust fillIntent to return the IntentBasedAction including a ref
         // to the component + the selected intent filter
-        Intent intent = fillIntent(component);
+        Intent intent = fillIntent(component, false);
         return new IntentBasedAction(intent, componentType);
     }
 
@@ -194,12 +253,13 @@ public class IntentProvider {
      * in a random fashion.
      *
      * @param component The component information.
+     * @param dynamicReceiver Whether the component is a dynamic receiver.
      * @return Returns an intent for a given component.
      */
-    private Intent fillIntent(ComponentDescription component) {
+    private Intent fillIntent(ComponentDescription component, boolean dynamicReceiver) {
 
         if (!component.hasIntentFilter()) {
-            MATE.log_acc("Component " + component + " doesn't declare any intent-filter!");
+            MATE.log("Component " + component + " doesn't declare any intent-filter!");
             throw new IllegalStateException("Component without intent-filter!");
         }
 
@@ -247,8 +307,18 @@ public class IntentProvider {
             }
         }
 
-        // make every intent explicit
-        intent.setComponent(new ComponentName(MATE.packageName, component.getFullyQualifiedName()));
+        /*
+        * Android forbids to send an explicit intent to a dynamically registered broadcast receiver.
+        * We can only specify the package-name to restrict the number of possible receivers of
+        * the intent.
+         */
+        if (dynamicReceiver) {
+            // will result in implicit resolution restricted to application package
+            intent.setPackage(MATE.packageName);
+        } else {
+            // make every other intent explicit
+            intent.setComponent(new ComponentName(MATE.packageName, component.getFullyQualifiedName()));
+        }
 
         // construct suitable key-value pairs
         if (component.hasExtra()) {
@@ -272,7 +342,7 @@ public class IntentProvider {
                 targetComponents.add(component);
             }
         }
-        MATE.log_acc("Found " + targetComponents.size() + " " + componentType);
+        MATE.log("Found " + targetComponents.size() + " " + componentType);
         return Collections.unmodifiableList(targetComponents);
     }
 }

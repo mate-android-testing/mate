@@ -205,9 +205,12 @@ public class EnvironmentManager {
      *
      * @param receiver The receiver listening for the system event.
      * @param action The system event.
+     * @param dynamic Whether the receiver is a dynamic receiver or not.
+     *
      */
-    public void executeSystemEvent(String receiver, String action) {
-        String cmd = "executeSystemEvent:" + MATE.packageName + ":" + receiver + ":" + action + ":" + emulator;
+    public void executeSystemEvent(String receiver, String action, boolean dynamic) {
+        String cmd = "executeSystemEvent:" + MATE.packageName + ":"
+                + receiver + ":" + action + ":" + dynamic + ":" + emulator;
         tunnelLegacyCmd(cmd);
     }
 
