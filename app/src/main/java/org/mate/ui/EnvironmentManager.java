@@ -61,30 +61,29 @@ public class EnvironmentManager {
         }
         addMetadata(message);
 
-        TimeoutRun.maskInterrupt();
+        TimeoutRun.maskStop();
         try {
-            server.getOutputStream().write(Serializer.serialize(message));
-            server.getOutputStream().flush();
-        } catch (IOException e) {
-            TimeoutRun.unmaskInterrupt();
-            MATE.log("socket error sending");
-            throw new IllegalStateException(e);
+            try {
+                server.getOutputStream().write(Serializer.serialize(message));
+                server.getOutputStream().flush();
+            } catch (IOException e) {
+                MATE.log("socket error sending");
+                throw new IllegalStateException(e);
+            }
+
+            Message response = messageParser.nextMessage();
+
+            verifyMetadata(response);
+            if (response.getSubject().equals("/error")) {
+                MATE.log("Received error message from mate-server: "
+                        + response.getParameter("info"));
+                return null;
+            }
+            stripMetadata(response);
+            return response;
         } finally {
-            TimeoutRun.unmaskInterrupt();
+            TimeoutRun.unmaskStop();
         }
-
-        TimeoutRun.maskInterrupt();
-        Message response = messageParser.nextMessage();
-        TimeoutRun.unmaskInterrupt();
-
-        verifyMetadata(response);
-        if (response.getSubject().equals("/error")) {
-            MATE.log("Received error message from mate-server: "
-                    + response.getParameter("info"));
-            return null;
-        }
-        stripMetadata(response);
-        return response;
     }
 
     public String tunnelLegacyCmd(String cmd) {
