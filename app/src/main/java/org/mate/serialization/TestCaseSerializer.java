@@ -39,7 +39,7 @@ public final class TestCaseSerializer {
      */
     public static void serializeTestCase(TestCase testCase) {
 
-        TimeoutRun.maskStop();
+        TimeoutRun.maskInterrupt();
 
         try {
             MATE.log("Serializing TestCase " + recordCounter);
@@ -76,7 +76,7 @@ public final class TestCaseSerializer {
             // update counter
             recordCounter++;
         } finally {
-            TimeoutRun.unmaskStop();
+            TimeoutRun.unmaskInterrupt();
         }
     }
 
