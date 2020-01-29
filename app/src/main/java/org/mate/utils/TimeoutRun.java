@@ -2,105 +2,111 @@ package org.mate.utils;
 
 import org.mate.MATE;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 public class TimeoutRun {
-    private static volatile boolean stopMasked = false;
-    private static volatile boolean wasStopped = false;
-    private static volatile boolean activeRun = false;
+    private static boolean interruptMasked = false;
+    private static boolean wasInterrupted = false;
+    private static boolean activeRun = false;
 
-    public static void maskStop() {
+    public static void maskInterrupt() {
         if (!activeRun) {
             return;
         }
 
-        withStopLock(new Runnable() {
+        withInterruptLock(new Runnable() {
             @Override
             public void run() {
-                if (wasStopped) {
-                    throw new IllegalStateException("Entering a new stop masked block in an already stopped thread.");
+                if (wasInterrupted) {
+                    throw new IllegalStateException("Entering a new interrupt masked block in an already interrupted thread.");
                 }
-                stopMasked = true;
+                interruptMasked = true;
             }
         });
     }
 
-    public static void unmaskStop() {
+    public static void unmaskInterrupt() {
         if (!activeRun) {
             return;
         }
 
-        withStopLock(new Runnable() {
+        withInterruptLock(new Runnable() {
             @Override
             public void run() {
-                stopMasked = false;
-                if (wasStopped) {
-                    Thread.currentThread().stop();
+                interruptMasked = false;
+                if (wasInterrupted) {
+                    Thread.currentThread().interrupt();
                 }
             }
         });
     }
 
-    private static synchronized void withStopLock(Runnable r) {
+    private static synchronized void withInterruptLock(Runnable r) {
         r.run();
     }
 
-    public static boolean timeoutRun(Runnable r, long milliseconds) {
-        stopMasked = false;
-        wasStopped = false;
-        activeRun = true;
+    public static boolean timeoutRun(Callable<Void> c, long milliseconds) {
+        interruptMasked = false;
+        wasInterrupted = false;
 
-        StopMaskableThread run = new StopMaskableThread(r);
-        run.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+        ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
             @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                MATE.log_acc("Unexpected exception during timeout run: " + e.getMessage());
+            public Thread newThread(Runnable r) {
+                return new InterruptMaskableThread(r);
             }
         });
-        run.start();
 
-        boolean finishedBeforeTimeout = false;
+        activeRun = true;
+        Future<Void> future = executor.submit(c);
+        boolean finishedWithoutTimeout = false;
+
         try {
             MATE.log_acc("Starting timeout run...");
-            run.join(milliseconds);
-            if (!run.isAlive()) {
-                MATE.log_acc("Finished run before timeout.");
-                finishedBeforeTimeout = true;
-            } else {
-                MATE.log_acc("Timeout. Requesting shutdown...");
-                run.saveStop();
-                try {
-                    run.join(30000);
-                    if (run.isAlive()) {
-                        MATE.log_acc("Timeout didn't finish up after shutdown request.");
-                    }
-                } catch (InterruptedException e) {
-                    MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
-                    e.printStackTrace();
-                }
+            future.get(milliseconds, TimeUnit.MILLISECONDS);
+            MATE.log_acc("Finished run before timeout.");
+            finishedWithoutTimeout = true;
+        } catch (TimeoutException e) {
+            MATE.log_acc("Timeout. Requesting shutdown...");
+            executor.shutdownNow();
+            try {
+                executor.awaitTermination(30, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+                MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
+            MATE.log_acc("Finished run due to timeout.");
+        } catch (InterruptedException | ExecutionException e) {
             MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
             e.printStackTrace();
         } finally {
             activeRun = false;
         }
 
-        MATE.log_acc("Finished run due to timeout.");
-        return  finishedBeforeTimeout;
+        executor.shutdownNow();
+        return  finishedWithoutTimeout;
     }
 
-    private static class StopMaskableThread extends Thread {
-        private StopMaskableThread(Runnable r) {
+    private static class InterruptMaskableThread extends Thread {
+        private InterruptMaskableThread(Runnable r) {
             super(r);
         }
 
-        public void saveStop() {
-            withStopLock(new Runnable() {
+        @Override
+        public void interrupt() {
+            withInterruptLock(new Runnable() {
                 @Override
                 public void run() {
-                    if (stopMasked) {
-                        wasStopped = true;
+                    if (interruptMasked) {
+                        wasInterrupted = true;
                     } else {
-                        StopMaskableThread.super.stop();
+                        InterruptMaskableThread.super.interrupt();
                     }
                 }
             });
