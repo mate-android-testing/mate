@@ -202,10 +202,11 @@ public class MATE {
                             .withMaxNumEvents(50)
                             .build();
 
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             randomSearchGA.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -232,10 +233,11 @@ public class MATE {
                             .withMaxNumEvents(50)
                             .build();
 
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             onePlusOneNew.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -277,11 +279,11 @@ public class MATE {
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
-
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             genericGA.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -324,11 +326,11 @@ public class MATE {
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
-
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             genericGA.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -367,10 +369,11 @@ public class MATE {
                             .withNumTestCases(5)
                             .build();
 
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             nsga.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -387,10 +390,11 @@ public class MATE {
 
                     final HeuristicExploration heuristicExploration = new HeuristicExploration(50);
 
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             heuristicExploration.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -412,10 +416,11 @@ public class MATE {
                             = new RandomExploration(Properties.STORE_COVERAGE(), false, MAX_NUMBER_EVENTS(),
                             Properties.RELATIVE_INTENT_AMOUNT());
 
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             randomExploration.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -465,10 +470,11 @@ public class MATE {
                     }
 
                     final IGeneticAlgorithm<TestCase> mosa = builder.build();
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             mosa.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -515,11 +521,11 @@ public class MATE {
                     MATE.log_acc("done processing lines");
 
                     final IGeneticAlgorithm<TestCase> mio = builder.build();
-
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             mio.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
 
@@ -541,11 +547,11 @@ public class MATE {
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             randomWalk.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
                 } else if (explorationStrategy.equals("RandomWalkActivityCoverage")) {
@@ -562,10 +568,11 @@ public class MATE {
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             randomWalk.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
                 } else if (explorationStrategy.equals("RandomWalkStateCoverage")) {
@@ -582,10 +589,11 @@ public class MATE {
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-                    TimeoutRun.timeoutRun(new Runnable() {
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() throws Exception {
                             randomWalk.run();
+                            return null;
                         }
                     }, MATE.TIME_OUT);
                 }
