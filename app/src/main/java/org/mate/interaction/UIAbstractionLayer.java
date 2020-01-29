@@ -15,6 +15,7 @@ import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.TimeoutRun;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,12 +52,17 @@ public class UIAbstractionLayer {
     }
 
     public ActionResult executeAction(Action action) {
+        TimeoutRun.maskStop();
         try {
-            return executeActionUnsafe(action);
-        } catch (Exception e) {
-            Log.e("acc", "", e);
+            try {
+                return executeActionUnsafe(action);
+            } catch (Exception e) {
+                Log.e("acc", "", e);
+            }
+            return FAILURE_UNKNOWN;
+        } finally {
+            TimeoutRun.unmaskStop();
         }
-        return FAILURE_UNKNOWN;
     }
 
     private ActionResult executeActionUnsafe(Action action) {
