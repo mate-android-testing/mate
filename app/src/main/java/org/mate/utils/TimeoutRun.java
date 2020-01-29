@@ -3,9 +3,9 @@ package org.mate.utils;
 import org.mate.MATE;
 
 public class TimeoutRun {
-    private static boolean stopMasked = false;
-    private static boolean wasStopped = false;
-    private static boolean activeRun = false;
+    private static volatile boolean stopMasked = false;
+    private static volatile boolean wasStopped = false;
+    private static volatile boolean activeRun = false;
 
     public static void maskStop() {
         if (!activeRun) {
