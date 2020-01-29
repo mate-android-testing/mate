@@ -2,111 +2,105 @@ package org.mate.utils;
 
 import org.mate.MATE;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 public class TimeoutRun {
-    private static boolean interruptMasked = false;
-    private static boolean wasInterrupted = false;
+    private static boolean stopMasked = false;
+    private static boolean wasStopped = false;
     private static boolean activeRun = false;
 
-    public static void maskInterrupt() {
+    public static void maskStop() {
         if (!activeRun) {
             return;
         }
 
-        withInterruptLock(new Runnable() {
+        withStopLock(new Runnable() {
             @Override
             public void run() {
-                if (wasInterrupted) {
-                    throw new IllegalStateException("Entering a new interrupt masked block in an already interrupted thread.");
+                if (wasStopped) {
+                    throw new IllegalStateException("Entering a new stop masked block in an already stopped thread.");
                 }
-                interruptMasked = true;
+                stopMasked = true;
             }
         });
     }
 
-    public static void unmaskInterrupt() {
+    public static void unmaskStop() {
         if (!activeRun) {
             return;
         }
 
-        withInterruptLock(new Runnable() {
+        withStopLock(new Runnable() {
             @Override
             public void run() {
-                interruptMasked = false;
-                if (wasInterrupted) {
-                    Thread.currentThread().interrupt();
+                stopMasked = false;
+                if (wasStopped) {
+                    Thread.currentThread().stop();
                 }
             }
         });
     }
 
-    private static synchronized void withInterruptLock(Runnable r) {
+    private static synchronized void withStopLock(Runnable r) {
         r.run();
     }
 
-    public static boolean timeoutRun(Callable<Void> c, long milliseconds) {
-        interruptMasked = false;
-        wasInterrupted = false;
+    public static boolean timeoutRun(Runnable r, long milliseconds) {
+        stopMasked = false;
+        wasStopped = false;
+        activeRun = true;
 
-        ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+        StopMaskableThread run = new StopMaskableThread(r);
+        run.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
-            public Thread newThread(Runnable r) {
-                return new InterruptMaskableThread(r);
+            public void uncaughtException(Thread t, Throwable e) {
+                MATE.log_acc("Unexpected exception during timeout run: " + e.getMessage());
             }
         });
+        run.start();
 
-        activeRun = true;
-        Future<Void> future = executor.submit(c);
-        boolean finishedWithoutTimeout = false;
-
+        boolean finishedBeforeTimeout = false;
         try {
             MATE.log_acc("Starting timeout run...");
-            future.get(milliseconds, TimeUnit.MILLISECONDS);
-            MATE.log_acc("Finished run before timeout.");
-            finishedWithoutTimeout = true;
-        } catch (TimeoutException e) {
-            MATE.log_acc("Timeout. Requesting shutdown...");
-            executor.shutdownNow();
-            try {
-                executor.awaitTermination(30, TimeUnit.SECONDS);
-            } catch (InterruptedException ex) {
-                MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
-                e.printStackTrace();
+            run.join(milliseconds);
+            if (!run.isAlive()) {
+                MATE.log_acc("Finished run before timeout.");
+                finishedBeforeTimeout = true;
+            } else {
+                MATE.log_acc("Timeout. Requesting shutdown...");
+                run.saveStop();
+                try {
+                    run.join(30000);
+                    if (run.isAlive()) {
+                        MATE.log_acc("Timeout didn't finish up after shutdown request.");
+                    }
+                } catch (InterruptedException e) {
+                    MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
-            MATE.log_acc("Finished run due to timeout.");
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
             e.printStackTrace();
         } finally {
             activeRun = false;
         }
 
-        executor.shutdownNow();
-        return  finishedWithoutTimeout;
+        MATE.log_acc("Finished run due to timeout.");
+        return  finishedBeforeTimeout;
     }
 
-    private static class InterruptMaskableThread extends Thread {
-        private InterruptMaskableThread(Runnable r) {
+    private static class StopMaskableThread extends Thread {
+        private StopMaskableThread(Runnable r) {
             super(r);
         }
 
-        @Override
-        public void interrupt() {
-            withInterruptLock(new Runnable() {
+        public void saveStop() {
+            withStopLock(new Runnable() {
                 @Override
                 public void run() {
-                    if (interruptMasked) {
-                        wasInterrupted = true;
+                    if (stopMasked) {
+                        wasStopped = true;
                     } else {
-                        InterruptMaskableThread.super.interrupt();
+                        StopMaskableThread.super.stop();
                     }
                 }
             });
