@@ -15,6 +15,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
+import org.mate.exploration.ant.AntColony;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
@@ -251,6 +252,23 @@ public class MATE {
                             .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                             .build();
                     nsga.run();
+                } else if (explorationStrategy.equals("AntColonyExploration")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+
+                    final AntColony antColony = new AntColony();
+
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            antColony.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                    if (Properties.STORE_COVERAGE()) {
+                        Registry.getEnvironmentManager().storeCoverageData(antColony, null);
+                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
+                    }
                 } else if (explorationStrategy.equals("PrimitiveStandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");

@@ -125,6 +125,10 @@ public class Properties {
         return propertyOr(Coverage.LINE_COVERAGE);
     }
 
+    public static String TARGET_LINE() {
+        return propertyOr(null);
+    }
+
 
 
     // Primitive actions or widget based actions?

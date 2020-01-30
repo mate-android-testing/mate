@@ -46,8 +46,9 @@ public class ScreenshotUtils {
     }
 
     public static boolean hasScreenshotPermission(Context context) {
-        return (context.checkCallingOrSelfPermission(Manifest.permission.READ_FRAME_BUFFER) ==
-                PackageManager.PERMISSION_GRANTED);
+        throw new UnsupportedOperationException();
+        //return (context.checkCallingOrSelfPermission(Manifest.permission.READ_FRAME_BUFFER) ==
+        //        PackageManager.PERMISSION_GRANTED);
     }
 
     /**
