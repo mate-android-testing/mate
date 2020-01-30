@@ -112,3 +112,4 @@ gradle-app.setting
 
 ## Local properties
 local.properties
+ant.log
