@@ -65,6 +65,7 @@ public final class IntentInfoParser {
         Set<IntentFilterDescription> intentFilters = new HashSet<>();
         IntentFilterDescription intentFilter = new IntentFilterDescription();
         boolean dynamicReceiver = false;
+        boolean handlesOnNewIntent = false;
 
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.getEventType() == XmlPullParser.START_TAG) {
@@ -79,6 +80,7 @@ public final class IntentInfoParser {
                     stringConstants = new HashSet<>();
                     intentFilters = new HashSet<>();
                     dynamicReceiver = false;
+                    handlesOnNewIntent = false;
                     componentName = parser.getAttributeValue(null, "name");
 
                     // we found a string constant tag
@@ -98,6 +100,8 @@ public final class IntentInfoParser {
                     intentFilter.addCategory(parser.getAttributeValue(null, "name"));
                 } else if (parser.getName().equals("dynamic")) {
                     dynamicReceiver = Boolean.parseBoolean(parser.getAttributeValue(null, "value"));
+                } else if (parser.getName().equals("on_new_intent")) {
+                    handlesOnNewIntent = true;
                 }
 
             } else if (parser.getEventType() == XmlPullParser.END_TAG) {
@@ -120,6 +124,7 @@ public final class IntentInfoParser {
 
                             component.addStringConstants(stringConstants);
                             component.addExtras(extras);
+                            component.setHandlingOnNewIntent(handlesOnNewIntent);
 
                             if (!intentFilters.isEmpty()) {
                                 component.addIntentFilters(intentFilters);

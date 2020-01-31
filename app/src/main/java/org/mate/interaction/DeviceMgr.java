@@ -86,7 +86,7 @@ public class DeviceMgr implements IApp {
         try {
             switch (action.getComponentType()) {
                 case ACTIVITY:
-                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    // intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     InstrumentationRegistry.getTargetContext().startActivity(intent);
                     break;
                 case SERVICE:

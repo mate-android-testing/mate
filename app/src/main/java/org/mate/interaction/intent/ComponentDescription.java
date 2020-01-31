@@ -23,6 +23,9 @@ public class ComponentDescription {
     private final String name;
     private final ComponentType type;
 
+    // whether the component handles onNewIntent (solely activities do so)
+    private boolean handleOnNewIntent = false;
+
     // a component may define optionally intent filter tags
     private Set<IntentFilterDescription> intentFilters = new HashSet<>();
 
@@ -38,6 +41,14 @@ public class ComponentDescription {
     public ComponentDescription(String name, ComponentType type) {
         this.name = name;
         this.type = type;
+    }
+
+    public boolean isHandlingOnNewIntent() {
+        return handleOnNewIntent;
+    }
+
+    public void setHandlingOnNewIntent(boolean handleOnNewIntent) {
+        this.handleOnNewIntent = handleOnNewIntent;
     }
 
     void addStringConstants(Set<String> stringConstants) {
@@ -107,7 +118,8 @@ public class ComponentDescription {
      *
      * @param components The list of components.
      * @param name The name of the component to be looked up.
-     * @return Returns the component matching the given name in the list of components.
+     * @return Returns the component matching the given name in the list of components
+     *          or {@code null} if the component couldn't be found.
      */
     public static ComponentDescription getComponentByName(final List<ComponentDescription> components, final String name) {
 
@@ -116,7 +128,7 @@ public class ComponentDescription {
                 return component;
             }
         }
-        throw new IllegalArgumentException("Component with name " + name + " does not exist!");
+        return null;
     }
 
     /**
@@ -229,6 +241,11 @@ public class ComponentDescription {
 
         builder.append("Strings: " + stringConstants + System.lineSeparator());
         builder.append("Extras: " + extras + System.lineSeparator());
+
+        if (isActivity()) {
+            builder.append("Handles OnNewIntent: " + handleOnNewIntent + System.lineSeparator());
+        }
+
         return builder.toString();
     }
 

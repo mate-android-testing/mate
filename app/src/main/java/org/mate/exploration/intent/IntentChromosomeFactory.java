@@ -143,7 +143,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     protected Action selectAction() {
 
         double random = Math.random();
-        final float EQUAL_INTERVAL_PROBABILITY = relativeIntentAmount / 5;
+        final float EQUAL_INTERVAL_PROBABILITY = relativeIntentAmount / 6;
 
         if (random < relativeIntentAmount) {
             // generate an Intent-based action or a system event notification with equal probability
@@ -160,6 +160,9 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             } else if (random < 4 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasDynamicReceiver()) {
                 // select a dynamic broadcast receiver
                 return intentProvider.getDynamicReceiverAction();
+            } else if (random < 5 * EQUAL_INTERVAL_PROBABILITY && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
+                // trigger the current activity's onNewIntent method
+                return intentProvider.generateIntentBasedActionForCurrentActivity();
             } else {
                 // select an activity (there must be at least the main activity exported!
                 return intentProvider.getAction(ComponentType.ACTIVITY);

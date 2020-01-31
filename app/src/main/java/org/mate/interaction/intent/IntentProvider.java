@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.ui.Action;
+import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -224,7 +226,66 @@ public class IntentProvider {
      */
     public IntentBasedAction getAction(ComponentType componentType) {
         ComponentDescription component = Randomness.randomElement(getComponents(componentType));
-        return generateIntentBasedAction(component, false);
+        return generateIntentBasedAction(component);
+    }
+
+    /**
+     * Checks whether the currently visible activity defines a callback for onNewIntent().
+     *
+     * @return Returns {@code true} if the current activity implements onNewIntent(),
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isCurrentActivityHandlingOnNewIntent() {
+
+        String name = Registry.getEnvironmentManager().getCurrentActivityName();
+        String[] tokens = name.split("/");
+
+        String packageName = tokens[0];
+        String activity = tokens[1];
+
+        if (activity.startsWith(".")) {
+            activity = packageName + activity;
+        }
+
+        MATE.log("Current visible Activity is: " + activity);
+        ComponentDescription component = ComponentDescription.getComponentByName(components, activity);
+
+        return component != null && component.isActivity() && component.isHandlingOnNewIntent();
+    }
+
+    /**
+     * Creates an IntentBasedAction that triggers the currently visible activity's onNewIntent method.
+     * Should only be called when {@link #isCurrentActivityHandlingOnNewIntent()} yields {@code true}.
+     *
+     * @return Returns an IntentBasedAction that triggers the currently visible activity's onNewIntent method.
+     */
+    public IntentBasedAction generateIntentBasedActionForCurrentActivity() {
+
+        String name = Registry.getEnvironmentManager().getCurrentActivityName();
+        String[] tokens = name.split("/");
+
+        String packageName = tokens[0];
+        String activity = tokens[1];
+
+        if (activity.startsWith(".")) {
+            activity = packageName + activity;
+        }
+
+        MATE.log("Current visible Activity is: " + activity);
+        ComponentDescription component = ComponentDescription.getComponentByName(components, activity);
+
+        if (component == null) {
+            throw new IllegalStateException("No component description found for current activity!");
+        }
+        return generateIntentBasedAction(component, false, true);
+    }
+
+    private IntentBasedAction generateIntentBasedAction(ComponentDescription component) {
+        return generateIntentBasedAction(component, false, false);
+    }
+
+    private IntentBasedAction generateIntentBasedAction(ComponentDescription component, boolean dynamicReceiver) {
+        return generateIntentBasedAction(component, dynamicReceiver, false);
     }
 
     /**
@@ -233,10 +294,12 @@ public class IntentProvider {
      *
      * @param component The component information.
      * @param dynamicReceiver Whether the component is a dynamic receiver.
+     * @param handleOnNewIntent Whether the intent should trigger the onNewIntent method.
      * @return Returns the corresponding IntentBasedAction encapsulating the component,
      *          the selected intent-filter and the generated intent.
      */
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component, boolean dynamicReceiver) {
+    private IntentBasedAction generateIntentBasedAction(ComponentDescription component,
+                                                        boolean dynamicReceiver, boolean handleOnNewIntent) {
 
         if (!component.hasIntentFilter()) {
             MATE.log("Component " + component + " doesn't declare any intent-filter!");
@@ -305,7 +368,11 @@ public class IntentProvider {
             intent.putExtras(component.generateRandomBundle());
         }
 
-        // TODO: may add flags, e.g. FLAG_ACTIVITY_NEW_TASK
+        // trigger onNewIntent() instead of onCreate() (solely for activities)
+        if (component.isHandlingOnNewIntent() && handleOnNewIntent) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        }
+
         return new IntentBasedAction(intent, component, intentFilter);
     }
 
