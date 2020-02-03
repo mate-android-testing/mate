@@ -52,15 +52,20 @@ public class IntentBasedAction extends Action {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("IntentBasedAction" + System.lineSeparator());
-        builder.append("------------------------");
+        builder.append("IntentBasedAction:" + System.lineSeparator());
+        builder.append("------------------------" + System.lineSeparator());
+        builder.append("Component: " + component + System.lineSeparator());
+        builder.append("IntentFilter: " + intentFilter + System.lineSeparator());
+        builder.append("------------------------" + System.lineSeparator());
+        builder.append("Intent:" + System.lineSeparator());
+        builder.append("------------------------" + System.lineSeparator());
         builder.append("ComponentType: " + getComponentType() + System.lineSeparator());
         builder.append("Receiver of Intent: " + intent.getComponent() + System.lineSeparator());
         builder.append("Action: " + intent.getAction() + System.lineSeparator());
         builder.append("Categories: " + intent.getCategories() + System.lineSeparator());
         builder.append("Data: " + intent.getData() + System.lineSeparator());
         builder.append("Extras: " + intent.getExtras() + System.lineSeparator());
-        builder.append("------------------------");
+        builder.append("------------------------" + System.lineSeparator());
         return builder.toString();
     }
 

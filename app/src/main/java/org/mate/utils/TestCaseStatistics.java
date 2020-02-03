@@ -45,7 +45,7 @@ public final class TestCaseStatistics {
                 String uri = intent.getDataString();
 
                 if (uri != null) {
-                    MATE.log("URI: " + uri);
+                    // MATE.log("URI: " + uri);
                     countTotalURIs++;
                     if (uri.equals("content:///") || uri.equals("file:///")) {
                         countInvalidURIs++;
@@ -66,7 +66,7 @@ public final class TestCaseStatistics {
     private static void countActionsPerType(TestCase testCase) {
 
         List<Action> actions = testCase.getEventSequence();
-        MATE.log("Total number of actions: " + actions);
+        MATE.log("Total number of actions: " + actions.size());
 
         int numberOfUIActions = 0;
         int numberOfSystemActions = 0;
@@ -101,22 +101,42 @@ public final class TestCaseStatistics {
                 Intent intent = ((IntentBasedAction) action).getIntent();
 
                 // get the corresponding component description
-                String componentName = intent.getComponent().getClassName();
-                ComponentDescription component =
-                        ComponentDescription.getComponentByName(components, componentName);
+                ComponentDescription component = ((IntentBasedAction) action).getComponent();
 
-                MATE.log("IntentBasedAction: " + action);
-                MATE.log("Corresponding IntentFilter: " + component.getMatchingIntentFilter(intent));
+                // get the corresponding intent filter description
+                IntentFilterDescription intentFilter = ((IntentBasedAction) action).getIntentFilter();
+
+                // MATE.log("" + action);
 
                 // actually each intent should have defined an action
                 if (intent.getAction() == null) {
-                    MATE.log("Found Intent without action: " + intent);
+                    // MATE.log("Found Intent without action!");
                     nullCtr++;
                 }
 
+                if (intent.getCategories() == null) {
+                    // MATE.log("Found Intent without category!");
+                    nullCtr++;
+                }
 
+                if (intent.getDataString() == null) {
+                    // MATE.log("Found Intent without data URI!");
+                    nullCtr++;
+                }
+
+                if (intent.getComponent() == null) {
+                    // MATE.log("Found Intent without target component name!");
+                    nullCtr++;
+                }
+
+                if (intent.getExtras() == null) {
+                    // MATE.log("Found Intent without extras!");
+                    nullCtr++;
+                }
             }
         }
+
+        MATE.log("TestCase included " + nullCtr + " null values!");
     }
 
 }

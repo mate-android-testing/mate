@@ -78,7 +78,7 @@ public class DeviceMgr implements IApp {
     public void executeAction(IntentBasedAction action) {
 
         // TODO: check if we can react to a crash
-        MATE.log(" ___ execute intent based action: " + action
+        MATE.log(" ___ execute intent based action: " + action.getIntent() + System.lineSeparator()
             + " Extras: " + action.getIntent().getExtras());
 
         Intent intent = action.getIntent();
