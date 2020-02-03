@@ -59,4 +59,64 @@ public final class TestCaseOptimizer {
         return testCase;
     }
 
+    /**
+     * Removes the action at the specified {@param index}.
+     *
+     * @param testCase The given test case.
+     * @param index The index of the action which should be removed.
+     * @return Returns the test case without the action at the given index.
+     */
+    public static TestCase removeActionAtIndex(TestCase testCase, int index) {
+        testCase.getEventSequence().remove(index);
+        return testCase;
+    }
+
+    /**
+     * Removes the last action of a test case.
+     *
+     * @param testCase The given test case.
+     * @return Returns the test case without the last action.
+     */
+    public static TestCase removeLastAction(TestCase testCase) {
+
+        int lastIndex = testCase.getEventSequence().size() - 1;
+        testCase.getEventSequence().remove(lastIndex);
+        return testCase;
+    }
+
+    /**
+     * Checks whether the last action of the given test case is of type {@param type}.
+     *
+     * @param testCase The given test case.
+     * @param type The action type, e.g. {@link org.mate.interaction.intent.IntentBasedAction}.
+     * @return Returns {@code true} if the last action matches the given action type,
+     *          otherwise {@code false} is returned.
+     */
+    public static boolean isLastActionOfGivenType(TestCase testCase, Class type) {
+
+        int lastIndex = testCase.getEventSequence().size() - 1;
+        return testCase.getEventSequence().get(lastIndex).getClass().equals(type);
+    }
+
+    /**
+     * Removes all actions of a test case except the last one. The idea is that
+     * a {@link org.mate.interaction.intent.IntentBasedAction} may lead to a crash
+     * directly without preceding UI or Intent-based actions. If no crash occurs anymore,
+     * the last action didn't cause the crash, at least not independently.
+     *
+     * @param testCase The given test case.
+     * @return Returns the test case containing solely the last action.
+     */
+    public static TestCase removeAllExceptLastAction(TestCase testCase) {
+
+        List<Action> toBeRemoved = new ArrayList<>();
+
+        for(int i=0; i<testCase.getEventSequence().size()-1; i++) {
+            toBeRemoved.add(testCase.getEventSequence().get(i));
+        }
+
+        testCase.getEventSequence().removeAll(toBeRemoved);
+        return testCase;
+    }
+
 }
