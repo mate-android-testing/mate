@@ -27,6 +27,7 @@ public class TestCase {
     private Set<String> visitedActivities;
     private Set<String> visitedStates;
     private List<Action> eventSequence;
+    private List<String> activityAfterAction;
     private float novelty;
     private boolean crashDetected;
     private double sparseness;
@@ -45,7 +46,7 @@ public class TestCase {
         sparseness = 0;
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
-
+        activityAfterAction = new ArrayList<>();
     }
 
     /**
@@ -94,6 +95,18 @@ public class TestCase {
 
         // print the number of unrelated widget actions
         MATE.log_acc("Number of unrelated widget actions: " + widgetUnrelatedActions);
+    }
+
+    /**
+     * Returns the name of the activity that is in the foreground after the execution
+     * of the n-th {@param actionIndex} action.
+     *
+     * @param actionIndex The action index.
+     * @return Returns the activity name after the execution of the {@param actionIndex} action,
+     *      or returns {@code "unknown"}.
+     */
+    public String getActivityAfterAction(int actionIndex) {
+        return activityAfterAction.get(actionIndex);
     }
 
     public void setDesiredSize(Optional<Integer> desiredSize) {
@@ -257,6 +270,9 @@ public class TestCase {
         }
         addEvent(a);
         UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(a);
+
+        // track the activity in focus after each executed action
+        activityAfterAction.add(Registry.getEnvironmentManager().getCurrentActivityName());
 
         switch (actionResult) {
             case SUCCESS:

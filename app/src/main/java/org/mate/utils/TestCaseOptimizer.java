@@ -1,8 +1,13 @@
 package org.mate.utils;
 
 import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.interaction.intent.ComponentType;
+import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
+import org.mate.ui.PrimitiveAction;
+import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,11 +25,128 @@ public final class TestCaseOptimizer {
         throw new UnsupportedOperationException("Utility class not instantiable!");
     }
 
+    public static TestCase optimise(TestCase testCase) {
+
+        switch (Properties.OPTIMISATION_STRATEGY()) {
+            case 1:
+                // remove all intent based actions
+                return removeAllIntentBasedActions(testCase);
+            case 2:
+                // remove all except last action
+                return removeAllExceptLastAction(testCase);
+            case 3:
+                // execute all actions after last activity transition
+                return removeAllActionsBeforeLastActivityTransition(testCase);
+            case 4:
+                // solely activity related actions (UI + intent)
+                return removeAllNonActivityRelatedActions(testCase);
+            default:
+                // leave the test case unchanged
+                return testCase;
+        }
+    }
+
+    /**
+     * The first optimisation strategy.
+     *
+     * Removes all intent-based actions from the test case.
+     *
+     * @param testCase The test case to be optimised.
+     * @return Returns the optimised test case.
+     */
+    private static TestCase removeAllIntentBasedActions(TestCase testCase) {
+
+        List<Action> toBeRemoved = new ArrayList<>();
+        List<Action> actions = testCase.getEventSequence();
+
+        for (Action action : actions) {
+            if (action instanceof IntentBasedAction) {
+                toBeRemoved.add(action);
+            }
+        }
+
+        actions.removeAll(toBeRemoved);
+        return testCase;
+    }
+
+    /**
+     * The second optimisation strategy.
+     *
+     * Removes all actions of a test case except the last one. The idea is that
+     * a {@link org.mate.interaction.intent.IntentBasedAction} may lead to a crash
+     * directly without preceding UI or Intent-based actions. If no crash occurs anymore,
+     * the last action didn't cause the crash, at least not independently.
+     *
+     * @param testCase The given test case.
+     * @return Returns the test case containing solely the last action.
+     */
+    private static TestCase removeAllExceptLastAction(TestCase testCase) {
+
+        List<Action> toBeRemoved = new ArrayList<>();
+
+        for (int i = 0; i < testCase.getEventSequence().size() - 1; i++) {
+            toBeRemoved.add(testCase.getEventSequence().get(i));
+        }
+
+        testCase.getEventSequence().removeAll(toBeRemoved);
+        return testCase;
+    }
+
+    /**
+     * The third optimisation strategy.
+     *
+     * Only execute those actions after the last activity transition.
+     *
+     * @param testCase The test case to be optimised.
+     * @return Returns the optimised test case.
+     */
+    private static TestCase removeAllActionsBeforeLastActivityTransition(TestCase testCase) {
+
+        List<Action> actions = new ArrayList<>(testCase.getEventSequence());
+        Collections.reverse(actions);
+
+        int lastIndex = testCase.getEventSequence().size()-1;
+        String lastActivity = testCase.getActivityAfterAction(lastIndex);
+
+        // traverse backwards until we reach a different activity
+        return testCase;
+    }
+
+
+    /**
+     * The fourth optimisation strategy.
+     *
+     * Removes all actions that do not target an activity.
+     *
+     * @param testCase The test case to be optimised.
+     * @return Returns the optimised test case.
+     */
+    private static TestCase removeAllNonActivityRelatedActions(TestCase testCase) {
+
+        List<Action> toBeRemoved = new ArrayList<>();
+        List<Action> actions = testCase.getEventSequence();
+
+        for (Action action : actions) {
+            if (action instanceof WidgetAction
+                    || action instanceof PrimitiveAction) {
+                continue;
+            } else if (action instanceof IntentBasedAction
+                    && ((IntentBasedAction) action).getComponentType() == ComponentType.ACTIVITY) {
+                continue;
+            } else {
+                toBeRemoved.add(action);
+            }
+        }
+
+        actions.removeAll(toBeRemoved);
+        return testCase;
+    }
+
     /**
      * Removes from the given test case the last {@param n} actions of type {@param actionType}.
      *
-     * @param testCase The test case to be optimised.
-     * @param n The number of intent-based actions that should be removed (upper bound), n > 0.
+     * @param testCase   The test case to be optimised.
+     * @param n          The number of intent-based actions that should be removed (upper bound), n > 0.
      * @param actionType The type of action, either an intent-based action, a system action
      *                   or a UI action.
      * @return Returns the test case after applied the optimisation.
@@ -63,7 +185,7 @@ public final class TestCaseOptimizer {
      * Removes the action at the specified {@param index}.
      *
      * @param testCase The given test case.
-     * @param index The index of the action which should be removed.
+     * @param index    The index of the action which should be removed.
      * @return Returns the test case without the action at the given index.
      */
     public static TestCase removeActionAtIndex(TestCase testCase, int index) {
@@ -88,9 +210,9 @@ public final class TestCaseOptimizer {
      * Checks whether the last action of the given test case is of type {@param type}.
      *
      * @param testCase The given test case.
-     * @param type The action type, e.g. {@link org.mate.interaction.intent.IntentBasedAction}.
+     * @param type     The action type, e.g. {@link org.mate.interaction.intent.IntentBasedAction}.
      * @return Returns {@code true} if the last action matches the given action type,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     public static boolean isLastActionOfGivenType(TestCase testCase, Class type) {
 
@@ -98,25 +220,6 @@ public final class TestCaseOptimizer {
         return testCase.getEventSequence().get(lastIndex).getClass().equals(type);
     }
 
-    /**
-     * Removes all actions of a test case except the last one. The idea is that
-     * a {@link org.mate.interaction.intent.IntentBasedAction} may lead to a crash
-     * directly without preceding UI or Intent-based actions. If no crash occurs anymore,
-     * the last action didn't cause the crash, at least not independently.
-     *
-     * @param testCase The given test case.
-     * @return Returns the test case containing solely the last action.
-     */
-    public static TestCase removeAllExceptLastAction(TestCase testCase) {
 
-        List<Action> toBeRemoved = new ArrayList<>();
-
-        for(int i=0; i<testCase.getEventSequence().size()-1; i++) {
-            toBeRemoved.add(testCase.getEventSequence().get(i));
-        }
-
-        testCase.getEventSequence().removeAll(toBeRemoved);
-        return testCase;
-    }
 
 }

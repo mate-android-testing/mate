@@ -54,6 +54,10 @@ public class Properties {
      */
     public static boolean OPTIMISE_TEST_CASE() { return propertyOr(false);}
 
+    public static int OPTIMISATION_STRATEGY() {
+        return propertyOr(0);
+    }
+
     /*
     * Record/Replay test case.
      */
