@@ -23,6 +23,12 @@ public final class TestCaseStatistics {
     }
 
     public static void recordStats(TestCase testCase, final List<ComponentDescription> components) {
+
+        System.out.println("Visited Activities in Order:");
+        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
+            System.out.println(testCase.getActivityAfterAction(i));
+        }
+
         countInvalidURIs(testCase);
         countActionsPerType(testCase);
 

@@ -25,6 +25,12 @@ public final class TestCaseOptimizer {
         throw new UnsupportedOperationException("Utility class not instantiable!");
     }
 
+    /**
+     * Performs the selected test case optimisation strategy.
+     *
+     * @param testCase The test case to be optimised.
+     * @return Returns the optimised test case.
+     */
     public static TestCase optimise(TestCase testCase) {
 
         switch (Properties.OPTIMISATION_STRATEGY()) {
@@ -102,13 +108,30 @@ public final class TestCaseOptimizer {
      */
     private static TestCase removeAllActionsBeforeLastActivityTransition(TestCase testCase) {
 
+        List<Action> toBeRemoved = new ArrayList<>();
         List<Action> actions = new ArrayList<>(testCase.getEventSequence());
-        Collections.reverse(actions);
-
-        int lastIndex = testCase.getEventSequence().size()-1;
-        String lastActivity = testCase.getActivityAfterAction(lastIndex);
 
         // traverse backwards until we reach a different activity
+        int index = testCase.getEventSequence().size()-1;
+        String activity = testCase.getActivityAfterAction(index);
+        index--;
+
+        // traverse backwards until we reach a different activity
+        while (index >= 0) {
+
+            if (!testCase.getActivityAfterAction(index).equals(activity)) {
+                // we reached a different activity
+                break;
+            }
+            index--;
+        }
+
+        // collect all actions up to last activity transition for removal
+        for (int i = 0; i < index; i++) {
+            toBeRemoved.add(actions.get(i));
+        }
+
+        testCase.getEventSequence().removeAll(toBeRemoved);
         return testCase;
     }
 

@@ -65,7 +65,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             testCase = TestCaseSerializer.deserializeTestCase();
 
             if (Properties.OPTIMISE_TEST_CASE()) {
-                testCase = TestCaseOptimizer.removeLastActions(testCase, 3, IntentBasedAction.class);
+                testCase = TestCaseOptimizer.optimise(testCase);
             }
 
             // we can only replay the number of actually serialized actions
