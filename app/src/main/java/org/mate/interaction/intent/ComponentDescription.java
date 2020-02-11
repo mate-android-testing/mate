@@ -174,6 +174,11 @@ public class ComponentDescription {
         return builder.toString();
     }
 
+    /**
+     * Generates a bundle with random entries.
+     *
+     * @return Returns the randomly generated bundle.
+     */
     Bundle generateRandomBundle() {
 
         Bundle bundle = new Bundle();
