@@ -13,6 +13,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -80,6 +81,15 @@ public class IntentProvider {
      */
     public List<ComponentDescription> getSystemEventReceivers() {
         return Collections.unmodifiableList(systemEventReceivers);
+    }
+
+    /**
+     * Returns the list of dynamic broadcast receivers.
+     *
+     * @return Returns the list of dynamic broadcast receivers.
+     */
+    public List<ComponentDescription> getDynamicReceivers() {
+        return Collections.unmodifiableList(dynamicReceivers);
     }
 
     /**

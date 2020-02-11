@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
+import org.mate.interaction.intent.ComponentDescription;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.IntentProvider;
@@ -31,6 +32,13 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     // stores the relative amount ([0,1]) of intent based actions that should be used
     private final float relativeIntentAmount;
 
+    private float relativeActivityAmount;
+    private float relativeServiceAmount;
+    private float relativeReceiverAmount;
+    private float relativeDynamicReceiverAmount;
+    private float relativeSystemReceiverAmount;
+    private float relativeActivityWithOnNewIntentAmount;
+
     private final IntentProvider intentProvider = new IntentProvider();
 
     public IntentChromosomeFactory(int maxNumEvents, float relativeIntentAmount) {
@@ -38,6 +46,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
+        determineRelativeComponentAmount();
     }
 
     public IntentChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents, float relativeIntentAmount) {
@@ -45,6 +54,53 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
+        determineRelativeComponentAmount();
+    }
+
+    /**
+     * Determines the relative amount of each component type. This information is used
+     * for the selection probability of a certain component, see {@link #selectAction()}.
+     */
+    private void determineRelativeComponentAmount() {
+
+        int numberOfComponents = intentProvider.getComponents().size()
+                + intentProvider.getSystemEventReceivers().size() + intentProvider.getDynamicReceivers().size();
+
+        relativeSystemReceiverAmount = ((float) intentProvider.getSystemEventReceivers().size()) / numberOfComponents;
+        relativeDynamicReceiverAmount = ((float) intentProvider.getDynamicReceivers().size()) / numberOfComponents;
+
+        int numberOfActivities = 0;
+        int numberOfServices = 0;
+        int numberOfReceivers = 0;
+        int numberOfActivitiesHandlingOnNewIntent = 0;
+
+        for (ComponentDescription component : intentProvider.getComponents()) {
+
+            if (component.isActivity()) {
+                if (component.isHandlingOnNewIntent()) {
+                    numberOfActivitiesHandlingOnNewIntent++;
+                } else {
+                    numberOfActivities++;
+                }
+            } else if (component.isService()) {
+                numberOfServices++;
+            } else if (component.isBroadcastReceiver()) {
+                numberOfReceivers++;
+            }
+        }
+
+        relativeActivityAmount = ((float) numberOfActivities) / numberOfComponents;
+        relativeActivityWithOnNewIntentAmount = ((float) numberOfActivitiesHandlingOnNewIntent) / numberOfComponents;
+        relativeServiceAmount = ((float) numberOfServices) / numberOfComponents;
+        relativeReceiverAmount = ((float ) numberOfReceivers) / numberOfComponents;
+
+        MATE.log("Total number of components: " + numberOfComponents);
+        MATE.log("Number of Activities: " + numberOfActivities);
+        MATE.log("Number of Services: " + numberOfServices);
+        MATE.log("Number of Receivers: " + numberOfReceivers);
+        MATE.log("Number of system Receivers: " + intentProvider.getSystemEventReceivers().size());
+        MATE.log("Number of dynamic Receivers: " + intentProvider.getDynamicReceivers().size());
+        MATE.log("Number of Activities handling OnNewIntent: " + numberOfActivitiesHandlingOnNewIntent);
     }
 
 
@@ -143,30 +199,37 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     protected Action selectAction() {
 
         double random = Math.random();
-        final float EQUAL_INTERVAL_PROBABILITY = relativeIntentAmount / 6;
 
         if (random < relativeIntentAmount) {
-            // generate an Intent-based action or a system event notification with equal probability
+            // select an intent based action
+            double rand = Math.random();
 
-            if (random < EQUAL_INTERVAL_PROBABILITY && intentProvider.hasService()) {
+            // select a component based on its relative occurrence in the set of components
+            if (rand < relativeServiceAmount && intentProvider.hasService()) {
                 // select a service
                 return intentProvider.getAction(ComponentType.SERVICE);
-            } else if (random < 2 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasBroadcastReceiver()) {
+            } else if (rand < relativeServiceAmount
+                    + relativeReceiverAmount && intentProvider.hasBroadcastReceiver()) {
                 // select a broadcast receiver
                 return intentProvider.getAction(ComponentType.BROADCAST_RECEIVER);
-            } else if (random < 3 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasSystemEventReceiver()) {
-                // select a system event
-                return intentProvider.getSystemEventAction();
-            } else if (random < 4 * EQUAL_INTERVAL_PROBABILITY && intentProvider.hasDynamicReceiver()) {
+            } else if (rand < relativeServiceAmount + relativeReceiverAmount
+                    + relativeDynamicReceiverAmount && intentProvider.hasDynamicReceiver()) {
                 // select a dynamic broadcast receiver
                 return intentProvider.getDynamicReceiverAction();
-            } else if (random < 5 * EQUAL_INTERVAL_PROBABILITY && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
+            } else if (rand < relativeServiceAmount + relativeReceiverAmount
+                    + relativeDynamicReceiverAmount + relativeSystemReceiverAmount
+                    && intentProvider.hasSystemEventReceiver()) {
+                // select a system event
+                return intentProvider.getSystemEventAction();
+            } else if (rand < relativeServiceAmount + relativeReceiverAmount
+                    + relativeDynamicReceiverAmount + relativeSystemReceiverAmount
+                    + relativeActivityWithOnNewIntentAmount
+                    && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
                 // trigger the current activity's onNewIntent method
                 return intentProvider.generateIntentBasedActionForCurrentActivity();
             } else {
                 // select an activity (there must be at least the main activity exported!
                 return intentProvider.getAction(ComponentType.ACTIVITY);
-                // TODO: may integrate probability to swap activity
             }
         } else {
             // select a UI action
