@@ -3,6 +3,8 @@ package org.mate.interaction.intent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Size;
+import android.util.SizeF;
 
 import org.mate.MATE;
 import org.mate.utils.DataPool;
@@ -180,7 +182,6 @@ public class ComponentDescription {
         final int COUNT = 5;
         final int BOUND = 100;
 
-        //
         for (Map.Entry<String, String> extra : extras.entrySet()) {
 
             // depending on the type we need to select a value out of a pre-defined pool
@@ -299,8 +300,20 @@ public class ComponentDescription {
                     parcelables.add(new Bundle());
                     bundle.putParcelableArrayList(extra.getKey(), new ArrayList<>(parcelables));
                     break;
+                case "Size":
+                    List<Integer> values = Randomness.getRandomIntegers(2, BOUND);
+                    Size size = new Size(values.get(0), values.get(1));
+                    bundle.putSize(extra.getKey(), size);
+                    break;
+                case "SizeF":
+                    float[] valuesF = Randomness.getRandomFloatArray(2);
+                    SizeF sizeF = new SizeF(valuesF[0], valuesF[1]);
+                    bundle.putSizeF(extra.getKey(), sizeF);
+                    break;
                 default:
-                    throw new UnsupportedOperationException("Data type not yet supported!");
+                    MATE.log("Data type not yet supported: " + extra.getValue());
+                    // omit bundle entry
+                    break;
             }
         }
         return bundle;
