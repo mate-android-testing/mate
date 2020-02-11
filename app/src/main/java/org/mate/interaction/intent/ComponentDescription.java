@@ -310,6 +310,9 @@ public class ComponentDescription {
                     SizeF sizeF = new SizeF(valuesF[0], valuesF[1]);
                     bundle.putSizeF(extra.getKey(), sizeF);
                     break;
+                case "Bundle":
+                    bundle.putBundle(extra.getKey(), new Bundle());
+                    break;
                 default:
                     MATE.log("Data type not yet supported: " + extra.getValue());
                     // omit bundle entry
