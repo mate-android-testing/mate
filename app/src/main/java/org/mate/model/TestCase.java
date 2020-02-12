@@ -266,9 +266,9 @@ public class TestCase {
      */
     public boolean updateTestCase(Action a, String event) {
 
-        WidgetAction selectedAction = (WidgetAction) a;
+        if (a instanceof WidgetAction && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
 
-        if (!MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
+            WidgetAction selectedAction = (WidgetAction) a;
 
             System.out.println("Action not applicable!");
             System.out.println(selectedAction.getActionType() + " on " + selectedAction.getWidget().getId()
@@ -295,7 +295,6 @@ public class TestCase {
                                 + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
                                 + " X : " + widgetAction.getWidget().getX()
                                 + " Y : " + widgetAction.getWidget().getY());
-
                     }
                 }
             }
