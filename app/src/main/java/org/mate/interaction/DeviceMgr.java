@@ -63,10 +63,11 @@ public class DeviceMgr implements IApp {
      *
      * @param event The system event.
      */
-    public void executeAction(SystemAction event) {
+    public void executeAction(SystemAction event) throws AUTCrashException {
         MATE.log(" ___ execute system action: " + event);
         Registry.getEnvironmentManager().executeSystemEvent(event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
+        checkForCrash();
     }
 
     /**
@@ -75,7 +76,7 @@ public class DeviceMgr implements IApp {
      *
      * @param action The action which contains the Intent to be sent.
      */
-    public void executeAction(IntentBasedAction action) {
+    public void executeAction(IntentBasedAction action) throws AUTCrashException {
 
         // TODO: check if we can react to a crash
         MATE.log(" ___ execute intent based action: " + action.getIntent() + System.lineSeparator()
@@ -102,6 +103,7 @@ public class DeviceMgr implements IApp {
             MATE.log("Executing Intent-based action failed: " + e.getMessage());
             e.printStackTrace();
         }
+        checkForCrash();
     }
 
     public void executeAction(PrimitiveAction action) throws AUTCrashException {
