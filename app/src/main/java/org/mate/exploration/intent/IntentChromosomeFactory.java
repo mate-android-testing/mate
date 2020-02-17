@@ -117,30 +117,9 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
-        if (Properties.REPLAY_TEST_CASE()) {
-            testCase = TestCaseSerializer.deserializeTestCase();
-
-            if (Properties.OPTIMISE_TEST_CASE()) {
-                testCase = TestCaseOptimizer.optimise(testCase);
-            }
-
-            // we can only replay the number of actually serialized actions
-            maxNumEvents = testCase.getEventSequence().size();
-        }
-
         try {
             for (int i = 0; i < maxNumEvents; i++) {
-
-                Action nextAction = null;
-
-                if (Properties.REPLAY_TEST_CASE()) {
-                    MATE.log("Replaying Action " + i);
-                    nextAction = testCase.getEventSequence().get(i);
-                } else {
-                    nextAction = selectAction();
-                }
-
-                if (!testCase.updateTestCase(nextAction, String.valueOf(i))) {
+                if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
                     return chromosome;
                 }
             }

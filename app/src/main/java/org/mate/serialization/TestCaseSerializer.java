@@ -100,9 +100,8 @@ public final class TestCaseSerializer {
             xstream.ignoreUnknownElements();
             xstream.registerConverter(new IntentBasedActionConverter());
 
-            System.out.println("Deserialize TestCase!");
             TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
-            System.out.println("Number of Actions: " + testCase.getEventSequence().size());
+            MATE.log("Number of Actions: " + testCase.getEventSequence().size());
 
             // update counter
             replayCounter++;
@@ -110,8 +109,7 @@ public final class TestCaseSerializer {
             return testCase;
         } catch (FileNotFoundException e) {
             MATE.log("TestCase file for deserialization not found!");
-            throw new IllegalStateException(e);
+            return null;
         }
     }
-
 }
