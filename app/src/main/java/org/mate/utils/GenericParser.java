@@ -24,6 +24,10 @@ public class GenericParser {
 
     @SuppressWarnings("unchecked")
     public static <T> T parse(Class<T> clazz, String s) throws Exception {
+        if (clazz == String.class) {
+            return (T) s;
+        }
+
         Class<?> boxedClass = PRIMITIVE_TO_BOXED.get(clazz);
         if (boxedClass == null) {
             boxedClass = clazz;
