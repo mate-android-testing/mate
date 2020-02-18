@@ -176,6 +176,12 @@ public class AppScreen {
             contentDesc = obj.getContentDescription().toString();
         if (contentDesc==null)
             contentDesc="";
+
+        String textError = "";
+        if (obj.getError()!=null)
+            textError=obj.getError().toString();
+        widget.setErrorText(textError);
+
         widget.setContentDesc(contentDesc);
         widget.setFocusable(obj.isFocusable());
         widget.setHasChildren(obj.getChildCount()!=0);

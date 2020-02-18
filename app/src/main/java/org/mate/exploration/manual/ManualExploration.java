@@ -2,16 +2,15 @@ package org.mate.exploration.manual;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.widgetbased.MultipleContentDescCheck;
+import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
+import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
@@ -58,14 +57,14 @@ public class ManualExploration {
 
                 MATE.logactivity(state.getActivityName());
 
-                AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();
+
                 AccessibilitySummaryResults.currentActivityName=state.getActivityName();
                 AccessibilitySummaryResults.currentPackageName=state.getPackageName();
-                accChecker.runAccessibilityTests(state);
+                AccessibilityViolationChecker.runAccessibilityChecks(state);
                 //MATE.log_acc("CHECK CONTRAST");
 
                 MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck();
-                ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck();
+                TextContrastRatioAccessibilityCheck contrastChecker = new TextContrastRatioAccessibilityCheck();
                 for (Widget widget: state.getWidgets()) {
 
                     AccessibilityViolation contrastRatioViolationFound = contrastChecker.check(state, widget);
