@@ -73,6 +73,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -413,10 +414,16 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    // track which test cases couldn't be successfully replayed
+                    List<TestCase> failures = new ArrayList<>();
+
                     TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
                     // as long as we find a test case for replaying
                     while (testCase != null) {
+
+                        // reset aut before each test case
+                        uiAbstractionLayer.resetApp();
 
                         // get the actions for replaying
                         List<Action> actions = testCase.getEventSequence();
@@ -430,9 +437,10 @@ public class MATE {
                             if (nextAction instanceof WidgetAction
                                     && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
                                 MATE.log("Action not applicable!");
-                                MATE.log("Activity before action: " + testCase.getActivityAfterAction(i-1));
+                                // MATE.log("Activity before action: " + testCase.getActivityAfterAction(i-1));
                                 // TODO: find appropriate repairment strategy
                                 repairUIAction(nextAction);
+                                failures.add(testCase);
                                 break;
                             } else {
                                 uiAbstractionLayer.executeAction(actions.get(i));
@@ -442,6 +450,52 @@ public class MATE {
                         // replay next test case
                         testCase = TestCaseSerializer.deserializeTestCase();
                     }
+
+                    MATE.log("Couldn't replay " + failures.size() + " test-cases!");
+
+                    List<TestCase> successfulTestCases = new ArrayList<>();
+
+                    for (TestCase failure : failures) {
+
+                        // reset aut before each test case
+                        uiAbstractionLayer.resetApp();
+
+                        boolean fail = false;
+
+                        // repeat test case maximal 5 times or until it could be successfully executed
+                        for (int i = 0; i < 5; i++) {
+
+                            // get the actions for replaying
+                            List<Action> actions = failure.getEventSequence();
+
+                            for (int k = 0; k < failure.getEventSequence().size(); k++) {
+
+                                Action nextAction = actions.get(k);
+
+                                // check whether the UI action is applicable on the current state
+                                if (nextAction instanceof WidgetAction
+                                        && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
+                                    MATE.log("Action not applicable!");
+                                    // MATE.log("Activity before action: " + testCase.getActivityAfterAction(k-1));
+                                    // TODO: find appropriate repairment strategy
+                                    repairUIAction(nextAction);
+                                    fail = true;
+                                    break;
+                                } else {
+                                    uiAbstractionLayer.executeAction(actions.get(k));
+                                }
+                            }
+
+                            if (!fail) {
+                                successfulTestCases.add(failure);
+                                break;
+                            }
+
+                        }
+                    }
+
+                    MATE.log("Could successfully replay " + successfulTestCases.size()
+                            + " test cases from failing ones!");
 
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);

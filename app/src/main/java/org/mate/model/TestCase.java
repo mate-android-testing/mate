@@ -106,7 +106,11 @@ public class TestCase {
      *      or returns {@code "unknown"}.
      */
     public String getActivityAfterAction(int actionIndex) {
-        return activityAfterAction.get(actionIndex);
+        if (actionIndex < activityAfterAction.size()) {
+            return activityAfterAction.get(actionIndex);
+        } else {
+            return "unknown";
+        }
     }
 
     public void setDesiredSize(Optional<Integer> desiredSize) {
