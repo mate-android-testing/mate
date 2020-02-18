@@ -266,40 +266,6 @@ public class TestCase {
      */
     public boolean updateTestCase(Action a, String event) {
 
-        if (a instanceof WidgetAction && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
-
-            WidgetAction selectedAction = (WidgetAction) a;
-
-            System.out.println("Action not applicable!");
-            System.out.println(selectedAction.getActionType() + " on " + selectedAction.getWidget().getId()
-                    + " Text : " + selectedAction.getWidget().getText()
-                    + " hint : " + selectedAction.getWidget().getHint()
-                    + " Class : " + selectedAction.getWidget().getClazz()
-                    + " ResourceID : " + selectedAction.getWidget().getResourceID()
-                    + " IdByActivity : " + selectedAction.getWidget().getIdByActivity()
-                    + " X : " + selectedAction.getWidget().getX()
-                    + " Y : " + selectedAction.getWidget().getY());
-
-            System.out.println("------------------------------------------");
-
-            for (Action action : MATE.uiAbstractionLayer.getExecutableActions()) {
-
-                if (action instanceof WidgetAction) {
-                    if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {
-                        WidgetAction widgetAction = (WidgetAction) action;
-                        System.out.println(widgetAction.getActionType() + " on " + widgetAction.getWidget().getId()
-                                + " Text : " + widgetAction.getWidget().getText()
-                                + " hint : " + widgetAction.getWidget().getHint()
-                                + " Class : " + widgetAction.getWidget().getClazz()
-                                + " ResourceID : " + widgetAction.getWidget().getResourceID()
-                                + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
-                                + " X : " + widgetAction.getWidget().getX()
-                                + " Y : " + widgetAction.getWidget().getY());
-                    }
-                }
-            }
-        }
-
         if (a instanceof WidgetAction
                 && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
             throw new IllegalStateException("Action not applicable to current state");

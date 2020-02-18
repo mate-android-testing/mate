@@ -249,6 +249,22 @@ public class ActionsScreenState extends AbstractScreenState {
         executables.add(new WidgetAction(ActionType.BACK));
         executables.add(new WidgetAction(ActionType.MENU));
 
+        // those actions should be always applicable independent of the widget
+        executables.add(new WidgetAction(ActionType.ROTATE_LEFT));
+        executables.add(new WidgetAction(ActionType.ROTATE_RIGHT));
+        executables.add(new WidgetAction(ActionType.HOME));
+        executables.add(new WidgetAction(ActionType.SEARCH));
+        executables.add(new WidgetAction(ActionType.QUICK_SETTINGS));
+        executables.add(new WidgetAction(ActionType.NOTIFICATIONS));
+        executables.add(new WidgetAction(ActionType.SLEEP));
+        executables.add(new WidgetAction(ActionType.WAKE_UP));
+        executables.add(new WidgetAction(ActionType.DELETE));
+        executables.add(new WidgetAction(ActionType.DPAD_CENTER));
+        executables.add(new WidgetAction(ActionType.DPAD_DOWN));
+        executables.add(new WidgetAction(ActionType.DPAP_UP));
+        executables.add(new WidgetAction(ActionType.DPAD_LEFT));
+        executables.add(new WidgetAction(ActionType.DPAD_RIGHT));
+
         actions = executables;
         return executables;
     }
