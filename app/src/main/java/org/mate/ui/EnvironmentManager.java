@@ -22,7 +22,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.1";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.2";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -440,6 +440,21 @@ public class EnvironmentManager {
         tunnelLegacyCmd(cmd);
     }
 
+    public double matchesSurroundingColor(String packageName, String stateId, Widget widget){
+        String cmd = "surroundingColor:";
+        cmd += emulator + "_" + packageName + ":";
+        cmd += stateId + ":";
+        cmd += widget.getX1() + "," + widget.getY1() + "," + widget.getX2() + "," + widget.getY2();
+
+        Message message = new Message("/accessibility");
+        message.addParameter("cmd",cmd);
+
+        //will break commands in several parameters-values in the future.
+        //For now I'm sending the whole command with parameters in one single string
+        String response = sendMessage(message).getParameter("response");
+        return Double.valueOf(response);
+    }
+
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
@@ -451,7 +466,7 @@ public class EnvironmentManager {
         int x2 = widget.getX2();
         int y1 = widget.getY1();
         int y2 = widget.getY2();
-        int borderExpanded = 1;
+        int borderExpanded = 0;
         if (x1 - borderExpanded >= 0)
             x1 -= borderExpanded;
         if (x2 + borderExpanded <= maxw)
@@ -462,8 +477,6 @@ public class EnvironmentManager {
             y2 += borderExpanded;
         cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
-        //MATE.log(cmd);
-        //MATE.log(widget.getClazz() + " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " + widget.isFocusable());
         return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
@@ -493,35 +506,11 @@ public class EnvironmentManager {
         return tunnelLegacyCmd(cmd);
     }
 
-    public void deleteAllScreenShots(String packageName) {
-        MATE.log("DELETE SCREENSHOTS");
-        tunnelLegacyCmd("rm " + emulator + "_" + packageName + "*.png");
-    }
-
     public long getRandomLength() {
         String cmd = "randomlength";
         return Long.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public void markScreenshot(final Widget widget, final String packageName,
-                               final String nodeId, final String flawDescription,
-                               final String extraInfo) {
-
-        final String imageName = emulator + "_" + packageName + "_" +
-                String.valueOf(Math.abs(System.currentTimeMillis())) + ".png";
-
-        String cmd = "screenshot:" + emulator + ":" + imageName;
-
-        //for now I'm keeping this command commented so it can speed up the process
-        //sendCommandToServer(cmd);
-
-        cmd = "mark-image:" + imageName + ":x-" + widget.getX1() + ":y-"
-                + widget.getY1() + ":width-" + (widget.getX2() - widget.getX1())
-                + ":heigth-" + (widget.getY2() - widget.getY1()) + ":" + flawDescription + ":" + extraInfo;
-
-        //for now I'm keeping this command commented so it can speed up the process
-        //sendCommandToServer(cmd);
-    }
 
     public void sendFlawToServer(String msg) {
         String cmd = "reportFlaw:" + emulator + ":" + msg;

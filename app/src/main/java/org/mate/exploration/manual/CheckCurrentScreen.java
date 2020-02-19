@@ -1,40 +1,36 @@
 package org.mate.exploration.manual;
 
-import android.app.ActivityManager;
-import android.app.Instrumentation;
-import android.app.UiAutomation;
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.media.AudioManager;
-import android.os.Build;
-import android.support.test.uiautomator.UiDevice;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
-
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityViolationChecker;
+import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
-
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class CheckCurrentScreen {
 
     public void scanScreen(){
 
-        Context context = getInstrumentation().getContext();
-        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        MATE.log("Sound active: " +audioManager.isMusicActive());
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        //Context appContext = getInstrumentation().getContext().getApplicationContext();
+        //Context generalContext = getInstrumentation().getContext();
+        //Context targetContext = getInstrumentation().getTargetContext();
+
+
+        //AudioManager audioManager = (AudioManager) targetContext.getSystemService(Context.AUDIO_SERVICE);
+        //MATE.log("Sound active: " +audioManager.isMusicActive());
+
+        //ActivityManager activityManager = (ActivityManager) targetContext.getSystemService(Context.ACTIVITY_SERVICE);
+
+
+        //DisplayManager displayManager = (DisplayManager) targetContext.getSystemService(Context.DISPLAY_SERVICE);
+        //MATE.log("Length: " + displayManager.getDisplays().length);
+        //Display display = displayManager.getDisplays()[0];
+        //MATE.log("density: " + display.getName());
+        //DisplayMetrics dm = new DisplayMetrics();
+        //display.getMetrics(dm);
+        //MATE.log("density: " + dm.density);
+
+
+
 
         /*
         Instrumentation instrumentation =  getInstrumentation();
@@ -87,16 +83,25 @@ public class CheckCurrentScreen {
             }
         }
 
+
+
         */
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
+
+        String currentPackageName = screenState.getPackageName();
 
         Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 
         for (Widget w : screenState.getWidgets()) {
-            //MATE.log(w.getId() + " " + w.getClazz() + "  IFA: " + w.isImportantForAccessibility() + " actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
+            if (w.isImportantForAccessibility()) {
+                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
+                MATE.log("---showing hint: " + w.isShowingHintText());
+            }
+
+            //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
             //if (w.getParent()!=null)
             //MATE.log("------ son of " + w.getParent().getClazz());
             //if (w.isEditable())
@@ -106,6 +111,8 @@ public class CheckCurrentScreen {
         }
 
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
+/*
+
 
         try {
             //MATE.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
@@ -115,7 +122,17 @@ public class CheckCurrentScreen {
             e.printStackTrace();
         }
 
-        screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+
+        WidgetAction manualAction = new WidgetAction(ActionType.MANUAL_ACTION);
+
+        MATE.uiAbstractionLayer.executeAction(manualAction);
+        IScreenState previousScreenState = screenState;
+        screenState = MATE.uiAbstractionLayer.getLastScreenState();
+
+        if (!screenState.getPackageName().equals(currentPackageName)){
+            AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.LINK_TO_ALTERNATIVE_FORMAT,manualAction.getWidget(), previousScreenState,"");
+            violation.setWarning(true);
+        }
 
         AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 
@@ -126,7 +143,7 @@ public class CheckCurrentScreen {
 
 
         //MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck(screenState);
-        //ContrastRatioAccessibilityCheck contrastChecker = new ContrastRatioAccessibilityCheck(screenState.getPackageName(),screenState.getActivityName(),screenState.getId(),device
+        //TextContrastRatioAccessibilityCheck contrastChecker = new TextContrastRatioAccessibilityCheck(screenState.getPackageName(),screenState.getActivityName(),screenState.getId(),device
           //      .getDisplayWidth(),device.getDisplayHeight());
         /*
         FormControlLabelCheck formCheck = new FormControlLabelCheck();
