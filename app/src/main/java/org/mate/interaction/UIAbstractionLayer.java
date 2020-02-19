@@ -30,6 +30,8 @@ import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
 public class UIAbstractionLayer {
+    private static final int UiAutomatorDisconnectedRetries = 3;
+    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
     private String packageName;
     private DeviceMgr deviceMgr;
     private Map<Action, Edge> edges;
@@ -42,7 +44,7 @@ public class UIAbstractionLayer {
         edges = new HashMap<>();
         clearScreen();
         lastScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-        lastScreenState.setId("S" + 0);
+        lastScreenState.setId("S0");
         screenStateEnumeration = 1;
     }
 
@@ -51,10 +53,23 @@ public class UIAbstractionLayer {
     }
 
     public ActionResult executeAction(Action action) {
-        try {
-            return executeActionUnsafe(action);
-        } catch (Exception e) {
-            Log.e("acc", "", e);
+        boolean retry = true;
+        int retryCount = 0;
+
+        while (retry) {
+            retry = false;
+            try {
+                return executeActionUnsafe(action);
+            } catch (Exception e) {
+                if (e instanceof IllegalStateException
+                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && retryCount < UiAutomatorDisconnectedRetries ) {
+                    retry = true;
+                    retryCount += 1;
+                    continue;
+                }
+                Log.e("acc", "", e);
+            }
         }
         return FAILURE_UNKNOWN;
     }
@@ -154,52 +169,57 @@ public class UIAbstractionLayer {
      */
     public static void clearScreen(DeviceMgr deviceMgr) {
         boolean change = true;
+        boolean retry = true;
+        int retryCount = 0;
 
-        while (change) {
+        while (change || retry) {
+            retry = false;
             change = false;
             // check for crash messages
-            UiObject window = new UiObject(new UiSelector().packageName("android")
-                    .textContains("has stopped"));
-            if (window.exists()) {
-                deviceMgr.handleCrashDialog();
-                change = true;
-                continue;
-            } else {
-                window = new UiObject(new UiSelector().packageName("android")
-                    .textContains("keeps stopping"));
+            try {
+                UiObject window = new UiObject(new UiSelector().packageName("android")
+                        .textContains("has stopped"));
                 if (window.exists()) {
                     deviceMgr.handleCrashDialog();
                     change = true;
                     continue;
+                } else {
+                    window = new UiObject(new UiSelector().packageName("android")
+                            .textContains("keeps stopping"));
+                    if (window.exists()) {
+                        deviceMgr.handleCrashDialog();
+                        change = true;
+                        continue;
+                    }
                 }
-            }
 
-            // check for outdated build warnings
-            IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-            for (Widget widget : screenState.getWidgets()) {
-                if(widget.getText().equals("This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.")) {
-                    for (WidgetAction action : screenState.getActions()) {
-                        if (action.getWidget().getText().equals("OK")) {
-                            try {
-                                deviceMgr.executeAction(action);
-                                break;
-                            } catch (AUTCrashException e) {
-                                e.printStackTrace();
+                // check for outdated build warnings
+                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                for (Widget widget : screenState.getWidgets()) {
+                    if (widget.getText().equals("This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.")) {
+                        for (WidgetAction action : screenState.getActions()) {
+                            if (action.getWidget().getText().equals("OK")) {
+                                try {
+                                    deviceMgr.executeAction(action);
+                                    break;
+                                } catch (AUTCrashException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
+                        change = true;
                     }
-                    change = true;
                 }
-            }
-            if (change) {
-                continue;
-            }
+                if (change) {
+                    continue;
+                }
 
-            // check for google sign in dialog
-            if (screenState.getPackageName().equals("com.google.android.gms")) {
-                try {
-                    // press BACK to return to AUT
-                    deviceMgr.executeAction(new WidgetAction(ActionType.BACK));
+                // check for google sign in dialog
+                if (screenState.getPackageName().equals("com.google.android.gms")) {
+                    try {
+                        // press BACK to return to AUT
+                        MATE.log("Google Sign Dialog detected! Returning.");
+                        deviceMgr.executeAction(new WidgetAction(ActionType.BACK));
                 } catch (AUTCrashException e) {
                     e.printStackTrace();
                 }
@@ -207,21 +227,31 @@ public class UIAbstractionLayer {
                 continue;
             }
 
-            // check for permission dialog
-            if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
-                List<WidgetAction> actions = screenState.getActions();
-                for (WidgetAction action : actions) {
-                    if (action.getWidget().getId().contains("allow")) {
-                        try {
-                            deviceMgr.executeAction(action);
-                        } catch (AUTCrashException e) {
-                            e.printStackTrace();
+                // check for permission dialog
+                if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
+                    List<WidgetAction> actions = screenState.getActions();
+                    for (WidgetAction action : actions) {
+                        if (action.getWidget().getId().contains("allow")) {
+                            try {
+                                deviceMgr.executeAction(action);
+                            } catch (AUTCrashException e) {
+                                e.printStackTrace();
+                            }
+                            break;
                         }
-                        break;
                     }
+                    change = true;
+                    continue;
                 }
-                change = true;
-                continue;
+            } catch (Exception e) {
+                if (e instanceof IllegalStateException
+                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && retryCount < UiAutomatorDisconnectedRetries) {
+                    retry = true;
+                    retryCount += 1;
+                    continue;
+                }
+                Log.e("acc", "", e);
             }
         }
     }
