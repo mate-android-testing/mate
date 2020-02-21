@@ -5,10 +5,15 @@ import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,7 +25,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class AntColony {
     private final UIAbstractionLayer uiAbstractionLayer;
@@ -31,8 +38,8 @@ public class AntColony {
     private static final int antPathLength = 20;
     private static final double evaporationRate = 0.1;
     private double currentPheromoneStandardValue;
-    private HashMap<WidgetAction, Double> pheromones = new HashMap<>();
-    private ArrayList<TestCase> testCasesList = new ArrayList<>();
+    private Map<WidgetAction, Double> pheromones = new HashMap<>();
+    private List<IChromosome<TestCase>> testCasesList = new ArrayList<>();
 
     public AntColony() {
         uiAbstractionLayer = MATE.uiAbstractionLayer;
@@ -43,7 +50,7 @@ public class AntColony {
 
         //TODO start algorithm (Vorgegeben)
         String targetLine = Properties.TARGET_LINE();
-        LineCoveredPercentageFitnessFunction lineCoveredPercentageFitnessFunction
+        IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
         // Value to add the correct pheromone amount to unknown widget actions
@@ -60,23 +67,25 @@ public class AntColony {
                 antStatsLogger.write("Start of Ant #" + (z + 1));
 
                 // Create a ant to traverse the graph
-                TestCase testCase = runAnt();
+                IChromosome<TestCase> chromosome = new Chromosome<>(runAnt());
 
-                // Stop algorithm if target line was reached (Fitness of testCase == 1) Wie und wo wird diese berechnet?
-                // Wie kann ich den Wert verwenden?
-                if (false) {
+                Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
+                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+
+
+                // Stop algorithm if target line was reached (Fitness of testCase == 1)
+                if (lineCoveredPercentageFitnessFunction.getFitness(chromosome) == 1) {
                     //TODO add necessary action for successful algorithm run (print message, etc)
                     break outerLoop;
                 } else {
                     // Add testcase of current ant to list for later deposition of pheromones
-                    //TODO add testCase to list of testCases for later use
-                    testCasesList.add(testCase);
+                    testCasesList.add(chromosome);
                 }
 
                 antStatsLogger.write("End of Ant #" + (z + 1));
             }
             // Pheromone evaporation
-            for (HashMap.Entry<WidgetAction, Double> entry : pheromones.entrySet()) {
+            for (Map.Entry<WidgetAction, Double> entry : pheromones.entrySet()) {
                 entry.setValue((1-evaporationRate)*entry.getValue());
             }
             currentPheromoneStandardValue *= (1-evaporationRate);
@@ -93,10 +102,10 @@ public class AntColony {
 
     //TODO finish ant method
     private TestCase runAnt() {
+        MATE.uiAbstractionLayer.restartApp();
+
         //TODO set variables (start widget action, previous action, current action), start test case, etc...
-        WidgetAction previousAction = null;
-        //WidgetAction currentAction; ?? Wo fängt der Algortihmus an, wie bestimme ich den aktuellen Standort bzw setze ihn weiter
-        HashMap<WidgetAction, Double> probabilities = new HashMap<>();
+        Map<WidgetAction, Double> probabilities = new HashMap<>();
         TestCase testCase = TestCase.newInitializedTestCase();
 
         // Start the loop to traverse the app with antPathLength-many steps
@@ -130,9 +139,13 @@ public class AntColony {
                     double probability = (Math.pow(currentPheromoneValue, 2));
 
                     // Reduce probability if the current action is the previous action (step back)
+                    //TODO Check if necessary
+                    /*
                     if (action.equals(previousAction)) {
                         probability /= 2;
                     }
+
+                     */
 
                     // Store the calculated value in combination with the target action for the current option
                     probabilities.put(action, probability);
@@ -140,39 +153,31 @@ public class AntColony {
 
                 // Sum up all the probabilites
                 double sumProbabilities = 0.0;
-                for (HashMap.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
+                for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     sumProbabilities += entry.getValue();
                 }
 
                 // Calculate relative probability for each option
-                for (HashMap.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
+                for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     entry.setValue(entry.getValue() / sumProbabilities);
                 }
 
                 // Determine the next action with roulette and make the step
                 double randomValue = Math.random();
                 double sum = 0.0;
-                for (HashMap.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
+                WidgetAction currentAction = null;
+                for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     sum += entry.getValue();
+                    currentAction = entry.getKey();
                     if (sum > randomValue) {
-                        // TODO use the chosen option and update relevant variables
-                        testCase.updateTestCase(entry.getKey(), "" + i);
                         break;
                     }
                 }
+                testCase.updateTestCase(currentAction, "" + i);
             }
 
-            // TODO remove if it is not possible to test this during the testcase (test afterwards with fitness = 1)
-            // Kann man die fitness von den unvollständigen testcases berechnen und in jedem schritt überprüfen ob die Zeile erreich wurde?
-            /* Check if target was reached in this step and stop the ant if that is the case
-            If () {
-                return testCase;
-            }
-            */
-
-            // Reset used variables (if the ant continues to traverse the app)
+            // Reset used variables
             probabilities.clear();
-            MATE.uiAbstractionLayer.restartApp();
         }
         return testCase;
     }
