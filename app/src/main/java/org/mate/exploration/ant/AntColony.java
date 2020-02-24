@@ -12,6 +12,8 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
+import org.mate.ui.Action;
+import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 
@@ -25,21 +27,40 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class AntColony {
     private final UIAbstractionLayer uiAbstractionLayer;
     private final AntStatsLogger antStatsLogger;
 
-    private static final int generationAmount = 5;
-    private static final int generationSize = 1;
-    private static final int antPathLength = 20;
-    private static final double evaporationRate = 0.1;
     private double currentPheromoneStandardValue;
     private Map<WidgetAction, Double> pheromones = new HashMap<>();
     private List<IChromosome<TestCase>> testCasesList = new ArrayList<>();
+
+    // Parameters to customize the ACO algorithm
+    private static final int generationAmount = 10;
+    private static final int generationSize = 5;
+    private static final int antPathLength = 30;
+    private static final double evaporationRate = 0.1;
+
+    /* Parameter to change the process of calculating the action probability
+    *  True:    Calculate the probability for a action by taking the pheromone value and
+    *           multiplying it with the weight of the action (depending on the action type)
+    *  False:   Only use the pheromone value of the action as the probability
+    */
+    private static final boolean includeActionTypeInTransition = false;
+
+    /* Parameter to change the process of depositing pheromones.
+    *  True:    Rank all ants in a generation according to the fitness value of their testcase.
+    *           Best ants get to deposit most pheromones, decreasing downwards and worst ants don´t
+    *           deposit any pheromones
+    *  False:   Only the ant with the best fitness value in a generation gets to deposit pheromones
+    */
+    private static final boolean depositPheromonesWithRanking = true;
 
     public AntColony() {
         uiAbstractionLayer = MATE.uiAbstractionLayer;
@@ -47,8 +68,7 @@ public class AntColony {
     }
 
     public void run() {
-
-        //TODO start algorithm (Vorgegeben)
+        // Get the target line for ACO to generate a test for and initialise the fitness function
         String targetLine = Properties.TARGET_LINE();
         IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
                 = new LineCoveredPercentageFitnessFunction(targetLine);
@@ -66,19 +86,20 @@ public class AntColony {
                 MATE.log_acc("Ant #" + (z + 1));
                 antStatsLogger.write("Start of Ant #" + (z + 1));
 
-                // Create a ant to traverse the graph
+                // Create an ant to traverse the app and wrap the generated testcase in a chromosome
                 IChromosome<TestCase> chromosome = new Chromosome<>(runAnt());
 
+                // Necessary lines to calculate the fitness value for the stored chromosome
                 Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
 
-
-                // Stop algorithm if target line was reached (Fitness of testCase == 1)
+                // Stop algorithm if target line was reached
                 if (lineCoveredPercentageFitnessFunction.getFitness(chromosome) == 1) {
-                    //TODO add necessary action for successful algorithm run (print message, etc)
+                    //TODO add necessary action for successful algorithm run (write log)
+                    MATE.log_acc("ACO finished successfully");
                     break outerLoop;
                 } else {
-                    // Add testcase of current ant to list for later deposition of pheromones
+                    // Add testcase of current ant to list for later depositing of pheromones
                     testCasesList.add(chromosome);
                 }
 
@@ -91,8 +112,48 @@ public class AntColony {
             currentPheromoneStandardValue *= (1-evaporationRate);
 
             // Deposit pheromones
-            //TODO add loop for each element used in ant runs to deposit pheromones depending on fitness
-            //(Noch nicht ganz sicher ob deposit einmal pro generation oder nach jeder ameise)
+            // TODO finish the deposit
+            if (depositPheromonesWithRanking) {
+                // Map test cases to their fitness values
+                Map<Double, TestCase> fitnessValues = new TreeMap<>();
+                for (int y = 0; y < testCasesList.size(); y++) {
+                    fitnessValues.put(
+                            lineCoveredPercentageFitnessFunction.getFitness(testCasesList.get(y)),
+                            testCasesList.get(y).getValue());
+                }
+
+                // Sort map according to the fitness values
+
+
+                // Deposit pheromones for the better half of test cases. Amount steadily decreases
+
+            } else {
+                // Set the cache to the test case of the first ant in the generation
+                IChromosome<TestCase> bestTestCase = testCasesList.get(0);
+
+                // Compare each of the test cases of all ants in the generation with the current
+                // best one and store the best of both in the cache
+                for (int y = 1; y < testCasesList.size(); y++) {
+                    if (lineCoveredPercentageFitnessFunction.getFitness(testCasesList.get(y)) >
+                            lineCoveredPercentageFitnessFunction.getFitness(bestTestCase)) {
+                        bestTestCase = testCasesList.get(y);
+                    }
+                }
+
+                // Store the used actions of the best test case without duplicates
+                List<WidgetAction> actionList = new ArrayList<>();
+                List<Action> eventSequence = bestTestCase.getValue().getEventSequence();
+                for (int y = 0; y < eventSequence.size(); y++) {
+                    if (!actionList.contains(eventSequence.get(y))) {
+                        actionList.add(eventSequence.get(y));
+                    }
+                }
+
+                // Deposit pheromones for all actions used in the best test case
+                for (int y = 0; y < actionList.size(); y++) {
+                    pheromones.replace(actionList.get(y), 0.5);
+                }
+            }
 
             antStatsLogger.write("End of Generation #" + (i + 1));
         }
@@ -100,11 +161,15 @@ public class AntColony {
         antStatsLogger.close();
     }
 
-    //TODO finish ant method
+    /**
+     * Method to create ants that run through the app to create a testcase
+     * @return the generated testcase
+     */
     private TestCase runAnt() {
+        // Reset the current App to guarantee standardized testing starting at the same state
         MATE.uiAbstractionLayer.restartApp();
 
-        //TODO set variables (start widget action, previous action, current action), start test case, etc...
+        // Initialise probabilities and create a new testcase for the current ant
         Map<WidgetAction, Double> probabilities = new HashMap<>();
         TestCase testCase = TestCase.newInitializedTestCase();
 
@@ -113,14 +178,20 @@ public class AntColony {
             // Get list possible actions to execute
             List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
 
+            // If there is no executable action stop MATE and throw exception
+            if (executableActions.size() == 0) {
+                // TODO throw exception
+
             // If there is only one possible widget action execute that one
-            if (executableActions.size() == 1) {
+            } else if (executableActions.size() == 1) {
+                // Set pheromone value for the action if it does not already have one
                 if (!pheromones.containsKey(executableActions.get(0))) {
                     pheromones.put(executableActions.get(0), currentPheromoneStandardValue);
                 }
 
-                // TODO use the only option and update relevant variables
+                // Execute the widget action and update the testcase
                 testCase.updateTestCase(executableActions.get(0), "" + i);
+
             } else {
                 // Set pheromone values for the available widget actions without one
                 for (WidgetAction action : executableActions) {
@@ -129,29 +200,30 @@ public class AntColony {
                     }
                 }
 
-                // Calculate attractiveness for all available actions and store their probabilities
-                for (WidgetAction action : executableActions) {
-                    // Get pheromone value for the current action
-                    double currentPheromoneValue = pheromones.get(action);
+                // Store probabilities for each action with or without factoring in the action type
+                if(includeActionTypeInTransition) {
+                    // Calculate attractiveness for all available actions and store the results
+                    for (WidgetAction action : executableActions) {
+                        // Get pheromone value for the current action
+                        double pheromoneValue = pheromones.get(action);
 
-                    // Calculate attractiveness for the current action (pheromone * fitness) möglich?? falls nicht prob = pheromone
-                    // Eventuell action type (??) einbeziehen in die bewertung
-                    double probability = (Math.pow(currentPheromoneValue, 2));
+                        // Get the weight for the current action type
+                        double actionTypeWeight = getActionTypeWeight(action);
 
-                    // Reduce probability if the current action is the previous action (step back)
-                    //TODO Check if necessary
-                    /*
-                    if (action.equals(previousAction)) {
-                        probability /= 2;
+                        // Calculate attractiveness for the current action (pheromone * action type)
+                        double probability = (pheromoneValue*actionTypeWeight);
+
+                        // Store the calculated value for the current action
+                        probabilities.put(action, probability);
                     }
-
-                     */
-
-                    // Store the calculated value in combination with the target action for the current option
-                    probabilities.put(action, probability);
+                } else {
+                    // Store pheromone value of all actions as their probability
+                    for (WidgetAction action : executableActions) {
+                        probabilities.put(action, pheromones.get(action));
+                    }
                 }
 
-                // Sum up all the probabilites
+                // Sum up all the probabilities
                 double sumProbabilities = 0.0;
                 for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     sumProbabilities += entry.getValue();
@@ -173,27 +245,37 @@ public class AntColony {
                         break;
                     }
                 }
+                // Execute the widget action and update the testcase
                 testCase.updateTestCase(currentAction, "" + i);
             }
-
             // Reset used variables
             probabilities.clear();
         }
         return testCase;
     }
 
-    /*
-    //TODO delete examples after using them (Vorgegeben)
-    //Liste an momentan möglichen Aktionen
-    List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
-
-    //Aktion ausführen
-    TestCase testCase = TestCase.newInitializedTestCase();
-    testCase.updateTestCase(executableActions.get(0), "0");
-
-    //Daten in Datei schreiben
-    antStatsLogger.write("asdf\n");
-    //... am Schluss zu machen
-    antStatsLogger.close();
-    */
+    /**
+     * Determine the weight for an action depending on the type of the action
+     * @param action the action to get a weight value for
+     * @return the determined value
+     */
+    private Double getActionTypeWeight (WidgetAction action) {
+        double eventTypeWeight;
+        switch (action.getActionType()) {
+            case SWIPE_UP:
+            case SWIPE_DOWN:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+            case BACK:
+                eventTypeWeight = 0.5;
+                break;
+            case MENU:
+                eventTypeWeight = 2;
+                break;
+            default:
+                eventTypeWeight = 1;
+                break;
+        }
+        return eventTypeWeight;
+    }
 }
