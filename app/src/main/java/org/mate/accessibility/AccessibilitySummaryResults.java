@@ -5,6 +5,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.accessibility.utils.AccessibilityUtils;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;

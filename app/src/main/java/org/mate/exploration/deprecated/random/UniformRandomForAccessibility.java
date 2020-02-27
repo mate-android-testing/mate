@@ -2,17 +2,16 @@ package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityInfoChecker;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.widgetbased.ContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.widgetbased.MultipleContentDescCheck;
+import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
+import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
+import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
@@ -161,16 +160,15 @@ public class UniformRandomForAccessibility {
         //   ClickableSpan
         //   TouchTargetSize
         //   DuplicateClickableBounds
-        AccessibilityInfoChecker accChecker = new AccessibilityInfoChecker();
-        accChecker.runAccessibilityTests(state);
+        AccessibilityViolationChecker.runAccessibilityChecks(state);
 
         //run accessibility checks implemented by MATE team
 
         //create checker for multiple (duplicate) content description
         MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck();
         //create checker for contrast issues
-        ContrastRatioAccessibilityCheck contrastChecker =
-                new ContrastRatioAccessibilityCheck();
+        TextContrastRatioAccessibilityCheck contrastChecker =
+                new TextContrastRatioAccessibilityCheck();
 
         //run checks for each widget on the screen
         for (Widget widget: state.getWidgets()) {
