@@ -419,11 +419,11 @@ public class MATE {
 
                     TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
+                    // reset the app once
+                    uiAbstractionLayer.resetApp();
+
                     // as long as we find a test case for replaying
                     while (testCase != null) {
-
-                        // reset aut before each test case
-                        uiAbstractionLayer.resetApp();
 
                         // get the actions for replaying
                         List<Action> actions = testCase.getEventSequence();
@@ -449,16 +449,19 @@ public class MATE {
 
                         // replay next test case
                         testCase = TestCaseSerializer.deserializeTestCase();
+
+                        // reset aut after each test case
+                        uiAbstractionLayer.restartApp();
                     }
 
                     MATE.log("Couldn't replay " + failures.size() + " test-cases!");
 
                     List<TestCase> successfulTestCases = new ArrayList<>();
 
-                    for (TestCase failure : failures) {
+                    // reset app once
+                    uiAbstractionLayer.resetApp();
 
-                        // reset aut before each test case
-                        uiAbstractionLayer.resetApp();
+                    for (TestCase failure : failures) {
 
                         boolean fail = false;
 
@@ -491,6 +494,8 @@ public class MATE {
                                 break;
                             }
 
+                            // reset aut after each test case
+                            uiAbstractionLayer.restartApp();
                         }
                     }
 
