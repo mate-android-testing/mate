@@ -46,6 +46,8 @@ public class AntColony {
     private static final int generationSize = 5;
     private static final int antPathLength = 30;
     private static final double evaporationRate = 0.1;
+    // TODO Choose appropriate deposit amount
+    private static final double standardDepositAmount = 1.0;
 
     /* Parameter to change the process of calculating the action probability
     *  True:    Calculate the probability for a action by taking the pheromone value and
@@ -133,8 +135,7 @@ public class AntColony {
                 }
 
                 // Deposit pheromones for the better half of testcases. Amount steadily decreases
-                // TODO Set deposit amount
-                double depositAmount = 1.0;
+                double depositAmount = standardDepositAmount;
                 double reductionAmount = 1 / (testCasesList.size() / 2.0);
                 int antsAllowedToDeposit = (int) Math.ceil(testCasesList.size() / 2.0);
                 for (Map.Entry<Double, List<TestCase>> entry : sortedFitnessValues.entrySet()) {
@@ -191,8 +192,7 @@ public class AntColony {
 
                 // Deposit pheromones for all actions used in the best testcase
                 for (int y = 0; y < actionList.size(); y++) {
-                    // TODO add pheromone amount to deposit for best ant
-                    double newValue = pheromones.get(actionList.get(y)) + 1.0;
+                    double newValue = pheromones.get(actionList.get(y)) + standardDepositAmount;
                     pheromones.put(actionList.get(y), newValue);
                 }
             }
