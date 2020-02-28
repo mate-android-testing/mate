@@ -74,7 +74,7 @@ public class AntColony {
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
         // Value to add the correct pheromone amount to unknown widget actions
-        currentPheromoneStandardValue = 0.5;
+        currentPheromoneStandardValue = 1.0;
 
         // Loop to create multiple generations of ants
         outerLoop: for (int i = 0; i < generationAmount; i++) {
@@ -112,23 +112,62 @@ public class AntColony {
             currentPheromoneStandardValue *= (1-evaporationRate);
 
             // Deposit pheromones
-            // TODO finish the deposit
             if (depositPheromonesWithRanking) {
-                // Map test cases to their fitness values
-                Map<Double, TestCase> fitnessValues = new TreeMap<>();
+                // Map test cases to their fitness values in a sorted treemap
+                Map<Double, List<TestCase>> sortedFitnessValues = new TreeMap<>();
                 for (int y = 0; y < testCasesList.size(); y++) {
-                    fitnessValues.put(
-                            lineCoveredPercentageFitnessFunction.getFitness(testCasesList.get(y)),
-                            testCasesList.get(y).getValue());
+                    // Retrieve fitness value for current ant
+                    double fitnessValue =
+                            lineCoveredPercentageFitnessFunction.getFitness(testCasesList.get(y));
+
+                    // Check if previous ant had same fitness value
+                    if (sortedFitnessValues.containsKey(fitnessValue)) {
+                        // Add current testcase to the list of testcases with that fitness value
+                        sortedFitnessValues.get(fitnessValue).add(testCasesList.get(y).getValue());
+                    } else {
+                        // Create a new map entry and add the current testcase
+                        List<TestCase> tempList = new ArrayList<>();
+                        sortedFitnessValues.put(fitnessValue, tempList);
+                        sortedFitnessValues.get(fitnessValue).add(testCasesList.get(y).getValue());
+                    }
                 }
 
-                // Sort map according to the fitness values
+                // Deposit pheromones for the better half of testcases. Amount steadily decreases
+                // TODO Set deposit amount
+                double depositAmount = 1.0;
+                double reductionAmount = 1 / (testCasesList.size() / 2.0);
+                int antsAllowedToDeposit = (int) Math.ceil(testCasesList.size() / 2.0);
+                for (Map.Entry<Double, List<TestCase>> entry : sortedFitnessValues.entrySet()) {
+                    // Check if all relevant ants have already deposited their pheromones
+                    if(antsAllowedToDeposit > 0) {
+                        for (TestCase currentTestCase : entry.getValue()) {
+                            // Store the used actions of the current testcase without duplicates
+                            List<WidgetAction> actionList = new ArrayList<>();
+                            List<WidgetAction> eventSequence = (List<WidgetAction>)(List<?>)
+                                    currentTestCase.getEventSequence();
+                            for (int y = 0; y < eventSequence.size(); y++) {
+                                if (!actionList.contains(eventSequence.get(y))) {
+                                    actionList.add(eventSequence.get(y));
+                                }
+                            }
 
+                            // Deposit pheromones for all actions used in the current testcase
+                            for (int y = 0; y < actionList.size(); y++) {
+                                double newValue = pheromones.get(actionList.get(y)) + depositAmount;
+                                pheromones.put(actionList.get(y), newValue);
+                            }
 
-                // Deposit pheromones for the better half of test cases. Amount steadily decreases
+                            // Updating of iteration variables
+                            depositAmount -= reductionAmount;
+                            antsAllowedToDeposit--;
+                        }
+                    } else {
+                        break;
+                    }
+                }
 
             } else {
-                // Set the cache to the test case of the first ant in the generation
+                // Set the cache to the testcase of the first ant in the generation
                 IChromosome<TestCase> bestTestCase = testCasesList.get(0);
 
                 // Compare each of the test cases of all ants in the generation with the current
@@ -140,18 +179,21 @@ public class AntColony {
                     }
                 }
 
-                // Store the used actions of the best test case without duplicates
+                // Store the used actions of the best testcase without duplicates
                 List<WidgetAction> actionList = new ArrayList<>();
-                List<Action> eventSequence = bestTestCase.getValue().getEventSequence();
+                List<WidgetAction> eventSequence =
+                        (List<WidgetAction>)(List<?>) bestTestCase.getValue().getEventSequence();
                 for (int y = 0; y < eventSequence.size(); y++) {
                     if (!actionList.contains(eventSequence.get(y))) {
                         actionList.add(eventSequence.get(y));
                     }
                 }
 
-                // Deposit pheromones for all actions used in the best test case
+                // Deposit pheromones for all actions used in the best testcase
                 for (int y = 0; y < actionList.size(); y++) {
-                    pheromones.replace(actionList.get(y), 0.5);
+                    // TODO add pheromone amount to deposit for best ant
+                    double newValue = pheromones.get(actionList.get(y)) + 1.0;
+                    pheromones.put(actionList.get(y), newValue);
                 }
             }
 
@@ -180,7 +222,8 @@ public class AntColony {
 
             // If there is no executable action stop MATE and throw exception
             if (executableActions.size() == 0) {
-                // TODO throw exception
+                throw new IllegalStateException("No possible Transitions available! App contains" +
+                        "a dead end.");
 
             // If there is only one possible widget action execute that one
             } else if (executableActions.size() == 1) {
