@@ -15,7 +15,7 @@ public class AntStatsLogger {
 
     public AntStatsLogger() {
         try {
-            fos = InstrumentationRegistry.getTargetContext().openFileOutput("port", Context.MODE_PRIVATE);
+            fos = InstrumentationRegistry.getTargetContext().openFileOutput("antstats.log", Context.MODE_PRIVATE);
         } catch (FileNotFoundException e) {
             //Fehlerbehandlung
         }
