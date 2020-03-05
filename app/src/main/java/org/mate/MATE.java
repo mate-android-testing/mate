@@ -417,6 +417,9 @@ public class MATE {
                     // track which test cases couldn't be successfully replayed
                     List<TestCase> failures = new ArrayList<>();
 
+                    // track the number of test cases
+                    int testCaseCounter = 0;
+
                     TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
                     // reset the app once
@@ -424,6 +427,8 @@ public class MATE {
 
                     // as long as we find a test case for replaying
                     while (testCase != null) {
+
+                        testCaseCounter++;
 
                         // get the actions for replaying
                         List<Action> actions = testCase.getEventSequence();
@@ -501,6 +506,9 @@ public class MATE {
 
                     MATE.log("Could successfully replay " + successfulTestCases.size()
                             + " test cases from failing ones!");
+
+                    MATE.log("Total number of successfully replayed test cases: "
+                            + String.valueOf(testCaseCounter - failures.size() + successfulTestCases.size()));
 
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);

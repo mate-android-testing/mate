@@ -79,9 +79,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             if (component.isActivity()) {
                 if (component.isHandlingOnNewIntent()) {
                     numberOfActivitiesHandlingOnNewIntent++;
-                } else {
-                    numberOfActivities++;
                 }
+                numberOfActivities++;
             } else if (component.isService()) {
                 numberOfServices++;
             } else if (component.isBroadcastReceiver()) {
@@ -90,9 +89,12 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         }
 
         relativeActivityAmount = ((float) numberOfActivities) / numberOfComponents;
-        relativeActivityWithOnNewIntentAmount = ((float) numberOfActivitiesHandlingOnNewIntent) / numberOfComponents;
         relativeServiceAmount = ((float) numberOfServices) / numberOfComponents;
         relativeReceiverAmount = ((float ) numberOfReceivers) / numberOfComponents;
+
+        // this amount is relative to the total amount of activities handling onCreate and onNewIntent
+        relativeActivityWithOnNewIntentAmount = ((float) numberOfActivitiesHandlingOnNewIntent)
+                / numberOfActivitiesHandlingOnNewIntent + numberOfActivities;
 
         MATE.log("Total number of components: " + numberOfComponents);
         MATE.log("Number of Activities: " + numberOfActivities);
@@ -200,15 +202,18 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                     && intentProvider.hasSystemEventReceiver()) {
                 // select a system event
                 return intentProvider.getSystemEventAction();
-            } else if (rand < relativeServiceAmount + relativeReceiverAmount
-                    + relativeDynamicReceiverAmount + relativeSystemReceiverAmount
-                    + relativeActivityWithOnNewIntentAmount
-                    && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
-                // trigger the current activity's onNewIntent method
-                return intentProvider.generateIntentBasedActionForCurrentActivity();
             } else {
-                // select an activity (there must be at least the main activity exported!
-                return intentProvider.getAction(ComponentType.ACTIVITY);
+                // we select an activity (at least the main activity must be exported)
+                double rnd = Math.random();
+
+                if (rnd < relativeActivityWithOnNewIntentAmount
+                        && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
+                    // we trigger the onNewIntent method
+                    return intentProvider.generateIntentBasedActionForCurrentActivity();
+                } else {
+                    // we trigger the onCreate method
+                    return intentProvider.getAction(ComponentType.ACTIVITY);
+                }
             }
         } else {
             // select a UI action
