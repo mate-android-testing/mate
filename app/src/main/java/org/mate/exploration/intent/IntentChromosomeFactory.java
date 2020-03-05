@@ -206,12 +206,12 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 // we select an activity (at least the main activity must be exported)
                 double rnd = Math.random();
 
-                if (rnd < relativeActivityWithOnNewIntentAmount
-                        && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
-                    // we trigger the onNewIntent method
+                // select with p = 1/2 either onNewIntent or OnCreate
+                if (rnd < 0.5 && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
+                    // we trigger the onNewIntent method of the current activity
                     return intentProvider.generateIntentBasedActionForCurrentActivity();
                 } else {
-                    // we trigger the onCreate method
+                    // we trigger the onCreate method of any activity
                     return intentProvider.getAction(ComponentType.ACTIVITY);
                 }
             }
