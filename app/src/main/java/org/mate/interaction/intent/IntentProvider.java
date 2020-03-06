@@ -248,6 +248,11 @@ public class IntentProvider {
     public boolean isCurrentActivityHandlingOnNewIntent() {
 
         String name = Registry.getEnvironmentManager().getCurrentActivityName();
+
+        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
+            return false;
+        }
+
         String[] tokens = name.split("/");
 
         String packageName = tokens[0];
@@ -272,6 +277,11 @@ public class IntentProvider {
     public IntentBasedAction generateIntentBasedActionForCurrentActivity() {
 
         String name = Registry.getEnvironmentManager().getCurrentActivityName();
+
+        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
+            throw new IllegalStateException("Couldn't retrieve name of current activity!");
+        }
+
         String[] tokens = name.split("/");
 
         String packageName = tokens[0];
