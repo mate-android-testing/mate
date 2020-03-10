@@ -113,6 +113,9 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             uiAbstractionLayer.resetApp();
         }
 
+        // restore natural orientation of device (reset any rotation)
+        uiAbstractionLayer.restoreNaturalOrientation();
+
         // grant runtime permissions (read/write external storage) which are dropped after each reset
         Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
 

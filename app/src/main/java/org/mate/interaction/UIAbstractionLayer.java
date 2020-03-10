@@ -256,6 +256,18 @@ public class UIAbstractionLayer {
         }
     }
 
+    /**
+     * Restores the natural orientation of the emulator, that is reverting
+     * any performed rotation operation.
+     */
+    public void restoreNaturalOrientation() {
+        try {
+            deviceMgr.executeAction(new WidgetAction(ActionType.NATURAL_ORIENTATION));
+        } catch (AUTCrashException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private long waitForProgressBar(IScreenState state) {
         long ini = new Date().getTime();
         long end = new Date().getTime();

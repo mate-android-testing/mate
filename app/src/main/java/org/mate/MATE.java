@@ -428,6 +428,9 @@ public class MATE {
                     // as long as we find a test case for replaying
                     while (testCase != null) {
 
+                        // restore the natural orientation before each test case
+                        uiAbstractionLayer.restoreNaturalOrientation();
+
                         testCaseCounter++;
 
                         // get the actions for replaying

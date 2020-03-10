@@ -250,6 +250,7 @@ public class ActionsScreenState extends AbstractScreenState {
         executables.add(new WidgetAction(ActionType.MENU));
 
         // those actions should be always applicable independent of the widget
+        executables.add(new WidgetAction(ActionType.NATURAL_ORIENTATION));
         executables.add(new WidgetAction(ActionType.ROTATE_LEFT));
         executables.add(new WidgetAction(ActionType.ROTATE_RIGHT));
         executables.add(new WidgetAction(ActionType.HOME));

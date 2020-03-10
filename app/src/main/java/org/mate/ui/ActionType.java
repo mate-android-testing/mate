@@ -13,6 +13,7 @@ public enum ActionType {
     MENU,
     CLEAR_WIDGET,
     MANUAL_ACTION,
+    NATURAL_ORIENTATION,
     ROTATE_LEFT,
     ROTATE_RIGHT,
     HOME,
