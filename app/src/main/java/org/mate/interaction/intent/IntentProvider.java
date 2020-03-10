@@ -249,11 +249,11 @@ public class IntentProvider {
 
         String name = Registry.getEnvironmentManager().getCurrentActivityName();
 
-        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
+        String[] tokens = name.split("/");
+
+        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN) || tokens.length < 2) {
             return false;
         }
-
-        String[] tokens = name.split("/");
 
         String packageName = tokens[0];
         String activity = tokens[1];
@@ -278,11 +278,11 @@ public class IntentProvider {
 
         String name = Registry.getEnvironmentManager().getCurrentActivityName();
 
-        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
+        String[] tokens = name.split("/");
+
+        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN) || tokens.length < 2) {
             throw new IllegalStateException("Couldn't retrieve name of current activity!");
         }
-
-        String[] tokens = name.split("/");
 
         String packageName = tokens[0];
         String activity = tokens[1];
