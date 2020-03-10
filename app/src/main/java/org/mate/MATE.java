@@ -255,15 +255,8 @@ public class MATE {
                 } else if (explorationStrategy.equals("AntColonyExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    final AntColony antColony = new AntColony();
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            antColony.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
+                    AntColony antColony = new AntColony();
+                    antColony.run();
 
                     if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(antColony, null);
@@ -416,7 +409,7 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final RandomExploration randomExploration = new RandomExploration(50);
+                    final RandomExploration randomExploration = new RandomExploration(Properties.STORE_COVERAGE(), true, 50);
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override

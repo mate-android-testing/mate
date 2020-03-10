@@ -43,8 +43,8 @@ public class AntColony {
 
     // Parameters to customize the ACO algorithm
     private static final int generationAmount = 10;
-    private static final int generationSize = 5;
-    private static final int antPathLength = 30;
+    private static final int generationSize = 2;
+    private static final int antPathLength = 4;
     private static final double evaporationRate = 0.1;
     // TODO Choose appropriate deposit amount
     private static final double standardDepositAmount = 1.0;
@@ -94,6 +94,9 @@ public class AntColony {
                 // Necessary lines to calculate the fitness value for the stored chromosome
                 Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+
+                // DEBUG
+                System.out.println(lineCoveredPercentageFitnessFunction.getFitness(chromosome));
 
                 // Stop algorithm if target line was reached
                 if (lineCoveredPercentageFitnessFunction.getFitness(chromosome) == 1) {
@@ -209,7 +212,7 @@ public class AntColony {
      */
     private TestCase runAnt() {
         // Reset the current App to guarantee standardized testing starting at the same state
-        MATE.uiAbstractionLayer.restartApp();
+        MATE.uiAbstractionLayer.resetApp();
 
         // Initialise probabilities and create a new testcase for the current ant
         Map<WidgetAction, Double> probabilities = new HashMap<>();
@@ -219,6 +222,7 @@ public class AntColony {
         for (int i = 0; i < antPathLength; i++) {
             // Get list possible actions to execute
             List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
+            boolean prematureShutdown;
 
             // If there is no executable action stop MATE and throw exception
             if (executableActions.size() == 0) {
@@ -233,7 +237,7 @@ public class AntColony {
                 }
 
                 // Execute the widget action and update the testcase
-                testCase.updateTestCase(executableActions.get(0), "" + i);
+                prematureShutdown = !testCase.updateTestCase(executableActions.get(0), "" + i);
 
             } else {
                 // Set pheromone values for the available widget actions without one
@@ -289,8 +293,15 @@ public class AntColony {
                     }
                 }
                 // Execute the widget action and update the testcase
-                testCase.updateTestCase(currentAction, "" + i);
+                prematureShutdown = !testCase.updateTestCase(currentAction, "" + i);
             }
+
+            // TODO Comment
+            if (prematureShutdown) {
+                break;
+            }
+
+
             // Reset used variables
             probabilities.clear();
         }
