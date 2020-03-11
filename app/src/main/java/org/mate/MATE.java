@@ -427,10 +427,6 @@ public class MATE {
 
                     // as long as we find a test case for replaying
                     while (testCase != null) {
-
-                        // restore the natural orientation before each test case
-                        uiAbstractionLayer.restoreNaturalOrientation();
-
                         testCaseCounter++;
 
                         // get the actions for replaying
@@ -459,7 +455,7 @@ public class MATE {
                         testCase = TestCaseSerializer.deserializeTestCase();
 
                         // reset aut after each test case
-                        uiAbstractionLayer.restartApp();
+                        uiAbstractionLayer.resetApp();
                     }
 
                     MATE.log("Couldn't replay " + failures.size() + " test-cases!");
@@ -503,7 +499,7 @@ public class MATE {
                             }
 
                             // reset aut after each test case
-                            uiAbstractionLayer.restartApp();
+                            uiAbstractionLayer.resetApp();
                         }
                     }
 
@@ -524,7 +520,7 @@ public class MATE {
                     MATE.log_acc("Store Coverage: " + Properties.STORE_COVERAGE());
 
                     final RandomExploration randomExploration
-                            = new RandomExploration(Properties.STORE_COVERAGE(), false, MAX_NUMBER_EVENTS(),
+                            = new RandomExploration(Properties.STORE_COVERAGE(), true, MAX_NUMBER_EVENTS(),
                             Properties.RELATIVE_INTENT_AMOUNT());
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {

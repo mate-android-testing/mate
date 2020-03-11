@@ -516,4 +516,25 @@ public class EnvironmentManager {
         String cmd = "reportFlaw:" + emulator + ":" + msg;
         tunnelLegacyCmd(cmd);
     }
+
+    public void setPortraitMode() {
+        Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("type", "rotation")
+                .withParameter("rotation", "portrait")
+                .build());
+        if (!"/emulator/interaction".equals(response.getSubject()) ||
+            !"portrait".equals(response.getParameter("rotation"))) {
+            MATE.log_acc("ERROR: unable to set rotation to portrait mode");
+        }
+    }
+
+    public void toggleRotation() {
+        Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("type", "rotation")
+                .withParameter("rotation", "toggle")
+                .build());
+        if (!"/emulator/interaction".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: unable to toggle rotation of emulator");
+        }
+    }
 }

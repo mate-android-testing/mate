@@ -10,7 +10,7 @@ public class RandomExploration {
     private final boolean alwaysReset;
 
     public RandomExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), false, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), true, maxNumEvents);
     }
 
     /**

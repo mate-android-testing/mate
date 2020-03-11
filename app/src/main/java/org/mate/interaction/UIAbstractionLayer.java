@@ -1,5 +1,6 @@
 package org.mate.interaction;
 
+import android.os.RemoteException;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -256,18 +258,6 @@ public class UIAbstractionLayer {
         }
     }
 
-    /**
-     * Restores the natural orientation of the emulator, that is reverting
-     * any performed rotation operation.
-     */
-    public void restoreNaturalOrientation() {
-        try {
-            deviceMgr.executeAction(new WidgetAction(ActionType.NATURAL_ORIENTATION));
-        } catch (AUTCrashException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     private long waitForProgressBar(IScreenState state) {
         long ini = new Date().getTime();
         long end = new Date().getTime();
@@ -296,6 +286,13 @@ public class UIAbstractionLayer {
     }
 
     public void resetApp() {
+        try {
+            device.wakeUp();
+        } catch (RemoteException e) {
+            MATE.log("Wake up couldn't be performed");
+            e.printStackTrace();
+        }
+        Registry.getEnvironmentManager().setPortraitMode();
         deviceMgr.reinstallApp();
         sleep(5000);
         deviceMgr.restartApp();

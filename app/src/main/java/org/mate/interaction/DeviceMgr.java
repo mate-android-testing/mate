@@ -266,31 +266,8 @@ public class DeviceMgr implements IApp {
                 device.openNotification();
                 break;
 
-            case NATURAL_ORIENTATION:
-                try {
-                    device.setOrientationNatural();
-                } catch (RemoteException e) {
-                    MATE.log("Couldn't restore natural orientation!");
-                    e.printStackTrace();
-                }
-                break;
-
-            case ROTATE_LEFT:
-                try {
-                    device.setOrientationLeft();
-                } catch (RemoteException e) {
-                    MATE.log("Left Rotation couldn't be performed!");
-                    e.printStackTrace();
-                }
-                break;
-
-            case ROTATE_RIGHT:
-                try {
-                    device.setOrientationRight();
-                } catch (RemoteException e) {
-                    MATE.log("Right Rotation couldn't be performed!");
-                    e.printStackTrace();
-                }
+            case TOGGLE_ROTATION:
+                Registry.getEnvironmentManager().toggleRotation();
                 break;
         }
 

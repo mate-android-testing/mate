@@ -13,7 +13,7 @@ public class HeuristicExploration {
     private final boolean alwaysReset;
 
     public HeuristicExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), false, maxNumEvents);
+        this(Properties.STORE_COVERAGE(), true, maxNumEvents);
     }
 
     // TODO: we need some sort of combined factory that makes use of heuristic exploration with intent based actions
