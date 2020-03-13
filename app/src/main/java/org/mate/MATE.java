@@ -67,6 +67,7 @@ import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.MersenneTwister;
+import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
@@ -450,6 +451,9 @@ public class MATE {
                                 uiAbstractionLayer.executeAction(actions.get(i));
                             }
                         }
+
+                        // record stats only if test case could be successfully replayed
+                        TestCaseStatistics.recordStats(testCase, null);
 
                         // replay next test case
                         testCase = TestCaseSerializer.deserializeTestCase();
