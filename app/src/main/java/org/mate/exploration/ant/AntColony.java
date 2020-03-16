@@ -222,7 +222,13 @@ public class AntColony {
         for (int i = 0; i < antPathLength; i++) {
             // Get list possible actions to execute
             List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
+
+            //TODO REMOVE
+            MATE.log_acc("---------- Anzahl an Möglichkeiten "+ executableActions.size() +" ----------");
+
+            // Variable to flag a premature shutdown due to ant executing closing action
             boolean prematureShutdown;
+            WidgetAction currentAction = null;
 
             // If there is no executable action stop MATE and throw exception
             if (executableActions.size() == 0) {
@@ -238,7 +244,7 @@ public class AntColony {
 
                 // Execute the widget action and update the testcase
                 prematureShutdown = !testCase.updateTestCase(executableActions.get(0), "" + i);
-
+                currentAction = executableActions.get(0);
             } else {
                 // Set pheromone values for the available widget actions without one
                 for (WidgetAction action : executableActions) {
@@ -277,14 +283,19 @@ public class AntColony {
                 }
 
                 // Calculate relative probability for each option
+                //TODO Remove
+                int temp = 1;
+                MATE.log_acc("---------- Wahrscheinlichkeiten : ----------");
                 for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     entry.setValue(entry.getValue() / sumProbabilities);
+                    //TODO REMOVE
+                    MATE.log_acc("---------- Für Action Nr. "+ temp +": "+ entry.getValue() +" ----------");
+                    temp++;
                 }
 
                 // Determine the next action with roulette and make the step
                 double randomValue = Math.random();
                 double sum = 0.0;
-                WidgetAction currentAction = null;
                 for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     sum += entry.getValue();
                     currentAction = entry.getKey();
@@ -296,17 +307,21 @@ public class AntColony {
                 prematureShutdown = !testCase.updateTestCase(currentAction, "" + i);
             }
 
-            // TODO Comment
+            // If the application gets shutdown the ant run is terminated and the action resulting
+            // in the shutdown gets set to 0 to not be used in future runs
             if (prematureShutdown) {
+                pheromones.put(currentAction, 0.0);
+                //TODO REMOVE
+                MATE.log_acc("---------- Pheromone von exit action auf 0 gesetzt ----------");
                 break;
             }
-
 
             // Reset used variables
             probabilities.clear();
         }
         return testCase;
     }
+
 
     /**
      * Determine the weight for an action depending on the type of the action
