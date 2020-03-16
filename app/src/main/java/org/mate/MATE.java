@@ -418,9 +418,6 @@ public class MATE {
                     // track which test cases couldn't be successfully replayed
                     List<TestCase> failures = new ArrayList<>();
 
-                    // track the number of test cases
-                    int testCaseCounter = 0;
-
                     TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
                     // reset the app once
@@ -428,32 +425,15 @@ public class MATE {
 
                     // as long as we find a test case for replaying
                     while (testCase != null) {
-                        testCaseCounter++;
 
-                        // get the actions for replaying
-                        List<Action> actions = testCase.getEventSequence();
-
-                        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
-
-                            MATE.log("Replaying Action " + i);
-                            Action nextAction = actions.get(i);
-
-                            // check whether the UI action is applicable on the current state
-                            if (nextAction instanceof WidgetAction
-                                    && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
-                                MATE.log("Action not applicable!");
-                                // MATE.log("Activity before action: " + testCase.getActivityAfterAction(i-1));
-                                // TODO: find appropriate repairment strategy
-                                repairUIAction(nextAction);
-                                failures.add(testCase);
-                                break;
-                            } else {
-                                uiAbstractionLayer.executeAction(actions.get(i));
-                            }
+                        if (replayTestCase(testCase)) {
+                            // record stats only if test case could be successfully replayed
+                            TestCaseStatistics.recordStats(testCase, null);
+                        } else {
+                            failures.add(testCase);
                         }
 
-                        // record stats only if test case could be successfully replayed
-                        TestCaseStatistics.recordStats(testCase, null);
+                        MATE.log("Replayed TestCase!");
 
                         // replay next test case
                         testCase = TestCaseSerializer.deserializeTestCase();
@@ -462,57 +442,21 @@ public class MATE {
                         uiAbstractionLayer.resetApp();
                     }
 
-                    MATE.log("Couldn't replay " + failures.size() + " test-cases!");
+                    // retry failed test cases
+                    for (TestCase failedTestCase : failures) {
 
-                    List<TestCase> successfulTestCases = new ArrayList<>();
+                        boolean success = false;
 
-                    // reset app once
-                    uiAbstractionLayer.resetApp();
+                        for (int i = 0; i < 5 && !success; i++) {
 
-                    for (TestCase failure : failures) {
+                            success = replayTestCase(failedTestCase);
 
-                        boolean fail = false;
-
-                        // repeat test case maximal 5 times or until it could be successfully executed
-                        for (int i = 0; i < 5; i++) {
-
-                            // get the actions for replaying
-                            List<Action> actions = failure.getEventSequence();
-
-                            for (int k = 0; k < failure.getEventSequence().size(); k++) {
-
-                                Action nextAction = actions.get(k);
-
-                                // check whether the UI action is applicable on the current state
-                                if (nextAction instanceof WidgetAction
-                                        && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
-                                    MATE.log("Action not applicable!");
-                                    // MATE.log("Activity before action: " + testCase.getActivityAfterAction(k-1));
-                                    // TODO: find appropriate repairment strategy
-                                    repairUIAction(nextAction);
-                                    fail = true;
-                                    break;
-                                } else {
-                                    uiAbstractionLayer.executeAction(actions.get(k));
-                                }
-                            }
-
-                            if (!fail) {
-                                successfulTestCases.add(failure);
-                                break;
-                            }
+                            MATE.log("Replayed TestCase!");
 
                             // reset aut after each test case
                             uiAbstractionLayer.resetApp();
                         }
                     }
-
-                    MATE.log("Could successfully replay " + successfulTestCases.size()
-                            + " test cases from failing ones!");
-
-                    MATE.log("Total number of successfully replayed test cases: "
-                            + String.valueOf(testCaseCounter - failures.size() + successfulTestCases.size()));
-
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -746,6 +690,42 @@ public class MATE {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Replays a test case. Repairs individual UI actions if not directly applicable.
+     *
+     * @param testCase The test case to be replayed.
+     * @return Returns {@code true} if the test case could be successfully replayed,
+     *          otherwise {@code false} is returned.
+     */
+    private boolean replayTestCase(TestCase testCase) {
+
+        // get the actions for replaying
+        List<Action> actions = testCase.getEventSequence();
+
+        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
+
+            Action nextAction = actions.get(i);
+
+            // check whether the UI action is applicable on the current state
+            if (nextAction instanceof WidgetAction
+                    && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
+
+                // try to repair UI action
+                Action repairedAction = repairUIAction(nextAction);
+
+                if (repairedAction != null) {
+                    uiAbstractionLayer.executeAction(repairedAction);
+                } else {
+                    MATE.log("Action not applicable!");
+                    return false;
+                }
+            } else {
+                uiAbstractionLayer.executeAction(actions.get(i));
+            }
+        }
+        return true;
     }
 
     /**
