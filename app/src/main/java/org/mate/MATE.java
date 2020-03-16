@@ -451,6 +451,11 @@ public class MATE {
 
                             success = replayTestCase(failedTestCase);
 
+                            if (success) {
+                                // record stats about successful test cases
+                                TestCaseStatistics.recordStats(failedTestCase, null);
+                            }
+
                             MATE.log("Replayed TestCase!");
 
                             // reset aut after each test case
