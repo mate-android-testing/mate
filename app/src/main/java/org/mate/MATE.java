@@ -76,8 +76,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -416,7 +418,9 @@ public class MATE {
                     }
 
                     // track which test cases couldn't be successfully replayed
-                    List<TestCase> failures = new ArrayList<>();
+                    Map<Integer, TestCase> failures = new HashMap<>();
+
+                    int testCaseID = 0;
 
                     TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
@@ -430,33 +434,35 @@ public class MATE {
                             // record stats only if test case could be successfully replayed
                             TestCaseStatistics.recordStats(testCase, null);
                         } else {
-                            failures.add(testCase);
+                            failures.put(testCaseID, testCase);
                         }
 
-                        MATE.log("Replayed TestCase!");
+                        MATE.log("Replayed TestCase " + testCaseID + "!");
 
                         // replay next test case
                         testCase = TestCaseSerializer.deserializeTestCase();
+
+                        testCaseID++;
 
                         // reset aut after each test case
                         uiAbstractionLayer.resetApp();
                     }
 
                     // retry failed test cases
-                    for (TestCase failedTestCase : failures) {
+                    for (Map.Entry<Integer, TestCase> entry : failures.entrySet()) {
 
                         boolean success = false;
 
                         for (int i = 0; i < 5 && !success; i++) {
 
-                            success = replayTestCase(failedTestCase);
+                            success = replayTestCase(entry.getValue());
 
                             if (success) {
                                 // record stats about successful test cases
-                                TestCaseStatistics.recordStats(failedTestCase, null);
+                                TestCaseStatistics.recordStats(entry.getValue(), null);
                             }
 
-                            MATE.log("Replayed TestCase!");
+                            MATE.log("Replayed TestCase " + entry.getKey() + "!");
 
                             // reset aut after each test case
                             uiAbstractionLayer.resetApp();
