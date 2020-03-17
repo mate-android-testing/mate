@@ -721,12 +721,14 @@ public class MATE {
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
+                    MATE.log("Replaying action " + i);
                     uiAbstractionLayer.executeAction(repairedAction);
                 } else {
                     MATE.log("Action not applicable!");
                     return false;
                 }
             } else {
+                MATE.log("Replaying action " + i);
                 uiAbstractionLayer.executeAction(actions.get(i));
             }
         }

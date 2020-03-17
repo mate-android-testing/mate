@@ -121,6 +121,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         try {
             for (int i = 0; i < maxNumEvents; i++) {
+                MATE.log("Executing action " + i);
                 if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
                     return chromosome;
                 }
