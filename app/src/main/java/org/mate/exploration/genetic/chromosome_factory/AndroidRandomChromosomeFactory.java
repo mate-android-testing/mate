@@ -53,10 +53,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
 
             testCase.print();
 
-            //TODO: remove hack, when better solution implemented (query fitness function)
-            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+            if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
                 BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
             }
 
@@ -64,7 +61,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             if (storeCoverage) {
 
                 if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                    //TODO: remove hack, when better solution implemented (query fitness function)
                     Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
+                    LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
 
                     MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getCoverage(chromosome));

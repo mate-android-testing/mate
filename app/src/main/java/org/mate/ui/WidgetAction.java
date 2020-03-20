@@ -104,12 +104,21 @@ public class WidgetAction extends Action {
         if (o == null || getClass() != o.getClass()) return false;
         WidgetAction action = (WidgetAction) o;
         return actionType == action.actionType &&
-                Objects.equals(widget.getIdByActivity(), action.widget.getIdByActivity());
+                Objects.equals(widget.getIdByActivity(), action.widget.getIdByActivity()) &&
+                widget.getX1() == action.widget.getX1() &&
+                widget.getX2() == action.widget.getX2() &&
+                widget.getY1() == action.widget.getY1() &&
+                widget.getX2() == action.widget.getY2();
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(widget.getIdByActivity(), actionType);
+        return Objects.hash(
+                widget.getIdByActivity(),
+                actionType,
+                widget.getX1(),
+                widget.getX2(),
+                widget.getY1(),
+                widget.getY2());
     }
 }
