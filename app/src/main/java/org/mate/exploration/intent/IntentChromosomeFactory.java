@@ -129,7 +129,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         } finally {
 
             // record stats about test case, in particular intent based actions
-            TestCaseStatistics.recordStats(testCase, intentProvider.getComponents());
+            TestCaseStatistics.recordStats(testCase);
 
             if (Properties.RECORD_TEST_CASE()) {
                 TestCaseSerializer.serializeTestCase(testCase);

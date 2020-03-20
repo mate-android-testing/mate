@@ -275,7 +275,7 @@ public class IntentFilterDescription {
                     uriBuilder.append(Uri.fromFile(new File("/sdcard/", possibleFile)).toString());
                 }
 
-                MATE.log("Generated URI: " + Uri.parse(uriBuilder.toString()));
+                // MATE.log("Generated URI: " + Uri.parse(uriBuilder.toString()));
                 return Uri.parse(uriBuilder.toString());
 
             } else {

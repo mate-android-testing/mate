@@ -432,7 +432,7 @@ public class MATE {
 
                         if (replayTestCase(testCase)) {
                             // record stats only if test case could be successfully replayed
-                            TestCaseStatistics.recordStats(testCase, null);
+                            TestCaseStatistics.recordStats(testCase);
                         } else {
                             failures.put(testCaseID, testCase);
                         }
@@ -459,7 +459,7 @@ public class MATE {
 
                             if (success) {
                                 // record stats about successful test cases
-                                TestCaseStatistics.recordStats(entry.getValue(), null);
+                                TestCaseStatistics.recordStats(entry.getValue());
                             }
 
                             MATE.log("Replayed TestCase " + entry.getKey() + "!");

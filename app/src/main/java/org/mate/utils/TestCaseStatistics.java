@@ -22,7 +22,7 @@ public final class TestCaseStatistics {
         throw new UnsupportedOperationException("Utility class can't be instantiated!");
     }
 
-    public static void recordStats(TestCase testCase, final List<ComponentDescription> components) {
+    public static void recordStats(TestCase testCase) {
 
         MATE.log("Visited Activities in Order:");
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
@@ -31,9 +31,24 @@ public final class TestCaseStatistics {
 
         countInvalidURIs(testCase);
         countActionsPerType(testCase);
+        countNullValues(testCase);
+        printURIs(testCase);
+    }
 
-        if (components != null) {
-            countNullValues(testCase, components);
+    private static void printURIs(TestCase testCase) {
+
+        List<Action> actions = testCase.getEventSequence();
+
+        for (Action action : actions) {
+
+            if (action instanceof IntentBasedAction) {
+
+                Intent intent = ((IntentBasedAction) action).getIntent();
+
+                if (intent.getData() != null){
+                    MATE.log("URI: " + intent.getData());
+                }
+            }
         }
     }
 
@@ -95,7 +110,7 @@ public final class TestCaseStatistics {
         MATE.log("Number of system actions: " + numberOfSystemActions);
     }
 
-    private static void countNullValues(TestCase testCase, final List<ComponentDescription> components) {
+    private static void countNullValues(TestCase testCase) {
 
         List<Action> actions = testCase.getEventSequence();
 
@@ -105,14 +120,6 @@ public final class TestCaseStatistics {
             if (action instanceof IntentBasedAction) {
 
                 Intent intent = ((IntentBasedAction) action).getIntent();
-
-                // get the corresponding component description
-                ComponentDescription component = ((IntentBasedAction) action).getComponent();
-
-                // get the corresponding intent filter description
-                IntentFilterDescription intentFilter = ((IntentBasedAction) action).getIntentFilter();
-
-                // MATE.log("" + action);
 
                 // actually each intent should have defined an action
                 if (intent.getAction() == null) {
