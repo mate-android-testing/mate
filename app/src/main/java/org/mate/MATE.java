@@ -417,6 +417,8 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+
                     // track which test cases couldn't be successfully replayed
                     Map<Integer, TestCase> failures = new HashMap<>();
 
