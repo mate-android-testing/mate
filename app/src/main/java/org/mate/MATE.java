@@ -429,6 +429,9 @@ public class MATE {
                     // reset the app once
                     uiAbstractionLayer.resetApp();
 
+                    // grant runtime permissions (read/write external storage) which are dropped after each reset
+                    Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+
                     // as long as we find a test case for replaying
                     while (testCase != null) {
 
@@ -448,6 +451,9 @@ public class MATE {
 
                         // reset aut after each test case
                         uiAbstractionLayer.resetApp();
+
+                        // grant runtime permissions (read/write external storage) which are dropped after each reset
+                        Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
                     }
 
                     // retry failed test cases
@@ -468,6 +474,9 @@ public class MATE {
 
                             // reset aut after each test case
                             uiAbstractionLayer.resetApp();
+
+                            // grant runtime permissions (read/write external storage) which are dropped after each reset
+                            Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
                         }
                     }
                 } else if (explorationStrategy.equals("RandomExploration")) {
@@ -719,7 +728,8 @@ public class MATE {
 
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
 
-            MATE.log("Current Activity: " + testCase.getActivityAfterAction(i-1));
+            MATE.log("Current Activity: " + Registry.getEnvironmentManager().getCurrentActivityName());
+            MATE.log("Expected Activity: " + testCase.getActivityAfterAction(i-1));
 
             Action nextAction = actions.get(i);
 
