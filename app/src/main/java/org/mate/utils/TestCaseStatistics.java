@@ -149,7 +149,7 @@ public final class TestCaseStatistics {
             }
         }
 
-        MATE.log("TestCase included " + nullCtr + " null values!");
+        MATE.log("TestCase included null values: " + nullCtr);
     }
 
 }
