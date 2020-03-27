@@ -46,7 +46,7 @@ public final class TestCaseStatistics {
                 Intent intent = ((IntentBasedAction) action).getIntent();
 
                 if (intent.getData() != null){
-                    MATE.log("URI: " + intent.getData());
+                    MATE.log("Generated URI: " + intent.getData());
                 }
             }
         }
