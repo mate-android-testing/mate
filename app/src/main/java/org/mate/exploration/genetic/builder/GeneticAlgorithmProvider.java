@@ -42,6 +42,7 @@ import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TargetLineCoveredTerminationCondition;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;
@@ -362,6 +363,9 @@ public class GeneticAlgorithmProvider {
                 return new NeverTerminationCondition();
             case ConditionalTerminationCondition.TERMINATION_CONDITION_ID:
                 return new ConditionalTerminationCondition();
+            case TargetLineCoveredTerminationCondition.TERMINATION_CONDITION_ID:
+                return new TargetLineCoveredTerminationCondition();
+
             default:
                 throw new UnsupportedOperationException("Unknown termination condition: "
                         + terminationConditionId);

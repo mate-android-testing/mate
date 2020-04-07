@@ -50,6 +50,8 @@ import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TargetLineCoveredTerminationCondition;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
 import org.mate.interaction.DeviceMgr;
@@ -297,20 +299,6 @@ public class MATE {
                     }
                 } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                        // init the CFG
-                        boolean isInit = Registry.getEnvironmentManager().initCFG();
-
-                        if (!isInit) {
-                            MATE.log("Couldn't initialise CFG! Aborting.");
-                            throw new IllegalStateException("Graph initialisation failed!");
-                        }
-                    }
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
@@ -318,21 +306,18 @@ public class MATE {
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                            .withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID,
+                                    Properties.TARGET_LINE())
+                            .withTerminationCondition(TargetLineCoveredTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
                             .withMaxNumEvents(50)
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            genericGA.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
+
+                    TargetLineCoveredTerminationCondition.INSTANCE.setGeneticAlgorithm(genericGA);
+                    genericGA.run();
 
                     if (Properties.STORE_COVERAGE()) {
                         if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {

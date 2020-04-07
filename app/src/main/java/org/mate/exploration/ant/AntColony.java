@@ -43,8 +43,8 @@ public class AntColony {
 
     // Parameters to customize the ACO algorithm
     private static final int generationAmount = 10;
-    private static final int generationSize = 2;
-    private static final int antPathLength = 4;
+    private static final int generationSize = 5;
+    private static final int antPathLength = 30;
     private static final double evaporationRate = 0.1;
     // TODO Choose appropriate deposit amount
     private static final double standardDepositAmount = 1.0;
@@ -95,7 +95,7 @@ public class AntColony {
                 Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
 
-                // DEBUG
+                // TODO REMOVE - DEBUG
                 System.out.println(lineCoveredPercentageFitnessFunction.getFitness(chromosome));
 
                 // Stop algorithm if target line was reached
@@ -224,7 +224,15 @@ public class AntColony {
             List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
 
             //TODO REMOVE
-            MATE.log_acc("---------- Anzahl an Möglichkeiten "+ executableActions.size() +" ----------");
+            MATE.log_acc("========== Schritt #"+ (i + 1));
+            MATE.log_acc("---------- Anzahl an Möglichkeiten "+ executableActions.size());
+            int tempNum = 0;
+            for (WidgetAction action : executableActions) {
+                MATE.log_acc("Aktionnummer: #" + tempNum + ", Actiontype: " + action.getActionType());
+                tempNum++;
+            }
+            MATE.log_acc("---------- Anzahl Iterationen über executableActions: " + tempNum);
+
 
             // Variable to flag a premature shutdown due to ant executing closing action
             boolean prematureShutdown;
@@ -247,11 +255,19 @@ public class AntColony {
                 currentAction = executableActions.get(0);
             } else {
                 // Set pheromone values for the available widget actions without one
+                //TODO REMOVE
+                tempNum = 0;
                 for (WidgetAction action : executableActions) {
                     if (!pheromones.containsKey(action)) {
                         pheromones.put(action, currentPheromoneStandardValue);
                     }
+                    //TODO REMOVE
+                    MATE.log_acc("AKtion hinzugefügt: Actionnummer: #" + tempNum + ", Actiontype: " + action.getActionType() + ", Aktionsname: " + action + " --- Größe: "+ pheromones.size());
+                    tempNum++;
                 }
+                //TODO REMOVE
+                MATE.log_acc("---------- Anzahl Iterationen für Vergabe von Pheromonwerten über executableActions: " + tempNum);
+                MATE.log_acc("---------- Anzahl an Einträgen in Pheromonmap: " + pheromones.size());
 
                 // Store probabilities for each action with or without factoring in the action type
                 if(includeActionTypeInTransition) {
@@ -271,9 +287,16 @@ public class AntColony {
                     }
                 } else {
                     // Store pheromone value of all actions as their probability
+                    //TODO REMOVE
+                    tempNum = 0;
                     for (WidgetAction action : executableActions) {
                         probabilities.put(action, pheromones.get(action));
+                        //TODO REMOVE
+                        tempNum++;
                     }
+                    //TODO REMOVE
+                    MATE.log_acc("---------- Anzahl Iterationen für Vergabe von Attraktivitätswerten über executableActions: " + tempNum);
+                    MATE.log_acc("---------- Anzahl an Einträgen in Probabilities: "+ probabilities.size());
                 }
 
                 // Sum up all the probabilities
@@ -285,11 +308,11 @@ public class AntColony {
                 // Calculate relative probability for each option
                 //TODO Remove
                 int temp = 1;
-                MATE.log_acc("---------- Wahrscheinlichkeiten : ----------");
+                MATE.log_acc("---------- Wahrscheinlichkeiten :");
                 for (Map.Entry<WidgetAction, Double> entry : probabilities.entrySet()) {
                     entry.setValue(entry.getValue() / sumProbabilities);
                     //TODO REMOVE
-                    MATE.log_acc("---------- Für Action Nr. "+ temp +": "+ entry.getValue() +" ----------");
+                    MATE.log_acc("Für Action Nr. "+ temp +": "+ entry.getValue() +", Typ: " + entry.getKey().getActionType());
                     temp++;
                 }
 
@@ -312,7 +335,7 @@ public class AntColony {
             if (prematureShutdown) {
                 pheromones.put(currentAction, 0.0);
                 //TODO REMOVE
-                MATE.log_acc("---------- Pheromone von exit action auf 0 gesetzt ----------");
+                MATE.log_acc("---------- Pheromone von exit action auf 0 gesetzt");
                 break;
             }
 
