@@ -71,6 +71,7 @@ import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -500,6 +501,15 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+
+                    File outputDir = new File("/data/data/org.mate/test-cases");
+                    if (outputDir.exists()) {
+                        MATE.log("Stored TestCase Files: ");
+                        File[] files = outputDir.listFiles();
+                        for (File file : files) {
+                            MATE.log(file.getName());
+                        }
+                    }
 
                     if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
