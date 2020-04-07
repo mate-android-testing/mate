@@ -30,9 +30,63 @@ public final class TestCaseStatistics {
         }
 
         countInvalidURIs(testCase);
+        countComponentsPerType(testCase);
         countActionsPerType(testCase);
         countNullValues(testCase);
         printURIs(testCase);
+    }
+
+    /**
+     * Counts how often an activity, a service, a receiver, etc. is triggered by an intent
+     * of the test case. We don't differentiate between a dynamic system event receiver and
+     * a system event receiver; we count it as a system event receiver.
+     *
+     * @param testCase The test case to be inspected.
+     */
+    private static void countComponentsPerType(TestCase testCase) {
+
+        List<Action> actions = testCase.getEventSequence();
+
+        int activities = 0;
+        int services = 0;
+        int receivers = 0;
+        int dynamicReceivers = 0;
+        int systemEventReceivers = 0;
+
+        for (Action action : actions) {
+
+            if (action instanceof IntentBasedAction) {
+
+                switch (((IntentBasedAction) action).getComponentType()) {
+
+                    case ACTIVITY:
+                        activities++;
+                        break;
+                    case SERVICE:
+                        services++;
+                        break;
+                    case BROADCAST_RECEIVER:
+                        Intent intent = ((IntentBasedAction) action).getIntent();
+
+                        if (intent.getComponent() == null) {
+                            // dynamic receivers can't receive an explicit intent
+                            dynamicReceivers++;
+                        } else {
+                            receivers++;
+                        }
+                        break;
+                }
+            } else if (action instanceof SystemAction) {
+                // we don't consider here dynamic system event receivers
+                systemEventReceivers++;
+            }
+        }
+
+        MATE.log("Number of targeted Activities: " + activities);
+        MATE.log("Number of targeted Services: " + services);
+        MATE.log("Number of targeted Receivers: " + receivers);
+        MATE.log("Number of targeted dynamic Receivers: " + dynamicReceivers);
+        MATE.log("Number of targeted system-event Receivers: " + systemEventReceivers);
     }
 
     private static void printURIs(TestCase testCase) {
