@@ -494,16 +494,24 @@ public class MATE {
                             = new RandomExploration(Properties.STORE_COVERAGE(), true, MAX_NUMBER_EVENTS(),
                             Properties.RELATIVE_INTENT_AMOUNT());
 
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomExploration.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
+                    try {
+                        TimeoutRun.timeoutRun(new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+                                randomExploration.run();
+                                return null;
+                            }
+                        }, MATE.TIME_OUT);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } catch (Error e) {
+                        e.printStackTrace();
+                    }
+
+                    MATE.log("This line should be always logged!");
 
                     File outputDir = new File("/data/data/org.mate/test-cases");
-                    if (outputDir.exists()) {
+                    if (outputDir != null && outputDir.exists()) {
                         MATE.log("Stored TestCase Files: ");
                         File[] files = outputDir.listFiles();
                         for (File file : files) {
