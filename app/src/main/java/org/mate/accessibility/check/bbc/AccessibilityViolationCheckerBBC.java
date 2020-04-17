@@ -2,6 +2,7 @@ package org.mate.accessibility.check.bbc;
 
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.check.IAccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.screenbased.ScreenBasedAccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.WidgetBasedAccessibilityViolationChecker;
 import org.mate.state.IScreenState;
@@ -9,11 +10,11 @@ import org.mate.state.IScreenState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccessibilityViolationChecker {
+public class AccessibilityViolationCheckerBBC implements IAccessibilityViolationChecker {
 
-    public static List<AccessibilityViolation> violations = new ArrayList<>();
+    public List<AccessibilityViolation> violations = new ArrayList<>();
 
-    public static List<AccessibilityViolation> runAccessibilityChecks(IScreenState state){
+    public List<AccessibilityViolation> runAccessibilityChecks(IScreenState state){
 
         List<AccessibilityViolation> violations = new ArrayList<>();
         MATE.log("RUN ALL ACC CHECKS");

@@ -3,7 +3,8 @@ package org.mate.exploration.deprecated.random;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
+import org.mate.accessibility.check.IAccessibilityViolationChecker;
+import org.mate.accessibility.check.bbc.AccessibilityViolationCheckerBBC;
 import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
@@ -31,6 +32,7 @@ public class UniformRandomForAccessibility {
     private boolean runAccChecks;
     public static int totalNumberOfChecks;
 
+    private IAccessibilityViolationChecker bbcChecker;
 
     public UniformRandomForAccessibility(DeviceMgr deviceMgr,
                                          String packageName, IGUIModel guiModel, boolean runAccChecks){
@@ -39,6 +41,7 @@ public class UniformRandomForAccessibility {
         this.guiModel = guiModel;
         currentActivityName="";
         this.runAccChecks = runAccChecks;
+        bbcChecker = new AccessibilityViolationCheckerBBC();
     }
 
 
@@ -160,7 +163,7 @@ public class UniformRandomForAccessibility {
         //   ClickableSpan
         //   TouchTargetSize
         //   DuplicateClickableBounds
-        AccessibilityViolationChecker.runAccessibilityChecks(state);
+        bbcChecker.runAccessibilityChecks(state);
 
         //run accessibility checks implemented by MATE team
 

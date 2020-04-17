@@ -1,31 +1,22 @@
-package org.mate.accessibility.check.bbc.widgetbased;
+package org.mate.accessibility.check.wcag.perceivable.textalternative;
 
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
-import org.mate.accessibility.check.IWidgetAccessibilityCheck;
+import org.mate.accessibility.check.wcag.IWCAGCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
 
-//
-public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
-
-    /*All form controls, such as text inputs, check boxes, select lists, or buttons,
-    must each have a unique label. The label can be either a default value of the control,
-    such as a submit button, or a correctly associated property or element, such as a label.
-    While placeholders may provide additional hints, they are temporary and must not substitute a label.
-    Labels must be visible and available to assistive technology.
-     */
+//Success Criterion 1.1.1 Non-text Content
+//https://www.w3.org/TR/WCAG21/#non-text-content
+public class NonTextContentCheck implements IWCAGCheck {
 
     private List<String> labeledBy;
 
-    public FormControlLabelCheck(){
-
-    }
-
     private boolean applicable(Widget widget){
+
 
         boolean buttonType = widget.isButtonType();
         boolean imageButtonType = widget.isImageButtonType();
@@ -50,7 +41,6 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
 
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
-
         if (!widget.isImportantForAccessibility())
             return null;
 
@@ -94,10 +84,9 @@ public class FormControlLabelCheck implements IWidgetAccessibilityCheck {
         }
 
         if (widget.isImageType() || widget.isImageSwitcherType() || widget.mightBeImage()){
-            return new AccessibilityViolation(AccessibilityViolationType.MISSING_ALTERNATIVE_TEXT,widget,state,"");
+            return new AccessibilityViolation(AccessibilityViolationType.NON_TEXT_CONTENT,widget,state,"");
         }
 
-        return new AccessibilityViolation(AccessibilityViolationType.MISSING_FORM_CONTROL_LABEL,widget,state,"");
+        return new AccessibilityViolation(AccessibilityViolationType.NON_TEXT_CONTENT,widget,state,"");
     }
-
 }

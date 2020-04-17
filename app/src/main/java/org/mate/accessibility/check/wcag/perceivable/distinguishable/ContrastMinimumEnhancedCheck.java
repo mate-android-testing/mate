@@ -1,26 +1,20 @@
-package org.mate.accessibility.check.bbc.widgetbased;
+package org.mate.accessibility.check.wcag.perceivable.distinguishable;
 
 import org.mate.Registry;
-import org.mate.accessibility.check.bbc.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
-import org.mate.accessibility.check.IWidgetAccessibilityCheck;
+import org.mate.accessibility.check.wcag.IWCAGCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
-/**
- * Created by marceloeler on 26/06/17.
- */
-
-public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibilityCheck {
-
+public class ContrastMinimumEnhancedCheck implements IWCAGCheck {
 
     private String packageName;
     private String stateId;
     private double contratio;
     boolean screenShot;
 
-    public TextContrastRatioAccessibilityCheck(){
+    public ContrastMinimumEnhancedCheck(){
         contratio=21;
         screenShot=false;
     }
@@ -31,13 +25,16 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
         this.stateId = state.getId();
 
         if (!needsTextContrastChecked(widget))
-                return null;
+            return null;
         contratio=21;
         double contrastRatio = Registry.getEnvironmentManager().getContrastRatio(packageName,stateId,widget);
         contratio=contrastRatio;
         //MATE.log("Checked: " + widget.getClazz()+" txt:"+ widget.getText()+ " hint: " + widget.getHint()+":"+widget.getContentDesc()+" contrast ratio: " + contrastRatio);
-        if (contrastRatio< AccessibilitySettings.MIN_CONTRAST_RATIO)
-            return new AccessibilityViolation(AccessibilityViolationType.LOW_CONTRAST_RATIO,widget,state,String.valueOf(contrastRatio));
+        if (contrastRatio<4.5)
+            return new AccessibilityViolation(AccessibilityViolationType.CONSTRAST_MINUMUM,widget,state,String.valueOf(contrastRatio));
+        if (contrastRatio<7){
+            return new AccessibilityViolation(AccessibilityViolationType.CONSTRAST_ENHANCED,widget,state,String.valueOf(contrastRatio));
+        }
         return null;
     }
 
@@ -70,6 +67,4 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
 
         return true;
     }
-
-
 }

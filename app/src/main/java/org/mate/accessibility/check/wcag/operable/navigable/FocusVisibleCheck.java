@@ -1,21 +1,21 @@
-package org.mate.accessibility.check.bbc.widgetbased;
+package org.mate.accessibility.check.wcag.operable.navigable;
 
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
-import org.mate.accessibility.check.IWidgetAccessibilityCheck;
+import org.mate.accessibility.check.wcag.IWCAGCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
+public class FocusVisibleCheck implements IWCAGCheck {
 
     private List<IScreenState> visitedStates;
     private List<String> sameStatesID;
 
-    public VisibleFocusCheck(){
+    public FocusVisibleCheck(){
         visitedStates = new ArrayList<IScreenState>();
         sameStatesID = new ArrayList<String>();
     }
@@ -64,7 +64,7 @@ public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
                 if (!wOther.isFocused()){
                     //checks difference between colours
                     if (widget.getColor().equals(wOther.getColor()) && widget.getMaxminLum().equals(wOther.getMaxminLum())){
-                        return new AccessibilityViolation(AccessibilityViolationType.VISIBLE_FOCUS,widget,state,widget.getId());
+                        return new AccessibilityViolation(AccessibilityViolationType.FOCUS_VISIBLE,widget,state,widget.getId());
                     }
                 }
             }

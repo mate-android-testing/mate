@@ -28,10 +28,12 @@ public class ActionsScreenState extends AbstractScreenState {
     private String id;
     private AppScreen appScreen;
     private AccessibilityNodeInfo rootNodeInfo;
+    private String sessionID;
 
     @Override
     public String getId() {
-        return id;
+
+        return id+"_"+sessionID;
     }
 
     @Override
@@ -45,7 +47,12 @@ public class ActionsScreenState extends AbstractScreenState {
         this.rootNodeInfo = appScreen.getRootNodeInfo();
         actions=null;
         this.appScreen = appScreen;
+        sessionID = String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode()));
+    }
 
+
+    public String getSessionId(){
+        return sessionID;
     }
 
     private int getMaxAmountOfID(Hashtable<String, List<Integer>> sameIDWidgets, String wid){

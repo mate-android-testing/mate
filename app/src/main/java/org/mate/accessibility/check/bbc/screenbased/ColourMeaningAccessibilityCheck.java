@@ -5,7 +5,7 @@ import android.os.Build;
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationType;
+import org.mate.accessibility.check.AccessibilityViolationType;
 import org.mate.accessibility.check.IScreenAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;

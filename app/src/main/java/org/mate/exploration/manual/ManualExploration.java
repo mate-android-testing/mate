@@ -3,9 +3,8 @@ package org.mate.exploration.manual;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
-import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
-import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
+import org.mate.accessibility.check.IAccessibilityViolationChecker;
+import org.mate.accessibility.check.bbc.AccessibilityViolationCheckerBBC;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -15,6 +14,7 @@ import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by geyan on 11/06/2017.
@@ -28,6 +28,8 @@ public class ManualExploration {
     }
 
     public void startManualExploration(long runningTime) {
+
+        IAccessibilityViolationChecker bbcChecker = new AccessibilityViolationCheckerBBC();
 
         long currentTime = new Date().getTime();
 
@@ -60,9 +62,17 @@ public class ManualExploration {
 
                 AccessibilitySummaryResults.currentActivityName=state.getActivityName();
                 AccessibilitySummaryResults.currentPackageName=state.getPackageName();
-                AccessibilityViolationChecker.runAccessibilityChecks(state);
+
+                List<AccessibilityViolation> violations = bbcChecker.runAccessibilityChecks(state);
+
+                MATE.log_acc("Amount of violations found: " + violations.size());
+                for (AccessibilityViolation violation: violations){
+                    MATE.log_acc(violation.getType() + " " + violation.getWidget().getId() + ":"+violation.getWidget().getText()+ " -- " + violation.getInfo());
+                }
+
                 //MATE.log_acc("CHECK CONTRAST");
 
+                /*
                 MultipleContentDescCheck multDescChecker = new MultipleContentDescCheck();
                 TextContrastRatioAccessibilityCheck contrastChecker = new TextContrastRatioAccessibilityCheck();
                 for (Widget widget: state.getWidgets()) {
@@ -77,7 +87,7 @@ public class ManualExploration {
                     if (multDescViolationFound!=null)
                         AccessibilitySummaryResults.addAccessibilityFlaw("DUPLICATE_SPEAKABLE_TEXT_FLAW",widget,"");
 
-                }
+                }*/
 
             }
             currentTime = new Date().getTime();

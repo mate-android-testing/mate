@@ -3,7 +3,7 @@ package org.mate.accessibility.check.bbc.widgetbased;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationType;
+import org.mate.accessibility.check.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
@@ -30,7 +30,7 @@ public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
             MATE.log("CHECKS BACKGROUND COLOR = " + widget.getClazz() + " " + widget.getText());
             MATE.log("   matching: " + matchesBackgroundColor);
             if (matchesBackgroundColor>0.5) {
-                AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.ACTIONABLE_ELEMENTS, widget, state, "Button background color is the same as the screen, match: " + matchesBackgroundColor);
+                AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.ACTIONABLE_ELEMENTS, widget, state, "Button background color is the same as the screen. Match: " + matchesBackgroundColor);
                 violation.setWarning(true);
                 return violation;
             }

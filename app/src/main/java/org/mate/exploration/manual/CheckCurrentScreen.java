@@ -2,13 +2,52 @@ package org.mate.exploration.manual;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
+import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.check.IAccessibilityViolationChecker;
+import org.mate.accessibility.check.wcag.AccessibilityViolationCheckerWCAG;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
+
+import java.util.List;
 
 public class CheckCurrentScreen {
 
     public void scanScreen(){
+
+        long sessionID = new java.util.Date().getTime();
+
+        IAccessibilityViolationChecker wcagChecker = new AccessibilityViolationCheckerWCAG();
+
+        IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
+
+        String currentPackageName = screenState.getPackageName();
+
+        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
+
+        MATE.log("Current screen state: " + screenState.getId());
+
+        for (Widget w : screenState.getWidgets()) {
+            if (w.isImportantForAccessibility()) {
+                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
+                MATE.log("---showing hint: " + w.isShowingHintText());
+            }
+
+            //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
+            //if (w.getParent()!=null)
+            //MATE.log("------ son of " + w.getParent().getClazz());
+            //if (w.isEditable())
+            //MATE.log("INPUT TYPE: " + w.getInputType());
+            //MATE.log("\n");
+            //MATE.log("");
+        }
+
+
+        List<AccessibilityViolation> violations = wcagChecker.runAccessibilityChecks(screenState);
+
+        MATE.log_acc("Amount of violations found: " + violations.size());
+        for (AccessibilityViolation violation: violations){
+            MATE.log_acc(violation.getType() + " " + violation.getWidget().getId() + ":"+violation.getWidget().getText()+ " -- " + violation.getInfo());
+        }
 
         //Context appContext = getInstrumentation().getContext().getApplicationContext();
         //Context generalContext = getInstrumentation().getContext();
@@ -87,30 +126,7 @@ public class CheckCurrentScreen {
 
         */
 
-        IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
-        String currentPackageName = screenState.getPackageName();
-
-        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
-
-        MATE.log("Current screen state: " + screenState.getId());
-
-        for (Widget w : screenState.getWidgets()) {
-            if (w.isImportantForAccessibility()) {
-                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
-                MATE.log("---showing hint: " + w.isShowingHintText());
-            }
-
-            //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
-            //if (w.getParent()!=null)
-            //MATE.log("------ son of " + w.getParent().getClazz());
-            //if (w.isEditable())
-            //MATE.log("INPUT TYPE: " + w.getInputType());
-            //MATE.log("\n");
-            //MATE.log("");
-        }
-
-        AccessibilityViolationChecker.runAccessibilityChecks(screenState);
 /*
 
 
