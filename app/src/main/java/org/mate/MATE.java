@@ -67,6 +67,7 @@ import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.MersenneTwister;
+import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
@@ -435,6 +436,10 @@ public class MATE {
 
                     // as long as we find a test case for replaying
                     while (testCase != null) {
+
+                        if (Properties.OPTIMISE_TEST_CASE()) {
+                            testCase = TestCaseOptimizer.optimise(testCase);
+                        }
 
                         if (replayTestCase(testCase)) {
                             // record stats only if test case could be successfully replayed
