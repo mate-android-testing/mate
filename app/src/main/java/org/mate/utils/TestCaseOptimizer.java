@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
+import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.PrimitiveAction;
@@ -58,7 +59,7 @@ public final class TestCaseOptimizer {
     /**
      * The first optimisation strategy.
      *
-     * Removes all intent-based actions from the test case.
+     * Removes all intent-based actions (both intent and system actions) from the test case.
      *
      * @param testCase The test case to be optimised.
      * @return Returns the optimised test case.
@@ -69,7 +70,7 @@ public final class TestCaseOptimizer {
         List<Action> actions = testCase.getEventSequence();
 
         for (Action action : actions) {
-            if (action instanceof IntentBasedAction) {
+            if (action instanceof IntentBasedAction || action instanceof SystemAction) {
                 toBeRemoved.add(action);
             }
         }
