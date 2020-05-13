@@ -6,4 +6,5 @@ import org.mate.ui.Widget;
 
 public interface IWCAGCheck {
     public AccessibilityViolation check(IScreenState state, Widget widget);
+    //public String violationChecked();
 }

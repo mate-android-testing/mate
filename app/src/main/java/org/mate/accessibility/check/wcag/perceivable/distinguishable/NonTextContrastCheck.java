@@ -38,26 +38,24 @@ public class NonTextContrastCheck implements IWCAGCheck {
 
     public boolean needsTextContrastChecked(Widget widget) {
 
-        if (!widget.isImportantForAccessibility())
-            return false;
+        //if (!widget.isImportantForAccessibility())
+          //  return false;
 
-        if (widget.getBounds().equals("[0,0][0,0]"))
+
+        if (widget.hasChildren())
             return false;
 
         if (widget.getClazz().contains(("Image")))
             return true;
 
-        if (widget.getClazz().contains("android.widget.Switch"))
-            return false;
+        if (widget.getClazz().contains("Switch"))
+            return true;
 
         if (widget.getClazz().contains("android.widget.ProgressBar"))
             return true;
 
         if (widget.mightBeImage())
             return true;
-
-        if (widget.isActionable() && widget.getClazz().contains("Text") && !widget.getText().equals(""))
-            return false;
 
         if (widget.getClazz().contains("ImageButton")){
             return true;
@@ -71,6 +69,12 @@ public class NonTextContrastCheck implements IWCAGCheck {
 
         if (widget.getClazz().contains("Radio"))
             return true;
+
+        if (widget.isEditable() && widget.getText().equals(""))
+            return true;
+
+        if (!widget.getText().equals(""))
+            return false;
 
         return true;
     }

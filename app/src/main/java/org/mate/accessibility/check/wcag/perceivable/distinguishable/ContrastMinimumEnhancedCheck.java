@@ -40,16 +40,20 @@ public class ContrastMinimumEnhancedCheck implements IWCAGCheck {
 
     public boolean needsTextContrastChecked(Widget widget) {
 
-        if (!widget.isImportantForAccessibility())
+
+        //if (!widget.isImportantForAccessibility())
+         // return false;
+
+        if (widget.hasChildren())
             return false;
 
-        if (widget.getBounds().equals("[0,0][0,0]"))
+        if (widget.getText().equals(""))
             return false;
 
         if (widget.getClazz().contains(("Image")))
             return false;
 
-        if (widget.getText().equals(""))
+        if (widget.mightBeImage())
             return false;
 
         if (widget.getClazz().contains("android.widget.Switch"))
@@ -58,12 +62,17 @@ public class ContrastMinimumEnhancedCheck implements IWCAGCheck {
         if (widget.getClazz().contains("android.widget.ProgressBar"))
             return false;
 
-        if (widget.mightBeImage())
+        if (widget.getClazz().contains("Text") && widget.getText().equals(""))
             return false;
 
-        if (widget.isActionable() && widget.getClazz().contains("Text") && widget.getText().equals(""))
+        if (widget.getClazz().contains("Toggle"))
             return false;
 
+        if (widget.getClazz().contains("Check"))
+            return false;
+
+        if (widget.getClazz().contains("Radio"))
+            return false;
 
         return true;
     }

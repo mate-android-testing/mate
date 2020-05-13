@@ -46,12 +46,15 @@ public class AccessibilityViolationCheckerWCAG implements IAccessibilityViolatio
 
     public List<AccessibilityViolation> runAccessibilityChecks(IScreenState state) {
 
+        MATE.log("RUN WCAG CHECKS");
+
         List<AccessibilityViolation> violations = new ArrayList<AccessibilityViolation>();
 
-        MATE.log(">>WIDGET BASED CHECKS");
         for (Widget widget: state.getWidgets()){
-
+            //MATE.log(">>> " + widget.getText());
             for (IWCAGCheck widgetCheck: accChecks){
+                //if (widget.getText().contains("clicar aqui"))
+                  //  MATE.log("CHECK: ");
                 AccessibilityViolation violation = widgetCheck.check(state,widget);
                 if (violation!=null) {
                     violations.add(violation);
@@ -61,8 +64,8 @@ public class AccessibilityViolationCheckerWCAG implements IAccessibilityViolatio
                         MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());
                 }
             }
+            //MATE.log("<<< " + widget.getText());
         }
-        MATE.log("<<WIDGET BASED CHECKS");
         return violations;
     }
 }

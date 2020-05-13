@@ -28,8 +28,8 @@ public class CheckCurrentScreen {
 
         for (Widget w : screenState.getWidgets()) {
             if (w.isImportantForAccessibility()) {
-                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
-                MATE.log("---showing hint: " + w.isShowingHintText());
+               // MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
+               // MATE.log("---showing hint: " + w.isShowingHintText() + "   important for acc: " + w.isImportantForAccessibility() + " click: " + w.isClickable());
             }
 
             //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());

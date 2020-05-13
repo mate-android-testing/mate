@@ -125,7 +125,7 @@ public class Widget {
         this.errorText = errorText;
     }
 
-    public boolean isHasChildren() {
+    public boolean hasChildren() {
         return hasChildren;
     }
 
@@ -550,43 +550,6 @@ public class Widget {
         return this.labelFor;
     }
 
-    public boolean needsContrastChecked() {
-        Set<String> excludedClasses = new HashSet<String>();
-       // excludedClasses.add("Layout");
-        //excludedClasses.add("ViewGroup");
-        //excludedClasses.add("ScrollView");
-        //excludedClasses.add("Spinner");
-        //excludedClasses.add("TableRow");
-        //excludedClasses.add("ListView");
-        //excludedClasses.add("GridView");
-
-        if (!this.isImportantForAccessibility())
-            return false;
-
-        if (this.bounds.equals("[0,0][0,0]"))
-            return false;
-
-        if (this.isEditable() && this.text.equals(""))
-            return false;
-
-        //if (this.getClazz().contains("Text") && this.getText().equals(""))
-          //  return false;
-
-        if (this.getClazz().contains("Image") && !this.isActionable())
-            return false;
-
-        for (String excluded : excludedClasses) {
-            if (this.clazz.contains(excluded))
-                return false;
-        }
-
-        if (!this.isActionable() && !this.getClazz().contains("Text"))
-            return false;
-
-
-        return true;
-    }
-
     public String getOriginalBounds() {
         return originalBounds;
     }
@@ -604,7 +567,9 @@ public class Widget {
     }
 
     public boolean isImportantForAccessibility() {
-        return importantForAccessibility;
+        //return importantForAccessibility;
+        //return importantForAccessibility || this.isActionable();
+        return true;
     }
 
     public void setImportantForAccessibility(boolean importantForAccessibility) {
@@ -722,7 +687,16 @@ public class Widget {
 
 
     public boolean isActionable() {
-        return this.isEditable()||this.isClickable()||this.isLongClickable()||this.isSpinnerType()||this.isCheckable();
+
+        boolean actionable = false;
+
+        actionable = this.isEditable()||this.isLongClickable()||this.isSpinnerType()||this.isCheckable();
+        if (this.clazz.contains("View"))
+            actionable = actionable || (this.isClickable() && this.isFocusable());
+        else
+            actionable = actionable || this.isClickable();
+
+        return actionable;
     }
 
     public void setFocused(boolean focused) {
@@ -734,7 +708,24 @@ public class Widget {
     }
 
 
-
+    public String describe(){
+        StringBuilder widgetDetails = new StringBuilder();
+        widgetDetails.append("\n\n");
+        widgetDetails.append("ID: ").append(this.id).append(" ");
+        widgetDetails.append("Text: ").append(this.text).append(" ");
+        widgetDetails.append("Clazz: ").append(this.clazz).append(" ");
+        widgetDetails.append("Bounds: ").append(this.bounds).append(" \n");
+        widgetDetails.append("Actionable: ").append(this.isActionable()).append(" ");
+        widgetDetails.append("Focusable: ").append(this.isFocusable()).append(" ");
+        widgetDetails.append("Visible: ").append(this.isVisibleToUser()).append(" \n");
+        widgetDetails.append("IFA: ").append(this.isImportantForAccessibility()).append(" ");
+        widgetDetails.append("ISRF: ").append(this.isScreenReaderFocusable()).append(" ");
+        widgetDetails.append("IAF: ").append(this.isAccessibilityFocused()).append(" ");
+        if(this.parent!=null)
+            widgetDetails.append("Parent actionable: ").append(this.parent.isActionable());
+        widgetDetails.append("\n\n");
+        return widgetDetails.toString();
+    }
 
 
 }

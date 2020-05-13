@@ -3,6 +3,7 @@ package org.mate.accessibility.check.wcag.operable.inputmodalities;
 import android.content.Context;
 import android.graphics.Rect;
 
+import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
 import org.mate.accessibility.check.bbc.AccessibilitySettings;
@@ -14,11 +15,23 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class TargetSizeCheck implements IWCAGCheck {
 
+    public boolean needsSizeChecked(Widget widget) {
+
+        if (widget.hasChildren())
+            return false;
+
+        if (!widget.isActionable())
+            return false;
+
+        return true;
+    }
+
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
-        if (!widget.isActionable())
+        if (!needsSizeChecked(widget))
             return null;
+
 
         Context generalContext = getInstrumentation().getContext();
         float density = generalContext.getResources().getDisplayMetrics().density;

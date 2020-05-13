@@ -1,5 +1,6 @@
 package org.mate.accessibility.check.wcag.perceivable.textalternative;
 
+import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
 import org.mate.accessibility.check.wcag.IWCAGCheck;
@@ -28,9 +29,11 @@ public class NonTextContentCheck implements IWCAGCheck {
 
 
         if (buttonType || imageButtonType || imageSwitcherType || imageType || spinnerType || editType || textViewType){
-            if (widget.isImportantForAccessibility())
+            //if (widget.isImportantForAccessibility())
                 return true;
         }
+
+
 
 
         //if (widget.isClickable() || widget.isEditable() || widget.isCheckable())
@@ -41,23 +44,28 @@ public class NonTextContentCheck implements IWCAGCheck {
 
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
-        if (!widget.isImportantForAccessibility())
-            return null;
+
+
 
         labeledBy = new ArrayList<String>();
         for (Widget w: state.getWidgets()){
-            labeledBy.add(w.getLabelFor());
+            if (!w.getLabelFor().equals("")) {
+               labeledBy.add(w.getLabelFor());
+            }
         }
 
         if (!applicable(widget)){
             return null;
         }
 
-        if (widget.isButtonType() || widget.isTextViewType()){
+
+
+        if ((widget.isButtonType() || widget.isTextViewType())&&!widget.isEditable()){
             if (!widget.getText().equals("")){
                 return null;
             }
         }
+        
 
         if (!widget.getHint().equals("")){
             return null;
@@ -71,15 +79,16 @@ public class NonTextContentCheck implements IWCAGCheck {
                 return new AccessibilityViolation(AccessibilityViolationType.EDITABLE_CONTENT_DESC,widget,state,"");
         }
 
+
+
         if (!widget.getLabeledBy().equals("")) {
-            //MATE.log(" ACC CHECK LABEL: has label by: " + widget.getLabeledBy());
+
             return null;
         }
 
         if (labeledBy.contains(widget.getResourceID())) {
             //MATE.log(" ACC CHECK LABEL: has label by: id)");
             int index = labeledBy.indexOf(widget.getResourceID());
-            //MATE.log("   label: " + labeledBy.get(index));
             return null;
         }
 

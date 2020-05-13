@@ -64,6 +64,9 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
         if (widget.mightBeImage())
             return false;
 
+        if (!widget.getText().equals(""))
+            return true;
+
         if (widget.isActionable() && widget.getClazz().contains("Text") && widget.getText().equals(""))
             return false;
 

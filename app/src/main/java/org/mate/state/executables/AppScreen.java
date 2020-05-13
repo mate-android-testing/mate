@@ -48,6 +48,10 @@ public class AppScreen {
         Instrumentation instrumentation = getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
 
+        MATE.log("Display width: " + device.getDisplayWidth());
+        MATE.log("Display height:"+ device.getDisplayHeight());
+
+
         this.widgets = new ArrayList<>();
         this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
@@ -80,12 +84,14 @@ public class AppScreen {
             ///obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
             try {
                 widget = createWidget(obj, parent, activityName);
-            }
-            catch(StaleObjectException e){
+            } catch (StaleObjectException e) {
                 MATE.log("StaleObjectException");
             }
-            if (widget!=null)
+            if (widget != null){
                 widgets.add(widget);
+                //MATE.log(" Widget created: " + widget.getId() + " " + widget.getText() + " " + widget.getBounds() + "  act: " + widget.isActionable() + " visible: " + widget.isVisibleToUser());
+                //MATE.log(widget.describe());
+            }
             else{
                 Rect rec = new Rect();
                 obj.getBoundsInScreen(rec);
@@ -113,8 +119,9 @@ public class AppScreen {
             clazz = obj.getClassName().toString();
 
         String text = "";
-        if (obj.getText()!=null)
+        if (obj.getText()!=null) {
             text = obj.getText().toString();
+        }
 
         String newId = clazz;
         if (id.equals("")) {
@@ -167,6 +174,21 @@ public class AppScreen {
             this.hastoScrollDown = true;
             return null;
         }
+
+        if (Math.abs(y2-y1)<=5){
+            this.hastoScrollDown=true;
+            this.hasToScrollUp=true;
+            return null;
+        }
+        if (Math.abs(x2-x1)<=5){
+            this.hasToScrollLeft=true;
+            this.hasToScrollRight=true;
+            return null;
+        }
+
+        //in some cases, all components that should be visible only
+        //by swiping up the screen are retrieved by the accessibility service
+        //in such cases, their coordinates matches the max display height or width
 
         widget.setCheckable(obj.isCheckable());
         widget.setChecked(obj.isChecked());
@@ -222,6 +244,8 @@ public class AppScreen {
         else
             widget.setLabelFor("");
 
+
+
         AccessibilityNodeInfo lb = obj.getLabeledBy();
         if (lb!=null){
             String lbstr = lb.getViewIdResourceName();
@@ -231,6 +255,18 @@ public class AppScreen {
         }
         else widget.setLabeledBy("");
 
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            String hintText = "";
+            if (obj.getHintText()!=null){
+                hintText = obj.getHintText().toString();
+            }
+            widget.setHint(hintText);
+
+            widget.setShowingHintText(obj.isShowingHintText());
+        }
+
+        /*
         if (widget.isEditable()){
 
             String hint = editTextHints.get(id);
@@ -269,7 +305,7 @@ public class AppScreen {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 widget.setShowingHintText(obj.isShowingHintText());
             }
-        }
+        }*/
 
         widget.setFocused(obj.isFocused());
 

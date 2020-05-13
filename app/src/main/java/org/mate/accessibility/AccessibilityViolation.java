@@ -29,6 +29,7 @@ public class AccessibilityViolation {
         widgetid = widgetid.replace(":","/");
         info = info.replace(":","- ");
         String widgetText = widget.getText();
+        widgetText = widgetText.replace(":","-");
         String extraInfo = info;
 
         StringBuilder flawMessage = new StringBuilder();
