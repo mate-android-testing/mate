@@ -48,10 +48,6 @@ public class AppScreen {
         Instrumentation instrumentation = getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
 
-        MATE.log("Display width: " + device.getDisplayWidth());
-        MATE.log("Display height:"+ device.getDisplayHeight());
-
-
         this.widgets = new ArrayList<>();
         this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {

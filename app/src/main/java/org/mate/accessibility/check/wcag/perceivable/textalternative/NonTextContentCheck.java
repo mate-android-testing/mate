@@ -65,7 +65,7 @@ public class NonTextContentCheck implements IWCAGCheck {
                 return null;
             }
         }
-        
+
 
         if (!widget.getHint().equals("")){
             return null;

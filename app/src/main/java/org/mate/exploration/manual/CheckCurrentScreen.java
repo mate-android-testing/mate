@@ -14,8 +14,6 @@ public class CheckCurrentScreen {
 
     public void scanScreen(){
 
-        long sessionID = new java.util.Date().getTime();
-
         IAccessibilityViolationChecker wcagChecker = new AccessibilityViolationCheckerWCAG();
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
@@ -26,21 +24,6 @@ public class CheckCurrentScreen {
 
         MATE.log("Current screen state: " + screenState.getId());
 
-        for (Widget w : screenState.getWidgets()) {
-            if (w.isImportantForAccessibility()) {
-               // MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
-               // MATE.log("---showing hint: " + w.isShowingHintText() + "   important for acc: " + w.isImportantForAccessibility() + " click: " + w.isClickable());
-            }
-
-            //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
-            //if (w.getParent()!=null)
-            //MATE.log("------ son of " + w.getParent().getClazz());
-            //if (w.isEditable())
-            //MATE.log("INPUT TYPE: " + w.getInputType());
-            //MATE.log("\n");
-            //MATE.log("");
-        }
-
 
         List<AccessibilityViolation> violations = wcagChecker.runAccessibilityChecks(screenState);
 
@@ -48,6 +31,8 @@ public class CheckCurrentScreen {
         for (AccessibilityViolation violation: violations){
             MATE.log_acc(violation.getType() + " " + violation.getWidget().getId() + ":"+violation.getWidget().getText()+ " -- " + violation.getInfo());
         }
+
+        MATE.log("END OF CURRENT SCREEN VALIDATION");
 
         //Context appContext = getInstrumentation().getContext().getApplicationContext();
         //Context generalContext = getInstrumentation().getContext();
@@ -182,6 +167,6 @@ public class CheckCurrentScreen {
 
         }*/
 
-        MATE.log("END OF CURRENT SCREEN VALIDATION");
+
     }
 }

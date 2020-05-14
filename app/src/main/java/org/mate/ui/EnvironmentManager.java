@@ -155,7 +155,6 @@ public class EnvironmentManager {
     }
 
     public long getTimeout() {
-        long timeout = 0;
         String cmd = "timeout";
         return Long.valueOf(tunnelLegacyCmd(cmd));
     }

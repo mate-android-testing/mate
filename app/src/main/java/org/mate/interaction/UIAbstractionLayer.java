@@ -74,6 +74,7 @@ public class UIAbstractionLayer {
         return FAILURE_UNKNOWN;
     }
 
+    //executes the action and updates the model
     private ActionResult executeActionUnsafe(Action action) {
         IScreenState state;
         try {
