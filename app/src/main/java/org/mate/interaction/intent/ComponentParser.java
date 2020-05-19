@@ -123,8 +123,9 @@ public final class ComponentParser {
                         if (currentComponent != null && currentComponent.hasIntentFilter()) {
                             // MATE.log_acc(currentComponent.toString());
                             components.add(currentComponent);
-                            currentComponent = null;
                         }
+                        // reset anyway
+                        currentComponent = null;
                         break;
                     case "intent-filter":
                         if (currentComponent != null && currentIntentFilter != null) {
