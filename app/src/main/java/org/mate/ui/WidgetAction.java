@@ -1,11 +1,14 @@
 package org.mate.ui;
 
+import org.mate.state.IScreenState;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Created by marceloe on 12/12/16.
+ * Updated on May 2020
  */
 
 public class WidgetAction extends Action {
@@ -14,14 +17,17 @@ public class WidgetAction extends Action {
     private ActionType actionType;
     private String extraInfo;
     private boolean executed;
-
+    private Integer weight;
     private float fitness;
     private long timeToWait;
     private float pheromone;
     private float proportionalPheromone;
-
-
+    private int qtdeOfExec;
+    private boolean newStateGenerated;
+    private IScreenState adjScreen;
+    //private List<IScreenState> listAdjScreen;
     private List<WidgetAction> adjActions;
+
 
     public List<WidgetAction> getAdjActions() {
         return adjActions;
@@ -98,6 +104,42 @@ public class WidgetAction extends Action {
         this.proportionalPheromone = proportionalPheromone;
     }
 
+    public boolean isExecuted() {
+        return executed;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
+
+    public float getFitness() {
+        return fitness;
+    }
+
+    public int getQtdeOfExec() {
+        return qtdeOfExec;
+    }
+
+    public void setQtdeOfExec(int qtdeOfExec) {
+        this.qtdeOfExec = qtdeOfExec;
+    }
+
+    public void plusQtdeOfExec() {
+        this.qtdeOfExec++;
+    }
+
+    public boolean isNewStateGenerated() {
+        return newStateGenerated;
+    }
+
+    public void setNewStateGenerated(boolean newStateGenerated) {
+        this.newStateGenerated = newStateGenerated;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -105,6 +147,14 @@ public class WidgetAction extends Action {
         WidgetAction action = (WidgetAction) o;
         return actionType == action.actionType &&
                 Objects.equals(widget.getIdByActivity(), action.widget.getIdByActivity());
+    }
+
+    public IScreenState getAdjScreen() {
+        return adjScreen;
+    }
+
+    public void setAdjScreen(IScreenState adjScreen) {
+        this.adjScreen = adjScreen;
     }
 
     @Override
