@@ -28,6 +28,7 @@ public class EventEdge implements Cloneable{
     private float pheromone;
 
     private float fitness;
+    private Integer weight;
     private boolean isUpdatedPheromone = false;
 
     public EventEdge(){}
@@ -41,6 +42,23 @@ public class EventEdge implements Cloneable{
         setId(source.getId()+"-"+this.event.getActionType()+":"+"-"+target.getId());
     }
 
+    /**
+     * TODO - Change the parameter if necessary
+     * @param source
+     * @param eventAction
+     */
+    public EventEdge(ScreenNode source, WidgetAction eventAction) {
+        setSource(source);
+        if(eventAction.isNewStateGenerated()) {
+            setTarget(new ScreenNode(eventAction.getAdjScreen().getId(), eventAction.getAdjScreen()));
+        }
+        setEvent(eventAction);
+        //TODO:a tiny button here, back button doesn't have id, so null pointer exeception
+//        setId(source.getId()+"-"+this.event.getActionType()+":"+this.event.getWidget().getId()+"-"+target.getId());
+        setId(source.getId()+"-"+eventAction.getActionType()+":"+"-"+ ((target!=null && target.getId()!=null) ? target.getId():"(n/a)"));
+        this.weight = 0;
+    }
+
     public String getId() {
         return id;
     }
@@ -50,6 +68,10 @@ public class EventEdge implements Cloneable{
     }
 
     public Action getEvent() {
+        return event;
+    }
+
+    public WidgetAction getWidgetAction() {
         return event;
     }
 
@@ -91,8 +113,45 @@ public class EventEdge implements Cloneable{
         this.fitness = fitness;
         event.setFitness(fitness);
     }
+
+    public void increaseFitness(float fitness) {
+        this.fitness = this.fitness + fitness;
+        event.setFitness(fitness);
+    }
+
+    public void decreaseFitness(float fitness) {
+        this.fitness = this.fitness - fitness;
+        event.setFitness(fitness);
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+        event.setWeight(weight);
+    }
+
+    public void increaseWeight(int weight) {
+        this.weight = this.weight + weight;
+        event.setWeight(weight);
+    }
+
+    public void decreaseWeight(int weight) {
+        this.weight = this.weight - weight;
+        event.setWeight(weight);
+    }
+
+    public void plusQtdeOfExec(){
+        event.plusQtdeOfExec();
+    }
+
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
+
+
 }

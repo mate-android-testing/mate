@@ -2,7 +2,6 @@ package org.mate.model.graph;
 
 import org.mate.Properties;
 import org.mate.state.IScreenState;
-import org.mate.ui.Action;
 import org.mate.ui.WidgetAction;
 
 import java.util.ArrayList;
@@ -25,10 +24,16 @@ public class ScreenNode {
         }
     }
 
+    public ScreenNode(IScreenState screenState) {
+        setId(screenState.getId());
+        setScreenState(screenState);
+        this.addAllEdge(screenState.getActions());
+    }
+
     public ScreenNode(String id, IScreenState screenState){
         setId(id);
         setScreenState(screenState);
-        eventEdges = new ArrayList<>();
+        this.addAllEdge(screenState.getActions());
         //init pheromone when creating a new node
         initPheromone();
     }
@@ -64,6 +69,15 @@ public class ScreenNode {
             neighbors.add(edge.getTarget());
         }
         return neighbors;
+    }
+
+    public void addAllEdge(List<WidgetAction> executableActions){
+        if(eventEdges == null){
+            eventEdges = new ArrayList<>();
+        }
+        for(WidgetAction action : executableActions){
+            this.addEdge(new EventEdge(this, action));
+        }
     }
 
 
