@@ -140,6 +140,22 @@ public class WidgetAction extends Action {
         this.newStateGenerated = newStateGenerated;
     }
 
+    public void increaseWeight(int weight) {
+        this.weight = this.weight + weight;
+    }
+
+    public void decreaseWeight(int weight) {
+        this.weight = this.weight - weight;
+    }
+
+    public void increaseFitness(float fitness) {
+        this.fitness = this.fitness + fitness;
+    }
+
+    public void decreaseFitness(float fitness) {
+        this.fitness = this.fitness - fitness;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

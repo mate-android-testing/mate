@@ -46,6 +46,9 @@ public class ScreenNode {
         this.id = id;
     }
 
+    public void setEventEdges(List<EventEdge> eventEdgesList) {
+        eventEdges = eventEdgesList;
+    }
     public IScreenState getScreenState() {
         return screenState;
     }

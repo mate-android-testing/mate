@@ -152,6 +152,16 @@ public class EventEdge implements Cloneable{
         return super.clone();
     }
 
+    public boolean isNewStateGenerated() {
+        return event.isNewStateGenerated();
+    }
 
+    public void setNewStateGenerated(boolean newStateGenerated) {
+        event.setNewStateGenerated(newStateGenerated);
+    }
+
+    public void setTimeToWait(long timeToWait) {
+        event.setTimeToWait(timeToWait);
+    }
 
 }
