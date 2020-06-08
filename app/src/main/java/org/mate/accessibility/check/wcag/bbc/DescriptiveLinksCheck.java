@@ -1,12 +1,13 @@
-package org.mate.accessibility.check.bbc.widgetbased;
+package org.mate.accessibility.check.wcag.bbc;
 
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
+import org.mate.accessibility.check.wcag.IWCAGCheck;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
-public class DescriptiveLinksCheck implements IWidgetAccessibilityCheck {
+public class DescriptiveLinksCheck implements IWCAGCheck {
 
 
 

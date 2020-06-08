@@ -6,6 +6,7 @@ public enum AccessibilityViolationType {
 
     NON_TEXT_CONTENT("1.1.1 - Non-text Content (A)"),
 
+    ORIENTATION("1.3.4 - Orientation(AA)"),
     IDENTIFY_INPUT_PURPOSE("1.3.5 - Identify Input Purpose (AA)"),
 
     USE_OF_COLOR("1.4.1 - Use of Color (A)"),
@@ -23,7 +24,10 @@ public enum AccessibilityViolationType {
     CONTENT_HOVER_FOCUS("1.4.13 - Content on Hover or Focus (AA)"),
 
 
-    FOCUS_VISIBLE("2.4.7 Focus Visible (AA)"),
+    PAGE_TITLED("2.4.2 - Page Titled (A)"),
+
+    FOCUS_VISIBLE("2.4.7 - Focus Visible (AA)"),
+
     TARGET_SIZE("2.5.5 - Target Size (AAA)"),
 
 
@@ -35,22 +39,23 @@ public enum AccessibilityViolationType {
     MISSING_ALTERNATIVE_TEXT("MISSING_ALTERNATIVE_TEXT"),
     LOW_CONTRAST_RATIO("LOW_CONTRAST_RATIO"),
     SMALL_TOUCH_AREA("SMALL_TOUCH_AREA"),
-    DUPLICATE_CONTENT_DESCRIPTION("DUPLICATE_CONTENT_DESCRIPTION"),
+    DUPLICATE_CONTENT_DESCRIPTION("GENERAL - Duplicate Content Description (label)"),
     NON_CLICKABLE_SPAN("NON_CLICKABLE_SPAN"),
     MISSING_INPUT_TYPE("MISSING_INPUT_TYPE"),
-    LABEL_NOT_DEFINED("LABEL_NOT_DEFINED"),
-    LABEL_FAR_FROM_INPUTTEXT("LABEL_FAR_FROM_INPUTTEXT"),
+    LABEL_NOT_DEFINED("BBC - Label is not defined"),
+    LABEL_FAR_FROM_INPUTTEXT("BBC - FORM - Form Layout (Label far from input area)"),
     COLOUR_MEANING("COLOUR_MEANING"),
-    SPACING("SPACING"),
+    SPACING("BBC - DESIGN - Spacing"),
     HIDDEN_DECORATIVE_CONTENT("HIDDEN_DECORATIVE_CONTENT"),
-    DESCRIPTIVE_LINKS("DESCRIPTIVE_LINKS"),
+    DESCRIPTIVE_LINKS("BBC - LINK - Descriptive link (repeated)"),
     VISIBLE_FOCUS("VISIBLE_FOCUS"),
-    MANAGING_FOCUS("MANAGING_FOCUS"),
+    MANAGING_FOCUS("BBC - FOCUS - Managing Focus"),
     RADIOGROUPCHECK("RADIOGROUPCHECK"),
-    ACTIONABLE_ELEMENTS("ACTIONABLE_ELEMENTS"),
+    ACTIONABLE_ELEMENTS("BBC - DESIGN - Actionable Element"),
     LINK_TO_ALTERNATIVE_FORMAT("LINK_TO_ALTERNATIVE_FORMAT"),
-    PHANTOM_ELEMENT("PHANTOM_ELEMENT"),
+    PHANTOM_ELEMENT("GENERAL - Phantom Element"),
     ERROR_MESSAGE("ERROR_MESSAGE");
+
 
     private String type;
 

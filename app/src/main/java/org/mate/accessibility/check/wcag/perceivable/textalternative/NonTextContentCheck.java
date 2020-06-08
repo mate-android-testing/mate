@@ -12,32 +12,35 @@ import java.util.List;
 
 //Success Criterion 1.1.1 Non-text Content
 //https://www.w3.org/TR/WCAG21/#non-text-content
+//https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html
+
+/*
+Controls, Input (description)
+Time-Based Media (description)
+Test (web)
+Sensory (description)
+CAPTCHA (web)
+Decoration, Formatting, Invisible (should be ignored by assistive technology)
+*/
+
+
 public class NonTextContentCheck implements IWCAGCheck {
 
     private List<String> labeledBy;
 
     private boolean applicable(Widget widget){
 
-
         boolean buttonType = widget.isButtonType();
+        boolean spinnerType = widget.isSpinnerType();
+        boolean editType = 	widget.isEditable();
         boolean imageButtonType = widget.isImageButtonType();
         boolean imageSwitcherType = widget.isImageSwitcherType();
         boolean imageType = widget.isImageType();
-        boolean spinnerType = widget.isSpinnerType();
-        boolean editType = 	widget.isEditable();
         boolean textViewType = widget.isTextViewType();
 
-
         if (buttonType || imageButtonType || imageSwitcherType || imageType || spinnerType || editType || textViewType){
-            //if (widget.isImportantForAccessibility())
                 return true;
         }
-
-
-
-
-        //if (widget.isClickable() || widget.isEditable() || widget.isCheckable())
-        //   return true;
 
         return false;
     }
@@ -45,7 +48,9 @@ public class NonTextContentCheck implements IWCAGCheck {
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
-
+        if (!applicable(widget)){
+            return null;
+        }
 
         labeledBy = new ArrayList<String>();
         for (Widget w: state.getWidgets()){
@@ -53,12 +58,6 @@ public class NonTextContentCheck implements IWCAGCheck {
                labeledBy.add(w.getLabelFor());
             }
         }
-
-        if (!applicable(widget)){
-            return null;
-        }
-
-
 
         if ((widget.isButtonType() || widget.isTextViewType())&&!widget.isEditable()){
             if (!widget.getText().equals("")){
@@ -79,10 +78,11 @@ public class NonTextContentCheck implements IWCAGCheck {
                 return new AccessibilityViolation(AccessibilityViolationType.EDITABLE_CONTENT_DESC,widget,state,"");
         }
 
-
+        if (widget.isImageType() || widget.isImageSwitcherType() || widget.mightBeImage()){
+            return new AccessibilityViolation(AccessibilityViolationType.NON_TEXT_CONTENT,widget,state,"");
+        }
 
         if (!widget.getLabeledBy().equals("")) {
-
             return null;
         }
 
@@ -90,10 +90,6 @@ public class NonTextContentCheck implements IWCAGCheck {
             //MATE.log(" ACC CHECK LABEL: has label by: id)");
             int index = labeledBy.indexOf(widget.getResourceID());
             return null;
-        }
-
-        if (widget.isImageType() || widget.isImageSwitcherType() || widget.mightBeImage()){
-            return new AccessibilityViolation(AccessibilityViolationType.NON_TEXT_CONTENT,widget,state,"");
         }
 
         return new AccessibilityViolation(AccessibilityViolationType.NON_TEXT_CONTENT,widget,state,"");

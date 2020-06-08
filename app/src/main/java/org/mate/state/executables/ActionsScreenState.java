@@ -44,6 +44,7 @@ public class ActionsScreenState extends AbstractScreenState {
     public ActionsScreenState(AppScreen appScreen){
         super(appScreen.getPackageName(),appScreen.getActivityName());
         this.widgets = appScreen.getWidgets();
+        this.screenTitle = appScreen.getTitle();
         this.rootNodeInfo = appScreen.getRootNodeInfo();
         actions=null;
         this.appScreen = appScreen;
@@ -407,7 +408,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 //search by text
                 for (Widget wOther: otherWidgets){
 
-                    if (wThis.getText().equals(wOther.getText())){
+                    if (!wThis.getText().equals("") && wThis.getText().equals(wOther.getText())){
                         found = true;
 
                         if (!wOther.getColor().equals(wThis.getColor()) &&

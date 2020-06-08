@@ -1,5 +1,21 @@
 package org.mate.exploration.manual;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.AudioPlaybackConfiguration;
+import android.media.projection.MediaProjectionManager;
+import android.media.session.MediaSessionManager;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
+import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityWindowInfo;
+
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
@@ -8,7 +24,11 @@ import org.mate.accessibility.check.wcag.AccessibilityViolationCheckerWCAG;
 import org.mate.state.IScreenState;
 import org.mate.ui.Widget;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static android.view.KeyEvent.KEYCODE_TAB;
 
 public class CheckCurrentScreen {
 
@@ -18,14 +38,88 @@ public class CheckCurrentScreen {
 
         IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
 
-        String currentPackageName = screenState.getPackageName();
+        UiDevice device = MATE.device;
+       // device.click(device.getDisplayWidth()/2,device.getDisplayHeight()/2);
+       // device.click(device.getDisplayWidth()/2,device.getDisplayHeight()/2);
+       // device.click(device.getDisplayWidth()/2,device.getDisplayHeight()/2);
+        //device.pressKeyCode(KEYCODE_TAB);
+        //device.pressKeyCode(KEYCODE_TAB);
+
+        //device.pressKeyCode(KeyEvent.KEYCODE_MEDIA_PAUSE);
+      //  MATE.log("OK media play: " + device.pressKeyCode(KeyEvent.KEYCODE_MEDIA_PLAY));
+        MATE.log("OK media play: " + device.pressKeyCode(KeyEvent.KEYCODE_VOLUME_UP));
+
+
+
+        //device.pressKeyCode(KeyEvent.KEYCODE_VOLUME_UP);
+        //device.pressDPadCenter();
+
+/*
+        List<AccessibilityWindowInfo> accWindows = getInstrumentation().getUiAutomation().getWindows();
+        int count = 0;
+        String showStr = "";
+        for (AccessibilityWindowInfo accWindowInfo: accWindows){
+            count++;
+            if (accWindowInfo.isActive()){
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    if (accWindowInfo.getTitle()!=null)
+                        showStr += accWindowInfo.getTitle().toString();
+                }
+                showStr += "  is focused: " + accWindowInfo.isAccessibilityFocused();
+            }
+        }
+
+        showStr += "   count: " + count;
+        MATE.log(showStr);
+/*
+        Context targetContext = getInstrumentation().getTargetContext();
+        AudioManager audioManager = (AudioManager) targetContext.getSystemService(Context.AUDIO_SERVICE);
+        MATE.log("Sound active: " +audioManager.isMusicActive());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            List<AudioPlaybackConfiguration> configs = audioManager.getActivePlaybackConfigurations();
+            for (AudioPlaybackConfiguration config: configs){
+                AudioAttributes audio = config.getAudioAttributes();
+                MATE.log(" content type audio: " + audio.getContentType());
+                MATE.log(" audio flag: " + audio.getFlags());
+                MATE.log( " audio usage: " + audio.getUsage());
+                MATE.log("  audio volume: " + audio.getVolumeControlStream());
+                MATE.log(" volume for sure: " + audioManager.getStreamVolume(audio.getVolumeControlStream()));
+                MATE.log(" max volume for sure: " + audioManager.getStreamMaxVolume(audio.getVolumeControlStream()));
+                if (audio.getContentType()==AudioAttributes.CONTENT_TYPE_MOVIE){
+                    MATE.log(" Playing movie");
+                }
+            }
+        }
+        MATE.log("Volume fixed: " + audioManager.isVolumeFixed());
+        MediaSessionManager mediaManager = (MediaSessionManager) targetContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+
+        AccessibilityManager accServiceManager = (AccessibilityManager) targetContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> accServices = accServiceManager.getInstalledAccessibilityServiceList();
+        MATE.log("ACC SERVICES: " + accServices.size());
+        for (AccessibilityServiceInfo accService: accServices){
+            MATE.log("ID: " + accService.getId());
+        }
+
+
+*/
+
+        //encontrar um botão que quando clicado altera o volume, ou pausa o vídeo
+        //
+
+
+        for (Widget widget: screenState.getWidgets()){
+            MATE.log(widget.getId() + " " + widget.getClazz() + " " + widget.getText() + " ");
+        }
 
         Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 
 
-        List<AccessibilityViolation> violations = wcagChecker.runAccessibilityChecks(screenState);
+        List<AccessibilityViolation> violations = new ArrayList<AccessibilityViolation>();
+
+        violations = wcagChecker.runAccessibilityChecks(screenState);
 
         MATE.log_acc("Amount of violations found: " + violations.size());
         for (AccessibilityViolation violation: violations){

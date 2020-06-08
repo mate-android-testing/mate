@@ -24,6 +24,7 @@ public interface IScreenState {
     public String getPackageName();
     public String getType();
     public String getSessionId();
+    public String getScreenTitle();
     public void updatePheromone(Action triggeredAction);
     public Map<Action,Float> getActionsWithPheromone();
     public AccessibilityNodeInfo getRootAccessibilityNodeInfo();
