@@ -121,43 +121,43 @@ public class IntentFilterDescription {
         }
 
         void addScheme(String scheme) {
-            if (scheme != null) {
+            if (scheme != null && !scheme.isEmpty()) {
                 schemes.add(scheme);
             }
         }
 
         void addHost(String host) {
-            if (host != null) {
+            if (host != null && !host.isEmpty()) {
                 hosts.add(host);
             }
         }
 
         void addPort(String port) {
-            if (port != null) {
+            if (port != null && !port.isEmpty()) {
                 ports.add(port);
             }
         }
 
         void addPath(String path) {
-            if (path != null) {
+            if (path != null && !path.isEmpty()) {
                 paths.add(path.replace("\\\\", "\\"));
             }
         }
 
         void addPathPattern(String pathPattern) {
-            if (pathPattern != null) {
+            if (pathPattern != null && !pathPattern.isEmpty()) {
                 pathPatterns.add(pathPattern.replace("\\\\", "\\"));
             }
         }
 
         void addPathPrefix(String pathPrefix) {
-            if (pathPrefix != null) {
+            if (pathPrefix != null && !pathPrefix.isEmpty()) {
                 pathPrefixes.add(pathPrefix.replace("\\\\", "\\"));
             }
         }
 
         void addMimeType(String mimeType) {
-            if (mimeType != null) {
+            if (mimeType != null && !mimeType.isEmpty()) {
                 mimeTypes.add(mimeType);
             }
         }

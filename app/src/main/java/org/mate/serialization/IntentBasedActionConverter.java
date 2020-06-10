@@ -68,6 +68,7 @@ public final class IntentBasedActionConverter implements Converter {
             writer.endNode();
         }
 
+        // TODO: handle dynamic receiver -> serialize package name
         if (intent.getComponent() != null) {
             writer.startNode("name");
             writer.setValue(intent.getComponent().getClassName());
@@ -193,6 +194,15 @@ public final class IntentBasedActionConverter implements Converter {
 
         // leave 'intent-filter' tag
         reader.moveUp();
+
+        /*
+        * If there is no component name specified, the intent targets a dynamic
+        * broadcast receiver. In this case, we can only specify the package name.
+         */
+        if (intent.getComponent() == null) {
+            // TODO: check if package name is valid
+            intent.setPackage(MATE.packageName);
+        }
 
         return new IntentBasedAction(intent, component, intentFilter);
     }

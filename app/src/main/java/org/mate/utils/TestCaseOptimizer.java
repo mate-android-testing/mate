@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
+import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.PrimitiveAction;
@@ -46,6 +47,9 @@ public final class TestCaseOptimizer {
             case 4:
                 // solely activity related actions (UI + intent)
                 return removeAllNonActivityRelatedActions(testCase);
+            case 5:
+                // remove all UI actions
+                return removeAllUIActions(testCase);
             default:
                 // leave the test case unchanged
                 return testCase;
@@ -55,7 +59,7 @@ public final class TestCaseOptimizer {
     /**
      * The first optimisation strategy.
      *
-     * Removes all intent-based actions from the test case.
+     * Removes all intent-based actions (both intent and system actions) from the test case.
      *
      * @param testCase The test case to be optimised.
      * @return Returns the optimised test case.
@@ -66,7 +70,7 @@ public final class TestCaseOptimizer {
         List<Action> actions = testCase.getEventSequence();
 
         for (Action action : actions) {
-            if (action instanceof IntentBasedAction) {
+            if (action instanceof IntentBasedAction || action instanceof SystemAction) {
                 toBeRemoved.add(action);
             }
         }
@@ -166,6 +170,29 @@ public final class TestCaseOptimizer {
     }
 
     /**
+     * The fifth optimisation strategy.
+     *
+     * Removes all UI actions from the test case.
+     *
+     * @param testCase The test case to be optimised.
+     * @return Returns the optimised test case.
+     */
+    private static TestCase removeAllUIActions(TestCase testCase) {
+
+        List<Action> toBeRemoved = new ArrayList<>();
+        List<Action> actions = testCase.getEventSequence();
+
+        for (Action action : actions) {
+            if (action instanceof WidgetAction) {
+                toBeRemoved.add(action);
+            }
+        }
+
+        actions.removeAll(toBeRemoved);
+        return testCase;
+    }
+
+    /**
      * Removes from the given test case the last {@param n} actions of type {@param actionType}.
      *
      * @param testCase   The test case to be optimised.
@@ -174,7 +201,7 @@ public final class TestCaseOptimizer {
      *                   or a UI action.
      * @return Returns the test case after applied the optimisation.
      */
-    public static TestCase removeLastActions(TestCase testCase, int n, Class actionType) {
+    private static TestCase removeLastActions(TestCase testCase, int n, Class actionType) {
 
         MATE.log("Optimising TestCase!");
 
@@ -211,7 +238,7 @@ public final class TestCaseOptimizer {
      * @param index    The index of the action which should be removed.
      * @return Returns the test case without the action at the given index.
      */
-    public static TestCase removeActionAtIndex(TestCase testCase, int index) {
+    private static TestCase removeActionAtIndex(TestCase testCase, int index) {
         testCase.getEventSequence().remove(index);
         return testCase;
     }
@@ -222,7 +249,7 @@ public final class TestCaseOptimizer {
      * @param testCase The given test case.
      * @return Returns the test case without the last action.
      */
-    public static TestCase removeLastAction(TestCase testCase) {
+    private static TestCase removeLastAction(TestCase testCase) {
 
         int lastIndex = testCase.getEventSequence().size() - 1;
         testCase.getEventSequence().remove(lastIndex);
@@ -237,7 +264,7 @@ public final class TestCaseOptimizer {
      * @return Returns {@code true} if the last action matches the given action type,
      * otherwise {@code false} is returned.
      */
-    public static boolean isLastActionOfGivenType(TestCase testCase, Class type) {
+    private static boolean isLastActionOfGivenType(TestCase testCase, Class type) {
 
         int lastIndex = testCase.getEventSequence().size() - 1;
         return testCase.getEventSequence().get(lastIndex).getClass().equals(type);

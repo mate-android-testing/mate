@@ -106,7 +106,7 @@ public class TestCase {
      *      or returns {@code "unknown"}.
      */
     public String getActivityAfterAction(int actionIndex) {
-        if (actionIndex < activityAfterAction.size()) {
+        if (actionIndex >= 0 && actionIndex < activityAfterAction.size()) {
             return activityAfterAction.get(actionIndex);
         } else {
             return "unknown";

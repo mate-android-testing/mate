@@ -67,10 +67,12 @@ import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.MersenneTwister;
+import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -417,6 +419,8 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+
                     // track which test cases couldn't be successfully replayed
                     Map<Integer, TestCase> failures = new HashMap<>();
 
@@ -427,8 +431,15 @@ public class MATE {
                     // reset the app once
                     uiAbstractionLayer.resetApp();
 
+                    // grant runtime permissions (read/write external storage) which are dropped after each reset
+                    Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+
                     // as long as we find a test case for replaying
                     while (testCase != null) {
+
+                        if (Properties.OPTIMISE_TEST_CASE()) {
+                            testCase = TestCaseOptimizer.optimise(testCase);
+                        }
 
                         if (replayTestCase(testCase)) {
                             // record stats only if test case could be successfully replayed
@@ -446,6 +457,9 @@ public class MATE {
 
                         // reset aut after each test case
                         uiAbstractionLayer.resetApp();
+
+                        // grant runtime permissions (read/write external storage) which are dropped after each reset
+                        Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
                     }
 
                     // retry failed test cases
@@ -466,6 +480,9 @@ public class MATE {
 
                             // reset aut after each test case
                             uiAbstractionLayer.resetApp();
+
+                            // grant runtime permissions (read/write external storage) which are dropped after each reset
+                            Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
                         }
                     }
                 } else if (explorationStrategy.equals("RandomExploration")) {
@@ -482,13 +499,30 @@ public class MATE {
                             = new RandomExploration(Properties.STORE_COVERAGE(), true, MAX_NUMBER_EVENTS(),
                             Properties.RELATIVE_INTENT_AMOUNT());
 
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomExploration.run();
-                            return null;
+                    try {
+                        TimeoutRun.timeoutRun(new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+                                randomExploration.run();
+                                return null;
+                            }
+                        }, MATE.TIME_OUT);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } catch (Error e) {
+                        e.printStackTrace();
+                    }
+
+                    MATE.log("This line should be always logged!");
+
+                    File outputDir = new File("/data/data/org.mate/test-cases");
+                    if (outputDir != null && outputDir.exists()) {
+                        MATE.log("Stored TestCase Files: ");
+                        File[] files = outputDir.listFiles();
+                        for (File file : files) {
+                            MATE.log(file.getName());
                         }
-                    }, MATE.TIME_OUT);
+                    }
 
                     if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
@@ -716,6 +750,9 @@ public class MATE {
         List<Action> actions = testCase.getEventSequence();
 
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
+
+            MATE.log("Current Activity: " + Registry.getEnvironmentManager().getCurrentActivityName());
+            MATE.log("Expected Activity: " + testCase.getActivityAfterAction(i-1));
 
             Action nextAction = actions.get(i);
 
