@@ -82,8 +82,12 @@ public class StateGraph {
         if (source==null)
             return null;
         for (EventEdge edge: source.getEventEdges()){
-            if (edge.getTarget().getId().equals(node2))
-                return edge;
+            if(edge.getTarget() != null) {
+                if (edge.getTarget().getId().equals(node2))
+                    return edge;
+            }else{
+                System.out.println("buaaaaa");
+            }
         }
         return null;
     }
@@ -92,8 +96,12 @@ public class StateGraph {
         if (screenNodes.get(targetScreenNode.getId())==null || screenNodes.get(currentScreenNode.getId())==null)
             return null;
         for (EventEdge edge: targetScreenNode.getEventEdges()){
-            if (edge.getTarget().getId().equals(currentScreenNode.getId()))
-                return edge;
+            if(edge.getTarget() != null) {
+                if (edge.getTarget().getId().equals(currentScreenNode.getId()))
+                    return edge;
+            }else{
+                System.out.println("buaaaaa");
+            }
         }
         return null;
     }

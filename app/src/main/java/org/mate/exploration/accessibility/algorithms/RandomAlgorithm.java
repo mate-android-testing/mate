@@ -5,6 +5,7 @@ import org.mate.message.ResultsRandomExecution;
 import org.mate.model.IGUIModel;
 import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.ScreenNode;
+import org.mate.model.graph.StateGraph;
 import org.mate.state.IScreenState;
 
 import java.util.Map;
@@ -31,7 +32,9 @@ public interface RandomAlgorithm {
     public String getPackageName();
     void setQtdeScreen();
     void setScreenHistoric(ScreenNode screenHistoric);
+    void setScreenHistoric(ScreenNode screenHistoric, EventEdge eventAction);
     ScreenNode getScreenHistoric();
     public IGUIModel getGuiModel();
-
+    void setStateGraph(StateGraph stateGraph);
+    StateGraph getStateGraph();
 }

@@ -5,8 +5,10 @@ import org.mate.message.ResultsRandomExecution;
 import org.mate.model.IGUIModel;
 import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.ScreenNode;
+import org.mate.model.graph.StateGraph;
 import org.mate.state.RandomAccessibilityMethods;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -29,6 +31,8 @@ public class RandomAlgorithmImpl_1 extends RandomAccessibilityMethods implements
         this.runAccChecks = runAccChecks;
         this.qtdeScreen = 0;
         this.screenHistoric = null;
+        this.listScreenHistoric = new ArrayList<>();
+        this.stateGraph = new StateGraph();
     }
 
     /**
@@ -74,12 +78,25 @@ public class RandomAlgorithmImpl_1 extends RandomAccessibilityMethods implements
             selectedScreenNodeState.setEventEdges(executableEventsActions);
             this.setHistoric(selectedScreenNodeState.getId(), selectedScreenNodeState);
 
+            this.stateGraph.addScreenNode(selectedScreenNodeState);
+            this.stateGraph.addEventEdge(eventAction.getSource(), eventAction.getTarget(), eventAction.getWidgetAction());
         }
     }
 
-    //public void setHistoric(String id, ScreenNode screenNode) {this.historic.put(id, screenNode);}
-
-    //public ScreenNode getHistoric(String id){return this.historic.get(id);}
+    public void setScreenHistoric(ScreenNode selectedScreenNodeState, EventEdge eventAction){
+        int index = 0;
+        int index2 = 0;
+        if(selectedScreenNodeState != null && eventAction != null){
+            index = selectedScreenNodeState.getEventEdges().indexOf(eventAction);
+            if(!this.listScreenHistoric.contains(selectedScreenNodeState)){
+                this.listScreenHistoric.add(selectedScreenNodeState);
+            }else{
+                index2 = this.listScreenHistoric.indexOf(selectedScreenNodeState);
+                selectedScreenNodeState.getEventEdges().get(index).setEvent(eventAction.getWidgetAction());
+                this.listScreenHistoric.get(index2).setEventEdges(selectedScreenNodeState.getEventEdges());
+            }
+        }
+    }
 
     public ResultsRandomExecution getFactory() {return factory;}
 

@@ -66,12 +66,13 @@ public class NewUniformRandomForAccessibility {
         int numberOfActions = 0;
         int totalNumberOfActions = 0;
         int violationsAmountFounded = 0;
-        ScreenNode screenNodeState = null;
-        ScreenNode screenNodeStateData = new ScreenNode(selectedScreenState);
-        this.algorithm.setScreenHistoric(new ScreenNode(selectedScreenState.getId(), selectedScreenState));
+        ScreenNode screenNodeState = new ScreenNode(selectedScreenState);
+        //this.algorithm.setScreenNodeStateData(new ScreenNode(selectedScreenState));
+        this.algorithm.setScreenHistoric(screenNodeState);
+
         while (currentTime - runningTime <= MATE.TIME_OUT){
             try{
-                screenNodeState = new ScreenNode(selectedScreenState.getId(), selectedScreenState);
+                //screenNodeState = new ScreenNode(selectedScreenState);
                 //from a list of all executable actions as long as this state is different from last state
                 //select one action randomly
                 EventEdge eventAction = this.algorithm.getAExecutableActions(screenNodeState);
@@ -127,6 +128,7 @@ public class NewUniformRandomForAccessibility {
                     //try to update GUI model with the current screen state
                     //it the current screen is a screen not explored before,
                     //   then a new state is created (newstate = true)
+
                     boolean newState = this.algorithm.updateModel(eventAction, screenNodeState, state);
 
 
@@ -144,8 +146,9 @@ public class NewUniformRandomForAccessibility {
                     }
                 }
                 this.algorithm.setHistoric(screenNodeState, eventAction);
+                this.algorithm.setScreenHistoric(screenNodeState, eventAction);
                 selectedScreenState = state;
-
+                screenNodeState = new ScreenNode(selectedScreenState);
                 /*} catch (AUTCrashException e) {
                     deviceMgr.handleCrashDialog();
                 }*/

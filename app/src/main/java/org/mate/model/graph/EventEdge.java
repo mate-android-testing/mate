@@ -39,7 +39,7 @@ public class EventEdge implements Cloneable{
         setEvent(event);
         //TODO:a tiny button here, back button doesn't have id, so null pointer exeception
 //        setId(source.getId()+"-"+this.event.getActionType()+":"+this.event.getWidget().getId()+"-"+target.getId());
-        setId(source.getId()+"-"+this.event.getActionType()+":"+"-"+target.getId());
+        setId(source.getId()+"-"+this.event.getActionType()+":"+"-"+ (getTarget() != null ? target.getId() : "[n/a]"));
     }
 
     /**

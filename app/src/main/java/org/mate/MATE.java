@@ -1,56 +1,53 @@
 package org.mate;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
-import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 
-import org.mate.exploration.genetic.algorithm.RandomSearch;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
-import org.mate.exploration.manual.CheckCurrentScreen;
-import org.mate.exploration.manual.ManualExploration;
+import org.mate.exploration.accessibility.NewUniformRandomForAccessibility;
+import org.mate.exploration.accessibility.algorithms.RandomAlgorithm;
+import org.mate.exploration.accessibility.algorithms.RandomAlgorithmImpl_1;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
-import org.mate.exploration.genetic.algorithm.NSGAII;
-import org.mate.exploration.genetic.algorithm.RandomWalk;
-import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
-import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
-import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
-import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
-import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
-import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
-import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
-import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
-import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
-import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.termination.IterTerminationCondition;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.Mio;
-import org.mate.exploration.genetic.selection.RandomSelectionFunction;
-import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
-import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.algorithm.RandomSearch;
+import org.mate.exploration.genetic.algorithm.RandomWalk;
+import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
+import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
+import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
+import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
+import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
+import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
+import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
+import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
+import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
+import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.heuristical.HeuristicExploration;
 import org.mate.exploration.heuristical.RandomExploration;
+import org.mate.exploration.manual.CheckCurrentScreen;
+import org.mate.exploration.manual.ManualExploration;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.IGUIModel;
@@ -581,6 +578,7 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
                 }
+                //+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+_+
                 if (explorationStrategy.equals("AccManual")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     ManualExploration manualExploration = new ManualExploration();
@@ -595,13 +593,23 @@ public class MATE {
                     this.guiModel.updateModel(null,initialScreenState);
                     UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,guiModel,true);
                     unirandomacc.startUniformRandomExploration(initialScreenState,runningTime);
-                }
-                else{
-                    if (explorationStrategy.equals("checkScreen")){
-                        uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                        CheckCurrentScreen checkScreen = new CheckCurrentScreen();
-                        checkScreen.scanScreen();
+                } else {
+                    if (explorationStrategy.equals("AccRandomAdptative")) {
+                        IScreenState initialScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        //creates the graph that represents the GUI model
+                        this.guiModel = new GraphGUIModel();
+                        //first state (root node - action ==null)
+                        this.guiModel.updateModel(null, initialScreenState);
+                        RandomAlgorithm algorithm = new RandomAlgorithmImpl_1(deviceMgr, packageName, guiModel, true);
+                        NewUniformRandomForAccessibility unirandomacc = new NewUniformRandomForAccessibility(algorithm, true);
+                        unirandomacc.startUniformRandomExploration(initialScreenState, runningTime);
+                    } else{
+                        if (explorationStrategy.equals("checkScreen")){
+                            uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                            CheckCurrentScreen checkScreen = new CheckCurrentScreen();
+                            checkScreen.scanScreen();
 
+                        }
                     }
                 }
             } else

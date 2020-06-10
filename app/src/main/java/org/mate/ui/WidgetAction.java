@@ -37,6 +37,7 @@ public class WidgetAction extends Action {
         this.actionType = actionType;
         fitness=0;
         widget = new Widget("","","");
+        this.weight = 0;
     }
 
     public WidgetAction(Widget widget, ActionType actionType) {
@@ -45,6 +46,7 @@ public class WidgetAction extends Action {
         setExtraInfo("");
         adjActions = new ArrayList<>();
         setExecuted(false);
+        this.weight = 0;
     }
 
     public void setExecuted(boolean executed) {

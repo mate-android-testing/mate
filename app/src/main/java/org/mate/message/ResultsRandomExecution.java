@@ -1,5 +1,6 @@
 package org.mate.message;
 
+import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.ScreenNode;
 import org.mate.state.IScreenState;
 import org.mate.ui.WidgetAction;
@@ -31,7 +32,23 @@ public class ResultsRandomExecution {
      * @param historic
      */
    public static void printResultsNew(Map<String, ScreenNode>  historic){
-
+       System.out.println("");
+       System.out.println("-------------------------------Resultados---------------------------------");
+       for (Map.Entry<String, ScreenNode> i : historic.entrySet()) {
+           System.out.println("Screen: " + i.getKey() + " | QTDE de ações: " + i.getValue().getEventEdges().size());
+           System.out.println("Acções executadas:");
+           for (EventEdge widget : i.getValue().getEventEdges()) {
+               if (widget.getWidgetAction().isExecuted()) {
+                   System.out.println("> AÇÃO: " + widget.getWidgetAction().getActionType());
+                   System.out.println("  -> Weight - " + widget.getWeight());
+                   System.out.println("  -> Fitness - " + widget.getFitness());
+                   System.out.println("  -> Executado? " + widget.getWidgetAction().isExecuted() + "(x" + widget.getWidgetAction().getQtdeOfExec() + ")");
+                   if (widget.isNewStateGenerated()) {
+                       System.out.println("    --> Gerou novo estado - " + widget.getTarget().getId());
+                   }
+               }
+           }
+       }
    }
     public static void printResults(Map<String, List<WidgetAction>> historic){
         //historic = sortMap(historic);

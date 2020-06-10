@@ -9,6 +9,7 @@ import org.mate.message.ResultsRandomExecution;
 import org.mate.model.IGUIModel;
 import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.ScreenNode;
+import org.mate.model.graph.StateGraph;
 import org.mate.ui.ActionType;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -27,10 +28,12 @@ public class RandomAccessibilityMethods {
     protected DeviceMgr deviceMgr;
     protected Map<String, ScreenNode> historic;
     protected ScreenNode screenHistoric;
+    protected List<ScreenNode> listScreenHistoric;
     protected boolean runAccChecks = true;
     protected ResultsRandomExecution factory;
     protected String log;
     protected  int qtdeScreen;
+    protected StateGraph stateGraph;
 
     public long waitForProgressBar(IScreenState state) {
         long ini = new Date().getTime();
@@ -143,7 +146,6 @@ public class RandomAccessibilityMethods {
     }
 
     public static int runAccessibilityChecks(IScreenState state) {
-        //this.setLog("Executando verificação de acessibilidade...");
         MATE.log("start ACCESSIBILITY CHECKS: " );
         return AccessibilityViolationChecker.runAccessibilityChecks(state).size();
     }
@@ -302,8 +304,10 @@ public class RandomAccessibilityMethods {
         return screenHistoric;
     }
 
+
     public void setScreenHistoric(ScreenNode screenHistoric) {
         this.screenHistoric = screenHistoric;
+        this.listScreenHistoric.add(screenHistoric);
     }
 
     public String getLog() {return log;}
@@ -314,4 +318,11 @@ public class RandomAccessibilityMethods {
         return guiModel;
     }
 
+    public StateGraph getStateGraph() {
+        return stateGraph;
+    }
+
+    public void setStateGraph(StateGraph stateGraph) {
+        this.stateGraph = stateGraph;
+    }
 }
