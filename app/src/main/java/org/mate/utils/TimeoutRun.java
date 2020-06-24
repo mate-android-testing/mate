@@ -12,58 +12,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class TimeoutRun {
-    private static boolean interruptMasked = false;
-    private static boolean wasInterrupted = false;
-    private static boolean activeRun = false;
-
-    public static void maskInterrupt() {
-        if (!activeRun) {
-            return;
-        }
-
-        withInterruptLock(new Runnable() {
-            @Override
-            public void run() {
-                if (wasInterrupted) {
-                    throw new IllegalStateException("Entering a new interrupt masked block in an already interrupted thread.");
-                }
-                interruptMasked = true;
-            }
-        });
-    }
-
-    public static void unmaskInterrupt() {
-        if (!activeRun) {
-            return;
-        }
-
-        withInterruptLock(new Runnable() {
-            @Override
-            public void run() {
-                interruptMasked = false;
-                if (wasInterrupted) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
-    }
-
     private static synchronized void withInterruptLock(Runnable r) {
         r.run();
     }
 
     public static boolean timeoutRun(Callable<Void> c, long milliseconds) {
-        interruptMasked = false;
-        wasInterrupted = false;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return new InterruptMaskableThread(r);
-            }
-        });
-
-        activeRun = true;
         Future<Void> future = executor.submit(c);
         boolean finishedWithoutTimeout = false;
 
@@ -85,31 +40,9 @@ public class TimeoutRun {
         } catch (InterruptedException | ExecutionException e) {
             MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            activeRun = false;
         }
 
         executor.shutdownNow();
         return  finishedWithoutTimeout;
-    }
-
-    private static class InterruptMaskableThread extends Thread {
-        private InterruptMaskableThread(Runnable r) {
-            super(r);
-        }
-
-        @Override
-        public void interrupt() {
-            withInterruptLock(new Runnable() {
-                @Override
-                public void run() {
-                    if (interruptMasked) {
-                        wasInterrupted = true;
-                    } else {
-                        InterruptMaskableThread.super.interrupt();
-                    }
-                }
-            });
-        }
     }
 }

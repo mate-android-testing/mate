@@ -55,27 +55,22 @@ public class EnvironmentManager {
      * @param message {@link org.mate.message.Message} that will be send to the server
      * @return Response {@link org.mate.message.Message} of the server
      */
-    public Message sendMessage(Message message) {
+    public synchronized Message sendMessage(Message message) {
         if (!active) {
             throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
         }
         addMetadata(message);
 
-        TimeoutRun.maskInterrupt();
         try {
             server.getOutputStream().write(Serializer.serialize(message));
             server.getOutputStream().flush();
         } catch (IOException e) {
-            TimeoutRun.unmaskInterrupt();
             MATE.log("socket error sending");
             throw new IllegalStateException(e);
         } finally {
-            TimeoutRun.unmaskInterrupt();
         }
 
-        TimeoutRun.maskInterrupt();
         Message response = messageParser.nextMessage();
-        TimeoutRun.unmaskInterrupt();
 
         verifyMetadata(response);
         if (response.getSubject().equals("/error")) {
