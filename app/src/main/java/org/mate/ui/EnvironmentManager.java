@@ -67,7 +67,6 @@ public class EnvironmentManager {
         } catch (IOException e) {
             MATE.log("socket error sending");
             throw new IllegalStateException(e);
-        } finally {
         }
 
         Message response = messageParser.nextMessage();
