@@ -278,12 +278,12 @@ public class DeviceMgr implements IApp {
     }
 
     private void checkForCrash() throws AUTCrashException {
+        
         //handle app crashes
-        UiObject window = new UiObject(new UiSelector().packageName("android")
-                .textContains("has stopped"));
-        UiObject window2 = new UiObject(new UiSelector().packageName("android")
-                .textContains("keeps stopping"));
-        if (window.exists() || window2.exists()) {
+        UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
+        UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
+
+        if (crashDialog1.exists() || crashDialog2.exists()) {
             MATE.log("CRASH");
             throw new AUTCrashException("App crashed");
         }
