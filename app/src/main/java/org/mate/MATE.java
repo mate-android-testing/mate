@@ -395,14 +395,7 @@ public class MATE {
                     }
 
                     final RandomExploration randomExploration = new RandomExploration(Properties.STORE_COVERAGE(), true, 50);
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomExploration.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
+                    randomExploration.run();
 
                     if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
