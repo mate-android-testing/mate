@@ -29,8 +29,11 @@ public class RandomExploration {
 
     public void run() {
         long algorithmStartTime = System.currentTimeMillis();
+        // number of ants created in a full ACO run, generationAmount * generationSize
+        int antAmount = 20 * 10;
 
-        antStatsLogger.write("Algorithm Type; Test Case #; Fitness Value; Runtime\n");
+        antStatsLogger.write("Algorithm Type; Test Case #; Fitness Value;" +
+                " Current Coverage; Combined Coverage; Runtime in s\n");
 
         // Get the target line to generate a test for and initialise the fitness function
         String targetLine = Properties.TARGET_LINE();
@@ -65,8 +68,11 @@ public class RandomExploration {
             antStatsLogger.write("random; " + (i + 1) + "; ");
 
             double fitnessValue = lineCoveredPercentageFitnessFunction.getFitness(chromosome);
+            double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
+            double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
-            antStatsLogger.write(fitnessValue + "; ");
+            antStatsLogger.write(fitnessValue + "; " +
+                    coverage + "; " + combinedCoverage + "; ");
 
             logCurrentRuntime(testCaseStartTime);
 
@@ -74,8 +80,19 @@ public class RandomExploration {
             if (fitnessValue == 1) {
                 MATE.log_acc("Random Exploration finished successfully");
 
-                antStatsLogger.write("random; -; -; ");
+                antStatsLogger.write("random; -; -; -; -; ");
                 logCurrentRuntime(algorithmStartTime);
+
+                antStatsLogger.write("random; -; -; -; -; successful\n");
+
+                break;
+            } else if (i == (antAmount - 1)) {
+                MATE.log_acc("Random Exploration finished unsuccessfully");
+
+                antStatsLogger.write("random; -; -; -; -; ");
+                logCurrentRuntime(algorithmStartTime);
+
+                antStatsLogger.write("random; -; -; -; -; unsuccessful\n");
 
                 break;
             }

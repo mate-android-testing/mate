@@ -44,7 +44,7 @@ public class AntColony {
 
     // Parameters to customize the ACO algorithm
     private static final int generationAmount = 20;
-    private static final int generationSize = 8;
+    private static final int generationSize = 10;
     private static final int antPathLength = 30;
     private static final double evaporationRate = 0.1;
     // TODO Choose appropriate deposit amount
@@ -72,10 +72,10 @@ public class AntColony {
 
     public void run() {
         long algorithmStartTime = System.currentTimeMillis();
-        // TODO Remove
+        // TODO Print target line & coverage
         //antStatsLogger.write("Start of Algorithm at " + startTime + ", ");
-        antStatsLogger.write("Algorithm Type; Generation #; Ant #; Fitness Value; Runtime\n");
-
+        antStatsLogger.write("Algorithm Type; Generation #; Ant #; Fitness Value;" +
+                " Current Coverage; Combined Coverage; Runtime in s\n");
 
         // Get the target line for ACO to generate a test for and initialise the fitness function
         String targetLine = Properties.TARGET_LINE();
@@ -104,21 +104,26 @@ public class AntColony {
                 Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
 
-                // TODO REMOVE - DEBUG
                 double fitnessValue = lineCoveredPercentageFitnessFunction.getFitness(chromosome);
+                double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
+                double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
                 System.out.println(fitnessValue);
-                antStatsLogger.write(fitnessValue + "; ");
+                antStatsLogger.write(fitnessValue + "; " +
+                        coverage + "; " + combinedCoverage + "; ");
                 logCurrentRuntime(antStartTime);
 
                 // Stop algorithm if target line was reached
                 if (fitnessValue == 1) {
                     //TODO finish necessary action for successful algorithm run (write log)
-                    antStatsLogger.write("ant; " + (i + 1) + "; -; -; ");
+                    antStatsLogger.write("ant; " + (i + 1) + "; -; -; -; -; ");
                     logCurrentRuntime(generationStartTime);
 
                     MATE.log_acc("ACO finished successfully");
-                    antStatsLogger.write("ant; -; -; -; ");
+                    antStatsLogger.write("ant; -; -; -; -; -; ");
                     logCurrentRuntime(algorithmStartTime);
+
+                    antStatsLogger.write("random; -; -; -; -; successful\n");
+
                     break outerLoop;
                 } else {
                     // Add testcase of current ant to list for later depositing of pheromones
@@ -216,13 +221,15 @@ public class AntColony {
                 }
             }
 
-            antStatsLogger.write("ant; " + (i + 1) + "; -; -; ");
+            antStatsLogger.write("ant; " + (i + 1) + "; -; -; -; -; ");
             logCurrentRuntime(generationStartTime);
 
-            // TODO Comment
+            // TODO Comment max generations reached
             if ((i + 1) == generationAmount) {
-                antStatsLogger.write("ant; -; -; -; ");
+                antStatsLogger.write("ant; -; -; -; -; -; ");
                 logCurrentRuntime(algorithmStartTime);
+
+                antStatsLogger.write("random; -; -; -; -; unsuccessful\n");
             }
         }
         // Close the logger
