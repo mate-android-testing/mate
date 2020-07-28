@@ -65,17 +65,18 @@ public class UseOfColorCheck implements IWCAGCheck {
     public AccessibilityViolation check(IScreenState state, Widget widget) {
         String extraInfo = "";
 
+        //check if the same state exists but with different colours
+
+
         IScreenState visitedState =stateHasBeenVisited(state);
         if (visitedState!=null){
-            Registry.getEnvironmentManager().screenShot(state.getPackageName(),visitedState.getId()+"_");
-            state.setId(visitedState.getId()+"_");
             detectColours(state);
             //MATE.log("CHECK IF COLOR CHANGED");
             //if state has been visited
             //   check whether any of their colors have changed
             //todo: implementes colour comparison outside the ActionScreenState class
             if (visitedState.differentColor(state)){
-                extraInfo = "Same state, different colors for some widgets!";
+                extraInfo = "Same state - different colors for some widgets!";
                 return new AccessibilityViolation(AccessibilityViolationType.USE_OF_COLOR,state,extraInfo);
                 //MATE.log("COR DIFERENTE");
             }

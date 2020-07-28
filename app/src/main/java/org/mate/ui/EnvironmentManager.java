@@ -9,7 +9,10 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.utils.TimeoutRun;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +43,10 @@ public class EnvironmentManager {
         messageParser = new Parser(server.getInputStream());
     }
 
+    public boolean isActive(){
+        return active;
+    }
+
     public void close() throws IOException {
         sendMessage(new Message("/close"));
         active = false;
@@ -67,6 +74,7 @@ public class EnvironmentManager {
             server.getOutputStream().flush();
         } catch (IOException e) {
             TimeoutRun.unmaskInterrupt();
+            active = false;
             MATE.log("socket error sending");
             throw new IllegalStateException(e);
         } finally {
@@ -87,11 +95,43 @@ public class EnvironmentManager {
         return response;
     }
 
+    public String tunnelLegacyCmdX(String cmd){
+        String response = "";
+        try {
+
+            Socket server = new Socket("10.0.2.2", 12345);
+            PrintStream output = new PrintStream(server.getOutputStream());
+            output.println(cmd);
+
+
+            String serverResponse="";
+            BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+            while(true) {
+                if ((serverResponse = in.readLine()) != null) {
+                    response = serverResponse;
+                    MATE.log("screenshot response: " + response);
+                    break;
+                }
+            }
+
+            server.close();
+            output.close();
+            in.close();
+
+        } catch (IOException e) {
+            MATE.log("socket error sending");
+            e.printStackTrace();
+        }
+        return response;
+    }
+
     public String tunnelLegacyCmd(String cmd) {
         Message message = new Message.MessageBuilder("/legacy")
                 .withParameter("cmd", cmd)
                 .build();
+        //MATE.log("CMD: " + message.getParameter("cmd"));
         Message response = sendMessage(message);
+        //MATE.log(response.getParameter("response"));
         if (!response.getSubject().equals("/legacy")) {
             StringBuilder sb = new StringBuilder("Received unexpected message with subject: <");
             sb.append(response.getSubject());
@@ -141,6 +181,10 @@ public class EnvironmentManager {
     public void releaseEmulator() {
         String cmd = "releaseEmulator:" + emulator;
         tunnelLegacyCmd(cmd);
+    }
+
+    public void setEmulator(String emulatorID){
+        this.emulator = emulatorID;
     }
 
     public String detectEmulator(String packageName) {
@@ -227,7 +271,7 @@ public class EnvironmentManager {
         Bundle arguments = InstrumentationRegistry.getArguments();
         String apkPath = arguments.getString("apk");
         String packageName = arguments.getString("packageName");
-        MATE.log("Path to APK file: " + apkPath);
+        //MATE.log("Path to APK file: " + apkPath);
 
         boolean isInit = false;
 
@@ -400,11 +444,13 @@ public class EnvironmentManager {
     }
 
     public void screenShot(String packageName, String nodeId) {
+        packageName = packageName.replace("_","-");
         String cmd = "screenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
         tunnelLegacyCmd(cmd);
     }
 
     public void screenShotForFlickerDetection(String packageName,String nodeId){
+        packageName = packageName.replace("_","-");
         String cmd = "flickerScreenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
         tunnelLegacyCmd(cmd);
     }
@@ -415,6 +461,7 @@ public class EnvironmentManager {
     }
 
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget){
+        packageName = packageName.replace("_","-");
         String cmd = "surroundingColor:";
         cmd += emulator + "_" + packageName + ":";
         cmd += stateId + ":";
@@ -430,9 +477,9 @@ public class EnvironmentManager {
     }
 
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
+        packageName = packageName.replace("_","-");
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
-        double contrastRatio = 21;
         String cmd = "contrastratio:";
         cmd += emulator + "_" + packageName + ":";
         cmd += stateId + ":";
@@ -455,6 +502,7 @@ public class EnvironmentManager {
     }
 
     public String getLuminances(String packageName, String stateId, Widget widget){
+        packageName = packageName.replace("_","-");
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
         String cmd = "luminance:";
@@ -486,8 +534,20 @@ public class EnvironmentManager {
     }
 
 
+
+
     public void sendFlawToServer(String msg) {
         String cmd = "reportFlaw:" + emulator + ":" + msg;
+        tunnelLegacyCmd(cmd);
+    }
+
+    public void generalReport(String header, String values) {
+        String cmd = "reportFlaw"+"@"+emulator+"@"+header+"@"+values;
+        tunnelLegacyCmd(cmd);
+    }
+
+    public void measureReport(String header, String values) {
+        String cmd = "reportFlaw"+"%"+emulator+"%"+header+"%"+values;
         tunnelLegacyCmd(cmd);
     }
 }

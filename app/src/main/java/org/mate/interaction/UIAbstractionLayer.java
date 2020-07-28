@@ -8,8 +8,11 @@ import android.widget.TextView;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.exploration.accessibility.StateUtils;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.state.executables.ActionsScreenState;
+import org.mate.state.executables.RelatedState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
@@ -21,15 +24,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import static org.mate.MATE.device;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
 public class UIAbstractionLayer {
+
     private static final int UiAutomatorDisconnectedRetries = 3;
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
     private String packageName;
@@ -37,7 +43,12 @@ public class UIAbstractionLayer {
     private Map<Action, Edge> edges;
     private IScreenState lastScreenState;
     private int screenStateEnumeration;
+    private List<IScreenState> visitedStates;
 
+
+    public DeviceMgr getDeviceMgr(){
+        return deviceMgr;
+    }
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
@@ -45,11 +56,26 @@ public class UIAbstractionLayer {
         clearScreen();
         lastScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
         lastScreenState.setId("S0");
+        Action action = new WidgetAction(new Widget(String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode())),"",""),ActionType.STARTAPP);
+        addEdge(action,lastScreenState,lastScreenState);
         screenStateEnumeration = 1;
+        visitedStates = new ArrayList<IScreenState>();
+        addVisitedState(lastScreenState);
     }
 
     public List<WidgetAction> getExecutableActions() {
         return getLastScreenState().getActions();
+    }
+
+    public void addVisitedState(IScreenState state){
+        boolean found = false;
+        for (IScreenState st: visitedStates){
+            if (st.getId().equals(state.getId()))
+                found = true;
+        }
+        if (!found) {
+            visitedStates.add(state);
+        }
     }
 
     public ActionResult executeAction(Action action) {
@@ -90,8 +116,8 @@ public class UIAbstractionLayer {
                 return FAILURE_APP_CRASH;
             }
             state = ScreenStateFactory.getScreenState("ActionsScreenState"); //TODO: maybe not needed
-            state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, lastScreenState, state));
+            state = toRecordedScreenStateAccessibilityCriteria(state);
+            addEdge(action,lastScreenState,state);
             lastScreenState = state;
 
             return FAILURE_APP_CRASH;
@@ -134,28 +160,32 @@ public class UIAbstractionLayer {
         //check whether the package of the app currently running is from the app under test
         //if it is not, restart app
         if (!currentPackageName.equals(this.packageName)) {
-            MATE.log_acc("current package different from app package: " + currentPackageName);
-
-            state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, lastScreenState, state));
+            //MATE.log("current package different from app package: " + currentPackageName);
+            state = toRecordedScreenStateAccessibilityCriteria(state);
+            //MATE.log("     state id outside app: " + state.getId());
+            addEdge(action,lastScreenState,state);
             lastScreenState = state;
 
             return SUCCESS_OUTBOUND;
         } else {
             //update model with new state
-            state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, lastScreenState, state));
+            long beforeTime = new Date().getTime();
+            state = toRecordedScreenStateAccessibilityCriteria(state);
+            long afterTime = new Date().getTime();
+            //MATE.log("Time to check if new state: " + (afterTime-beforeTime));
+            addEdge(action,lastScreenState,state);
             lastScreenState = state;
-
+            addVisitedState(lastScreenState);
             /* Ignore this for now
             if (edges.put(action, state)) {
                 MATE.log("New State found:" + state.getId());
                 return SUCCESS_NEW_STATE;
             }*/
-
             return SUCCESS;
         }
     }
+
+
 
     public IScreenState getLastScreenState() {
         return lastScreenState;
@@ -291,7 +321,12 @@ public class UIAbstractionLayer {
         sleep(2000);
         clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+            IScreenState state = toRecordedScreenStateAccessibilityCriteria(ScreenStateFactory.getScreenState("ActionsScreenState"));
+            Action action = new WidgetAction(new Widget(String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode())),"",""),ActionType.RESTART);
+            addEdge(action,lastScreenState,state);
+            lastScreenState = state;
+            addVisitedState(lastScreenState);
+            //lastScreenState = toRecordedScreenStateAccessibilityCriteria(ScreenStateFactory.getScreenState("ActionsScreenState"));
         }
     }
 
@@ -300,7 +335,12 @@ public class UIAbstractionLayer {
         sleep(2000);
         clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+            IScreenState state = toRecordedScreenStateAccessibilityCriteria(ScreenStateFactory.getScreenState("ActionsScreenState"));
+            Action action = new WidgetAction(new Widget(String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode())),"",""),ActionType.RESTART);
+            addEdge(action,lastScreenState,state);
+            lastScreenState = state;
+            addVisitedState(lastScreenState);
+            //lastScreenState = toRecordedScreenStateAccessibilityCriteria(ScreenStateFactory.getScreenState("ActionsScreenState"));
         }
     }
 
@@ -317,14 +357,47 @@ public class UIAbstractionLayer {
     }
 
     public List<IScreenState> getRecordedScreenStates() {
+        return visitedStates;
+        /*
+        List<String> ids = new ArrayList<String>();
         List<IScreenState> screenStates = new ArrayList<>();
         for (Edge edge : edges.values()) {
-            if (!screenStates.contains(edge.source)) {
+            //MATE.log(edge.getSource().getId() + " -> " + edge.getTarget().getId());
+            if (!ids.contains(edge.source.getId())) {
+                if (!edge.source.getId().contains("OUTBOUND")) {
+                    screenStates.add(edge.source);
+                    ids.add(edge.getSource().getId());
+                }
+            }
+            if (!ids.contains(edge.target.getId())) {
+                if (!edge.target.getId().contains("OUTBOUND")) {
+                    screenStates.add(edge.target);
+                    ids.add(edge.getTarget().getId());
+                }
+            }
+        }
+        return screenStates;
+
+         */
+    }
+
+    public List<IScreenState> getRecordedScreenStatesFinal() {
+        List<String> ids = new ArrayList<String>();
+        List<IScreenState> screenStates = new ArrayList<>();
+        for (Edge edge : edges.values()) {
+            MATE.log(edge.getSource().getId() + " -> " + edge.getTarget().getId());
+            // if (!ids.contains(edge.source.getId())) {
+            if (!edge.source.getId().contains("OUTBOUND")) {
                 screenStates.add(edge.source);
+                MATE.log ("in: "+edge.source.getId());
             }
-            if (!screenStates.contains(edge.target)) {
+            // }
+            //  if (!ids.contains(edge.target.getId())) {
+            if (!edge.target.getId().contains("OUTBOUND")) {
                 screenStates.add(edge.target);
+                MATE.log ("in: "+edge.target.getId());
             }
+            //}
         }
         return screenStates;
     }
@@ -338,10 +411,113 @@ public class UIAbstractionLayer {
                 return recordedScreenState;
             }
         }
+        //if it is a new state
         screenState.setId("S"+screenStateEnumeration);
         screenStateEnumeration++;
         return screenState;
     }
+
+    public IScreenState toRecordedScreenStateAccessibilityCriteria(IScreenState screenState){
+        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
+
+        int minScore = Integer.MAX_VALUE;
+        String minDifference = "";
+
+        Vector<IScreenState> statesRelated = new Vector<IScreenState>();
+        Vector<String> differences = new Vector<String>();
+
+        String result = "";
+        for (IScreenState recordedScreenState : recordedScreenStates) {
+            result = StateUtils.checkStateDifferenceType(recordedScreenState,screenState);
+
+            //there is no difference
+            if (result.equals(""))
+                return recordedScreenState;
+
+            //they are different
+            int resultScore = calculateResultScore(result);
+            if (resultScore < minScore) {
+                minScore = resultScore;
+                minDifference = result;
+            }
+
+            //create related states list
+            if (!(result.equals("Package") || result.equals("Activity") || result.equals("Hierarchy"))){
+                screenState.addRelatedState(recordedScreenState,result);
+                statesRelated.add(recordedScreenState);
+                differences.add(result);
+            }
+        }
+
+
+
+        //if it is a new state
+        screenState.setId("S"+screenStateEnumeration);
+        //MATE.log("NEW STATE: " + screenState.getId() +  "  " + result);
+        ((ActionsScreenState) screenState).setTypeOfNewState(minDifference);
+        screenStateEnumeration++;
+
+
+        for (int i=0; i<statesRelated.size(); i++){
+            statesRelated.get(i).addRelatedState(screenState,differences.get(i));
+        }
+
+        return screenState;
+    }
+
+
+    private int calculateResultScore(String result) {
+        //MATE.log("calc score");
+        int resultScore = 0;
+        String[] types = {"Er","Cl","St","Ht","Cd","Sz","Ifa","Lu","Srf","Ctr"};
+
+        for (String type: types){
+            int count = 0;
+            int stIndex = 0;
+            while (stIndex!=-1){
+                stIndex = result.indexOf(type, stIndex);
+                if (stIndex>=0) {
+                    count++;
+                    stIndex++;
+                }
+            }
+            resultScore+=count;
+        }
+
+        if (result.equals("Package"))
+            return 1000000000;
+        if (result.equals("Activity"))
+            return 100000000;
+        if (result.equals("Hierarchy"))
+            return 10000000;
+        // MATE.log("end calc score");
+        return resultScore;
+    }
+
+    /*
+    private String isANewState(IScreenState currentState) {
+        MATE.log("Check new state");
+        int minScore = Integer.MAX_VALUE;
+        String minDifference = "";
+        for (IScreenState state: getRecordedScreenStates()) {
+            String result = StateUtils.checkStateDifferenceType(currentState, state);
+            MATE.log("result: " + result);
+            if (result.equals(""))
+                return "";
+            int resultScore = calculateResultScore(result);
+            if (resultScore < minScore) {
+                minScore = resultScore;
+                minDifference = result;
+            }
+        }
+
+        MATE.log("  difference set: " + minDifference);
+        ((ActionsScreenState) currentState).setTypeOfNewState(minDifference);
+
+        return minDifference;
+    }*/
+
+
 
     public boolean checkIfNewState(IScreenState screenState) {
         List<IScreenState> recordedScreenStates = getRecordedScreenStates();
@@ -362,6 +538,21 @@ public class UIAbstractionLayer {
         }
         return null;
     }
+
+    public void addEdge(Action action, IScreenState source, IScreenState target) {
+
+        Edge edge = new Edge(action, source, target);
+        if (action instanceof  WidgetAction){
+            WidgetAction wa = (WidgetAction) action;
+            if (wa.getWidget().getId().equals("")){
+                wa.getWidget().setId(String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode())));
+                wa.getWidget().setIdByActivity(String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode())));
+                action = wa;
+            }
+        }
+        edges.put(action, edge);
+    }
+
 
     public enum ActionResult {
         FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND

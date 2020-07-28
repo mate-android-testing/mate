@@ -32,12 +32,14 @@ public class DeviceMgr implements IApp {
     private UiDevice device;
     private String packageName;
 
+    public UiDevice getDevice(){
+        return device;
+    }
+
     public DeviceMgr(UiDevice device, String packageName){
         this.device = device;
         this.packageName = packageName;
-
-
-
+        MATE.log("Device manager device: " + this.device);
     }
 
     public void executeAction(Action action) throws AUTCrashException{
@@ -49,6 +51,7 @@ public class DeviceMgr implements IApp {
         else {
             throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
         }
+        sleep(100);
     }
 
     public void executeAction(PrimitiveAction action) throws AUTCrashException{
@@ -97,7 +100,7 @@ public class DeviceMgr implements IApp {
     }
 
     public void executeAction(WidgetAction action) throws AUTCrashException{
-        MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
+        //MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
         Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
 

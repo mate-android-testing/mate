@@ -1,12 +1,8 @@
 package org.mate.ui;
 
 
-import org.mate.MATE;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by marceloe on 08/12/16.
@@ -21,19 +17,10 @@ public class Widget {
     private String resourceID;
     private int index;
     private String packageName;
-    private String contentDesc;
     private String labeledBy;
-    private boolean showingHintText;
-    private String color;
-    private String maxminLum;
     private boolean focused;
-
     private String errorText;
-
     private boolean contextClickable;
-    private boolean importantForAccessibility;
-    private boolean accessibilityFocused;
-    private String labelFor;
     private boolean checkable;
     private boolean checked;
     private boolean enabled;
@@ -46,6 +33,21 @@ public class Widget {
     private boolean visibleToUser;
     private String bounds;
     private String originalBounds;
+
+    //accessibility
+    private String color;
+    private String maxminLum;
+    private String size;
+    private boolean importantForAccessibility;
+    private boolean accessibilityFocused;
+    private String labelFor;
+    private String contentDesc;
+    private boolean screenReaderFocusable;
+    private int inputType;
+    private String hint;
+    private boolean showingHintText;
+    private double contrast;
+
     private int X;
     private int Y;
     private int x1;
@@ -54,16 +56,9 @@ public class Widget {
     private int y2;
     private int maxLength;
 
-    private boolean screenReaderFocusable;
-
-    private int inputType;
     private boolean hasChildren;
-
     private List<Widget> children;
-
     private boolean usedAsStateDiff;
-
-    private String hint;
     private boolean heading;
 
     public Widget(String id, String clazz, String idByActivity) {
@@ -77,8 +72,11 @@ public class Widget {
         maxLength = -1;
         this.idByActivity = idByActivity;
         usedAsStateDiff = false;
-        hint = "";
+        setHint("");
         color = "";
+        size="";
+        maxminLum="";
+        contrast=100;
     }
 
     public boolean isContextClickable() {
@@ -527,7 +525,7 @@ public class Widget {
     }
 
     public boolean isEmpty() {
-        if (hint.equals(text))
+        if (getHint().equals(text))
             return true;
         if (text.equals(""))
             return true;
@@ -708,6 +706,15 @@ public class Widget {
     }
 
 
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+
     public String describe(){
         StringBuilder widgetDetails = new StringBuilder();
         widgetDetails.append("\n\n");
@@ -728,4 +735,11 @@ public class Widget {
     }
 
 
+    public double getContrast() {
+        return contrast;
+    }
+
+    public void setContrast(double contrast) {
+        this.contrast = contrast;
+    }
 }

@@ -42,40 +42,36 @@ public class AccessibilityViolationCheckerWCAG implements IAccessibilityViolatio
         //1.3.5
         widgetAccChecks.add(new IdentifyInputPurposeCheck());
 
-
         //1.4.3 & 1.4.7
         widgetAccChecks.add(new ContrastMinimumEnhancedCheck());
 
         // 1.4.11
-        widgetAccChecks.add(new NonTextContrastCheck());
+        //widgetAccChecks.add(new NonTextContrastCheck());
 
 
         //2.4.7
-        widgetAccChecks.add(new FocusVisibleCheck());
+        //widgetAccChecks.add(new FocusVisibleCheck());
 
         //2.5.5
         widgetAccChecks.add(new TargetSizeCheck());
 
-
-
         //BBC
-        widgetAccChecks.add(new AcionableElementsCheck());
-        widgetAccChecks.add(new DescriptiveLinksCheck());
-        widgetAccChecks.add(new FormLayoutAccessibilityCheck());
-        widgetAccChecks.add(new PhantomElementCheck());
-        widgetAccChecks.add(new ManagingFocusCheck());
+        //widgetAccChecks.add(new AcionableElementsCheck());
+        //widgetAccChecks.add(new DescriptiveLinksCheck());
+        //widgetAccChecks.add(new FormLayoutAccessibilityCheck());
+        //widgetAccChecks.add(new PhantomElementCheck());
+        //widgetAccChecks.add(new ManagingFocusCheck());
         widgetAccChecks.add(new MultipleContentDescCheck());
         widgetAccChecks.add(new SpacingAccessibilityCheck());
 
 
-
         screenAccChecks = new ArrayList<IWCAGCheck>();
-
-        //1.3.4
-        screenAccChecks.add(new OrientationCheck());
 
         //1.4.1
         screenAccChecks.add(new UseOfColorCheck());
+
+        //1.3.4
+        screenAccChecks.add(new OrientationCheck());
 
         //2.4.2
         screenAccChecks.add(new PageTitledCheck());
@@ -84,7 +80,7 @@ public class AccessibilityViolationCheckerWCAG implements IAccessibilityViolatio
 
     public List<AccessibilityViolation> runAccessibilityChecks(IScreenState state) {
 
-        MATE.log("RUN WCAG CHECKS");
+        //MATE.log("RUN WCAG CHECKS");
 
         List<AccessibilityViolation> violations = new ArrayList<AccessibilityViolation>();
 
@@ -94,9 +90,9 @@ public class AccessibilityViolationCheckerWCAG implements IAccessibilityViolatio
             if (violation!=null) {
                 violations.add(violation);
                 violation.reportFlaw();
-                MATE.log("VIOLATION FOUND: " + violation.getType().getValue());
-                if (!violation.getInfo().equals(""))
-                    MATE.log(" -- extra info: " + violation.getInfo());
+                //MATE.log("VIOLATION FOUND: " + violation.getType().getValue());
+                //if (!violation.getInfo().equals(""))
+                    //MATE.log(" -- extra info: " + violation.getInfo());
             }
         }
 
@@ -110,9 +106,9 @@ public class AccessibilityViolationCheckerWCAG implements IAccessibilityViolatio
                 if (violation!=null) {
                     violations.add(violation);
                     violation.reportFlaw();
-                    MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
-                    if (!violation.getInfo().equals(""))
-                        MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());
+                    //MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                    //if (!violation.getInfo().equals(""))
+                        //MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());
                 }
             }
             //MATE.log("<<< " + widget.getText());

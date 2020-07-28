@@ -36,7 +36,7 @@ public class NonTextContrastCheck implements IWCAGCheck {
         return null;
     }
 
-    public boolean needsTextContrastChecked(Widget widget) {
+    public static boolean needsTextContrastChecked(Widget widget) {
 
         //if (!widget.isImportantForAccessibility())
           //  return false;

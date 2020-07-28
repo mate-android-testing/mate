@@ -79,25 +79,26 @@ public class FormLayoutAccessibilityCheck implements IWCAGCheck {
         }
 
         if (!widget.getLabeledBy().equals("")) {
-            hasLabel=true;
             labelID = widget.getLabeledBy();
             for (Widget w: state.getWidgets()){
-                if (w.getId().equals(labelID))
+                if (w.getId().equals(labelID)) {
                     label = w;
-            }
-        }
-
-        if (labeledBy.contains(widget.getResourceID())) {
-            hasLabel = true;
-
-            for (Widget w: state.getWidgets()){
-                if (w.getLabelFor().equals(widget.getId())){
-                    label = w;
+                    hasLabel=true;
                 }
             }
         }
 
-        if (hasLabel){
+        if (labeledBy.contains(widget.getResourceID())) {
+
+            for (Widget w: state.getWidgets()){
+                if (w.getLabelFor().equals(widget.getId())){
+                    label = w;
+                    hasLabel = true;
+                }
+            }
+        }
+
+        if (hasLabel && label!=null){
             //check proximity
             //boolean isAbove = false;
             boolean isAtLeft = checkLeft(label,widget);

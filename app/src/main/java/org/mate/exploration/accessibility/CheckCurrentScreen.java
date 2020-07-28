@@ -1,4 +1,4 @@
-package org.mate.exploration.manual;
+package org.mate.exploration.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;

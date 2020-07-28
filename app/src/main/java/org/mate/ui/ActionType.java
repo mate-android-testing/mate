@@ -13,7 +13,9 @@ public enum ActionType {
     MENU,
     CLEAR_WIDGET,
     MANUAL_ACTION,
-    ENTER;
+    ENTER,
+    RESTART,
+    STARTAPP;
 
     public static final ActionType[] primitiveActionTypes = {
             CLICK,

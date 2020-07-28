@@ -1,5 +1,6 @@
 package org.mate.accessibility.check.wcag.perceivable.distinguishable;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.AccessibilityViolationType;
@@ -26,19 +27,28 @@ public class ContrastMinimumEnhancedCheck implements IWCAGCheck {
 
         if (!needsTextContrastChecked(widget))
             return null;
-        contratio=21;
-        double contrastRatio = Registry.getEnvironmentManager().getContrastRatio(packageName,stateId,widget);
+
+        double contrastRatio = 21;
+        if (widget.getContrast()==100 || widget.getContrast()==0) {
+            contrastRatio = Registry.getEnvironmentManager().getContrastRatio(packageName, stateId, widget);
+        }
+        else
+            contrastRatio = widget.getContrast();
         contratio=contrastRatio;
         //MATE.log("Checked: " + widget.getClazz()+" txt:"+ widget.getText()+ " hint: " + widget.getHint()+":"+widget.getContentDesc()+" contrast ratio: " + contrastRatio);
-        if (contrastRatio<4.5)
-            return new AccessibilityViolation(AccessibilityViolationType.CONSTRAST_MINUMUM,widget,state,String.valueOf(contrastRatio));
+        //MATE.log(widget.getText()+ " - contrast: " + contrastRatio);
+        if (contrastRatio<4.5) {
+            //MATE.log("contrast issue");
+            return new AccessibilityViolation(AccessibilityViolationType.CONSTRAST_MINUMUM, widget, state, String.valueOf(contrastRatio));
+        }
         if (contrastRatio<7){
-            return new AccessibilityViolation(AccessibilityViolationType.CONSTRAST_ENHANCED,widget,state,String.valueOf(contrastRatio));
+            //MATE.log("contrast issue enhanced");
+            //return new AccessibilityViolation(AccessibilityViolationType.CONSTRAST_ENHANCED,widget,state,String.valueOf(contrastRatio));
         }
         return null;
     }
 
-    public boolean needsTextContrastChecked(Widget widget) {
+    public static boolean needsTextContrastChecked(Widget widget) {
 
 
         //if (!widget.isImportantForAccessibility())

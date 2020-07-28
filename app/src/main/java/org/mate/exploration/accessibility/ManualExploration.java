@@ -1,4 +1,4 @@
-package org.mate.exploration.manual;
+package org.mate.exploration.accessibility;
 
 import android.support.test.InstrumentationRegistry;
 
@@ -30,13 +30,14 @@ public class ManualExploration {
 
     }
 
-    public void startManualExploration(long runningTime) {
+    public void startManualExploration() {
+
 
         //default
         MATE.TIME_OUT = 2000;
 
         IAccessibilityViolationChecker wcagChecker = new AccessibilityViolationCheckerWCAG();
-
+        long runningTime = new Date().getTime();
         long currentTime = new Date().getTime();
 
         long newTimeout = 0;

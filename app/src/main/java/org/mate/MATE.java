@@ -1,27 +1,25 @@
 package org.mate;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
-import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 
+import org.mate.exploration.accessibility.AbstractRandomExploration;
+import org.mate.exploration.accessibility.BiasedRandomFixedWeight;
+import org.mate.exploration.accessibility.BiasedRandomNewAction;
+import org.mate.exploration.accessibility.NonRepetitiveRandom;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
-import org.mate.exploration.manual.CheckCurrentScreen;
-import org.mate.exploration.manual.ManualExploration;
-import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
+import org.mate.exploration.accessibility.CheckCurrentScreen;
+import org.mate.exploration.accessibility.ManualExploration;
+import org.mate.exploration.accessibility.UniformRandom;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
@@ -58,7 +56,6 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
@@ -69,7 +66,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -84,23 +80,26 @@ public class MATE {
     public static UIAbstractionLayer uiAbstractionLayer;
     public static String packageName;
     public static IGUIModel guiModel;
-    private List<Action> actions;
     private DeviceMgr deviceMgr;
     public static long total_time;
     public static long RANDOM_LENGH;
-    private long runningTime = new Date().getTime();
+    //private long runningTime = new Date().getTime();
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
-    private GraphGUIModel completeModel;
-
     public static String logMessage;
 
+    public static String sessionID;
 
     //public static Vector<String> checkedWidgets = new Vector<String>();
     public static Set<String> visitedActivities = new HashSet<String>();
 
     public MATE() {
+
+        sessionID = InstrumentationRegistry.getArguments().getString("sessionID");
+        if (sessionID==null)
+            sessionID = String.valueOf(Math.abs(String.valueOf(new java.util.Date().getTime()).hashCode()));
+
         Integer serverPort = null;
         try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
@@ -109,6 +108,11 @@ public class MATE {
         } catch (IOException e) {
             //ignore: use default port if file does not exists
         }
+
+        String srtServerPort = InstrumentationRegistry.getArguments().getString("serverPort");
+        if (srtServerPort!=null)
+            serverPort = Integer.valueOf(srtServerPort);
+
         EnvironmentManager environmentManager;
         try {
             if (serverPort == null) {
@@ -165,10 +169,17 @@ public class MATE {
 
     public void testApp(String explorationStrategy) {
 
-        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+        String emulator = InstrumentationRegistry.getArguments().getString("emulatorID");
+        MATE.log(this.getPackageName());
+        MATE.log("EMULATOR ID: " + emulator);
+        if (emulator==null)
+            emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+        else
+            Registry.getEnvironmentManager().setEmulator(emulator);
+        MATE.log("EMULATOR ID: " + emulator);
         //MATE.log("EMULATOR: " + emulator);
 
-        runningTime = new Date().getTime();
+        //runningTime = new Date().getTime();
         try {
             if (emulator != null && !emulator.equals("")) {
                 this.deviceMgr = new DeviceMgr(device, packageName);
@@ -584,25 +595,41 @@ public class MATE {
                 if (explorationStrategy.equals("AccManual")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     ManualExploration manualExploration = new ManualExploration();
-                    manualExploration.startManualExploration(runningTime);
+                    manualExploration.startManualExploration();
                 }
                 else
-                if (explorationStrategy.equals("AccRandom")) {
-                    IScreenState initialScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                    //creates the graph that represents the GUI model
-                    this.guiModel = new GraphGUIModel();
-                    //first state (root node - action ==null)
-                    this.guiModel.updateModel(null,initialScreenState);
-                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr,packageName,guiModel,true);
-                    unirandomacc.startUniformRandomExploration(initialScreenState,runningTime);
-                }
-                else{
-                    if (explorationStrategy.equals("checkScreen")){
-                        uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                        CheckCurrentScreen checkScreen = new CheckCurrentScreen();
-                        checkScreen.scanScreen();
+                if (explorationStrategy.equals("UniformRandom")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    AbstractRandomExploration unirandomacc = new UniformRandom(uiAbstractionLayer);
+                    unirandomacc.run();
 
-                    }
+                }
+                else
+                if (explorationStrategy.equals("NoRepsRandom")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    AbstractRandomExploration noRepsRandom = new NonRepetitiveRandom(uiAbstractionLayer);
+                    noRepsRandom.run();
+                }
+                else
+                if (explorationStrategy.equals("BiasedRandomNewAction")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    AbstractRandomExploration biasedRandom = new BiasedRandomNewAction(uiAbstractionLayer);
+                    biasedRandom.run();
+
+                }
+                else
+                if (explorationStrategy.equals("BiasedRandomFixedWeight")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                    AbstractRandomExploration biasedRandom = new BiasedRandomFixedWeight(uiAbstractionLayer);
+                    biasedRandom.run();
+
+                }
+                else
+                if (explorationStrategy.equals("checkScreen")){
+                   uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+                   CheckCurrentScreen checkScreen = new CheckCurrentScreen();
+                   checkScreen.scanScreen();
+
                 }
             } else
                 MATE.log("Emulator is null");

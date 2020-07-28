@@ -14,6 +14,7 @@ public class WidgetAction extends Action {
     private ActionType actionType;
     private String extraInfo;
     private boolean executed;
+    private int executionCount;
 
     private float fitness;
     private long timeToWait;
@@ -29,7 +30,11 @@ public class WidgetAction extends Action {
 
     public WidgetAction(ActionType actionType){
         this.actionType = actionType;
+        this.executed = false;
+        this.setExecutionCount(0);
         fitness=0;
+        pheromone=0;
+        proportionalPheromone=0;
         widget = new Widget("","","");
     }
 
@@ -43,7 +48,10 @@ public class WidgetAction extends Action {
 
     public void setExecuted(boolean executed) {
         this.executed = executed;
+        this.setExecutionCount(this.getExecutionCount() + 1);
     }
+
+
 
     public Widget getWidget() {
         return widget;
@@ -120,5 +128,17 @@ public class WidgetAction extends Action {
                 widget.getX2(),
                 widget.getY1(),
                 widget.getY2());
+    }
+
+    public int getExecutionCount() {
+        return executionCount;
+    }
+
+    public void setExecutionCount(int executionCount) {
+        this.executionCount = executionCount;
+    }
+
+    public boolean isExecuted(){
+        return this.executed;
     }
 }

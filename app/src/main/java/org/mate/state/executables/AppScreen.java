@@ -12,6 +12,7 @@ import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.StaleObjectException;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
+import android.view.View;
 import android.view.Window;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -150,12 +151,18 @@ public class AppScreen {
             text = obj.getText().toString();
         }
 
+
+        Rect rec = new Rect();
+        obj.getBoundsInScreen(rec);
+        String bounds = rec.toShortString();
+
+
         String newId = clazz;
         if (id.equals("")) {
 
             if (parent!=null && !parentResourceId.equals("")){
 
-                id = parentResourceId+"-child-"+parent.getChildren().size()+"#"+clazz;
+                id = parentResourceId+"-child-"+parent.getChildren().size()+"#"+clazz+"#"+bounds;
             }
             else
                 id = clazz+"-"+text;
@@ -177,10 +184,9 @@ public class AppScreen {
         widget.setPackageName(wpackageName);
         widget.setEnabled(obj.isEnabled());
 
-        Rect rec = new Rect();
-        obj.getBoundsInScreen(rec);
-        widget.setBounds(rec.toShortString());
+        //obj.focusSearch(View.FOCUS_LEFT);
 
+        widget.setBounds(rec.toShortString());
         int x1=widget.getX1();
         int x2=widget.getX2();
         int y1=widget.getY1();

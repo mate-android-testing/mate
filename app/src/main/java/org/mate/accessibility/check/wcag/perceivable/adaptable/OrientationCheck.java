@@ -33,13 +33,15 @@ public class OrientationCheck implements IWCAGCheck {
             int before = MATE.device.getDisplayRotation();
             MATE.device.setOrientationRight();
             MATE.device.unfreezeRotation();
-            MATE.log ("before: " + before);
+            //MATE.log ("before: " + before);
             int after = MATE.device.getDisplayRotation();
-            MATE.log ("after: " + after);
+            //MATE.log ("after: " + after);
             MATE.device.setOrientationLeft();
             MATE.device.unfreezeRotation();
+            Thread.sleep(200);
             if (before == after)
                 return new AccessibilityViolation(AccessibilityViolationType.ORIENTATION, state,"");
+
 
         }
         catch(Exception e) {
