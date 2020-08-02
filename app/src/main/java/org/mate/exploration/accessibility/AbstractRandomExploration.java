@@ -32,23 +32,14 @@ import static org.mate.exploration.accessibility.StateUtils.takeScreenShotDetect
 public abstract class AbstractRandomExploration {
 
     protected String packageName;
-
     protected UIAbstractionLayer uiAbstractionLayer;
-
     protected IAccessibilityViolationChecker wcagChecker;
-
     private Set<String> allDistinctViolations;
-
     private Set<String> allWidgetsWithIssues;
-
     private Hashtable<String,Integer> violationsByType;
-
     private String[] violationTypesChecked;
-
     private Hashtable<String, ActionMeasure> widgetActionMeasures;
-
     private List<String> visitedWidgets;
-
     private String projectName;
 
     public AbstractRandomExploration(UIAbstractionLayer uiAbstractionLayer){
@@ -61,26 +52,6 @@ public abstract class AbstractRandomExploration {
         visitedWidgets = new ArrayList<String>();
         initializeViolationsByType();
         projectName = "";
-    }
-
-
-    protected void initializeViolationsByType(){
-        violationsByType = new Hashtable<String,Integer>();
-        violationTypesChecked = new String[9];
-        violationTypesChecked[0] = AccessibilityViolationType.NON_TEXT_CONTENT.getValue();
-        violationTypesChecked[1] = AccessibilityViolationType.IDENTIFY_INPUT_PURPOSE.getValue();
-        violationTypesChecked[2] = AccessibilityViolationType.CONSTRAST_MINUMUM.getValue();
-        //violationTypesChecked[3] = AccessibilityViolationType.CONSTRAST_ENHANCED.getValue();
-        //violationTypesChecked[4] = AccessibilityViolationType.NON_TEXT_CONTRAST.getValue();
-        violationTypesChecked[3] = AccessibilityViolationType.TARGET_SIZE.getValue();
-        violationTypesChecked[4] = AccessibilityViolationType.DUPLICATE_CONTENT_DESCRIPTION.getValue();
-        violationTypesChecked[5] = AccessibilityViolationType.SPACING.getValue();
-        violationTypesChecked[6] = AccessibilityViolationType.USE_OF_COLOR.getValue();
-        violationTypesChecked[7] = AccessibilityViolationType.ORIENTATION.getValue();
-        violationTypesChecked[8] = AccessibilityViolationType.PAGE_TITLED.getValue();
-
-        for (String acctype: violationTypesChecked)
-            violationsByType.put(acctype,0);
     }
 
     public abstract WidgetAction nextAction(IScreenState state);
@@ -191,7 +162,6 @@ public abstract class AbstractRandomExploration {
         }
 
         reportResults(currentTime - runningTime);
-
     }
 
     private void reportResults(long execTime){
@@ -206,7 +176,7 @@ public abstract class AbstractRandomExploration {
         //MATE.log("Number of distinct widgets analyzed: " + numberOfWidgetsAnalyzed);
 
         String header = "";
-        header+="projectname,packagename,sessionID,activities_executed,states_visited,violations,";
+        header+="projectname,packagename,algorithm,sessionID,activities_executed,states_visited,violations,";
         header+="widgets,widgets_with_issues,";
         for (int i=0; i<violationTypesChecked.length; i++){
             String type = violationTypesChecked[i];
@@ -222,9 +192,11 @@ public abstract class AbstractRandomExploration {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 
 
+        String algorithm = this.getClass().getName();
+
         int numberOfDistinctActivities = this.getNumberOfDistinctActivitiesAnalyzed();
         String values = "";
-        values+=projectName+","+packageName+","+MATE.sessionID+","+numberOfDistinctActivities+","+numberVisitedStates+","+numberOfViolations+",";
+        values+=projectName+","+packageName+","+algorithm+","+MATE.sessionID+","+numberOfDistinctActivities+","+numberVisitedStates+","+numberOfViolations+",";
         values+=numberOfWidgetsAnalyzed+","+numberOfWidgetsWithIssues+",";
         for (int i=0; i<violationTypesChecked.length; i++){
             String type = violationTypesChecked[i];
@@ -248,33 +220,25 @@ public abstract class AbstractRandomExploration {
             Registry.getEnvironmentManager().measureReport(header,values);
            // MATE.log(values);
         }
+    }
 
+    protected void initializeViolationsByType(){
+        violationsByType = new Hashtable<String,Integer>();
+        violationTypesChecked = new String[9];
+        violationTypesChecked[0] = AccessibilityViolationType.NON_TEXT_CONTENT.getValue();
+        violationTypesChecked[1] = AccessibilityViolationType.IDENTIFY_INPUT_PURPOSE.getValue();
+        violationTypesChecked[2] = AccessibilityViolationType.CONSTRAST_MINUMUM.getValue();
+        //violationTypesChecked[3] = AccessibilityViolationType.CONSTRAST_ENHANCED.getValue();
+        //violationTypesChecked[4] = AccessibilityViolationType.NON_TEXT_CONTRAST.getValue();
+        violationTypesChecked[3] = AccessibilityViolationType.TARGET_SIZE.getValue();
+        violationTypesChecked[4] = AccessibilityViolationType.DUPLICATE_CONTENT_DESCRIPTION.getValue();
+        violationTypesChecked[5] = AccessibilityViolationType.SPACING.getValue();
+        violationTypesChecked[6] = AccessibilityViolationType.USE_OF_COLOR.getValue();
+        violationTypesChecked[7] = AccessibilityViolationType.ORIENTATION.getValue();
+        violationTypesChecked[8] = AccessibilityViolationType.PAGE_TITLED.getValue();
 
-        //AccessibilityViolation.reportGeneralResults();
-
-        /*
-        String[] types = {"Cl","St","Ht","Cd","Sz","Ifa","Lu","Srf","Er","Ctr","Package","Activity","Hierarchy"};
-        MATE.log("LN: " + types.length);
-        for (String type: types){
-            int nv = numberOfVisitedStatesOfDifferenceType(type);
-            MATE.log("Number of states visited ot type difference " + type + ": " + nv);
-        }
-
-        MATE.log("DIFFERENCES BETWEEN STATES: " );
-        Set<String> statesID = new HashSet<String>();
-        for (IScreenState state: uiAbstractionLayer.getRecordedScreenStates()){
-            if (!statesID.contains(state.getId())) {
-                statesID.add(state.getId());
-                if (state.getRelatedStates().size()>0)
-                    MATE.log("State: " + state.getId());
-                List<RelatedState> relatedStates = state.getRelatedStates();
-                for (RelatedState relatedState : relatedStates) {
-                    MATE.log("    " + state.getId() + " != " + relatedState.getState().getId() + " = " + relatedState.getDifferences());
-                }
-            }
-        }
-        */
-
+        for (String acctype: violationTypesChecked)
+            violationsByType.put(acctype,0);
     }
 
     private int numberOfVisitedStatesOfDifferenceType(String type) {
@@ -334,13 +298,11 @@ public abstract class AbstractRandomExploration {
         List<AccessibilityViolation> violations = wcagChecker.runAccessibilityChecks(state);
         addDistinctViolations(violations);
 
-
         /*
         MATE.log_acc("Amount of violations found: " + violations.size());
         for (AccessibilityViolation violation: violations){
             MATE.log_acc(violation.getType() + " " + violation.getWidget().getId() + ":"+violation.getWidget().getText()+ " -- " + violation.getInfo());
         }
-        MATE.log("NEW SCREEN CHECKED");
          */
     }
 

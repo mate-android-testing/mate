@@ -24,13 +24,11 @@ public class BiasedRandomNewAction extends AbstractRandomExploration{
         List<WidgetAction> executableActions = state.getActions();
         List<WidgetAction> possibleActions  = new ArrayList<WidgetAction>();
 
-        MATE.log("All actions of that state: " + executableActions.size());
         for (WidgetAction action: executableActions){
             if (!action.isExecuted()){
                 possibleActions.add(action);
             }
         }
-        MATE.log("All possible actions: " + possibleActions.size());
 
         if (possibleActions.size()==0){
             for (WidgetAction wa: executableActions)

@@ -25,13 +25,13 @@ public class NonRepetitiveRandom extends AbstractRandomExploration{
         List<WidgetAction> executableActions = state.getActions();
         List<WidgetAction> possibleActions  = new ArrayList<WidgetAction>();
 
-        MATE.log("All actions of that state: " + executableActions.size());
+        //MATE.log("All actions of that state: " + executableActions.size());
         for (WidgetAction action: executableActions){
             if (!action.isExecuted()){
                 possibleActions.add(action);
             }
         }
-        MATE.log("All possible actions: " + possibleActions.size());
+        //MATE.log("All possible actions: " + possibleActions.size());
 
         if (possibleActions.size()>0){
             Random rand = new Random();
@@ -43,9 +43,6 @@ public class NonRepetitiveRandom extends AbstractRandomExploration{
             //back
             return new WidgetAction(ActionType.BACK);
         }
-
-
-
 
     }
 }

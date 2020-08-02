@@ -21,31 +21,51 @@ public class BiasedRandomFixedWeight extends AbstractRandomExploration{
         super(uiAbstractionLayer);
     }
 
+    /*
+    Action	States	%States
+CLICK	2690	65,21%
+TYPE_TEXT	448	10,86%
+SWIPE_DOWN	405	9,82%
+MENU	129	3,13%
+BACK	125	3,03%
+SWIPE_UP	117	2,84%
+ENTER	68	1,65%
+LONG_CLICK	49	1,19%
+SWIPE_RIGHT	48	1,16%
+SWIPE_LEFT	46	1,12%
+
+     */
+
     //run experiment to tune weight
     private int defineWeight(WidgetAction widgetAction){
         ActionType typeOfAction = widgetAction.getActionType();
 
+        //order
+        //1,1,2,3,5,8
+
         switch (typeOfAction){
             case CLICK:
-                return 10;
+                return 65;
             case LONG_CLICK:
-                return 10;
+                return 1;
             case TYPE_SPECIFIC_TEXT:
-                return 8;
+                return 10;
             case TYPE_TEXT:
-                return 8;
+                return 10;
             case SWIPE_DOWN:
-                return 3;
+                return 10;
             case SWIPE_UP:
-                return 3;
+                return 10;
             case SWIPE_LEFT:
-                return 3;
+                return 1;
             case SWIPE_RIGHT:
-                return 3;
+                return 1;
             case CLEAR_WIDGET:
                 return 1;
+            case MENU:
+                return 3;
             case BACK:
-                return 2;
+                return 3;
             default:
                 return 1;
         }
