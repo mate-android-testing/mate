@@ -82,6 +82,9 @@ public class AntColony {
         IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
+        // Log the current target line for later identification of the test
+        antStatsLogger.write("ant; -; -; -; -; -; " + targetLine + "\n");
+
         // Value to add the correct pheromone amount to unknown widget actions
         currentPheromoneStandardValue = 1.0;
 

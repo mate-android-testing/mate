@@ -40,6 +40,9 @@ public class RandomExploration {
         IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
+        // Log the current target line for later identification of the test
+        antStatsLogger.write("random; -; -; -; -; " + targetLine + "\n");
+
         if (!alwaysReset) {
             MATE.uiAbstractionLayer.resetApp();
         }

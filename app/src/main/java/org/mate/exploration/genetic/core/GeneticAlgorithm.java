@@ -82,6 +82,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         antStatsLogger.write("Algorithm Type; Generation Number; Population Number; " +
                 "Fitness Value; Current Coverage; Combined Coverage; Runtime in s\n");
 
+
         createInitialPopulation();
 
         antStatsLogger.write("genetic; " + currentGenerationNumber + "; -; -; -; -; ");
@@ -111,6 +112,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
+        // Log the current target line for later identification of the test
+        antStatsLogger.write("genetic; -; -; -; -; -; " + targetLine + "\n");
+
         for (int i = 0; i < populationSize; i++) {
             long populationStartTime = System.currentTimeMillis();
 
@@ -125,7 +129,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
             population.add(chromosomeT);
 
-            antStatsLogger.write("genetic; " + (currentGenerationNumber - 1) + "; " + (i + 1) +
+            antStatsLogger.write("genetic; " + (currentGenerationNumber + 1) + "; " + (i + 1) +
                     "; " + fitnessValue + "; " + coverage + "; " + combinedCoverage + "; ");
 
             logCurrentRuntime(populationStartTime);
@@ -190,10 +194,10 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
             double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
-            antStatsLogger.write("genetic; " + currentGenerationNumber + "; " + (i + 1) +
+            antStatsLogger.write("genetic; " + (currentGenerationNumber + 1) + "; " + (i + 1) +
                     "; " + fitnessValue + "; " + coverage + "; " + combinedCoverage + "; -\n");
         }
-        antStatsLogger.write("genetic; " + currentGenerationNumber + "; -; -; -; -; ");
+        antStatsLogger.write("genetic; " + (currentGenerationNumber + 1) + "; -; -; -; -; ");
         logCurrentRuntime(generationStartTime);
 
         logCurrentFitness();
