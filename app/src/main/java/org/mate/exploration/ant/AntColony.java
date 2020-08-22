@@ -74,16 +74,19 @@ public class AntColony {
         long algorithmStartTime = System.currentTimeMillis();
         // TODO Print target line & coverage
         //antStatsLogger.write("Start of Algorithm at " + startTime + ", ");
-        antStatsLogger.write("Algorithm Type; Generation #; Ant #; Fitness Value;" +
-                " Current Coverage; Combined Coverage; Runtime in s\n");
+        antStatsLogger.write("\"Algorithm_Type\";\"Generation\";\"Ant\";\"Fitness_Value\";" +
+                "\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");
 
         // Get the target line for ACO to generate a test for and initialise the fitness function
         String targetLine = Properties.TARGET_LINE();
         IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
-        // Log the current target line for later identification of the test
-        antStatsLogger.write("ant; -; -; -; -; -; " + targetLine + "\n");
+        // Log the current target line for later identification of the test and the settings for this run
+        antStatsLogger.write("\"ant\";\"" +
+                "includeActionTypeInTransition:\";\"" + includeActionTypeInTransition + "\";\"" +
+                "depositPheromonesWithRanking:\";\"" + depositPheromonesWithRanking +
+                "\";\"-\";\"" + targetLine + "\"\n");
 
         // Value to add the correct pheromone amount to unknown widget actions
         currentPheromoneStandardValue = 1.0;
@@ -98,7 +101,7 @@ public class AntColony {
             for (int z = 0; z < generationSize; z++){
                 antStartTime = System.currentTimeMillis();
                 MATE.log_acc("Ant #" + (z + 1));
-                antStatsLogger.write("ant; " + (i + 1) + "; " + (z + 1) + "; ");
+                antStatsLogger.write("\"ant\";\"" + (i + 1) + "\";\"" + (z + 1) + "\";");
 
                 // Create an ant to traverse the app and wrap the generated testcase in a chromosome
                 IChromosome<TestCase> chromosome = new Chromosome<>(runAnt());
@@ -111,21 +114,21 @@ public class AntColony {
                 double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
                 double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
                 System.out.println(fitnessValue);
-                antStatsLogger.write(fitnessValue + "; " +
-                        coverage + "; " + combinedCoverage + "; ");
+                antStatsLogger.write("\"" + fitnessValue + "\";\"" + coverage + "\";\""
+                        + combinedCoverage + "\";\"");
                 logCurrentRuntime(antStartTime);
 
                 // Stop algorithm if target line was reached
                 if (fitnessValue == 1) {
                     //TODO finish necessary action for successful algorithm run (write log)
-                    antStatsLogger.write("ant; " + (i + 1) + "; -; -; -; -; ");
+                    antStatsLogger.write("\"ant\";\"" + (i + 1) + "\";\"-\";\"-\";\"-\";\"-\";\"");
                     logCurrentRuntime(generationStartTime);
 
                     MATE.log_acc("ACO finished successfully");
-                    antStatsLogger.write("ant; -; -; -; -; -; ");
+                    antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
                     logCurrentRuntime(algorithmStartTime);
 
-                    antStatsLogger.write("random; -; -; -; -; successful\n");
+                    antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
 
                     break outerLoop;
                 } else {
@@ -224,15 +227,15 @@ public class AntColony {
                 }
             }
 
-            antStatsLogger.write("ant; " + (i + 1) + "; -; -; -; -; ");
+            antStatsLogger.write("\"ant\";\"" + (i + 1) + "\";\"-\";\"-\";\"-\";\"-\";\"");
             logCurrentRuntime(generationStartTime);
 
             // TODO Comment max generations reached
             if ((i + 1) == generationAmount) {
-                antStatsLogger.write("ant; -; -; -; -; -; ");
+                antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
                 logCurrentRuntime(algorithmStartTime);
 
-                antStatsLogger.write("random; -; -; -; -; unsuccessful\n");
+                antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
             }
         }
         // Close the logger
@@ -374,6 +377,6 @@ public class AntColony {
         long currentTime = System.currentTimeMillis();
         currentTime = currentTime - startTime;
         long seconds = (currentTime/(1000));
-        antStatsLogger.write(seconds + "\n");
+        antStatsLogger.write(seconds + "\"\n");
     }
 }

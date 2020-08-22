@@ -79,22 +79,23 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     public void run() {
         long algorithmStartTime = System.currentTimeMillis();
         long generationStartTime = System.currentTimeMillis();
-        antStatsLogger.write("Algorithm Type; Generation Number; Population Number; " +
-                "Fitness Value; Current Coverage; Combined Coverage; Runtime in s\n");
+        antStatsLogger.write("\"Algorithm_Type\";\"Generation_Number\";\"Population_Number\"" +
+                ";\"Fitness_Value\";\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");
 
 
         createInitialPopulation();
 
-        antStatsLogger.write("genetic; " + currentGenerationNumber + "; -; -; -; -; ");
+        antStatsLogger.write("\"genetic\";\"" + currentGenerationNumber + "\";\"-\";\"-\";" +
+                "\"-\";\"-\";\"");
         logCurrentRuntime(generationStartTime);
 
         while (!terminationCondition.isMet()) {
             evolve();
 
             if(terminationCondition.isMet()) {
-                antStatsLogger.write("genetic; -; -; -; -; -; ");
+                antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
                 logCurrentRuntime(algorithmStartTime);
-                antStatsLogger.write("genetic; -; -; -; -; -; successful");
+                antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"");
             }
         }
     }
@@ -113,7 +114,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
         // Log the current target line for later identification of the test
-        antStatsLogger.write("genetic; -; -; -; -; -; " + targetLine + "\n");
+        antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"" + targetLine + "\"\n");
 
         for (int i = 0; i < populationSize; i++) {
             long populationStartTime = System.currentTimeMillis();
@@ -129,8 +130,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
             population.add(chromosomeT);
 
-            antStatsLogger.write("genetic; " + (currentGenerationNumber + 1) + "; " + (i + 1) +
-                    "; " + fitnessValue + "; " + coverage + "; " + combinedCoverage + "; ");
+            antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
+                    + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
+                    + combinedCoverage + "\";\"");
 
             logCurrentRuntime(populationStartTime);
         }
@@ -194,10 +196,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
             double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
-            antStatsLogger.write("genetic; " + (currentGenerationNumber + 1) + "; " + (i + 1) +
-                    "; " + fitnessValue + "; " + coverage + "; " + combinedCoverage + "; -\n");
+            antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
+                    + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
+                    + combinedCoverage + "\";\"-\"\n");
         }
-        antStatsLogger.write("genetic; " + (currentGenerationNumber + 1) + "; -; -; -; -; ");
+        antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";" +
+                "\"-\";\"-\";\"-\";\"");
         logCurrentRuntime(generationStartTime);
 
         logCurrentFitness();
@@ -240,7 +244,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         long currentTime = System.currentTimeMillis();
         currentTime = currentTime - startTime;
         long seconds = (currentTime/(1000));
-        antStatsLogger.write(seconds + "\n");
+        antStatsLogger.write(seconds + "\"\n");
     }
 
 }

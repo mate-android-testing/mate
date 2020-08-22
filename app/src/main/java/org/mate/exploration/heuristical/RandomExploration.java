@@ -32,8 +32,8 @@ public class RandomExploration {
         // number of ants created in a full ACO run, generationAmount * generationSize
         int antAmount = 20 * 10;
 
-        antStatsLogger.write("Algorithm Type; Test Case #; Fitness Value;" +
-                " Current Coverage; Combined Coverage; Runtime in s\n");
+        antStatsLogger.write("\"Algorithm_Type\";\"Test_Case\";\"Fitness_Value\";" +
+                "\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");
 
         // Get the target line to generate a test for and initialise the fitness function
         String targetLine = Properties.TARGET_LINE();
@@ -41,7 +41,7 @@ public class RandomExploration {
                 = new LineCoveredPercentageFitnessFunction(targetLine);
 
         // Log the current target line for later identification of the test
-        antStatsLogger.write("random; -; -; -; -; " + targetLine + "\n");
+        antStatsLogger.write("\"random\";\"-\";\"-\";\"-\";\"-\";\"" + targetLine + "\"\n");
 
         if (!alwaysReset) {
             MATE.uiAbstractionLayer.resetApp();
@@ -68,14 +68,14 @@ public class RandomExploration {
             System.out.println(lineCoveredPercentageFitnessFunction.getFitness(chromosome));
 
 
-            antStatsLogger.write("random; " + (i + 1) + "; ");
+            antStatsLogger.write("\"random\";\"" + (i + 1) + "\";");
 
             double fitnessValue = lineCoveredPercentageFitnessFunction.getFitness(chromosome);
             double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
             double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
-            antStatsLogger.write(fitnessValue + "; " +
-                    coverage + "; " + combinedCoverage + "; ");
+            antStatsLogger.write("\"" + fitnessValue + "\";\"" +
+                    coverage + "\";\"" + combinedCoverage + "\";\"");
 
             logCurrentRuntime(testCaseStartTime);
 
@@ -83,19 +83,19 @@ public class RandomExploration {
             if (fitnessValue == 1) {
                 MATE.log_acc("Random Exploration finished successfully");
 
-                antStatsLogger.write("random; -; -; -; -; ");
+                antStatsLogger.write("\"random\";\"-\";\"-\";\"-\";\"-\";\"");
                 logCurrentRuntime(algorithmStartTime);
 
-                antStatsLogger.write("random; -; -; -; -; successful\n");
+                antStatsLogger.write("\"random\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
 
                 break;
             } else if (i == (antAmount - 1)) {
                 MATE.log_acc("Random Exploration finished unsuccessfully");
 
-                antStatsLogger.write("random; -; -; -; -; ");
+                antStatsLogger.write("\"random\";\"-\";\"-\";\"-\";\"-\";\"");
                 logCurrentRuntime(algorithmStartTime);
 
-                antStatsLogger.write("random; -; -; -; -; unsuccessful\n");
+                antStatsLogger.write("\"random\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
 
                 break;
             }
@@ -110,6 +110,6 @@ public class RandomExploration {
         long currentTime = System.currentTimeMillis();
         currentTime = currentTime - startTime;
         long seconds = (currentTime/(1000));
-        antStatsLogger.write(seconds + "\n");
+        antStatsLogger.write(seconds + "\"\n");
     }
 }
