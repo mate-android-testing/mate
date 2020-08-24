@@ -235,7 +235,7 @@ public class AntColony {
                 antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
                 logCurrentRuntime(algorithmStartTime);
 
-                antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
+                antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
             }
         }
         // Close the logger

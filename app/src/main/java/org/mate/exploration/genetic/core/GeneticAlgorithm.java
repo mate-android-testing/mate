@@ -20,6 +20,9 @@ import org.mate.utils.Randomness;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * Abstract class that serves as a basis for genetic algorithms
  * @param <T> Type wrapped by the chromosome implementation
@@ -78,16 +81,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     @Override
     public void run() {
         long algorithmStartTime = System.currentTimeMillis();
-        long generationStartTime = System.currentTimeMillis();
         antStatsLogger.write("\"Algorithm_Type\";\"Generation_Number\";\"Population_Number\"" +
                 ";\"Fitness_Value\";\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");
 
 
         createInitialPopulation();
 
-        antStatsLogger.write("\"genetic\";\"" + currentGenerationNumber + "\";\"-\";\"-\";" +
-                "\"-\";\"-\";\"");
-        logCurrentRuntime(generationStartTime);
 
         while (!terminationCondition.isMet()) {
             evolve();
@@ -107,6 +106,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     @Override
     public void createInitialPopulation() {
+        long generationStartTime = System.currentTimeMillis();
         MATE.log_acc("Creating initial population (1st generation)");
 
         String targetLine = Properties.TARGET_LINE();
@@ -115,6 +115,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         // Log the current target line for later identification of the test
         antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"" + targetLine + "\"\n");
+
+        //TODO comment
+        boolean successful = FALSE;
 
         for (int i = 0; i < populationSize; i++) {
             long populationStartTime = System.currentTimeMillis();
@@ -130,11 +133,23 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
             population.add(chromosomeT);
 
+            if(fitnessValue == 1.0) {
+                successful = TRUE;
+            }
+
             antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
                     + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
                     + combinedCoverage + "\";\"");
 
             logCurrentRuntime(populationStartTime);
+        }
+
+        antStatsLogger.write("\"genetic\";\"" + currentGenerationNumber + "\";\"-\";\"-\";" +
+                "\"-\";\"-\";\"");
+        logCurrentRuntime(generationStartTime);
+
+        if(successful) {
+            antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
         }
 
         logCurrentFitness();
@@ -187,6 +202,10 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         population.clear();
         population.addAll(tmp);
         // TODO log new generation infos
+
+        //TODO comment
+        boolean successful = FALSE;
+
         for (int i = 0; i < population.size(); i++) {
             IChromosome<TestCase> chromosome = (IChromosome<TestCase>) population.get(i);
 
@@ -196,6 +215,10 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
             double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
+            if(fitnessValue == 1.0) {
+                successful = TRUE;
+            }
+
             antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
                     + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
                     + combinedCoverage + "\";\"-\"\n");
@@ -203,6 +226,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";" +
                 "\"-\";\"-\";\"-\";\"");
         logCurrentRuntime(generationStartTime);
+
+        if(successful) {
+            antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
+        } else {
+            antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
+        }
 
         logCurrentFitness();
         currentGenerationNumber++;
