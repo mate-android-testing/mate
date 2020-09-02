@@ -12,10 +12,14 @@ public class TargetLineCoveredTerminationCondition implements ITerminationCondit
     public static TargetLineCoveredTerminationCondition INSTANCE = null;
     private LineCoveredPercentageFitnessFunction lineCoveredPercentageFitnessFunction;
     private IGeneticAlgorithm<TestCase> geneticAlgorithm;
+    private int iterations;
+    private int maxIterations;
 
     public TargetLineCoveredTerminationCondition() {
         INSTANCE = this;
         lineCoveredPercentageFitnessFunction = new LineCoveredPercentageFitnessFunction(Properties.TARGET_LINE());
+        iterations = 0;
+        maxIterations = 4;
     }
 
     public void setGeneticAlgorithm(IGeneticAlgorithm<TestCase> geneticAlgorithm) {
@@ -29,6 +33,13 @@ public class TargetLineCoveredTerminationCondition implements ITerminationCondit
                 return true;
             }
         }
+
+        iterations++;
+
+        if(iterations==maxIterations) {
+            return true;
+        }
+
         return false;
     }
 }
