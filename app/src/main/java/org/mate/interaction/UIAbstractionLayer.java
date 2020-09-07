@@ -1,5 +1,6 @@
 package org.mate.interaction;
 
+import android.os.RemoteException;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -220,12 +222,12 @@ public class UIAbstractionLayer {
                         // press BACK to return to AUT
                         MATE.log("Google Sign Dialog detected! Returning.");
                         deviceMgr.executeAction(new WidgetAction(ActionType.BACK));
-                } catch (AUTCrashException e) {
-                    e.printStackTrace();
+                    } catch (AUTCrashException e) {
+                        e.printStackTrace();
+                    }
+                    change = true;
+                    continue;
                 }
-                change = true;
-                continue;
-            }
 
                 // check for permission dialog
                 if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
@@ -284,6 +286,13 @@ public class UIAbstractionLayer {
     }
 
     public void resetApp() {
+        try {
+            device.wakeUp();
+        } catch (RemoteException e) {
+            MATE.log("Wake up couldn't be performed");
+            e.printStackTrace();
+        }
+        Registry.getEnvironmentManager().setPortraitMode();
         deviceMgr.reinstallApp();
         sleep(5000);
         deviceMgr.restartApp();

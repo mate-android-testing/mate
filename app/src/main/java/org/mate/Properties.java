@@ -1,5 +1,8 @@
 package org.mate;
 
+import android.os.Bundle;
+import android.support.test.InstrumentationRegistry;
+
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
 
@@ -36,6 +39,43 @@ public class Properties {
         return propertyOr(3);
     }
 
+
+    /*
+    * Intent fuzzing related properties.
+     */
+    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
+
+    public static float SERVICE_SELECTION_PROBABILITY() { return propertyOr(0.1f); }
+
+    public static float BROADCAST_RECEIVER_SELECTION_PROBABILITY() { return propertyOr( 0.2f); }
+
+    /*
+    * Whether to apply optimisation of test cases before replaying them.
+     */
+    public static boolean OPTIMISE_TEST_CASE() { return propertyOr(false);}
+
+    public static int OPTIMISATION_STRATEGY() {
+        return propertyOr(0);
+    }
+
+    /*
+    * Record/Replay test case.
+     */
+    public static boolean RECORD_TEST_CASE() {
+
+        Bundle arguments = InstrumentationRegistry.getArguments();
+        return Boolean.parseBoolean(arguments.getString("record", "false"));
+    }
+
+    public static boolean REPLAY_TEST_CASE() {
+
+        Bundle arguments = InstrumentationRegistry.getArguments();
+        return Boolean.parseBoolean(arguments.getString("replay", "false"));
+    }
+
+    // public static boolean RECORD_TEST_CASE() { return propertyOr(false); }
+
+    // public static boolean REPLAY_TEST_CASE() { return propertyOr(true); }
 
     /**
      *  Added by vin on 24/05/2018
@@ -116,7 +156,7 @@ public class Properties {
      * Coverage properties
      */
     public static boolean STORE_COVERAGE() {
-        return propertyOr(true);
+        return propertyOr(false);
     }
 
 

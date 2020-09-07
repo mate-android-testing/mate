@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
@@ -19,6 +20,7 @@ import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.exploration.manual.ManualExploration;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
@@ -57,26 +59,35 @@ import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.model.graph.GraphGUIModel;
+import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
+import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.MersenneTwister;
+import org.mate.utils.TestCaseOptimizer;
+import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 public class MATE {
 
@@ -101,6 +112,11 @@ public class MATE {
     public static Set<String> visitedActivities = new HashSet<String>();
 
     public MATE() {
+
+        // should resolve android.os.FileUriExposedException
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
         Integer serverPort = null;
         try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
@@ -149,7 +165,6 @@ public class MATE {
         //Instrumentation instrumentation =  getInstrumentation();
         instrumentation = getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
-
 
         //checks whether user needs to authorize access to something on the device/emulator
         UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
@@ -291,7 +306,9 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
+                    /*
                     if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+
                         // init the CFG
                         boolean isInit = Registry.getEnvironmentManager().initCFG();
 
@@ -300,10 +317,12 @@ public class MATE {
                             throw new IllegalStateException("Graph initialisation failed!");
                         }
                     }
+                    */
 
                     final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withChromosomeFactory(IntentChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                            .withRelativeIntentAmount(0.5f)
                             .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                             .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
@@ -391,6 +410,81 @@ public class MATE {
                         Registry.getEnvironmentManager().storeCoverageData(heuristicExploration, null);
                         MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
                     }
+                } else if (explorationStrategy.equals("Replaying")) {
+
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+
+                    MATE.log_acc("Activities");
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
+                    MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+
+                    // track which test cases couldn't be successfully replayed
+                    Map<Integer, TestCase> failures = new HashMap<>();
+
+                    int testCaseID = 0;
+
+                    TestCase testCase = TestCaseSerializer.deserializeTestCase();
+
+                    // reset the app once
+                    uiAbstractionLayer.resetApp();
+
+                    // grant runtime permissions (read/write external storage) which are dropped after each reset
+                    Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+
+                    // as long as we find a test case for replaying
+                    while (testCase != null) {
+
+                        if (Properties.OPTIMISE_TEST_CASE()) {
+                            testCase = TestCaseOptimizer.optimise(testCase);
+                        }
+
+                        if (replayTestCase(testCase)) {
+                            // record stats only if test case could be successfully replayed
+                            TestCaseStatistics.recordStats(testCase);
+                        } else {
+                            failures.put(testCaseID, testCase);
+                        }
+
+                        MATE.log("Replayed TestCase " + testCaseID + "!");
+
+                        // replay next test case
+                        testCase = TestCaseSerializer.deserializeTestCase();
+
+                        testCaseID++;
+
+                        // reset aut after each test case
+                        uiAbstractionLayer.resetApp();
+
+                        // grant runtime permissions (read/write external storage) which are dropped after each reset
+                        Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+                    }
+
+                    // retry failed test cases
+                    for (Map.Entry<Integer, TestCase> entry : failures.entrySet()) {
+
+                        boolean success = false;
+
+                        for (int i = 0; i < 5 && !success; i++) {
+
+                            success = replayTestCase(entry.getValue());
+
+                            if (success) {
+                                // record stats about successful test cases
+                                TestCaseStatistics.recordStats(entry.getValue());
+                            }
+
+                            MATE.log("Replayed TestCase " + entry.getKey() + "!");
+
+                            // reset aut after each test case
+                            uiAbstractionLayer.resetApp();
+
+                            // grant runtime permissions (read/write external storage) which are dropped after each reset
+                            Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+                        }
+                    }
                 } else if (explorationStrategy.equals("RandomExploration")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -398,15 +492,37 @@ public class MATE {
                         MATE.log_acc("\t" + s);
                     }
 
-                    final RandomExploration randomExploration = new RandomExploration(50);
+                    MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+                    MATE.log_acc("Store Coverage: " + Properties.STORE_COVERAGE());
 
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomExploration.run();
-                            return null;
+                    final RandomExploration randomExploration
+                            = new RandomExploration(Properties.STORE_COVERAGE(), true, MAX_NUMBER_EVENTS(),
+                            Properties.RELATIVE_INTENT_AMOUNT());
+
+                    try {
+                        TimeoutRun.timeoutRun(new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+                                randomExploration.run();
+                                return null;
+                            }
+                        }, MATE.TIME_OUT);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } catch (Error e) {
+                        e.printStackTrace();
+                    }
+
+                    MATE.log("This line should be always logged!");
+
+                    File outputDir = new File("/data/data/org.mate/test-cases");
+                    if (outputDir != null && outputDir.exists()) {
+                        MATE.log("Stored TestCase Files: ");
+                        File[] files = outputDir.listFiles();
+                        for (File file : files) {
+                            MATE.log(file.getName());
                         }
-                    }, MATE.TIME_OUT);
+                    }
 
                     if (Properties.STORE_COVERAGE()) {
                         Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
@@ -619,6 +735,93 @@ public class MATE {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Replays a test case. Repairs individual UI actions if not directly applicable.
+     *
+     * @param testCase The test case to be replayed.
+     * @return Returns {@code true} if the test case could be successfully replayed,
+     *          otherwise {@code false} is returned.
+     */
+    private boolean replayTestCase(TestCase testCase) {
+
+        // get the actions for replaying
+        List<Action> actions = testCase.getEventSequence();
+
+        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
+
+            MATE.log("Current Activity: " + Registry.getEnvironmentManager().getCurrentActivityName());
+            MATE.log("Expected Activity: " + testCase.getActivityAfterAction(i-1));
+
+            Action nextAction = actions.get(i);
+
+            // check whether the UI action is applicable on the current state
+            if (nextAction instanceof WidgetAction
+                    && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
+
+                // try to repair UI action
+                Action repairedAction = repairUIAction(nextAction);
+
+                if (repairedAction != null) {
+                    MATE.log("Replaying action " + i);
+                    uiAbstractionLayer.executeAction(repairedAction);
+                } else {
+                    MATE.log("Action not applicable!");
+                    return false;
+                }
+            } else {
+                MATE.log("Replaying action " + i);
+                uiAbstractionLayer.executeAction(actions.get(i));
+            }
+        }
+        return true;
+    }
+
+    /**
+     * If a de-serialized (widget-based) action is not applicable to the current state,
+     * we can try to select an alternative action.
+     *
+     * @param a The action not applicable on the current state.
+     * @return Returns an alternative action that is applicable, or {@code null} if no appropriate
+     * action could be derived.
+     */
+    private Action repairUIAction(Action a) {
+
+        // log information about selected and available actions
+        if (a instanceof WidgetAction && !uiAbstractionLayer.getExecutableActions().contains(a)) {
+
+            WidgetAction selectedAction = (WidgetAction) a;
+
+            MATE.log(selectedAction.getActionType() + " on " + selectedAction.getWidget().getId()
+                    + " Text : " + selectedAction.getWidget().getText()
+                    + " hint : " + selectedAction.getWidget().getHint()
+                    + " Class : " + selectedAction.getWidget().getClazz()
+                    + " ResourceID : " + selectedAction.getWidget().getResourceID()
+                    + " IdByActivity : " + selectedAction.getWidget().getIdByActivity()
+                    + " X : " + selectedAction.getWidget().getX()
+                    + " Y : " + selectedAction.getWidget().getY());
+
+            MATE.log("------------------------------------------");
+
+            for (Action action : uiAbstractionLayer.getExecutableActions()) {
+
+                if (action instanceof WidgetAction) {
+                    if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {
+                        WidgetAction widgetAction = (WidgetAction) action;
+                        MATE.log(widgetAction.getActionType() + " on " + widgetAction.getWidget().getId()
+                                + " Text : " + widgetAction.getWidget().getText()
+                                + " hint : " + widgetAction.getWidget().getHint()
+                                + " Class : " + widgetAction.getWidget().getClazz()
+                                + " ResourceID : " + widgetAction.getWidget().getResourceID()
+                                + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
+                                + " X : " + widgetAction.getWidget().getX()
+                                + " Y : " + widgetAction.getWidget().getY());
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void checkVisitedActivities(String explorationStrategy) {

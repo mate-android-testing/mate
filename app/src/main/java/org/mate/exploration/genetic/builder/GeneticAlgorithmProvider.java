@@ -42,6 +42,7 @@ import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;
@@ -199,6 +200,8 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
+            case IntentChromosomeFactory.CHROMOSOME_FACTORY_ID:
+                return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), getRelativeIntentAmount());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -394,6 +397,21 @@ public class GeneticAlgorithmProvider {
         } else {
             return Integer.valueOf(numEvents);
         }
+    }
+
+    private float getRelativeIntentAmount() {
+        String relativeIntentAmount = properties.getProperty(GeneticAlgorithmBuilder.RELATIVE_INTENT_AMOUNT);
+        if (relativeIntentAmount == null) {
+            if (useDefaults) {
+                return org.mate.Properties.RELATIVE_INTENT_AMOUNT();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: relative intent amount not specified");
+            }
+        } else {
+            return Float.valueOf(relativeIntentAmount);
+        }
+
     }
 
     private int getNumberIterations() {

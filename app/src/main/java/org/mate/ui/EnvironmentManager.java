@@ -200,6 +200,21 @@ public class EnvironmentManager {
     }
 
     /**
+     * Simulates a system event by broadcasting the notification of the occurrence of
+     * a system event to a certain receiver.
+     *
+     * @param receiver The receiver listening for the system event.
+     * @param action The system event.
+     * @param dynamic Whether the receiver is a dynamic receiver or not.
+     *
+     */
+    public void executeSystemEvent(String receiver, String action, boolean dynamic) {
+        String cmd = "executeSystemEvent:" + MATE.packageName + ":"
+                + receiver + ":" + action + ":" + dynamic + ":" + emulator;
+        tunnelLegacyCmd(cmd);
+    }
+
+    /**
      * API level 23 and higher requires that permissions are also granted
      * at runtime. This can be done at install time with the flag -g,
      * i.e. adb install -g apk, or via adb shell pm grant packageName permission.
@@ -214,6 +229,16 @@ public class EnvironmentManager {
         String cmd = "grantPermissions:" + packageName + ":" + emulator;
 
         return Boolean.parseBoolean(tunnelLegacyCmd(cmd));
+    }
+
+    /**
+     * Pushes dummy files for various data types, e.g. video, onto
+     * the external storage. This method should be only used in combination
+     * with the intent fuzzing functionality.
+     */
+    public void pushDummyFiles() {
+        String cmd = "pushDummyFiles:" + emulator;
+        tunnelLegacyCmd(cmd);
     }
 
     /**
@@ -490,5 +515,26 @@ public class EnvironmentManager {
     public void sendFlawToServer(String msg) {
         String cmd = "reportFlaw:" + emulator + ":" + msg;
         tunnelLegacyCmd(cmd);
+    }
+
+    public void setPortraitMode() {
+        Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("type", "rotation")
+                .withParameter("rotation", "portrait")
+                .build());
+        if (!"/emulator/interaction".equals(response.getSubject()) ||
+            !"portrait".equals(response.getParameter("rotation"))) {
+            MATE.log_acc("ERROR: unable to set rotation to portrait mode");
+        }
+    }
+
+    public void toggleRotation() {
+        Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("type", "rotation")
+                .withParameter("rotation", "toggle")
+                .build());
+        if (!"/emulator/interaction".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: unable to toggle rotation of emulator");
+        }
     }
 }
