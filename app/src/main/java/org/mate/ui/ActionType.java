@@ -13,6 +13,19 @@ public enum ActionType {
     MENU,
     CLEAR_WIDGET,
     MANUAL_ACTION,
+    TOGGLE_ROTATION,
+    HOME,
+    QUICK_SETTINGS,
+    SEARCH,
+    NOTIFICATIONS,
+    SLEEP,
+    WAKE_UP,
+    DELETE,
+    DPAP_UP,
+    DPAD_DOWN,
+    DPAD_LEFT,
+    DPAD_RIGHT,
+    DPAD_CENTER,
     ENTER;
 
     public static final ActionType[] primitiveActionTypes = {
