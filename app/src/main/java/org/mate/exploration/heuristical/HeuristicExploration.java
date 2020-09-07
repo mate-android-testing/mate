@@ -8,19 +8,11 @@ import org.mate.exploration.intent.IntentChromosomeFactory;
 
 public class HeuristicExploration {
 
-    // TODO: use here chromosome factory interface
     private final IChromosomeFactory heuristicChromosomeFactory;
     private final boolean alwaysReset;
 
     public HeuristicExploration(int maxNumEvents) {
         this(Properties.STORE_COVERAGE(), true, maxNumEvents);
-    }
-
-    // TODO: we need some sort of combined factory that makes use of heuristic exploration with intent based actions
-    // that is we need to assign weights to actions, but how to different between UI, system and intent based actions
-    public HeuristicExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents, float relativeIntentAmount) {
-        this.alwaysReset = alwaysReset;
-        heuristicChromosomeFactory = new IntentChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents, relativeIntentAmount);
     }
 
     public HeuristicExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents) {
