@@ -38,46 +38,39 @@ public final class TestCaseSerializer {
      * @param testCase The test case to be serialized and stored.
      */
     public static void serializeTestCase(TestCase testCase) {
+        MATE.log("Serializing TestCase " + recordCounter);
 
-        TimeoutRun.maskInterrupt();
-
-        try {
-            MATE.log("Serializing TestCase " + recordCounter);
-
-            // create the test-cases folder if not yet present
-            File dir = new File(TEST_CASES_DIR);
-            if (!dir.exists()) {
-                MATE.log("Creating test-cases folder succeeded: " + dir.mkdir());
-            }
-
-            // log whether execution of test case resulted in a crash
-            if (testCase.getCrashDetected()) {
-                MATE.log_acc("TestCase " + recordCounter + " caused a crash!");
-            }
-
-            // the output file
-            File testCaseFile = new File(dir, "TestCase" + recordCounter + ".xml");
-
-            try (Writer fileWriter = new FileWriter(testCaseFile)) {
-
-                // convert test case to xml
-                XStream xstream = new XStream();
-                xstream.registerConverter(new IntentBasedActionConverter());
-                String testCaseXML = xstream.toXML(testCase);
-
-                fileWriter.write(testCaseXML);
-                fileWriter.flush();
-
-            } catch (IOException e) {
-                MATE.log_acc("Serializing TestCase " + recordCounter + " failed!");
-                e.printStackTrace();
-            }
-
-            // update counter
-            recordCounter++;
-        } finally {
-            TimeoutRun.unmaskInterrupt();
+        // create the test-cases folder if not yet present
+        File dir = new File(TEST_CASES_DIR);
+        if (!dir.exists()) {
+            MATE.log("Creating test-cases folder succeeded: " + dir.mkdir());
         }
+
+        // log whether execution of test case resulted in a crash
+        if (testCase.getCrashDetected()) {
+            MATE.log_acc("TestCase " + recordCounter + " caused a crash!");
+        }
+
+        // the output file
+        File testCaseFile = new File(dir, "TestCase" + recordCounter + ".xml");
+
+        try (Writer fileWriter = new FileWriter(testCaseFile)) {
+
+            // convert test case to xml
+            XStream xstream = new XStream();
+            xstream.registerConverter(new IntentBasedActionConverter());
+            String testCaseXML = xstream.toXML(testCase);
+
+            fileWriter.write(testCaseXML);
+            fileWriter.flush();
+
+        } catch (IOException e) {
+            MATE.log_acc("Serializing TestCase " + recordCounter + " failed!");
+            e.printStackTrace();
+        }
+
+        // update counter
+        recordCounter++;
     }
 
     /**
