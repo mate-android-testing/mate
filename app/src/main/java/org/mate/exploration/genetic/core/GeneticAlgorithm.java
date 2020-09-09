@@ -88,14 +88,14 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         createInitialPopulation();
 
         int iterations = 1;
-        boolean success = TRUE;
+        boolean successful = TRUE;
 
         while (!terminationCondition.isMet()) {
             if (iterations < 4) {
                 evolve();
                 iterations++;
             } else {
-                success = FALSE;
+                successful = FALSE;
                 break;
             }
         }
@@ -103,7 +103,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
         logCurrentRuntime(algorithmStartTime);
 
-        if(success) {
+        if(successful) {
             antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"");
         } else {
             antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"");
@@ -144,10 +144,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
             population.add(chromosomeT);
 
-            if(fitnessValue == 1.0) {
-                successful = TRUE;
-            }
-
             antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
                     + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
                     + combinedCoverage + "\";\"");
@@ -158,10 +154,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         antStatsLogger.write("\"genetic\";\"" + currentGenerationNumber + "\";\"-\";\"-\";" +
                 "\"-\";\"-\";\"");
         logCurrentRuntime(generationStartTime);
-
-        if(successful) {
-            antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
-        }
 
         logCurrentFitness();
         currentGenerationNumber++;
