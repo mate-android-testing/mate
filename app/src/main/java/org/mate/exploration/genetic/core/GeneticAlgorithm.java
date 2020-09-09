@@ -87,15 +87,26 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         createInitialPopulation();
 
+        int iterations = 1;
+        boolean success = TRUE;
 
         while (!terminationCondition.isMet()) {
-            evolve();
-
-            if(terminationCondition.isMet()) {
-                antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
-                logCurrentRuntime(algorithmStartTime);
-                antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"");
+            if (iterations < 4) {
+                evolve();
+                iterations++;
+            } else {
+                success = FALSE;
+                break;
             }
+        }
+
+        antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
+        logCurrentRuntime(algorithmStartTime);
+
+        if(success) {
+            antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"");
+        } else {
+            antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"");
         }
     }
 
@@ -204,20 +215,19 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         // TODO log new generation infos
 
         //TODO comment
-        boolean successful = FALSE;
+        //boolean successful = FALSE;
 
         for (int i = 0; i < population.size(); i++) {
             IChromosome<TestCase> chromosome = (IChromosome<TestCase>) population.get(i);
-
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
 
             double fitnessValue = lineCoveredPercentageFitnessFunction.getFitness(chromosome);
             double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
             double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
+            /*
             if(fitnessValue == 1.0) {
                 successful = TRUE;
-            }
+            }*/
 
             antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
                     + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
@@ -227,11 +237,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 "\"-\";\"-\";\"-\";\"");
         logCurrentRuntime(generationStartTime);
 
+        /*
         if(successful) {
             antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
         } else {
             antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
-        }
+        }*/
 
         logCurrentFitness();
         currentGenerationNumber++;
