@@ -513,6 +513,7 @@ public class EnvironmentManager {
 
     public void setPortraitMode() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("deviceId", emulator)
                 .withParameter("type", "rotation")
                 .withParameter("rotation", "portrait")
                 .build());
@@ -524,6 +525,7 @@ public class EnvironmentManager {
 
     public void toggleRotation() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("deviceId", emulator)
                 .withParameter("type", "rotation")
                 .withParameter("rotation", "toggle")
                 .build());
