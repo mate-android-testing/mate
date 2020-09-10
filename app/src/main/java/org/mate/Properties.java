@@ -162,7 +162,7 @@ public class Properties {
 
     // use LINE_COVERAGE as default
     public static Coverage COVERAGE() {
-        return propertyOr(Coverage.LINE_COVERAGE);
+        return propertyOr(Coverage.NO_COVERAGE);
     }
 
 

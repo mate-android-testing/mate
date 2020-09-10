@@ -129,6 +129,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } finally {
 
+            testCase.finish();
+
             // record stats about test case, in particular intent based actions
             TestCaseStatistics.recordStats(testCase);
 

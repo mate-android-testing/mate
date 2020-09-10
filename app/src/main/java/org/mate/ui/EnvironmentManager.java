@@ -7,6 +7,8 @@ import org.mate.MATE;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
+import org.mate.model.TestCase;
+import org.mate.utils.Coverage;
 import org.mate.utils.TimeoutRun;
 
 import java.io.IOException;
@@ -22,7 +24,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.2";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.3";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -280,6 +282,49 @@ public class EnvironmentManager {
 
         String cmd = "getSourceLines:" + emulator;
         return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
+    }
+
+    // store test case coverage
+    public double storeCoverage(Coverage coverage, TestCase testCase) {
+        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("operation", "store")
+                // TODO: convert to Integer
+                .withParameter("testcaseId", testCase.getId())
+                .build());
+        return Double.valueOf(response.getParameter("coverage"));
+    }
+
+    // store overall coverage
+    public double storeCoverage(Coverage coverage) {
+        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("operation", "store")
+                .build());
+        return Double.valueOf(response.getParameter("coverage"));
+    }
+
+    // get test case coverage
+    public double getCoverage(Coverage coverage, TestCase testCase) {
+        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("operation", "fetch")
+                .withParameter("testcaseId", testCase.getId())
+                .build());
+        return Double.valueOf(response.getParameter("coverage"));
+    }
+
+    // get overall coverage
+    public double getCoverage(Coverage coverage) {
+        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("operation", "fetch")
+                .build());
+        return Double.valueOf(response.getParameter("coverage"));
     }
 
     public double getCombinedCoverage() {

@@ -10,6 +10,7 @@ import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
@@ -47,6 +48,30 @@ public class TestCase {
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
         activityAfterAction = new ArrayList<>();
+    }
+
+    /**
+     * Should be called after the test case has been executed.
+     * Among other things, this method is responsible for creating
+     * coverage information if desired.
+     */
+    public void finish() {
+
+        MATE.log("test case finished");
+
+        if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
+            // TODO: directly compute activity coverage (no server interaction required)
+        } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            double coverage = storeCoverage(Properties.COVERAGE());
+            MATE.log("TestCase Coverage: " + coverage);
+        }
+
+        // serialization of test case
+    }
+
+    private double storeCoverage(Coverage coverage) {
+        MATE.log("store coverage");
+        return Registry.getEnvironmentManager().storeCoverage(coverage, this);
     }
 
     /**

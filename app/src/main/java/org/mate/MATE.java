@@ -493,6 +493,7 @@ public class MATE {
                     }
 
                     MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+                    MATE.log_acc("Coverage Type: " + Properties.COVERAGE());
                     MATE.log_acc("Store Coverage: " + Properties.STORE_COVERAGE());
 
                     final RandomExploration randomExploration
