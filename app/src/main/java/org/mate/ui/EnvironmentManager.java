@@ -24,7 +24,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.3";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.4";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -57,27 +57,21 @@ public class EnvironmentManager {
      * @param message {@link org.mate.message.Message} that will be send to the server
      * @return Response {@link org.mate.message.Message} of the server
      */
-    public Message sendMessage(Message message) {
+    public synchronized Message sendMessage(Message message) {
         if (!active) {
             throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
         }
         addMetadata(message);
 
-        TimeoutRun.maskInterrupt();
         try {
             server.getOutputStream().write(Serializer.serialize(message));
             server.getOutputStream().flush();
         } catch (IOException e) {
-            TimeoutRun.unmaskInterrupt();
             MATE.log("socket error sending");
             throw new IllegalStateException(e);
-        } finally {
-            TimeoutRun.unmaskInterrupt();
         }
 
-        TimeoutRun.maskInterrupt();
         Message response = messageParser.nextMessage();
-        TimeoutRun.unmaskInterrupt();
 
         verifyMetadata(response);
         if (response.getSubject().equals("/error")) {
@@ -278,10 +272,14 @@ public class EnvironmentManager {
     }
 
     public List<String> getSourceLines() {
-        List<String> lines = new ArrayList<>();
-
-        String cmd = "getSourceLines:" + emulator;
-        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/getSourceLines")
+                .withParameter("deviceId", emulator)
+                .build());
+        if (!"/coverage/getSourceLines".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: unable to retrieve source lines");
+            return null;
+        }
+        return Arrays.asList(response.getParameter("lines").split("\n"));
     }
 
     // store test case coverage
@@ -481,8 +479,12 @@ public class EnvironmentManager {
     }
 
     public void clearAppData() {
-        String cmd = "clearApp:" + emulator;
-        tunnelLegacyCmd(cmd);
+        Message response = sendMessage(new Message.MessageBuilder("/android/clearApp")
+                .withParameter("deviceId", emulator)
+                .build());
+        if (!"/android/clearApp".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: unable clear app data");
+        }
     }
 
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget){
