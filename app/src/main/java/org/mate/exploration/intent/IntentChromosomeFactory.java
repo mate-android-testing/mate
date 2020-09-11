@@ -129,23 +129,10 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } finally {
 
+            // store coverage, serialize, record stats about test case if desired
             testCase.finish();
 
-            // record stats about test case, in particular intent based actions
-            TestCaseStatistics.recordStats(testCase);
-
-            if (Properties.RECORD_TEST_CASE()) {
-                TestCaseSerializer.serializeTestCase(testCase);
-            }
-
-            /*
-            //TODO: remove hack, when better solution implemented (query fitness function)
-            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-            }
-            */
+            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
 
             //store coverage in any case
             if (storeCoverage) {
@@ -156,18 +143,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                     MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getCoverage(chromosome));
 
-                } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-
-                    // TODO: this should be depended on which fitness function is used
-                    // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
-
-                    Registry.getEnvironmentManager().storeBranchCoverage(chromosome);
-
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                            .getBranchCoverage(chromosome));
                 }
-
-                MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
             }
         }
         return chromosome;

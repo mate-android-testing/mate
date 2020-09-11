@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
@@ -13,6 +14,7 @@ import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
+import org.mate.utils.TestCaseStatistics;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -57,8 +59,7 @@ public class TestCase {
      */
     public void finish() {
 
-        MATE.log("test case finished");
-
+        // store coverage
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
             // TODO: directly compute activity coverage (no server interaction required)
         } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
@@ -67,10 +68,17 @@ public class TestCase {
         }
 
         // serialization of test case
+        if (Properties.RECORD_TEST_CASE()) {
+            TestCaseSerializer.serializeTestCase(this);
+        }
+
+        // record stats about a test case, in particular about intent based actions
+        if (Properties.RECORD_TEST_CASE_STATS()) {
+            TestCaseStatistics.recordStats(this);
+        }
     }
 
     private double storeCoverage(Coverage coverage) {
-        MATE.log("store coverage");
         return Registry.getEnvironmentManager().storeCoverage(coverage, this);
     }
 

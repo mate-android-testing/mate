@@ -309,6 +309,7 @@ public class EnvironmentManager {
     public double getCombinedCoverage(Coverage coverage) {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
                 .withParameter("coverage_type", coverage.name())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));

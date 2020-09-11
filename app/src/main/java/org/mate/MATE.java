@@ -494,7 +494,6 @@ public class MATE {
 
                     MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
                     MATE.log_acc("Coverage Type: " + Properties.COVERAGE());
-                    MATE.log_acc("Store Coverage: " + Properties.STORE_COVERAGE());
 
                     final RandomExploration randomExploration
                             = new RandomExploration(Properties.STORE_COVERAGE(), true, MAX_NUMBER_EVENTS(),
@@ -514,20 +513,11 @@ public class MATE {
                         e.printStackTrace();
                     }
 
-                    MATE.log("This line should be always logged!");
-
-                    File outputDir = new File("/data/data/org.mate/test-cases");
-                    if (outputDir != null && outputDir.exists()) {
-                        MATE.log("Stored TestCase Files: ");
-                        File[] files = outputDir.listFiles();
-                        for (File file : files) {
-                            MATE.log(file.getName());
-                        }
-                    }
-
-                    if (Properties.STORE_COVERAGE()) {
-                        Registry.getEnvironmentManager().storeCoverageData(randomExploration, null);
-                        MATE.log_acc("Total coverage: " + Registry.getEnvironmentManager().getCombinedCoverage());
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        // get combined coverage
+                        MATE.log_acc("Total coverage: "
+                                + Registry.getEnvironmentManager()
+                                .getCombinedCoverage(Properties.COVERAGE()));
                     }
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
