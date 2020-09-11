@@ -282,45 +282,50 @@ public class EnvironmentManager {
         return Arrays.asList(response.getParameter("lines").split("\n"));
     }
 
-    // store test case coverage
+    /**
+     * Stores the coverage information of the given test case. By storing
+     * we mean that a trace/coverage file is generated/fetched from the emulator.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param testCase The test case for which coverage should be evaluated.
+     * @return Returns the coverage of the given test case.
+     */
     public double storeCoverage(Coverage coverage, TestCase testCase) {
-        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("operation", "store")
                 // TODO: convert to Integer
                 .withParameter("testcaseId", testCase.getId())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }
 
-    // store overall coverage
-    public double storeCoverage(Coverage coverage) {
-        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+    /**
+     * Requests the combined coverage information.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @return Returns the overall coverage.
+     */
+    public double getCombinedCoverage(Coverage coverage) {
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("operation", "store")
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }
 
-    // get test case coverage
+    /**
+     * Requests the coverage information for a given test case.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param testCase The test case for which coverage should be evaluated.
+     * @return Returns the coverage of the given test case.
+     */
     public double getCoverage(Coverage coverage, TestCase testCase) {
-        Message response = sendMessage(new Message.MessageBuilder("/coverage")
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/get")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("operation", "fetch")
                 .withParameter("testcaseId", testCase.getId())
-                .build());
-        return Double.valueOf(response.getParameter("coverage"));
-    }
-
-    // get overall coverage
-    public double getCoverage(Coverage coverage) {
-        Message response = sendMessage(new Message.MessageBuilder("/coverage")
-                .withParameter("deviceId", emulator)
-                .withParameter("coverage_type", coverage.name())
-                .withParameter("operation", "fetch")
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }
