@@ -157,12 +157,16 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-            MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
-        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            MATE.log_acc("Combined coverage until now: " + Registry.getEnvironmentManager().getCombinedCoverage());
-            if (population.size() <= 10) {
-                MATE.log_acc("Combined coverage of current population: " + Registry.getEnvironmentManager().getCombinedCoverage(population));
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            // get combined coverage
+            MATE.log_acc("Combined coverage until now: "
+                    + Registry.getEnvironmentManager()
+                    .getCombinedCoverage(Properties.COVERAGE()));
+            // TODO: make this invocation independent of line coverage
+            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                if (population.size() <= 10) {
+                    MATE.log_acc("Combined coverage of current population: " + Registry.getEnvironmentManager().getCombinedCoverage(population));
+                }
             }
         }
     }
