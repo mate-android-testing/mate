@@ -343,7 +343,7 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("chromosomes", chromosomeIds.toString())
+                .withParameter("chromosomes", chromosomes.toString())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }
