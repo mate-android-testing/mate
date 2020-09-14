@@ -82,6 +82,10 @@ public class TestCase {
         return Registry.getEnvironmentManager().storeCoverage(coverage, this);
     }
 
+    private double getCoverage(Coverage coverage) {
+        return Registry.getEnvironmentManager().getCoverage(coverage, this);
+    }
+
     /**
      * Prints how often each widget has been triggered by a certain action.
      */

@@ -295,7 +295,7 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
                 // TODO: convert to Integer
-                .withParameter("testcaseId", testCase.getId())
+                .withParameter("chromosome", testCase.getId())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }
@@ -308,6 +308,8 @@ public class EnvironmentManager {
      */
     public double getCombinedCoverage(Coverage coverage) {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/combined")
+                // TODO: add param 'chromosomes' to get coverage for a test suite for instance
+                //   see getCombinedLineCoverage() on MATE server for further details
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("coverage_type", coverage.name())
@@ -326,7 +328,7 @@ public class EnvironmentManager {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/get")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("testcaseId", testCase.getId())
+                .withParameter("chromosome", testCase.getId())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }
