@@ -79,7 +79,7 @@ public class TestCase {
     }
 
     private double storeCoverage(Coverage coverage) {
-        return Registry.getEnvironmentManager().storeCoverage(coverage, this);
+        return Registry.getEnvironmentManager().storeCoverage(coverage, getId(), null);
     }
 
     private double getCoverage(Coverage coverage) {

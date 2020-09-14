@@ -287,16 +287,19 @@ public class EnvironmentManager {
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      *
      * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
-     * @param testCase The test case for which coverage should be evaluated.
+     * @param chromosomeId The chromosome identifier.
+     * @param entityId An identifier to separate test suites from each other.
      * @return Returns the coverage of the given test case.
      */
-    public double storeCoverage(Coverage coverage, TestCase testCase) {
-        Message response = sendMessage(new Message.MessageBuilder("/coverage/store")
+    public double storeCoverage(Coverage coverage, String chromosomeId, String entityId) {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                // TODO: convert to Integer
-                .withParameter("chromosome", testCase.getId())
-                .build());
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
+        }
+        Message response = sendMessage(messageBuilder.build());
         return Double.valueOf(response.getParameter("coverage"));
     }
 
@@ -318,6 +321,24 @@ public class EnvironmentManager {
     }
 
     /**
+     * Requests the combined coverage information.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @return Returns the overall coverage.
+     */
+    public double getCombinedCoverage(Coverage coverage, String chromosomeIds) {
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/combined")
+                // TODO: add param 'chromosomes' to get coverage for a test suite for instance
+                //   see getCombinedLineCoverage() on MATE server for further details
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("chromosomes", chromosomeIds)
+                .build());
+        return Double.valueOf(response.getParameter("coverage"));
+    }
+
+    /**
      * Requests the coverage information for a given test case.
      *
      * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
@@ -331,12 +352,6 @@ public class EnvironmentManager {
                 .withParameter("chromosome", testCase.getId())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
-    }
-
-    public double getCombinedCoverage() {
-        String cmd = "getCombinedCoverage:" + emulator;
-
-        return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
     public double getCombinedCoverage(List<? extends Object> os) {

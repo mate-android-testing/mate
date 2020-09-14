@@ -181,7 +181,6 @@ public class MATE {
     public void testApp(String explorationStrategy) {
 
         String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
-        //MATE.log("EMULATOR: " + emulator);
 
         runningTime = new Date().getTime();
         try {
@@ -191,16 +190,6 @@ public class MATE {
                 if (explorationStrategy.equals("RandomSearchGA")) {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                        // init the CFG
-                        boolean isInit = Registry.getEnvironmentManager().initCFG();
-
-                        if (!isInit) {
-                            MATE.log("Couldn't initialise CFG! Aborting.");
-                            throw new IllegalStateException("Graph initialisation failed!");
-                        }
-                    }
 
                     final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(RandomSearch.ALGORITHM_NAME)
@@ -220,16 +209,6 @@ public class MATE {
 
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                        // init the CFG
-                        boolean isInit = Registry.getEnvironmentManager().initCFG();
-
-                        if (!isInit) {
-                            MATE.log("Couldn't initialise CFG! Aborting.");
-                            throw new IllegalStateException("Graph initialisation failed!");
-                        }
-                    }
 
                     final IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
                             .withAlgorithm(org.mate.exploration.genetic.algorithm.OnePlusOne.ALGORITHM_NAME)
@@ -295,11 +274,14 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                        // TODO: make invocation independent of line coverage
-                        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                            Registry.getEnvironmentManager().storeCoverageData(genericGA, null);
-                        }
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
@@ -335,11 +317,14 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                        // TODO: make invocation independent of line coverage
-                        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                            Registry.getEnvironmentManager().storeCoverageData(genericGA, null);
-                        }
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
@@ -379,11 +364,14 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                        // TODO: make invocation independent of line coverage
-                        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                            Registry.getEnvironmentManager().storeCoverageData(nsga, null);
-                        }
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
@@ -406,11 +394,14 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                        // TODO: make invocation independent of line coverage
-                        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                            Registry.getEnvironmentManager().storeCoverageData(heuristicExploration, null);
-                        }
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
@@ -518,7 +509,14 @@ public class MATE {
                         e.printStackTrace();
                     }
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
@@ -626,11 +624,13 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                        // TODO: make invocation independent of line coverage
-                        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                            Registry.getEnvironmentManager().storeCoverageData(mio, null);
-                        }
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
