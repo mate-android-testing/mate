@@ -51,20 +51,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             }
         } finally {
 
-            testCase.finish();
-
-            if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-            }
-
-            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-
-                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                        .getCoverage(chromosome));
-            }
-            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+            testCase.finish(chromosome);
         }
         return chromosome;
     }

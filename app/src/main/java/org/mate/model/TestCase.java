@@ -3,6 +3,9 @@ package org.mate.model;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
@@ -57,7 +60,7 @@ public class TestCase {
      * Among other things, this method is responsible for creating
      * coverage information if desired.
      */
-    public void finish() {
+    public void finish(IChromosome<TestCase> chromosome) {
 
         // store coverage
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
@@ -75,6 +78,16 @@ public class TestCase {
         // record stats about a test case, in particular about intent based actions
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
+        }
+
+        MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+
+        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+            BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
+        }
+
+        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 

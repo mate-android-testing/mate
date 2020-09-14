@@ -326,14 +326,24 @@ public class EnvironmentManager {
      * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @return Returns the overall coverage.
      */
-    public double getCombinedCoverage(Coverage coverage, String chromosomeIds) {
+    public double getCombinedCoverage(Coverage coverage, List<String> chromosomeIds) {
+
+        // Java 8: String.join("+", chromosomeIds);
+        StringBuilder chromosomes = new StringBuilder("");
+
+        for (String chromosomeId : chromosomeIds) {
+            chromosomes.append(chromosomeId);
+            chromosomes.append("+");
+        }
+
+        // remove '+' at the end
+        chromosomes.setLength(chromosomes.length() - 1);
+
         Message response = sendMessage(new Message.MessageBuilder("/coverage/combined")
-                // TODO: add param 'chromosomes' to get coverage for a test suite for instance
-                //   see getCombinedLineCoverage() on MATE server for further details
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("chromosomes", chromosomeIds)
+                .withParameter("chromosomes", chromosomeIds.toString())
                 .build());
         return Double.valueOf(response.getParameter("coverage"));
     }

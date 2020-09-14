@@ -128,23 +128,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
             }
         } finally {
-
             // store coverage, serialize, record stats about test case if desired
-            testCase.finish();
-
-            MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
-
-            //store coverage in any case
-            if (storeCoverage) {
-
-                if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                    Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
-
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                            .getCoverage(chromosome));
-
-                }
-            }
+            testCase.finish(chromosome);
         }
         return chromosome;
     }
