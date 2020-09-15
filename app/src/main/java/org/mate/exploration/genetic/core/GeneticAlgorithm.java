@@ -127,9 +127,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         // Log the current target line for later identification of the test
         antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"" + targetLine + "\"\n");
 
-        //TODO comment
-        boolean successful = FALSE;
-
         for (int i = 0; i < populationSize; i++) {
             long populationStartTime = System.currentTimeMillis();
 
@@ -151,7 +148,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             logCurrentRuntime(populationStartTime);
         }
 
-        antStatsLogger.write("\"genetic\";\"" + currentGenerationNumber + "\";\"-\";\"-\";" +
+        antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";\"-\";" +
                 "\"-\";\"-\";\"");
         logCurrentRuntime(generationStartTime);
 
