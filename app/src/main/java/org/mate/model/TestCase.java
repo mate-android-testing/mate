@@ -96,7 +96,7 @@ public class TestCase {
     }
 
     private double getCoverage(Coverage coverage) {
-        return Registry.getEnvironmentManager().getCoverage(coverage, this);
+        return Registry.getEnvironmentManager().getCoverage(coverage, getId(), null);
     }
 
     /**

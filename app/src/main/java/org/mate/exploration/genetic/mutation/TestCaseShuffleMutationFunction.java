@@ -11,15 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCase> {
-    private final boolean storeCoverage;
+
     private boolean executeActions;
 
-    public TestCaseShuffleMutationFunction() {
-        this(Properties.STORE_COVERAGE());
-    }
-
-    public TestCaseShuffleMutationFunction(boolean storeCoverage) {
-        this.storeCoverage = storeCoverage;
+    public TestCaseShuffleMutationFunction(boolean executeActions) {
+        this.executeActions = executeActions;
     }
 
     @Override

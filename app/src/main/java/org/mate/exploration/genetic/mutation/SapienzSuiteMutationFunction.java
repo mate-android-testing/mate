@@ -9,6 +9,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -21,16 +22,10 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     private final double pMutate;
     private final TestCaseMergeCrossOverFunction testCaseMergeCrossOverFunction;
     private final TestCaseShuffleMutationFunction testCaseShuffleMutationFunction;
-    private final boolean storeCoverage;
 
     public SapienzSuiteMutationFunction(double pMutate) {
-        this(Properties.STORE_COVERAGE(), pMutate);
-    }
-
-    public SapienzSuiteMutationFunction(boolean storeCoverage, double pMutate) {
         this.pMutate = pMutate;
-        this.storeCoverage = storeCoverage;
-        testCaseMergeCrossOverFunction = new TestCaseMergeCrossOverFunction(false);
+        testCaseMergeCrossOverFunction = new TestCaseMergeCrossOverFunction();
         testCaseMergeCrossOverFunction.setExecuteActions(false);
         testCaseShuffleMutationFunction = new TestCaseShuffleMutationFunction(false);
         testCaseShuffleMutationFunction.setExecuteActions(false);
@@ -89,16 +84,17 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
             if (testCase.getId().equals("dummy")) {
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
-                if (storeCoverage) {
+                if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                    // TODO: replace with new storeCoverage() method
                     Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, mutatedTestCase);
 
                     MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
                             .getCoverage(chromosome));
-                    MATE.log_acc("Found crash: " + String.valueOf(mutatedTestCase.getCrashDetected()));
+                    MATE.log_acc("Found crash: " + mutatedTestCase.getCrashDetected());
                 }
             } else {
                 executedTestCases.add(testCase);
-                if (storeCoverage) {
+                if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                     copyTestCases.add(testCase);
                 }
             }

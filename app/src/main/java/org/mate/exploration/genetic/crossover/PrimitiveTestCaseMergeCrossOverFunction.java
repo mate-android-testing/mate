@@ -5,24 +5,20 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
 import java.util.List;
 
 public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
     public static final String CROSSOVER_FUNCTION_ID = "primitive_test_case_merge_crossover_function";
-    private boolean storeCoverage;
     private boolean executeActions;
 
     public PrimitiveTestCaseMergeCrossOverFunction() {
-        this(Properties.STORE_COVERAGE());
-    }
-
-    public PrimitiveTestCaseMergeCrossOverFunction(boolean storeCoverage) {
-        this.storeCoverage = storeCoverage;
         executeActions = false;
     }
 
@@ -47,18 +43,25 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
             TestCase executedTestCase = TestCase.fromDummy(offspring);
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
-            if (storeCoverage) {
-                Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
+            // TODO: check whether we can use here testcase.finish()
+            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
 
                 MATE.log_acc("After primitive test case merge crossover:");
-                MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                        .getCoverage(chromosome));
-                MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+                MATE.log_acc("Coverage of: " + chromosome.getValue().getId() + ": "
+                        +Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        chromosome.getValue().getId(), null));
 
                 //TODO: remove hack, when better solution implemented
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+                if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                    LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+                }
+
+                if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+                    BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
+                }
             }
 
+            MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
             return chromosome;
         }
 

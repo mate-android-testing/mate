@@ -8,23 +8,18 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.ui.EnvironmentManager;
+import org.mate.utils.Coverage;
 
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
     public static final String CHROMOSOME_FACTORY_ID = "android_suite_random_chromosome_factory";
 
     private final int numTestCases;
     private final AndroidRandomChromosomeFactory androidRandomChromosomeFactory;
-    private final boolean storeCoverage;
 
-    public AndroidSuiteRandomChromosomeFactory(boolean storeCoverage, int numTestCases, int
+    public AndroidSuiteRandomChromosomeFactory(int numTestCases, int
             maxNumEvents) {
-        this.storeCoverage = storeCoverage;
         this.numTestCases = numTestCases;
-        androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory(false, true, maxNumEvents);
-    }
-
-    public AndroidSuiteRandomChromosomeFactory(int numTestCases, int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), numTestCases, maxNumEvents);
+        androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory( true, maxNumEvents);
     }
 
     @Override
@@ -36,14 +31,18 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
             MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
-            if (storeCoverage) {
-                Registry.getEnvironmentManager().storeCoverageData(chromosome, tc);
+            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                // TODO: should store coverage for the test case tc belonging to the testsuite ts
+                Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(), chromosome.toString(), null);
             }
         }
 
-        if (storeCoverage) {
-            MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                    .getCoverage(chromosome));
+        // TODO: create method 'finish' in TestSuite class and move code there
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            // TODO: should retrieve coverage of entire test suite
+            MATE.log_acc("Coverage of: " + chromosome.toString() + ": "
+                    + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                    chromosome.toString(), null));
         }
 
         return chromosome;

@@ -165,6 +165,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             // TODO: make this invocation independent of line coverage
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                 if (population.size() <= 10) {
+                    // TODO: use new coverage() methods
                     MATE.log_acc("Combined coverage of current population: " + Registry.getEnvironmentManager().getCombinedCoverage(population));
                 }
             }

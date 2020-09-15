@@ -17,15 +17,9 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
     public static final String MUTATION_FUNCTION_ID = "suite_cut_point_mutation_function";
 
     private final CutPointMutationFunction cutPointMutationFunction;
-    private final boolean storeCoverage;
-
-    public SuiteCutPointMutationFunction(boolean storeCoverage, int maxNumEvents) {
-        this.storeCoverage = storeCoverage;
-        cutPointMutationFunction = new CutPointMutationFunction(false, maxNumEvents);
-    }
 
     public SuiteCutPointMutationFunction(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), maxNumEvents);
+        cutPointMutationFunction = new CutPointMutationFunction(maxNumEvents);
     }
 
     @Override

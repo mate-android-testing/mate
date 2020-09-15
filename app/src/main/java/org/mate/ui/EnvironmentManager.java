@@ -352,15 +352,20 @@ public class EnvironmentManager {
      * Requests the coverage information for a given test case.
      *
      * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
-     * @param testCase The test case for which coverage should be evaluated.
+     * @param chromosomeId The chromosome identifier.
+     * @param entityId An identifier to separate test suites from each other.
      * @return Returns the coverage of the given test case.
      */
-    public double getCoverage(Coverage coverage, TestCase testCase) {
-        Message response = sendMessage(new Message.MessageBuilder("/coverage/get")
+    public double getCoverage(Coverage coverage, String chromosomeId, String entityId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/get")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("chromosome", testCase.getId())
-                .build());
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
+        }
+        Message response = sendMessage(messageBuilder.build());
         return Double.valueOf(response.getParameter("coverage"));
     }
 

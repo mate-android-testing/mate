@@ -492,7 +492,7 @@ public class MATE {
                     MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
                     final RandomExploration randomExploration
-                            = new RandomExploration(Properties.STORE_COVERAGE(), true, MAX_NUMBER_EVENTS(),
+                            = new RandomExploration( true, MAX_NUMBER_EVENTS(),
                             Properties.RELATIVE_INTENT_AMOUNT());
 
                     try {

@@ -10,8 +10,8 @@ public class PrimitiveAndroidRandomChromosomeFactory extends AndroidRandomChromo
         super(maxNumEvents);
     }
 
-    public PrimitiveAndroidRandomChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {
-        super(storeCoverage, resetApp, maxNumEvents);
+    public PrimitiveAndroidRandomChromosomeFactory(boolean resetApp, int maxNumEvents) {
+        super(resetApp, maxNumEvents);
     }
 
     @Override

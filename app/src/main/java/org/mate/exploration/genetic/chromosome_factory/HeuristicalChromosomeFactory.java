@@ -41,15 +41,15 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     private Action previousAction = null;
 
     public HeuristicalChromosomeFactory(int maxNumEvents) {
-        this(true, true, maxNumEvents);
+        this( true, maxNumEvents);
     }
 
-    public HeuristicalChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {
-        this(storeCoverage, resetApp, maxNumEvents, 1, 0.3, 1.5);
+    public HeuristicalChromosomeFactory(boolean resetApp, int maxNumEvents) {
+        this(resetApp, maxNumEvents, 1, 0.3, 1.5);
     }
 
-    public HeuristicalChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents, double alpha, double beta, double gamma) {
-        super(storeCoverage, resetApp, maxNumEvents);
+    public HeuristicalChromosomeFactory(boolean resetApp, int maxNumEvents, double alpha, double beta, double gamma) {
+        super(resetApp, maxNumEvents);
         this.alpha = alpha;
         this.beta = beta;
         this.gamma = gamma;
