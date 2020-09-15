@@ -311,8 +311,6 @@ public class EnvironmentManager {
      */
     public double getCombinedCoverage(Coverage coverage) {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/combined")
-                // TODO: add param 'chromosomes' to get coverage for a test suite for instance
-                //   see getCombinedLineCoverage() on MATE server for further details
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("coverage_type", coverage.name())
