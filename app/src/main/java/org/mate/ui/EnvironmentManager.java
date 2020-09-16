@@ -4,9 +4,12 @@ import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
+import org.mate.model.TestCase;
+import org.mate.utils.Coverage;
 import org.mate.utils.TimeoutRun;
 
 import java.io.IOException;
@@ -22,7 +25,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.4";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.5";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -154,6 +157,7 @@ public class EnvironmentManager {
         return Long.valueOf(tunnelLegacyCmd(cmd));
     }
 
+    // TODO: use new coverage endpoint
     public void copyCoverageData(Object source, Object target, List<? extends Object> entities) {
         StringBuilder sb = new StringBuilder();
         String prefix = "";
@@ -166,15 +170,6 @@ public class EnvironmentManager {
                 + ":" + sb.toString();
         tunnelLegacyCmd(cmd);
     }
-
-    public void storeCoverageData(Object o, Object o2) {
-        String cmd = "storeCoverageData:" + emulator + ":" + o.toString();
-        if (o2 != null) {
-            cmd += ":" + o2.toString();
-        }
-        tunnelLegacyCmd(cmd);
-    }
-
 
     public String getCurrentActivityName() {
         String currentActivity = "current_activity";
@@ -280,90 +275,106 @@ public class EnvironmentManager {
         return Arrays.asList(response.getParameter("lines").split("\n"));
     }
 
-    public double getCombinedCoverage() {
-        String cmd = "getCombinedCoverage:" + emulator;
-
-        return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    public double getCombinedCoverage(List<? extends Object> os) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("getCombinedCoverage:" + emulator + ":");
-        for (Object o : os) {
-            sb.append(o);
-            sb.append("+");
+    /**
+     * Stores the coverage information of the given test case. By storing
+     * we mean that a trace/coverage file is generated/fetched from the emulator.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosomeId Identifies either a test case or a test suite.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *                 otherwise {@code null}.
+     * @return Returns the coverage of the given test case.
+     */
+    public double storeCoverage(Coverage coverage, String chromosomeId, String entityId) {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
         }
-        sb.setLength(sb.length() - 1);
-        String cmd = sb.toString();
-
-        return Double.valueOf(tunnelLegacyCmd(cmd));
+        Message response = sendMessage(messageBuilder.build());
+        return Double.valueOf(response.getParameter("coverage"));
     }
 
+    /**
+     * Requests the combined coverage information for all chromosomes.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @return Returns the overall coverage.
+     */
+    public double getCombinedCoverage(Coverage coverage) {
+        return getCombinedCoverage(coverage, null);
+    }
+
+    /**
+     * Requests the combined coverage information for the given set of test cases / test suites.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosomes The list of chromosomes (test cases or test suites) for which the
+     *                    coverage should be computed.
+     * @param <T> Refers to a test case or a test suite.
+     * @return Returns the combined coverage information for a set of chromosomes.
+     */
+    public <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
+
+        String chromosomesParam = null;
+
+        if (chromosomes != null) {
+
+            // Java 8: String.join("+", chromosomeIds);
+            StringBuilder chromosomeIds = new StringBuilder();
+
+            for (IChromosome<T> chromosome : chromosomes) {
+                chromosomeIds.append(chromosome.getValue());
+                chromosomeIds.append("+");
+            }
+
+            // remove '+' at the end
+            chromosomeIds.setLength(chromosomeIds.length() - 1);
+
+            chromosomesParam = chromosomeIds.toString();
+        }
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("coverage_type", coverage.name());
+        if (chromosomesParam != null) {
+            messageBuilder.withParameter("chromosomes", chromosomesParam);
+        }
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.valueOf(response.getParameter("coverage"));
+    }
+
+    /**
+     * Requests the coverage information for a given test case.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosomeId Identifies either a test case or a test suite.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *                 otherwise {@code null}.
+     * @return Returns the coverage of the given test case.
+     */
+    public double getCoverage(Coverage coverage, String chromosomeId, String entityId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/get")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
+        }
+        Message response = sendMessage(messageBuilder.build());
+        return Double.valueOf(response.getParameter("coverage"));
+    }
+
+    // TODO: use new coverage endpoint
     public double getCoverage(Object o) {
         String cmd = "getCoverage:" + emulator + ":" + o.toString();
 
         return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    /**
-     * Stores the branch coverage information of the given test case.
-     *
-     * @param chromosome The given test case.
-     */
-    public void storeBranchCoverage(Object chromosome) {
-        storeBranchCoverage("storeBranchCoverage:" + chromosome.toString());
-    }
-
-    /**
-     * Stores the total branch coverage information.
-     */
-    public void storeBranchCoverage() {
-        storeBranchCoverage("storeBranchCoverage");
-    }
-
-    /**
-     * Stores the obtained branch coverage information. Depending on the given
-     * command string, either the total branch coverage is stored or only the
-     * branch coverage of a single test case.
-     *
-     * @param cmd The command string specifying which branch coverage
-     *            should be stored.
-     */
-    private void storeBranchCoverage(String cmd) {
-        cmd += ":" + emulator;
-        tunnelLegacyCmd(cmd);
-    }
-
-    /**
-     * Returns the branch coverage.
-     *
-     * @param cmd The command string specifying the branch coverage
-     *            either for a given test case or the (global) branch coverage.
-     * @return Returns the branch coverage.
-     */
-    private double getBranchCoverage(String cmd) {
-        return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    /**
-     * Returns the (global) branch coverage.
-     *
-     * @return Returns the (global) branch coverage.
-     */
-    public double getBranchCoverage() {
-        String cmd = "getBranchCoverage";
-        return getBranchCoverage(cmd);
-    }
-
-    /**
-     * Returns the branch coverage of a given test case.
-     *
-     * @param chromosome The given test case.
-     * @return Returns the branch coverage for the specified test case.
-     */
-    public double getBranchCoverage(Object chromosome) {
-        String cmd = "getBranchCoverage" + ":" + chromosome.toString();
-        return getBranchCoverage(cmd);
     }
 
     /**

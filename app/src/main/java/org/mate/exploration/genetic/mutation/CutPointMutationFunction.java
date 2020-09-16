@@ -6,6 +6,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.interaction.UIAbstractionLayer;
@@ -19,17 +20,11 @@ import java.util.List;
 
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     public static final String MUTATION_FUNCTION_ID = "cut_point_mutation_function";
-    private final boolean storeCoverage;
 
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
     public CutPointMutationFunction(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), maxNumEvents);
-    }
-
-    public CutPointMutationFunction(boolean storeCoverage, int maxNumEvents) {
-        this.storeCoverage = storeCoverage;
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
     }
@@ -59,26 +54,21 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             }
         }
 
-        if (storeCoverage) {
+        // TODO: check whether we can use here testcase.finish()
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
+            MATE.log_acc("Coverage of: " + mutatedChromosome + ": " +
+                    Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                            mutatedChromosome.getValue().getId(), null));
+
+            MATE.log_acc("Found crash: " + mutatedChromosome.getValue().getCrashDetected());
 
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-
-                Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, null);
-
-                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + Registry.getEnvironmentManager()
-                        .getCoverage(mutatedChromosome));
-                MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
-
-                //TODO: remove hack, when better solution implemented
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
+            }
 
-            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-
-                Registry.getEnvironmentManager().storeBranchCoverage(mutatedChromosome);
-
-                MATE.log_acc("Coverage of: " + mutatedChromosome + ": " + Registry.getEnvironmentManager()
-                        .getBranchCoverage(mutatedChromosome));
-                MATE.log_acc("Found crash: " + String.valueOf(mutatedChromosome.getValue().getCrashDetected()));
+            if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+                BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
             }
         }
         return mutations;

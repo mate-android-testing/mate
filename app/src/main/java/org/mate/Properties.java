@@ -59,6 +59,13 @@ public class Properties {
     }
 
     /*
+    * Whether to record stats about test cases or not.
+     */
+    public static boolean RECORD_TEST_CASE_STATS() {
+        return propertyOr(false);
+    }
+
+    /*
     * Record/Replay test case.
      */
     public static boolean RECORD_TEST_CASE() {
@@ -162,7 +169,7 @@ public class Properties {
 
     // use LINE_COVERAGE as default
     public static Coverage COVERAGE() {
-        return propertyOr(Coverage.LINE_COVERAGE);
+        return propertyOr(Coverage.NO_COVERAGE);
     }
 
 

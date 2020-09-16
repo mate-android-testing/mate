@@ -2,10 +2,12 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import android.os.Environment;
 
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParser;
 
@@ -41,15 +43,15 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     private Action previousAction = null;
 
     public HeuristicalChromosomeFactory(int maxNumEvents) {
-        this(true, true, maxNumEvents);
+        this( true, maxNumEvents);
     }
 
-    public HeuristicalChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents) {
-        this(storeCoverage, resetApp, maxNumEvents, 1, 0.3, 1.5);
+    public HeuristicalChromosomeFactory(boolean resetApp, int maxNumEvents) {
+        this(resetApp, maxNumEvents, 1, 0.3, 1.5);
     }
 
-    public HeuristicalChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents, double alpha, double beta, double gamma) {
-        super(storeCoverage, resetApp, maxNumEvents);
+    public HeuristicalChromosomeFactory(boolean resetApp, int maxNumEvents, double alpha, double beta, double gamma) {
+        super(resetApp, maxNumEvents);
         this.alpha = alpha;
         this.beta = beta;
         this.gamma = gamma;

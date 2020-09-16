@@ -2,15 +2,23 @@ package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.intent.IntentChromosomeFactory;
+import org.mate.model.TestCase;
+import org.mate.model.TestSuite;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RandomExploration {
     private final AndroidRandomChromosomeFactory randomChromosomeFactory;
     private final boolean alwaysReset;
 
     public RandomExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), true, maxNumEvents);
+        this( true, maxNumEvents);
     }
 
     /**
@@ -18,19 +26,18 @@ public class RandomExploration {
      * {@link org.mate.interaction.intent.IntentBasedAction} and {@link org.mate.interaction.intent.SystemAction}
      * in contrast to solely using {@link org.mate.ui.WidgetAction} (UI actions).
      *
-     * @param storeCoverage Whether to store coverage information or not.
      * @param alwaysReset Whether to reset the app after each creation and execution of a chromosome.
      * @param maxNumEvents The maximal number of actions for a chromosome.
      * @param relativeIntentAmount The relative amount of intents that should be used.
      */
-    public RandomExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents, float relativeIntentAmount) {
+    public RandomExploration(boolean alwaysReset, int maxNumEvents, float relativeIntentAmount) {
         this.alwaysReset = alwaysReset;
-        randomChromosomeFactory = new IntentChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents, relativeIntentAmount);
+        randomChromosomeFactory = new IntentChromosomeFactory(alwaysReset, maxNumEvents, relativeIntentAmount);
     }
 
-    public RandomExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents) {
+    public RandomExploration(boolean alwaysReset, int maxNumEvents) {
         this.alwaysReset = alwaysReset;
-        randomChromosomeFactory = new AndroidRandomChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents);
+        randomChromosomeFactory = new AndroidRandomChromosomeFactory(alwaysReset, maxNumEvents);
     }
 
     public void run() {

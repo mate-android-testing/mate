@@ -3,15 +3,21 @@ package org.mate.model;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
+import org.mate.utils.TestCaseStatistics;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -47,6 +53,66 @@ public class TestCase {
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
         activityAfterAction = new ArrayList<>();
+    }
+
+    /**
+     * Should be called after the test case has been executed.
+     * Among other things, this method is responsible for creating
+     * coverage information if desired.
+     */
+    public void finish(IChromosome<TestCase> chromosome) {
+
+        // store coverage
+        if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
+            // activity coverage requires no interaction with coverage endpoint
+            int visitedActivities = chromosome.getValue().getVisitedActivities().size();
+            int activities = Registry.getEnvironmentManager().getActivityNames().size();
+            double activityCoverage = visitedActivities * 1.0d / activities;
+            MATE.log("TestCase Coverage" + activityCoverage);
+        } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            double coverage = storeCoverage(Properties.COVERAGE());
+            MATE.log("TestCase Coverage: " + coverage);
+        }
+
+        // serialization of test case
+        if (Properties.RECORD_TEST_CASE()) {
+            TestCaseSerializer.serializeTestCase(this);
+        }
+
+        // record stats about a test case, in particular about intent based actions
+        if (Properties.RECORD_TEST_CASE_STATS()) {
+            TestCaseStatistics.recordStats(this);
+        }
+
+        MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
+
+        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
+            BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
+        }
+
+        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+        }
+    }
+
+    /**
+     * Stores and gets the coverage information for a test case.
+     *
+     * @param coverage The coverage type, e.g. LINE_COVERAGE.
+     * @return Returns the coverage information for the given test case.
+     */
+    private double storeCoverage(Coverage coverage) {
+        return Registry.getEnvironmentManager().storeCoverage(coverage, getId(), null);
+    }
+
+    /**
+     * Gets the coverage information for a test case.
+     *
+     * @param coverage The coverage type, e.g. LINE_COVERAGE.
+     * @return Returns the coverage information for the given test case.
+     */
+    private double getCoverage(Coverage coverage) {
+        return Registry.getEnvironmentManager().getCoverage(coverage, getId(), null);
     }
 
     /**
@@ -249,6 +315,11 @@ public class TestCase {
         }
 
         return resultingTc;
+    }
+
+    @Override
+    public String toString() {
+        return getId();
     }
 
     /**

@@ -12,12 +12,12 @@ public class HeuristicExploration {
     private final boolean alwaysReset;
 
     public HeuristicExploration(int maxNumEvents) {
-        this(Properties.STORE_COVERAGE(), true, maxNumEvents);
+        this( true, maxNumEvents);
     }
 
-    public HeuristicExploration(boolean storeCoverage, boolean alwaysReset, int maxNumEvents) {
+    public HeuristicExploration(boolean alwaysReset, int maxNumEvents) {
         this.alwaysReset = alwaysReset;
-        heuristicChromosomeFactory = new HeuristicalChromosomeFactory(storeCoverage, alwaysReset, maxNumEvents);
+        heuristicChromosomeFactory = new HeuristicalChromosomeFactory(alwaysReset, maxNumEvents);
     }
 
     public void run() {

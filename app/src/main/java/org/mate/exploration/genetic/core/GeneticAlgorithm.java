@@ -19,6 +19,7 @@ import java.util.List;
 
 /**
  * Abstract class that serves as a basis for genetic algorithms
+ *
  * @param <T> Type wrapped by the chromosome implementation
  */
 public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
@@ -39,16 +40,17 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
-     * @param chromosomeFactory see {@link IChromosomeFactory}
-     * @param selectionFunction see {@link ISelectionFunction}
-     * @param crossOverFunction see {@link ICrossOverFunction}
-     * @param mutationFunction see {@link IMutationFunction}
-     * @param fitnessFunctions see {@link IFitnessFunction}
+     *
+     * @param chromosomeFactory    see {@link IChromosomeFactory}
+     * @param selectionFunction    see {@link ISelectionFunction}
+     * @param crossOverFunction    see {@link ICrossOverFunction}
+     * @param mutationFunction     see {@link IMutationFunction}
+     * @param fitnessFunctions     see {@link IFitnessFunction}
      * @param terminationCondition see {@link ITerminationCondition}
-     * @param populationSize size of population kept by the genetic algorithm
-     * @param bigPopulationSize size which population will temporarily be after creating offspring
-     * @param pCrossover probability that crossover occurs (between 0 and 1)
-     * @param pMutate probability that mutation occurs (between 0 and 1)
+     * @param populationSize       size of population kept by the genetic algorithm
+     * @param bigPopulationSize    size which population will temporarily be after creating offspring
+     * @param pCrossover           probability that crossover occurs (between 0 and 1)
+     * @param pMutate              probability that mutation occurs (between 0 and 1)
      */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T>
             selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int bigPopulationSize, double pCrossover, double pMutate) {
@@ -141,7 +143,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     }
 
     protected void logCurrentFitness() {
-        if (population.size() <= 10 ) {
+        if (population.size() <= 10) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
@@ -157,12 +159,13 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-            MATE.log_acc("Total Coverage: " + Registry.getEnvironmentManager().getBranchCoverage());
-        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            MATE.log_acc("Combined coverage until now: " + Registry.getEnvironmentManager().getCombinedCoverage());
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            MATE.log_acc("Combined coverage until now: "
+                    + Registry.getEnvironmentManager()
+                    .getCombinedCoverage(Properties.COVERAGE()));
             if (population.size() <= 10) {
-                MATE.log_acc("Combined coverage of current population: " + Registry.getEnvironmentManager().getCombinedCoverage(population));
+                MATE.log_acc("Combined coverage of current population: "
+                        + Registry.getEnvironmentManager().getCombinedCoverage(Properties.COVERAGE(), population));
             }
         }
     }

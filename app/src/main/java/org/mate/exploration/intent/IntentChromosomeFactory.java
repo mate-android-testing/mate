@@ -49,8 +49,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         determineRelativeComponentAmount();
     }
 
-    public IntentChromosomeFactory(boolean storeCoverage, boolean resetApp, int maxNumEvents, float relativeIntentAmount) {
-        super(storeCoverage, resetApp, maxNumEvents);
+    public IntentChromosomeFactory(boolean resetApp, int maxNumEvents, float relativeIntentAmount) {
+        super(resetApp, maxNumEvents);
 
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
@@ -128,45 +128,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
             }
         } finally {
-
-            // record stats about test case, in particular intent based actions
-            TestCaseStatistics.recordStats(testCase);
-
-            if (Properties.RECORD_TEST_CASE()) {
-                TestCaseSerializer.serializeTestCase(testCase);
-            }
-
-            /*
-            //TODO: remove hack, when better solution implemented (query fitness function)
-            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-            }
-            */
-
-            //store coverage in any case
-            if (storeCoverage) {
-
-                if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                    Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
-
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                            .getCoverage(chromosome));
-
-                } else if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-
-                    // TODO: this should be depended on which fitness function is used
-                    // BranchDistanceFitnessFunction.retrieveFitnessValues(chromosome);
-
-                    Registry.getEnvironmentManager().storeBranchCoverage(chromosome);
-
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                            .getBranchCoverage(chromosome));
-                }
-
-                MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
-            }
+            // store coverage, serialize, record stats about test case if desired
+            testCase.finish(chromosome);
         }
         return chromosome;
     }
