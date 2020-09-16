@@ -55,6 +55,7 @@ public class EnvironmentManager {
 
     /**
      * Send a {@link org.mate.message.Message} to the server and return the response of the server
+     *
      * @param message {@link org.mate.message.Message} that will be send to the server
      * @return Response {@link org.mate.message.Message} of the server
      */
@@ -112,7 +113,7 @@ public class EnvironmentManager {
     private void stripMetadata(Message message) {
         List<String> metadataKeys = new ArrayList<>();
         Map<String, String> parameters = message.getParameters();
-        for (String parameterKey: parameters.keySet()) {
+        for (String parameterKey : parameters.keySet()) {
             if (parameterKey.startsWith(METADATA_PREFIX)) {
                 metadataKeys.add(parameterKey);
             }
@@ -192,15 +193,22 @@ public class EnvironmentManager {
      * Simulates a system event by broadcasting the notification of the occurrence of
      * a system event to a certain receiver.
      *
-     * @param receiver The receiver listening for the system event.
-     * @param action The system event.
-     * @param dynamic Whether the receiver is a dynamic receiver or not.
-     *
+     * @param packageName The package name of the AUT.
+     * @param receiver    The receiver listening for the system event.
+     * @param action      The system event.
+     * @param dynamic     Whether the receiver is a dynamic receiver or not.
+     * @return Returns whether broadcasting the system event succeeded or not.
      */
-    public void executeSystemEvent(String receiver, String action, boolean dynamic) {
-        String cmd = "executeSystemEvent:" + MATE.packageName + ":"
-                + receiver + ":" + action + ":" + dynamic + ":" + emulator;
-        tunnelLegacyCmd(cmd);
+    public boolean executeSystemEvent(String packageName, String receiver, String action, boolean dynamic) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/execute_system_event")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", packageName)
+                .withParameter("receiver", receiver)
+                .withParameter("action", action)
+                .withParameter("dynamic", String.valueOf(dynamic));
+        Message response = sendMessage(messageBuilder.build());
+        return Boolean.parseBoolean(response.getParameter("response"));
     }
 
     /**
@@ -215,19 +223,27 @@ public class EnvironmentManager {
      * otherwise {@code false}.
      */
     public boolean grantRuntimePermissions(String packageName) {
-        String cmd = "grantPermissions:" + packageName + ":" + emulator;
 
-        return Boolean.parseBoolean(tunnelLegacyCmd(cmd));
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/grant_runtime_permissions")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", packageName);
+        Message response = sendMessage(messageBuilder.build());
+        return Boolean.parseBoolean(response.getParameter("response"));
     }
 
     /**
      * Pushes dummy files for various data types, e.g. video, onto
      * the external storage. This method should be only used in combination
      * with the intent fuzzing functionality.
+     *
+     * @return Returns whether the push operation succeeded or not.
      */
-    public void pushDummyFiles() {
-        String cmd = "pushDummyFiles:" + emulator;
-        tunnelLegacyCmd(cmd);
+    public boolean pushDummyFiles() {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/push_dummy_files")
+                .withParameter("deviceId", emulator);
+        Message response = sendMessage(messageBuilder.build());
+        return Boolean.parseBoolean(response.getParameter("response"));
     }
 
     /**
@@ -279,10 +295,10 @@ public class EnvironmentManager {
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
-     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
-     *                 otherwise {@code null}.
+     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
+     *                     otherwise {@code null}.
      * @return Returns the coverage of the given test case.
      */
     public double storeCoverage(Coverage coverage, String chromosomeId, String entityId) {
@@ -310,10 +326,10 @@ public class EnvironmentManager {
     /**
      * Requests the combined coverage information for the given set of test cases / test suites.
      *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomes The list of chromosomes (test cases or test suites) for which the
      *                    coverage should be computed.
-     * @param <T> Refers to a test case or a test suite.
+     * @param <T>         Refers to a test case or a test suite.
      * @return Returns the combined coverage information for a set of chromosomes.
      */
     public <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
@@ -351,10 +367,10 @@ public class EnvironmentManager {
     /**
      * Requests the coverage information for a given test case.
      *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
-     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
-     *                 otherwise {@code null}.
+     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
+     *                     otherwise {@code null}.
      * @return Returns the coverage of the given test case.
      */
     public double getCoverage(Coverage coverage, String chromosomeId, String entityId) {
@@ -439,8 +455,8 @@ public class EnvironmentManager {
         tunnelLegacyCmd(cmd);
     }
 
-    public void screenShotForFlickerDetection(String packageName,String nodeId){
-        String cmd = "flickerScreenshot:"+emulator+":"+emulator+"_"+packageName+"_"+nodeId+".png";
+    public void screenShotForFlickerDetection(String packageName, String nodeId) {
+        String cmd = "flickerScreenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
         tunnelLegacyCmd(cmd);
     }
 
@@ -453,14 +469,14 @@ public class EnvironmentManager {
         }
     }
 
-    public double matchesSurroundingColor(String packageName, String stateId, Widget widget){
+    public double matchesSurroundingColor(String packageName, String stateId, Widget widget) {
         String cmd = "surroundingColor:";
         cmd += emulator + "_" + packageName + ":";
         cmd += stateId + ":";
         cmd += widget.getX1() + "," + widget.getY1() + "," + widget.getX2() + "," + widget.getY2();
 
         Message message = new Message("/accessibility");
-        message.addParameter("cmd",cmd);
+        message.addParameter("cmd", cmd);
 
         //will break commands in several parameters-values in the future.
         //For now I'm sending the whole command with parameters in one single string
@@ -493,26 +509,26 @@ public class EnvironmentManager {
         return Double.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    public String getLuminances(String packageName, String stateId, Widget widget){
+    public String getLuminances(String packageName, String stateId, Widget widget) {
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
         String cmd = "luminance:";
-        cmd+=emulator+"_"+packageName+":";
-        cmd+=stateId+":";
-        int x1=widget.getX1();
-        int x2=widget.getX2();
-        int y1=widget.getY1();
-        int y2=widget.getY2();
-        int borderExpanded=1;
-        if (x1-borderExpanded>=0)
-            x1-=borderExpanded;
-        if (x2+borderExpanded<=maxw)
-            x2+=borderExpanded;
-        if (y1-borderExpanded>=0)
-            y1-=borderExpanded;
-        if (y2+borderExpanded<=maxh)
-            y2+=borderExpanded;
-        cmd+=x1+","+y1+","+x2+","+y2;
+        cmd += emulator + "_" + packageName + ":";
+        cmd += stateId + ":";
+        int x1 = widget.getX1();
+        int x2 = widget.getX2();
+        int y1 = widget.getY1();
+        int y2 = widget.getY2();
+        int borderExpanded = 1;
+        if (x1 - borderExpanded >= 0)
+            x1 -= borderExpanded;
+        if (x2 + borderExpanded <= maxw)
+            x2 += borderExpanded;
+        if (y1 - borderExpanded >= 0)
+            y1 -= borderExpanded;
+        if (y2 + borderExpanded <= maxh)
+            y2 += borderExpanded;
+        cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
         //MATE.log(cmd);
         //MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
@@ -537,7 +553,7 @@ public class EnvironmentManager {
                 .withParameter("rotation", "portrait")
                 .build());
         if (!"/emulator/interaction".equals(response.getSubject()) ||
-            !"portrait".equals(response.getParameter("rotation"))) {
+                !"portrait".equals(response.getParameter("rotation"))) {
             MATE.log_acc("ERROR: unable to set rotation to portrait mode");
         }
     }

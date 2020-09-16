@@ -68,7 +68,7 @@ public class TestCase {
             int visitedActivities = chromosome.getValue().getVisitedActivities().size();
             int activities = Registry.getEnvironmentManager().getActivityNames().size();
             double activityCoverage = visitedActivities * 1.0d / activities;
-            MATE.log("TestCase Coverage" + activityCoverage);
+            MATE.log("TestCase Coverage: " + activityCoverage);
         } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
             double coverage = storeCoverage(Properties.COVERAGE());
             MATE.log("TestCase Coverage: " + coverage);
