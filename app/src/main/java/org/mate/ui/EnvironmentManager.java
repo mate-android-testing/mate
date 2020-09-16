@@ -8,9 +8,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
-import org.mate.model.TestCase;
 import org.mate.utils.Coverage;
-import org.mate.utils.TimeoutRun;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -25,7 +23,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.6";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.7";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -294,14 +292,12 @@ public class EnvironmentManager {
     /**
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
-     *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     *  @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
      * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
-     *                     otherwise {@code null}.
-     * @return Returns the coverage of the given test case.
+ *                     otherwise {@code null}.
      */
-    public double storeCoverage(Coverage coverage, String chromosomeId, String entityId) {
+    public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
@@ -309,8 +305,7 @@ public class EnvironmentManager {
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
         }
-        Message response = sendMessage(messageBuilder.build());
-        return Double.valueOf(response.getParameter("coverage"));
+        sendMessage(messageBuilder.build());
     }
 
     /**
@@ -361,29 +356,26 @@ public class EnvironmentManager {
         }
 
         Message response = sendMessage(messageBuilder.build());
-        return Double.valueOf(response.getParameter("coverage"));
+        return Double.parseDouble(response.getParameter("coverage"));
     }
 
     /**
-     * Requests the coverage information for a given test case.
+     * Convenient function to request the coverage information for a given chromosome.
+     * A chromosome can be either a test case or a test suite.
      *
      * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
-     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
-     *                     otherwise {@code null}.
      * @return Returns the coverage of the given test case.
      */
-    public double getCoverage(Coverage coverage, String chromosomeId, String entityId) {
+    public double getCoverage(Coverage coverage, String chromosomeId) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/get")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("chromosome", chromosomeId);
-        if (entityId != null) {
-            messageBuilder.withParameter("entity", entityId);
-        }
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
-        return Double.valueOf(response.getParameter("coverage"));
+        return Double.parseDouble(response.getParameter("coverage"));
     }
 
     // TODO: use new coverage endpoint

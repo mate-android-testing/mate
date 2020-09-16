@@ -8,7 +8,6 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
@@ -85,9 +84,14 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": "
-                            + Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
-                            mutatedChromosome.toString(), mutatedTestCase.toString()));
+
+                    Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                            mutatedChromosome.toString(), mutatedTestCase.toString());
+
+                    MATE.log_acc("Coverage of: " + mutatedChromosome.toString() + ": "
+                            +Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                            mutatedChromosome.toString()));
+
                     MATE.log_acc("Found crash: " + mutatedTestCase.getCrashDetected());
                 }
             } else {

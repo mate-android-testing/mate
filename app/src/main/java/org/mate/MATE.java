@@ -1,20 +1,14 @@
 package org.mate;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
-import android.app.UiAutomation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
@@ -72,11 +66,9 @@ import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -279,7 +271,7 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
                         // get combined coverage
@@ -322,7 +314,7 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
                         // get combined coverage
@@ -369,7 +361,7 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
                         // get combined coverage
@@ -399,7 +391,7 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
                         // get combined coverage
@@ -514,8 +506,12 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
+
+                        MATE.log_acc("Coverage of last test case: " +
+                                Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
+                                        ,"lastIncompleteTestCase"));
 
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
@@ -576,7 +572,7 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
                         // get combined coverage
@@ -630,7 +626,7 @@ public class MATE {
                             && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
 
                         // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
                         // get combined coverage

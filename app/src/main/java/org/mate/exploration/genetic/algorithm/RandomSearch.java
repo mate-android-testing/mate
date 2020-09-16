@@ -3,20 +3,13 @@ package org.mate.exploration.genetic.algorithm;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.exploration.genetic.mutation.IMutationFunction;
-import org.mate.exploration.genetic.selection.ISelectionFunction;
-import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RandomSearch<T> extends GeneticAlgorithm<T> {
@@ -62,9 +55,13 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
                         + fitnessFunction.getFitness(chromosome));
 
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
+                    Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                            chromosome.toString(), null);
+
                     MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
-                            + Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
-                            chromosome.toString(), null));
+                            + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                            chromosome.toString()));
                 }
             }
         }
