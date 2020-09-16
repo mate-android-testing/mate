@@ -372,6 +372,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));

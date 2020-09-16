@@ -509,6 +509,10 @@ public class MATE {
                         Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
+                        MATE.log_acc("Coverage of last test case: " +
+                                Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
+                                        ,"lastIncompleteTestCase"));
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
