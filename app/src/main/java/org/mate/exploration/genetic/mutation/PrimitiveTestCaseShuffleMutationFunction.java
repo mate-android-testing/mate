@@ -9,13 +9,11 @@ import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiOb
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFunction<TestCase> {
@@ -35,9 +33,13 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
 
             MATE.log_acc("After primitive test case shuffle mutation:");
+
+            Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                    chromosome.getValue().getId(), null);
+
             MATE.log_acc("Coverage of: " + chromosome.getValue().getId() + ": "
-                            +Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
-                    chromosome.getValue().getId(), null));
+                    +Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                    chromosome.getValue().getId()));
 
             //TODO: remove hack, when better solution implemented
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {

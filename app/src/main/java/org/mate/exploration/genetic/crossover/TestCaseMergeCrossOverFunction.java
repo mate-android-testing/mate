@@ -151,9 +151,13 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
 
                 MATE.log_acc("After test case merge crossover:");
+
+                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                        chromosome.getValue().getId(), null);
+
                 MATE.log_acc("Coverage of: " + chromosome.getValue().getId() + ": "
-                        +Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
-                        chromosome.getValue().getId(), null));
+                        +Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                        chromosome.getValue().getId()));
 
                 //TODO: remove hack, when better solution implemented
                 if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {

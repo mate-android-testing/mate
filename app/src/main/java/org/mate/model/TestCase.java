@@ -70,8 +70,8 @@ public class TestCase {
             double activityCoverage = visitedActivities * 1.0d / activities;
             MATE.log("TestCase Coverage: " + activityCoverage);
         } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            double coverage = storeCoverage(Properties.COVERAGE());
-            MATE.log("TestCase Coverage: " + coverage);
+            storeCoverage(Properties.COVERAGE());
+            MATE.log("TestCase Coverage: " + getCoverage(Properties.COVERAGE()));
         }
 
         // serialization of test case
@@ -96,13 +96,12 @@ public class TestCase {
     }
 
     /**
-     * Stores and gets the coverage information for a test case.
+     * Stores the coverage data for a chromosome, which can be a test case or a test suite.
      *
      * @param coverage The coverage type, e.g. LINE_COVERAGE.
-     * @return Returns the coverage information for the given test case.
      */
-    private double storeCoverage(Coverage coverage) {
-        return Registry.getEnvironmentManager().storeCoverage(coverage, getId(), null);
+    private void storeCoverage(Coverage coverage) {
+        Registry.getEnvironmentManager().storeCoverageData(coverage, toString(), null);
     }
 
     /**
@@ -112,7 +111,7 @@ public class TestCase {
      * @return Returns the coverage information for the given test case.
      */
     private double getCoverage(Coverage coverage) {
-        return Registry.getEnvironmentManager().getCoverage(coverage, getId(), null);
+        return Registry.getEnvironmentManager().getCoverage(coverage, toString());
     }
 
     /**

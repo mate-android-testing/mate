@@ -5,12 +5,10 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
@@ -57,9 +55,12 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         // TODO: check whether we can use here testcase.finish()
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
 
-            MATE.log_acc("Coverage of: " + mutatedChromosome + ": " +
-                    Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
-                            mutatedChromosome.getValue().getId(), null));
+            Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                    mutatedChromosome.getValue().getId(), null);
+
+            MATE.log_acc("Coverage of: " + mutatedChromosome  + ": "
+                    +Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                    mutatedChromosome.getValue().getId()));
 
             MATE.log_acc("Found crash: " + mutatedChromosome.getValue().getCrashDetected());
 

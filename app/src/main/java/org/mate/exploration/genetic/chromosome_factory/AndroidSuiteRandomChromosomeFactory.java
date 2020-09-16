@@ -7,7 +7,6 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
 
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
@@ -33,7 +32,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             ts.getTestCases().add(tc);
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 // TODO: should store coverage for the test case tc belonging to the testsuite ts
-                Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(), chromosome.toString(), tc.toString());
+                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(), chromosome.toString(), tc.toString());
             }
         }
 
@@ -42,7 +41,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             // TODO: should retrieve coverage of entire test suite
             MATE.log_acc("Coverage of: " + chromosome.toString() + ": "
                     + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
-                    chromosome.toString(), null));
+                    chromosome.toString()));
         }
 
         return chromosome;
