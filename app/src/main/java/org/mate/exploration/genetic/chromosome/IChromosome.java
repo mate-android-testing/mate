@@ -1,5 +1,7 @@
 package org.mate.exploration.genetic.chromosome;
 
+import android.support.annotation.NonNull;
+
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
@@ -14,4 +16,7 @@ public interface IChromosome<T> {
      * @return wrapped value
      */
     T getValue();
+
+    @NonNull
+    String toString();
 }

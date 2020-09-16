@@ -33,7 +33,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             ts.getTestCases().add(tc);
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 // TODO: should store coverage for the test case tc belonging to the testsuite ts
-                Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(), chromosome.toString(), null);
+                Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(), chromosome.toString(), tc.toString());
             }
         }
 

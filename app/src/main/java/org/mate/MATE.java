@@ -517,12 +517,6 @@ public class MATE {
                         Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
                                 "lastIncompleteTestCase", null);
 
-                        List<String> testcaseIds = new ArrayList<>();
-                        testcaseIds.add("lastIncompleteTestCase");
-
-                        MATE.log_acc("Coverage of last test case is: " +
-                                Registry.getEnvironmentManager().getCombinedCoverage(Properties.COVERAGE(), testcaseIds));
-
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()
@@ -578,11 +572,13 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                        // TODO: make invocation independent of line coverage
-                        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                            Registry.getEnvironmentManager().storeCoverageData(mosa, null);
-                        }
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
                         // get combined coverage
                         MATE.log_acc("Total coverage: "
                                 + Registry.getEnvironmentManager()

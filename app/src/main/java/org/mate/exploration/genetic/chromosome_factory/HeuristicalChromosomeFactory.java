@@ -2,10 +2,12 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import android.os.Environment;
 
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Coverage;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParser;
 

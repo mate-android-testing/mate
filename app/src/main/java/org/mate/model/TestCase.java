@@ -80,7 +80,7 @@ public class TestCase {
             TestCaseStatistics.recordStats(this);
         }
 
-        MATE.log_acc("Found crash: " + String.valueOf(chromosome.getValue().getCrashDetected()));
+        MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
 
         if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
             BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
@@ -91,10 +91,22 @@ public class TestCase {
         }
     }
 
+    /**
+     * Stores and gets the coverage information for a test case.
+     *
+     * @param coverage The coverage type, e.g. LINE_COVERAGE.
+     * @return Returns the coverage information for the given test case.
+     */
     private double storeCoverage(Coverage coverage) {
         return Registry.getEnvironmentManager().storeCoverage(coverage, getId(), null);
     }
 
+    /**
+     * Gets the coverage information for a test case.
+     *
+     * @param coverage The coverage type, e.g. LINE_COVERAGE.
+     * @return Returns the coverage information for the given test case.
+     */
     private double getCoverage(Coverage coverage) {
         return Registry.getEnvironmentManager().getCoverage(coverage, getId(), null);
     }
@@ -299,6 +311,11 @@ public class TestCase {
         }
 
         return resultingTc;
+    }
+
+    @Override
+    public String toString() {
+        return getId();
     }
 
     /**

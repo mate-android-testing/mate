@@ -85,11 +85,9 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                    // TODO: replace with new storeCoverage() method
-                    Registry.getEnvironmentManager().storeCoverageData(mutatedChromosome, mutatedTestCase);
-
-                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": " + Registry.getEnvironmentManager()
-                            .getCoverage(chromosome));
+                    MATE.log_acc("Coverage of: " + chromosome.toString() + ": "
+                            + Registry.getEnvironmentManager().storeCoverage(Properties.COVERAGE(),
+                            mutatedChromosome.toString(), mutatedTestCase.toString()));
                     MATE.log_acc("Found crash: " + mutatedTestCase.getCrashDetected());
                 }
             } else {
