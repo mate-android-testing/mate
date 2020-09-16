@@ -65,7 +65,7 @@ public class DeviceMgr implements IApp {
      */
     public void executeAction(SystemAction event) throws AUTCrashException {
         MATE.log(" ___ execute system action: " + event);
-        Registry.getEnvironmentManager().executeSystemEvent(event.getReceiver(),
+        Registry.getEnvironmentManager().executeSystemEvent(MATE.packageName, event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
         checkForCrash();
     }
