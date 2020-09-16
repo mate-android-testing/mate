@@ -64,7 +64,11 @@ public class TestCase {
 
         // store coverage
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
-            // TODO: directly compute activity coverage (no server interaction required)
+            // activity coverage requires no interaction with coverage endpoint
+            int visitedActivities = chromosome.getValue().getVisitedActivities().size();
+            int activities = Registry.getEnvironmentManager().getActivityNames().size();
+            double activityCoverage = visitedActivities * 1.0d / activities;
+            MATE.log("TestCase Coverage" + activityCoverage);
         } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
             double coverage = storeCoverage(Properties.COVERAGE());
             MATE.log("TestCase Coverage: " + coverage);

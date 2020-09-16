@@ -157,6 +157,7 @@ public class EnvironmentManager {
         return Long.valueOf(tunnelLegacyCmd(cmd));
     }
 
+    // TODO: use new coverage endpoint
     public void copyCoverageData(Object source, Object target, List<? extends Object> entities) {
         StringBuilder sb = new StringBuilder();
         String prefix = "";
@@ -169,7 +170,7 @@ public class EnvironmentManager {
                 + ":" + sb.toString();
         tunnelLegacyCmd(cmd);
     }
-    
+
     public String getCurrentActivityName() {
         String currentActivity = "current_activity";
         if (emulator == null || emulator.isEmpty()) {
@@ -369,7 +370,7 @@ public class EnvironmentManager {
         return Double.valueOf(response.getParameter("coverage"));
     }
 
-
+    // TODO: use new coverage endpoint
     public double getCoverage(Object o) {
         String cmd = "getCoverage:" + emulator + ":" + o.toString();
 
