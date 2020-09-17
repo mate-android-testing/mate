@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.graph.GraphType;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
@@ -242,6 +244,31 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator);
         Message response = sendMessage(messageBuilder.build());
         return Boolean.parseBoolean(response.getParameter("response"));
+    }
+
+    /**
+     * Initialises a graph.
+     */
+    public void initGraph() {
+
+        GraphType graphType = Properties.GRAPH_TYPE();
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/init")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("graph_type", graphType.name())
+                .withParameter("apk", Properties.APK());
+
+        if (graphType == GraphType.INTRA_CFG) {
+            messageBuilder.withParameter("method", Properties.METHOD_NAME());
+        }
+
+        if (graphType == GraphType.INTRA_CFG || graphType == GraphType.INTER_CFG) {
+            messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
+            messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
+        }
+
+        sendMessage(messageBuilder.build());
     }
 
     /**
