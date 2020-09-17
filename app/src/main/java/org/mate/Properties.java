@@ -3,6 +3,7 @@ package org.mate;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 
+import org.mate.graph.GraphType;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
 
@@ -162,17 +163,38 @@ public class Properties {
     /*
      * Coverage properties
      */
-    public static boolean STORE_COVERAGE() {
-        return propertyOr(false);
-    }
-
-
-    // use LINE_COVERAGE as default
     public static Coverage COVERAGE() {
         return propertyOr(Coverage.NO_COVERAGE);
     }
 
+    /*
+    * Graph properties
+     */
 
+    // the graph type, e.g. CFG or SGD
+    public static GraphType GRAPH_TYPE() {
+        return propertyOr(null);
+    }
+
+    // the path to the APK file
+    public static String APK() {
+        return propertyOr(null);
+    }
+
+    // specifies the method name when an intra CFG should be constructed
+    public static String METHOD_NAME() {
+        return propertyOr(null);
+    }
+
+    // whether basic blocks should be used or not
+    public static boolean BASIC_BLOCKS() {
+        return propertyOr(true);
+    }
+
+    // whether ART classes should be excluded when constructing the graph
+    public static boolean EXCLUDE_ART_CLASSES() {
+        return propertyOr(true);
+    }
 
     // Primitive actions or widget based actions?
     public static boolean WIDGET_BASED_ACTIONS() {
