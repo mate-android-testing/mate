@@ -289,7 +289,55 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
 
-        return Arrays.asList(response.getParameter("branches").split("\n"));
+        return Arrays.asList(response.getParameter("branches").split("\\+"));
+    }
+
+    /**
+     * Retrieves the branch distance for the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
+     * @return Returns the branch distance for the given chromosome.
+     */
+    // TODO: do we need to be able to get the distance of single test cases of a test suite???
+    public <T> double getBranchDistance(IChromosome<T> chromosome) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
+                .withParameter("deviceId", emulator)
+                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosome", chromosome.getValue().toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("branch_distance"));
+    }
+
+    /**
+     * Retrieves the branch distance vector for the given chromosome. A branch distance
+     * vector consists of n entries, where n refers to the number of branches.
+     * The nth entry in the vector refers to the fitness value of the nth branch.
+     *
+     * @param chromosome The given chromosome.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance_vector")
+                .withParameter("deviceId", emulator)
+                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosome", chromosome.getValue().toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        List<Double> branchDistanceVector = new ArrayList<>();
+        String[] branchDistances = response.getParameter("branch_distance_vector").split("\\+");
+
+        for (String branchDistance : branchDistances) {
+            branchDistanceVector.add(Double.parseDouble(branchDistance));
+        }
+
+        return branchDistanceVector;
     }
 
     public List<String> getSourceLines() {
@@ -397,33 +445,6 @@ public class EnvironmentManager {
         String cmd = "getCoverage:" + emulator + ":" + o.toString();
 
         return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    /**
-     * Returns the branch distance for a given test case.
-     *
-     * @param chromosome The given test case.
-     * @return Returns the branch distance for the given test case.
-     */
-    public double getBranchDistance(Object chromosome) {
-        String cmd = "getBranchDistance:" + emulator + ":" + chromosome.toString();
-        return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    /**
-     * Computes the branch distance fitness vector for a given test case (chromosome).
-     * In particular, the given test case is evaluated against each branch.
-     *
-     * @param chromosome The given test case.
-     * @return Returns the branch distance vector for a given test case.
-     */
-    public List<Double> getBranchDistanceVector(Object chromosome) {
-        String cmd = "getBranchDistanceVector:" + emulator + ":" + chromosome.toString();
-        List<Double> branchDistanceVectors = new ArrayList<>();
-        for (String branchDistanceVectorStr : tunnelLegacyCmd(cmd).split("\n")) {
-            branchDistanceVectors.add(Double.valueOf(branchDistanceVectorStr));
-        }
-        return branchDistanceVectors;
     }
 
     public List<Double> getLineCoveredPercentage(Object o, List<String> lines) {

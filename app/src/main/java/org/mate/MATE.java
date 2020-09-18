@@ -521,10 +521,7 @@ public class MATE {
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    if (Properties.GRAPH_TYPE() != null) {
-                        // initialise a graph
-                        Registry.getEnvironmentManager().initGraph();
-                    }
+                    MATE.log_acc("Running MOSA");
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
@@ -539,6 +536,15 @@ public class MATE {
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
 
+                    // TODO: introduce 'getObjectives(Objective objective)' which returns either
+                    //  a list of branches or lines and initialises the graph in the former case
+                    if (Properties.GRAPH_TYPE() != null) {
+                        // initialise a graph
+                        MATE.log_acc("Initialising graph!");
+                        Registry.getEnvironmentManager().initGraph();
+                    }
+
+                    MATE.log_acc("Getting branches...!");
                     // get the set of branches (branch == objective)
                     List<String> branches = Registry.getEnvironmentManager().getBranches();
 
@@ -551,6 +557,7 @@ public class MATE {
 
                     // we need to associate with each branch a fitness function
                     for (String branch : branches) {
+                        // TODO: use property 'FITNESS_FUNCTION'
                         builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, branch);
                     }
 

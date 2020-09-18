@@ -86,6 +86,8 @@ public class TestCase {
 
         MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
 
+        // TODO: replace either with property 'OBJECTIVE()' or with property 'FITNESS_FUNCTION()'
+        //   property 'OBJECTIVE()' could be derived from fitness function -> prefix line/branch
         if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
             BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
         }

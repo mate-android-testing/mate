@@ -168,7 +168,7 @@ public class Properties {
     }
 
     /*
-    * Graph properties
+    * Begin Graph properties
      */
 
     // the graph type, e.g. CFG or SGD
@@ -196,11 +196,14 @@ public class Properties {
         return propertyOr(true);
     }
 
+    /*
+    * End Graph properties
+     */
+
     // Primitive actions or widget based actions?
     public static boolean WIDGET_BASED_ACTIONS() {
         return propertyOr(true);
     }
-
 
     // stack trace
     public static boolean RECORD_STACK_TRACE() {
