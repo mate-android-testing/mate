@@ -43,9 +43,9 @@ public class AntColony {
     private List<IChromosome<TestCase>> testCasesList = new ArrayList<>();
 
     // Parameters to customize the ACO algorithm
-    private static final int generationAmount = 20;
+    private static final int generationAmount = 40;
     private static final int generationSize = 10;
-    private static final int antPathLength = 30;
+    private static final int antPathLength = 50;
     private static final double evaporationRate = 0.1;
     // TODO Choose appropriate deposit amount
     private static final double standardDepositAmount = 1.0;

@@ -309,8 +309,8 @@ public class MATE {
                             .withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID,
                                     Properties.TARGET_LINE())
                             .withTerminationCondition(TargetLineCoveredTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(50)
-                            .withBigPopulationSize(100)
+                            .withPopulationSize(20)
+                            .withBigPopulationSize(40)
                             .withMaxNumEvents(50)
                             .withPMutate(0.3)
                             .withPCrossover(0.7)

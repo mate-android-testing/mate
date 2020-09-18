@@ -30,7 +30,7 @@ public class RandomExploration {
     public void run() {
         long algorithmStartTime = System.currentTimeMillis();
         // number of ants created in a full ACO run, generationAmount * generationSize
-        int antAmount = 20 * 10;
+        int antAmount = 40 * 10;
 
         antStatsLogger.write("\"Algorithm_Type\";\"Test_Case\";\"Fitness_Value\";" +
                 "\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");

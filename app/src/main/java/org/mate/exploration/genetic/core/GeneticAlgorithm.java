@@ -43,7 +43,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected double pMutate;
 
     private final AntStatsLogger antStatsLogger;
-
+    private Boolean algorithmFinished = FALSE;
 
     /**
      * Initializing the genetic algorithm with all necessary attributes
@@ -84,19 +84,26 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         antStatsLogger.write("\"Algorithm_Type\";\"Generation_Number\";\"Population_Number\"" +
                 ";\"Fitness_Value\";\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");
 
+        boolean successful = TRUE;
 
         createInitialPopulation();
 
         int iterations = 1;
-        boolean successful = TRUE;
 
-        while (!terminationCondition.isMet()) {
-            if (iterations < 4) {
-                evolve();
-                iterations++;
-            } else {
-                successful = FALSE;
-                break;
+        if(!algorithmFinished) {
+            while (!terminationCondition.isMet()) {
+                if (iterations < 20) {
+                    evolve();
+
+                    if(algorithmFinished) {
+                        break;
+                    }
+
+                    iterations++;
+                } else {
+                    successful = FALSE;
+                    break;
+                }
             }
         }
 
@@ -141,11 +148,20 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
             population.add(chromosomeT);
 
+            MATE.log_acc("Fitness Value: " + fitnessValue);
+
             antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
                     + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
                     + combinedCoverage + "\";\"");
 
             logCurrentRuntime(populationStartTime);
+
+            if(fitnessValue == 1.0) {
+                algorithmFinished = TRUE;
+                break;
+            }
+
+            MATE.log_acc("Algorithm Finished: " + algorithmFinished);
         }
 
         antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";\"-\";" +
@@ -159,6 +175,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     @Override
     public void evolve() {
         long generationStartTime = System.currentTimeMillis();
+        int testCaseCount = 0;
 
         String targetLine = Properties.TARGET_LINE();
         IFitnessFunction<TestCase> lineCoveredPercentageFitnessFunction
@@ -167,7 +184,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
-        while (newGeneration.size() < bigPopulationSize) {
+        outerLoop: while (newGeneration.size() < bigPopulationSize) {
+            long algorithmStartTime = System.currentTimeMillis();
+
             List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
 
             IChromosome<T> parent;
@@ -192,7 +211,29 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
                 newGeneration.add(chromosome);
 
+                testCaseCount++;
+
+                IChromosome<TestCase> iChromosome = (IChromosome<TestCase>) chromosome;
+
+                double fitnessValue = lineCoveredPercentageFitnessFunction.getFitness(iChromosome);
+                double coverage = Registry.getEnvironmentManager().getCoverage(iChromosome);
+                double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
+
+                antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
+                        + testCaseCount + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
+                        + combinedCoverage + "\";\"");
+                logCurrentRuntime(algorithmStartTime);
+
+                if(fitnessValue == 1.0) {
+                    algorithmFinished = TRUE;
+                    break outerLoop;
+                }
             }
+            /*
+            antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";" +
+                    "\"-\";\"-\";\"-\";\"");
+            logCurrentRuntime(algorithmStartTime);
+             */
         }
 
         //todo: beautify later when more time
@@ -203,6 +244,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         population.addAll(tmp);
         // TODO log new generation infos
 
+        /*
         //TODO comment
         //boolean successful = FALSE;
 
@@ -213,25 +255,22 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
             double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
 
-            /*
-            if(fitnessValue == 1.0) {
-                successful = TRUE;
-            }*/
-
             antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\""
                     + (i + 1) + "\";\"" + fitnessValue + "\";\"" + coverage + "\";\""
                     + combinedCoverage + "\";\"-\"\n");
         }
-        antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";" +
-                "\"-\";\"-\";\"-\";\"");
-        logCurrentRuntime(generationStartTime);
 
-        /*
+
+
         if(successful) {
             antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"successful\"\n");
         } else {
             antStatsLogger.write("\"genetic\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
         }*/
+
+        antStatsLogger.write("\"genetic\";\"" + (currentGenerationNumber + 1) + "\";\"-\";" +
+                "\"-\";\"-\";\"-\";\"");
+        logCurrentRuntime(generationStartTime);
 
         logCurrentFitness();
         currentGenerationNumber++;
