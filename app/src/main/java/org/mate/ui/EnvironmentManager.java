@@ -261,9 +261,10 @@ public class EnvironmentManager {
 
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
+            messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
         }
 
-        if (graphType == GraphType.INTRA_CFG || graphType == GraphType.INTER_CFG) {
+        if (graphType == GraphType.INTER_CFG) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
         }
@@ -272,37 +273,23 @@ public class EnvironmentManager {
     }
 
     /**
-     * Initializes the CFG; the path to the APK file is given
-     * as command line argument (key: apk). If no argument was specified,
-     * {@code false} is returned.
+     * Requests the list of branches of the AUT. Each branch typically
+     * represents a testing target into the context of MIO/MOSA.
+     * A branch's representation coincides with the trace that is produced
+     * by the branchDistance instrumentation tool.
      *
-     * @return Returns whether the CFG can be initialised.
-     */
-    public boolean initCFG() {
-
-        Bundle arguments = InstrumentationRegistry.getArguments();
-        String apkPath = arguments.getString("apk");
-        String packageName = arguments.getString("packageName");
-        MATE.log("Path to APK file: " + apkPath);
-
-        boolean isInit = false;
-
-        if (apkPath != null && packageName != null) {
-            String cmd = "initCFG:" + packageName + ":" + apkPath;
-
-            isInit = Boolean.parseBoolean(tunnelLegacyCmd(cmd));
-        }
-        return isInit;
-    }
-
-    /**
-     * Returns the list of branches of the AUT.
-     *
-     * @return Returns the set of branches.
+     * @return Returns the list of branches.
      */
     public List<String> getBranches() {
-        String cmd = "getBranches";
-        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
+
+        GraphType graphType = Properties.GRAPH_TYPE();
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branches")
+                .withParameter("graph_type", graphType.name());
+
+        Message response = sendMessage(messageBuilder.build());
+
+        return Arrays.asList(response.getParameter("branches").split("\n"));
     }
 
     public List<String> getSourceLines() {

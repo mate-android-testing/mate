@@ -521,14 +521,9 @@ public class MATE {
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                        // init the CFG
-                        boolean isInit = Registry.getEnvironmentManager().initCFG();
-
-                        if (!isInit) {
-                            MATE.log("Couldn't initialise CFG! Aborting.");
-                            throw new IllegalStateException("Graph initialisation failed!");
-                        }
+                    if (Properties.GRAPH_TYPE() != null) {
+                        // initialise a graph
+                        Registry.getEnvironmentManager().initGraph();
                     }
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
