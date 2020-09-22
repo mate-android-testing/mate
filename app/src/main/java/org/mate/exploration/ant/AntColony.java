@@ -47,7 +47,6 @@ public class AntColony {
     private static final int generationSize = 10;
     private static final int antPathLength = 50;
     private static final double evaporationRate = 0.1;
-    // TODO Choose appropriate deposit amount
     private static final double standardDepositAmount = 1.0;
 
     /* Parameter to change the process of calculating the action probability
@@ -67,12 +66,15 @@ public class AntColony {
 
     public AntColony() {
         uiAbstractionLayer = MATE.uiAbstractionLayer;
+
+        // Create a logger to store collected data during the run
         antStatsLogger = new AntStatsLogger();
     }
 
     public void run() {
+        // Store the start time of the algorithm for later runtime calculation
         long algorithmStartTime = System.currentTimeMillis();
-        // TODO Print target line & coverage
+
         //antStatsLogger.write("Start of Algorithm at " + startTime + ", ");
         antStatsLogger.write("\"Algorithm_Type\";\"Generation\";\"Ant\";\"Fitness_Value\";" +
                 "\"Current_Coverage\";\"Combined_Coverage\";\"Runtime\"\n");
@@ -94,13 +96,19 @@ public class AntColony {
         // Loop to create multiple generations of ants
         long generationStartTime, antStartTime;
         outerLoop: for (int i = 0; i < generationAmount; i++) {
+            // Store the start time of the generation for later runtime calculation
             generationStartTime = System.currentTimeMillis();
+
             MATE.log_acc("Generation #" + (i + 1));
 
             // Create ants and check if they reach the target line
             for (int z = 0; z < generationSize; z++){
+                // Store the start time of the current ant for later runtime calculation
                 antStartTime = System.currentTimeMillis();
+
                 MATE.log_acc("Ant #" + (z + 1));
+
+                // Log the start of the log file line for the relevant data
                 antStatsLogger.write("\"ant\";\"" + (i + 1) + "\";\"" + (z + 1) + "\";");
 
                 // Create an ant to traverse the app and wrap the generated testcase in a chromosome
@@ -110,17 +118,18 @@ public class AntColony {
                 Registry.getEnvironmentManager().storeCoverageData(chromosome, null);
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
 
+                // Retrieve the relevant test case data
                 double fitnessValue = lineCoveredPercentageFitnessFunction.getFitness(chromosome);
                 double coverage = Registry.getEnvironmentManager().getCoverage(chromosome);
                 double combinedCoverage = Registry.getEnvironmentManager().getCombinedCoverage();
-                System.out.println(fitnessValue);
+
+                // Log the relevant test case data
                 antStatsLogger.write("\"" + fitnessValue + "\";\"" + coverage + "\";\""
                         + combinedCoverage + "\";\"");
                 logCurrentRuntime(antStartTime);
 
-                // Stop algorithm if target line was reached
+                // Stop algorithm if target line was reached and log the runtime + result
                 if (fitnessValue == 1) {
-                    //TODO finish necessary action for successful algorithm run (write log)
                     antStatsLogger.write("\"ant\";\"" + (i + 1) + "\";\"-\";\"-\";\"-\";\"-\";\"");
                     logCurrentRuntime(generationStartTime);
 
@@ -164,7 +173,7 @@ public class AntColony {
                     }
                 }
 
-                // Deposit pheromones for the better half of testcases. Amount steadily decreases
+                // Deposit pheromones for the better half of test cases. Amount steadily decreases
                 double depositAmount = standardDepositAmount;
                 double reductionAmount = 1 / (testCasesList.size() / 2.0);
                 int antsAllowedToDeposit = (int) Math.ceil(testCasesList.size() / 2.0);
@@ -227,10 +236,11 @@ public class AntColony {
                 }
             }
 
+            // Log the runtime of the current generation
             antStatsLogger.write("\"ant\";\"" + (i + 1) + "\";\"-\";\"-\";\"-\";\"-\";\"");
             logCurrentRuntime(generationStartTime);
 
-            // TODO Comment max generations reached
+            // Check if the max amount of generations has been reached and log the result if so
             if ((i + 1) == generationAmount) {
                 antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"");
                 logCurrentRuntime(algorithmStartTime);
@@ -238,6 +248,7 @@ public class AntColony {
                 antStatsLogger.write("\"ant\";\"-\";\"-\";\"-\";\"-\";\"-\";\"unsuccessful\"\n");
             }
         }
+
         // Close the logger
         antStatsLogger.close();
     }
@@ -373,10 +384,18 @@ public class AntColony {
         return eventTypeWeight;
     }
 
+    /**
+     * Log the time past from a certain point in time until now
+     * @param startTime the start point to calculate the time difference from
+     */
     private void logCurrentRuntime (long startTime) {
+        // Get the current time
         long currentTime = System.currentTimeMillis();
-        currentTime = currentTime - startTime;
-        long seconds = (currentTime/(1000));
-        antStatsLogger.write(seconds + "\"\n");
+
+        // Calculate the time difference in seconds
+        long secondsPast = (currentTime - startTime)/(1000);
+
+        // Log the calculated time in the file
+        antStatsLogger.write(secondsPast + "\"\n");
     }
 }
