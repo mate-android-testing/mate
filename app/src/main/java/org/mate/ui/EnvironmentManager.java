@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EnvironmentManager {
     public static final String ACTIVITY_UNKNOWN = "unknown";
@@ -32,6 +34,16 @@ public class EnvironmentManager {
     private final Socket server;
     private final Parser messageParser;
     private boolean active;
+
+    /**
+     * Stores for which test case the pulling
+     * of traces files have been already performed. This is necessary that
+     * BranchDistance and BranchCoverage don't try to fetch for the same
+     * test case the traces file multiple times. Otherwise, the last
+     * fetch trial overwrites the traces file for the given test case
+     * with an empty file.
+     */
+    private Set<String> coveredTestCases = new HashSet<>();
 
     public EnvironmentManager() throws IOException {
         this(DEFAULT_PORT);
@@ -360,6 +372,17 @@ public class EnvironmentManager {
  *                     otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
+
+        if (coverage == Coverage.BRANCH_COVERAGE) {
+            // check whether the storing of the traces file has been already requested
+            String testcase = entityId == null ? chromosomeId : entityId;
+            if (coveredTestCases.contains(testcase)) {
+                // don't fetch again traces file from emulator
+                return;
+            }
+            coveredTestCases.add(testcase);
+        }
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
