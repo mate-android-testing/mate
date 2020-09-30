@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.core;
 
+import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
  * Interface for genetic algorithms
  * @param <T> Type wrapped by the chromosome implementation
  */
-public interface IGeneticAlgorithm<T> {
+public interface IGeneticAlgorithm<T> extends Algorithm {
     /**
      * Get the current population of the genetic algorithm
      * @return current population

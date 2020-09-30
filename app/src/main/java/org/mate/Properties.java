@@ -158,6 +158,10 @@ public class Properties {
         return propertyOr(10);
     }
 
+    /**
+     * Added by stockinger on 28/09/2020
+     */
+    public static int MAX_NUM_EVENTS() { return propertyOr(50); }
 
     /*
      * Coverage properties

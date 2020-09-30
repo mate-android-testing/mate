@@ -188,7 +188,7 @@ public class MATE {
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                             .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -209,7 +209,7 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                             .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .build();
 
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -254,7 +254,7 @@ public class MATE {
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(10)
                             .withBigPopulationSize(20)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
@@ -297,7 +297,7 @@ public class MATE {
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
@@ -341,7 +341,7 @@ public class MATE {
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .withPMutate(1)
                             .withPInnerMutate(0.3)
                             .withPCrossover(0.7)
@@ -540,7 +540,7 @@ public class MATE {
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
 
@@ -592,7 +592,7 @@ public class MATE {
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withPopulationSize(50)
                             .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .withPSampleRandom(0.5)
@@ -644,7 +644,7 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50);
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS());
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
@@ -665,7 +665,7 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50);
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS());
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
@@ -686,7 +686,7 @@ public class MATE {
                             .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                             .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                             .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50);
+                            .withMaxNumEvents(Properties.MAX_NUM_EVENTS());
 
 
                     final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
