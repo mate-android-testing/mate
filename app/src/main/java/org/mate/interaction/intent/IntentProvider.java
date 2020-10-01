@@ -40,6 +40,9 @@ public class IntentProvider {
             // extract all exported and enabled components declared in the manifest
             components = ComponentParser.parseManifest();
 
+            // remove self defined components, e.g. the tracer used for branch coverage / branch distance computation
+            filterSelfDefinedComponents(components);
+
             // add information about bundle entries and extracted string constants + collect dynamic receivers
             IntentInfoParser.parseIntentInfoFile(components, dynamicReceivers);
 
@@ -53,6 +56,29 @@ public class IntentProvider {
             MATE.log("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * We don't want to invoke our tracer used for branch coverage / branch distance computation
+     * via the intent fuzzer. This may write out traces otherwise.
+     *
+     * @param components The list of components parsed from the manifest.
+     */
+    private void filterSelfDefinedComponents(List<ComponentDescription> components) {
+
+        List<ComponentDescription> toBeRemoved = new ArrayList<>();
+
+        final String BRANCH_COVERAGE_TRACER = "de.uni_passau.fim.auermich.branchcoverage.tracer.Tracer";
+        final String BRANCH_DISTANCE_TRACER = "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer";
+
+        for (ComponentDescription component : components) {
+            if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
+                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)) {
+                toBeRemoved.add(component);
+            }
+        }
+
+        components.removeAll(toBeRemoved);
     }
 
     /**
