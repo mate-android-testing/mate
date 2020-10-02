@@ -10,6 +10,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
+import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
@@ -720,6 +721,40 @@ public class MATE {
                 }
             } else
                 MATE.log("Emulator is null");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Registry.getEnvironmentManager().releaseEmulator();
+            //EnvironmentManager.deleteAllScreenShots(packageName);
+            try {
+                Registry.unregisterEnvironmentManager();
+                Registry.unregisterProperties();
+                Registry.unregisterRandom();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void testApp(final Algorithm algorithm) {
+
+        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+
+        runningTime = new Date().getTime();
+        try {
+            if (emulator != null && !emulator.equals("")) {
+                this.deviceMgr = new DeviceMgr(device, packageName);
+
+                uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+
+                TimeoutRun.timeoutRun(new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        algorithm.run();
+                        return null;
+                    }
+                }, MATE.TIME_OUT);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

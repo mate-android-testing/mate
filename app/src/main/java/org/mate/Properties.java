@@ -164,6 +164,17 @@ public class Properties {
     public static int MAX_NUM_EVENTS() { return propertyOr(50); }
 
     /*
+     * Primitive Standard GA properties
+     */
+    public static int PRIMITIVE_STANDARD_GA_POPULATION_SIZE() { return propertyOr(10); }
+
+    public static int PRIMITIVE_STANDARD_GA_BIG_POPULATION_SIZE() { return propertyOr(20); }
+
+    public static double PRIMITIVE_STANDARD_GA_P_MUTATE() { return propertyOr(0.3); }
+
+    public static double PRIMITIVE_STANDARD_GA_P_CROSSOVER() { return propertyOr(0.7); }
+
+    /*
      * Coverage properties
      */
     public static boolean STORE_COVERAGE() {
