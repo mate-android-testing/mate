@@ -14,6 +14,7 @@ import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFun
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestCase;
+import org.mate.utils.Coverage;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEPrimitiveStandardGA {
@@ -41,10 +42,24 @@ public class ExecuteMATEPrimitiveStandardGA {
                 .withPopulationSize(Properties.PRIMITIVE_STANDARD_GA_POPULATION_SIZE())
                 .withBigPopulationSize(Properties.PRIMITIVE_STANDARD_GA_BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
-                .withPMutate(Properties.PRIMITIVE_STANDARD_GA_P_MUTATE())
-                .withPCrossover(Properties.PRIMITIVE_STANDARD_GA_P_CROSSOVER())
+                .withPMutate(Properties.P_MUTATE())
+                .withPCrossover(Properties.P_CROSSOVER())
                 .build();
 
         mate.testApp(genericGA);
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                // TODO: handle combined activity coverage
+                && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+            // store coverage of test case interrupted by timeout
+            Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                    "lastIncompleteTestCase", null);
+
+            // get combined coverage
+            MATE.log_acc("Total coverage: "
+                    + Registry.getEnvironmentManager()
+                    .getCombinedCoverage(Properties.COVERAGE()));
+        }
     }
 }
