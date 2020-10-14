@@ -54,7 +54,7 @@ public class AntColony {
     *           multiplying it with the weight of the action (depending on the action type)
     *  False:   Only use the pheromone value of the action as the probability
     */
-    private static final boolean includeActionTypeInTransition = false;
+    private static final boolean includeActionTypeInTransition = true;
 
     /* Parameter to change the process of depositing pheromones.
     *  True:    Rank all ants in a generation according to the fitness value of their testcase.
