@@ -45,8 +45,8 @@ public class ExecuteMATEwithMOSA {
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                .withPopulationSize(Properties.MOSA_POPULATION_SIZE())
-                .withBigPopulationSize(Properties.MOSA_BIG_POPULATION_SIZE())
+                .withPopulationSize(Properties.EVOLUTIONARY_SEARCH_POPULATION_SIZE())
+                .withBigPopulationSize(Properties.EVOLUTIONARY_SEARCH_BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER());

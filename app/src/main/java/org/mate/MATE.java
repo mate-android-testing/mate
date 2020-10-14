@@ -755,6 +755,19 @@ public class MATE {
                     }
                 }, MATE.TIME_OUT);
             }
+
+            if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                    && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                // store coverage of test case interrupted by timeout
+                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                        "lastIncompleteTestCase", null);
+
+                // get combined coverage
+                MATE.log_acc("Total coverage: "
+                        + Registry.getEnvironmentManager()
+                        .getCombinedCoverage(Properties.COVERAGE()));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

@@ -173,10 +173,6 @@ public class Properties {
     /*
      * Standard GA properties
      */
-    public static int STANDARD_GA_POPULATION_SIZE() { return propertyOr(50); }
-
-    public static int STANDARD_GA_BIG_POPULATION_SIZE() { return propertyOr(100); }
-
     public static float STANDARD_GA_RELATIVE_INTENT_AMOUNT() { return propertyOr(0.5f); }
 
     /*
@@ -186,23 +182,13 @@ public class Properties {
 
     public static int SAPIENZ_P_MUTATE() { return propertyOr(1); }
 
-    public static int SAPIENZ_POPULATION_SIZE() { return propertyOr(50); }
-
-    public static int SAPIENZ_BIG_POPULATION_SIZE() { return propertyOr(100); }
-
     /*
-     * Mosa properties
+     * Evolutionary Search properties
      */
-    public static int MOSA_POPULATION_SIZE() { return propertyOr(50); }
+    public static int EVOLUTIONARY_SEARCH_POPULATION_SIZE() { return propertyOr(50); }
 
-    public static int MOSA_BIG_POPULATION_SIZE() { return propertyOr(100); }
+    public static int EVOLUTIONARY_SEARCH_BIG_POPULATION_SIZE() { return propertyOr(100); }
 
-    /*
-     * Mio properties
-     */
-    public static int MIO_POPULATION_SIZE() { return propertyOr(50); }
-
-    public static int MIO_BIG_POPULATION_SIZE() { return propertyOr(100); }
 
     /*
      * Coverage properties
