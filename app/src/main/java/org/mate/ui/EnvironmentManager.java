@@ -312,6 +312,7 @@ public class EnvironmentManager {
      * @return Returns the branch distance for the given chromosome.
      */
     // TODO: do we need to be able to get the distance of single test cases of a test suite???
+    // TODO: might be replaced by the next method
     public <T> double getBranchDistance(IChromosome<T> chromosome) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
@@ -319,6 +320,28 @@ public class EnvironmentManager {
                 // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosome", chromosome.getValue().toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("branch_distance"));
+    }
+
+    /**
+     * Retrieves the branch distance for the given chromosome.
+     *
+     * @param chromosomeId Identifies either a test case or a test suite.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *  *                     otherwise {@code null}.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    // TODO: replace occurrences of getBranchDistance(IChromosome<T> chromosome) with this method
+    public double getBranchDistance(String chromosomeId, String entityId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
+                .withParameter("deviceId", emulator)
+                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosome", chromosomeId)
+                .withParameter("entity", entityId);
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("branch_distance"));
