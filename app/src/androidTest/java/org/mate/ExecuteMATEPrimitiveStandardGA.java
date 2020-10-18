@@ -47,19 +47,5 @@ public class ExecuteMATEPrimitiveStandardGA {
                 .build();
 
         mate.testApp(genericGA);
-
-        if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                // TODO: handle combined activity coverage
-                && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-            // store coverage of test case interrupted by timeout
-            Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                    "lastIncompleteTestCase", null);
-
-            // get combined coverage
-            MATE.log_acc("Total coverage: "
-                    + Registry.getEnvironmentManager()
-                    .getCombinedCoverage(Properties.COVERAGE()));
-        }
     }
 }

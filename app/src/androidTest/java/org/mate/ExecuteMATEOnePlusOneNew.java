@@ -46,7 +46,5 @@ public class ExecuteMATEOnePlusOneNew {
         //MATE.log_acc(OnePlusOne.coverageArchive.keySet().toString());
         //MATE.log_acc("Visited GUI States number = "+ OnePlusOne.coverageArchive.keySet().size());
         //MATE.log_acc("Covered GUI States = "+ OnePlusOne.testsuite.get("0").getVisitedStates().size());
-
-
     }
 }
