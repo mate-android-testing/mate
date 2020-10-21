@@ -188,6 +188,23 @@ public class EnvironmentManager {
     }
 
     /**
+     * Fetches a serialized test case from the internal storage of the emulator.
+     * Also removes the serialized test case afterwards.
+     *
+     * @param testcaseDir The test case directory.
+     * @param testCase The name of the test case file.
+     */
+    public void fetchTestCase(String testcaseDir, String testCase) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_test_case")
+                .withParameter("deviceId", emulator)
+                .withParameter("testcaseDir", testcaseDir)
+                .withParameter("testcase", testCase);
+        Message response = sendMessage(messageBuilder.build());
+        MATE.log("Fetching TestCase from emulator succeeded: " + response.getParameter("response"));
+    }
+
+    /**
      * Simulates a system event by broadcasting the notification of the occurrence of
      * a system event to a certain receiver.
      *
@@ -231,7 +248,7 @@ public class EnvironmentManager {
 
     /**
      * Pushes dummy files for various data types, e.g. video, onto
-     * the external storage. This method should be only used in combination
+     * the external storage (sd card). This method should be only used in combination
      * with the intent fuzzing functionality.
      *
      * @return Returns whether the push operation succeeded or not.
