@@ -1,8 +1,5 @@
 package org.mate;
 
-import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-
 import org.mate.graph.GraphType;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
@@ -67,23 +64,11 @@ public class Properties {
     }
 
     /*
-    * Record/Replay test case.
+    * Whether to serialize a test case. Default: off.
      */
     public static boolean RECORD_TEST_CASE() {
-
-        Bundle arguments = InstrumentationRegistry.getArguments();
-        return Boolean.parseBoolean(arguments.getString("record", "false"));
+        return propertyOr(false);
     }
-
-    public static boolean REPLAY_TEST_CASE() {
-
-        Bundle arguments = InstrumentationRegistry.getArguments();
-        return Boolean.parseBoolean(arguments.getString("replay", "false"));
-    }
-
-    // public static boolean RECORD_TEST_CASE() { return propertyOr(false); }
-
-    // public static boolean REPLAY_TEST_CASE() { return propertyOr(true); }
 
     /**
      *  Added by vin on 24/05/2018
