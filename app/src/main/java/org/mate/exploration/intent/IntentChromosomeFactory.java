@@ -114,10 +114,12 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         }
 
         // push dummy files onto device
-        Registry.getEnvironmentManager().pushDummyFiles();
+        MATE.log("Pushing custom media files: "
+                + Registry.getEnvironmentManager().pushDummyFiles());
 
         // grant runtime permissions (read/write external storage) which are dropped after each reset
-        Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
+        MATE.log("Grant runtime permissions: "
+                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
