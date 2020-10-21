@@ -6,7 +6,6 @@ import android.support.test.InstrumentationRegistry;
 import com.thoughtworks.xstream.XStream;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.model.TestCase;
 import org.mate.utils.TimeoutRun;
 
@@ -49,7 +48,7 @@ public final class TestCaseSerializer {
 
         // log whether execution of test case resulted in a crash
         if (testCase.getCrashDetected()) {
-            MATE.log("TestCase " + recordCounter + " caused a crash!");
+            MATE.log_acc("TestCase " + recordCounter + " caused a crash!");
         }
 
         // the output file
@@ -65,14 +64,9 @@ public final class TestCaseSerializer {
             fileWriter.write(testCaseXML);
             fileWriter.flush();
 
-            // fetch serialized test case from emulator + clean up
-            Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
-                    "TestCase" + recordCounter + ".xml");
-
         } catch (IOException e) {
-            MATE.log("Serializing TestCase " + recordCounter + " failed!");
+            MATE.log_acc("Serializing TestCase " + recordCounter + " failed!");
             e.printStackTrace();
-            // TODO: we could try to write to external storage as a fallback if it is a memory issue
         }
 
         // update counter
