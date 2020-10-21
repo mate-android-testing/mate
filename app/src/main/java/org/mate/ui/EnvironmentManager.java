@@ -248,7 +248,7 @@ public class EnvironmentManager {
 
     /**
      * Pushes dummy files for various data types, e.g. video, onto
-     * the external storage. This method should be only used in combination
+     * the external storage (sd card). This method should be only used in combination
      * with the intent fuzzing functionality.
      *
      * @return Returns whether the push operation succeeded or not.
