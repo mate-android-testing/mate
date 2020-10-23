@@ -21,15 +21,17 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     protected UIAbstractionLayer uiAbstractionLayer;
     protected int maxNumEvents;
     protected boolean resetApp;
+    private int actionsCount;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
-        this( true, maxNumEvents);
+        this(true, maxNumEvents);
     }
 
     public AndroidRandomChromosomeFactory( boolean resetApp, int maxNumEvents) {
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
+        actionsCount = 0;
     }
 
     @Override
@@ -37,12 +39,14 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         if (resetApp) {
             uiAbstractionLayer.resetApp();
         }
+        actionsCount = 0;
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            for (int i = 0; i < maxNumEvents; i++) {
+            for (int i = 0; !finishTestCase(); i++) {
+                actionsCount = i;
                 if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
                     return chromosome;
                 }
@@ -51,6 +55,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             testCase.finish(chromosome);
         }
         return chromosome;
+    }
+
+    protected boolean finishTestCase() {
+        return actionsCount >= maxNumEvents;
     }
 
     protected Action selectAction() {
