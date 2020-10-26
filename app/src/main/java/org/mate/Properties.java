@@ -1,8 +1,5 @@
 package org.mate;
 
-import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-
 import org.mate.graph.GraphType;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
