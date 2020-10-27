@@ -74,7 +74,8 @@ public class IntentProvider {
 
         for (ComponentDescription component : components) {
             if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
-                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)) {
+                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)
+                    || component.getFullyQualifiedName().equals(TRACER)) {
                 toBeRemoved.add(component);
             }
         }
