@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.UIAbstractionLayer;
@@ -11,6 +12,7 @@ import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.ui.Action;
 import org.mate.ui.ActionType;
+import org.mate.ui.EnvironmentManager;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
@@ -61,6 +63,12 @@ public class TestCase {
      * coverage information if desired.
      */
     public void finish(IChromosome<TestCase> chromosome) {
+
+        // store branch distance data
+        if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            Registry.getEnvironmentManager().storeBranchDistanceData(toString(), null);
+            MATE.log("Branch Distance: " + Registry.getEnvironmentManager().getBranchDistance(toString()));
+        }
 
         // store coverage
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {

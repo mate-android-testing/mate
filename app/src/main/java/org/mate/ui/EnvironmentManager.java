@@ -206,7 +206,7 @@ public class EnvironmentManager {
      * Also removes the serialized test case afterwards.
      *
      * @param testcaseDir The test case directory.
-     * @param testCase The name of the test case file.
+     * @param testCase    The name of the test case file.
      */
     public void fetchTestCase(String testcaseDir, String testCase) {
 
@@ -325,7 +325,7 @@ public class EnvironmentManager {
      * Retrieves the branch distance for the given chromosome.
      *
      * @param chromosome The given chromosome.
-     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
+     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance for the given chromosome.
      */
     // TODO: do we need to be able to get the distance of single test cases of a test suite???
@@ -343,22 +343,48 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the branch distance for the given chromosome.
+     * Stores the branch distance data for the given chromosome.
      *
      * @param chromosomeId Identifies either a test case or a test suite.
-     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
-     *  *                     otherwise {@code null}.
-     * @return Returns the branch distance vector for the given chromosome.
+     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
+     *                     otherwise {@code null}.
      */
-    // TODO: replace occurrences of getBranchDistance(IChromosome<T> chromosome) with this method
-    public double getBranchDistance(String chromosomeId, String entityId) {
+    public void storeBranchDistanceData(String chromosomeId, String entityId) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
+        MATE.log("Storing branch distance data...");
+
+        String testcase = entityId == null ? chromosomeId : entityId;
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/store")
                 .withParameter("deviceId", emulator)
                 // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
                 .withParameter("packageName", MATE.packageName)
-                .withParameter("chromosome", chromosomeId)
-                .withParameter("entity", entityId);
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
+        }
+
+        // TODO: may log failure contained in response
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Retrieves the branch distance for the given chromosome. Note that
+     * {@link #storeBranchDistanceData(String, String)} has to be called previously.
+     *
+     * @param chromosomeId Identifies either a test case or a test suite.
+     * @return Returns the branch distance for the given chromosome.
+     */
+    public double getBranchDistance(String chromosomeId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
+                .withParameter("deviceId", emulator)
+                .withParameter("chromosomes", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("branch_distance"));
@@ -370,7 +396,7 @@ public class EnvironmentManager {
      * The nth entry in the vector refers to the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
-     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
+     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
     public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome) {
@@ -406,10 +432,11 @@ public class EnvironmentManager {
     /**
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
-     *  @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     *
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
      * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
- *                     otherwise {@code null}.
+     *                     otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
 

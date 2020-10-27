@@ -5,6 +5,7 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Coverage;
@@ -30,15 +31,29 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
             MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
-            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                // TODO: should store coverage for the test case tc belonging to the testsuite ts
-                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(), chromosome.toString(), tc.toString());
+
+            if (Properties.FITNESS_FUNCTION().equals(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)) {
+                // store branch distance data for test case tc belonging to the testsuite ts
+                Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.toString(), tc.toString());
             }
+
+            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                // store coverage data for the test case tc belonging to the testsuite ts
+                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                        chromosome.toString(), tc.toString());
+            }
+        }
+
+        // TODO: remove after debugging
+        if (Properties.FITNESS_FUNCTION().equals(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)) {
+            MATE.log("Branch Distance of: " + chromosome.toString() + ": "
+                + Registry.getEnvironmentManager().getBranchDistance(chromosome.toString()));
+
         }
 
         // TODO: create method 'finish' in TestSuite class and move code there
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            // TODO: should retrieve coverage of entire test suite
+            // retrieve coverage of entire test suite
             MATE.log_acc("Coverage of: " + chromosome.toString() + ": "
                     + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
                     chromosome.toString()));

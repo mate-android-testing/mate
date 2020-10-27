@@ -144,6 +144,10 @@ public class Properties {
         return propertyOr(10);
     }
 
+    // TODO: make use of an enum
+    public static String FITNESS_FUNCTION() {
+        return propertyOr(null);
+    }
 
     /*
      * Coverage properties
