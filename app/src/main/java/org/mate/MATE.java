@@ -183,6 +183,12 @@ public class MATE {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
+                    if (Properties.GRAPH_TYPE() != null) {
+                        // initialise a graph
+                        MATE.log_acc("Initialising graph!");
+                        Registry.getEnvironmentManager().initGraph();
+                    }
+
                     final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(RandomSearch.ALGORITHM_NAME)
                             .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
@@ -198,6 +204,20 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
+                        // get combined coverage
+                        MATE.log_acc("Total coverage: "
+                                + Registry.getEnvironmentManager()
+                                .getCombinedCoverage(Properties.COVERAGE()));
+                    }
 
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);

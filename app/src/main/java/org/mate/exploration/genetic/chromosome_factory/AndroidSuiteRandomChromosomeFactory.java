@@ -24,6 +24,15 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
 
     @Override
     public IChromosome<TestSuite> createChromosome() {
+
+        /*
+        * FIXME: The invocation of 'androidRandomChromosomeFactory.createChromosome()' causes
+        *  the call of 'testCase.finish', which stores coverage/branch distance data without
+        *  the proper 'entity' param. I don't see any solution apart from creating an additional
+        *  chromosome factory for that particular use case. Or, we have to move all invocations
+        *  of 'testCase.finish()' outside the 'createChromosome()' method.
+         */
+
         TestSuite ts = new TestSuite();
         IChromosome<TestSuite> chromosome = new Chromosome<>(ts);
         MATE.log_acc("Android Suite Random Chromosome Factory: creating chromosome: " + chromosome);
