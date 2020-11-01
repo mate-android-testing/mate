@@ -16,11 +16,11 @@ public class Randomness {
     }
 
     public static <T> T randomElement(List<T> list) {
-        return list.get(Registry.getRandom().nextInt(list.size()));
+        return list.get(getRnd().nextInt(list.size()));
     }
 
     public static <T> int randomIndex(List<T> list) {
-        return Registry.getRandom().nextInt(list.size());
+        return getRnd().nextInt(list.size());
     }
 
     /**
@@ -31,7 +31,7 @@ public class Randomness {
      * @return Returns a random element from a given set.
      */
     public static <T> T randomElement(Set<T> set) {
-        int index = new Random().nextInt(set.size());
+        int index = getRnd().nextInt(set.size());
         Iterator<T> iter = set.iterator();
         for (int i = 0; i < index; i++) {
             iter.next();
@@ -83,7 +83,7 @@ public class Randomness {
     public static int getInRangeStd(int range, double std) {
         int x;
         do {
-            x = (int) Math.round(Registry.getRandom().nextGaussian() * std + (range - 1) / 2.0);
+            x = (int) Math.round(getRnd().nextGaussian() * std + (range - 1) / 2.0);
         } while (x < 0 || x >= range);
         return x;
     }
@@ -102,8 +102,8 @@ public class Randomness {
 
     public static List<Integer> getRandomIntegers(int count, int bound) {
 
-        // API 28: IntStream.generate(() -> new Random().nextInt(100)).limit(100).toArray();
-        Random random = new Random();
+        // API 28: IntStream.generate(() -> getRnd().nextInt(100)).limit(100).toArray();
+        Random random = getRnd();
         List<Integer> result = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++)
@@ -116,8 +116,8 @@ public class Randomness {
 
     public static List<Integer> getRandomIntegersWithNull(int count, int bound) {
 
-        // API 28: IntStream.generate(() -> new Random().nextInt(100)).limit(100).toArray();
-        Random random = new Random();
+        // API 28: IntStream.generate(() -> getRnd().nextInt(100)).limit(100).toArray();
+        Random random = getRnd();
         List<Integer> result = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++)
@@ -137,7 +137,7 @@ public class Randomness {
 
     public static int[] getRandomIntArray(int count, int bound) {
 
-        Random random = new Random();
+        Random random = getRnd();
         int[] result = new int[count];
 
         for (int i = 0; i < count; i++)
@@ -150,7 +150,7 @@ public class Randomness {
 
     public static float[] getRandomFloatArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         float[] result = new float[count];
 
         for (int i = 0; i < count; i++)
@@ -163,7 +163,7 @@ public class Randomness {
 
     public static double[] getRandomDoubleArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         double[] result = new double[count];
 
         for (int i = 0; i < count; i++)
@@ -176,7 +176,7 @@ public class Randomness {
 
     public static long[] getRandomLongArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         long[] result = new long[count];
 
         for (int i = 0; i < count; i++)
@@ -189,7 +189,7 @@ public class Randomness {
 
     public static short[] getRandomShortArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         short[] result = new short[count];
 
         for (int i = 0; i < count; i++)
@@ -203,7 +203,7 @@ public class Randomness {
 
     public static byte[] getRandomByteArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         byte[] result = new byte[count];
         random.nextBytes(result);
         return result;
@@ -211,7 +211,7 @@ public class Randomness {
 
     public static boolean[] getRandomBooleanArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         boolean[] result = new boolean[count];
 
         for (int i = 0; i < count; i++)
@@ -224,7 +224,7 @@ public class Randomness {
 
     public static char[] getRandomCharArray(int count) {
 
-        Random random = new Random();
+        Random random = getRnd();
         char[] result = new char[count];
 
         for (int i = 0; i < count; i++)
