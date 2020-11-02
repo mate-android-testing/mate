@@ -1,14 +1,11 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
     public static final String CHROMOSOME_FACTORY_ID = "android_suite_random_chromosome_factory";
@@ -20,19 +17,11 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             maxNumEvents) {
         this.numTestCases = numTestCases;
         androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory( true, maxNumEvents);
+        androidRandomChromosomeFactory.setTriggerStoreCoverage(false);
     }
 
     @Override
     public IChromosome<TestSuite> createChromosome() {
-
-        /*
-        * FIXME: The invocation of 'androidRandomChromosomeFactory.createChromosome()' causes
-        *  the call of 'testCase.finish', which stores coverage/branch distance data without
-        *  the proper 'entity' param. I don't see any solution apart from creating an additional
-        *  chromosome factory for that particular use case. Or, we have to move all invocations
-        *  of 'testCase.finish()' outside the 'createChromosome()' method.
-         */
-
         TestSuite ts = new TestSuite();
         IChromosome<TestSuite> chromosome = new Chromosome<>(ts);
         MATE.log_acc("Android Suite Random Chromosome Factory: creating chromosome: " + chromosome);
@@ -40,34 +29,9 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
             MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
-
-            if (Properties.FITNESS_FUNCTION().equals(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)) {
-                // store branch distance data for test case tc belonging to the testsuite ts
-                Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.toString(), tc.toString());
-            }
-
-            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                // store coverage data for the test case tc belonging to the testsuite ts
-                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                        chromosome.toString(), tc.toString());
-            }
+            CoverageUtils.storeTestSuiteChromosomeCoverage(chromosome, tc.toString());
         }
-
-        // TODO: remove after debugging
-        if (Properties.FITNESS_FUNCTION().equals(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)) {
-            MATE.log("Branch Distance of: " + chromosome.toString() + ": "
-                + Registry.getEnvironmentManager().getBranchDistance(chromosome.toString()));
-
-        }
-
-        // TODO: create method 'finish' in TestSuite class and move code there
-        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            // retrieve coverage of entire test suite
-            MATE.log_acc("Coverage of: " + chromosome.toString() + ": "
-                    + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
-                    chromosome.toString()));
-        }
-
+        CoverageUtils.logChromosomeCoverage(chromosome);
         return chromosome;
     }
 }
