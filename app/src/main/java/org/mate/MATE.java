@@ -183,6 +183,7 @@ public class MATE {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
+                    // TODO: move to end of constructor of MATE
                     if (Properties.GRAPH_TYPE() != null) {
                         // initialise a graph
                         MATE.log_acc("Initialising graph!");
