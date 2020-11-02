@@ -60,19 +60,8 @@ public class TestCase {
      * Among other things, this method is responsible for creating
      * coverage information if desired.
      */
-    public void finish(IChromosome<TestCase> chromosome) {
-
-        // store coverage
-        if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
-            // activity coverage requires no interaction with coverage endpoint
-            int visitedActivities = chromosome.getValue().getVisitedActivities().size();
-            int activities = Registry.getEnvironmentManager().getActivityNames().size();
-            double activityCoverage = visitedActivities * 1.0d / activities;
-            MATE.log("TestCase Coverage: " + activityCoverage);
-        } else if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            storeCoverage(Properties.COVERAGE());
-            MATE.log("TestCase Coverage: " + getCoverage(Properties.COVERAGE()));
-        }
+    public void finish() {
+        MATE.log_acc("Found crash: " + getCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
@@ -83,35 +72,6 @@ public class TestCase {
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
         }
-
-        MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
-
-        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-            BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-        }
-
-        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-        }
-    }
-
-    /**
-     * Stores the coverage data for a chromosome, which can be a test case or a test suite.
-     *
-     * @param coverage The coverage type, e.g. LINE_COVERAGE.
-     */
-    private void storeCoverage(Coverage coverage) {
-        Registry.getEnvironmentManager().storeCoverageData(coverage, toString(), null);
-    }
-
-    /**
-     * Gets the coverage information for a test case.
-     *
-     * @param coverage The coverage type, e.g. LINE_COVERAGE.
-     * @return Returns the coverage information for the given test case.
-     */
-    private double getCoverage(Coverage coverage) {
-        return Registry.getEnvironmentManager().getCoverage(coverage, toString());
     }
 
     /**

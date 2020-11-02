@@ -1,18 +1,12 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.ui.EnvironmentManager;
-import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 import org.mate.utils.Randomness;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
@@ -21,6 +15,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     protected UIAbstractionLayer uiAbstractionLayer;
     protected int maxNumEvents;
     protected boolean resetApp;
+    protected boolean triggerStoreCoverage;
     private int actionsCount;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
@@ -31,7 +26,12 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
+        triggerStoreCoverage = true;
         actionsCount = 0;
+    }
+
+    public void setTriggerStoreCoverage(boolean triggerStoreCoverage) {
+        this.triggerStoreCoverage = triggerStoreCoverage;
     }
 
     @Override
@@ -52,7 +52,11 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
-            testCase.finish(chromosome);
+            if (triggerStoreCoverage) {
+                CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+                CoverageUtils.logChromosomeCoverage(chromosome);
+            }
+            testCase.finish();
         }
         return chromosome;
     }

@@ -1,29 +1,16 @@
 package org.mate.exploration.intent;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.intent.ComponentDescription;
 import org.mate.interaction.intent.ComponentType;
-import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.IntentProvider;
-import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
-import org.mate.serialization.TestCaseSerializer;
 import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
-import org.mate.ui.PrimitiveAction;
-import org.mate.utils.Coverage;
-import org.mate.utils.TestCaseOptimizer;
-import org.mate.utils.TestCaseStatistics;
-import org.mate.utils.TimeoutRun;
-
-import java.util.Random;
+import org.mate.utils.CoverageUtils;
 
 public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
@@ -136,7 +123,11 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } finally {
             // store coverage, serialize, record stats about test case if desired
-            testCase.finish(chromosome);
+            if (triggerStoreCoverage) {
+                CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+                CoverageUtils.logChromosomeCoverage(chromosome);
+            }
+            testCase.finish();
         }
         return chromosome;
     }
