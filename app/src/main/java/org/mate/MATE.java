@@ -11,9 +11,16 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exploration.genetic.algorithm.RandomSearch;
+import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
+import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
+import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
+import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.exploration.manual.ManualExploration;
@@ -69,6 +76,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,6 +87,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
 import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 public class MATE {
@@ -301,6 +310,49 @@ public class MATE {
                             .withPMutate(0.3)
                             .withPCrossover(0.7)
                             .build();
+                    TimeoutRun.timeoutRun(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            genericGA.run();
+                            return null;
+                        }
+                    }, MATE.TIME_OUT);
+
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                            // TODO: handle combined activity coverage
+                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+
+                        // store coverage of test case interrupted by timeout
+                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                                "lastIncompleteTestCase", null);
+
+                        // get combined coverage
+                        MATE.log_acc("Total coverage: "
+                                + Registry.getEnvironmentManager()
+                                .getCombinedCoverage(Properties.COVERAGE()));
+                    }
+                } else if (explorationStrategy.equals("StandardGE")) {
+                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+
+                    List<IFitnessFunction<List<Integer>>> fitnessFunctions = new ArrayList<>();
+                    fitnessFunctions.add(new GenotypePhenotypeMappedFitnessFunction<>(
+                            new AndroidListBasedBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND()),
+                            new BranchCoverageFitnessFunction<TestCase>()
+                    ));
+
+                    final IGeneticAlgorithm<List<Integer>> genericGA = new StandardGeneticAlgorithm<>(
+                            new IntegerSequenceChromosomeFactory(Properties.GE_SEQUENCE_LENGTH()),
+                            new FitnessProportionateSelectionFunction<List<Integer>>(),
+                            new IntegerSequencePointCrossOverFunction(),
+                            new IntegerSequencePointMutationFunction(),
+                            fitnessFunctions,
+                            new NeverTerminationCondition(),
+                            Properties.POPULATION_SIZE(),
+                            Properties.POPULATION_SIZE() * 2,
+                            Properties.P_CROSSOVER(),
+                            Properties.P_MUTATE()
+                    );
+
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {

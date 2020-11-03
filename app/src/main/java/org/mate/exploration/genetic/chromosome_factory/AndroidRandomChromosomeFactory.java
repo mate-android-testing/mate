@@ -39,15 +39,13 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         if (resetApp) {
             uiAbstractionLayer.resetApp();
         }
-        actionsCount = 0;
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            for (int i = 0; !finishTestCase(); i++) {
-                actionsCount = i;
-                if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
+            for (actionsCount = 0; !finishTestCase(); actionsCount++) {
+                if (!testCase.updateTestCase(selectAction(), String.valueOf(actionsCount))) {
                     return chromosome;
                 }
             }

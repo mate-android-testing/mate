@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
 
@@ -168,6 +169,15 @@ public class Properties {
     // stack trace
     public static boolean RECORD_STACK_TRACE() {
         return propertyOr(false);
+    }
+
+    //Grammatical Evolution Properties
+    public static int GE_SEQUENCE_LENGTH() {
+        return propertyOr(100);
+    }
+
+    public static int GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND() {
+        return propertyOr(AndroidListBasedBiasedMapping.BIAS_50_PERCENT);
     }
 
     /**

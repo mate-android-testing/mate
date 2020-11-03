@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 

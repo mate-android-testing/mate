@@ -48,11 +48,6 @@ public class AndroidListBasedBiasedMapping extends AndroidRandomChromosomeFactor
     }
 
     @Override
-    public IChromosome<TestCase> associatedPhenotype(IChromosome<List<Integer>> genotype) {
-        return associatedPhenotypeChromosome.get(genotype);
-    }
-
-    @Override
     public IChromosome<TestCase> createChromosome() {
         IChromosome<TestCase> phenotypeChromosome = super.createChromosome();
         associatedPhenotypeChromosome.put(activeGenotypeChromosome, phenotypeChromosome);
