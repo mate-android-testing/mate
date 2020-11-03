@@ -168,6 +168,11 @@ public class MATE {
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
 
+        if (Properties.GRAPH_TYPE() != null) {
+            // initialise a graph
+            MATE.log_acc("Initialising graph!");
+            Registry.getEnvironmentManager().initGraph();
+        }
     }
 
     public void testApp(String explorationStrategy) {
@@ -182,13 +187,6 @@ public class MATE {
                 if (explorationStrategy.equals("RandomSearchGA")) {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    // TODO: move to end of constructor of MATE
-                    if (Properties.GRAPH_TYPE() != null) {
-                        // initialise a graph
-                        MATE.log_acc("Initialising graph!");
-                        Registry.getEnvironmentManager().initGraph();
-                    }
 
                     final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
                             .withAlgorithm(RandomSearch.ALGORITHM_NAME)
@@ -559,12 +557,6 @@ public class MATE {
 
                     // TODO: introduce 'getObjectives(Objective objective)' which returns either
                     //  a list of branches or lines and initialises the graph in the former case
-                    if (Properties.GRAPH_TYPE() != null) {
-                        // initialise a graph
-                        MATE.log_acc("Initialising graph!");
-                        Registry.getEnvironmentManager().initGraph();
-                    }
-
                     MATE.log_acc("Getting branches...!");
                     // get the set of branches (branch == objective)
                     List<String> branches = Registry.getEnvironmentManager().getBranches();
@@ -573,8 +565,6 @@ public class MATE {
                     if (branches.isEmpty()) {
                         throw new IllegalStateException("No branches available! Aborting.");
                     }
-
-                    MATE.log("Branches: " + branches);
 
                     // we need to associate with each branch a fitness function
                     for (String branch : branches) {
