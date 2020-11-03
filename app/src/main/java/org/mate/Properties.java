@@ -3,6 +3,7 @@ package org.mate;
 import org.mate.graph.GraphType;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
+import org.mate.utils.Objective;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -146,6 +147,10 @@ public class Properties {
 
     // TODO: make use of an enum
     public static String FITNESS_FUNCTION() {
+        return propertyOr(null);
+    }
+
+    public static Objective OBJECTIVE() {
         return propertyOr(null);
     }
 

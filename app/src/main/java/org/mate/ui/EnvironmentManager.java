@@ -11,6 +11,7 @@ import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.utils.Coverage;
+import org.mate.utils.Objective;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class EnvironmentManager {
@@ -199,6 +201,28 @@ public class EnvironmentManager {
 
         String cmd = "getActivities:" + emulator;
         return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
+    }
+
+    /**
+     * Returns the list of objectives based on objective property.
+     *
+     * @param objective The specified objective property.
+     * @return Returns a list of objectives, e.g. the list of branches.
+     */
+    public List<String> getObjectives(Objective objective) {
+        if (objective == null) {
+            throw new IllegalStateException("Objective property not defined!");
+        }
+
+        MATE.log_acc("Getting objectives...!");
+
+        if (objective == Objective.LINES) {
+            return getSourceLines();
+        } else if (objective == Objective.BRANCHES) {
+            return getBranches();
+        }
+
+        throw new UnsupportedOperationException("Objective not yet supported!");
     }
 
     /**
