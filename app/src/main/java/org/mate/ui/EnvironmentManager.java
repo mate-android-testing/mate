@@ -427,7 +427,7 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator)
                 // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
                 .withParameter("packageName", MATE.packageName)
-                .withParameter("chromosome", chromosome.getValue().toString());
+                .withParameter("chromosomes", chromosome.getValue().toString());
 
         Message response = sendMessage(messageBuilder.build());
         List<Double> branchDistanceVector = new ArrayList<>();

@@ -5,6 +5,7 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 
@@ -22,8 +23,10 @@ public class FitnessUtils {
      */
     public static void storeTestCaseChromosomeFitness(IChromosome<TestCase> chromosome) {
 
+        // TODO: use enum for fitness function property
         // store branch distance data
-        if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+        if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.getValue().toString(), null);
             MATE.log("Branch Distance: " + Registry.getEnvironmentManager()
                     .getBranchDistance(chromosome.getValue().toString()));
@@ -40,8 +43,10 @@ public class FitnessUtils {
      */
     public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, String testCaseId) {
 
+        // TODO: use enum for fitness function property
         // store branch distance data
-        if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+        if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.getValue().toString(), testCaseId);
             MATE.log("Branch Distance: " + Registry.getEnvironmentManager()
                     .getBranchDistance(chromosome.getValue().toString()));
