@@ -67,10 +67,6 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
             }
-
-            if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-            }
         }
         return mutations;
     }

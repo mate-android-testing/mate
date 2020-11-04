@@ -4,7 +4,6 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
@@ -25,9 +24,8 @@ public class CoverageUtils {
                     null);
         }
 
-        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-            BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+        // TODO: try to get rid of this
+        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
             LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
@@ -48,9 +46,7 @@ public class CoverageUtils {
                     testCaseId);
         }
 
-        if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-            //Currently Unsupported
-        } else if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
             //Currently Unsupported
         }
     }

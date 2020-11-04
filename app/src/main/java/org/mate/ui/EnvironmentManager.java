@@ -38,12 +38,10 @@ public class EnvironmentManager {
     private boolean active;
 
     /**
-     * Stores for which test case the pulling
-     * of traces files have been already performed. This is necessary that
-     * BranchDistance and BranchCoverage don't try to fetch for the same
-     * test case the traces file multiple times. Otherwise, the last
-     * fetch trial overwrites the traces file for the given test case
-     * with an empty file.
+     * Tracks for which test case the pulling of traces files have been already performed.
+     * This is necessary that BranchDistance and BranchCoverage don't try to fetch for the same
+     * test case the traces file multiple times. Otherwise, the last fetch trial overwrites
+     * the traces file for the given test case with an empty file.
      */
     private Set<String> coveredTestCases = new HashSet<>();
 

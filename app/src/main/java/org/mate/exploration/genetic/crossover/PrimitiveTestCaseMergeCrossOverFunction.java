@@ -58,10 +58,6 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
                 if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                     LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
                 }
-
-                if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                    BranchDistanceFitnessFunctionMultiObjective.retrieveFitnessValues(chromosome);
-                }
             }
 
             MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
