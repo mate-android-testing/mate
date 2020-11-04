@@ -4,9 +4,8 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
-import org.mate.model.TestCase;
 
-public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase> {
+public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
     public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function";
 
@@ -25,7 +24,7 @@ public class BranchDistanceFitnessFunction implements IFitnessFunction<TestCase>
      * @return Returns the fitness value (branch distance) for the given chromosome.
      */
     @Override
-    public double getFitness(IChromosome<TestCase> chromosome) {
+    public double getFitness(IChromosome<T> chromosome) {
 
         double branchDistance = Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
         MATE.log("Branch Distance for chromosome: " + chromosome + ": " + branchDistance);
