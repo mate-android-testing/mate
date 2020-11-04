@@ -5,16 +5,14 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
     public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function";
 
-    /*
-    * FIXME: Caching the fitness values would be only valid for a single iteration, e.g.
-    *  in iteration 1 both log_fitness() and evolve() require the fitness value. Thus, we
-    *  would require some clear cache mechanism (static or part of interface). However,
-    *  caching only makes sense for branch distance and line fitness.
-     */
+    private Map<IChromosome<T>, Double> cache = new HashMap<>();
 
     /**
      * Retrieves the branch distance value for the given chromosome.
@@ -26,14 +24,28 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double branchDistance = Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
-        MATE.log("Branch Distance for chromosome: " + chromosome + ": " + branchDistance);
+        double branchDistance;
 
+        if (cache.containsKey(chromosome)) {
+            MATE.log_acc("Accessing cache for retrieving fitness value!");
+            branchDistance = cache.get(chromosome);
+        } else {
+            branchDistance = Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
+        }
+        
+        /*
+        * TODO: This is a side effect, which is triggered multiple times, e.g. by logFitness().
+        *  Additionally, the decision when a 'target' is satisfied might depend on the
+        *  algorithm in use. Thus, a better option is to move this functionality. However, be
+        *  aware that the initial population can also satisfy this condition.
+         */
         // we can end execution if we covered the target vertex
         if (branchDistance == 1.0) {
-            MATE.log("Covered target vertex. Abort execution!");
             ConditionalTerminationCondition.satisfiedCondition();
         }
+
+        // cache fitness value for subsequent requests
+        cache.put(chromosome, branchDistance);
 
         return branchDistance;
     }
