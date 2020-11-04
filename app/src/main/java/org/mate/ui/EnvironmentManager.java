@@ -344,27 +344,6 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the branch distance for the given chromosome.
-     *
-     * @param chromosome The given chromosome.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
-     * @return Returns the branch distance for the given chromosome.
-     */
-    // TODO: do we need to be able to get the distance of single test cases of a test suite???
-    // TODO: might be replaced by the next method
-    public <T> double getBranchDistance(IChromosome<T> chromosome) {
-
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
-                .withParameter("deviceId", emulator)
-                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
-                .withParameter("packageName", MATE.packageName)
-                .withParameter("chromosome", chromosome.getValue().toString());
-
-        Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("branch_distance"));
-    }
-
-    /**
      * Stores the branch distance data for the given chromosome.
      *
      * @param chromosomeId Identifies either a test case or a test suite.
