@@ -4,7 +4,6 @@ import android.os.RemoteException;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
-import android.widget.TextView;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -177,22 +176,16 @@ public class UIAbstractionLayer {
         while (change || retry) {
             retry = false;
             change = false;
-            // check for crash messages
             try {
-                UiObject window = new UiObject(new UiSelector().packageName("android")
-                        .textContains("has stopped"));
-                if (window.exists()) {
+
+                // check for crash messages
+                UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
+                UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
+
+                if (crashDialog1.exists() || crashDialog2.exists()) {
                     deviceMgr.handleCrashDialog();
                     change = true;
                     continue;
-                } else {
-                    window = new UiObject(new UiSelector().packageName("android")
-                            .textContains("keeps stopping"));
-                    if (window.exists()) {
-                        deviceMgr.handleCrashDialog();
-                        change = true;
-                        continue;
-                    }
                 }
 
                 // check for outdated build warnings
@@ -230,7 +223,8 @@ public class UIAbstractionLayer {
                 }
 
                 // check for permission dialog
-                if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
+                if (screenState.getPackageName().equals("com.google.android.packageinstaller")
+                        || screenState.getPackageName().equals("com.android.packageinstaller")) {
                     List<WidgetAction> actions = screenState.getActions();
                     for (WidgetAction action : actions) {
                         if (action.getWidget().getId().contains("allow")) {
