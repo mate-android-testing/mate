@@ -230,7 +230,8 @@ public class UIAbstractionLayer {
                 }
 
                 // check for permission dialog
-                if (screenState.getPackageName().equals("com.google.android.packageinstaller")) {
+                if (screenState.getPackageName().equals("com.google.android.packageinstaller")
+                        || screenState.getPackageName().equals("com.android.packageinstaller")) {
                     List<WidgetAction> actions = screenState.getActions();
                     for (WidgetAction action : actions) {
                         if (action.getWidget().getId().contains("allow")) {
