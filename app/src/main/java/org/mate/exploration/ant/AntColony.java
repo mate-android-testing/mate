@@ -62,7 +62,7 @@ public class AntColony {
     *           deposit any pheromones
     *  False:   Only the ant with the best fitness value in a generation gets to deposit pheromones
     */
-    private static final boolean depositPheromonesWithRanking = true;
+    private static final boolean depositPheromonesWithRanking = false;
 
     public AntColony() {
         uiAbstractionLayer = MATE.uiAbstractionLayer;
