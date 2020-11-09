@@ -242,34 +242,39 @@ public class TestCase {
             finalSize = testCase.desiredSize.getValue();
         }
 
-        int count = 0;
-        for (Action action0 : testCase.eventSequence) {
-            if (count < finalSize) {
-                if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
-                    if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
-                        return resultingTc;
+        try {
+            int count = 0;
+            for (Action action0 : testCase.eventSequence) {
+                if (count < finalSize) {
+                    if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
+                        if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
+                            return resultingTc;
+                        }
+                        count++;
+                    } else {
+                        break;
                     }
-                    count++;
                 } else {
-                    break;
+                    return resultingTc;
                 }
-            } else {
-                return resultingTc;
             }
-        }
-        for (; count < finalSize; count++) {
-            Action action;
-            if (Properties.WIDGET_BASED_ACTIONS()) {
-                action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
-            } else {
-                action = PrimitiveAction.randomAction();
+            for (; count < finalSize; count++) {
+                Action action;
+                if (Properties.WIDGET_BASED_ACTIONS()) {
+                    action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+                } else {
+                    action = PrimitiveAction.randomAction();
+                }
+                if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                    return resultingTc;
+                }
             }
-            if(!resultingTc.updateTestCase(action, String.valueOf(count))) {
-                return resultingTc;
-            }
-        }
 
-        return resultingTc;
+            return resultingTc;
+        } finally {
+            // serialize test case, record test case stats, etc.
+            resultingTc.finish();
+        }
     }
 
     @Override
