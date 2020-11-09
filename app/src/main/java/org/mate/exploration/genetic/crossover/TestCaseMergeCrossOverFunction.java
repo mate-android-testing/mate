@@ -1,16 +1,13 @@
 package org.mate.exploration.genetic.crossover;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
-import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 
@@ -147,25 +144,10 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             TestCase executedTestCase = TestCase.fromDummy(testCase);
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
-            // TODO: check whether we can use here testcase.finish()
-            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
+            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+            CoverageUtils.logChromosomeCoverage(chromosome);
 
-                MATE.log_acc("After test case merge crossover:");
-
-                Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                        chromosome.getValue().getId(), null);
-
-                MATE.log_acc("Coverage of: " + chromosome.getValue().getId() + ": "
-                        +Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
-                        chromosome.getValue().getId()));
-
-                //TODO: remove hack, when better solution implemented
-                if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                    LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-                }
-            }
-
-            MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
             return chromosome;
         }
 
