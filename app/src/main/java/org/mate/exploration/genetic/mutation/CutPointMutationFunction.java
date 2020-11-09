@@ -1,16 +1,13 @@
 package org.mate.exploration.genetic.mutation;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
-import org.mate.model.TestCase;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.TestCase;
 import org.mate.ui.WidgetAction;
-import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -22,10 +19,18 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
 
+    private boolean isTestSuiteExecution = false;
+
     public CutPointMutationFunction(int maxNumEvents) {
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
     }
+
+    // TODO: might be replaceable with chromosome factory property in the future
+    public void setTestSuiteExecution(boolean testSuiteExecution) {
+        this.isTestSuiteExecution = testSuiteExecution;
+    }
+
     @Override
     public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> chromosome) {
         uiAbstractionLayer.resetApp();
@@ -39,35 +44,33 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
         mutations.add(mutatedChromosome);
 
-        for (int i = 0; i < maxNumEvents; i++) {
-            WidgetAction newAction;
-            if (i < cutPoint) {
-                //Todo: highlight that this class can only be used for widget based execution
-                newAction = (WidgetAction) chromosome.getValue().getEventSequence().get(i);
-            } else {
-                newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+        try {
+            for (int i = 0; i < maxNumEvents; i++) {
+                WidgetAction newAction;
+                if (i < cutPoint) {
+                    //Todo: highlight that this class can only be used for widget based execution
+                    newAction = (WidgetAction) chromosome.getValue().getEventSequence().get(i);
+                } else {
+                    newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+                }
+                if (!uiAbstractionLayer.getExecutableActions().contains(newAction) || !mutant.updateTestCase(newAction, String.valueOf(i))) {
+                    break;
+                }
             }
-            if (!uiAbstractionLayer.getExecutableActions().contains(newAction) || !mutant.updateTestCase(newAction, String.valueOf(i))) {
-                break;
-            }
+        } finally {
+            mutant.finish();
         }
 
-        // TODO: check whether we can use here testcase.finish()
-        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-
-            Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                    mutatedChromosome.getValue().getId(), null);
-
-            MATE.log_acc("Coverage of: " + mutatedChromosome  + ": "
-                    +Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
-                    mutatedChromosome.getValue().getId()));
-
-            MATE.log_acc("Found crash: " + mutatedChromosome.getValue().getCrashDetected());
-
-            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(mutatedChromosome);
-            }
+        if (!isTestSuiteExecution) {
+            /*
+             * If we deal with a test suite execution, the storing of coverage
+             * and fitness data is handled by the AndroidSuiteRandomChromosomeFactory itself.
+             */
+            FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
+            CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
+            CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         }
+
         return mutations;
     }
 
