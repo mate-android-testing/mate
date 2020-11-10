@@ -190,6 +190,9 @@ public class Properties {
         return propertyOr(true);
     }
 
+    // how and which target vertex should be selected, e.g. a random branch vertex
+    public static String TARGET() { return propertyOr("no_target"); }
+
     /*
     * End Graph properties
      */

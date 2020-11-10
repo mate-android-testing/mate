@@ -308,7 +308,8 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("graph_type", graphType.name())
-                .withParameter("apk", Properties.APK());
+                .withParameter("apk", Properties.APK())
+                .withParameter("target", Properties.TARGET());
 
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
