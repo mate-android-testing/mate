@@ -325,6 +325,18 @@ public class EnvironmentManager {
     }
 
     /**
+     * Requests the drawing of the graph.
+     *
+     * @param raw Whether drawing the raw graph or target and visited vertices should be marked.
+     */
+    public void drawGraph(boolean raw) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
+                .withParameter("raw", String.valueOf(raw));
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
      * Requests the list of branches of the AUT. Each branch typically
      * represents a testing target into the context of MIO/MOSA.
      * A branch's representation coincides with the trace that is produced

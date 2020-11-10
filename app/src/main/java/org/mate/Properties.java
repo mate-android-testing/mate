@@ -193,6 +193,9 @@ public class Properties {
     // how and which target vertex should be selected, e.g. a random branch vertex
     public static String TARGET() { return propertyOr("no_target"); }
 
+    // whether to draw raw graph or 'extended' graph
+    public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }
+
     /*
     * End Graph properties
      */

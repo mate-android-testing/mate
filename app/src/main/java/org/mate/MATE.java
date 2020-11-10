@@ -219,6 +219,10 @@ public class MATE {
                                 .getCombinedCoverage(Properties.COVERAGE()));
                     }
 
+                    if (Properties.GRAPH_TYPE() != null) {
+                        Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+                    }
+
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
@@ -593,6 +597,11 @@ public class MATE {
                                 + Registry.getEnvironmentManager()
                                 .getCombinedCoverage(Properties.COVERAGE()));
                     }
+
+                    if (Properties.GRAPH_TYPE() != null) {
+                        Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+                    }
+
                 } else if (explorationStrategy.equals("Mio")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
