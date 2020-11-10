@@ -1,6 +1,5 @@
 package org.mate.utils;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -28,10 +27,7 @@ public class FitnessUtils {
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.getValue().toString(), null);
-            MATE.log("Branch Distance: " + Registry.getEnvironmentManager()
-                    .getBranchDistance(chromosome.getValue().toString()));
         }
-
     }
 
     /**
@@ -48,8 +44,6 @@ public class FitnessUtils {
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.getValue().toString(), testCaseId);
-            MATE.log("Branch Distance: " + Registry.getEnvironmentManager()
-                    .getBranchDistance(chromosome.getValue().toString()));
         }
 
     }
