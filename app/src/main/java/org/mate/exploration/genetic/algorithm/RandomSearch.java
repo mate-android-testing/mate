@@ -2,13 +2,13 @@ package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 
 import java.util.List;
 
@@ -57,16 +57,15 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE
                         && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
                     MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
-                            + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
+                            + CoverageUtils.getCoverage(Properties.COVERAGE(),
                             chromosome.toString()));
                 }
             }
         }
 
-        if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
             MATE.log_acc("Accumulated Coverage: "
-                    + Registry.getEnvironmentManager().getCombinedCoverage(Properties.COVERAGE()));
+                    + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
         }
     }
 

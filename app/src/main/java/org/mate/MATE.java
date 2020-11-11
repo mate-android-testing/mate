@@ -60,6 +60,7 @@ import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TestCaseStatistics;
@@ -205,18 +206,8 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
 
                     if (Properties.GRAPH_TYPE() != null) {
@@ -290,19 +281,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -333,19 +315,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("Sapienz")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -380,19 +353,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("HeuristicRandom")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -410,19 +374,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("Replaying")) {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
@@ -525,23 +480,10 @@ public class MATE {
                         e.printStackTrace();
                     }
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        MATE.log_acc("Coverage of last test case: " +
-                                Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
-                                        ,"lastIncompleteTestCase"));
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
@@ -585,17 +527,8 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
 
                     if (Properties.GRAPH_TYPE() != null) {
@@ -643,18 +576,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("RandomWalk")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log("Starting random walk now ...");
