@@ -545,6 +545,7 @@ public class EnvironmentManager {
     }
 
     // TODO: use new coverage endpoint
+    @Deprecated
     public double getCoverage(Object o) {
         String cmd = "getCoverage:" + emulator + ":" + o.toString();
 
