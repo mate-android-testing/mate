@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.MOSA;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATEwithMOSA {
+public class ExecuteMATEMOSA {
 
     @Test
     public void useAppContext() throws Exception {

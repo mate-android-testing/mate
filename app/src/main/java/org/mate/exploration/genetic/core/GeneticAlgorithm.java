@@ -2,7 +2,6 @@ package org.mate.exploration.genetic.core;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -10,8 +9,8 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.ui.EnvironmentManager;
 import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -161,11 +160,10 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
             MATE.log_acc("Combined coverage until now: "
-                    + Registry.getEnvironmentManager()
-                    .getCombinedCoverage(Properties.COVERAGE()));
+                    + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
             if (population.size() <= 10) {
                 MATE.log_acc("Combined coverage of current population: "
-                        + Registry.getEnvironmentManager().getCombinedCoverage(Properties.COVERAGE(), population));
+                        + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }
         }
     }

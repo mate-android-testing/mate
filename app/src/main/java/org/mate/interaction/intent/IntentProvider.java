@@ -70,10 +70,12 @@ public class IntentProvider {
 
         final String BRANCH_COVERAGE_TRACER = "de.uni_passau.fim.auermich.branchcoverage.tracer.Tracer";
         final String BRANCH_DISTANCE_TRACER = "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer";
+        final String TRACER = "de.uni_passau.fim.auermich.tracer.Tracer";
 
         for (ComponentDescription component : components) {
             if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
-                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)) {
+                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)
+                    || component.getFullyQualifiedName().equals(TRACER)) {
                 toBeRemoved.add(component);
             }
         }

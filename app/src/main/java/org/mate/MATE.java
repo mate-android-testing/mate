@@ -60,6 +60,7 @@ import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TestCaseStatistics;
@@ -167,7 +168,6 @@ public class MATE {
 
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
-
     }
 
     public void testApp(String explorationStrategy) {
@@ -191,6 +191,18 @@ public class MATE {
                             .withMaxNumEvents(50)
                             .build();
 
+                    // TODO: move to constructor but ensure that emulator is properly initialized before
+                    if (Properties.GRAPH_TYPE() != null) {
+                        // initialise a graph
+                        MATE.log_acc("Initialising graph!");
+                        Registry.getEnvironmentManager().initGraph();
+                    }
+
+                    MATE.log_acc("Activities");
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {
@@ -198,6 +210,14 @@ public class MATE {
                             return null;
                         }
                     }, MATE.TIME_OUT);
+
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
+                    }
+
+                    if (Properties.GRAPH_TYPE() != null) {
+                        Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+                    }
 
                 } else if (explorationStrategy.equals("OnePlusOneNew")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
@@ -266,19 +286,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -309,19 +320,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("Sapienz")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -356,19 +358,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("HeuristicRandom")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log_acc("Activities");
@@ -386,19 +379,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("Replaying")) {
 
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
@@ -501,35 +485,14 @@ public class MATE {
                         e.printStackTrace();
                     }
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        MATE.log_acc("Coverage of last test case: " +
-                                Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
-                                        ,"lastIncompleteTestCase"));
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                        // init the CFG
-                        boolean isInit = Registry.getEnvironmentManager().initCFG();
-
-                        if (!isInit) {
-                            MATE.log("Couldn't initialise CFG! Aborting.");
-                            throw new IllegalStateException("Graph initialisation failed!");
-                        }
-                    }
+                    MATE.log_acc("Running MOSA");
 
                     final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                             .withAlgorithm(MOSA.ALGORITHM_NAME)
@@ -544,19 +507,25 @@ public class MATE {
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
 
-                    // get the set of branches (branch == objective)
-                    List<String> branches = Registry.getEnvironmentManager().getBranches();
-
-                    // if there are no branches, we can stop
-                    if (branches.isEmpty()) {
-                        throw new IllegalStateException("No branches available! Aborting.");
+                    MATE.log_acc("Activities");
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+                        MATE.log_acc("\t" + s);
                     }
 
-                    MATE.log("Branches: " + branches);
+                    // TODO: move to constructor but ensure that emulator is properly initialized before
+                    if (Properties.GRAPH_TYPE() != null) {
+                        // initialise a graph
+                        MATE.log_acc("Initialising graph!");
+                        Registry.getEnvironmentManager().initGraph();
+                    }
+
+                    List<String> objectives = Registry.getEnvironmentManager()
+                            .getObjectives(Properties.OBJECTIVE());
 
                     // we need to associate with each branch a fitness function
-                    for (String branch : branches) {
-                        builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, branch);
+                    for (String objective : objectives) {
+                        // TODO: use property 'FITNESS_FUNCTION'
+                        builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, objective);
                     }
 
                     final IGeneticAlgorithm<TestCase> mosa = builder.build();
@@ -568,18 +537,14 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
+                    if (Properties.GRAPH_TYPE() != null) {
+                        Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+                    }
+
                 } else if (explorationStrategy.equals("Mio")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
@@ -598,20 +563,19 @@ public class MATE {
                             .withPSampleRandom(0.5)
                             .withFocusedSearchStart(0.5);
 
-                    // add specific fitness functions for all activities of the Application Under Test
-                    MATE.log_acc("Retrieving source lines...");
-                    List<String> lines = Registry.getEnvironmentManager().getSourceLines();
-                    MATE.log_acc("Retrieved " + lines.size() + " lines.");
-                    MATE.log_acc("Processing lines...");
-                    int count = 1;
-                    for (String line : lines) {
-                        if (count % (lines.size() / 10) == 0) {
-                            MATE.log_acc(Math.ceil(count * 100.0 / lines.size()) + "%");
-                        }
-                        builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, line);
-                        count++;
+                    // TODO: move to constructor but ensure that emulator is properly initialized before
+                    if (Properties.GRAPH_TYPE() != null) {
+                        // initialise a graph
+                        MATE.log_acc("Initialising graph!");
+                        Registry.getEnvironmentManager().initGraph();
                     }
-                    MATE.log_acc("done processing lines");
+
+                    List<String> objectives = Registry.getEnvironmentManager().getObjectives(Properties.OBJECTIVE());
+
+                    for (String objective : objectives) {
+                        // TODO: use property 'FITNESS_FUNCTION'
+                        builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, objective);
+                    }
 
                     final IGeneticAlgorithm<TestCase> mio = builder.build();
                     TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -622,18 +586,10 @@ public class MATE {
                         }
                     }, MATE.TIME_OUT);
 
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
+                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                        CoverageUtils.logFinalCoverage();
                     }
+
                 } else if (explorationStrategy.equals("RandomWalk")) {
                     uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
                     MATE.log("Starting random walk now ...");
