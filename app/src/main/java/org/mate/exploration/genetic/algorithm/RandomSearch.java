@@ -54,11 +54,8 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
                 MATE.log_acc("Chromosome " + (j + 1) + " Fitness: "
                         + fitnessFunction.getFitness(chromosome));
 
-                if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-
-                    Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                            chromosome.toString(), null);
-
+                if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                        && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
                     MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
                             + Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE(),
                             chromosome.toString()));
@@ -66,7 +63,8 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
             }
         }
 
-        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE
+                && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
             MATE.log_acc("Accumulated Coverage: "
                     + Registry.getEnvironmentManager().getCombinedCoverage(Properties.COVERAGE()));
         }
