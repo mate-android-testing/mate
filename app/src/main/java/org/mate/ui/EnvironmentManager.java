@@ -171,6 +171,7 @@ public class EnvironmentManager {
     }
 
     // TODO: use new coverage endpoint
+    @Deprecated
     public void copyCoverageData(Object source, Object target, List<? extends Object> entities) {
         StringBuilder sb = new StringBuilder();
         String prefix = "";

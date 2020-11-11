@@ -17,8 +17,7 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
             throw new IllegalStateException("Wrong coverage property specified!");
         }
 
-        double branchCoverage = CoverageUtils.getCoverage(Properties.COVERAGE(),
-                chromosome.getValue().toString());
+        double branchCoverage = CoverageUtils.getCoverage(Properties.COVERAGE(), chromosome);
 
         if (branchCoverage == 100.0) {
             ConditionalTerminationCondition.satisfiedCondition();

@@ -58,7 +58,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
                         && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
                     MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
                             + CoverageUtils.getCoverage(Properties.COVERAGE(),
-                            chromosome.toString()));
+                            chromosome));
                 }
             }
         }

@@ -198,6 +198,11 @@ public class MATE {
                         Registry.getEnvironmentManager().initGraph();
                     }
 
+                    MATE.log_acc("Activities");
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
                     TimeoutRun.timeoutRun(new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {
@@ -501,6 +506,11 @@ public class MATE {
                             .withMaxNumEvents(50)
                             .withPMutate(0.3)
                             .withPCrossover(0.7);
+
+                    MATE.log_acc("Activities");
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
 
                     // TODO: move to constructor but ensure that emulator is properly initialized before
                     if (Properties.GRAPH_TYPE() != null) {
