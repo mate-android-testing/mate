@@ -14,13 +14,12 @@ import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFun
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestCase;
-import org.mate.utils.Coverage;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEPrimitiveStandardGA {
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("Primitive StandardGeneticAlgorithm implementation");
 

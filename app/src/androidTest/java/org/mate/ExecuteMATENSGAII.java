@@ -21,7 +21,7 @@ public class ExecuteMATENSGAII {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("NSGA-II algorithm");

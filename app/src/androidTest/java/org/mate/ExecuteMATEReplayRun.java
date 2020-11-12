@@ -1,6 +1,5 @@
 package org.mate;
 
-import android.app.Instrumentation;
 import android.support.test.runner.AndroidJUnit4;
 
 import android.support.test.uiautomator.UiDevice;
@@ -19,9 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.mate.MATE.packageName;
-
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEReplayRun {
 
@@ -34,7 +30,7 @@ public class ExecuteMATEReplayRun {
     private DeviceMgr deviceMgr;
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Replaying run...");
 
         MATE mate = new MATE();
@@ -45,7 +41,7 @@ public class ExecuteMATEReplayRun {
 
         if (emulator != null && !emulator.equals("")) {
             this.deviceMgr = new DeviceMgr(device, packageName);
-            uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+            uiAbstractionLayer = mate.getUiAbstractionLayer();
 
             MATE.log_acc("Activities");
             for (String s : Registry.getEnvironmentManager().getActivityNames()) {

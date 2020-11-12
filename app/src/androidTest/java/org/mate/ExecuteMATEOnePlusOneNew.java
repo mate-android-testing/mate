@@ -20,7 +20,7 @@ public class ExecuteMATEOnePlusOneNew {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("One-plus-one (new) algorithm");

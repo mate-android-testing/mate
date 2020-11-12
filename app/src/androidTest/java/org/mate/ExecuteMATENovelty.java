@@ -19,11 +19,11 @@ public class ExecuteMATENovelty {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
 
         MATE.log_acc("Starting Novelty Search...");
         MATE mate = new MATE();
-        mate.testApp("Novelty");
+        //mate.testApp("Novelty");
 
         //Report
         List<TestCase> ts = new ArrayList<>(NoveltyBased.testsuite.values());

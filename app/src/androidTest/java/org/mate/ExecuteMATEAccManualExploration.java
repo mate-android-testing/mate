@@ -18,7 +18,7 @@ public class ExecuteMATEAccManualExploration {
     private long runningTime;
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         runningTime = new Date().getTime();
 
         MATE.log("start testing acc");

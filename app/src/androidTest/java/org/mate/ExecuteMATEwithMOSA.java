@@ -21,7 +21,7 @@ import java.util.List;
 public class ExecuteMATEwithMOSA {
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc(MOSA.ALGORITHM_NAME + " algorithm");

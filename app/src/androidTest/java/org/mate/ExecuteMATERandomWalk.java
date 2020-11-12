@@ -17,7 +17,7 @@ import org.mate.model.TestCase;
 public class ExecuteMATERandomWalk {
 
         @Test
-        public void useAppContext() throws Exception {
+        public void useAppContext() {
             MATE.log_acc("Starting Random Walk ....");
 
             MATE mate = new MATE();
@@ -31,7 +31,6 @@ public class ExecuteMATERandomWalk {
                     .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                     .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                     .withMaxNumEvents(Properties.MAX_NUM_EVENTS());
-
 
             final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
 

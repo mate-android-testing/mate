@@ -14,7 +14,6 @@ import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestCase;
-import org.mate.utils.Coverage;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class ExecuteMATEMio {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("Mio implementation");
 

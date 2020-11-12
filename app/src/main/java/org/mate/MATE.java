@@ -169,27 +169,26 @@ public class MATE {
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
 
+        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+
+        if (emulator != null && !emulator.equals("")) {
+            this.deviceMgr = new DeviceMgr(device, packageName);
+            uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+        }
     }
 
     public void testApp(final Algorithm algorithm) {
 
-        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
-
         runningTime = new Date().getTime();
+
         try {
-            if (emulator != null && !emulator.equals("")) {
-                this.deviceMgr = new DeviceMgr(device, packageName);
-
-                uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                TimeoutRun.timeoutRun(new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        algorithm.run();
-                        return null;
-                    }
+            TimeoutRun.timeoutRun(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    algorithm.run();
+                    return null;
+                }
                 }, MATE.TIME_OUT);
-            }
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE
                     && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
@@ -274,6 +273,10 @@ public class MATE {
 
     public UiDevice getDevice() {
         return device;
+    }
+
+    public static UIAbstractionLayer getUiAbstractionLayer() {
+        return uiAbstractionLayer;
     }
 
     public static void logactivity(String activityName) {

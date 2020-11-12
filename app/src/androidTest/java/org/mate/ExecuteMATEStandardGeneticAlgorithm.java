@@ -14,14 +14,13 @@ import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunct
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.model.TestCase;
-import org.mate.utils.Coverage;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEStandardGeneticAlgorithm {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("StandardGeneticAlgorithm implementation");
 

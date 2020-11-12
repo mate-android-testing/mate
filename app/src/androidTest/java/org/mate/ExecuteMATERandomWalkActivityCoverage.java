@@ -17,8 +17,8 @@ import org.mate.model.TestCase;
 public class ExecuteMATERandomWalkActivityCoverage {
 
     @Test
-    public void useAppContext() throws Exception {
-        MATE.log_acc("Starting Random Walk ....");
+    public void useAppContext() {
+        MATE.log_acc("Starting Random Walk ...");
 
         MATE mate = new MATE();
 

@@ -5,14 +5,13 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.heuristical.HeuristicExploration;
-import org.mate.utils.Coverage;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEHeuristicRandomExploration {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
 
         MATE.log_acc("Starting Heuristic Random Exploration...");
 

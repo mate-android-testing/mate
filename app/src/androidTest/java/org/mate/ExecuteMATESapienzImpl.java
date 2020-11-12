@@ -16,14 +16,13 @@ import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestSuite;
-import org.mate.utils.Coverage;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATESapienzImpl {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("Sapienz implementation");
 

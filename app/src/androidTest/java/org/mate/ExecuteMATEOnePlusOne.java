@@ -16,13 +16,13 @@ public class ExecuteMATEOnePlusOne {
 
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("One-plus-one algorithm");
 
         MATE mate = new MATE();
-        mate.testApp("OnePlusOne");
+       // mate.testApp("OnePlusOne");
 
         //Report
         List<TestCase> ts = new ArrayList<>(OnePlusOne.testsuite.values());

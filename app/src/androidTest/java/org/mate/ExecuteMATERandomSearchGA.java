@@ -16,7 +16,7 @@ import org.mate.model.TestCase;
 public class ExecuteMATERandomSearchGA {
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Starting Random Search GA ....");
 
         MATE mate = new MATE();
