@@ -4,7 +4,6 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.ui.EnvironmentManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;

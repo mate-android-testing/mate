@@ -476,16 +476,6 @@ public class EnvironmentManager {
     }
 
     /**
-     * Requests the combined coverage information for all chromosomes.
-     *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
-     * @return Returns the overall coverage.
-     */
-    public double getCombinedCoverage(Coverage coverage) {
-        return getCombinedCoverage(coverage, null);
-    }
-
-    /**
      * Requests the combined coverage information for the given set of test cases / test suites.
      *
      * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
@@ -544,10 +534,12 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));
     }
-    
-    public List<Double> getLineCoveredPercentage(Object o, List<String> lines) {
+
+    public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
+
+        // concatenate lines
         StringBuilder sb = new StringBuilder();
-        sb.append("getLineCoveredPercentage:" + emulator + ":" + o.toString() + ":");
+
         for (String line : lines) {
             sb.append(line);
             sb.append("*");
@@ -556,13 +548,26 @@ public class EnvironmentManager {
             sb.setLength(sb.length() - 1);
         }
 
-        String cmd = sb.toString();
-        List<Double> coveredPercentages = new ArrayList<>();
-        for (String coveredPercentageStr : tunnelLegacyCmd(cmd).split("\n")) {
-            coveredPercentages.add(Double.valueOf(coveredPercentageStr));
-        }
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
+                .withParameter("deviceId", emulator)
+                .withParameter("lines", sb.toString())
+                .withParameter("chromosomes", chromosome.toString());
+        Message response = sendMessage(messageBuilder.build());
 
-        return coveredPercentages;
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Retrieving line covered percentages failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        } else {
+            // convert result
+            List<Double> coveragePercentagesVector = new ArrayList<>();
+            String[] coveragePercentages = response.getParameter("coveragePercentages").split("\n");
+
+            for (String coveragePercentage : coveragePercentages) {
+                coveragePercentagesVector.add(Double.parseDouble(coveragePercentage));
+            }
+
+            return coveragePercentagesVector;
+        }
     }
 
     public String getLastCrashStackTrace() {
