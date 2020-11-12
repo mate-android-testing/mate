@@ -455,11 +455,11 @@ public class EnvironmentManager {
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
 
-        if (coverage == Coverage.BRANCH_COVERAGE) {
-            // check whether the storing of the traces file has been already requested
+        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE) {
+            // check whether the storing of the traces/coverage file has been already requested
             String testcase = entityId == null ? chromosomeId : entityId;
             if (coveredTestCases.contains(testcase)) {
-                // don't fetch again traces file from emulator
+                // don't fetch again traces/coverage file from emulator
                 return;
             }
             coveredTestCases.add(testcase);

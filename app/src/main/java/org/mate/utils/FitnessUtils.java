@@ -5,8 +5,11 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+
+import java.util.List;
 
 public class FitnessUtils {
 
@@ -28,6 +31,15 @@ public class FitnessUtils {
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.getValue().toString(), null);
         }
+
+        if (LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            Registry.getEnvironmentManager().storeCoverageData(
+                    Coverage.LINE_COVERAGE,
+                    chromosome.getValue().toString(),
+                    null);
+
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+        }
     }
 
     /**
@@ -46,5 +58,17 @@ public class FitnessUtils {
             Registry.getEnvironmentManager().storeBranchDistanceData(chromosome.getValue().toString(), testCaseId);
         }
 
+    }
+
+    /**
+     * Removes all non active chromosomes, i.e. obsolete chromosomes, from an internal cache.
+     *
+     * @param activeChromosomes The list of active chromosomes.
+     */
+    public static void cleanCache(List<IChromosome<TestCase>> activeChromosomes) {
+
+        if (LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            // LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+        }
     }
 }

@@ -34,6 +34,12 @@ public class CoverageUtils {
         if (activities == null) {
             activities = new HashSet<>(Registry.getEnvironmentManager().getActivityNames());
         }
+
+        if (activities.size() == 0) {
+            // TODO: app with 0 activities is unlikely
+            throw new IllegalStateException("Couldn't derive the list of activities!");
+        }
+
         return activities;
     }
 
@@ -57,11 +63,6 @@ public class CoverageUtils {
                 break;
             default:
                 break;
-        }
-
-        // TODO: try to get rid of this
-        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 
@@ -101,10 +102,6 @@ public class CoverageUtils {
                 break;
             default:
                 break;
-        }
-
-        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            //Currently Unsupported
         }
     }
 
