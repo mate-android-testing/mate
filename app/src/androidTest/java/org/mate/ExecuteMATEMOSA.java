@@ -18,7 +18,7 @@ import org.mate.utils.Coverage;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATEwithMOSA {
+public class ExecuteMATEMOSA {
 
     @Test
     public void useAppContext() {

@@ -20,6 +20,7 @@ import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -340,6 +341,8 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
             case BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunctionMultiObjective(getFitnessFunctionArgument(index));
+            case BranchCoverageFitnessFunction.FITNESS_FUNCTION_ID:
+                return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

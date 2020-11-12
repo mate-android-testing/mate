@@ -1,18 +1,13 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.ui.EnvironmentManager;
-import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
@@ -21,6 +16,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     protected UIAbstractionLayer uiAbstractionLayer;
     protected int maxNumEvents;
     protected boolean resetApp;
+    protected boolean isTestSuiteExecution;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
         this( true, maxNumEvents);
@@ -30,6 +26,12 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
+        isTestSuiteExecution = false;
+    }
+
+    // TODO: might be replaceable with chromosome factory property in the future
+    public void setTestSuiteExecution(boolean testSuiteExecution) {
+        this.isTestSuiteExecution = testSuiteExecution;
     }
 
     @Override
@@ -48,7 +50,16 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
-            testCase.finish(chromosome);
+            if (!isTestSuiteExecution) {
+                /*
+                * If we deal with a test suite execution, the storing of coverage
+                * and fitness data is handled by the AndroidSuiteRandomChromosomeFactory itself.
+                 */
+                FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
+                CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+                CoverageUtils.logChromosomeCoverage(chromosome);
+            }
+            testCase.finish();
         }
         return chromosome;
     }
