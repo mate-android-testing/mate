@@ -21,7 +21,10 @@ public class ExecuteMATENovelty {
     @Test
     public void useAppContext() {
 
-        MATE.log_acc("Starting Novelty Search...");
+        throw new UnsupportedOperationException("Novelty search algorithm not" +
+                " supported yet!");
+
+        /*MATE.log_acc("Starting Novelty Search...");
         MATE mate = new MATE();
         //mate.testApp("Novelty");
 
