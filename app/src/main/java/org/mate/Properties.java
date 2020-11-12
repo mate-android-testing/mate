@@ -211,6 +211,39 @@ public class Properties {
     }
 
     /**
+     * Added by stockinger on 28/09/2020
+     */
+    public static int MAX_NUM_EVENTS() { return propertyOr(50); }
+
+    /*
+     * Primitive Standard GA properties
+     */
+    public static int PRIMITIVE_STANDARD_GA_POPULATION_SIZE() { return propertyOr(10); }
+
+    public static int PRIMITIVE_STANDARD_GA_BIG_POPULATION_SIZE() { return propertyOr(20); }
+
+    /*
+     * Standard GA properties
+     */
+    public static float STANDARD_GA_RELATIVE_INTENT_AMOUNT() { return propertyOr(0.5f); }
+
+    /*
+     * Sapienz properties
+     */
+    public static int SAPIENZ_NUMBER_TESTCASES() { return propertyOr(5); }
+
+    public static int SAPIENZ_P_MUTATE() { return propertyOr(1); }
+
+    /*
+     * Evolutionary Search properties
+     */
+    public static int EVOLUTIONARY_SEARCH_POPULATION_SIZE() { return propertyOr(50); }
+
+    public static int EVOLUTIONARY_SEARCH_BIG_POPULATION_SIZE() { return propertyOr(100); }
+
+
+
+    /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored
      * the given default value will be returned.
