@@ -65,10 +65,10 @@ public class FitnessUtils {
      *
      * @param activeChromosomes The list of active chromosomes.
      */
-    public static void cleanCache(List<IChromosome<TestCase>> activeChromosomes) {
+    public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
         if (LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
-            // LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+            LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
         }
     }
 }

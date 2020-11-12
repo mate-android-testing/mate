@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -144,10 +145,10 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
 
         // Todo: remove. Memory issue dirty quick fix
-        List<Object> activeChromosomes = new ArrayList<>();
+        List<IChromosome<T>> activeChromosomes = new ArrayList<>();
         activeChromosomes.addAll(population);
         activeChromosomes.addAll(archive);
-        LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+        FitnessUtils.cleanCache(activeChromosomes);
 
     }
 
