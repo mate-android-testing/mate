@@ -544,15 +544,7 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));
     }
-
-    // TODO: use new coverage endpoint
-    @Deprecated
-    public double getCoverage(Object o) {
-        String cmd = "getCoverage:" + emulator + ":" + o.toString();
-
-        return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
+    
     public List<Double> getLineCoveredPercentage(Object o, List<String> lines) {
         StringBuilder sb = new StringBuilder();
         sb.append("getLineCoveredPercentage:" + emulator + ":" + o.toString() + ":");
