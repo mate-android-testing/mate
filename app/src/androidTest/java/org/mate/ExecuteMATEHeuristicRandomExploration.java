@@ -23,7 +23,7 @@ public class ExecuteMATEHeuristicRandomExploration {
         }
 
         final HeuristicExploration heuristicExploration =
-                new HeuristicExploration(Properties.MAX_NUM_EVENTS());
+                new HeuristicExploration(Properties.MAX_NUMBER_EVENTS());
 
         mate.testApp(heuristicExploration);
     }

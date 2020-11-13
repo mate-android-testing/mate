@@ -26,7 +26,7 @@ public class ExecuteMATERandomSearchGA {
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                 .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
-                .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
+                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .build();
 
         // TODO: move to constructor but ensure that emulator is properly initialized before

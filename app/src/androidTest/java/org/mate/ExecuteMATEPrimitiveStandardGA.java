@@ -38,9 +38,9 @@ public class ExecuteMATEPrimitiveStandardGA {
                 .withMutationFunction(PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID)
                 .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                .withPopulationSize(Properties.PRIMITIVE_STANDARD_GA_POPULATION_SIZE())
-                .withBigPopulationSize(Properties.PRIMITIVE_STANDARD_GA_BIG_POPULATION_SIZE())
-                .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
+                .withPopulationSize(Properties.POPULATION_SIZE())
+                .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
+                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
                 .build();

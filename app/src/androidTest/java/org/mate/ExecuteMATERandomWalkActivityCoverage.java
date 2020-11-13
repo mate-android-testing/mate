@@ -30,7 +30,7 @@ public class ExecuteMATERandomWalkActivityCoverage {
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                 .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                .withMaxNumEvents(Properties.MAX_NUM_EVENTS());
+                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS());
 
 
         final IGeneticAlgorithm<TestCase> randomWalk = builder.build();

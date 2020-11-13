@@ -44,13 +44,13 @@ public class ExecuteMATESapienzImpl {
                 .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                 .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                .withPopulationSize(Properties.EVOLUTIONARY_SEARCH_POPULATION_SIZE())
-                .withBigPopulationSize(Properties.EVOLUTIONARY_SEARCH_BIG_POPULATION_SIZE())
-                .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
-                .withPMutate(Properties.SAPIENZ_P_MUTATE())
+                .withPopulationSize(Properties.POPULATION_SIZE())
+                .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
+                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
+                .withPMutate(Properties.P_MUTATE())
                 .withPInnerMutate(Properties.P_INNER_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
-                .withNumTestCases(Properties.SAPIENZ_NUMBER_TESTCASES())
+                .withNumTestCases(Properties.NUMBER_TESTCASES())
                 .build();
 
         mate.testApp(sapienz);

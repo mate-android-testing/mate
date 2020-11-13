@@ -35,9 +35,9 @@ public class ExecuteMATEMio {
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                .withPopulationSize(Properties.EVOLUTIONARY_SEARCH_POPULATION_SIZE())
-                .withBigPopulationSize(Properties.EVOLUTIONARY_SEARCH_BIG_POPULATION_SIZE())
-                .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
+                .withPopulationSize(Properties.POPULATION_SIZE())
+                .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
+                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
                 .withPSampleRandom(Properties.P_SAMPLE_RANDOM())

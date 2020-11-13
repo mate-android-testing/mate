@@ -34,7 +34,7 @@ public class ExecuteMATEOnePlusOne {
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
                 .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
-                .withMaxNumEvents(Properties.MAX_NUM_EVENTS())
+                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .build();
 
         mate.testApp(onePlusOne);
