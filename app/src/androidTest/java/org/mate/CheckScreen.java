@@ -13,6 +13,7 @@ import android.support.test.uiautomator.UiDevice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.state.IScreenState;
@@ -74,9 +75,8 @@ public class CheckScreen {
         }
         */
 
-        MATE mate = new MATE();
-        //run mate for timeout minutes
-        mate.testApp("checkScreen");
+        CheckCurrentScreen checkScreen = new CheckCurrentScreen();
+        checkScreen.scanScreen();
     }
 
 }

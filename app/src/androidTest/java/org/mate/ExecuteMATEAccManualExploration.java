@@ -4,8 +4,9 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.accessibility.AccessibilitySummaryResults;
-import org.mate.model.IGUIModel;
+import org.mate.exploration.manual.ManualExploration;
+
+import java.util.Date;
 
 /**
  * Created by marceloeler on 11/07/17.
@@ -14,13 +15,16 @@ import org.mate.model.IGUIModel;
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEAccManualExploration {
 
+    private long runningTime;
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
+        runningTime = new Date().getTime();
 
         MATE.log("start testing acc");
         MATE mate = new MATE();
-        //run mate for timeout minutes
-        mate.testApp("AccManual");
+
+        ManualExploration manualExploration = new ManualExploration();
+        manualExploration.startManualExploration(runningTime);
     }
 }
