@@ -6,13 +6,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
+import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
-import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
@@ -28,12 +28,11 @@ public class ExecuteMATEStandardGeneticAlgorithm {
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                .withChromosomeFactory(IntentChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                .withRelativeIntentAmount(Properties.RELATIVE_INTENT_AMOUNT())
+                .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                 .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
+                .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
