@@ -348,6 +348,8 @@ public class EnvironmentManager {
      */
     public void drawGraph(boolean raw) {
 
+        MATE.log_acc("Drawing graph!");
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(raw));
         sendMessage(messageBuilder.build());

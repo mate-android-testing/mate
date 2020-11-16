@@ -40,18 +40,6 @@ public class ExecuteMATEMOSA {
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER());
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
-        // TODO: move to constructor but ensure that emulator is properly initialized before
-        if (Properties.GRAPH_TYPE() != null) {
-            // initialise a graph
-            MATE.log_acc("Initialising graph!");
-            Registry.getEnvironmentManager().initGraph();
-        }
-
         List<String> objectives = Registry.getEnvironmentManager()
                 .getObjectives(Properties.OBJECTIVE());
 
@@ -64,9 +52,5 @@ public class ExecuteMATEMOSA {
         final IGeneticAlgorithm<TestCase> mosa = builder.build();
 
         mate.testApp(mosa);
-
-        if (Properties.GRAPH_TYPE() != null) {
-            Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
-        }
     }
 }

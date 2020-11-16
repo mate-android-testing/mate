@@ -181,6 +181,17 @@ public class MATE {
 
     public void testApp(final Algorithm algorithm) {
 
+        MATE.log_acc("Activities");
+        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+            MATE.log_acc("\t" + s);
+        }
+
+        if (Properties.GRAPH_TYPE() != null) {
+            // initialise a graph
+            MATE.log_acc("Initialising graph!");
+            Registry.getEnvironmentManager().initGraph();
+        }
+
         runningTime = new Date().getTime();
 
         try {
@@ -194,6 +205,10 @@ public class MATE {
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 CoverageUtils.logFinalCoverage();
+            }
+
+            if (Properties.GRAPH_TYPE() != null) {
+                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
             }
 
         } catch (Exception e) {

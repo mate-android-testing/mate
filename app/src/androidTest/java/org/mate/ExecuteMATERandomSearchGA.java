@@ -29,22 +29,6 @@ public class ExecuteMATERandomSearchGA {
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .build();
 
-        // TODO: move to constructor but ensure that emulator is properly initialized before
-        if (Properties.GRAPH_TYPE() != null) {
-            // initialise a graph
-            MATE.log_acc("Initialising graph!");
-            Registry.getEnvironmentManager().initGraph();
-        }
-
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
         mate.testApp(randomSearchGA);
-
-        if (Properties.GRAPH_TYPE() != null) {
-            Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
-        }
     }
 }
