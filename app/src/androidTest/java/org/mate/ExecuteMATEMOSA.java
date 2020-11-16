@@ -40,33 +40,16 @@ public class ExecuteMATEMOSA {
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER());
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
-        // TODO: move to constructor but ensure that emulator is properly initialized before
-        if (Properties.GRAPH_TYPE() != null) {
-            // initialise a graph
-            MATE.log_acc("Initialising graph!");
-            Registry.getEnvironmentManager().initGraph();
-        }
-
         List<String> objectives = Registry.getEnvironmentManager()
                 .getObjectives(Properties.OBJECTIVE());
 
         // we need to associate with each branch a fitness function
         for (String objective : objectives) {
-            // TODO: use property 'FITNESS_FUNCTION'
-            builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, objective);
+            builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
         }
 
         final IGeneticAlgorithm<TestCase> mosa = builder.build();
 
         mate.testApp(mosa);
-
-        if (Properties.GRAPH_TYPE() != null) {
-            Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
-        }
     }
 }

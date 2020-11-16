@@ -49,11 +49,6 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withRelativeIntentAmount(float relativeIntentAmount) {
-        properties.setProperty(RELATIVE_INTENT_AMOUNT, String.valueOf(relativeIntentAmount));
-        return this;
-    }
-
     public GeneticAlgorithmBuilder withChromosomeFactory(String chromosomeFactoryId) {
         properties.setProperty(CHROMOSOME_FACTORY_KEY, chromosomeFactoryId);
         return this;

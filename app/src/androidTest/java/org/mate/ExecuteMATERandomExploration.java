@@ -17,11 +17,6 @@ public class ExecuteMATERandomExploration {
 
         MATE mate = new MATE();
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
         final RandomExploration randomExploration
                 = new RandomExploration(true, Properties.MAX_NUMBER_EVENTS());
 

@@ -1,13 +1,13 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.Registry;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.ui.EnvironmentManager;
+import org.mate.utils.CoverageUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> {
     public static final String FITNESS_FUNCTION_ID = "statement_coverage_fitness_function";
 
@@ -23,7 +23,7 @@ public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> 
             return cache.get(chromosome);
         }
         // FIXME: statement coverage is not working right now
-        double fitness = Registry.getEnvironmentManager().getCoverage(chromosome);
+        double fitness = CoverageUtils.getCoverage(Properties.COVERAGE(), chromosome);
         cache.put(chromosome, fitness);
         return fitness;
     }

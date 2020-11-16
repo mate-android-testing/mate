@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
+import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,10 +73,10 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         updateArchive(population);
 
         // Todo: remove. Memory issue dirty quick fix
-        List<Object> activeChromosomes = new ArrayList<>();
+        List<IChromosome<T>> activeChromosomes = new ArrayList<>();
         activeChromosomes.addAll(population);
         activeChromosomes.addAll(archive.values());
-        LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+        FitnessUtils.cleanCache(activeChromosomes);
     }
 
     @Override

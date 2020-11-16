@@ -15,11 +15,6 @@ public class ExecuteMATERandomExplorationIntent {
 
         MATE mate = new MATE();
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
         final RandomExploration randomExploration

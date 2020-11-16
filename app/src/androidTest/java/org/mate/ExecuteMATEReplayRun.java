@@ -43,11 +43,6 @@ public class ExecuteMATEReplayRun {
             this.deviceMgr = new DeviceMgr(device, packageName);
             uiAbstractionLayer = mate.getUiAbstractionLayer();
 
-            MATE.log_acc("Activities");
-            for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                MATE.log_acc("\t" + s);
-            }
-
             MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
             // track which test cases couldn't be successfully replayed

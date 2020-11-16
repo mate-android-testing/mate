@@ -28,11 +28,6 @@ public class ExecuteMATENSGAII {
 
         MATE mate = new MATE();
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
         IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
                 .withAlgorithm(NSGAII.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)

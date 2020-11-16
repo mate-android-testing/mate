@@ -43,18 +43,10 @@ public class ExecuteMATEMio {
                 .withPSampleRandom(Properties.P_SAMPLE_RANDOM())
                 .withFocusedSearchStart(Properties.P_FOCUSED_SEARCH_START());
 
-        // TODO: move to constructor but ensure that emulator is properly initialized before
-        if (Properties.GRAPH_TYPE() != null) {
-            // initialise a graph
-            MATE.log_acc("Initialising graph!");
-            Registry.getEnvironmentManager().initGraph();
-        }
-
         List<String> objectives = Registry.getEnvironmentManager().getObjectives(Properties.OBJECTIVE());
 
         for (String objective : objectives) {
-            // TODO: use property 'FITNESS_FUNCTION'
-            builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, objective);
+            builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
         }
 
         final IGeneticAlgorithm<TestCase> mio = builder.build();

@@ -17,11 +17,6 @@ public class ExecuteMATEHeuristicRandomExploration {
 
         MATE mate = new MATE();
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
         final HeuristicExploration heuristicExploration =
                 new HeuristicExploration(Properties.MAX_NUMBER_EVENTS());
 

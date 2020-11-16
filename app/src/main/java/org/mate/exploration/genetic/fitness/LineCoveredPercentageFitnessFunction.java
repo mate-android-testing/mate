@@ -4,7 +4,6 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.ui.EnvironmentManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,14 +53,14 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
     /**
      * remove chromosome from cache that are no longer in use. (to avoid memory issues)
      */
-    public static void cleanCache(List<Object> activeChromosomesAnon) {
+    public static <T> void cleanCache(List<IChromosome<T>> activeChromosomesAnon) {
         if (lines.size() == 0 || cache.size() == 0) {
             return;
         }
 
         List<IChromosome<TestCase>> activeChromosomes = new ArrayList<>();
-        for (Object o : activeChromosomesAnon) {
-            activeChromosomes.add((IChromosome<TestCase>) o);
+        for (IChromosome<T> chromosome: activeChromosomesAnon) {
+            activeChromosomes.add((IChromosome<TestCase>) chromosome);
         }
 
         int count = 0;

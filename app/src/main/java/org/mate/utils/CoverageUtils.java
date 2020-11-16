@@ -26,6 +26,27 @@ public class CoverageUtils {
     private static Map<IChromosome, Set<String>> visitedActivities = new HashMap<>();
 
     /**
+     * Copies the coverage data for the given test cases from a source chromosome to a
+     * target chromosome.
+     *
+     * @param sourceChromosome The source chromosome.
+     * @param targetChromosome The target chromosome.
+     * @param testCases The test cases for which coverage data should be copied over.
+     */
+    public static void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
+                                        IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+
+        switch (Properties.COVERAGE()) {
+            case BRANCH_COVERAGE:
+            case LINE_COVERAGE:
+                Registry.getEnvironmentManager().copyCoverageData(sourceChromosome, targetChromosome, testCases);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
      * Retrieves the activities of the AUT.
      *
      * @return Return a set of activities.
@@ -34,6 +55,12 @@ public class CoverageUtils {
         if (activities == null) {
             activities = new HashSet<>(Registry.getEnvironmentManager().getActivityNames());
         }
+
+        if (activities.size() == 0) {
+            // TODO: app with 0 activities is unlikely
+            throw new IllegalStateException("Couldn't derive the list of activities!");
+        }
+
         return activities;
     }
 
@@ -57,11 +84,6 @@ public class CoverageUtils {
                 break;
             default:
                 break;
-        }
-
-        // TODO: try to get rid of this
-        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 
@@ -101,10 +123,6 @@ public class CoverageUtils {
                 break;
             default:
                 break;
-        }
-
-        if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-            //Currently Unsupported
         }
     }
 

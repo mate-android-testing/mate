@@ -28,11 +28,6 @@ public class ExecuteMATESapienzImpl {
 
         MATE mate = new MATE();
 
-        MATE.log_acc("Activities");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
-        }
-
         final IGeneticAlgorithm<TestSuite> sapienz =
                 new GeneticAlgorithmBuilder()
                 .withAlgorithm(NSGAII.ALGORITHM_NAME)
