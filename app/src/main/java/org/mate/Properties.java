@@ -118,7 +118,7 @@ public class Properties {
     }
 
     public static int MAX_NUMBER_EVENTS() {
-        return propertyOr(5);
+        return propertyOr(50);
     }
 
     public static double P_CROSSOVER() {
@@ -209,6 +209,11 @@ public class Properties {
     public static boolean RECORD_STACK_TRACE() {
         return propertyOr(false);
     }
+
+    /**
+     * Added by stockinger on 28/09/2020
+     */
+    public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
