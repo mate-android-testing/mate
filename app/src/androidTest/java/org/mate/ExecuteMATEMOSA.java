@@ -45,8 +45,7 @@ public class ExecuteMATEMOSA {
 
         // we need to associate with each branch a fitness function
         for (String objective : objectives) {
-            // TODO: use property 'FITNESS_FUNCTION'
-            builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, objective);
+            builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
         }
 
         final IGeneticAlgorithm<TestCase> mosa = builder.build();
