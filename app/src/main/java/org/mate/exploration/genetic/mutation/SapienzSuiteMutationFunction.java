@@ -98,7 +98,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         }
 
         if (!copyTestCases.isEmpty()) {
-            Registry.getEnvironmentManager().copyCoverageData(chromosome, mutatedChromosome, copyTestCases);
+            CoverageUtils.copyCoverageData(chromosome, mutatedChromosome, copyTestCases);
+            FitnessUtils.copyFitnessData(chromosome, mutatedChromosome, copyTestCases);
         }
 
         mutatedTestSuite.getTestCases().addAll(executedTestCases);

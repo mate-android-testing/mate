@@ -32,7 +32,11 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
 
         List<TestCase> copyCoverageDataFor = new ArrayList<>(chromosome.getValue().getTestCases());
         copyCoverageDataFor.remove(randomElementIndex);
-        Registry.getEnvironmentManager().copyCoverageData(chromosome, mutatedChromosome, copyCoverageDataFor);
+
+        if (!copyCoverageDataFor.isEmpty()) {
+            CoverageUtils.copyCoverageData(chromosome, mutatedChromosome, copyCoverageDataFor);
+            FitnessUtils.copyFitnessData(chromosome, mutatedChromosome, copyCoverageDataFor);
+        }
 
         //Todo: handle coverage
         for (int i = 0; i < chromosome.getValue().getTestCases().size(); i++) {
