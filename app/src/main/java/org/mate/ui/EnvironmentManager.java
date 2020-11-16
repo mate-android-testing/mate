@@ -10,6 +10,8 @@ import org.mate.graph.GraphType;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
+import org.mate.model.TestCase;
+import org.mate.model.TestSuite;
 import org.mate.utils.Coverage;
 import org.mate.utils.Objective;
 
@@ -168,6 +170,20 @@ public class EnvironmentManager {
         long timeout = 0;
         String cmd = "timeout";
         return Long.valueOf(tunnelLegacyCmd(cmd));
+    }
+
+    /**
+     * Copies the test cases coverage data belonging to chromosome over to the given mutated chromosome.
+     * This is necessary when a new chromosome is created but not executed, e.g. a chromosome is duplicated
+     * (which doesn't require execution since the coverage is identical).
+     *
+     * @param chromosome The original chromosome.
+     * @param mutatedChromosome The mutated chromosome.
+     * @param testCases The test cases belonging to the original chromosome.
+     */
+    public void copyCoverageData(IChromosome<TestSuite> chromosome,
+                                 IChromosome<TestSuite> mutatedChromosome, List<TestCase> testCases) {
+
     }
 
     // TODO: use new coverage endpoint

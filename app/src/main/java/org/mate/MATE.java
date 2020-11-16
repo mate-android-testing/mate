@@ -563,6 +563,11 @@ public class MATE {
                             .withPSampleRandom(0.5)
                             .withFocusedSearchStart(0.5);
 
+                    MATE.log_acc("Activities");
+                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+                        MATE.log_acc("\t" + s);
+                    }
+
                     // TODO: move to constructor but ensure that emulator is properly initialized before
                     if (Properties.GRAPH_TYPE() != null) {
                         // initialise a graph
