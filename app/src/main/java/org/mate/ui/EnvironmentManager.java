@@ -229,7 +229,7 @@ public class EnvironmentManager {
             prefix = ",";
             sb.append(testCase);
         }
-        
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/copy")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", Properties.COVERAGE().name())
