@@ -31,7 +31,7 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.8";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.9";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -173,32 +173,75 @@ public class EnvironmentManager {
     }
 
     /**
-     * Copies the test cases coverage data belonging to chromosome over to the given mutated chromosome.
+     * Copies the test cases fitness data belonging to the source chromosome over to the given target chromosome.
+     * This is necessary when a new chromosome is created but not executed, e.g. a chromosome is duplicated
+     * (which doesn't require execution since the fitness is identical).
+     *
+     * @param sourceChromosome The source chromosome.
+     * @param targetChromosome The target chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
+     */
+    public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
+                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+
+        // concatenate test cases
+        StringBuilder sb = new StringBuilder();
+
+        String prefix = "";
+        for (TestCase testCase : testCases) {
+            sb.append(prefix);
+            prefix = ",";
+            sb.append(testCase);
+        }
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/copy_fitness_data")
+                .withParameter("deviceId", emulator)
+                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION())
+                .withParameter("chromosome_src", sourceChromosome.toString())
+                .withParameter("chromosome_target", targetChromosome.toString())
+                .withParameter("entities", sb.toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Copying fitness data failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        }
+    }
+
+    /**
+     * Copies the test cases coverage data belonging to the source chromosome over to the given target chromosome.
      * This is necessary when a new chromosome is created but not executed, e.g. a chromosome is duplicated
      * (which doesn't require execution since the coverage is identical).
      *
-     * @param chromosome The original chromosome.
-     * @param mutatedChromosome The mutated chromosome.
-     * @param testCases The test cases belonging to the original chromosome.
+     * @param sourceChromosome The source chromosome.
+     * @param targetChromosome The target chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
      */
-    public void copyCoverageData(IChromosome<TestSuite> chromosome,
-                                 IChromosome<TestSuite> mutatedChromosome, List<TestCase> testCases) {
+    public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
+                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
-    }
-
-    // TODO: use new coverage endpoint
-    @Deprecated
-    public void copyCoverageData(Object source, Object target, List<? extends Object> entities) {
+        // concatenate test cases
         StringBuilder sb = new StringBuilder();
+
         String prefix = "";
-        for (Object entity : entities) {
+        for (TestCase testCase : testCases) {
             sb.append(prefix);
             prefix = ",";
-            sb.append(entity.toString());
+            sb.append(testCase);
         }
-        String cmd = "copyCoverageData:" + emulator + ":" + source.toString() + ":" + target.toString()
-                + ":" + sb.toString();
-        tunnelLegacyCmd(cmd);
+        
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/copy")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", Properties.COVERAGE().name())
+                .withParameter("chromosome_src", sourceChromosome.toString())
+                .withParameter("chromosome_target", targetChromosome.toString())
+                .withParameter("entities", sb.toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Copying coverage data failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        }
     }
 
     public String getCurrentActivityName() {
@@ -376,15 +419,13 @@ public class EnvironmentManager {
     }
 
     /**
-     * Stores the branch distance data for the given chromosome.
+     * Stores the fitness data for the given chromosome.
      *
      * @param chromosomeId Identifies either a test case or a test suite.
      * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
      *                     otherwise {@code null}.
      */
-    public void storeBranchDistanceData(String chromosomeId, String entityId) {
-
-        MATE.log("Storing branch distance data...");
+    public void storeFitnessData(String chromosomeId, String entityId) {
 
         String testcase = entityId == null ? chromosomeId : entityId;
         if (coveredTestCases.contains(testcase)) {
@@ -393,22 +434,26 @@ public class EnvironmentManager {
         }
         coveredTestCases.add(testcase);
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/store")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/store_fitness_data")
+                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION())
                 .withParameter("deviceId", emulator)
-                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosome", chromosomeId);
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
         }
 
-        // TODO: may log failure contained in response
-        sendMessage(messageBuilder.build());
+        Message response = sendMessage(messageBuilder.build());
+
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Storing fitness data failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        }
     }
 
     /**
      * Retrieves the branch distance for the given chromosome. Note that
-     * {@link #storeBranchDistanceData(String, String)} has to be called previously.
+     * {@link #storeFitnessData(String, String)} has to be called previously.
      *
      * @param chromosomeId Identifies either a test case or a test suite.
      * @return Returns the branch distance for the given chromosome.
