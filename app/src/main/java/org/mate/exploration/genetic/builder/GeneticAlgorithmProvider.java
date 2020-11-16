@@ -202,7 +202,7 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
             case IntentChromosomeFactory.CHROMOSOME_FACTORY_ID:
-                return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), getRelativeIntentAmount());
+                return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -400,21 +400,6 @@ public class GeneticAlgorithmProvider {
         } else {
             return Integer.valueOf(numEvents);
         }
-    }
-
-    private float getRelativeIntentAmount() {
-        String relativeIntentAmount = properties.getProperty(GeneticAlgorithmBuilder.RELATIVE_INTENT_AMOUNT);
-        if (relativeIntentAmount == null) {
-            if (useDefaults) {
-                return org.mate.Properties.RELATIVE_INTENT_AMOUNT();
-            } else {
-                throw new IllegalStateException(
-                        "Without using defaults: relative intent amount not specified");
-            }
-        } else {
-            return Float.valueOf(relativeIntentAmount);
-        }
-
     }
 
     private int getNumberIterations() {
