@@ -1,19 +1,17 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Deprecated
-public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> {
-    public static final String FITNESS_FUNCTION_ID = "statement_coverage_fitness_function";
+public class LineCoverageFitnessFunction<T> implements IFitnessFunction<T> {
+    public static final String FITNESS_FUNCTION_ID = "line_coverage_fitness_function";
 
     private final Map<IChromosome<T>, Double> cache;
 
-    public StatementCoverageFitnessFunction() {
+    public LineCoverageFitnessFunction() {
         cache = new HashMap<>();
     }
 
@@ -23,7 +21,7 @@ public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> 
             return cache.get(chromosome);
         }
         // FIXME: statement coverage is not working right now
-        double fitness = CoverageUtils.getCoverage(Properties.COVERAGE(), chromosome);
+        double fitness = FitnessUtils.getFitness(chromosome);
         cache.put(chromosome, fitness);
         return fitness;
     }

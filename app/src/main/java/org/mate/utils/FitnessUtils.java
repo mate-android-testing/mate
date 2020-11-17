@@ -3,9 +3,11 @@ package org.mate.utils;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 
@@ -30,7 +32,8 @@ public class FitnessUtils {
 
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
-                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
         }
     }
@@ -45,7 +48,8 @@ public class FitnessUtils {
 
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
-                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome.getValue().toString(), null);
         }
 
@@ -66,10 +70,10 @@ public class FitnessUtils {
         // TODO: use enum for fitness function property
         // store branch distance data
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
-                || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+                || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome.getValue().toString(), testCaseId);
         }
-
     }
 
     /**
@@ -82,5 +86,47 @@ public class FitnessUtils {
         if (LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
         }
+    }
+
+    /**
+     * Retrieves the fitness value for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the fitness value should be evaluated.
+     * @param <T> Specifies whether the chromosome is a test suite or a test case.
+     * @return Returns the fitness value for the given chromosome.
+     */
+    public static <T> double getFitness(IChromosome<T> chromosome) {
+
+        if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            return Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
+        } else if (BranchCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            return Registry.getEnvironmentManager().getCoverage(Coverage.BRANCH_COVERAGE, chromosome.toString());
+        } else if (LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            return Registry.getEnvironmentManager().getCoverage(Coverage.LINE_COVERAGE, chromosome.toString());
+        }
+
+        throw new UnsupportedOperationException("Fitness function "
+                + Properties.FITNESS_FUNCTION() + "not yet supported!");
+    }
+
+    /**
+     * Retrieves the fitness vector for the given chromosome, i.e. the chromosome is evaluated
+     * against each single objective, e.g. branch.
+     *
+     * @param chromosome The chromosome for which the fitness vector should be evaluated.
+     * @param objectives A list of objectives, e.g. lines or branches, or {@code null} if not required.
+     * @param <T> Specifies whether the chromosome is a test suite or a test case.
+     * @return Returns the fitness vector for the given chromosome.
+     */
+    public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives) {
+
+        if (BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome);
+        } else if (LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+            return Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, objectives);
+        }
+
+        throw new UnsupportedOperationException("Fitness function "
+                + Properties.FITNESS_FUNCTION() + "not yet supported!");
     }
 }

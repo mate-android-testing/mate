@@ -26,7 +26,7 @@ import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiOb
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
-import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
@@ -331,8 +331,8 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SuiteActivityFitnessFunction();
-            case StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID:
-                return new StatementCoverageFitnessFunction<>();
+            case LineCoverageFitnessFunction.FITNESS_FUNCTION_ID:
+                return new LineCoverageFitnessFunction<>();
             case LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes

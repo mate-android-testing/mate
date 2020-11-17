@@ -1,10 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
-import org.mate.utils.Coverage;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 
 public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
@@ -13,11 +11,7 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        if (Properties.COVERAGE() != Coverage.BRANCH_COVERAGE) {
-            throw new IllegalStateException("Wrong coverage property specified!");
-        }
-
-        double branchCoverage = CoverageUtils.getCoverage(Properties.COVERAGE(), chromosome);
+        double branchCoverage = FitnessUtils.getFitness(chromosome);
 
         if (branchCoverage == 100.0) {
             ConditionalTerminationCondition.satisfiedCondition();

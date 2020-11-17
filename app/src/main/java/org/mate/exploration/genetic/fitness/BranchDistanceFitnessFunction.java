@@ -1,9 +1,9 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.utils.FitnessUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
             MATE.log_acc("Accessing cache for retrieving fitness value!");
             branchDistance = cache.get(chromosome);
         } else {
-            branchDistance = Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
+            branchDistance = FitnessUtils.getFitness(chromosome);
         }
         
         /*

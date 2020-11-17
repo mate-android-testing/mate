@@ -10,7 +10,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromos
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
-import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
@@ -35,7 +35,7 @@ public class ExecuteMATESapienzImpl {
                 .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
                 .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
                 .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
-                .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                .withFitnessFunction(LineCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                 .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
                 .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
