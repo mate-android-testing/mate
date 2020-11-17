@@ -1,8 +1,7 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> 
             return cache.get(chromosome);
         }
         // FIXME: statement coverage is not working right now
-        double fitness = CoverageUtils.getCoverage(Properties.COVERAGE(), chromosome);
+        double fitness = FitnessUtils.getFitness(chromosome);
         cache.put(chromosome, fitness);
         return fitness;
     }

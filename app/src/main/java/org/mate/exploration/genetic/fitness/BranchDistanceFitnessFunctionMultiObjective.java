@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessF
             branchDistance = cache.get(branch).get(chromosome);
         } else {
             // retrieves the fitness value for every single branch
-            List<Double> branchDistanceVector = Registry.getEnvironmentManager().getBranchDistanceVector(chromosome);
+            List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, null);
 
             // insert them into the cache
             for (int i = 0; i < branchDistanceVector.size(); i++) {

@@ -1,9 +1,9 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
+import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
         }
 
         MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> coveredPercentage = Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, lines);
+        List<Double> coveredPercentage = FitnessUtils.getFitness(chromosome, lines);
         for (int i = 0; i < coveredPercentage.size(); i++) {
             cache.get(lines.get(i)).put(chromosome, coveredPercentage.get(i));
         }
