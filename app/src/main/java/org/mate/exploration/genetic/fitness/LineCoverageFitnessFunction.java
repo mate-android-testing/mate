@@ -6,13 +6,12 @@ import org.mate.utils.FitnessUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-@Deprecated
-public class StatementCoverageFitnessFunction<T> implements IFitnessFunction<T> {
-    public static final String FITNESS_FUNCTION_ID = "statement_coverage_fitness_function";
+public class LineCoverageFitnessFunction<T> implements IFitnessFunction<T> {
+    public static final String FITNESS_FUNCTION_ID = "line_coverage_fitness_function";
 
     private final Map<IChromosome<T>, Double> cache;
 
-    public StatementCoverageFitnessFunction() {
+    public LineCoverageFitnessFunction() {
         cache = new HashMap<>();
     }
 

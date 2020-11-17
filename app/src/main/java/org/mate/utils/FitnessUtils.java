@@ -7,7 +7,7 @@ import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
-import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 
@@ -32,7 +32,8 @@ public class FitnessUtils {
 
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
-                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
         }
     }
@@ -47,7 +48,8 @@ public class FitnessUtils {
 
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
                 || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
-                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+                || LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome.getValue().toString(), null);
         }
 
@@ -68,7 +70,8 @@ public class FitnessUtils {
         // TODO: use enum for fitness function property
         // store branch distance data
         if (BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
-                || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+                || BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())
+                || LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome.getValue().toString(), testCaseId);
         }
     }
@@ -98,7 +101,7 @@ public class FitnessUtils {
             return Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
         } else if (BranchCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             return Registry.getEnvironmentManager().getCoverage(Coverage.BRANCH_COVERAGE, chromosome.toString());
-        } else if (StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
+        } else if (LineCoverageFitnessFunction.FITNESS_FUNCTION_ID.equals(Properties.FITNESS_FUNCTION())) {
             return Registry.getEnvironmentManager().getCoverage(Coverage.LINE_COVERAGE, chromosome.toString());
         }
 

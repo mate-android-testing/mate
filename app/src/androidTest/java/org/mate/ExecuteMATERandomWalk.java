@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestCase;
@@ -29,7 +29,7 @@ public class ExecuteMATERandomWalk {
                     .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                     .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                     .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                    .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
+                    .withFitnessFunction(LineCoverageFitnessFunction.FITNESS_FUNCTION_ID)
                     .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS());
 
             final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
