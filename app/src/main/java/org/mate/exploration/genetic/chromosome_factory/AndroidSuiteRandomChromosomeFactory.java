@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
     public static final String CHROMOSOME_FACTORY_ID = "android_suite_random_chromosome_factory";
@@ -17,7 +18,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             maxNumEvents) {
         this.numTestCases = numTestCases;
         androidRandomChromosomeFactory = new AndroidRandomChromosomeFactory( true, maxNumEvents);
-        androidRandomChromosomeFactory.setTriggerStoreCoverage(false);
+        androidRandomChromosomeFactory.setTestSuiteExecution(true);
     }
 
     @Override
@@ -29,6 +30,7 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
             MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
+            FitnessUtils.storeTestSuiteChromosomeFitness(chromosome, tc.toString());
             CoverageUtils.storeTestSuiteChromosomeCoverage(chromosome, tc.toString());
         }
         CoverageUtils.logChromosomeCoverage(chromosome);

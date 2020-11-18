@@ -7,6 +7,7 @@ import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
@@ -15,7 +16,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     protected UIAbstractionLayer uiAbstractionLayer;
     protected int maxNumEvents;
     protected boolean resetApp;
-    protected boolean triggerStoreCoverage;
+    protected boolean isTestSuiteExecution;
     private int actionsCount;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
@@ -26,12 +27,13 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         this.uiAbstractionLayer = MATE.uiAbstractionLayer;
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
-        triggerStoreCoverage = true;
+        isTestSuiteExecution = false;
         actionsCount = 0;
     }
 
-    public void setTriggerStoreCoverage(boolean triggerStoreCoverage) {
-        this.triggerStoreCoverage = triggerStoreCoverage;
+    // TODO: might be replaceable with chromosome factory property in the future
+    public void setTestSuiteExecution(boolean testSuiteExecution) {
+        this.isTestSuiteExecution = testSuiteExecution;
     }
 
     @Override
@@ -50,7 +52,12 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
-            if (triggerStoreCoverage) {
+            if (!isTestSuiteExecution) {
+                /*
+                * If we deal with a test suite execution, the storing of coverage
+                * and fitness data is handled by the AndroidSuiteRandomChromosomeFactory itself.
+                 */
+                FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }

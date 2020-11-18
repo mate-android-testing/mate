@@ -1,10 +1,7 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.model.TestCase;
-import org.mate.ui.EnvironmentManager;
+import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,100 +14,56 @@ import java.util.Map;
  *
  * @author Michael Auer
  */
-public class BranchDistanceFitnessFunctionMultiObjective implements IFitnessFunction<TestCase> {
+public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessFunction<T> {
 
     public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function_multi_objective";
 
     // a cache that stores for each branch the set of test cases and its fitness value
-    private static final Map<String, Map<IChromosome<TestCase>, Double>> cache = new HashMap<>();
+    private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
 
-    // all branches (should be a set like in the original algorithm???)
+    // all branches (shared by instances)
     private static List<String> branches = new ArrayList<>();
 
     // the current branch we want to evaluate this fitness function against
     private final String branch;
 
+    /**
+     * Initialises the fitness function with the given branch as target.
+     *
+     * @param branch The target branch.
+     */
     public BranchDistanceFitnessFunctionMultiObjective(String branch) {
         this.branch = branch;
         branches.add(branch);
+        cache.put(branch, new HashMap<IChromosome, Double>());
     }
 
     /**
-     * Retrieves the fitness value for a given test case. Note that
-     * fitness values are pre-computed and the cache is queried for its value.
-     * If the cache doesn't contain a fitness value for a given test case,
-     * an {#link IllegalStateException} is thrown.
+     * Retrieves the branch distance fitness value for the given chromosome.
+     * A cache is employed to make subsequent requests faster.
      *
-     * @param chromosome The test case for which we want to retrieve its fitness value.
-     * @return Returns the fitness value associated with the given test case.
+     * @param chromosome The chromosome for which we want to retrieve its fitness value.
+     * @return Returns the fitness value for the given chromosome.
      */
     @Override
-    public double getFitness(IChromosome<TestCase> chromosome) {
-        if (!cache.get(branch).containsKey(chromosome)) {
-            throw new IllegalStateException("Fitness for chromosome " + chromosome
-                    + " not in cache. Must fetch fitness previously due to performance reasons");
-        }
-        return cache.get(branch).get(chromosome);
-    }
+    public double getFitness(IChromosome<T> chromosome) {
 
-    /**
-     * Computes the fitness values for a given test case, i.e. evaluates the fitness value for
-     * each single branch.
-     *
-     * @param chromosome The test case for which we want to evaluate its fitness values.
-     */
-    public static void retrieveFitnessValues(IChromosome<TestCase> chromosome) {
+        double branchDistance;
 
-        // if there are no branches, there is no possibility to retrieve a fitness value
-        if (branches.size() == 0) {
-            return;
-        }
+        if (cache.get(branch).containsKey(chromosome)) {
+            branchDistance = cache.get(branch).get(chromosome);
+        } else {
+            // retrieves the fitness value for every single branch
+            List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, null);
 
-        // init cache if not done yet
-        if (cache.size() == 0) {
-            for (String branch : branches) {
-                cache.put(branch, new HashMap<IChromosome<TestCase>, Double>());
+            // insert them into the cache
+            for (int i = 0; i < branchDistanceVector.size(); i++) {
+                cache.get(branches.get(i)).put(chromosome, branchDistanceVector.get(i));
             }
+
+            branchDistance = cache.get(branch).get(chromosome);
         }
 
-        // computes the branch distance fitness vector for a given test case
-        MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> branchDistanceVector = Registry.getEnvironmentManager().getBranchDistanceVector(chromosome);
-
-        // if there is no branch distance vector available, we can abort
-        if (branchDistanceVector.isEmpty()) {
-            throw new IllegalStateException("No branch distance vector available! Aborting.");
-        }
-
-        // insert them into the cache
-        for (int i = 0; i < branchDistanceVector.size(); i++) {
-            cache.get(branches.get(i)).put(chromosome, branchDistanceVector.get(i));
-        }
-    }
-
-    /**
-     * Removes chromosome from cache that are no longer in use. (to avoid memory issues)
-     */
-    public static void cleanCache(List<Object> activeChromosomesAnon) {
-        if (branches.size() == 0 || cache.size() == 0) {
-            return;
-        }
-
-        List<IChromosome<TestCase>> activeChromosomes = new ArrayList<>();
-        for (Object o : activeChromosomesAnon) {
-            activeChromosomes.add((IChromosome<TestCase>) o);
-        }
-
-        int count = 0;
-        for (String branch : branches) {
-            Map<IChromosome<TestCase>, Double> branchCache =  cache.get(branch);
-            for (IChromosome<TestCase> chromosome: new ArrayList<>(branchCache.keySet())) {
-                if (!activeChromosomes.contains(chromosome)) {
-                    branchCache.remove(chromosome);
-                    count++;
-                }
-            }
-        }
-        MATE.log_acc("Cleaning cache: " + count + " inactive chromosome(s) removed");
+        return branchDistance;
     }
 }

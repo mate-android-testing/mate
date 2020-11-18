@@ -4,18 +4,26 @@ import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.graph.GraphType;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
+import org.mate.model.TestCase;
+import org.mate.model.TestSuite;
 import org.mate.utils.Coverage;
+import org.mate.utils.Objective;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class EnvironmentManager {
     public static final String ACTIVITY_UNKNOWN = "unknown";
@@ -23,13 +31,21 @@ public class EnvironmentManager {
     private static final int DEFAULT_PORT = 12345;
     //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "1.7";
+    private static final String MESSAGE_PROTOCOL_VERSION = "1.9";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
     private final Socket server;
     private final Parser messageParser;
     private boolean active;
+
+    /**
+     * Tracks for which test case the pulling of traces files have been already performed.
+     * This is necessary that BranchDistance and BranchCoverage don't try to fetch for the same
+     * test case the traces file multiple times. Otherwise, the last fetch trial overwrites
+     * the traces file for the given test case with an empty file.
+     */
+    private Set<String> coveredTestCases = new HashSet<>();
 
     public EnvironmentManager() throws IOException {
         this(DEFAULT_PORT);
@@ -156,18 +172,76 @@ public class EnvironmentManager {
         return Long.valueOf(tunnelLegacyCmd(cmd));
     }
 
-    // TODO: use new coverage endpoint
-    public void copyCoverageData(Object source, Object target, List<? extends Object> entities) {
+    /**
+     * Copies the test cases fitness data belonging to the source chromosome over to the given target chromosome.
+     * This is necessary when a new chromosome is created but not executed, e.g. a chromosome is duplicated
+     * (which doesn't require execution since the fitness is identical).
+     *
+     * @param sourceChromosome The source chromosome.
+     * @param targetChromosome The target chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
+     */
+    public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
+                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+
+        // concatenate test cases
         StringBuilder sb = new StringBuilder();
+
         String prefix = "";
-        for (Object entity : entities) {
+        for (TestCase testCase : testCases) {
             sb.append(prefix);
             prefix = ",";
-            sb.append(entity.toString());
+            sb.append(testCase);
         }
-        String cmd = "copyCoverageData:" + emulator + ":" + source.toString() + ":" + target.toString()
-                + ":" + sb.toString();
-        tunnelLegacyCmd(cmd);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/copy_fitness_data")
+                .withParameter("deviceId", emulator)
+                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION())
+                .withParameter("chromosome_src", sourceChromosome.toString())
+                .withParameter("chromosome_target", targetChromosome.toString())
+                .withParameter("entities", sb.toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Copying fitness data failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        }
+    }
+
+    /**
+     * Copies the test cases coverage data belonging to the source chromosome over to the given target chromosome.
+     * This is necessary when a new chromosome is created but not executed, e.g. a chromosome is duplicated
+     * (which doesn't require execution since the coverage is identical).
+     *
+     * @param sourceChromosome The source chromosome.
+     * @param targetChromosome The target chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
+     */
+    public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
+                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+
+        // concatenate test cases
+        StringBuilder sb = new StringBuilder();
+
+        String prefix = "";
+        for (TestCase testCase : testCases) {
+            sb.append(prefix);
+            prefix = ",";
+            sb.append(testCase);
+        }
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/copy")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", Properties.COVERAGE().name())
+                .withParameter("chromosome_src", sourceChromosome.toString())
+                .withParameter("chromosome_target", targetChromosome.toString())
+                .withParameter("entities", sb.toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Copying coverage data failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        }
     }
 
     public String getCurrentActivityName() {
@@ -188,11 +262,33 @@ public class EnvironmentManager {
     }
 
     /**
+     * Returns the list of objectives based on objective property.
+     *
+     * @param objective The specified objective property.
+     * @return Returns a list of objectives, e.g. the list of branches.
+     */
+    public List<String> getObjectives(Objective objective) {
+        if (objective == null) {
+            throw new IllegalStateException("Objective property not defined!");
+        }
+
+        MATE.log_acc("Getting objectives...!");
+
+        if (objective == Objective.LINES) {
+            return getSourceLines();
+        } else if (objective == Objective.BRANCHES) {
+            return getBranches();
+        }
+
+        throw new UnsupportedOperationException("Objective not yet supported!");
+    }
+
+    /**
      * Fetches a serialized test case from the internal storage of the emulator.
      * Also removes the serialized test case afterwards.
      *
      * @param testcaseDir The test case directory.
-     * @param testCase The name of the test case file.
+     * @param testCase    The name of the test case file.
      */
     public void fetchTestCase(String testcaseDir, String testCase) {
 
@@ -262,37 +358,142 @@ public class EnvironmentManager {
     }
 
     /**
-     * Initializes the CFG; the path to the APK file is given
-     * as command line argument (key: apk). If no argument was specified,
-     * {@code false} is returned.
-     *
-     * @return Returns whether the CFG can be initialised.
+     * Initialises a graph.
      */
-    public boolean initCFG() {
+    public void initGraph() {
 
-        Bundle arguments = InstrumentationRegistry.getArguments();
-        String apkPath = arguments.getString("apk");
-        String packageName = arguments.getString("packageName");
-        MATE.log("Path to APK file: " + apkPath);
+        GraphType graphType = Properties.GRAPH_TYPE();
 
-        boolean isInit = false;
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/init")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("graph_type", graphType.name())
+                .withParameter("apk", Properties.APK())
+                .withParameter("target", Properties.TARGET());
 
-        if (apkPath != null && packageName != null) {
-            String cmd = "initCFG:" + packageName + ":" + apkPath;
-
-            isInit = Boolean.parseBoolean(tunnelLegacyCmd(cmd));
+        if (graphType == GraphType.INTRA_CFG) {
+            messageBuilder.withParameter("method", Properties.METHOD_NAME());
+            messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
         }
-        return isInit;
+
+        if (graphType == GraphType.INTER_CFG) {
+            messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
+            messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
+        }
+
+        sendMessage(messageBuilder.build());
     }
 
     /**
-     * Returns the list of branches of the AUT.
+     * Requests the drawing of the graph.
      *
-     * @return Returns the set of branches.
+     * @param raw Whether drawing the raw graph or target and visited vertices should be marked.
+     */
+    public void drawGraph(boolean raw) {
+
+        MATE.log_acc("Drawing graph!");
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
+                .withParameter("raw", String.valueOf(raw));
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Requests the list of branches of the AUT. Each branch typically
+     * represents a testing target into the context of MIO/MOSA.
+     * A branch's representation coincides with the trace that is produced
+     * by the branchDistance instrumentation tool.
+     *
+     * @return Returns the list of branches.
      */
     public List<String> getBranches() {
-        String cmd = "getBranches";
-        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
+
+        GraphType graphType = Properties.GRAPH_TYPE();
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branches")
+                .withParameter("graph_type", graphType.name());
+
+        Message response = sendMessage(messageBuilder.build());
+
+        return Arrays.asList(response.getParameter("branches").split("\\+"));
+    }
+
+    /**
+     * Stores the fitness data for the given chromosome.
+     *
+     * @param chromosomeId Identifies either a test case or a test suite.
+     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
+     *                     otherwise {@code null}.
+     */
+    public void storeFitnessData(String chromosomeId, String entityId) {
+
+        String testcase = entityId == null ? chromosomeId : entityId;
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/store_fitness_data")
+                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION())
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
+        }
+
+        Message response = sendMessage(messageBuilder.build());
+
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Storing fitness data failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        }
+    }
+
+    /**
+     * Retrieves the branch distance for the given chromosome. Note that
+     * {@link #storeFitnessData(String, String)} has to be called previously.
+     *
+     * @param chromosomeId Identifies either a test case or a test suite.
+     * @return Returns the branch distance for the given chromosome.
+     */
+    public double getBranchDistance(String chromosomeId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
+                .withParameter("deviceId", emulator)
+                .withParameter("chromosomes", chromosomeId);
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("branch_distance"));
+    }
+
+    /**
+     * Retrieves the branch distance vector for the given chromosome. A branch distance
+     * vector consists of n entries, where n refers to the number of branches.
+     * The nth entry in the vector refers to the fitness value of the nth branch.
+     *
+     * @param chromosome The given chromosome.
+     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance_vector")
+                .withParameter("deviceId", emulator)
+                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosomes", chromosome.getValue().toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        List<Double> branchDistanceVector = new ArrayList<>();
+        String[] branchDistances = response.getParameter("branch_distance_vector").split("\\+");
+
+        for (String branchDistance : branchDistances) {
+            branchDistanceVector.add(Double.parseDouble(branchDistance));
+        }
+
+        return branchDistanceVector;
     }
 
     public List<String> getSourceLines() {
@@ -309,12 +510,24 @@ public class EnvironmentManager {
     /**
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
-     *  @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     *
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
      * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
- *                     otherwise {@code null}.
+     *                     otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
+
+        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE) {
+            // check whether the storing of the traces/coverage file has been already requested
+            String testcase = entityId == null ? chromosomeId : entityId;
+            if (coveredTestCases.contains(testcase)) {
+                // don't fetch again traces/coverage file from emulator
+                return;
+            }
+            coveredTestCases.add(testcase);
+        }
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
@@ -323,16 +536,6 @@ public class EnvironmentManager {
             messageBuilder.withParameter("entity", entityId);
         }
         sendMessage(messageBuilder.build());
-    }
-
-    /**
-     * Requests the combined coverage information for all chromosomes.
-     *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
-     * @return Returns the overall coverage.
-     */
-    public double getCombinedCoverage(Coverage coverage) {
-        return getCombinedCoverage(coverage, null);
     }
 
     /**
@@ -395,43 +598,11 @@ public class EnvironmentManager {
         return Double.parseDouble(response.getParameter("coverage"));
     }
 
-    // TODO: use new coverage endpoint
-    public double getCoverage(Object o) {
-        String cmd = "getCoverage:" + emulator + ":" + o.toString();
+    public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
 
-        return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    /**
-     * Returns the branch distance for a given test case.
-     *
-     * @param chromosome The given test case.
-     * @return Returns the branch distance for the given test case.
-     */
-    public double getBranchDistance(Object chromosome) {
-        String cmd = "getBranchDistance:" + emulator + ":" + chromosome.toString();
-        return Double.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-    /**
-     * Computes the branch distance fitness vector for a given test case (chromosome).
-     * In particular, the given test case is evaluated against each branch.
-     *
-     * @param chromosome The given test case.
-     * @return Returns the branch distance vector for a given test case.
-     */
-    public List<Double> getBranchDistanceVector(Object chromosome) {
-        String cmd = "getBranchDistanceVector:" + emulator + ":" + chromosome.toString();
-        List<Double> branchDistanceVectors = new ArrayList<>();
-        for (String branchDistanceVectorStr : tunnelLegacyCmd(cmd).split("\n")) {
-            branchDistanceVectors.add(Double.valueOf(branchDistanceVectorStr));
-        }
-        return branchDistanceVectors;
-    }
-
-    public List<Double> getLineCoveredPercentage(Object o, List<String> lines) {
+        // concatenate lines
         StringBuilder sb = new StringBuilder();
-        sb.append("getLineCoveredPercentage:" + emulator + ":" + o.toString() + ":");
+
         for (String line : lines) {
             sb.append(line);
             sb.append("*");
@@ -440,13 +611,26 @@ public class EnvironmentManager {
             sb.setLength(sb.length() - 1);
         }
 
-        String cmd = sb.toString();
-        List<Double> coveredPercentages = new ArrayList<>();
-        for (String coveredPercentageStr : tunnelLegacyCmd(cmd).split("\n")) {
-            coveredPercentages.add(Double.valueOf(coveredPercentageStr));
-        }
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
+                .withParameter("deviceId", emulator)
+                .withParameter("lines", sb.toString())
+                .withParameter("chromosomes", chromosome.toString());
+        Message response = sendMessage(messageBuilder.build());
 
-        return coveredPercentages;
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Retrieving line covered percentages failed!");
+            throw new IllegalStateException(response.getParameter("info"));
+        } else {
+            // convert result
+            List<Double> coveragePercentagesVector = new ArrayList<>();
+            String[] coveragePercentages = response.getParameter("coveragePercentages").split("\n");
+
+            for (String coveragePercentage : coveragePercentages) {
+                coveragePercentagesVector.add(Double.parseDouble(coveragePercentage));
+            }
+
+            return coveragePercentagesVector;
+        }
     }
 
     public String getLastCrashStackTrace() {

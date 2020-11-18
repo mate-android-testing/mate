@@ -2,11 +2,12 @@ package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 
-public class HeuristicExploration {
+public class HeuristicExploration implements Algorithm {
 
     private final IChromosomeFactory heuristicChromosomeFactory;
     private final boolean alwaysReset;

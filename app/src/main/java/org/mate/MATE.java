@@ -10,85 +10,31 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
-import org.mate.exploration.genetic.algorithm.RandomSearch;
-import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
-import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
-import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
-import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunction;
-import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
-import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
-import org.mate.exploration.intent.IntentChromosomeFactory;
-import org.mate.exploration.manual.CheckCurrentScreen;
-import org.mate.exploration.manual.ManualExploration;
-import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
-import org.mate.exploration.genetic.algorithm.NSGAII;
-import org.mate.exploration.genetic.algorithm.RandomWalk;
-import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
-import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
-import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
-import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
-import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
-import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
-import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
-import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
-import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
-import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.termination.IterTerminationCondition;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
-import org.mate.exploration.genetic.algorithm.MOSA;
-import org.mate.exploration.genetic.algorithm.Mio;
-import org.mate.exploration.genetic.selection.RandomSelectionFunction;
-import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
-import org.mate.exploration.genetic.fitness.StatementCoverageFitnessFunction;
-import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
-import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
-import org.mate.exploration.genetic.termination.NeverTerminationCondition;
-import org.mate.exploration.heuristical.HeuristicExploration;
-import org.mate.exploration.heuristical.RandomExploration;
+import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.IGUIModel;
-import org.mate.model.TestCase;
-import org.mate.model.TestSuite;
 import org.mate.model.graph.GraphGUIModel;
-import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
 import org.mate.ui.EnvironmentManager;
-import org.mate.ui.WidgetAction;
 import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
 import org.mate.utils.MersenneTwister;
-import org.mate.utils.TestCaseOptimizer;
-import org.mate.utils.TestCaseStatistics;
 import org.mate.utils.TimeoutRun;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
-import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 public class MATE {
 
@@ -177,601 +123,47 @@ public class MATE {
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
 
-    }
-
-    public void testApp(String explorationStrategy) {
-
         String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
 
+        if (emulator != null && !emulator.equals("")) {
+            this.deviceMgr = new DeviceMgr(device, packageName);
+            uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+        }
+
+    }
+
+    public void testApp(final Algorithm algorithm) {
+
+        MATE.log_acc("Activities");
+        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
+            MATE.log_acc("\t" + s);
+        }
+
+        if (Properties.GRAPH_TYPE() != null) {
+            // initialise a graph
+            MATE.log_acc("Initialising graph!");
+            Registry.getEnvironmentManager().initGraph();
+        }
+
         runningTime = new Date().getTime();
+
         try {
-            if (emulator != null && !emulator.equals("")) {
-                this.deviceMgr = new DeviceMgr(device, packageName);
-
-                if (explorationStrategy.equals("RandomSearchGA")) {
-
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    final IGeneticAlgorithm<TestCase> randomSearchGA = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(RandomSearch.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withMaxNumEvents(50)
-                            .build();
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomSearchGA.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                } else if (explorationStrategy.equals("OnePlusOneNew")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    final IGeneticAlgorithm<TestCase> onePlusOneNew = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(org.mate.exploration.genetic.algorithm.OnePlusOne.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withMaxNumEvents(50)
-                            .build();
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            onePlusOneNew.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                } else if (explorationStrategy.equals("NSGA-II")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(NSGAII.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
-                            .build();
-                    nsga.run();
-                } else if (explorationStrategy.equals("PrimitiveStandardGeneticAlgorithm")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                            .withChromosomeFactory(PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
-                            .withCrossoverFunction(PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
-                            .withMutationFunction(PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(10)
-                            .withBigPopulationSize(20)
-                            .withMaxNumEvents(50)
-                            .withPMutate(0.3)
-                            .withPCrossover(0.7)
-                            .build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            genericGA.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("StandardGeneticAlgorithm")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                            .withChromosomeFactory(IntentChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withRelativeIntentAmount(0.5f)
-                            .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
-                            .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(50)
-                            .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
-                            .withPMutate(0.3)
-                            .withPCrossover(0.7)
-                            .build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            genericGA.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("StandardGE")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    List<IFitnessFunction<List<Integer>>> fitnessFunctions = new ArrayList<>();
-                    fitnessFunctions.add(new GenotypePhenotypeMappedFitnessFunction<>(
-                            new AndroidListBasedBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND()),
-                            new BranchCoverageFitnessFunction<TestCase>()
-                    ));
-
-                    final IGeneticAlgorithm<List<Integer>> genericGA = new StandardGeneticAlgorithm<>(
-                            new IntegerSequenceChromosomeFactory(Properties.GE_SEQUENCE_LENGTH()),
-                            new FitnessProportionateSelectionFunction<List<Integer>>(),
-                            new IntegerSequencePointCrossOverFunction(),
-                            new IntegerSequencePointMutationFunction(),
-                            fitnessFunctions,
-                            new NeverTerminationCondition(),
-                            Properties.POPULATION_SIZE(),
-                            Properties.POPULATION_SIZE() * 2,
-                            Properties.P_CROSSOVER(),
-                            Properties.P_MUTATE()
-                    );
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            genericGA.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("Sapienz")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    final IGeneticAlgorithm<TestSuite> nsga = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(NSGAII.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
-                            .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
-                            .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
-                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(50)
-                            .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
-                            .withPMutate(1)
-                            .withPInnerMutate(0.3)
-                            .withPCrossover(0.7)
-                            .withNumTestCases(5)
-                            .build();
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            nsga.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("HeuristicRandom")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    final HeuristicExploration heuristicExploration = new HeuristicExploration(50);
-
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            heuristicExploration.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("Replaying")) {
-
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
-
-                    // track which test cases couldn't be successfully replayed
-                    Map<Integer, TestCase> failures = new HashMap<>();
-
-                    int testCaseID = 0;
-
-                    TestCase testCase = TestCaseSerializer.deserializeTestCase();
-
-                    // reset the app once
-                    uiAbstractionLayer.resetApp();
-
-                    // grant runtime permissions (read/write external storage) which are dropped after each reset
-                    Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
-
-                    // as long as we find a test case for replaying
-                    while (testCase != null) {
-
-                        if (Properties.OPTIMISE_TEST_CASE()) {
-                            testCase = TestCaseOptimizer.optimise(testCase);
-                        }
-
-                        if (replayTestCase(testCase)) {
-                            // record stats only if test case could be successfully replayed
-                            TestCaseStatistics.recordStats(testCase);
-                        } else {
-                            failures.put(testCaseID, testCase);
-                        }
-
-                        MATE.log("Replayed TestCase " + testCaseID + "!");
-
-                        // replay next test case
-                        testCase = TestCaseSerializer.deserializeTestCase();
-
-                        testCaseID++;
-
-                        // reset aut after each test case
-                        uiAbstractionLayer.resetApp();
-
-                        // grant runtime permissions (read/write external storage) which are dropped after each reset
-                        Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
-                    }
-
-                    // retry failed test cases
-                    for (Map.Entry<Integer, TestCase> entry : failures.entrySet()) {
-
-                        boolean success = false;
-
-                        for (int i = 0; i < 5 && !success; i++) {
-
-                            success = replayTestCase(entry.getValue());
-
-                            if (success) {
-                                // record stats about successful test cases
-                                TestCaseStatistics.recordStats(entry.getValue());
-                            }
-
-                            MATE.log("Replayed TestCase " + entry.getKey() + "!");
-
-                            // reset aut after each test case
-                            uiAbstractionLayer.resetApp();
-
-                            // grant runtime permissions (read/write external storage) which are dropped after each reset
-                            Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName);
-                        }
-                    }
-                } else if (explorationStrategy.equals("RandomExploration")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log_acc("Activities");
-                    for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-                        MATE.log_acc("\t" + s);
-                    }
-
-                    MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
-
-                    final RandomExploration randomExploration
-                            = new RandomExploration(true, MAX_NUMBER_EVENTS(),
-                            Properties.RELATIVE_INTENT_AMOUNT());
-
-                    try {
-                        TimeoutRun.timeoutRun(new Callable<Void>() {
-                            @Override
-                            public Void call() throws Exception {
-                                randomExploration.run();
-                                return null;
-                            }
-                        }, MATE.TIME_OUT);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } catch (Error e) {
-                        e.printStackTrace();
-                    }
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            // TODO: handle combined activity coverage
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        MATE.log_acc("Coverage of last test case: " +
-                                Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
-                                        ,"lastIncompleteTestCase"));
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals(MOSA.ALGORITHM_NAME)) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    if (Properties.COVERAGE() == Coverage.BRANCH_COVERAGE) {
-                        // init the CFG
-                        boolean isInit = Registry.getEnvironmentManager().initCFG();
-
-                        if (!isInit) {
-                            MATE.log("Couldn't initialise CFG! Aborting.");
-                            throw new IllegalStateException("Graph initialisation failed!");
-                        }
-                    }
-
-                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(MOSA.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(50)
-                            .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
-                            .withPMutate(0.3)
-                            .withPCrossover(0.7);
-
-                    // get the set of branches (branch == objective)
-                    List<String> branches = Registry.getEnvironmentManager().getBranches();
-
-                    // if there are no branches, we can stop
-                    if (branches.isEmpty()) {
-                        throw new IllegalStateException("No branches available! Aborting.");
-                    }
-
-                    MATE.log("Branches: " + branches);
-
-                    // we need to associate with each branch a fitness function
-                    for (String branch : branches) {
-                        builder.withFitnessFunction(BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID, branch);
-                    }
-
-                    final IGeneticAlgorithm<TestCase> mosa = builder.build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            mosa.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("Mio")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-
-                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(Mio.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withPopulationSize(50)
-                            .withBigPopulationSize(100)
-                            .withMaxNumEvents(50)
-                            .withPMutate(0.3)
-                            .withPCrossover(0.7)
-                            .withPSampleRandom(0.5)
-                            .withFocusedSearchStart(0.5);
-
-                    // add specific fitness functions for all activities of the Application Under Test
-                    MATE.log_acc("Retrieving source lines...");
-                    List<String> lines = Registry.getEnvironmentManager().getSourceLines();
-                    MATE.log_acc("Retrieved " + lines.size() + " lines.");
-                    MATE.log_acc("Processing lines...");
-                    int count = 1;
-                    for (String line : lines) {
-                        if (count % (lines.size() / 10) == 0) {
-                            MATE.log_acc(Math.ceil(count * 100.0 / lines.size()) + "%");
-                        }
-                        builder.withFitnessFunction(LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID, line);
-                        count++;
-                    }
-                    MATE.log_acc("done processing lines");
-
-                    final IGeneticAlgorithm<TestCase> mio = builder.build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            mio.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-
-                    if (Properties.COVERAGE() != Coverage.NO_COVERAGE
-                            && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-
-                        // store coverage of test case interrupted by timeout
-                        Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
-                                "lastIncompleteTestCase", null);
-
-                        // get combined coverage
-                        MATE.log_acc("Total coverage: "
-                                + Registry.getEnvironmentManager()
-                                .getCombinedCoverage(Properties.COVERAGE()));
-                    }
-                } else if (explorationStrategy.equals("RandomWalk")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log("Starting random walk now ...");
-
-                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(RandomWalk.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withFitnessFunction(StatementCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50);
-
-
-                    final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomWalk.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-                } else if (explorationStrategy.equals("RandomWalkActivityCoverage")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log("Starting random walk now ...");
-
-                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(RandomWalk.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50);
-
-
-                    final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomWalk.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
-                } else if (explorationStrategy.equals("RandomWalkStateCoverage")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    MATE.log("Starting random walk now ...");
-
-                    final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                            .withAlgorithm(RandomWalk.ALGORITHM_NAME)
-                            .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                            .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                            .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
-                            .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
-                            .withMaxNumEvents(50);
-
-
-                    final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-                    TimeoutRun.timeoutRun(new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            randomWalk.run();
-                            return null;
-                        }
-                    }, MATE.TIME_OUT);
+            TimeoutRun.timeoutRun(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    algorithm.run();
+                    return null;
                 }
-                if (explorationStrategy.equals("AccManual")) {
-                    uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                    ManualExploration manualExploration = new ManualExploration();
-                    manualExploration.startManualExploration(runningTime);
-                } else if (explorationStrategy.equals("AccRandom")) {
-                    IScreenState initialScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                    //creates the graph that represents the GUI model
-                    this.guiModel = new GraphGUIModel();
-                    //first state (root node - action ==null)
-                    this.guiModel.updateModel(null, initialScreenState);
-                    UniformRandomForAccessibility unirandomacc = new UniformRandomForAccessibility(deviceMgr, packageName, guiModel, true);
-                    unirandomacc.startUniformRandomExploration(initialScreenState, runningTime);
-                } else {
-                    if (explorationStrategy.equals("checkScreen")) {
-                        uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-                        CheckCurrentScreen checkScreen = new CheckCurrentScreen();
-                        checkScreen.scanScreen();
+            }, MATE.TIME_OUT);
 
-                    }
-                }
-            } else
-                MATE.log("Emulator is null");
+            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+                CoverageUtils.logFinalCoverage();
+            }
+
+            if (Properties.GRAPH_TYPE() != null) {
+                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -785,93 +177,6 @@ public class MATE {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Replays a test case. Repairs individual UI actions if not directly applicable.
-     *
-     * @param testCase The test case to be replayed.
-     * @return Returns {@code true} if the test case could be successfully replayed,
-     * otherwise {@code false} is returned.
-     */
-    private boolean replayTestCase(TestCase testCase) {
-
-        // get the actions for replaying
-        List<Action> actions = testCase.getEventSequence();
-
-        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
-
-            MATE.log("Current Activity: " + Registry.getEnvironmentManager().getCurrentActivityName());
-            MATE.log("Expected Activity: " + testCase.getActivityAfterAction(i - 1));
-
-            Action nextAction = actions.get(i);
-
-            // check whether the UI action is applicable on the current state
-            if (nextAction instanceof WidgetAction
-                    && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
-
-                // try to repair UI action
-                Action repairedAction = repairUIAction(nextAction);
-
-                if (repairedAction != null) {
-                    MATE.log("Replaying action " + i);
-                    uiAbstractionLayer.executeAction(repairedAction);
-                } else {
-                    MATE.log("Action not applicable!");
-                    return false;
-                }
-            } else {
-                MATE.log("Replaying action " + i);
-                uiAbstractionLayer.executeAction(actions.get(i));
-            }
-        }
-        return true;
-    }
-
-    /**
-     * If a de-serialized (widget-based) action is not applicable to the current state,
-     * we can try to select an alternative action.
-     *
-     * @param a The action not applicable on the current state.
-     * @return Returns an alternative action that is applicable, or {@code null} if no appropriate
-     * action could be derived.
-     */
-    private Action repairUIAction(Action a) {
-
-        // log information about selected and available actions
-        if (a instanceof WidgetAction && !uiAbstractionLayer.getExecutableActions().contains(a)) {
-
-            WidgetAction selectedAction = (WidgetAction) a;
-
-            MATE.log(selectedAction.getActionType() + " on " + selectedAction.getWidget().getId()
-                    + " Text : " + selectedAction.getWidget().getText()
-                    + " hint : " + selectedAction.getWidget().getHint()
-                    + " Class : " + selectedAction.getWidget().getClazz()
-                    + " ResourceID : " + selectedAction.getWidget().getResourceID()
-                    + " IdByActivity : " + selectedAction.getWidget().getIdByActivity()
-                    + " X : " + selectedAction.getWidget().getX()
-                    + " Y : " + selectedAction.getWidget().getY());
-
-            MATE.log("------------------------------------------");
-
-            for (Action action : uiAbstractionLayer.getExecutableActions()) {
-
-                if (action instanceof WidgetAction) {
-                    if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {
-                        WidgetAction widgetAction = (WidgetAction) action;
-                        MATE.log(widgetAction.getActionType() + " on " + widgetAction.getWidget().getId()
-                                + " Text : " + widgetAction.getWidget().getText()
-                                + " hint : " + widgetAction.getWidget().getHint()
-                                + " Class : " + widgetAction.getWidget().getClazz()
-                                + " ResourceID : " + widgetAction.getWidget().getResourceID()
-                                + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
-                                + " X : " + widgetAction.getWidget().getX()
-                                + " Y : " + widgetAction.getWidget().getY());
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     private void checkVisitedActivities(String explorationStrategy) {
@@ -926,6 +231,14 @@ public class MATE {
 
     public IGUIModel getGuiModel() {
         return guiModel;
+    }
+
+    public UiDevice getDevice() {
+        return device;
+    }
+
+    public static UIAbstractionLayer getUiAbstractionLayer() {
+        return uiAbstractionLayer;
     }
 
     public static void logactivity(String activityName) {

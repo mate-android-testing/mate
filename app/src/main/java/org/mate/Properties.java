@@ -1,8 +1,10 @@
 package org.mate;
 
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.graph.GraphType;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
+import org.mate.utils.Objective;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -117,7 +119,7 @@ public class Properties {
     }
 
     public static int MAX_NUMBER_EVENTS() {
-        return propertyOr(5);
+        return propertyOr(50);
     }
 
     public static double P_CROSSOVER() {
@@ -144,32 +146,75 @@ public class Properties {
         return propertyOr(10);
     }
 
+    // TODO: make use of an enum
+    public static String FITNESS_FUNCTION() {
+        return propertyOr(null);
+    }
+
+    public static Objective OBJECTIVE() {
+        return propertyOr(null);
+    }
 
     /*
      * Coverage properties
      */
-    public static boolean STORE_COVERAGE() {
-        return propertyOr(false);
-    }
-
-
-    // use LINE_COVERAGE as default
     public static Coverage COVERAGE() {
         return propertyOr(Coverage.NO_COVERAGE);
     }
 
+    /*
+    * Begin Graph properties
+     */
 
+    // the graph type, e.g. CFG or SGD
+    public static GraphType GRAPH_TYPE() {
+        return propertyOr(null);
+    }
+
+    // the path to the APK file
+    public static String APK() {
+        return propertyOr(null);
+    }
+
+    // specifies the method name when an intra CFG should be constructed
+    public static String METHOD_NAME() {
+        return propertyOr(null);
+    }
+
+    // whether basic blocks should be used or not
+    public static boolean BASIC_BLOCKS() {
+        return propertyOr(true);
+    }
+
+    // whether ART classes should be excluded when constructing the graph
+    public static boolean EXCLUDE_ART_CLASSES() {
+        return propertyOr(true);
+    }
+
+    // how and which target vertex should be selected, e.g. a random branch vertex
+    public static String TARGET() { return propertyOr("no_target"); }
+
+    // whether to draw raw graph or 'extended' graph
+    public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }
+
+    /*
+    * End Graph properties
+     */
 
     // Primitive actions or widget based actions?
     public static boolean WIDGET_BASED_ACTIONS() {
         return propertyOr(true);
     }
 
-
     // stack trace
     public static boolean RECORD_STACK_TRACE() {
         return propertyOr(false);
     }
+
+    /**
+     * Added by stockinger on 28/09/2020
+     */
+    public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
 
     //Grammatical Evolution Properties
     public static int GE_SEQUENCE_LENGTH() {

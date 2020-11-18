@@ -1,10 +1,11 @@
 package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
+import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 
-public class RandomExploration {
+public class RandomExploration implements Algorithm {
     private final AndroidRandomChromosomeFactory randomChromosomeFactory;
     private final boolean alwaysReset;
 

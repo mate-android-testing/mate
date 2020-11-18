@@ -8,6 +8,8 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Coverage;
+import org.mate.utils.CoverageUtils;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -48,18 +50,16 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
             testCasePool.remove(choice);
         }
 
-        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            if (!copyTestCasesFromParent1.isEmpty()) {
-                MATE.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
-                // TODO: replace with new coverage methods
-                Registry.getEnvironmentManager().copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
-            }
+        if (!copyTestCasesFromParent1.isEmpty()) {
+            MATE.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
+            CoverageUtils.copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
+            FitnessUtils.copyFitnessData(parents.get(0), offspring, copyTestCasesFromParent1);
+        }
 
-            if (!copyTestCasesFromParent2.isEmpty()) {
-                MATE.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
-                // TODO: replace with new coverage methods
-                Registry.getEnvironmentManager().copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
-            }
+        if (!copyTestCasesFromParent2.isEmpty()) {
+            MATE.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
+            CoverageUtils.copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
+            FitnessUtils.copyFitnessData(parents.get(1), offspring, copyTestCasesFromParent2);
         }
 
         return offspring;
