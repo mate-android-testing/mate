@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
+import static org.mate.Properties.MAX_NUMBER_EVENTS;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEStandardGE {
@@ -37,7 +38,7 @@ public class ExecuteMATEStandardGE {
 
         List<IFitnessFunction<List<Integer>>> fitnessFunctions = new ArrayList<>();
         fitnessFunctions.add(new GenotypePhenotypeMappedFitnessFunction<>(
-                new AndroidListBasedBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND()),
+                new AndroidListBasedBiasedMapping(Properties.MAX_NUMBER_EVENTS(), GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND()),
                 new BranchCoverageFitnessFunction<TestCase>()
         ));
 
