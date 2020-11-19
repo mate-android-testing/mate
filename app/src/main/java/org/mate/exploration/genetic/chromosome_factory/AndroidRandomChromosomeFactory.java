@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -41,6 +42,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         if (resetApp) {
             uiAbstractionLayer.resetApp();
         }
+
+        // grant runtime permissions (read/write external storage) which are dropped after each reset
+        MATE.log("Grant runtime permissions: "
+                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
