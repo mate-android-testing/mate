@@ -11,6 +11,7 @@ import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunct
 import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
@@ -39,7 +40,7 @@ public class ExecuteMATEStandardGE {
         List<IFitnessFunction<List<Integer>>> fitnessFunctions = new ArrayList<>();
         fitnessFunctions.add(new GenotypePhenotypeMappedFitnessFunction<>(
                 new AndroidListBasedBiasedMapping(Properties.MAX_NUMBER_EVENTS(), GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND()),
-                new BranchCoverageFitnessFunction<TestCase>()
+                new LineCoverageFitnessFunction<TestCase>()
         ));
 
         final IGeneticAlgorithm<List<Integer>> standardGE = new StandardGeneticAlgorithm<>(
