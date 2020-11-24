@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,6 @@ public class MATE {
     private DeviceMgr deviceMgr;
     public static long total_time;
     public static long RANDOM_LENGH;
-    private long runningTime = new Date().getTime();
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
@@ -145,7 +145,7 @@ public class MATE {
             Registry.getEnvironmentManager().initGraph();
         }
 
-        runningTime = new Date().getTime();
+        long startTime = System.currentTimeMillis();
 
         try {
             TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -167,6 +167,11 @@ public class MATE {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+
+            long endTime = System.currentTimeMillis();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            MATE.log_acc("Execution time: " + (dateFormat.format(new Date(endTime-startTime))));
+
             Registry.getEnvironmentManager().releaseEmulator();
             //EnvironmentManager.deleteAllScreenShots(packageName);
             try {
