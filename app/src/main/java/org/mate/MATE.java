@@ -97,14 +97,14 @@ public class MATE {
         if (timeout == 0)
             timeout = 30; //set default - 30 minutes
         MATE.TIME_OUT = timeout * 60 * 1000;
-        MATE.log("TIMEOUT : " + timeout);
+        MATE.log_acc("TIMEOUT: " + timeout);
 
         //get random length = number of actions before restarting the app
         long rlength = Registry.getEnvironmentManager().getRandomLength();
         if (rlength == 0)
             rlength = 1000; //default
         MATE.RANDOM_LENGH = rlength;
-        MATE.log("RANDOM length by server: " + MATE.RANDOM_LENGH);
+        MATE.log_acc("RANDOM length by server: " + MATE.RANDOM_LENGH);
 
         logMessage = "";
 
@@ -118,7 +118,7 @@ public class MATE {
 
         //get the name of the package of the app currently running
         this.packageName = device.getCurrentPackageName();
-        MATE.log("Package name: " + this.packageName);
+        MATE.log_acc("Package name: " + this.packageName);
 
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
