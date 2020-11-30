@@ -160,10 +160,6 @@ public class MATE {
                 CoverageUtils.logFinalCoverage();
             }
 
-            if (Properties.GRAPH_TYPE() != null) {
-                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -171,6 +167,10 @@ public class MATE {
             long endTime = System.currentTimeMillis();
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             MATE.log_acc("Execution time: " + (dateFormat.format(new Date(endTime-startTime))));
+
+            if (Properties.GRAPH_TYPE() != null) {
+                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            }
 
             Registry.getEnvironmentManager().releaseEmulator();
             //EnvironmentManager.deleteAllScreenShots(packageName);
