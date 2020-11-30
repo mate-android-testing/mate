@@ -40,6 +40,7 @@ public class TestCase {
 
 
     public TestCase(String id){
+        MATE.log_acc("Initialising new test case!");
         setId(id);
         crashDetected = false;
         visitedActivities = new HashSet<>();
@@ -68,6 +69,8 @@ public class TestCase {
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
         }
+
+        MATE.log_acc("Finishing test case!");
     }
 
     /**
