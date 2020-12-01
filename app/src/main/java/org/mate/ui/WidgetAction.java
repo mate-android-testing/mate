@@ -1,5 +1,7 @@
 package org.mate.ui;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -120,5 +122,11 @@ public class WidgetAction extends Action {
                 widget.getX2(),
                 widget.getY1(),
                 widget.getY2());
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "widget-based action";
     }
 }

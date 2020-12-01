@@ -3,6 +3,7 @@ package org.mate.interaction.intent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -49,6 +50,7 @@ public class IntentBasedAction extends Action {
      *
      * @return Returns a string representation for an Intent-based action.
      */
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -66,7 +68,8 @@ public class IntentBasedAction extends Action {
         builder.append("Data: " + intent.getData() + System.lineSeparator());
         builder.append("Extras: " + intent.getExtras() + System.lineSeparator());
         builder.append("------------------------" + System.lineSeparator());
-        return builder.toString();
+        // return builder.toString();
+        return "intent-based action";
     }
 
 

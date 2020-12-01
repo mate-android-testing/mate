@@ -60,6 +60,7 @@ public class SystemAction extends Action {
 
     @Override
     public String toString() {
-        return "system event receiver: " + receiver + ", system event: " + action;
+        // return "system event receiver: " + receiver + ", system event: " + action;
+        return "system action";
     }
 }

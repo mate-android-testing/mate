@@ -53,7 +53,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
-                if (!uiAbstractionLayer.getExecutableActions().contains(newAction) || !mutant.updateTestCase(newAction, String.valueOf(i))) {
+                if (!uiAbstractionLayer.getExecutableActions().contains(newAction) || !mutant.updateTestCase(newAction, i)) {
                     break;
                 }
             }

@@ -29,6 +29,8 @@ public class TestCase {
     private Set<String> visitedActivities;
     private Set<String> visitedStates;
     private List<Action> eventSequence;
+    // TODO: rename, e.g. activitySequence
+    // TODO: should include activity before first action, i.e. main activity
     private List<String> activityAfterAction;
     private float novelty;
     private boolean crashDetected;
@@ -57,7 +59,10 @@ public class TestCase {
      * Among other things, this method is responsible for creating
      * coverage information if desired.
      */
+    // TODO: ensure that finish() is properly called after each test case
     public void finish() {
+        MATE.log_acc("Finishing test case!");
+
         MATE.log_acc("Found crash: " + getCrashDetected());
 
         // serialization of test case
@@ -70,7 +75,7 @@ public class TestCase {
             TestCaseStatistics.recordStats(this);
         }
 
-        MATE.log_acc("Finishing test case!");
+        // TODO: log the test case actions in a proper format
     }
 
     /**
@@ -250,7 +255,7 @@ public class TestCase {
             for (Action action0 : testCase.eventSequence) {
                 if (count < finalSize) {
                     if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
-                        if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
+                        if (!resultingTc.updateTestCase(action0, count)) {
                             return resultingTc;
                         }
                         count++;
@@ -268,7 +273,7 @@ public class TestCase {
                 } else {
                     action = PrimitiveAction.randomAction();
                 }
-                if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                if (!resultingTc.updateTestCase(action, count)) {
                     return resultingTc;
                 }
             }
@@ -298,26 +303,30 @@ public class TestCase {
     /**
      * Perform action and update TestCase accordingly.
      *
-     * @param a Action to perform
-     * @param event Event name
+     * @param action The action to be performed.
+     * @param actionID The id of the action.
      * @return True if action successful inbound false if outbound, crash, or some unkown failure
      */
-    public boolean updateTestCase(Action a, String event) {
+    public boolean updateTestCase(Action action, int actionID) {
 
-        if (a instanceof WidgetAction
-                && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
-            throw new IllegalStateException("Action not applicable to current state");
+        if (action instanceof WidgetAction
+                && !MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
+            throw new IllegalStateException("Action not applicable to current state!");
         }
-        addEvent(a);
-        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(a);
 
+        MATE.log("executing action " + actionID + ": " + action);
+
+        addEvent(action);
+        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);
+
+        // TODO: fix this list, may use screenstate (updateTestCase()) to avoid request to server
         // track the activity in focus after each executed action
         activityAfterAction.add(Registry.getEnvironmentManager().getCurrentActivityName());
 
         switch (actionResult) {
             case SUCCESS:
             case SUCCESS_NEW_STATE:
-                updateTestCase(event);
+                updateTestCase(String.valueOf(actionID));
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
