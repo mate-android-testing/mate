@@ -42,7 +42,7 @@ public class TestCase {
 
 
     public TestCase(String id){
-        MATE.log_acc("Initialising new test case!");
+        MATE.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
         visitedActivities = new HashSet<>();
@@ -61,9 +61,9 @@ public class TestCase {
      */
     // TODO: ensure that finish() is properly called after each test case
     public void finish() {
-        MATE.log_acc("Finishing test case!");
+        MATE.log("Finishing test case!");
 
-        MATE.log_acc("Found crash: " + getCrashDetected());
+        MATE.log("Found crash: " + getCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {

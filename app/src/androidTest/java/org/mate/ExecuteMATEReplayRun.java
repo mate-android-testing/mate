@@ -31,7 +31,7 @@ public class ExecuteMATEReplayRun {
 
     @Test
     public void useAppContext() {
-        MATE.log_acc("Replaying run...");
+        MATE.log_acc("Starting ReplayRun...");
 
         MATE mate = new MATE();
 
