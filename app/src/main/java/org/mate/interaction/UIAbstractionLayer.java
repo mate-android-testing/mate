@@ -78,18 +78,18 @@ public class UIAbstractionLayer {
     private ActionResult executeActionUnsafe(Action action) {
         IScreenState state;
         try {
-            //execute this selected action
+            // execute this selected action
             deviceMgr.executeAction(action);
 
-            //create an object that represents the screen
-            //using type: ActionScreenState
+            // create an object that represents the screen
+            // using type: ActionScreenState
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
             if (action instanceof PrimitiveAction) {
                 return FAILURE_APP_CRASH;
             }
-            state = ScreenStateFactory.getScreenState("ActionsScreenState"); //TODO: maybe not needed
+            state = ScreenStateFactory.getScreenState("ActionsScreenState"); // TODO: maybe not needed
             state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, lastScreenState, state));
             lastScreenState = state;
@@ -104,37 +104,37 @@ public class UIAbstractionLayer {
         clearScreen();
         state = ScreenStateFactory.getScreenState("ActionsScreenState");
 
-        //Todo: assess if timeout should be added to primitive actions as well
-        //check whether there is a progress bar on the screen
+        // TODO: assess if timeout should be added to primitive actions as well
+        // check whether there is a progress bar on the screen
         long timeToWait = waitForProgressBar(state);
-        //if there is a progress bar
+        // if there is a progress bar
         if (timeToWait > 0) {
-            //add 2 sec just to be sure
+            // add 2 sec just to be sure
             timeToWait += 2000;
-            //set that the current action needs to wait before new action
+            // set that the current action needs to wait before new action
             if (action instanceof WidgetAction) {
                 WidgetAction wa = (WidgetAction) action;
                 wa.setTimeToWait(timeToWait);
             }
             clearScreen();
-            //get a new state
+            // get a new state
             state = ScreenStateFactory.getScreenState("ActionsScreenState");
         }
 
-        //get the package name of the app currently running
+        // get the package name of the app currently running
         String currentPackageName = state.getPackageName();
 
-        //if current package is null, emulator has crashed/closed
+        // if current package is null, emulator has crashed/closed
         if (currentPackageName == null) {
             MATE.log_acc("CURRENT PACKAGE: NULL");
             return FAILURE_EMULATOR_CRASH;
-            //TODO: what to do when the emulator crashes?
+            // TODO: what to do when the emulator crashes?
         }
 
-        //check whether the package of the app currently running is from the app under test
-        //if it is not, restart app
+        // check whether the package of the app currently running is from the app under test
+        // if it is not, restart app
         if (!currentPackageName.equals(this.packageName)) {
-            MATE.log_acc("current package different from app package: " + currentPackageName);
+            MATE.log("current package different from app package: " + currentPackageName);
 
             state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, lastScreenState, state));
@@ -142,7 +142,7 @@ public class UIAbstractionLayer {
 
             return SUCCESS_OUTBOUND;
         } else {
-            //update model with new state
+            // update model with new state
             state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, lastScreenState, state));
             lastScreenState = state;
