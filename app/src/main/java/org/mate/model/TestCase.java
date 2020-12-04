@@ -29,9 +29,7 @@ public class TestCase {
     private Set<String> visitedActivities;
     private Set<String> visitedStates;
     private List<Action> eventSequence;
-    // TODO: rename, e.g. activitySequence
-    // TODO: should include activity before first action, i.e. main activity
-    private List<String> activityAfterAction;
+    private List<String> activitySequence;
     private float novelty;
     private boolean crashDetected;
     private double sparseness;
@@ -51,7 +49,7 @@ public class TestCase {
         sparseness = 0;
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
-        activityAfterAction = new ArrayList<>();
+        activitySequence = new ArrayList<>();
     }
 
     /**
@@ -74,6 +72,11 @@ public class TestCase {
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
         }
+
+        MATE.log("Visited activities in order: " + activitySequence);
+
+        // TODO: ensure that this log only appears here -> required for analysis framework
+        MATE.log("Visited activities: " + getVisitedActivities());
 
         // TODO: log the test case actions in a proper format
     }
@@ -127,19 +130,24 @@ public class TestCase {
     }
 
     /**
+     * Returns the activity name before the execution of the given action.
+     * @param actionIndex The action index.
+     * @return Returns the activity in foreground before the given action was executed.
+     */
+    public String getActivityBeforeAction(int actionIndex) {
+        return activitySequence.get(actionIndex);
+    }
+
+    /**
      * Returns the name of the activity that is in the foreground after the execution
      * of the n-th {@param actionIndex} action.
      *
      * @param actionIndex The action index.
-     * @return Returns the activity name after the execution of the {@param actionIndex} action,
-     *      or returns {@code "unknown"}.
+     * @return Returns the activity name after the execution of the {@param actionIndex} action.
      */
     public String getActivityAfterAction(int actionIndex) {
-        if (actionIndex >= 0 && actionIndex < activityAfterAction.size()) {
-            return activityAfterAction.get(actionIndex);
-        } else {
-            return "unknown";
-        }
+        // the activity sequence models a 'activity-before-action' relation
+        return activitySequence.get(actionIndex + 1);
     }
 
     public void setDesiredSize(Optional<Integer> desiredSize) {
@@ -314,14 +322,23 @@ public class TestCase {
             throw new IllegalStateException("Action not applicable to current state!");
         }
 
-        MATE.log("executing action " + actionID + ": " + action);
+        String activityBeforeAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
 
         addEvent(action);
         UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);
 
-        // TODO: fix this list, may use screenstate (updateTestCase()) to avoid request to server
-        // track the activity in focus after each executed action
-        activityAfterAction.add(Registry.getEnvironmentManager().getCurrentActivityName());
+        String activityAfterAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
+
+        if (actionID == 0) {
+            activitySequence.add(activityBeforeAction);
+            activitySequence.add(activityAfterAction);
+        } else {
+            activitySequence.add(activityAfterAction);
+        }
+
+        MATE.log("executed action " + actionID + ": " + action);
+        MATE.log("Activity Transition for action " +  actionID
+                + ":" + activityBeforeAction  + "->" + activityAfterAction);
 
         switch (actionResult) {
             case SUCCESS:
