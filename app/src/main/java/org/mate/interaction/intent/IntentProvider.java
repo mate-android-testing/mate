@@ -163,7 +163,6 @@ public class IntentProvider {
             // we need to distinguish between a dynamic system receiver and dynamic receiver
             if (describesSystemEvent(systemEventActions, intentFilter)) {
                 // use system event action
-                // TODO: adjust system action to contain a ref to the component + selected intent filter
                 String action = Randomness.randomElement(intentFilter.getActions());
                 SystemAction systemAction = new SystemAction(component, intentFilter, action);
                 systemAction.markAsDynamic();
@@ -251,7 +250,6 @@ public class IntentProvider {
             ComponentDescription component = Randomness.randomElement(systemEventReceivers);
             IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
             String action = Randomness.randomElement(intentFilter.getActions());
-            // TODO: adjust system action to contain a ref to the component + selected intent filter
             return new SystemAction(component, intentFilter, action);
         }
     }
@@ -319,7 +317,6 @@ public class IntentProvider {
             activity = packageName + activity;
         }
 
-        MATE.log("Current visible Activity is: " + activity);
         ComponentDescription component = ComponentDescription.getComponentByName(components, activity);
 
         if (component == null) {
@@ -437,7 +434,6 @@ public class IntentProvider {
                 targetComponents.add(component);
             }
         }
-        MATE.log("Found " + targetComponents.size() + " " + componentType);
         return Collections.unmodifiableList(targetComponents);
     }
 }
