@@ -127,6 +127,6 @@ public class WidgetAction extends Action {
     @NonNull
     @Override
     public String toString() {
-        return "widget-based action";
+        return "widget-based action: ";
     }
 }

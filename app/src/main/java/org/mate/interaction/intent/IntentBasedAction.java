@@ -1,17 +1,8 @@
 package org.mate.interaction.intent;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-
-import org.mate.MATE;
 import org.mate.ui.Action;
 
 import java.util.Set;
@@ -53,23 +44,43 @@ public class IntentBasedAction extends Action {
     @NonNull
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("IntentBasedAction:" + System.lineSeparator());
-        builder.append("------------------------" + System.lineSeparator());
-        builder.append("Component: " + component + System.lineSeparator());
-        builder.append("IntentFilter: " + intentFilter + System.lineSeparator());
-        builder.append("------------------------" + System.lineSeparator());
-        builder.append("Intent:" + System.lineSeparator());
-        builder.append("------------------------" + System.lineSeparator());
-        builder.append("ComponentType: " + getComponentType() + System.lineSeparator());
-        builder.append("Receiver of Intent: " + intent.getComponent() + System.lineSeparator());
-        builder.append("Action: " + intent.getAction() + System.lineSeparator());
-        builder.append("Categories: " + intent.getCategories() + System.lineSeparator());
-        builder.append("Data: " + intent.getData() + System.lineSeparator());
-        builder.append("Extras: " + intent.getExtras() + System.lineSeparator());
-        builder.append("------------------------" + System.lineSeparator());
-        // return builder.toString();
-        return "intent-based action";
+        StringBuilder builder = new StringBuilder("intent-based action: ");
+
+        if (intent.getAction() != null) {
+            builder.append("act=" + intent.getAction() + " ");
+        }
+
+        if (intent.getCategories() != null && !intent.getCategories().isEmpty()) {
+            builder.append("cat=" + intent.getCategories() + " ");
+        }
+
+        if (intent.getDataString() != null) {
+            builder.append("uri=" + intent.getDataString() + " ");
+        }
+
+        if (intent.getComponent() != null) {
+            builder.append("cmp=" + intent.getComponent().toShortString() + " ");
+        } else if (intent.getPackage() != null) {
+            builder.append("pkt=" + intent.getPackage() + " ");
+        }
+
+        if (intent.getType() != null) {
+            builder.append("typ=" + intent.getType() + " ");
+        }
+
+        if (intent.getExtras() != null) {
+            builder.append("ext=[");
+            String prefix = "";
+            Set<String> keys = intent.getExtras().keySet();
+            for (String key : keys) {
+                builder.append(prefix);
+                prefix = " || ";
+                builder.append(key + "=" + intent.getExtras().getString(key));
+            }
+            builder.append("]");
+        }
+
+        return builder.toString();
     }
 
 
