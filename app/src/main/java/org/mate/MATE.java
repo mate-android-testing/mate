@@ -145,8 +145,6 @@ public class MATE {
             Registry.getEnvironmentManager().initGraph();
         }
 
-        long startTime = System.currentTimeMillis();
-
         try {
             TimeoutRun.timeoutRun(new Callable<Void>() {
                 @Override
@@ -163,10 +161,6 @@ public class MATE {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-
-            long endTime = System.currentTimeMillis();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-            MATE.log_acc("Execution time: " + (dateFormat.format(new Date(endTime-startTime))));
 
             if (Properties.GRAPH_TYPE() != null) {
                 Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
