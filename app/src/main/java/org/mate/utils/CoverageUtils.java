@@ -144,12 +144,12 @@ public class CoverageUtils {
 
                 double activityCoverage = (double) visitedActivities.get(chromosome).size()
                         / getActivities().size() * 100;
-                MATE.log_acc("Coverage of chromosome "
+                MATE.log("Coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + activityCoverage);
                 break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
-                MATE.log_acc("Coverage of chromosome " + chromosome.getValue().toString() + ": "
+                MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(),
                         chromosome.getValue().toString()));
@@ -171,7 +171,7 @@ public class CoverageUtils {
             Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                     "lastIncompleteTestCase", null);
 
-            MATE.log_acc("Coverage of last test case: " +
+            MATE.log("Coverage of last test case: " +
                     Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
                             , "lastIncompleteTestCase"));
         }

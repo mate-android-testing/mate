@@ -38,6 +38,6 @@ public class PrimitiveAction extends Action {
     @NonNull
     @Override
     public String toString() {
-        return "primitive action: ";
+        return "primitive action: " + actionType + " at (" + x + "," + y + ")";
     }
 }
