@@ -127,6 +127,20 @@ public class WidgetAction extends Action {
     @NonNull
     @Override
     public String toString() {
-        return "widget-based action: ";
+        String representation = "widget-based action: " + actionType + " ";
+
+        if (widget.getIdByActivity() != null && !widget.getIdByActivity().isEmpty()) {
+            representation += "widget=" + widget.getIdByActivity() + " ";
+        }
+
+        if (widget.getResourceID() != null && !widget.getResourceID().isEmpty()) {
+            representation += "resource=" + widget.getResourceID() + " ";
+        }
+
+        if (widget.getClazz() != null && !widget.getClazz().isEmpty()) {
+            representation += "clazz=" + widget.getClazz();
+        }
+
+        return representation;
     }
 }
