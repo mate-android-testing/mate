@@ -8,7 +8,6 @@ import com.thoughtworks.xstream.XStream;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.model.TestCase;
-import org.mate.utils.TimeoutRun;
 
 import java.io.File;
 import java.io.FileInputStream;
