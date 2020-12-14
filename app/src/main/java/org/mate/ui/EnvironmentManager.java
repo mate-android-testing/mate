@@ -290,14 +290,16 @@ public class EnvironmentManager {
      * @param testcaseDir The test case directory.
      * @param testCase    The name of the test case file.
      */
-    public void fetchTestCase(String testcaseDir, String testCase) {
+    public boolean fetchTestCase(String testcaseDir, String testCase) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_test_case")
                 .withParameter("deviceId", emulator)
                 .withParameter("testcaseDir", testcaseDir)
                 .withParameter("testcase", testCase);
         Message response = sendMessage(messageBuilder.build());
-        MATE.log("Fetching TestCase from emulator succeeded: " + response.getParameter("response"));
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching TestCase from emulator succeeded: " + success);
+        return success;
     }
 
     /**
