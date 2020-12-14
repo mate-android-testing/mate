@@ -79,6 +79,7 @@ public final class TestCaseSerializer {
             }
 
             if (!success) {
+                MATE.log("Serializing TestCase " + recordCounter + " failed!");
                 throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
             }
         } catch (IOException e) {
@@ -96,11 +97,12 @@ public final class TestCaseSerializer {
                         "TestCase" + recordCounter + ".xml");
 
                 if (!success) {
-                    throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
+                    MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                    throw new IllegalStateException(e);
                 }
             } catch (IOException ioe) {
-                e.printStackTrace();
-                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
+                MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                throw new IllegalStateException(e);
             }
         }
 
