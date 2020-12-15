@@ -68,10 +68,20 @@ public final class IntentBasedActionConverter implements Converter {
             writer.endNode();
         }
 
-        // TODO: handle dynamic receiver -> serialize package name
         if (intent.getComponent() != null) {
-            writer.startNode("name");
-            writer.setValue(intent.getComponent().getClassName());
+            writer.startNode("target");
+            // writer.setValue(intent.getComponent().getClassName());
+            writer.setValue(intent.getComponent().toShortString());
+            writer.endNode();
+        } else if (intent.getPackage() != null) {
+            writer.startNode("package");
+            writer.setValue(intent.getPackage());
+            writer.endNode();
+        }
+
+        if (intent.getType() != null) {
+            writer.startNode("mime");
+            writer.setValue(intent.getType());
             writer.endNode();
         }
 
@@ -103,7 +113,9 @@ public final class IntentBasedActionConverter implements Converter {
      *          <action>action</action>
      *          <categories>categories</categories>
      *          <data>uri</data>
-     *          <name>name</name>
+     *          <target>name</target>
+     *          <package>package</package>  (if target is not defined)
+     *          <mime>mime type</mime>
      *          <extras>bundle</extras>
      *      </intent>
      *
@@ -154,13 +166,22 @@ public final class IntentBasedActionConverter implements Converter {
             } else if (reader.getNodeName().equals("data")) {
                 // System.out.println("Data: " + reader.getValue());
                 intent.setData(Uri.parse(reader.getValue()));
-            } else if (reader.getNodeName().equals("name")) {
-                // System.out.println("Target Component: " + reader.getValue());
-                intent.setComponent(new ComponentName(MATE.packageName, reader.getValue()));
+            } else if (reader.getNodeName().equals("target")) {
+                String[] tokens = reader.getValue().substring(1, reader.getValue()
+                        .length() - 1).split("/");
+                intent.setComponent(new ComponentName(tokens[0], tokens[1]));
             } else if (reader.getNodeName().equals("extras")) {
                 Bundle bundle = (Bundle)context.convertAnother(intent, Bundle.class);
                 // System.out.println("Extras: " + bundle);
                 intent.putExtras(bundle);
+            } else if (reader.getNodeName().equals("mime")) {
+                // TODO: consider the internal restrictions of setType()
+                //  setting the mime type clears an already defined uri
+                intent.setType(reader.getValue());
+            } else if (reader.getNodeName().equals("package")) {
+                // TODO: consider the internal restrictions of setPackage()
+                System.out.println("Package: " + reader.getValue());
+                intent.setPackage(reader.getValue());
             }
 
             reader.moveUp();
@@ -195,13 +216,9 @@ public final class IntentBasedActionConverter implements Converter {
         // leave 'intent-filter' tag
         reader.moveUp();
 
-        /*
-        * If there is no component name specified, the intent targets a dynamic
-        * broadcast receiver. In this case, we can only specify the package name.
-         */
-        if (intent.getComponent() == null) {
-            // TODO: check if package name is valid
-            intent.setPackage(MATE.packageName);
+        if (intent.getComponent() == null && intent.getPackage() == null) {
+            // should hopefully never happen, at least this should not be the typical use case
+            MATE.log("Intent without specified component nor package name!");
         }
 
         return new IntentBasedAction(intent, component, intentFilter);

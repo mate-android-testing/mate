@@ -2,11 +2,8 @@ package org.mate;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import android.support.test.uiautomator.UiDevice;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 import org.mate.serialization.TestCaseSerializer;
 import org.mate.ui.Action;
@@ -18,96 +15,82 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mate.MATE.uiAbstractionLayer;
+
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEReplayRun {
-
-    private static UIAbstractionLayer uiAbstractionLayer;
-
-    private static String packageName;
-
-    private static UiDevice device;
-
-    private DeviceMgr deviceMgr;
 
     @Test
     public void useAppContext() {
         MATE.log_acc("Starting ReplayRun...");
 
         MATE mate = new MATE();
+        String packageName = mate.getPackageName();
 
-        device = mate.getDevice();
-        this.packageName = mate.getPackageName();
-        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+        MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
-        if (emulator != null && !emulator.equals("")) {
-            this.deviceMgr = new DeviceMgr(device, packageName);
-            uiAbstractionLayer = mate.getUiAbstractionLayer();
+        // track which test cases couldn't be successfully replayed
+        Map<Integer, TestCase> failures = new HashMap<>();
 
-            MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+        int testCaseID = 0;
 
-            // track which test cases couldn't be successfully replayed
-            Map<Integer, TestCase> failures = new HashMap<>();
+        TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
-            int testCaseID = 0;
+        // reset the app once
+        uiAbstractionLayer.resetApp();
 
-            TestCase testCase = TestCaseSerializer.deserializeTestCase();
+        // grant runtime permissions (read/write external storage) which are dropped after each reset
+        Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
 
-            // reset the app once
+        // as long as we find a test case for replaying
+        while (testCase != null) {
+
+            if (Properties.OPTIMISE_TEST_CASE()) {
+                testCase = TestCaseOptimizer.optimise(testCase);
+            }
+
+            if (replayTestCase(testCase)) {
+                // record stats only if test case could be successfully replayed
+                TestCaseStatistics.recordStats(testCase);
+            } else {
+                failures.put(testCaseID, testCase);
+            }
+
+            MATE.log("Replayed TestCase " + testCaseID + "!");
+
+            // replay next test case
+            testCase = TestCaseSerializer.deserializeTestCase();
+
+            testCaseID++;
+
+            // reset aut after each test case
             uiAbstractionLayer.resetApp();
 
             // grant runtime permissions (read/write external storage) which are dropped after each reset
             Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
+        }
 
-            // as long as we find a test case for replaying
-            while (testCase != null) {
+        // retry failed test cases
+        for (Map.Entry<Integer, TestCase> entry : failures.entrySet()) {
 
-                if (Properties.OPTIMISE_TEST_CASE()) {
-                    testCase = TestCaseOptimizer.optimise(testCase);
+            boolean success = false;
+
+            for (int i = 0; i < 5 && !success; i++) {
+
+                success = replayTestCase(entry.getValue());
+
+                if (success) {
+                    // record stats about successful test cases
+                    TestCaseStatistics.recordStats(entry.getValue());
                 }
 
-                if (replayTestCase(testCase)) {
-                    // record stats only if test case could be successfully replayed
-                    TestCaseStatistics.recordStats(testCase);
-                } else {
-                    failures.put(testCaseID, testCase);
-                }
-
-                MATE.log("Replayed TestCase " + testCaseID + "!");
-
-                // replay next test case
-                testCase = TestCaseSerializer.deserializeTestCase();
-
-                testCaseID++;
+                MATE.log("Replayed TestCase " + entry.getKey() + "!");
 
                 // reset aut after each test case
                 uiAbstractionLayer.resetApp();
 
                 // grant runtime permissions (read/write external storage) which are dropped after each reset
                 Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
-            }
-
-            // retry failed test cases
-            for (Map.Entry<Integer, TestCase> entry : failures.entrySet()) {
-
-                boolean success = false;
-
-                for (int i = 0; i < 5 && !success; i++) {
-
-                    success = replayTestCase(entry.getValue());
-
-                    if (success) {
-                        // record stats about successful test cases
-                        TestCaseStatistics.recordStats(entry.getValue());
-                    }
-
-                    MATE.log("Replayed TestCase " + entry.getKey() + "!");
-
-                    // reset aut after each test case
-                    uiAbstractionLayer.resetApp();
-
-                    // grant runtime permissions (read/write external storage) which are dropped after each reset
-                    Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
-                }
             }
         }
     }
@@ -162,6 +145,8 @@ public class ExecuteMATEReplayRun {
      * action could be derived.
      */
     private Action repairUIAction(Action a) {
+
+        // TODO: provide appropriate repair mechanism!
 
         // log information about selected and available actions
         if (a instanceof WidgetAction && !uiAbstractionLayer.getExecutableActions().contains(a)) {

@@ -389,6 +389,7 @@ public class IntentProvider {
         // add a data tag
         if (intentFilter.hasData()) {
             // TODO: consider integration of mimeType -> should be derived automatically otherwise
+            //  the mimeType needs to be set in one pass together with the URI, see intent.setType()!
             Uri uri = intentFilter.getData().generateRandomUri();
             if (uri != null) {
                 intent.setData(uri);
