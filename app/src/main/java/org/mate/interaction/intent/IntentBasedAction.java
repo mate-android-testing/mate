@@ -75,7 +75,7 @@ public class IntentBasedAction extends Action {
             for (String key : keys) {
                 builder.append(prefix);
                 prefix = " || ";
-                builder.append(key + "=" + intent.getExtras().getString(key));
+                builder.append(key + "=" + intent.getExtras().get(key));
             }
             builder.append("]");
         }
