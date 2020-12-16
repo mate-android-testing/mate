@@ -11,9 +11,11 @@ import org.mate.ui.WidgetAction;
 import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TestCaseStatistics;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.mate.MATE.uiAbstractionLayer;
 
@@ -30,7 +32,7 @@ public class ExecuteMATEReplayRun {
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
         // track which test cases couldn't be successfully replayed
-        Map<Integer, TestCase> failures = new HashMap<>();
+        Map<Integer, TestCase> failures = new TreeMap<>();
 
         int testCaseID = 0;
 
@@ -45,18 +47,19 @@ public class ExecuteMATEReplayRun {
         // as long as we find a test case for replaying
         while (testCase != null) {
 
+            MATE.log("Replaying TestCase " + testCaseID);
+
             if (Properties.OPTIMISE_TEST_CASE()) {
                 testCase = TestCaseOptimizer.optimise(testCase);
             }
 
             if (replayTestCase(testCase)) {
+                MATE.log("Replayed TestCase " + testCaseID);
                 // record stats only if test case could be successfully replayed
                 TestCaseStatistics.recordStats(testCase);
             } else {
                 failures.put(testCaseID, testCase);
             }
-
-            MATE.log("Replayed TestCase " + testCaseID + "!");
 
             // replay next test case
             testCase = TestCaseSerializer.deserializeTestCase();
@@ -70,6 +73,12 @@ public class ExecuteMATEReplayRun {
             Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
         }
 
+        MATE.log("Retry replaying " + failures.size() + " test cases!");
+        MATE.log("Retry replaying test cases: " + failures.keySet());
+
+        // track which test cases couldn't be replayed though retry
+        Set<Integer> nonRecoverableTestCases = new TreeSet<>(failures.keySet());
+
         // retry failed test cases
         for (Map.Entry<Integer, TestCase> entry : failures.entrySet()) {
 
@@ -77,14 +86,19 @@ public class ExecuteMATEReplayRun {
 
             for (int i = 0; i < 5 && !success; i++) {
 
+                MATE.log("Replaying TestCase " + entry.getKey());
+
+                // TODO: we could try to insert some artificial delay between the actions
+                //  since the AUT might be too slow on loading on the current activity
+                //  however this should be only done if we are on the expected activity
                 success = replayTestCase(entry.getValue());
 
                 if (success) {
+                    MATE.log("Replayed TestCase " + entry.getKey());
+                    nonRecoverableTestCases.remove(entry.getKey());
                     // record stats about successful test cases
                     TestCaseStatistics.recordStats(entry.getValue());
                 }
-
-                MATE.log("Replayed TestCase " + entry.getKey() + "!");
 
                 // reset aut after each test case
                 uiAbstractionLayer.resetApp();
@@ -93,6 +107,9 @@ public class ExecuteMATEReplayRun {
                 Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
             }
         }
+
+        MATE.log("Number of non recoverable test cases: " + nonRecoverableTestCases.size());
+        MATE.log("Non recoverable test cases: " + nonRecoverableTestCases);
     }
 
     /**
@@ -113,6 +130,7 @@ public class ExecuteMATEReplayRun {
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
             Action nextAction = actions.get(i);
+            MATE.log("Next action to be replayed: " + nextAction);
 
             // check whether the UI action is applicable on the current state
             if (nextAction instanceof WidgetAction
@@ -122,15 +140,17 @@ public class ExecuteMATEReplayRun {
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
-                    MATE.log("Replaying action " + i);
+                    MATE.log("replaying action " + i);
                     uiAbstractionLayer.executeAction(repairedAction);
+                    MATE.log("replayed action " + i + ": " + repairedAction);
                 } else {
                     MATE.log("Action not applicable!");
                     return false;
                 }
             } else {
-                MATE.log("Replaying action " + i);
-                uiAbstractionLayer.executeAction(actions.get(i));
+                MATE.log("replaying action " + i);
+                uiAbstractionLayer.executeAction(nextAction);
+                MATE.log("replayed action " + i + ": " + nextAction);
             }
         }
         return true;
