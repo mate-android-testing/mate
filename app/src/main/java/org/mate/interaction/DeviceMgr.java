@@ -15,6 +15,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.SystemAction;
 import org.mate.model.IGUIModel;
@@ -93,8 +94,21 @@ public class DeviceMgr implements IApp {
                     throw new UnsupportedOperationException("Component type not supported yet!");
             }
         } catch (Exception e) {
-            MATE.log_acc("Executing Intent-based action failed: " + e.getMessage());
-            e.printStackTrace();
+            final String msg = "Calling startActivity() from outside of an Activity  context " +
+                    "requires the FLAG_ACTIVITY_NEW_TASK flag.";
+            if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
+                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
+                try {
+                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                } catch (Exception ex) {
+                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            } else {
+                MATE.log("Executing Intent-based action failed: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
         checkForCrash();
     }
