@@ -108,7 +108,7 @@ public class WidgetAction extends Action {
                 widget.getX1() == action.widget.getX1() &&
                 widget.getX2() == action.widget.getX2() &&
                 widget.getY1() == action.widget.getY1() &&
-                widget.getX2() == action.widget.getY2();
+                widget.getY2() == action.widget.getY2();
     }
 
     @Override
