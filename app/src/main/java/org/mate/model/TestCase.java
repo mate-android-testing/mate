@@ -328,6 +328,7 @@ public class TestCase {
         addEvent(action);
         UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);
 
+        // track the activity transitions of each action
         String activityAfterAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
 
         if (actionID == 0) {
