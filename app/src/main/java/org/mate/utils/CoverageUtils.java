@@ -194,6 +194,12 @@ public class CoverageUtils {
         }
     }
 
+    /**
+     *  Returns the total coverage for the given coverage type.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @return Returns the total coverage.
+     */
     public static double getCombinedCoverage(Coverage coverage) {
 
         switch (Properties.COVERAGE()) {
@@ -213,6 +219,15 @@ public class CoverageUtils {
         }
     }
 
+    /**
+     * Returns the total coverage for the given coverage type and the specified list of
+     * chromosomes.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosomes A list of chromosomes.
+     * @param <T> The type parameter referring to test cases or test suites.
+     * @return Returns the total coverage for the specified chromosomes.
+     */
     public static <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
 
         switch (Properties.COVERAGE()) {
@@ -238,6 +253,14 @@ public class CoverageUtils {
         }
     }
 
+    /**
+     * A convenient function to retrieve the coverage of a single chromosome.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosome The given chromosome.
+     * @param <T> The type parameter indicating a test case or a test suite.
+     * @return Returns the coverage for the given chromosome.
+     */
     public static <T> double getCoverage(Coverage coverage, IChromosome<T> chromosome) {
 
         switch (Properties.COVERAGE()) {
