@@ -12,10 +12,10 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.ui.Action;
-import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,14 +49,31 @@ public class UIAbstractionLayer {
         screenStateEnumeration = 1;
     }
 
+    /**
+     * Returns the list of executable widget actions on the current screen.
+     *
+     * @return Returns the list of executable widget actions.
+     */
     public List<WidgetAction> getExecutableActions() {
         return getLastScreenState().getActions();
     }
 
+    /**
+     * Executes the given action. Retries execution the action when the
+     * UIAutomator is disconnected for a pre-defined number of times.
+     *
+     * @param action The action that should be executed.
+     * @return Returns the outcome of the execution, e.g. success.
+     */
     public ActionResult executeAction(Action action) {
         boolean retry = true;
         int retryCount = 0;
 
+        /*
+        * FIXME: The UIAutomator bug seems to be unresolvable right now.
+        *  We have tried to restart the ADB server, but afterwards the
+        *   connection is still broken.
+         */
         while (retry) {
             retry = false;
             try {
@@ -64,7 +81,7 @@ public class UIAbstractionLayer {
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
                         && e.getMessage().equals(UiAutomatorDisconnectedMessage)
-                        && retryCount < UiAutomatorDisconnectedRetries ) {
+                        && retryCount < UiAutomatorDisconnectedRetries) {
                     retry = true;
                     retryCount += 1;
                     continue;
@@ -75,14 +92,17 @@ public class UIAbstractionLayer {
         return FAILURE_UNKNOWN;
     }
 
+    /**
+     * Executes the given action. As a side effect, the screen state
+     * model is updated.
+     *
+     * @param action The action to be executed.
+     * @return Returns the outcome of the execution, e.g. success.
+     */
     private ActionResult executeActionUnsafe(Action action) {
         IScreenState state;
         try {
-            // execute this selected action
             deviceMgr.executeAction(action);
-
-            // create an object that represents the screen
-            // using type: ActionScreenState
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.handleCrashDialog();
@@ -152,11 +172,15 @@ public class UIAbstractionLayer {
                 MATE.log("New State found:" + state.getId());
                 return SUCCESS_NEW_STATE;
             }*/
-
             return SUCCESS;
         }
     }
 
+    /**
+     * Returns the last recorded screen state.
+     *
+     * @return Returns the last recorded screen state.
+     */
     public IScreenState getLastScreenState() {
         return lastScreenState;
     }
@@ -166,7 +190,11 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Accept all permissions and ignore build for old android version warning.
+     * Clears the screen from all sorts of dialogs. In particular, whenever
+     * a permission dialog pops up, the permission is granted. If a crash dialog
+     * appears, we press 'HOME'. If a google-sign dialog appears, the 'BACK'
+     * button is pressed to return to the AUT. Clicks on 'OK' when a build
+     * warning pops up.
      */
     public static void clearScreen(DeviceMgr deviceMgr) {
         boolean change = true;
@@ -178,11 +206,13 @@ public class UIAbstractionLayer {
             change = false;
             try {
 
-                // check for crash messages
+                // check for crash dialog
                 UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
                 UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
 
                 if (crashDialog1.exists() || crashDialog2.exists()) {
+                    // TODO: Click 'OK' on crash dialog window rather than 'HOME'?
+                    // press 'HOME' button
                     deviceMgr.handleCrashDialog();
                     change = true;
                     continue;
@@ -211,13 +241,9 @@ public class UIAbstractionLayer {
 
                 // check for google sign in dialog
                 if (screenState.getPackageName().equals("com.google.android.gms")) {
-                    try {
-                        // press BACK to return to AUT
-                        MATE.log("Google Sign Dialog detected! Returning.");
-                        deviceMgr.executeAction(new WidgetAction(ActionType.BACK));
-                    } catch (AUTCrashException e) {
-                        e.printStackTrace();
-                    }
+                    // press BACK to return to AUT
+                    MATE.log("Google Sign Dialog detected! Returning.");
+                    deviceMgr.pressBack();
                     change = true;
                     continue;
                 }
@@ -252,23 +278,30 @@ public class UIAbstractionLayer {
         }
     }
 
+    /**
+     * Checks whether a progress bar appeared on the screen. If this is the case,
+     * waits a certain amount of time that the progress bar can reach completion.
+     *
+     * @param state The recording of the current screen.
+     * @return Returns the amount of time it has waited for completion.
+     */
     private long waitForProgressBar(IScreenState state) {
+
         long ini = new Date().getTime();
         long end = new Date().getTime();
         boolean hadProgressBar = false;
         boolean hasProgressBar = true;
+
+        // wait a certain amount of time (22 seconds at max)
         while (hasProgressBar && (end - ini) < 22000) {
             hasProgressBar = false;
+            // check whether a widget represents a progress bar
             for (Widget widget : state.getWidgets()) {
-                if (widget.getClazz().contains("ProgressBar") && widget.isEnabled() && widget.getContentDesc().contains("Loading")) {
+                if (deviceMgr.checkForProgressBar(widget)) {
                     MATE.log("WAITING PROGRESS BAR TO FINISH");
                     hasProgressBar = true;
                     hadProgressBar = true;
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    Utils.sleep(3000);
                     state = ScreenStateFactory.getScreenState(state.getType());
                 }
             }
@@ -279,6 +312,9 @@ public class UIAbstractionLayer {
         return end - ini;
     }
 
+    /**
+     * Resets an app, i.e. clearing the app cache and restarting the app.
+     */
     public void resetApp() {
         try {
             device.wakeUp();
@@ -288,32 +324,33 @@ public class UIAbstractionLayer {
         }
         Registry.getEnvironmentManager().setPortraitMode();
         deviceMgr.reinstallApp();
-        sleep(5000);
+        Utils.sleep(5000);
         deviceMgr.restartApp();
-        sleep(2000);
+        Utils.sleep(2000);
         clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
             lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
         }
     }
 
+    /**
+     * Restarts the app without clearing the app cache.
+     */
     public void restartApp() {
         deviceMgr.restartApp();
-        sleep(2000);
+        Utils.sleep(2000);
         clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
             lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
         }
     }
 
-    private void sleep(int millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e1) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
+    /**
+     * Returns the edge (a pair of screen states) that is described by the given action.
+     *
+     * @param action The given action.
+     * @return Returns the edge belonging to the action.
+     */
     public Edge getEdge(Action action) {
         return edges.get(action);
     }
@@ -332,7 +369,6 @@ public class UIAbstractionLayer {
     }
 
 
-
     public IScreenState toRecordedScreenState(IScreenState screenState) {
         List<IScreenState> recordedScreenStates = getRecordedScreenStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
@@ -340,7 +376,7 @@ public class UIAbstractionLayer {
                 return recordedScreenState;
             }
         }
-        screenState.setId("S"+screenStateEnumeration);
+        screenState.setId("S" + screenStateEnumeration);
         screenStateEnumeration++;
         return screenState;
     }
@@ -369,6 +405,11 @@ public class UIAbstractionLayer {
         FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
     }
 
+    /**
+     * Represents an edge that links the connection between two screen states by an action.
+     * Or more simply, executing the action on the source screen state leads to the target
+     * screen state.
+     */
     public static class Edge {
         private Action action;
         private IScreenState source;

@@ -267,7 +267,7 @@ public class DeviceMgr implements IApp {
     /**
      * Checks whether a crash dialog appeared on the screen.
      *
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     * @throws AUTCrashException Thrown when the last action caused a crash of the application.
      */
     private void checkForCrash() throws AUTCrashException {
         
@@ -279,6 +279,19 @@ public class DeviceMgr implements IApp {
             MATE.log("CRASH");
             throw new AUTCrashException("App crashed");
         }
+    }
+
+    /**
+     * Checks whether the given widget represents a progress bar.
+     *
+     * @param widget The given widget.
+     * @return Returns {@code true} if the widget refers to a progress bar,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean checkForProgressBar(Widget widget) {
+        return widget.getClazz().contains("ProgressBar")
+                && widget.isEnabled()
+                && widget.getContentDesc().contains("Loading");
     }
 
     /**
@@ -542,8 +555,18 @@ public class DeviceMgr implements IApp {
     }
 
     // TODO: rename to 'pressHome()' once IApp interface is fixed/removed
+    /**
+     * Emulates pressing the 'HOME' button.
+     */
     public void handleCrashDialog() {
         device.pressHome();
+    }
+
+    /**
+     * Emulates pressing the 'BACK' button.
+     */
+    public void pressBack() {
+        device.pressBack();
     }
 
     public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
