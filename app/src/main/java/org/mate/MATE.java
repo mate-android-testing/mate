@@ -27,8 +27,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -134,7 +132,7 @@ public class MATE {
 
     public void testApp(final Algorithm algorithm) {
 
-        MATE.log_acc("Activities");
+        MATE.log_acc("Activities:");
         for (String s : Registry.getEnvironmentManager().getActivityNames()) {
             MATE.log_acc("\t" + s);
         }
@@ -144,8 +142,6 @@ public class MATE {
             MATE.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
         }
-
-        long startTime = System.currentTimeMillis();
 
         try {
             TimeoutRun.timeoutRun(new Callable<Void>() {
@@ -160,17 +156,13 @@ public class MATE {
                 CoverageUtils.logFinalCoverage();
             }
 
-            if (Properties.GRAPH_TYPE() != null) {
-                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
 
-            long endTime = System.currentTimeMillis();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-            MATE.log_acc("Execution time: " + (dateFormat.format(new Date(endTime-startTime))));
+            if (Properties.GRAPH_TYPE() != null) {
+                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            }
 
             Registry.getEnvironmentManager().releaseEmulator();
             //EnvironmentManager.deleteAllScreenShots(packageName);

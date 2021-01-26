@@ -11,7 +11,7 @@ public class ExecuteMATERandomExplorationIntent {
 
     @Test
     public void useAppContext() {
-        MATE.log_acc("Starting Random Exploration...");
+        MATE.log_acc("Starting Random Intent Exploration...");
 
         MATE mate = new MATE();
 

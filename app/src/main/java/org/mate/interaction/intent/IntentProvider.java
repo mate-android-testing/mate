@@ -13,8 +13,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -40,8 +40,8 @@ public class IntentProvider {
             // extract all exported and enabled components declared in the manifest
             components = ComponentParser.parseManifest();
 
-            // remove self defined components, e.g. the tracer used for branch coverage / branch distance computation
-            filterSelfDefinedComponents(components);
+            // remove certain components, e.g. our custom tracer or google analytics receivers
+            filterComponents(components);
 
             // add information about bundle entries and extracted string constants + collect dynamic receivers
             IntentInfoParser.parseIntentInfoFile(components, dynamicReceivers);
@@ -59,12 +59,14 @@ public class IntentProvider {
     }
 
     /**
-     * We don't want to invoke our tracer used for branch coverage / branch distance computation
-     * via the intent fuzzer. This may write out traces otherwise.
+     * We don't want to interfere with the tracer that is responsible for branch coverage/distance.
+     * Likewise, there are certain receivers that rely on additional dependencies, which are
+     * typically not available on the emulator, e.g. the Google Analytics SDK. Thus, we simply
+     * remove those components from the targets of intents.
      *
      * @param components The list of components parsed from the manifest.
      */
-    private void filterSelfDefinedComponents(List<ComponentDescription> components) {
+    private void filterComponents(List<ComponentDescription> components) {
 
         List<ComponentDescription> toBeRemoved = new ArrayList<>();
 
@@ -72,10 +74,18 @@ public class IntentProvider {
         final String BRANCH_DISTANCE_TRACER = "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer";
         final String TRACER = "de.uni_passau.fim.auermich.tracer.Tracer";
 
+        // these receivers are often not available because the Google Analytics SDK is missing on emulators
+        final Set<String> GOOGLE_ANALYTICS_RECEIVERS = new HashSet() {{
+           add("com.google.android.gms.analytics.AnalyticsReceiver");
+           add("com.google.android.gms.analytics.CampaignTrackingReceiver");
+           add("com.google.android.apps.analytics.AnalyticsReceiver");
+        }};
+
         for (ComponentDescription component : components) {
             if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
                     || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)
-                    || component.getFullyQualifiedName().equals(TRACER)) {
+                    || component.getFullyQualifiedName().equals(TRACER)
+                    || GOOGLE_ANALYTICS_RECEIVERS.contains(component.getFullyQualifiedName())) {
                 toBeRemoved.add(component);
             }
         }
@@ -163,7 +173,6 @@ public class IntentProvider {
             // we need to distinguish between a dynamic system receiver and dynamic receiver
             if (describesSystemEvent(systemEventActions, intentFilter)) {
                 // use system event action
-                // TODO: adjust system action to contain a ref to the component + selected intent filter
                 String action = Randomness.randomElement(intentFilter.getActions());
                 SystemAction systemAction = new SystemAction(component, intentFilter, action);
                 systemAction.markAsDynamic();
@@ -251,7 +260,6 @@ public class IntentProvider {
             ComponentDescription component = Randomness.randomElement(systemEventReceivers);
             IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
             String action = Randomness.randomElement(intentFilter.getActions());
-            // TODO: adjust system action to contain a ref to the component + selected intent filter
             return new SystemAction(component, intentFilter, action);
         }
     }
@@ -319,7 +327,6 @@ public class IntentProvider {
             activity = packageName + activity;
         }
 
-        MATE.log("Current visible Activity is: " + activity);
         ComponentDescription component = ComponentDescription.getComponentByName(components, activity);
 
         if (component == null) {
@@ -392,6 +399,7 @@ public class IntentProvider {
         // add a data tag
         if (intentFilter.hasData()) {
             // TODO: consider integration of mimeType -> should be derived automatically otherwise
+            //  the mimeType needs to be set in one pass together with the URI, see intent.setType()!
             Uri uri = intentFilter.getData().generateRandomUri();
             if (uri != null) {
                 intent.setData(uri);
@@ -437,7 +445,6 @@ public class IntentProvider {
                 targetComponents.add(component);
             }
         }
-        MATE.log("Found " + targetComponents.size() + " " + componentType);
         return Collections.unmodifiableList(targetComponents);
     }
 }

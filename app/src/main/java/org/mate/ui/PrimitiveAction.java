@@ -1,5 +1,7 @@
 package org.mate.ui;
 
+import android.support.annotation.NonNull;
+
 import org.mate.MATE;
 import org.mate.utils.Randomness;
 
@@ -31,5 +33,11 @@ public class PrimitiveAction extends Action {
         int x = Randomness.getRnd().nextInt(MATE.device.getDisplayWidth());
         int y = Randomness.getRnd().nextInt(MATE.device.getDisplayHeight());
         return new PrimitiveAction(x, y, Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)));
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "primitive action: " + actionType + " at (" + x + "," + y + ")";
     }
 }

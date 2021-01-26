@@ -29,7 +29,7 @@ public class TestCase {
     private Set<String> visitedActivities;
     private Set<String> visitedStates;
     private List<Action> eventSequence;
-    private List<String> activityAfterAction;
+    private List<String> activitySequence;
     private float novelty;
     private boolean crashDetected;
     private double sparseness;
@@ -40,6 +40,7 @@ public class TestCase {
 
 
     public TestCase(String id){
+        MATE.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
         visitedActivities = new HashSet<>();
@@ -48,7 +49,7 @@ public class TestCase {
         sparseness = 0;
         statesMap = new HashMap<>();
         featureVector = new HashMap<String, Integer>();
-        activityAfterAction = new ArrayList<>();
+        activitySequence = new ArrayList<>();
     }
 
     /**
@@ -56,8 +57,11 @@ public class TestCase {
      * Among other things, this method is responsible for creating
      * coverage information if desired.
      */
+    // TODO: ensure that finish() is properly called after each test case
     public void finish() {
-        MATE.log_acc("Found crash: " + getCrashDetected());
+        MATE.log("Finishing test case!");
+
+        MATE.log("Found crash: " + getCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
@@ -68,6 +72,13 @@ public class TestCase {
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
         }
+
+        MATE.log("Visited activities in order: " + activitySequence);
+
+        // TODO: ensure that this log only appears here -> required for analysis framework
+        MATE.log("Visited activities: " + getVisitedActivities());
+
+        // TODO: log the test case actions in a proper format
     }
 
     /**
@@ -119,19 +130,24 @@ public class TestCase {
     }
 
     /**
+     * Returns the activity name before the execution of the given action.
+     * @param actionIndex The action index.
+     * @return Returns the activity in foreground before the given action was executed.
+     */
+    public String getActivityBeforeAction(int actionIndex) {
+        return activitySequence.get(actionIndex);
+    }
+
+    /**
      * Returns the name of the activity that is in the foreground after the execution
      * of the n-th {@param actionIndex} action.
      *
      * @param actionIndex The action index.
-     * @return Returns the activity name after the execution of the {@param actionIndex} action,
-     *      or returns {@code "unknown"}.
+     * @return Returns the activity name after the execution of the {@param actionIndex} action.
      */
     public String getActivityAfterAction(int actionIndex) {
-        if (actionIndex >= 0 && actionIndex < activityAfterAction.size()) {
-            return activityAfterAction.get(actionIndex);
-        } else {
-            return "unknown";
-        }
+        // the activity sequence models a 'activity-before-action' relation
+        return activitySequence.get(actionIndex + 1);
     }
 
     public void setDesiredSize(Optional<Integer> desiredSize) {
@@ -247,7 +263,7 @@ public class TestCase {
             for (Action action0 : testCase.eventSequence) {
                 if (count < finalSize) {
                     if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
-                        if (!resultingTc.updateTestCase(action0, String.valueOf(count))) {
+                        if (!resultingTc.updateTestCase(action0, count)) {
                             return resultingTc;
                         }
                         count++;
@@ -265,7 +281,7 @@ public class TestCase {
                 } else {
                     action = PrimitiveAction.randomAction();
                 }
-                if (!resultingTc.updateTestCase(action, String.valueOf(count))) {
+                if (!resultingTc.updateTestCase(action, count)) {
                     return resultingTc;
                 }
             }
@@ -295,26 +311,41 @@ public class TestCase {
     /**
      * Perform action and update TestCase accordingly.
      *
-     * @param a Action to perform
-     * @param event Event name
+     * @param action The action to be performed.
+     * @param actionID The id of the action.
      * @return True if action successful inbound false if outbound, crash, or some unkown failure
      */
-    public boolean updateTestCase(Action a, String event) {
+    public boolean updateTestCase(Action action, int actionID) {
 
-        if (a instanceof WidgetAction
-                && !MATE.uiAbstractionLayer.getExecutableActions().contains(a)) {
-            throw new IllegalStateException("Action not applicable to current state");
+        if (action instanceof WidgetAction
+                && !MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
+            throw new IllegalStateException("Action not applicable to current state!");
         }
-        addEvent(a);
-        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(a);
 
-        // track the activity in focus after each executed action
-        activityAfterAction.add(Registry.getEnvironmentManager().getCurrentActivityName());
+        String activityBeforeAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
+        MATE.log("executing action " + actionID);
+
+        addEvent(action);
+        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);
+
+        // track the activity transitions of each action
+        String activityAfterAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
+
+        if (actionID == 0) {
+            activitySequence.add(activityBeforeAction);
+            activitySequence.add(activityAfterAction);
+        } else {
+            activitySequence.add(activityAfterAction);
+        }
+
+        MATE.log("executed action " + actionID + ": " + action);
+        MATE.log("Activity Transition for action " +  actionID
+                + ":" + activityBeforeAction  + "->" + activityAfterAction);
 
         switch (actionResult) {
             case SUCCESS:
             case SUCCESS_NEW_STATE:
-                updateTestCase(event);
+                updateTestCase(String.valueOf(actionID));
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();

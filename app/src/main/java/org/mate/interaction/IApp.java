@@ -6,8 +6,9 @@ import org.mate.ui.WidgetAction;
 
 /**
  * Created by marceloeler on 22/06/17.
+ * TODO: Remove in near future.
  */
-
+@Deprecated
 public interface IApp {
 
     public void executeAction(WidgetAction action) throws AUTCrashException;
@@ -15,5 +16,5 @@ public interface IApp {
     public void restartApp();
     public void handleCrashDialog();
     public boolean goToState(IGUIModel guiModel, String targetScreenStateId);
-    public void sleep(long time);
+    // public void sleep(long time);
 }

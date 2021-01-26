@@ -112,11 +112,16 @@ public final class TestCaseOptimizer {
      */
     private static TestCase removeAllActionsBeforeLastActivityTransition(TestCase testCase) {
 
+        if (testCase.getEventSequence().isEmpty()) {
+            // no actions -> no activity transitions
+            return testCase;
+        }
+
         List<Action> toBeRemoved = new ArrayList<>();
         List<Action> actions = new ArrayList<>(testCase.getEventSequence());
 
         // traverse backwards until we reach a different activity
-        int index = testCase.getEventSequence().size()-1;
+        int index = testCase.getEventSequence().size() - 1;
         String activity = testCase.getActivityAfterAction(index);
         index--;
 
@@ -131,7 +136,7 @@ public final class TestCaseOptimizer {
         }
 
         // collect all actions up to last activity transition for removal
-        for (int i = 0; i < index; i++) {
+        for (int i = 0; i <= index; i++) {
             toBeRemoved.add(actions.get(i));
         }
 

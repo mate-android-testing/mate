@@ -45,7 +45,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
 
         try {
             for (int i = 0; i < maxNumEvents; i++) {
-                if (!testCase.updateTestCase(selectAction(), String.valueOf(i))) {
+                if (!testCase.updateTestCase(selectAction(), i)) {
                     return chromosome;
                 }
             }
