@@ -180,24 +180,30 @@ public class EnvironmentManager {
     }
 
     /**
-     * Releases the emulator. This doesn't have any
-     * effect on the real emulator, just sets some
+     * Releases the emulator. This doesn't have any effect on the real emulator, just sets some
      * internal properties.
      */
     public void releaseEmulator() {
-        String cmd = "releaseEmulator:" + emulator;
-        tunnelLegacyCmd(cmd);
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("deviceId", emulator)
+                .withParameter("type", "release_emulator");
+        sendMessage(messageBuilder.build());
     }
 
     /**
-     * Returns the name of the emulator, e.g. emulator-5554.
+     * Allocates the emulator that is running the given app.
      *
      * @param packageName The package name of the AUT.
      * @return Returns the name of the emulator.
      */
-    public String detectEmulator(String packageName) {
-        String cmd = "getEmulator:" + packageName;
-        String response = tunnelLegacyCmd(cmd);
+    public String allocateEmulator(String packageName) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("type", "allocate_emulator")
+                .withParameter("packageName", packageName);
+
+        String response = sendMessage(messageBuilder.build()).getParameter("emulator");
+
         if (response != null && !response.isEmpty()) {
             emulator = response;
         }

@@ -121,7 +121,7 @@ public class MATE {
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
 
-        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+        String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
 
         if (emulator != null && !emulator.equals("")) {
             this.deviceMgr = new DeviceMgr(device, packageName);
