@@ -4,14 +4,13 @@ import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.IApp;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.ActionType;
+import org.mate.interaction.ui.Widget;
+import org.mate.interaction.ui.WidgetAction;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.ui.ActionType;
-import org.mate.interaction.ui.Widget;
-import org.mate.interaction.ui.Action;
-import org.mate.interaction.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,7 +25,7 @@ import static org.mate.MATE.log;
 
 @Deprecated
 public class DepthFirst {
-    private IApp deviceMgr;
+    private DeviceMgr deviceMgr;
     private String packageName;
     private IGUIModel guiModel;
     List<String> statesVisited;

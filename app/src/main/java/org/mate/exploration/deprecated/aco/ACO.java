@@ -3,14 +3,14 @@ package org.mate.exploration.deprecated.aco;
 import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.deprecated.Fitness.ActivityCoverage;
-import org.mate.interaction.IApp;
+import org.mate.interaction.DeviceMgr;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.WidgetAction;
 import org.mate.model.graph.EventEdge;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.model.graph.ScreenNode;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.ui.Action;
-import org.mate.interaction.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ import java.util.Random;
 @Deprecated
 public class ACO {
 
-    private IApp deviceMgr;
+    private DeviceMgr deviceMgr;
     private String packageName;
     private GraphGUIModel wholeModel;
     private List<String> statesVisited;
@@ -40,7 +40,7 @@ public class ACO {
     private boolean isExitApp = false;
     private WidgetAction exitAction = null;
 
-    public ACO(IApp deviceMgr,String packageName,GraphGUIModel completeModel){
+    public ACO(DeviceMgr deviceMgr,String packageName,GraphGUIModel completeModel){
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.wholeModel = completeModel;

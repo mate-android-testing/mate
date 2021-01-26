@@ -33,8 +33,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 /**
  * Created by marceloeler on 08/03/17.
  */
-
-public class DeviceMgr implements IApp {
+public class DeviceMgr {
 
     private UiDevice device;
     private String packageName;
