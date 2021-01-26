@@ -1,6 +1,6 @@
 package org.mate;
 
-import org.mate.ui.EnvironmentManager;
+import org.mate.interaction.ui.EnvironmentManager;
 
 import java.io.IOException;
 import java.util.Random;

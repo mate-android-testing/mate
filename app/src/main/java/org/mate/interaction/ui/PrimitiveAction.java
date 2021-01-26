@@ -1,4 +1,4 @@
-package org.mate.ui;
+package org.mate.interaction.ui;
 
 import android.support.annotation.NonNull;
 

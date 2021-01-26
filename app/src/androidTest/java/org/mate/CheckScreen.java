@@ -1,32 +1,11 @@
 package org.mate;
 
-import android.app.ActivityManager;
-import android.app.Instrumentation;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.test.uiautomator.UiDevice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.UIAbstractionLayer;
-import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.EnvironmentManager;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
-
-import java.util.Date;
-import java.util.List;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 
 /**

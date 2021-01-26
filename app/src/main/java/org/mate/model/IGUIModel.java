@@ -1,9 +1,9 @@
 package org.mate.model;
 
 import org.mate.exceptions.InvalidScreenStateException;
-import org.mate.ui.Action;
+import org.mate.interaction.ui.Action;
 import org.mate.state.IScreenState;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.List;
 

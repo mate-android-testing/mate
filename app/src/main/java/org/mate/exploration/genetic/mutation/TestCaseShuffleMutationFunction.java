@@ -1,10 +1,9 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
+import org.mate.interaction.ui.Action;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;

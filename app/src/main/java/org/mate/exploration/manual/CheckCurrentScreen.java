@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.ui.Widget;
 
 public class CheckCurrentScreen {
 

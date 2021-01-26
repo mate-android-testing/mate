@@ -8,20 +8,14 @@ import android.os.Bundle;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.converters.collections.CollectionConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.mapper.DefaultImplementationsMapper;
-import com.thoughtworks.xstream.mapper.DefaultMapper;
 
 import org.mate.MATE;
 import org.mate.interaction.intent.ComponentDescription;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.IntentFilterDescription;
-import org.mate.ui.Action;
-
-import java.util.Set;
 
 /**
  * Represents a custom converter from an {@link IntentBasedAction} to XML and vice versa.

@@ -12,8 +12,8 @@ import org.mate.interaction.DeviceMgr;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.Widget;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.Date;
 import java.util.List;

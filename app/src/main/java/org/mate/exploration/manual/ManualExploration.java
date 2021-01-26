@@ -9,10 +9,10 @@ import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.ActionType;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.ActionType;
+import org.mate.interaction.ui.Widget;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.Date;
 

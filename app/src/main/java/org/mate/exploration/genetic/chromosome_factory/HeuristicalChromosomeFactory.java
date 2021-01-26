@@ -1,15 +1,10 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import android.os.Environment;
-
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
-import org.mate.utils.Coverage;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.WidgetAction;
 import org.mate.utils.Randomness;
-import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,13 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.mate.ui.ActionType.BACK;
-import static org.mate.ui.ActionType.MENU;
-import static org.mate.ui.ActionType.SWIPE_DOWN;
-import static org.mate.ui.ActionType.SWIPE_LEFT;
-import static org.mate.ui.ActionType.SWIPE_RIGHT;
-import static org.mate.ui.ActionType.SWIPE_UP;
 
 public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory {
     public static final String CHROMOSOME_FACTORY_ID = "heuristical_chromosome_factory";

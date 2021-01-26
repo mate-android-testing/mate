@@ -2,7 +2,7 @@ package org.mate.interaction;
 
 import org.mate.exceptions.AUTCrashException;
 import org.mate.model.IGUIModel;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.WidgetAction;
 
 /**
  * Created by marceloeler on 22/06/17.

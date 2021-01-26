@@ -1,7 +1,5 @@
-package org.mate.ui;
+package org.mate.interaction.ui;
 
-
-import org.mate.MATE;
 
 import java.util.ArrayList;
 import java.util.HashSet;

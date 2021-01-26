@@ -4,9 +4,7 @@ import android.app.Instrumentation;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.support.annotation.RequiresApi;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.StaleObjectException;
@@ -14,12 +12,10 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.content.Context;
-
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.ui.Widget;
-import org.mate.ui.EnvironmentManager;
+import org.mate.interaction.ui.Widget;
+import org.mate.interaction.ui.EnvironmentManager;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

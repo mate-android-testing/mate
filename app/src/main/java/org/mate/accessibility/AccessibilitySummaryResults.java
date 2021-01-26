@@ -8,7 +8,7 @@ import org.mate.Registry;
 import org.mate.accessibility.utils.AccessibilityUtils;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.HashSet;

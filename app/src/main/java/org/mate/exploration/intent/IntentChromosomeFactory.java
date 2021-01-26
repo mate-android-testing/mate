@@ -9,7 +9,7 @@ import org.mate.interaction.intent.ComponentDescription;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentProvider;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
+import org.mate.interaction.ui.Action;
 import org.mate.utils.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 

@@ -2,9 +2,9 @@ package org.mate.state;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.ui.Action;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.Widget;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.List;
 import java.util.Map;

@@ -1,7 +1,7 @@
 package org.mate.model.graph;
 
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.WidgetAction;
 
 /**
  * Created by marceloe on 08/12/16.

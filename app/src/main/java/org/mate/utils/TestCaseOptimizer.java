@@ -6,9 +6,9 @@ import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
-import org.mate.ui.PrimitiveAction;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.Action;
+import org.mate.interaction.ui.PrimitiveAction;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Collections;

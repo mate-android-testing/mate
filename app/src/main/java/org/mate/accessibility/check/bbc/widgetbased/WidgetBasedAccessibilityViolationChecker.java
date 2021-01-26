@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;

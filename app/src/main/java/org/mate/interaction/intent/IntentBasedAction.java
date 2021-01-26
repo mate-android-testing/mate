@@ -3,7 +3,7 @@ package org.mate.interaction.intent;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import org.mate.ui.Action;
+import org.mate.interaction.ui.Action;
 
 import java.util.Set;
 

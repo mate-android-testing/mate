@@ -1,7 +1,7 @@
 package org.mate.state.executables;
 
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

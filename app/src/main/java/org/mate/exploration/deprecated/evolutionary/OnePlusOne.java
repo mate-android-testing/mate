@@ -8,9 +8,8 @@ import org.mate.model.TestCase;
 import org.mate.model.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.Widget;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;

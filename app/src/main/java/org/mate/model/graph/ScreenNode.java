@@ -2,8 +2,7 @@ package org.mate.model.graph;
 
 import org.mate.Properties;
 import org.mate.state.IScreenState;
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.List;
