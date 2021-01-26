@@ -7,7 +7,7 @@ import android.net.Uri;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.interaction.ui.Action;
-import org.mate.interaction.ui.EnvironmentManager;
+import org.mate.interaction.EnvironmentManager;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParserException;
 

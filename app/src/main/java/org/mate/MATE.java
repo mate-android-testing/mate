@@ -17,7 +17,7 @@ import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.model.deprecated.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.interaction.ui.Action;
-import org.mate.interaction.ui.EnvironmentManager;
+import org.mate.interaction.EnvironmentManager;
 import org.mate.utils.Coverage;
 import org.mate.utils.CoverageUtils;
 import org.mate.utils.MersenneTwister;
