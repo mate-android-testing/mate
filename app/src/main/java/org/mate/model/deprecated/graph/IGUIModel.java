@@ -1,4 +1,4 @@
-package org.mate.model;
+package org.mate.model.deprecated.graph;
 
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.ui.Action;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by marceloeler on 22/06/17.
  */
-
+@Deprecated
 public interface IGUIModel {
 
     public void moveToState(IScreenState screenState) throws InvalidScreenStateException;

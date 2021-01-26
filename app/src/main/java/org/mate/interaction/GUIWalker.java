@@ -5,7 +5,7 @@ import android.app.Instrumentation;
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
-import org.mate.model.IGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.interaction.ui.Action;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -19,7 +19,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 /**
  * Created by marceloeler on 21/06/17.
  */
-
+@Deprecated
 public class GUIWalker {
 
     private IGUIModel guiModelMgr;

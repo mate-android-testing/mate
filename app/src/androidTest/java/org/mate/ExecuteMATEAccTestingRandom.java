@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
-import org.mate.model.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.model.deprecated.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 

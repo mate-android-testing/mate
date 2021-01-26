@@ -6,9 +6,9 @@ import org.mate.exploration.deprecated.Fitness.ActivityCoverage;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.WidgetAction;
-import org.mate.model.graph.EventEdge;
-import org.mate.model.graph.GraphGUIModel;
-import org.mate.model.graph.ScreenNode;
+import org.mate.model.deprecated.graph.EventEdge;
+import org.mate.model.deprecated.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.ScreenNode;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 

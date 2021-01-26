@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.interaction.ui.Action;
@@ -232,6 +233,7 @@ public class TestCase {
         return featureVector;
     }
 
+    @Deprecated
     public void updateFeatureVector(IGUIModel guiModel) {
         List<IScreenState> guiStates = guiModel.getStates();
         for(IScreenState state : guiStates){

@@ -1,9 +1,8 @@
-package org.mate.model.graph;
+package org.mate.model.deprecated.graph;
 
 import org.mate.MATE;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.exploration.deprecated.aco.Ant;
-import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.Widget;
@@ -15,7 +14,7 @@ import java.util.List;
 /**
  * Created by marceloeler on 22/06/17.
  */
-
+@Deprecated
 public class GraphGUIModel implements IGUIModel {
 
     private StateGraph stateGraph;

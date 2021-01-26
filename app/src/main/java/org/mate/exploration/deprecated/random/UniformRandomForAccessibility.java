@@ -9,7 +9,7 @@ import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.ui.Widget;

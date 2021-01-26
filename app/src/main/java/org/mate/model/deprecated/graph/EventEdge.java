@@ -1,4 +1,4 @@
-package org.mate.model.graph;
+package org.mate.model.deprecated.graph;
 
 import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.WidgetAction;
@@ -6,6 +6,7 @@ import org.mate.interaction.ui.WidgetAction;
 /**
  * Created by marceloe on 08/12/16.
  */
+@Deprecated
 public class EventEdge implements Cloneable{
 
     private String id;

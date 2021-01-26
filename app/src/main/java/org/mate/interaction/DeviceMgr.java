@@ -18,7 +18,7 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.SystemAction;
-import org.mate.model.IGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.ActionType;
 import org.mate.interaction.ui.PrimitiveAction;
@@ -567,6 +567,7 @@ public class DeviceMgr {
         device.pressBack();
     }
 
+    @Deprecated
     public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
         return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
     }

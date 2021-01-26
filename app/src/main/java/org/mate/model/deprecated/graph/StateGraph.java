@@ -1,4 +1,4 @@
-package org.mate.model.graph;
+package org.mate.model.deprecated.graph;
 
 import org.mate.MATE;
 import org.mate.interaction.ui.Action;
@@ -13,6 +13,7 @@ import java.util.List;
 /**
  * Created by marceloe on 08/12/16.
  */
+@Deprecated
 public class StateGraph {
 
     private ScreenNode rootNode;

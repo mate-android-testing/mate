@@ -8,7 +8,7 @@ import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.ActionType;
 import org.mate.interaction.ui.Widget;
 import org.mate.interaction.ui.WidgetAction;
-import org.mate.model.IGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 

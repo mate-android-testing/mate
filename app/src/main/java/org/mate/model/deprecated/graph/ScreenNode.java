@@ -1,4 +1,4 @@
-package org.mate.model.graph;
+package org.mate.model.deprecated.graph;
 
 import org.mate.Properties;
 import org.mate.state.IScreenState;
@@ -10,6 +10,7 @@ import java.util.List;
 /**
  * Created by marceloe on 08/12/16.
  */
+@Deprecated
 public class ScreenNode {
 
     private String id;
