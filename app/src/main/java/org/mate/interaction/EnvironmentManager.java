@@ -299,13 +299,16 @@ public class EnvironmentManager {
      *          the string 'unknown' if extraction failed.
      */
     public String getCurrentActivityName() {
-        String currentActivity = "current_activity";
+
         if (emulator == null || emulator.isEmpty()) {
             return ACTIVITY_UNKNOWN;
         }
 
-        String cmd = "getActivity:" + emulator;
-        return tunnelLegacyCmd(cmd);
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/android/get_current_activity")
+                .withParameter("deviceId", emulator);
+        Message response = sendMessage(messageBuilder.build());
+        return response.getParameter("activity");
     }
 
     /**
@@ -314,10 +317,11 @@ public class EnvironmentManager {
      * @return Returns the list of activities of the AUT.
      */
     public List<String> getActivityNames() {
-        List<String> activities = new ArrayList<>();
-
-        String cmd = "getActivities:" + emulator;
-        return Arrays.asList(tunnelLegacyCmd(cmd).split("\n"));
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/android/get_activities")
+                .withParameter("deviceId", emulator);
+        Message response = sendMessage(messageBuilder.build());
+        return Arrays.asList(response.getParameter("activities").split("\n"));
     }
 
     /**
