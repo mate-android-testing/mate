@@ -124,7 +124,7 @@ public class UniformRandomForAccessibility {
                     selectedScreenState = state;
 
                 } catch (AUTCrashException e) {
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                 }
             }
             catch(Exception e){

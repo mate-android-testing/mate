@@ -433,7 +433,7 @@ public class NoveltyBased {
                         MATE.log_acc("CRASH MESSAGE"+e.getMessage());
                         testcase.setCrashDetected();
                         crashArchive.add(testcase);
-                        deviceMgr.handleCrashDialog();
+                        deviceMgr.pressHome();
                         isApp=false;
 
                         deviceMgr.reinstallApp();
@@ -736,7 +736,7 @@ public class NoveltyBased {
                     MATE.log_acc("CRASH MESSAGE" + e.getMessage());
                     mutantTestCase.setCrashDetected();
                     crashArchive.add(mutantTestCase);
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                     isApp = false;
 
                     deviceMgr.reinstallApp();

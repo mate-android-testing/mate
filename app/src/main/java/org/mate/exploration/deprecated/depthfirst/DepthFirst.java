@@ -139,7 +139,7 @@ public class DepthFirst {
                         }
                     }
                 } catch (AUTCrashException e) {
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                 }
             }
             else{

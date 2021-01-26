@@ -146,7 +146,7 @@ public class GUIWalker {
                     }
 
                 } catch (AUTCrashException e) {
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                     i = path.size()+1; //exit loop
                 }
             }

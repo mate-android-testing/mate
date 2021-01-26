@@ -553,11 +553,10 @@ public class DeviceMgr {
         // sleep(1000);
     }
 
-    // TODO: rename to 'pressHome()' once IApp interface is fixed/removed
     /**
      * Emulates pressing the 'HOME' button.
      */
-    public void handleCrashDialog() {
+    public void pressHome() {
         device.pressHome();
     }
 

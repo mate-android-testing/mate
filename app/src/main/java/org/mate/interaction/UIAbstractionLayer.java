@@ -105,7 +105,7 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
-            deviceMgr.handleCrashDialog();
+            deviceMgr.pressHome();
             if (action instanceof PrimitiveAction) {
                 return FAILURE_APP_CRASH;
             }
@@ -213,7 +213,7 @@ public class UIAbstractionLayer {
                 if (crashDialog1.exists() || crashDialog2.exists()) {
                     // TODO: Click 'OK' on crash dialog window rather than 'HOME'?
                     // press 'HOME' button
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                     change = true;
                     continue;
                 }
