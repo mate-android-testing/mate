@@ -1,8 +1,5 @@
 package org.mate.ui;
 
-import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -22,14 +19,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Provides the interface to communicate with the MATE server.
+ */
 public class EnvironmentManager {
     public static final String ACTIVITY_UNKNOWN = "unknown";
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
-    //private static final String DEFAULT_SERVER_IP = "192.168.1.26";
     private static final String METADATA_PREFIX = "__meta__";
     private static final String MESSAGE_PROTOCOL_VERSION = "1.9";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
@@ -47,22 +45,45 @@ public class EnvironmentManager {
      */
     private Set<String> coveredTestCases = new HashSet<>();
 
+    /**
+     * Initialises a new environment manager communicating with
+     * the MATE server on the default port.
+     *
+     * @throws IOException If no connection could be established with the MATE server.
+     */
     public EnvironmentManager() throws IOException {
         this(DEFAULT_PORT);
     }
 
+    /**
+     * Initialises a new environment manager communicating with
+     * the MATE server on the given port.
+     *
+     * @param port The MATE server port.
+     * @throws IOException If no connection could be established with the MATE server.
+     */
     public EnvironmentManager(int port) throws IOException {
         active = true;
         server = new Socket(DEFAULT_SERVER_IP, port);
         messageParser = new Parser(server.getInputStream());
     }
 
+    /**
+     * Closes the connection to the MATE server.
+     *
+     * @throws IOException If closing connection fails.
+     */
     public void close() throws IOException {
         sendMessage(new Message("/close"));
         active = false;
         server.close();
     }
 
+    /**
+     * Get the name of the emulator.
+     *
+     * @return Returns the name of the emulator.
+     */
     public String getEmulator() {
         return emulator;
     }
@@ -99,6 +120,13 @@ public class EnvironmentManager {
         return response;
     }
 
+    /**
+     * Tunnels a request over the legacy end point.
+     *
+     * @param cmd The command string.
+     * @return Returns the response as a string.
+     */
+    // TODO: remove once all requests are ported to the individual end points
     public String tunnelLegacyCmd(String cmd) {
         Message message = new Message.MessageBuilder("/legacy")
                 .withParameter("cmd", cmd)
@@ -150,11 +178,22 @@ public class EnvironmentManager {
         }
     }
 
+    /**
+     * Releases the emulator. This doesn't have any
+     * effect on the real emulator, just sets some
+     * internal properties.
+     */
     public void releaseEmulator() {
         String cmd = "releaseEmulator:" + emulator;
         tunnelLegacyCmd(cmd);
     }
 
+    /**
+     * Returns the name of the emulator, e.g. emulator-5554.
+     *
+     * @param packageName The package name of the AUT.
+     * @return Returns the name of the emulator.
+     */
     public String detectEmulator(String packageName) {
         String cmd = "getEmulator:" + packageName;
         String response = tunnelLegacyCmd(cmd);
@@ -166,6 +205,11 @@ public class EnvironmentManager {
         return emulator;
     }
 
+    /**
+     * Returns the specified timeout (run execution) in minutes.
+     *
+     * @return Returns the specified timeout.
+     */
     public long getTimeout() {
         long timeout = 0;
         String cmd = "timeout";
@@ -244,6 +288,15 @@ public class EnvironmentManager {
         }
     }
 
+    /**
+     * Retrieves the name of the currently visible activity.
+     * It can happen that the AUT just crashed and the
+     * activity name wasn't updated, then the string 'unknown'
+     * is returned.
+     *
+     * @return Returns the name of the current activity or
+     *          the string 'unknown' if extraction failed.
+     */
     public String getCurrentActivityName() {
         String currentActivity = "current_activity";
         if (emulator == null || emulator.isEmpty()) {
@@ -254,6 +307,11 @@ public class EnvironmentManager {
         return tunnelLegacyCmd(cmd);
     }
 
+    /**
+     * Returns the list of activities belonging to the AUT.
+     *
+     * @return Returns the list of activities of the AUT.
+     */
     public List<String> getActivityNames() {
         List<String> activities = new ArrayList<>();
 
@@ -498,6 +556,13 @@ public class EnvironmentManager {
         return branchDistanceVector;
     }
 
+    /**
+     * Returns the list of source lines of the AUT. A single
+     * source line has the following format:
+     *      package name + class name + line number
+     *
+     * @return Returns the sources lines of the AUT.
+     */
     public List<String> getSourceLines() {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/getSourceLines")
                 .withParameter("deviceId", emulator)
@@ -600,6 +665,15 @@ public class EnvironmentManager {
         return Double.parseDouble(response.getParameter("coverage"));
     }
 
+    /**
+     * Returns a fitness vector for the given chromosome and the specified lines
+     * where each entry indicates to which degree the line was covered.
+     *
+     * @param chromosome The given chromosome.
+     * @param lines The lines for which coverage should be retrieved.
+     * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
+     * @return
+     */
     public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
 
         // concatenate lines
@@ -635,16 +709,32 @@ public class EnvironmentManager {
         }
     }
 
+    /**
+     * Extracts the last stack trace from the logcat.
+     *
+     * @return Returns the last discovered stack trace.
+     */
     public String getLastCrashStackTrace() {
         return sendMessage(new Message.MessageBuilder("/crash/stacktrace")
                 .withParameter("deviceId", emulator)
                 .build()).getParameter("stacktrace");
     }
 
+    /**
+     * Returns the key-value pairs defined in the mate.properties file.
+     *
+     * @return Returns a mapping of the specified properties.
+     */
     public Map<String, String> getProperties() {
         return sendMessage(new Message("/properties")).getParameters();
     }
 
+    /**
+     * Records a screenshot.
+     *
+     * @param packageName The package name of the AUT.
+     * @param nodeId Some id of the screen state.
+     */
     public void screenShot(String packageName, String nodeId) {
         String cmd = "screenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
         tunnelLegacyCmd(cmd);
@@ -655,6 +745,9 @@ public class EnvironmentManager {
         tunnelLegacyCmd(cmd);
     }
 
+    /**
+     * Clears the app cache.
+     */
     public void clearAppData() {
         Message response = sendMessage(new Message.MessageBuilder("/android/clearApp")
                 .withParameter("deviceId", emulator)
@@ -741,6 +834,9 @@ public class EnvironmentManager {
         tunnelLegacyCmd(cmd);
     }
 
+    /**
+     * Rotates the emulator into portrait mode.
+     */
     public void setPortraitMode() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
@@ -753,6 +849,9 @@ public class EnvironmentManager {
         }
     }
 
+    /**
+     * Toggles rotation.
+     */
     public void toggleRotation() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
