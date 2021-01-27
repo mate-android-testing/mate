@@ -41,7 +41,6 @@ public class MATE {
     public static UIAbstractionLayer uiAbstractionLayer;
     public static String packageName;
     public static IGUIModel guiModel;
-    private List<Action> actions;
     private DeviceMgr deviceMgr;
     public static long total_time;
     public static long RANDOM_LENGH;
@@ -51,10 +50,6 @@ public class MATE {
     private GraphGUIModel completeModel;
 
     public static String logMessage;
-
-
-    //public static Vector<String> checkedWidgets = new Vector<String>();
-    public static Set<String> visitedActivities = new HashSet<String>();
 
     public MATE() {
 
@@ -68,8 +63,9 @@ public class MATE {
             serverPort = Integer.valueOf(reader.readLine());
             MATE.log_acc("Using server port: " + serverPort);
         } catch (IOException e) {
-            //ignore: use default port if file does not exists
+            MATE.log_acc("Couldn't read server port, fall back to default port!");
         }
+
         EnvironmentManager environmentManager;
         try {
             if (serverPort == null) {

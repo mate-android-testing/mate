@@ -218,9 +218,11 @@ public class EnvironmentManager {
      * @return Returns the specified timeout.
      */
     public long getTimeout() {
-        long timeout = 0;
-        String cmd = "timeout";
-        return Long.valueOf(tunnelLegacyCmd(cmd));
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/properties/get_timeout");
+
+        return Long.parseLong(sendMessage(messageBuilder.build()).getParameter("timeout"));
     }
 
     /**
@@ -737,7 +739,7 @@ public class EnvironmentManager {
      * @return Returns a mapping of the specified properties.
      */
     public Map<String, String> getProperties() {
-        return sendMessage(new Message("/properties")).getParameters();
+        return sendMessage(new Message("/properties/get_mate_properties")).getParameters();
     }
 
     /**
