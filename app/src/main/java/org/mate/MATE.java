@@ -12,12 +12,11 @@ import android.util.Log;
 
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.UIAbstractionLayer;
-import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.model.deprecated.graph.GraphGUIModel;
-import org.mate.state.IScreenState;
-import org.mate.interaction.ui.Action;
 import org.mate.interaction.EnvironmentManager;
+import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.deprecated.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.state.IScreenState;
 import org.mate.utils.Coverage;
 import org.mate.utils.CoverageUtils;
 import org.mate.utils.MersenneTwister;
@@ -28,7 +27,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -110,12 +108,14 @@ public class MATE {
         listActivities(instrumentation.getContext());
 
         String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
+        MATE.log_acc("Emulator: " + emulator);
 
         if (emulator != null && !emulator.equals("")) {
             this.deviceMgr = new DeviceMgr(device, packageName);
             uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+        } else {
+            throw new IllegalStateException("Emulator couldn't be properly allocated!");
         }
-
     }
 
     public void testApp(final Algorithm algorithm) {
