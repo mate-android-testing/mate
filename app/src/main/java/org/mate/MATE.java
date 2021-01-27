@@ -43,7 +43,6 @@ public class MATE {
     public static IGUIModel guiModel;
     private DeviceMgr deviceMgr;
     public static long total_time;
-    public static long RANDOM_LENGH;
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
@@ -92,13 +91,6 @@ public class MATE {
             timeout = 30; //set default - 30 minutes
         MATE.TIME_OUT = timeout * 60 * 1000;
         MATE.log_acc("TIMEOUT: " + timeout);
-
-        //get random length = number of actions before restarting the app
-        long rlength = Registry.getEnvironmentManager().getRandomLength();
-        if (rlength == 0)
-            rlength = 1000; //default
-        MATE.RANDOM_LENGH = rlength;
-        MATE.log_acc("RANDOM length by server: " + MATE.RANDOM_LENGH);
 
         logMessage = "";
 

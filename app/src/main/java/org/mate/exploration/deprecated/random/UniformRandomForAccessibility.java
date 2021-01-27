@@ -1,6 +1,7 @@
 package org.mate.exploration.deprecated.random;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
@@ -96,7 +97,7 @@ public class UniformRandomForAccessibility {
                     //check whether the package of the app currently running is from the app under test
                     //if it is not, restart app
                     //check also whether the limit number of actions before restart has been reached
-                    if (!currentPackageName.equals(this.packageName)||numberOfActions>=MATE.RANDOM_LENGH) {
+                    if (!currentPackageName.equals(this.packageName)||numberOfActions>= Properties.MAX_NUMBER_EVENTS()) {
                         MATE.log("package name: " + this.packageName);
                         deviceMgr.restartApp();
                         state = ScreenStateFactory.getScreenState("ActionsScreenState");

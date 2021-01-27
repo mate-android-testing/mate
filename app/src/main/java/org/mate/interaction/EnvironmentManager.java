@@ -836,12 +836,6 @@ public class EnvironmentManager {
         return tunnelLegacyCmd(cmd);
     }
 
-    public long getRandomLength() {
-        String cmd = "randomlength";
-        return Long.valueOf(tunnelLegacyCmd(cmd));
-    }
-
-
     public void sendFlawToServer(String msg) {
         String cmd = "reportFlaw:" + emulator + ":" + msg;
         tunnelLegacyCmd(cmd);
