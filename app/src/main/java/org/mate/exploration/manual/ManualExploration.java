@@ -52,7 +52,7 @@ public class ManualExploration {
 
                 MATE.uiAbstractionLayer.executeAction(manualAction);
                 state = MATE.uiAbstractionLayer.getLastScreenState();
-                Registry.getEnvironmentManager().screenShot(state.getPackageName(),state.getId());
+                Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),state.getId());
 
 
                 MATE.logactivity(state.getActivityName());

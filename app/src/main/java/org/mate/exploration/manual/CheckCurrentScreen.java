@@ -91,7 +91,7 @@ public class CheckCurrentScreen {
 
         String currentPackageName = screenState.getPackageName();
 
-        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
+        Registry.getEnvironmentManager().takeScreenshot(screenState.getPackageName(), screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 

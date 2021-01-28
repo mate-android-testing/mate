@@ -143,7 +143,7 @@ public class UniformRandomForAccessibility {
     private void runAccessibilityChecks(IScreenState state, IScreenState selectedScreenState) {
 
 
-        Registry.getEnvironmentManager().screenShot(state.getPackageName(),state.getId());
+        Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),state.getId());
 
         //updates the current activity name
         currentActivityName = state.getActivityName();

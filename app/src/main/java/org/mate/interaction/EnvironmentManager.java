@@ -748,15 +748,32 @@ public class EnvironmentManager {
      * @param packageName The package name of the AUT.
      * @param nodeId Some id of the screen state.
      */
-    public void screenShot(String packageName, String nodeId) {
-        String cmd = "screenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
-        tunnelLegacyCmd(cmd);
+    public void takeScreenshot(String packageName, String nodeId) {
+
+        MATE.log_acc("Taking screenshot...");
+
+        sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("deviceId", emulator)
+                .withParameter("type", "screenshot")
+                .withParameter("packageName", packageName)
+                .withParameter("nodeId", nodeId)
+                .build());
     }
 
     public void screenShotForFlickerDetection(String packageName, String nodeId) {
-        String cmd = "flickerScreenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
-        tunnelLegacyCmd(cmd);
+
+        sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("deviceId", emulator)
+                .withParameter("type", "flicker_screenshot")
+                .withParameter("packageName", packageName)
+                .withParameter("nodeId", nodeId)
+                .build());
     }
+
+//    public void screenShotForFlickerDetection(String packageName, String nodeId) {
+//        String cmd = "flickerScreenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
+//        tunnelLegacyCmd(cmd);
+//    }
 
     /**
      * Clears the app cache.

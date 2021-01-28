@@ -306,7 +306,7 @@ public class NoveltyBased {
 
 
                 //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
-                Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_");
+                Registry.getEnvironmentManager().takeScreenshot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_");
 
                 //TODO: is it necessary?
                 testcase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
@@ -411,7 +411,7 @@ public class NoveltyBased {
                             updateCoverageArchive(state.getId(),testcase.getId());
 
                             //Registry.getEnvironmentManager().screenShot(state.getPackageName(),"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
-                            Registry.getEnvironmentManager().screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter");
+                            Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter");
 
 
 
@@ -602,7 +602,7 @@ public class NoveltyBased {
         while ((numberOfActions < MAX_NUMBER_EVENTS())&&(isApp)) {
 
             //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+TCcounter+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
-            Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
+            Registry.getEnvironmentManager().takeScreenshot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
 
 
             //MATE.log("Mutation Iteration number: " + numberOfActions +
@@ -716,7 +716,7 @@ public class NoveltyBased {
                         updateCoverageArchive(state.getId(),mutantTestCase.getId());
 
                         //Registry.getEnvironmentManager().screenShot(state.getPackageName(),"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
-                        Registry.getEnvironmentManager().screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
+                        Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
 
 
                         //if it is a new state or the initial screen (first action)

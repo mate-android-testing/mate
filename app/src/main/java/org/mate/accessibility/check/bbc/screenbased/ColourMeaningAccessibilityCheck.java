@@ -72,7 +72,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
 
         IScreenState visitedState =stateHasBeenVisited(state);
         if (visitedState!=null){
-            Registry.getEnvironmentManager().screenShot(state.getPackageName(),visitedState.getId()+"_");
+            Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),visitedState.getId()+"_");
             state.setId(visitedState.getId()+"_");
             detectColours(state);
             //MATE.log("CHECK IF COLOR CHANGED");
