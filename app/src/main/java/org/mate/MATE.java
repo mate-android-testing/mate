@@ -35,7 +35,9 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class MATE {
 
+    // TODO: remove this field once its references are resolved
     public static UiDevice device;
+    // TODO: make private
     public static UIAbstractionLayer uiAbstractionLayer;
     public static String packageName;
     public static IGUIModel guiModel;

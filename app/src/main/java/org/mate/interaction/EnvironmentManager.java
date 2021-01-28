@@ -762,17 +762,16 @@ public class EnvironmentManager {
      * Checks whether a flickering of a screen state can be detected.
      *
      * @param packageName The package name of the screen state.
-     * @param nodeId Identifies the screen state.
+     * @param stateId Identifies the screen state.
      * @return Returns {@code true} if flickering was detected, otherwise
      *          {@code false} is returned.
      */
-    public boolean checkForFlickering(String packageName, String nodeId) {
+    public boolean checkForFlickering(String packageName, String stateId) {
 
-        Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
+        Message response = sendMessage(new Message.MessageBuilder("/accessibility/check_flickering")
                 .withParameter("deviceId", emulator)
-                .withParameter("type", "check_for_flickering")
                 .withParameter("packageName", packageName)
-                .withParameter("nodeId", nodeId)
+                .withParameter("stateId", stateId)
                 .build());
 
         return Boolean.parseBoolean(response.getParameter("flickering"));
@@ -790,44 +789,73 @@ public class EnvironmentManager {
         }
     }
 
+    /**
+     * Another accessibility function.
+     *
+     * @param packageName The package name corresponding to the screen state.
+     * @param stateId The id of the screen state.
+     * @param widget The widget for which this metric should be evaluated.
+     * @return Returns ...
+     */
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget) {
+
+        // TODO: use proper parameters with message
         String cmd = "surroundingColor:";
         cmd += emulator + "_" + packageName + ":";
         cmd += stateId + ":";
         cmd += widget.getX1() + "," + widget.getY1() + "," + widget.getX2() + "," + widget.getY2();
 
-        Message message = new Message("/accessibility");
+        Message message = new Message("/accessibility/matches_surrounding_color");
         message.addParameter("cmd", cmd);
 
-        //will break commands in several parameters-values in the future.
-        //For now I'm sending the whole command with parameters in one single string
-        String response = sendMessage(message).getParameter("response");
-        return Double.valueOf(response);
+        String response = sendMessage(message).getParameter("match");
+        return Double.parseDouble(response);
     }
 
+    /**
+     * Retrieves the contrast ratio of the widget residing on the screen state.
+     *
+     * @param packageName The package name corresponding to the screen state.
+     * @param stateId Identifies the screens state.
+     * @param widget The widget on which the contrast ratio should be evaluated.
+     * @return Returns the contrast ratio.
+     */
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
+
+        // TODO: retrieves this values via the DeviceMgr
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
-        double contrastRatio = 21;
-        String cmd = "contrastratio:";
-        cmd += emulator + "_" + packageName + ":";
-        cmd += stateId + ":";
+
         int x1 = widget.getX1();
         int x2 = widget.getX2();
         int y1 = widget.getY1();
         int y2 = widget.getY2();
+
+        // TODO: fix this parameter, it is static and doesn't seem to make sense...
         int borderExpanded = 0;
+
         if (x1 - borderExpanded >= 0)
             x1 -= borderExpanded;
+
         if (x2 + borderExpanded <= maxw)
             x2 += borderExpanded;
+
         if (y1 - borderExpanded >= 0)
             y1 -= borderExpanded;
+
         if (y2 + borderExpanded <= maxh)
             y2 += borderExpanded;
-        cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
-        return Double.valueOf(tunnelLegacyCmd(cmd));
+        Message response = sendMessage(new Message.MessageBuilder("/accessibility/get_contrast_ratio")
+                .withParameter("packageName", packageName)
+                .withParameter("stateId", stateId)
+                .withParameter("x1", String.valueOf(x1))
+                .withParameter("x2", String.valueOf(x2))
+                .withParameter("y1", String.valueOf(y1))
+                .withParameter("y2", String.valueOf(y2))
+                .build());
+
+        return Double.parseDouble(response.getParameter("contrastRatio"));
     }
 
     public String getLuminances(String packageName, String stateId, Widget widget) {
