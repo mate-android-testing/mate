@@ -11,7 +11,7 @@ public class FlickeringAccessibilityCheck implements IWidgetAccessibilityCheck {
     @Override
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
-        Registry.getEnvironmentManager().screenShotForFlickerDetection(state.getPackageName(),state.getId());
+        Registry.getEnvironmentManager().checkForFlickering(state.getPackageName(),state.getId());
 
 
         return null;

@@ -750,30 +750,33 @@ public class EnvironmentManager {
      */
     public void takeScreenshot(String packageName, String nodeId) {
 
-        MATE.log_acc("Taking screenshot...");
-
         sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
-                .withParameter("type", "screenshot")
+                .withParameter("type", "take_screenshot")
                 .withParameter("packageName", packageName)
                 .withParameter("nodeId", nodeId)
                 .build());
     }
 
-    public void screenShotForFlickerDetection(String packageName, String nodeId) {
+    /**
+     * Checks whether a flickering of a screen state can be detected.
+     *
+     * @param packageName The package name of the screen state.
+     * @param nodeId Identifies the screen state.
+     * @return Returns {@code true} if flickering was detected, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean checkForFlickering(String packageName, String nodeId) {
 
-        sendMessage(new Message.MessageBuilder("/emulator/interaction")
+        Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
-                .withParameter("type", "flicker_screenshot")
+                .withParameter("type", "check_for_flickering")
                 .withParameter("packageName", packageName)
                 .withParameter("nodeId", nodeId)
                 .build());
-    }
 
-//    public void screenShotForFlickerDetection(String packageName, String nodeId) {
-//        String cmd = "flickerScreenshot:" + emulator + ":" + emulator + "_" + packageName + "_" + nodeId + ".png";
-//        tunnelLegacyCmd(cmd);
-//    }
+        return Boolean.parseBoolean(response.getParameter("flickering"));
+    }
 
     /**
      * Clears the app cache.
