@@ -43,7 +43,6 @@ public class MATE {
     public static IGUIModel guiModel;
     private DeviceMgr deviceMgr;
     public static long TIME_OUT;
-    public Instrumentation instrumentation;
 
     public MATE() {
 
@@ -82,11 +81,8 @@ public class MATE {
 
         MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
         MATE.TIME_OUT = Properties.TIMEOUT() * 60 * 1000;
-
-        //Defines the class that represents the device
-        //Instrumentation instrumentation =  getInstrumentation();
-        instrumentation = getInstrumentation();
-        device = UiDevice.getInstance(instrumentation);
+        
+        device = UiDevice.getInstance(getInstrumentation());
 
         //checks whether user needs to authorize access to something on the device/emulator
         UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
