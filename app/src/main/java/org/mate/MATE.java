@@ -46,8 +46,6 @@ public class MATE {
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
-    private GraphGUIModel completeModel;
-
     public static String logMessage;
 
     public MATE() {
@@ -85,12 +83,8 @@ public class MATE {
         }
         Registry.registerRandom(rnd);
 
-        //get timeout from server using EnvironmentManager
-        long timeout = Registry.getEnvironmentManager().getTimeout();
-        if (timeout == 0)
-            timeout = 30; //set default - 30 minutes
-        MATE.TIME_OUT = timeout * 60 * 1000;
-        MATE.log_acc("TIMEOUT: " + timeout);
+        MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
+        MATE.TIME_OUT = Properties.TIMEOUT() * 60 * 1000;
 
         logMessage = "";
 

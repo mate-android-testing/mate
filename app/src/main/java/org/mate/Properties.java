@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Properties {
+
+    // the timeout in minutes
+    public static int TIMEOUT() { return propertyOr(5); }
+
     public static int ANT_GENERATION() {
         return propertyOr(5);
     }

@@ -213,19 +213,6 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the specified timeout (run execution) in minutes.
-     *
-     * @return Returns the specified timeout.
-     */
-    public long getTimeout() {
-
-        Message.MessageBuilder messageBuilder
-                = new Message.MessageBuilder("/properties/get_timeout");
-
-        return Long.parseLong(sendMessage(messageBuilder.build()).getParameter("timeout"));
-    }
-
-    /**
      * Copies the test cases fitness data belonging to the source chromosome over to the given target chromosome.
      * This is necessary when a new chromosome is created but not executed, e.g. a chromosome is duplicated
      * (which doesn't require execution since the fitness is identical).
