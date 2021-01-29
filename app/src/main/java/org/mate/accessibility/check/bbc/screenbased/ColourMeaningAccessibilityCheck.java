@@ -29,7 +29,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
         luminancesByType = new Hashtable<String,List<String>>();
         for (Widget widget: state.getWidgets()){
             if (widget.isActionable()){
-                String luminances = Registry.getEnvironmentManager().getLuminances(state.getPackageName(),state.getId(),widget);
+                String luminances = Registry.getEnvironmentManager().getLuminance(state.getPackageName(),state.getId(),widget);
                 if (!luminances.equals("0,0")) {
                     widget.setColor(luminances);
                     //luminances.add(luminance);

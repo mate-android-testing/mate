@@ -857,17 +857,28 @@ public class EnvironmentManager {
         return Double.parseDouble(response.getParameter("contrastRatio"));
     }
 
-    public String getLuminances(String packageName, String stateId, Widget widget) {
+    /**
+     * Gets the luminance of the given widget.
+     *
+     * @param packageName The package name corresponding to the screen state.
+     * @param stateId Identifies the screens state.
+     * @param widget The widget on which the contrast ratio should be evaluated.
+     * @return Returns the luminance of the given widget.
+     */
+    public String getLuminance(String packageName, String stateId, Widget widget) {
+
+        // TODO: retrieves this values via the DeviceMgr
         int maxw = MATE.device.getDisplayWidth();
         int maxh = MATE.device.getDisplayHeight();
-        String cmd = "luminance:";
-        cmd += emulator + "_" + packageName + ":";
-        cmd += stateId + ":";
+
         int x1 = widget.getX1();
         int x2 = widget.getX2();
         int y1 = widget.getY1();
         int y2 = widget.getY2();
+
+        // TODO: how was this value chosen?
         int borderExpanded = 1;
+
         if (x1 - borderExpanded >= 0)
             x1 -= borderExpanded;
         if (x2 + borderExpanded <= maxw)
@@ -876,11 +887,17 @@ public class EnvironmentManager {
             y1 -= borderExpanded;
         if (y2 + borderExpanded <= maxh)
             y2 += borderExpanded;
-        cmd += x1 + "," + y1 + "," + x2 + "," + y2;
 
-        //MATE.log(cmd);
-        //MATE.log(widget.getClazz()+ " - " + widget.getId() + " - " + widget.getText() + " - vis:" + widget.isVisibleToUser() + " - foc: " +widget.isFocusable());
-        return tunnelLegacyCmd(cmd);
+        Message response = sendMessage(new Message.MessageBuilder("/accessibility/get_luminance")
+                .withParameter("packageName", packageName)
+                .withParameter("stateId", stateId)
+                .withParameter("x1", String.valueOf(x1))
+                .withParameter("x2", String.valueOf(x2))
+                .withParameter("y1", String.valueOf(y1))
+                .withParameter("y2", String.valueOf(y2))
+                .build());
+
+        return response.getParameter("luminance");
     }
 
     public void sendFlawToServer(String msg) {
