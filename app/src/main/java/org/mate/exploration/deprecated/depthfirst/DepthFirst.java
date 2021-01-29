@@ -153,7 +153,7 @@ public class DepthFirst {
                 MATE.log("STOP execution");
             }
         }
-        MATE.total_time=t2-t1;
+
         MATE.log("EXIT STATE: "+selectedStateId);
     }
 

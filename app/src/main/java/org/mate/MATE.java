@@ -42,7 +42,6 @@ public class MATE {
     public static String packageName;
     public static IGUIModel guiModel;
     private DeviceMgr deviceMgr;
-    public static long total_time;
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
