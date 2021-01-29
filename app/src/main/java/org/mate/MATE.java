@@ -45,8 +45,6 @@ public class MATE {
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
-    public static String logMessage;
-
     public MATE() {
 
         // should resolve android.os.FileUriExposedException
@@ -85,8 +83,6 @@ public class MATE {
         MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
         MATE.TIME_OUT = Properties.TIMEOUT() * 60 * 1000;
 
-        logMessage = "";
-
         //Defines the class that represents the device
         //Instrumentation instrumentation =  getInstrumentation();
         instrumentation = getInstrumentation();
@@ -98,9 +94,6 @@ public class MATE {
         //get the name of the package of the app currently running
         this.packageName = device.getCurrentPackageName();
         MATE.log_acc("Package name: " + this.packageName);
-
-        //list the activities of the app under test
-        listActivities(instrumentation.getContext());
 
         String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
         MATE.log_acc("Emulator: " + emulator);
@@ -176,33 +169,14 @@ public class MATE {
 
     public static void logsum(String msg) {
         Log.e("acc", msg);
-        logMessage += msg + "\n";
-
     }
 
     public static void log_acc(String msg) {
         Log.e("acc", msg);
-        logMessage += msg + "\n";
     }
 
     public static void log_vin(String msg) {
         Log.i("vinDebug", msg);
-        logMessage += msg + "\n";
-    }
-
-    public void listActivities(Context context) {
-
-        //list all activities of the application being executed
-        PackageManager pm = (PackageManager) context.getPackageManager();
-        try {
-            PackageInfo pinfo = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-            ActivityInfo[] activities = pinfo.activities;
-            for (int i = 0; i < activities.length; i++) {
-                //log("Activity " + (i + 1) + ": " + activities[i].name);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     public String getPackageName() {
