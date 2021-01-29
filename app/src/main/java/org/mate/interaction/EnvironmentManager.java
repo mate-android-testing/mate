@@ -799,17 +799,16 @@ public class EnvironmentManager {
      */
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget) {
 
-        // TODO: use proper parameters with message
-        String cmd = "surroundingColor:";
-        cmd += emulator + "_" + packageName + ":";
-        cmd += stateId + ":";
-        cmd += widget.getX1() + "," + widget.getY1() + "," + widget.getX2() + "," + widget.getY2();
+        Message response = sendMessage(new Message.MessageBuilder("/accessibility/matches_surrounding_color")
+                .withParameter("packageName", packageName)
+                .withParameter("stateId", stateId)
+                .withParameter("x1", String.valueOf(widget.getX1()))
+                .withParameter("x2", String.valueOf(widget.getX2()))
+                .withParameter("y1", String.valueOf(widget.getY1()))
+                .withParameter("y2", String.valueOf(widget.getY2()))
+                .build());
 
-        Message message = new Message("/accessibility/matches_surrounding_color");
-        message.addParameter("cmd", cmd);
-
-        String response = sendMessage(message).getParameter("match");
-        return Double.parseDouble(response);
+        return Double.parseDouble(response.getParameter("match"));
     }
 
     /**
