@@ -39,7 +39,7 @@ public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
                 Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),visitedState.getId());
             }
 
-            String luminances = Registry.getEnvironmentManager().getLuminances(state.getPackageName(),state.getId(),widget);
+            String luminances = Registry.getEnvironmentManager().getLuminance(state.getPackageName(),state.getId(),widget);
             if (!luminances.equals("0,0")) {
                 widget.setColor(luminances);
             }
