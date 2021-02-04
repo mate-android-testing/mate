@@ -5,11 +5,16 @@ import android.content.Intent;
 import org.mate.MATE;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.SystemAction;
+import org.mate.interaction.ui.ActionType;
+import org.mate.interaction.ui.Widget;
 import org.mate.model.TestCase;
 import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.WidgetAction;
 
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class TestCaseStatistics {
 
@@ -30,6 +35,57 @@ public final class TestCaseStatistics {
         countActionsPerType(testCase);
         countNullValues(testCase);
         printURIs(testCase);
+        countWidgetActivity(testCase);
+    }
+
+    /**
+     * Counts how often each widget has been triggered by a 'real' widget-related action,
+     * e.g. a click, a long click or a text insertion. Also tracks the number of
+     * widget-unrelated actions, e.g. a sleep or wake up action.
+     */
+    private static void countWidgetActivity(TestCase testCase) {
+
+        // count how many actions per widgets have been executed
+        Map<String, Integer> widgetActions = new HashMap<>();
+
+        EnumSet<ActionType> widgetRelatedActions = EnumSet.of(ActionType.CLICK, ActionType.LONG_CLICK,
+                ActionType.CLEAR_WIDGET, ActionType.TYPE_TEXT);
+
+        // track the number of unrelated widget actions
+        int widgetUnrelatedActions = 0;
+
+        for (Action action : testCase.getEventSequence()) {
+            if (action instanceof WidgetAction) {
+
+                ActionType actionType = ((WidgetAction) action).getActionType();
+
+                if (!widgetRelatedActions.contains(actionType)) {
+                    widgetUnrelatedActions++;
+                    continue;
+                }
+
+                Widget widget = ((WidgetAction) action).getWidget();
+
+                String widgetName = widget.getClazz() + ":" + widget.getId();
+
+                // with API level 24 (Java 8): Map.merge(key, 1, Integer::sum)
+                if (widgetActions.containsKey(widgetName)) {
+                    int currentCount = widgetActions.get(widgetName);
+                    widgetActions.put(widgetName, currentCount+1);
+                } else {
+                    widgetActions.put(widgetName, 1);
+                }
+            }
+        }
+
+        // print how often each widget has been triggered
+        for (Map.Entry<String, Integer> widgetEntry : widgetActions.entrySet()) {
+            MATE.log_acc("Widget " + widgetEntry.getKey()
+                    + " has been triggered: " + widgetEntry.getValue() + " times!");
+        }
+
+        // print the number of unrelated widget actions
+        MATE.log_acc("Number of unrelated widget actions: " + widgetUnrelatedActions);
     }
 
     /**
