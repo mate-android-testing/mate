@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.model.TestCase;
 import org.mate.serialization.TestCaseSerializer;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.interaction.ui.WidgetAction;
 import org.mate.utils.TestCaseOptimizer;
 import org.mate.utils.TestCaseStatistics;

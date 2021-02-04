@@ -1,7 +1,7 @@
 package org.mate.model.deprecated.graph;
 
 import org.mate.MATE;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.state.IScreenState;
 import org.mate.interaction.ui.WidgetAction;
 

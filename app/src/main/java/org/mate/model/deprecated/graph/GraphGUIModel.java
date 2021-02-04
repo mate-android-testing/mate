@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.exploration.deprecated.aco.Ant;
 import org.mate.state.IScreenState;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.interaction.ui.Widget;
 import org.mate.interaction.ui.WidgetAction;
 

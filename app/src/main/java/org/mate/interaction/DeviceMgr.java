@@ -19,7 +19,6 @@ import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.SystemAction;
 import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.interaction.ui.Action;
 import org.mate.interaction.ui.ActionType;
 import org.mate.interaction.ui.PrimitiveAction;
 import org.mate.interaction.ui.Widget;

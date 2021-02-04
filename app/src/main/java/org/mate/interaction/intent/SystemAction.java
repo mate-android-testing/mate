@@ -1,6 +1,6 @@
 package org.mate.interaction.intent;
 
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 
 /**
  * Describes a system event notification that should be broad-casted

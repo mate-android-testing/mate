@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.interaction.ui.ActionType;
 import org.mate.interaction.ui.Widget;
 import org.mate.interaction.ui.WidgetAction;

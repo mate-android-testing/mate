@@ -8,7 +8,7 @@ import org.mate.interaction.intent.SystemAction;
 import org.mate.interaction.ui.ActionType;
 import org.mate.interaction.ui.Widget;
 import org.mate.model.TestCase;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.interaction.ui.WidgetAction;
 
 import java.util.EnumSet;

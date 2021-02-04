@@ -6,7 +6,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.interaction.ui.PrimitiveAction;
 import org.mate.interaction.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;

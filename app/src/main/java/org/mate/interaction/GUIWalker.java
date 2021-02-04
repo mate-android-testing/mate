@@ -6,7 +6,6 @@ import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.interaction.ui.Action;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.ui.WidgetAction;

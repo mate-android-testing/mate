@@ -2,6 +2,8 @@ package org.mate.interaction.ui;
 
 import android.support.annotation.NonNull;
 
+import org.mate.interaction.Action;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

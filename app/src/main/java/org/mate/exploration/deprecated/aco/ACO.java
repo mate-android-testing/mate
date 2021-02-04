@@ -4,7 +4,7 @@ import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.deprecated.Fitness.ActivityCoverage;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.ui.Action;
+import org.mate.interaction.Action;
 import org.mate.interaction.ui.WidgetAction;
 import org.mate.model.deprecated.graph.EventEdge;
 import org.mate.model.deprecated.graph.GraphGUIModel;
