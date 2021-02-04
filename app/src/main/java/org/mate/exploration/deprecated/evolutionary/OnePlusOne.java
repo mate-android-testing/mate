@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -463,7 +464,7 @@ public class OnePlusOne {
         int cutpoint = 0;
         if(rand.nextDouble()<=1-GREEDY_EPSILON()){
             MATE.log_acc("choose best cutpoint");
-            HashMap<String, String> statesMap = tc.getStatesMap();
+            Map<String, String> statesMap = tc.getStatesMap();
             float bestSparseness = 0;
             String bestCutpoint = null;
             //MATE.log_acc("Possibile bug, tc: "+tc.getId()+", covered states: "+statesMap.keySet());

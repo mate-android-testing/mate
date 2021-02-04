@@ -1050,7 +1050,7 @@ public class NoveltyBased {
     }
 
     private int chooseCutpoint(TestCase tc) {
-        HashMap<String, String> statesMap = tc.getStatesMap();
+        Map<String, String> statesMap = tc.getStatesMap();
         float bestSparseness = 0;
         String bestCutpoint = null;
         //MATE.log_acc("Possibile bug, tc: "+tc.getId()+", covered states: "+statesMap.keySet());
@@ -1073,7 +1073,7 @@ public class NoveltyBased {
         int cutpoint = 0;
         if(rand.nextDouble()<=1-GREEDY_EPSILON()){
             MATE.log_acc("choose best cutpoint");
-            HashMap<String, String> statesMap = tc.getStatesMap();
+            Map<String, String> statesMap = tc.getStatesMap();
             float bestSparseness = 0;
             String bestCutpoint = null;
             //MATE.log_acc("Possibile bug, tc: "+tc.getId()+", covered states: "+statesMap.keySet());
