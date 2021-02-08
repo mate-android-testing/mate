@@ -12,19 +12,17 @@ import java.util.Map;
 /**
  * Created by marceloeler on 21/06/17.
  */
-
 public interface IScreenState {
 
-
-    public String getId();
-    public void setId(String stateId);
-    public List<Widget> getWidgets();
-    public List<WidgetAction> getActions();
-    public String getActivityName();
-    public String getPackageName();
-    public String getType();
-    public void updatePheromone(Action triggeredAction);
-    public Map<Action,Float> getActionsWithPheromone();
-    public AccessibilityNodeInfo getRootAccessibilityNodeInfo();
-    public boolean differentColor(IScreenState visitedState);
+    String getId();
+    void setId(String stateId);
+    List<Widget> getWidgets();
+    List<WidgetAction> getActions();
+    String getActivityName();
+    String getPackageName();
+    String getType();
+    void updatePheromone(Action triggeredAction);
+    Map<Action,Float> getActionsWithPheromone();
+    AccessibilityNodeInfo getRootAccessibilityNodeInfo();
+    boolean differentColor(IScreenState visitedState);
 }

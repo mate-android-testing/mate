@@ -13,6 +13,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.Date;
 
@@ -40,7 +41,7 @@ public class ManualExploration {
                 e.printStackTrace();
             }
 
-            IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
             for (Widget w: state.getWidgets()){
                 MATE.log_acc(w.getClazz()+"-"+w.getId()+"-"+w.getText()+"-"+w.getBounds());

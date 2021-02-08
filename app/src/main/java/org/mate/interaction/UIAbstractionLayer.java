@@ -15,6 +15,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 import org.mate.utils.Utils;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class UIAbstractionLayer {
         this.packageName = packageName;
         edges = new HashMap<>();
         clearScreen();
-        lastScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         lastScreenState.setId("S0");
         screenStateEnumeration = 1;
     }
@@ -72,7 +73,7 @@ public class UIAbstractionLayer {
         /*
         * FIXME: The UIAutomator bug seems to be unresolvable right now.
         *  We have tried to restart the ADB server, but afterwards the
-        *   connection is still broken.
+        *   connection is still broken. Fortunately, this
          */
         while (retry) {
             retry = false;
@@ -104,12 +105,16 @@ public class UIAbstractionLayer {
         try {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
+
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.pressHome();
+
             if (action instanceof PrimitiveAction) {
                 return FAILURE_APP_CRASH;
             }
-            state = ScreenStateFactory.getScreenState("ActionsScreenState"); // TODO: maybe not needed
+
+            // update screen state model
+            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, lastScreenState, state));
             lastScreenState = state;
@@ -122,7 +127,7 @@ public class UIAbstractionLayer {
         }
 
         clearScreen();
-        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
         // TODO: assess if timeout should be added to primitive actions as well
         // check whether there is a progress bar on the screen
@@ -138,7 +143,7 @@ public class UIAbstractionLayer {
             }
             clearScreen();
             // get a new state
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         }
 
         // get the package name of the app currently running
@@ -219,7 +224,7 @@ public class UIAbstractionLayer {
                 }
 
                 // check for outdated build warnings
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 for (Widget widget : screenState.getWidgets()) {
                     if (widget.getText().equals("This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.")) {
                         for (WidgetAction action : screenState.getActions()) {
@@ -294,15 +299,17 @@ public class UIAbstractionLayer {
 
         // wait a certain amount of time (22 seconds at max)
         while (hasProgressBar && (end - ini) < 22000) {
-            hasProgressBar = false;
+
             // check whether a widget represents a progress bar
+            hasProgressBar = false;
+
             for (Widget widget : state.getWidgets()) {
                 if (deviceMgr.checkForProgressBar(widget)) {
                     MATE.log("WAITING PROGRESS BAR TO FINISH");
                     hasProgressBar = true;
                     hadProgressBar = true;
                     Utils.sleep(3000);
-                    state = ScreenStateFactory.getScreenState(state.getType());
+                    state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 }
             }
             end = new Date().getTime();
@@ -329,7 +336,7 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
         clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+            lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         }
     }
 
@@ -341,7 +348,7 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
         clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = toRecordedScreenState(ScreenStateFactory.getScreenState("ActionsScreenState"));
+            lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         }
     }
 
@@ -401,6 +408,9 @@ public class UIAbstractionLayer {
         return null;
     }
 
+    /**
+     * The possible outcomes of applying an action.
+     */
     public enum ActionResult {
         FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
     }

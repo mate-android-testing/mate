@@ -20,6 +20,7 @@ import org.mate.interaction.EnvironmentManager;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -32,12 +33,12 @@ public class AppScreen {
     private String activityName;
     private String packageName;
     private List<Widget> widgets;
-    private static Hashtable<String,String> editTextHints = new Hashtable<String,String>();
+    private static Map<String, String> editTextHints = new Hashtable<String,String>();
     private UiDevice device;
     private boolean hasToScrollUp;
-    private boolean  hastoScrollDown;
-    private boolean  hasToScrollLeft;
-    private boolean  hasToScrollRight;
+    private boolean hastoScrollDown;
+    private boolean hasToScrollLeft;
+    private boolean hasToScrollRight;
     private AccessibilityNodeInfo rootNodeInfo;
 
     public AppScreen(){

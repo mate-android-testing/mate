@@ -171,6 +171,14 @@ public class MATE {
         Log.e("acc", msg);
     }
 
+    public static void log_debug(String msg) {
+        Log.d("debug", msg);
+    }
+
+    public static void log_warn(String msg) {
+        Log.w("warning", msg);
+    }
+
     public static void log_vin(String msg) {
         Log.i("vinDebug", msg);
     }

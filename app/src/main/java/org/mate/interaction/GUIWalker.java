@@ -10,6 +10,7 @@ import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class GUIWalker {
 
 
     private boolean checkStateReached(String targetScreenStateId) {
-        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+        IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         try {
             guiModelMgr.moveToState(state);
         } catch (InvalidScreenStateException e) {
