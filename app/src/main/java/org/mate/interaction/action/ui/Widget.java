@@ -1,4 +1,4 @@
-package org.mate.interaction.ui;
+package org.mate.interaction.action.ui;
 
 
 import java.util.ArrayList;

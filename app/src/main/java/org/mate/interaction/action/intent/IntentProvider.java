@@ -1,4 +1,4 @@
-package org.mate.interaction.intent;
+package org.mate.interaction.action.intent;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -6,7 +6,7 @@ import android.net.Uri;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.interaction.Action;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParserException;

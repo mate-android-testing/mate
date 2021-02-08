@@ -6,9 +6,9 @@ import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.ui.ActionType;
-import org.mate.interaction.ui.Widget;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 
 public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
     @Override

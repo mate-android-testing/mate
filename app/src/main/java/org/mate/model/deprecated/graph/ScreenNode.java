@@ -2,7 +2,7 @@ package org.mate.model.deprecated.graph;
 
 import org.mate.Properties;
 import org.mate.state.IScreenState;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.List;

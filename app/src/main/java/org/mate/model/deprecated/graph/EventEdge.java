@@ -1,7 +1,7 @@
 package org.mate.model.deprecated.graph;
 
-import org.mate.interaction.Action;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
 
 /**
  * Created by marceloe on 08/12/16.

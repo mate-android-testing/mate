@@ -2,8 +2,8 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.interaction.Action;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;

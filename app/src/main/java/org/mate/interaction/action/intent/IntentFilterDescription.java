@@ -1,4 +1,4 @@
-package org.mate.interaction.intent;
+package org.mate.interaction.action.intent;
 
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
@@ -7,11 +7,9 @@ import org.mate.MATE;
 import org.mate.utils.Randomness;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 

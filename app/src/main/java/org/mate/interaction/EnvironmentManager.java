@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.graph.GraphType;
-import org.mate.interaction.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;

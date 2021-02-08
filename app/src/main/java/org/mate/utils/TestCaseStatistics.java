@@ -3,13 +3,13 @@ package org.mate.utils;
 import android.content.Intent;
 
 import org.mate.MATE;
-import org.mate.interaction.intent.IntentBasedAction;
-import org.mate.interaction.intent.SystemAction;
-import org.mate.interaction.ui.ActionType;
-import org.mate.interaction.ui.Widget;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.Widget;
 import org.mate.model.TestCase;
-import org.mate.interaction.Action;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
 
 import java.util.EnumSet;
 import java.util.HashMap;

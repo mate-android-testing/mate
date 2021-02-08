@@ -14,7 +14,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.interaction.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.EnvironmentManager;
 
 import java.util.ArrayList;

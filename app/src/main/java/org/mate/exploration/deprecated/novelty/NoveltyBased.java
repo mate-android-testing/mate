@@ -10,8 +10,8 @@ import org.mate.model.TestCase;
 import org.mate.model.deprecated.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.ui.Widget;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.utils.MersenneTwister;
 
 import java.util.ArrayList;

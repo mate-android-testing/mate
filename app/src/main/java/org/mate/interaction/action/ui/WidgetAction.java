@@ -1,8 +1,8 @@
-package org.mate.interaction.ui;
+package org.mate.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 
-import org.mate.interaction.Action;
+import org.mate.interaction.action.Action;
 
 import java.util.ArrayList;
 import java.util.List;

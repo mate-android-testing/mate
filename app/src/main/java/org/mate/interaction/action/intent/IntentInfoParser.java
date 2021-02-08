@@ -1,6 +1,5 @@
-package org.mate.interaction.intent;
+package org.mate.interaction.action.intent;
 
-import android.content.BroadcastReceiver;
 import android.util.Xml;
 
 import org.mate.MATE;

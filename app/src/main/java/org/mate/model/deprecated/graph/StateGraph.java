@@ -1,9 +1,9 @@
 package org.mate.model.deprecated.graph;
 
 import org.mate.MATE;
-import org.mate.interaction.Action;
+import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;

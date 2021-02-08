@@ -1,6 +1,5 @@
-package org.mate.interaction.intent;
+package org.mate.interaction.action.intent;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Size;
@@ -11,7 +10,6 @@ import org.mate.utils.DataPool;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;

@@ -4,7 +4,7 @@ import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
-import org.mate.interaction.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 public class FlickeringAccessibilityCheck implements IWidgetAccessibilityCheck {
 

@@ -13,8 +13,8 @@ import org.mate.interaction.DeviceMgr;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.ui.Widget;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 
 import java.util.Date;
 import java.util.List;

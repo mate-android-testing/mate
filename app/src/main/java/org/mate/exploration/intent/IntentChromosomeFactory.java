@@ -5,11 +5,11 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.interaction.intent.ComponentDescription;
-import org.mate.interaction.intent.ComponentType;
-import org.mate.interaction.intent.IntentProvider;
+import org.mate.interaction.action.intent.ComponentDescription;
+import org.mate.interaction.action.intent.ComponentType;
+import org.mate.interaction.action.intent.IntentProvider;
 import org.mate.model.TestCase;
-import org.mate.interaction.Action;
+import org.mate.interaction.action.Action;
 import org.mate.utils.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 

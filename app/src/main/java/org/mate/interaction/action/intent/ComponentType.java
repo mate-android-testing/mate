@@ -1,4 +1,4 @@
-package org.mate.interaction.intent;
+package org.mate.interaction.action.intent;
 
 public enum ComponentType {
 

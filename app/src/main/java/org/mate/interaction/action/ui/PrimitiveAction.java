@@ -1,9 +1,9 @@
-package org.mate.interaction.ui;
+package org.mate.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
-import org.mate.interaction.Action;
+import org.mate.interaction.action.Action;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;

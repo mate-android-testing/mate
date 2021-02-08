@@ -9,11 +9,12 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.ui.PrimitiveAction;
-import org.mate.interaction.ui.Widget;
-import org.mate.interaction.ui.WidgetAction;
+import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.utils.Utils;
 
 import java.util.ArrayList;
