@@ -37,7 +37,9 @@ public class IntentBasedAction extends Action {
     }
 
     /**
-     * A custom string representation for an Intent-based action.
+     * A custom string representation for an Intent-based action. Do not
+     * alter this representation without changing the parsing routine
+     * of the analysis framework!
      *
      * @return Returns a string representation for an Intent-based action.
      */

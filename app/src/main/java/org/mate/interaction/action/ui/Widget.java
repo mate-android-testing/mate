@@ -4,6 +4,7 @@ package org.mate.interaction.action.ui;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -731,8 +732,42 @@ public class Widget {
         return focused;
     }
 
+    /**
+     * Compares two widgets for equality. Note that
+     * this check might be not fully unique!
+     *
+     * @param o The object to which we compare.
+     * @return Returns {@code true} if both widgets are equal,
+     *          otherwise {@code false} is returned.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            Widget other = (Widget) o;
+            return Objects.equals(getIdByActivity(), other.getIdByActivity()) &&
+                    getX1() == other.getX1() &&
+                    getX2() == other.getX2() &&
+                    getY1() == other.getY1() &&
+                    getY2() == other.getY2();
+        }
+    }
 
-
-
-
+    /**
+     * Computes the hash code based on attributes used for {@link #equals(Object)}.
+     *
+     * @return Returns the associated hash code of the widget action.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                getIdByActivity(),
+                getX1(),
+                getX2(),
+                getY1(),
+                getY2());
+    }
 }

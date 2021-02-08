@@ -1,5 +1,7 @@
 package org.mate.interaction.action.intent;
 
+import android.support.annotation.NonNull;
+
 import org.mate.interaction.action.Action;
 
 /**
@@ -58,9 +60,16 @@ public class SystemAction extends Action {
         return action;
     }
 
+    /**
+     * Defines a custom representation of a system action. Do not
+     * alter this representation without changing the parsing routine
+     * of the analysis framework!
+     *
+     * @return Returns the string representation of a system action.
+     */
+    @NonNull
     @Override
     public String toString() {
-        // return "system event receiver: " + receiver + ", system event: " + action;
         return "system action: act=" + action + " cmp=" + receiver;
     }
 }

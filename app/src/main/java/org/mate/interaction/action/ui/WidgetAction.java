@@ -96,30 +96,42 @@ public class WidgetAction extends Action {
         this.proportionalPheromone = proportionalPheromone;
     }
 
+    /**
+     * Compares two widget actions for equality.
+     *
+     * @param o The object to which we compare.
+     * @return Returns {@code true} if both actions are equal,
+     *          otherwise {@code false} is returned.
+     */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WidgetAction action = (WidgetAction) o;
-        return actionType == action.actionType &&
-                Objects.equals(widget.getIdByActivity(), action.widget.getIdByActivity()) &&
-                widget.getX1() == action.widget.getX1() &&
-                widget.getX2() == action.widget.getX2() &&
-                widget.getY1() == action.widget.getY1() &&
-                widget.getY2() == action.widget.getY2();
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            WidgetAction other = (WidgetAction) o;
+            return actionType == other.actionType && widget.equals(other.widget);
+        }
     }
 
+    /**
+     * Computes the hash code based on attributes used for {@link #equals(Object)}.
+     *
+     * @return Returns the associated hash code of the widget action.
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(
-                widget.getIdByActivity(),
-                actionType,
-                widget.getX1(),
-                widget.getX2(),
-                widget.getY1(),
-                widget.getY2());
+        return Objects.hashCode(actionType) + widget.hashCode();
     }
 
+    /**
+     * Returns the string representation of a widget action. Do not
+     * alter this representation without changing the parsing routine
+     * of the analysis framework!
+     *
+     * @return Returns the string representation of a widget action.
+     */
     @NonNull
     @Override
     public String toString() {
