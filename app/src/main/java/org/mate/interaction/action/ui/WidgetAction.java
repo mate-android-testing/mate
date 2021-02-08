@@ -19,7 +19,6 @@ public class WidgetAction extends Action {
     private String extraInfo;
     private boolean executed;
 
-    private float fitness;
     private long timeToWait;
     private float pheromone;
     private float proportionalPheromone;
@@ -33,7 +32,6 @@ public class WidgetAction extends Action {
 
     public WidgetAction(ActionType actionType){
         this.actionType = actionType;
-        fitness=0;
         widget = new Widget("","","");
     }
 
@@ -74,10 +72,6 @@ public class WidgetAction extends Action {
 
     public void addAdjAction(WidgetAction eventAction){
         adjActions.add(eventAction);
-    }
-
-    public void setFitness(float fitness) {
-        this.fitness = fitness;
     }
 
     public long getTimeToWait() {

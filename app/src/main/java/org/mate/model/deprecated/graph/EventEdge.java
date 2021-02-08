@@ -90,7 +90,6 @@ public class EventEdge implements Cloneable{
 
     public void setFitness(float fitness) {
         this.fitness = fitness;
-        event.setFitness(fitness);
     }
     @Override
     protected Object clone() throws CloneNotSupportedException {
