@@ -321,7 +321,7 @@ public class DeviceMgr {
         int Y = 0;
         int steps = 15;
 
-        if (!widget.getClazz().equals("")) {
+        if (!widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
                 X = obj.getVisibleBounds().centerX();
@@ -408,7 +408,7 @@ public class DeviceMgr {
 
         MATE.log("TEXT DATA: " + textData);
 
-        if (widget.getResourceID().equals("")) {
+        if (widget.getResourceID().isEmpty()) {
             if (!widget.getText().equals("")) {
                 UiObject2 obj = device.findObject(By.text(widget.getText()));
                 if (obj != null) {
