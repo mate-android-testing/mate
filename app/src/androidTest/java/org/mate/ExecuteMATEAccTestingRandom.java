@@ -42,7 +42,7 @@ public class ExecuteMATEAccTestingRandom {
         packageName = mate.getPackageName();
         String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
         runningTime = new Date().getTime();
-        guiModel = mate.getGuiModel();
+        this.guiModel = new GraphGUIModel();
 
         if (emulator != null && !emulator.equals("")) {
             this.deviceMgr = new DeviceMgr(device, packageName);

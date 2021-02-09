@@ -1,10 +1,5 @@
 package org.mate;
 
-import android.app.Instrumentation;
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -14,9 +9,6 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.model.deprecated.graph.GraphGUIModel;
-import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.state.IScreenState;
 import org.mate.utils.Coverage;
 import org.mate.utils.CoverageUtils;
 import org.mate.utils.MersenneTwister;
@@ -26,9 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
@@ -40,7 +30,6 @@ public class MATE {
     // TODO: make private
     public static UIAbstractionLayer uiAbstractionLayer;
     public static String packageName;
-    public static IGUIModel guiModel;
     private DeviceMgr deviceMgr;
     public static long TIME_OUT;
 
@@ -148,17 +137,6 @@ public class MATE {
         }
     }
 
-    private void checkVisitedActivities(String explorationStrategy) {
-        Set<String> visitedActivities = new HashSet<String>();
-        for (IScreenState scnd : guiModel.getStates()) {
-            visitedActivities.add(scnd.getActivityName());
-        }
-
-        MATE.log(explorationStrategy + " visited activities " + visitedActivities.size());
-        for (String act : visitedActivities)
-            MATE.log("   " + act);
-    }
-
     public static void log(String msg) {
         Log.i("apptest", msg);
     }
@@ -185,10 +163,6 @@ public class MATE {
 
     public String getPackageName() {
         return packageName;
-    }
-
-    public IGUIModel getGuiModel() {
-        return guiModel;
     }
 
     public UiDevice getDevice() {
