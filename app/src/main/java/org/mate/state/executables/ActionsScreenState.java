@@ -1,12 +1,10 @@
 package org.mate.state.executables;
 
-import android.view.accessibility.AccessibilityNodeInfo;
-
-import org.mate.state.IScreenState;
-import org.mate.interaction.action.Action;
+import org.mate.MATE;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.IScreenState;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -14,37 +12,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by marceloeler on 21/06/17.
+ * Models a screen state and maintains the list of applicable widget actions.
  */
-
 public class ActionsScreenState extends AbstractScreenState {
 
+    /**
+     * Defines the actions that are applicable on the screen's widgets.
+     */
     private List<WidgetAction> actions;
-    private static Hashtable<String,Hashtable<String,List<Integer>>> idSizes = new Hashtable<>();
-    private List<Float> pheromone;
-    private Map<Action,Float> actionsWithPheromone;
-    private Map<Action,Float> actionWithFitness;
-    private String id;
+
+    private static Map<String, Hashtable<String, List<Integer>>> idSizes = new Hashtable<>();
+
+    /**
+     * The app screen on which the screen state is based.
+     */
     private AppScreen appScreen;
-    private AccessibilityNodeInfo rootNodeInfo;
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Creates a new screen state based on the given {@link AppScreen}.
+     *
+     * @param appScreen The given app screen.
+     */
     public ActionsScreenState(AppScreen appScreen){
-        super(appScreen.getPackageName(),appScreen.getActivityName());
-        this.widgets = appScreen.getWidgets();
-        this.rootNodeInfo = appScreen.getRootNodeInfo();
-        actions=null;
+        super(appScreen.getPackageName(), appScreen.getActivityName(), appScreen.getWidgets());
+        MATE.log_debug("Creating new action screen state!");
+        this.actions = null;
         this.appScreen = appScreen;
-
     }
 
     private int getMaxAmountOfID(Hashtable<String, List<Integer>> sameIDWidgets, String wid){
@@ -68,6 +61,7 @@ public class ActionsScreenState extends AbstractScreenState {
         return max;
     }
 
+    @Override
     public List<WidgetAction> getActions(){
         if (actions!=null)
             return actions;
@@ -235,7 +229,7 @@ public class ActionsScreenState extends AbstractScreenState {
         if (executables.size()==0)
             executables.add(new WidgetAction(ActionType.BACK));
 
-        if (appScreen.isHastoScrollDown()||appScreen.isHasToScrollUp()){
+        if (appScreen.isHasToScrollDown()||appScreen.isHasToScrollUp()){
             executables.add(new WidgetAction(ActionType.SWIPE_DOWN));
             executables.add(new WidgetAction(ActionType.SWIPE_UP));
         }
@@ -323,8 +317,8 @@ public class ActionsScreenState extends AbstractScreenState {
                 }
             }
 
-            Hashtable<String, Widget> editablesThis = this.getEditableWidgets();
-            Hashtable<String, Widget> editablesOther = screenState.getEditableWidgets();
+            Map<String, Widget> editablesThis = this.getEditableWidgets();
+            Map<String, Widget> editablesOther = screenState.getEditableWidgets();
 
             for (Widget wdgThis: editablesThis.values()){
 
@@ -343,8 +337,8 @@ public class ActionsScreenState extends AbstractScreenState {
 
 
             //as for the checkables it considers two GUIs equals if they have the same objects checked
-            Hashtable<String,Widget> checkablesThis = this.getCheckableWidgets();
-            Hashtable<String,Widget> checkablesOther = screenState.getCheckableWidgets();
+            Map<String,Widget> checkablesThis = this.getCheckableWidgets();
+            Map<String,Widget> checkablesOther = screenState.getCheckableWidgets();
             for (Widget wdgThis: checkablesThis.values()){
                 Widget wdgOther = checkablesOther.get(wdgThis.getId());
                 if (wdgOther==null)
@@ -363,23 +357,22 @@ public class ActionsScreenState extends AbstractScreenState {
         return "ActionsScreenState";
     }
 
-
-    //yan
-    @Override
-    public void updatePheromone(Action triggeredAction) {
-        //find pheromone in hashMap and update
+    private Map<String, Widget> getEditableWidgets(){
+        Map<String, Widget> editables = new Hashtable<String, Widget>();
+        for (Widget widget: widgets){
+            if (widget.isEditable())
+                editables.put(widget.getId(),widget);
+        }
+        return editables;
     }
 
-    //yan
-    @Override
-    public Map<Action, Float> getActionsWithPheromone() {
-        return actionsWithPheromone;
-    }
-
-    //yan
-    @Override
-    public AccessibilityNodeInfo getRootAccessibilityNodeInfo() {
-        return rootNodeInfo;
+    private Map<String, Widget> getCheckableWidgets(){
+        Map<String, Widget> checkables = new Hashtable<String, Widget>();
+        for (Widget widget: widgets){
+            if (widget.isCheckable()||widget.isChecked())
+                checkables.put(widget.getId(),widget);
+        }
+        return checkables;
     }
 
     @Override

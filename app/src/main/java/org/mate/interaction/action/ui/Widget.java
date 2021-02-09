@@ -1,6 +1,9 @@
 package org.mate.interaction.action.ui;
 
 
+import android.graphics.Rect;
+import android.view.accessibility.AccessibilityNodeInfo;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,16 +46,31 @@ public class Widget {
     private boolean password;
     private boolean selected;
     private boolean visibleToUser;
-    private String bounds;
-    private String originalBounds;
+
+    /**
+     *  The coordinates/boundaries of the widget.
+     *
+     *  (0,0)      (xMax,0)
+     *  left       right
+     *  x1         x2 (X = x1 + x2 / 2)
+     *  ------------
+     *  |          |
+     *  |          |
+     *  |          |
+     *  ------------
+     *  y1         y2 (Y = y1 + y2 / 2)
+     *  top        bottom
+     *  (yMax,0)   (xMax,yMax)
+     */
+    private Rect bounds;
     private int X;
     private int Y;
     private int x1;
     private int x2;
     private int y1;
     private int y2;
-    private int maxLength;
 
+    private int maxLength;
     private boolean screenReaderFocusable;
 
     private int inputType;
@@ -65,11 +83,19 @@ public class Widget {
     private String hint;
     private boolean heading;
 
+    /**
+     * Creates a new widget.
+     *
+     * @param id A customized widget id, see createWidget() of the AppScreen class.
+     * @param clazz The class name the widget refers to, e.g. android.widget.TextView or the
+     *              empty string if not available.
+     * @param idByActivity Either the view id resource name, see {@link AccessibilityNodeInfo#getViewIdResourceName()}
+     *                     or a customized representation, check createWidget() of the AppScreen class.
+     */
     public Widget(String id, String clazz, String idByActivity) {
         setId(id);
         setClazz(clazz);
-        originalBounds = "";
-        setBounds("[0,0][0,0]");
+        setBounds(new Rect());
         setContentDesc("");
         setText("");
         children = new ArrayList<>();
@@ -111,9 +137,6 @@ public class Widget {
             this.color = color;
             setMaxminLum("");
         }
-
-
-
     }
 
     public String getErrorText() {
@@ -268,26 +291,6 @@ public class Widget {
         this.text = text;
     }
 
-    public String getBounds() {
-        return bounds;
-    }
-
-    public int getX() {
-        return X;
-    }
-
-    public void setX(int x) {
-        X = x;
-    }
-
-    public int getY() {
-        return Y;
-    }
-
-    public void setY(int y) {
-        Y = y;
-    }
-
     public boolean isShowingHintText() {
         return showingHintText;
     }
@@ -373,27 +376,49 @@ public class Widget {
         this.y2 = y2;
     }
 
-    public void setBounds(String bounds) {
-        this.bounds = bounds;
+    public int getX() {
+        return X;
+    }
 
-        if (originalBounds != null && originalBounds.equals(""))
-            originalBounds = bounds;
+    public void setX(int x) {
+        X = x;
+    }
 
-        String value = bounds;
-        value = value.replace("][", "|");
-        value = value.replace("[", "");
-        value = value.replace("]", "");
-        String[] twoPos = value.split("\\|");
-        String[] first = twoPos[0].split(",");
-        String[] second = twoPos[1].split(",");
-        x1 = Integer.valueOf(first[0]);
-        y1 = Integer.valueOf(first[1]);
+    public int getY() {
+        return Y;
+    }
 
-        x2 = Integer.valueOf(second[0]);
-        y2 = Integer.valueOf(second[1]);
+    public void setY(int y) {
+        Y = y;
+    }
 
-        setX((x1 + x2) / 2);
-        setY((y1 + y2) / 2);
+    /**
+     * Defines the boundaries of the widget. As a side effect,
+     * the coordinates of the widget are adjusted.
+     *
+     * @param rectangle The rectangle defining the boundaries of the widget.
+     */
+    public void setBounds(Rect rectangle) {
+
+        this.bounds = rectangle;
+
+        setX1(rectangle.left);
+        setX2(rectangle.right);
+        setY1(rectangle.top);
+        setY2(rectangle.bottom);
+
+        // TODO: there is 'exactCenter()' for X and Y if desired
+        setX(rectangle.centerX());
+        setY(rectangle.centerY());
+    }
+
+    /**
+     * Retrieves the boundaries of the widget.
+     *
+     * @return Returns a rectangle describing the widget boundaries.
+     */
+    public Rect getBounds() {
+        return bounds;
     }
 
     public boolean directSonOf(String type) {
@@ -584,14 +609,6 @@ public class Widget {
 
 
         return true;
-    }
-
-    public String getOriginalBounds() {
-        return originalBounds;
-    }
-
-    public void setOriginalBounds(String originalBounds) {
-        this.originalBounds = originalBounds;
     }
 
     public boolean isScreenReaderFocusable() {

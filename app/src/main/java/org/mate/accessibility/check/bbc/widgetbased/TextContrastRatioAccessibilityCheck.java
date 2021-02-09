@@ -1,5 +1,7 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
+import android.graphics.Rect;
+
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
@@ -46,7 +48,7 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
         if (!widget.isImportantForAccessibility())
             return false;
 
-        if (widget.getBounds().equals("[0,0][0,0]"))
+        if (widget.getBounds().equals(new Rect()))
             return false;
 
         if (widget.getClazz().contains(("Image")))

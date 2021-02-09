@@ -44,7 +44,7 @@ public class ManualExploration {
             IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
             for (Widget w: state.getWidgets()){
-                MATE.log_acc(w.getClazz()+"-"+w.getId()+"-"+w.getText()+"-"+w.getBounds());
+                MATE.log_acc(w.getClazz()+"-"+w.getId()+"-"+w.getText()+"-"+w.getBounds().toShortString());
             }
 
 

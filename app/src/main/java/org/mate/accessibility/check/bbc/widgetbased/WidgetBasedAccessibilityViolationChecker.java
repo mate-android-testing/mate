@@ -54,7 +54,7 @@ public class WidgetBasedAccessibilityViolationChecker {
                     violation.reportFlaw();
                     MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     if (!violation.getInfo().equals(""))
-                        MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds());
+                        MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds().toShortString());
                 }
             }
         }

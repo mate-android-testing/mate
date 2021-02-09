@@ -1,16 +1,14 @@
 package org.mate.state;
 
-import android.view.accessibility.AccessibilityNodeInfo;
-
-import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * Created by marceloeler on 21/06/17.
+ * Defines the interface for a screen state,
+ * see {@link org.mate.state.executables.AbstractScreenState} and
+ * {@link org.mate.state.executables.ActionsScreenState}, respectively.
  */
 public interface IScreenState {
 
@@ -21,8 +19,6 @@ public interface IScreenState {
     String getActivityName();
     String getPackageName();
     String getType();
-    void updatePheromone(Action triggeredAction);
-    Map<Action,Float> getActionsWithPheromone();
-    AccessibilityNodeInfo getRootAccessibilityNodeInfo();
+    Widget getWidget(String id);
     boolean differentColor(IScreenState visitedState);
 }
