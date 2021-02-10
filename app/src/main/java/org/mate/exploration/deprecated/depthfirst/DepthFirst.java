@@ -11,6 +11,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -102,13 +103,13 @@ public class DepthFirst {
 
 //                    action.setAdjActions(adjActions);
 
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     long timeToWait = waitForProgressBar(state);
                     if (timeToWait>300)
                         timeToWait+=2000;
                     action.setTimeToWait(timeToWait);
-                    state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     MATE.log("\n\nnumber of actions (new state?): " + state.getActions().size()+"\n\n");
 
@@ -129,7 +130,7 @@ public class DepthFirst {
                         log("out of the application - different package");
                         log("package: " + state.getPackageName());
                         deviceMgr.restartApp();
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         try {
                             guiModel.moveToState(state);
                         } catch (InvalidScreenStateException e) {

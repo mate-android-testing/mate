@@ -18,7 +18,7 @@ public interface IScreenState {
     List<WidgetAction> getActions();
     String getActivityName();
     String getPackageName();
-    String getType();
+    ScreenStateType getType();
     Widget getWidget(String id);
     boolean differentColor(IScreenState visitedState);
 }

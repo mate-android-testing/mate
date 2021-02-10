@@ -9,6 +9,7 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
     @Override
@@ -23,7 +24,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                 //MATE.log(" CLICK on : " + widget.getId() + " " + widget.getClazz() + " " + widget.getText());
                 MATE.uiAbstractionLayer.executeAction(wclick);
                 //MATE.log("AFTER CLICK");
-                IScreenState nState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                IScreenState nState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 //MATE.log("AFTER NEW STATE");
                 //MATE.log("nstate widgets: " + nState.getWidgets().size());
                 Widget wd = findWidget(nState, widget);
@@ -35,7 +36,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                     WidgetAction editAction = new WidgetAction(widget,ActionType.TYPE_TEXT);
                     MATE.uiAbstractionLayer.executeAction(editAction);
                     //MATE.log("AFTER EDIT TEXT");
-                    nState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    nState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     wd = findWidget(nState, widget);
                     if (wd!=null){
                         //MATE.log("Focused after: " + wd.isFocused());

@@ -5,11 +5,13 @@ import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Models a screen state and maintains the list of applicable widget actions.
@@ -21,7 +23,10 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     private List<WidgetAction> actions;
 
-    private static Map<String, Hashtable<String, List<Integer>>> idSizes = new Hashtable<>();
+    /**
+     *
+     */
+    private static Map<String, Map<String, List<Integer>>> idSizes = new Hashtable<>();
 
     /**
      * The app screen on which the screen state is based.
@@ -40,7 +45,7 @@ public class ActionsScreenState extends AbstractScreenState {
         this.appScreen = appScreen;
     }
 
-    private int getMaxAmountOfID(Hashtable<String, List<Integer>> sameIDWidgets, String wid){
+    private int getMaxAmountOfID(Map<String, List<Integer>> sameIDWidgets, String wid){
          List<Integer> amounts = sameIDWidgets.get(wid);
         if (amounts==null) {
             amounts = new ArrayList<>();
@@ -61,12 +66,16 @@ public class ActionsScreenState extends AbstractScreenState {
         return max;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
-    public List<WidgetAction> getActions(){
+    public List<WidgetAction> getActions() {
         if (actions!=null)
             return actions;
 
-        Hashtable<String,List<Integer>> sameIDWidgets = idSizes.get(activityName);
+        Map<String,List<Integer>> sameIDWidgets = idSizes.get(activityName);
         if (sameIDWidgets==null){
             sameIDWidgets = new Hashtable<>();
             idSizes.put(activityName,sameIDWidgets);
@@ -264,6 +273,10 @@ public class ActionsScreenState extends AbstractScreenState {
     }
 
      //Todo: add hashcode method
+    @Override
+    public int hashCode() {
+        return Objects.hash(actions, appScreen);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -353,8 +366,8 @@ public class ActionsScreenState extends AbstractScreenState {
         return false;
     }
 
-    public String getType(){
-        return "ActionsScreenState";
+    public ScreenStateType getType() {
+        return ScreenStateType.ACTION_SCREEN_STATE;
     }
 
     private Map<String, Widget> getEditableWidgets(){

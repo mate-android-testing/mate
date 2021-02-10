@@ -12,6 +12,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 import org.mate.utils.MersenneTwister;
 
 import java.util.ArrayList;
@@ -272,14 +273,14 @@ public class NoveltyBased {
 
 
             //Gets the first state
-            selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             guiModel.updateModelEVO(null,selectedScreenState);
-            //IScreenState statedebug = ScreenStateFactory.getScreenState("ActionsScreenState");
+            //IScreenState statedebug = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             //guiModel.updateModelEVO(null,statedebug);
             //MATE.log_acc("DEBUG: MATE STATE "+guiModel.getNewNodeName(statedebug)+" state updated? ");
             //MATE.log_acc("DEBUG: MATE STATE "+guiModel.getCurrentStateId()+" state updated? ");
 
-                //IScreenState s = ScreenStateFactory.getScreenState("ActionsScreenState");
+                //IScreenState s = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 //guiModel.updateModel(null,s);
                 //MATE.log_acc("DEBUG: INITIAL STATE "+s.getId());
 
@@ -341,7 +342,7 @@ public class NoveltyBased {
 
                         //create an object that represents the screen
                         //using type: ActionScreenState
-                        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                         //check whether there is a progress bar on the screen
                         long timeToWait = waitForProgressBar(state);
@@ -352,7 +353,7 @@ public class NoveltyBased {
                             //set that the current action needs to wait before new action
                             action.setTimeToWait(timeToWait);
                             //get a new state
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         }
 
                         //get the package name of the app currently running
@@ -385,7 +386,7 @@ public class NoveltyBased {
                             deviceMgr.restartApp();
                             Thread.sleep(2000);
                             //TODO: get state when restarts the app
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                             //numberOfActions = 0;
                             //numberOfTCs++;
                             //if(numberOfTCs < maxNumTCs){
@@ -398,7 +399,7 @@ public class NoveltyBased {
                             //it the current screen is a screen not explored before,
                             //   then a new state is created (newstate = true)
                             //TODO: is this useless?
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                             //testcase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
                             //testcase.updateVisitedStates(this.guiModel.getStateById(this.guiModel.getCurrentStateId()));
@@ -460,7 +461,7 @@ public class NoveltyBased {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                selectedScreenState=ScreenStateFactory.getScreenState("ActionsScreenState");
+                selectedScreenState=ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             }
         }
 
@@ -511,7 +512,7 @@ public class NoveltyBased {
             boolean goOn = true;
             while (goOn) {
 
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 List<WidgetAction> actions = screenState.getActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
@@ -556,7 +557,7 @@ public class NoveltyBased {
 
 
 
-        selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         guiModel.updateModelEVO(null,selectedScreenState);
 
         //add initial state to mutant test case
@@ -651,7 +652,7 @@ public class NoveltyBased {
 
                     //create an object that represents the screen
                     //using type: ActionScreenState
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     //check whether there is a progress bar on the screen
                     long timeToWait = waitForProgressBar(state);
@@ -662,7 +663,7 @@ public class NoveltyBased {
                         //set that the current action needs to wait before new action
                         action.setTimeToWait(timeToWait);
                         //get a new state
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }
 
                     //get the package name of the app currently running
@@ -696,7 +697,7 @@ public class NoveltyBased {
                         Thread.sleep(5000);
                         deviceMgr.restartApp();
                         Thread.sleep(2000);
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         //numberOfActions = 0;
                         //numberOfTCs++;
                         //if(numberOfTCs < maxNumTCs){
@@ -709,7 +710,7 @@ public class NoveltyBased {
                         //it the current screen is a screen not explored before,
                         //   then a new state is created (newstate = true)
                         //TODO: non mi trovo
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         boolean newState = guiModel.updateModel(action, state);
                         mutantTestCase.updateVisitedActivities(state.getActivityName());
                         mutantTestCase.updateVisitedStates(state);

@@ -10,6 +10,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -108,7 +109,7 @@ public class OnePlusOne {
             TestCase testcase = testsuite.get(String.valueOf(TCcounter));
 
             //Get the first state
-            selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             guiModel.updateModelEVO(null, selectedScreenState);
 
             int numberOfActions = 0;
@@ -141,7 +142,7 @@ public class OnePlusOne {
 
                         //create an object that represents the screen
                         //using type: ActionScreenState
-                        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                         //check whether there is a progress bar on the screen
                         long timeToWait = waitForProgressBar(state);
@@ -152,7 +153,7 @@ public class OnePlusOne {
                             //set that the current action needs to wait before new action
                             action.setTimeToWait(timeToWait);
                             //get a new state
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         }
 
                         //get the package name of the app currently running
@@ -180,14 +181,14 @@ public class OnePlusOne {
                             deviceMgr.restartApp();
                             Thread.sleep(2000);
                             //TODO: get state when restarts the app
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         } else {
                             //if the app under test is running
                             //try to update GUI model with the current screen state
                             //it the current screen is a screen not explored before,
                             //   then a new state is created (newstate = true)
                             //TODO: is this useless?
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
 
                             //update model with new state
@@ -236,7 +237,7 @@ public class OnePlusOne {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             }
         }
 
@@ -285,7 +286,7 @@ public class OnePlusOne {
             boolean goOn = true;
             while (goOn) {
 
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 List<WidgetAction> actions = screenState.getActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
@@ -322,7 +323,7 @@ public class OnePlusOne {
         TestCase mutantTestCase = new TestCase(String.valueOf(this.TCcounter));
 
 
-        selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         guiModel.updateModelEVO(null, selectedScreenState);
 
 
@@ -364,7 +365,7 @@ public class OnePlusOne {
                     //TODO: trying sleep
                     Thread.sleep(2500);
 
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     //check whether there is a progress bar on the screen
                     long timeToWait = waitForProgressBar(state);
@@ -375,7 +376,7 @@ public class OnePlusOne {
                         //set that the current action needs to wait before new action
                         action.setTimeToWait(timeToWait);
                         //get a new state
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }
 
                     //get the package name of the app currently running
@@ -401,14 +402,14 @@ public class OnePlusOne {
                         Thread.sleep(5000);
                         deviceMgr.restartApp();
                         Thread.sleep(2000);
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     } else {
                         //if the app under test is running
                         //try to update GUI model with the current screen state
                         //it the current screen is a screen not explored before,
                         //   then a new state is created (newstate = true)
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         boolean newState = guiModel.updateModel(action, state);
                         mutantTestCase.updateVisitedActivities(state.getActivityName());
                         mutantTestCase.updateVisitedStates(state);

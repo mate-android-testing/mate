@@ -15,6 +15,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.Date;
 import java.util.List;
@@ -68,7 +69,7 @@ public class UniformRandomForAccessibility {
 
                     //create an object that represents the screen
                     //using type: ActionScreenState
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     //check whether there is a progress bar on the screen
                     long timeToWait = waitForProgressBar(state);
@@ -79,7 +80,7 @@ public class UniformRandomForAccessibility {
                         //set that the current action needs to wait before new action
                         action.setTimeToWait(timeToWait);
                         //get a new state
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }
 
                     //get the package name of the app currently running
@@ -100,7 +101,7 @@ public class UniformRandomForAccessibility {
                     if (!currentPackageName.equals(this.packageName)||numberOfActions>= Properties.MAX_NUMBER_EVENTS()) {
                         MATE.log("package name: " + this.packageName);
                         deviceMgr.restartApp();
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         numberOfActions=0;
                     }
                     else{
@@ -245,7 +246,7 @@ public class UniformRandomForAccessibility {
             boolean goOn = true;
             while (goOn) {
 
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 List<WidgetAction> actions = screenState.getActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {

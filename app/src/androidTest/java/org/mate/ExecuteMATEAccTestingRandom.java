@@ -12,6 +12,7 @@ import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.model.deprecated.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.state.ScreenStateType;
 
 import java.util.Date;
 
@@ -47,7 +48,7 @@ public class ExecuteMATEAccTestingRandom {
         if (emulator != null && !emulator.equals("")) {
             this.deviceMgr = new DeviceMgr(device, packageName);
 
-            IScreenState initialScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            IScreenState initialScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             //creates the graph that represents the GUI model
             this.guiModel = new GraphGUIModel();
             //first state (root node - action ==null)

@@ -11,6 +11,7 @@ import org.mate.model.deprecated.graph.GraphGUIModel;
 import org.mate.model.deprecated.graph.ScreenNode;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,7 +85,7 @@ public class ACO {
             }else {
                 //if this app is restarted due to exiting from this app,
                 //we need to "scan" this state and get this launching activity.
-                state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 stateId = wholeModel.getNewNodeName(state);
                 if (stateId.equals("")){
                     //if this app is restarted and the launching state is new
@@ -107,7 +108,7 @@ public class ACO {
     public IScreenState handleFirstNodeOfAnt(IScreenState state, Ant ant, int l) {
         //if it is the first event of an ant
         if (l==0){
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             screenState = state;
             if (!isFirstNodeOfCompleteModel){
                 ant.getCoveredActivity().add(state.getActivityName());
@@ -179,7 +180,7 @@ public class ACO {
                 }
             }
             //renew a state, thus all of data about this state will be clean.
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             String newPackageName = state.getPackageName();
         //TODO:it's a unknown error about newPackageName is null
         if (newPackageName!=null){
