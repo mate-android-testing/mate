@@ -73,17 +73,17 @@ public class MATE {
         
         device = UiDevice.getInstance(getInstrumentation());
 
-        //checks whether user needs to authorize access to something on the device/emulator
+        // checks whether user needs to authorize access to something on the device/emulator
         UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
 
-        //get the name of the package of the app currently running
+        // get the name of the package of the app currently running
         this.packageName = device.getCurrentPackageName();
         MATE.log_acc("Package name: " + this.packageName);
 
         String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
         MATE.log_acc("Emulator: " + emulator);
 
-        if (emulator != null && !emulator.equals("")) {
+        if (emulator != null && !emulator.isEmpty()) {
             this.deviceMgr = new DeviceMgr(device, packageName);
             uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
         } else {
@@ -126,7 +126,7 @@ public class MATE {
             }
 
             Registry.getEnvironmentManager().releaseEmulator();
-            //EnvironmentManager.deleteAllScreenShots(packageName);
+            // EnvironmentManager.deleteAllScreenShots(packageName);
             try {
                 Registry.unregisterEnvironmentManager();
                 Registry.unregisterProperties();

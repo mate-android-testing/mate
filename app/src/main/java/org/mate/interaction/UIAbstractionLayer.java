@@ -32,6 +32,7 @@ import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
 public class UIAbstractionLayer {
+
     private static final int UiAutomatorDisconnectedRetries = 3;
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
     private String packageName;
@@ -73,7 +74,8 @@ public class UIAbstractionLayer {
         /*
         * FIXME: The UIAutomator bug seems to be unresolvable right now.
         *  We have tried to restart the ADB server, but afterwards the
-        *   connection is still broken. Fortunately, this
+        *   connection is still broken. Fortunately, this bug seems to appear
+        *   very rarely recently.
          */
         while (retry) {
             retry = false;
