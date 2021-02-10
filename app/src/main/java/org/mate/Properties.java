@@ -48,10 +48,6 @@ public class Properties {
      */
     public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
 
-    public static float SERVICE_SELECTION_PROBABILITY() { return propertyOr(0.1f); }
-
-    public static float BROADCAST_RECEIVER_SELECTION_PROBABILITY() { return propertyOr( 0.2f); }
-
     /*
     * Whether to apply optimisation of test cases before replaying them.
      */
