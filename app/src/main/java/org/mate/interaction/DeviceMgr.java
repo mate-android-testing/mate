@@ -176,7 +176,7 @@ public class DeviceMgr {
                 handleClick(selectedWidget);
                 break;
             case LONG_CLICK:
-                handleLongPress(selectedWidget);
+                handleLongClick(selectedWidget);
                 break;
             case TYPE_TEXT:
                 handleEdit(action);
@@ -266,7 +266,7 @@ public class DeviceMgr {
      */
     private void checkForCrash() throws AUTCrashException {
         
-        //handle app crashes
+        // handle app crashes
         UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
         UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
 
@@ -298,6 +298,11 @@ public class DeviceMgr {
         device.click(widget.getX(), widget.getY());
     }
 
+    /**
+     * Clears the widget's text.
+     *
+     * @param widget The widget whose input should be cleared.
+     */
     private void handleClear(Widget widget) {
         UiObject2 obj = findObject(widget);
         if (obj != null)
@@ -352,7 +357,12 @@ public class DeviceMgr {
         }
     }
 
-    private void handleLongPress(Widget widget) {
+    /**
+     * Performs a long click on the given widget.
+     *
+     * @param widget The widget on which a long click should be applied.
+     */
+    private void handleLongClick(Widget widget) {
         UiObject2 obj = findObject(widget);
         int X = widget.getX();
         int Y = widget.getY();
@@ -363,12 +373,23 @@ public class DeviceMgr {
         device.swipe(X, Y, X, Y, 120);
     }
 
+    /**
+     * Tries to return a ui object matching the given widget.
+     *
+     * @param widget The widget whose ui object should be looked up.
+     * @return Returns the corresponding ui object or {@code null} if no
+     *          such ui object could be found.
+     */
     private UiObject2 findObject(Widget widget) {
+
+        // retrieve all ui objects that match the given widget id
         List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
+
         if (objs != null) {
-            if (objs.size() == 1)
+            if (objs.size() == 1) {
                 return objs.get(0);
-            else {
+            } else {
+                // check for a match based on the text attribute
                 for (UiObject2 uiObject2 : objs) {
                     if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
                         return uiObject2;
@@ -376,15 +397,20 @@ public class DeviceMgr {
             }
         }
 
-        //if no obj has been found by id, and then text if there is more than one object with the same id
+        // if no match for id, try to find the object by text match
         objs = device.findObjects(By.text(widget.getText()));
+
         if (objs != null) {
-            if (objs.size() == 1)
+            if (objs.size() == 1) {
                 return objs.get(0);
-            else {
+            } else {
+                // try to match by content description or widget boundary
                 for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getContentDescription() != null && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
-                            (uiObject2.getVisibleBounds() != null && uiObject2.getVisibleBounds().centerX() == widget.getX() && uiObject2.getVisibleBounds().centerY() == widget.getY()))
+                    if (uiObject2.getContentDescription() != null
+                            && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
+                            (uiObject2.getVisibleBounds() != null
+                                    && uiObject2.getVisibleBounds().centerX() == widget.getX()
+                                    && uiObject2.getVisibleBounds().centerY() == widget.getY()))
                         return uiObject2;
                 }
             }
@@ -445,7 +471,6 @@ public class DeviceMgr {
         }
 
         action.setExtraInfo(textData);
-
     }
 
     private String generateTextData(WidgetAction action) {
@@ -506,7 +531,8 @@ public class DeviceMgr {
         DataGenerator dataGen = new DataGenerator();
         if (inputType != null) {
 
-            if (inputType.contains("phone") || inputType.contains("number") || inputType.contains("Phone") || inputType.contains("Number")) {
+            if (inputType.contains("phone") || inputType.contains("number")
+                    || inputType.contains("Phone") || inputType.contains("Number")) {
                 textData = dataGen.getRandomValidNumber(maxLengthInt);
                 // textData = dataGen.getRandomValidNumber();
             } else if (inputType.contains("Email") || inputType.contains("email")) {
