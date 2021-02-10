@@ -397,7 +397,7 @@ public class DeviceMgr {
         Widget widget = action.getWidget();
         String textData = "";
 
-        if (action.getExtraInfo().equals(""))
+        if (action.getExtraInfo().isEmpty())
             textData = generateTextData(action);
         else
             textData = action.getExtraInfo();
@@ -405,7 +405,7 @@ public class DeviceMgr {
         MATE.log("TEXT DATA: " + textData);
 
         if (widget.getResourceID().isEmpty()) {
-            if (!widget.getText().equals("")) {
+            if (!widget.getText().isEmpty()) {
                 UiObject2 obj = device.findObject(By.text(widget.getText()));
                 if (obj != null) {
                     obj.setText(textData);
@@ -449,16 +449,17 @@ public class DeviceMgr {
     }
 
     private String generateTextData(WidgetAction action) {
+
         Widget widget = action.getWidget();
 
         String widgetText = widget.getText();
-        if (widgetText.equals(""))
+        if (widgetText.isEmpty())
             widgetText = widget.getHint();
 
         String textData = "";
         String inputType = "";
         int maxLengthInt = widget.getMaxLength();
-        if (action.getExtraInfo().equals("")) {
+        if (action.getExtraInfo().isEmpty()) {
 
             if (maxLengthInt < 0)
                 maxLengthInt = 15;
@@ -477,18 +478,18 @@ public class DeviceMgr {
 
             widgetText = widgetText.replace(".", "");
             widgetText = widgetText.replace(",", "");
-            if (inputType.equals("") && !widgetText.equals("") && android.text.TextUtils.isDigitsOnly(widgetText)) {
+            if (inputType.isEmpty() && !widgetText.isEmpty() && android.text.TextUtils.isDigitsOnly(widgetText)) {
                 inputType = "number";
             }
 
-            if (inputType.equals("")) {
+            if (inputType.isEmpty()) {
                 String desc = widget.getContentDesc();
                 if (desc != null) {
                     if (desc.contains("email") || desc.contains("e-mail") || desc.contains("E-mail") || desc.contains("Email"))
                         inputType = "email";
                 }
             }
-            if (inputType.equals(""))
+            if (inputType.isEmpty())
                 inputType = "text";
 
 
