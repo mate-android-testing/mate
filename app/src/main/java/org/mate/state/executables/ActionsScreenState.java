@@ -366,68 +366,94 @@ public class ActionsScreenState extends AbstractScreenState {
         return false;
     }
 
+    /**
+     * Returns the screen state type.
+     *
+     * @return Returns the screen state types.
+     */
     public ScreenStateType getType() {
         return ScreenStateType.ACTION_SCREEN_STATE;
     }
 
+    /**
+     * Returns a mapping of editable widgets, where the key is the widget id
+     * and the value the actual widget.
+     *
+     * @return Returns a mapping of editable widgets.
+     */
     private Map<String, Widget> getEditableWidgets(){
-        Map<String, Widget> editables = new Hashtable<String, Widget>();
-        for (Widget widget: widgets){
+        Map<String, Widget> editableWidgets = new Hashtable<String, Widget>();
+        for (Widget widget : widgets) {
             if (widget.isEditable())
-                editables.put(widget.getId(),widget);
+                editableWidgets.put(widget.getId(), widget);
         }
-        return editables;
+        return editableWidgets;
     }
 
+    /**
+     * Returns a mapping of checkable widgets, where the key is the widget id
+     * and the value the actual widget.
+     *
+     * @return Returns a mapping of checkable widgets.
+     */
     private Map<String, Widget> getCheckableWidgets(){
-        Map<String, Widget> checkables = new Hashtable<String, Widget>();
-        for (Widget widget: widgets){
-            if (widget.isCheckable()||widget.isChecked())
-                checkables.put(widget.getId(),widget);
+        Map<String, Widget> checkableWidgets = new Hashtable<String, Widget>();
+        for (Widget widget : widgets) {
+            if (widget.isCheckable() || widget.isChecked())
+                checkableWidgets.put(widget.getId(), widget);
         }
-        return checkables;
+        return checkableWidgets;
     }
 
+    /**
+     * Checks whether two screen states have a different color by
+     * comparing pairwise the widgets.
+     *
+     * @param visitedState The screen state to check against.
+     * @return Returns {@code true} if the screen states have a different color,
+     *          otherwise {@code false} is returned.
+     */
     @Override
     public boolean differentColor(IScreenState visitedState) {
-        if (visitedState==null) {
-            //MATE.log("visited state = null");
+
+        if (visitedState == null) {
             return true;
         }
-        ActionsScreenState that = (ActionsScreenState) visitedState;
 
         List<Widget> thisWidgets = this.getWidgets();
         List<Widget> otherWidgets = visitedState.getWidgets();
 
         boolean found = false;
-        for (Widget wThis: thisWidgets){
-            //search by id
-            for (Widget wOther: otherWidgets){
+
+        // compare pairwise the widgets
+        for (Widget wThis: thisWidgets) {
+            for (Widget wOther: otherWidgets) {
+                // check equality by id and text
                 if (wThis.getId().equals(wOther.getId()) &&
-                        wThis.getText().equals(wOther.getText())){
+                        wThis.getText().equals(wOther.getText())) {
 
                     found = true;
 
                     if (!wOther.getColor().equals(wThis.getColor()) &&
                             !wOther.isFocused() &&
-                            wThis.isFocused()==wOther.isFocused() &&
+                            wThis.isFocused() == wOther.isFocused() &&
                             wOther.getHint().equals(wThis.getHint()) &&
-                            wOther.getContentDesc().equals(wThis.getContentDesc())){
+                            wOther.getContentDesc().equals(wThis.getContentDesc())) {
                         return true;
                     }
                 }
             }
 
-            if (!found){
-                //search by text
-                for (Widget wOther: otherWidgets){
+            if (!found) {
+                // search by text
+                for (Widget wOther: otherWidgets) {
 
-                    if (wThis.getText().equals(wOther.getText())){
+                    if (wThis.getText().equals(wOther.getText())) {
                         found = true;
 
                         if (!wOther.getColor().equals(wThis.getColor()) &&
                                 !wOther.isFocused() &&
-                                wThis.isFocused()==wOther.isFocused() &&
+                                wThis.isFocused() == wOther.isFocused() &&
                                 wOther.getHint().equals(wThis.getHint()) &&
                                 wOther.getContentDesc().equals(wThis.getContentDesc()))
                             return true;
@@ -436,7 +462,5 @@ public class ActionsScreenState extends AbstractScreenState {
             }
         }
         return false;
-
     }
-
 }
