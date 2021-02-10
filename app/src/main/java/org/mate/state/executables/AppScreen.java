@@ -14,13 +14,14 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.EnvironmentManager;
+import org.mate.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -151,23 +152,14 @@ public class AppScreen {
      * @param node Describes a node in the ui hierarchy.
      * @param parent The parent widget, {@code null} for the root node.
      * @param activityName The activity name that corresponds to the app screen.
-     * @return Returns the extracted widget or {@code null} if extraction failed.
+     * @return Returns the extracted widget or {@code null} if the widget is outside of visibility.
      */
     private Widget createWidget(AccessibilityNodeInfo node, Widget parent, String activityName) {
 
         String parentResourceId = getValidResourceIdFromTree(parent);
-
-        String id = node.getViewIdResourceName();
-        if (id == null)
-            id = "";
-
-        String clazz = "";
-        if (node.getClassName() != null)
-            clazz = node.getClassName().toString();
-
-        String text = "";
-        if (node.getText() != null)
-            text = node.getText().toString();
+        String id = Objects.toString(node.getViewIdResourceName(), "");
+        String clazz = Objects.toString(node.getClassName(), "");
+        String text = Objects.toString(node.getText(), "");
 
         if (id.isEmpty()) {
             if (parent != null && parentResourceId != null) {
@@ -184,22 +176,15 @@ public class AppScreen {
         MATE.log_debug("Widget id: " + id);
         Widget widget = new Widget(id, clazz, idByActivity);
 
-        String res = node.getViewIdResourceName();
-        if (res==null)
-            res="";
-        MATE.log_debug("Resource name: " + res);
+        String res = Objects.toString(node.getViewIdResourceName(), "");
         widget.setResourceID(res);
+        MATE.log_debug("Resource name: " + res);
 
         widget.setParent(parent);
         widget.setText(text);
         widget.setEnabled(node.isEnabled());
 
-        String widgetPackageName = packageName;
-
-        if (node.getPackageName() != null)
-            widgetPackageName = node.getPackageName().toString();
-
-        MATE.log_debug("Node Package name: " + widgetPackageName);
+        String widgetPackageName = Objects.toString(node.getPackageName(), packageName);
         widget.setPackageName(widgetPackageName);
 
         // define the widget border
@@ -250,12 +235,14 @@ public class AppScreen {
             return null;
         }
 
+        // FIXME: it seems like there is no way to retrieve the widget index from the node object
+        widget.setIndex(0);
+
         widget.setCheckable(node.isCheckable());
         widget.setChecked(node.isChecked());
         widget.setClickable(node.isClickable());
         widget.setFocusable(node.isFocusable());
-        widget.setHasChildren(node.getChildCount()!=0);
-        widget.setIndex(0);
+        widget.setHasChildren(node.getChildCount() != 0);
         widget.setLongClickable(node.isLongClickable());
         widget.setPassword(false);
         widget.setScrollable(node.isScrollable());
@@ -265,85 +252,95 @@ public class AppScreen {
         widget.setVisibleToUser(node.isVisibleToUser());
         widget.setAccessibilityFocused(node.isAccessibilityFocused());
 
-        String contentDesc = "";
-        if (node.getContentDescription() != null)
-            contentDesc = node.getContentDescription().toString();
+        String contentDesc = Objects.toString(node.getContentDescription(), "");
         widget.setContentDesc(contentDesc);
 
-        String textError = "";
-        if (node.getError()!=null)
-            textError=node.getError().toString();
+        String textError = Objects.toString(node.getError(), "");
         widget.setErrorText(textError);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             widget.setImportantForAccessibility(node.isImportantForAccessibility());
-        }
-        else
+        } else {
             widget.setImportantForAccessibility(true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             widget.setScreenReaderFocusable(node.isScreenReaderFocusable());
-        }
-        else
+        } else {
             widget.setScreenReaderFocusable(true);
+        }
 
         AccessibilityNodeInfo.CollectionItemInfo cinfo = node.getCollectionItemInfo();
-        if (cinfo!=null)
+        if (cinfo != null) {
             widget.setHeading(cinfo.isHeading());
-        else
+        } else {
             widget.setHeading(false);
+        }
 
         AccessibilityNodeInfo lf = node.getLabelFor();
-        if (lf!=null){
-            String lfstr = lf.getViewIdResourceName();
-            if (lfstr==null)
-                lfstr="";
-            widget.setLabelFor(lfstr);
+        String labelFor = "";
+        if (lf != null) {
+            labelFor = Objects.toString(lf.getViewIdResourceName(), "");
         }
-        else
-            widget.setLabelFor("");
+        widget.setLabelFor(labelFor);
 
         AccessibilityNodeInfo lb = node.getLabeledBy();
-        if (lb!=null){
-            String lbstr = lb.getViewIdResourceName();
-            if (lbstr==null)
-                lbstr = "";
-            widget.setLabeledBy(lbstr);
+        String labelBy = "";
+        if (lb != null) {
+            labelBy = Objects.toString(lb.getViewIdResourceName(), "");
         }
-        else widget.setLabeledBy("");
+        widget.setLabeledBy(labelBy);
 
-        if (widget.isEditable()){
+        /*
+        * TODO: we should replace the following code with node.isShowingHintText()
+        *  and node.getHintText() in the future, however this requires min API level 26.
+         */
+        // try to retrieve the hint of a widget
+        if (widget.isEditable()) {
 
             String hint = editTextHints.get(id);
 
-            if (hint==null){
-                UiObject2 uiobject = null;
-                if (widget.getResourceID().equals(""))
-                    uiobject = device.findObject(By.text(widget.getText()));
-                else
-                    uiobject = device.findObject(By.res(id));
-                if (uiobject!=null) {
-                    String textBeforeClear = uiobject.getText();
-                    if (textBeforeClear==null)
-                        textBeforeClear="";
+            if (hint == null) {
 
-                    uiobject.setText("");
-                    String textAfterClear = uiobject.getText();
+                UiObject2 uiObject = null;
 
-                    if (textAfterClear==null)
-                        textAfterClear="";
-                    uiobject.setText(textBeforeClear);
+                if (widget.getResourceID().isEmpty()) {
+                    uiObject = device.findObject(By.text(widget.getText()));
+                } else {
+                    uiObject = device.findObject(By.res(id));
+                }
+
+                if (uiObject != null) {
+
+                    /*
+                    * In order to retrieve the hint of a widget, we have to clear the
+                    * input, and this in turn should display the hint if we are lucky.
+                     */
+
+                    // save original input
+                    String textBeforeClear = Objects.toString(uiObject.getText(), "");
+
+                    // reset input and hope that this causes a hint to be set
+                    uiObject.setText("");
+                    String textAfterClear = Objects.toString(uiObject.getText(), "");
+
+                    // restore original input
+                    uiObject.setText(textBeforeClear);
 
                     hint = textAfterClear;
-                    if (!widget.getResourceID().equals(""))
-                        editTextHints.put(id,hint);
 
-                    if (textAfterClear.equals(textBeforeClear))
-                        uiobject.setText("");
+                    if (!widget.getResourceID().isEmpty()) {
+                        editTextHints.put(id, hint);
+                    }
+
+                    // TODO: I don't understand this check.
+                    if (textAfterClear.equals(textBeforeClear)) {
+                        uiObject.setText("");
+                    }
                 }
             }
-            if (hint==null)
-                hint="";
+
+            hint = Objects.toString(hint, "");
             widget.setHint(hint);
             widget.setContentDesc(hint);
 
@@ -354,12 +351,13 @@ public class AppScreen {
 
         widget.setFocused(node.isFocused());
 
-        if (parent!=null)
+        if (parent != null)
             parent.addChild(widget);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             widget.setContextClickable(node.isContextClickable());
         }
+
         return widget;
     }
 

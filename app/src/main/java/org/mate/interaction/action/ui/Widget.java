@@ -15,15 +15,66 @@ import java.util.Set;
  */
 public class Widget {
 
+    /**
+     * A reference to the parent widget or {@code null}
+     * if it is the root widget.
+     */
     private Widget parent;
+
+    /**
+     * A list of direct descendants.
+     */
+    private List<Widget> children;
+
+    /**
+     * The resource id or a custom representation.
+     * See the method createWidget() of the class {@link org.mate.state.executables.AppScreen#)}.
+     */
     private String id;
+
+    /**
+     * A concatenation of the activity name and the id.
+     * See the method createWidget() of the class {@link org.mate.state.executables.AppScreen#)}.
+     */
     private String idByActivity;
+
+    /**
+     * The widget class name, e.g. android.view.ListView, or the empty string.
+     * See {@link AccessibilityNodeInfo#getClassName()}.
+     */
     private String clazz;
-    private String text;
+
+    /**
+     *  The resource id of the widget or the empty string.
+     *  See {@link AccessibilityNodeInfo#getViewIdResourceName()}.
+     */
     private String resourceID;
+
+    /**
+     * The index of the widget in the ui hierarchy. Currently,
+     * the index is not set properly.
+     */
+    @Deprecated
     private int index;
+
+    /**
+     * Only set if the widget stores a text, e.g. the text of an input box, otherwise the empty string.
+     * See {@link AccessibilityNodeInfo#getText()}.
+     */
+    private String text;
+
+    /**
+     * The package name the widget is referring to.
+     * See {@link AccessibilityNodeInfo#getPackageName()}.
+     */
     private String packageName;
+
+    /**
+     * A possible content description of the widget, otherwise the empty string.
+     * See {@link AccessibilityNodeInfo#getContentDescription()}.
+     */
     private String contentDesc;
+
     private String labeledBy;
     private boolean showingHintText;
     private String color;
@@ -72,14 +123,9 @@ public class Widget {
 
     private int maxLength;
     private boolean screenReaderFocusable;
-
     private int inputType;
     private boolean hasChildren;
-
-    private List<Widget> children;
-
     private boolean usedAsStateDiff;
-
     private String hint;
     private boolean heading;
 
@@ -187,10 +233,22 @@ public class Widget {
         this.clazz = clazz;
     }
 
+    /**
+     * Returns the index of the widget in the ui hierarchy.
+     *
+     * @return Returns the widget's index.
+     */
+    @Deprecated
     public int getIndex() {
         return index;
     }
 
+    /**
+     * Sets the widget's index.
+     *
+     * @param index The new index.
+     */
+    @Deprecated
     public void setIndex(int index) {
         this.index = index;
     }
