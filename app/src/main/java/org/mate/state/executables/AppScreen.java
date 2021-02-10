@@ -18,6 +18,7 @@ import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -292,7 +293,7 @@ public class AppScreen {
         widget.setLabeledBy(labelBy);
 
         /*
-        * TODO: we should replace the following code with node.isShowingHintText()
+        * TODO: We should replace the following code with node.isShowingHintText()
         *  and node.getHintText() in the future, however this requires min API level 26.
          */
         // try to retrieve the hint of a widget
@@ -381,39 +382,70 @@ public class AppScreen {
         return resourceId;
     }
 
+    /**
+     * Returns the activity name that app screen corresponds to.
+     *
+     * @return Returns the activity name.
+     */
     public String getActivityName() {
         return activityName;
     }
 
+    /**
+     * Returns the widgets linked to the app screen.
+     *
+     * @return Returns the widgets of the app screen.
+     */
     public List<Widget> getWidgets(){
-        return widgets;
+        return Collections.unmodifiableList(widgets);
     }
 
+    /**
+     * Returns the package name the app screens corresponds to.
+     *
+     * @return Returns the package name.
+     */
     public String getPackageName() {
         return packageName;
     }
 
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
-    }
-
+    /**
+     * Whether scrolling up (wipe) is necessary to reach some widget on the app screen.
+     *
+     * @return Returns {@code true} if some widget is outside of visibility,
+     *          otherwise {@code false} is returned.
+     */
     public boolean isHasToScrollUp() {
         return hasToScrollUp;
     }
 
+    /**
+     * Whether scrolling down (wipe) is necessary to reach some widget on the app screen.
+     *
+     * @return Returns {@code true} if some widget is outside of visibility,
+     *          otherwise {@code false} is returned.
+     */
     public boolean isHasToScrollDown() {
         return hasToScrollDown;
     }
 
+    /**
+     * Whether scrolling left (wipe) is necessary to reach some widget on the app screen.
+     *
+     * @return Returns {@code true} if some widget is outside of visibility,
+     *          otherwise {@code false} is returned.
+     */
     public boolean isHasToScrollLeft() {
         return hasToScrollLeft;
     }
 
+    /**
+     * Whether scrolling right (wipe) is necessary to reach some widget on the app screen.
+     *
+     * @return Returns {@code true} if some widget is outside of visibility,
+     *          otherwise {@code false} is returned.
+     */
     public boolean isHasToScrollRight() {
         return hasToScrollRight;
-    }
-
-    public AccessibilityNodeInfo getRootNodeInfo(){
-        return this.rootNodeInfo;
     }
 }
