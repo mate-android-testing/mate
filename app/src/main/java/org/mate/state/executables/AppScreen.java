@@ -448,4 +448,41 @@ public class AppScreen {
     public boolean isHasToScrollRight() {
         return hasToScrollRight;
     }
+
+    /**
+     * Compares two app screens for equality.
+     *
+     * @param o The other app screen to compare against.
+     * @return Returns {@code true} if the two app screens are identical,
+     *          otherwise {@code false} is returned.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            AppScreen appScreen = (AppScreen) o;
+            // TODO: check whether comparing those boolean flags is desired
+            return hasToScrollUp == appScreen.hasToScrollUp &&
+                    hasToScrollDown == appScreen.hasToScrollDown &&
+                    hasToScrollLeft == appScreen.hasToScrollLeft &&
+                    hasToScrollRight == appScreen.hasToScrollRight &&
+                    Objects.equals(activityName, appScreen.activityName) &&
+                    Objects.equals(packageName, appScreen.packageName) &&
+                    Objects.equals(widgets, appScreen.widgets);
+        }
+    }
+
+    /**
+     * Returns the hash code of this app screen.
+     *
+     * @return Returns the hash code.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(activityName, packageName, widgets, hasToScrollUp,
+                hasToScrollDown, hasToScrollLeft, hasToScrollRight);
+    }
 }

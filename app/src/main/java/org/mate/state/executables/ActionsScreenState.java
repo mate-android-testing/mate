@@ -272,98 +272,116 @@ public class ActionsScreenState extends AbstractScreenState {
         return executables;
     }
 
-     //Todo: add hashcode method
+    /**
+     * Returns the hash code of this screen state.
+     *
+     * @return Returns the hash code.
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(actions, appScreen);
+        // TODO: adjust hash code according to equals()
+        return Objects.hash(actions);
     }
 
+    /**
+     * Compares two screen states for equality.
+     *
+     * @param o The other screen state to compare against.
+     * @return Returns {@code true} if the two screen states are identical,
+     *          otherwise {@code false} is returned.
+     */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ActionsScreenState that = (ActionsScreenState) o;
-
-        if (!this.activityName.equals(that.getActivityName())){
-            //MATE.log_acc("Strobe 1: State "+this.id+"different from State: "+object.getId());
-            return false;
-        }
-
-
-        if (!this.packageName.equals(that.getPackageName())){
-            //MATE.log_acc("Strobe 2: State "+this.id+"different from State: "+object.getId());
-            return false;
-        }
-
-
-        ActionsScreenState screenState = (ActionsScreenState) that;
-
-        List<WidgetAction> actionsThis = this.getActions();
-        List<WidgetAction> actionsOther = screenState.getActions();
-
-        List<String> setActThis = new ArrayList<>();
-        List<String> setActOther = new ArrayList<>();
-        for (WidgetAction act: actionsThis) {
-            if (act.getWidget()!=null) {
-                if (act.getWidget().getClazz().contains("Button"))
-                    setActThis.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
-                else
-                    setActThis.add(act.getWidget().getId() + "-" + act.getActionType());
-            }
-
-        }
-        for (WidgetAction act: actionsOther) {
-            if (act.getWidget()!=null) {
-                if (act.getWidget().getClazz().contains("Button"))
-                    setActOther.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
-                else
-                    setActOther.add(act.getWidget().getId() + "-" + act.getActionType());
-            }
-        }
-
-        if (setActThis.size()==setActOther.size()){
-
-            for (String strActThis: setActThis){
-                if (!setActOther.contains(strActThis)) {
-                    //MATE.log_acc("Strobe 3: State "+this.id+"different from State: "+object.getId());
-                    return false;
-                }
-            }
-
-            Map<String, Widget> editablesThis = this.getEditableWidgets();
-            Map<String, Widget> editablesOther = screenState.getEditableWidgets();
-
-            for (Widget wdgThis: editablesThis.values()){
-
-                Widget wdgOther = editablesOther.get(wdgThis.getId());
-                if (wdgOther==null) {
-                    //MATE.log_acc("Strobe 4 State "+this.id+"different from State: "+object.getId());
-                    return false;
-                }
-
-
-                if (wdgOther.isEmpty() != wdgThis.isEmpty()) {
-                    //MATE.log_acc("Strobe 5: State "+this.id+"different from State: "+object.getId());
-                    return false;
-                }
-            }
-
-
-            //as for the checkables it considers two GUIs equals if they have the same objects checked
-            Map<String,Widget> checkablesThis = this.getCheckableWidgets();
-            Map<String,Widget> checkablesOther = screenState.getCheckableWidgets();
-            for (Widget wdgThis: checkablesThis.values()){
-                Widget wdgOther = checkablesOther.get(wdgThis.getId());
-                if (wdgOther==null)
-                    return false;
-                if (wdgOther.isChecked()!=wdgThis.isChecked())
-                    return false;
-            }
-
-
+        if (this == o) {
             return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+
+            /*
+             * TODO: We should review the comparison of two screen states. The check highly
+             *  depends on the underlying model we intend to use. If we want a very fine granulated
+             *  comparison, we could simply use equals() of the AppScreen and WidgetAction class.
+             *  Otherwise, we need to build the comparison on our own.
+             */
+            ActionsScreenState that = (ActionsScreenState) o;
+
+            if (!this.activityName.equals(that.getActivityName())) {
+                //MATE.log_acc("Strobe 1: State "+this.id+"different from State: "+object.getId());
+                return false;
+            }
+
+            if (!this.packageName.equals(that.getPackageName())) {
+                //MATE.log_acc("Strobe 2: State "+this.id+"different from State: "+object.getId());
+                return false;
+            }
+
+            ActionsScreenState screenState = (ActionsScreenState) that;
+
+            List<WidgetAction> actionsThis = this.getActions();
+            List<WidgetAction> actionsOther = screenState.getActions();
+
+            List<String> setActThis = new ArrayList<>();
+            List<String> setActOther = new ArrayList<>();
+
+            for (WidgetAction act : actionsThis) {
+                if (act.getWidget() != null) {
+                    if (act.getWidget().getClazz().contains("Button"))
+                        setActThis.add(act.getWidget().getId() + "-" + act.getActionType() + "-" + act.getWidget().getText());
+                    else
+                        setActThis.add(act.getWidget().getId() + "-" + act.getActionType());
+                }
+            }
+
+            for (WidgetAction act : actionsOther) {
+                if (act.getWidget() != null) {
+                    if (act.getWidget().getClazz().contains("Button"))
+                        setActOther.add(act.getWidget().getId() + "-" + act.getActionType() + "-" + act.getWidget().getText());
+                    else
+                        setActOther.add(act.getWidget().getId() + "-" + act.getActionType());
+                }
+            }
+
+            if (setActThis.size() == setActOther.size()) {
+
+                for (String strActThis : setActThis) {
+                    if (!setActOther.contains(strActThis)) {
+                        //MATE.log_acc("Strobe 3: State "+this.id+"different from State: "+object.getId());
+                        return false;
+                    }
+                }
+
+                Map<String, Widget> editablesThis = this.getEditableWidgets();
+                Map<String, Widget> editablesOther = screenState.getEditableWidgets();
+
+                for (Widget wdgThis : editablesThis.values()) {
+
+                    Widget wdgOther = editablesOther.get(wdgThis.getId());
+                    if (wdgOther == null) {
+                        //MATE.log_acc("Strobe 4 State "+this.id+"different from State: "+object.getId());
+                        return false;
+                    }
+
+                    if (wdgOther.isEmpty() != wdgThis.isEmpty()) {
+                        //MATE.log_acc("Strobe 5: State "+this.id+"different from State: "+object.getId());
+                        return false;
+                    }
+                }
+
+                //as for the checkables it considers two GUIs equals if they have the same objects checked
+                Map<String, Widget> checkablesThis = this.getCheckableWidgets();
+                Map<String, Widget> checkablesOther = screenState.getCheckableWidgets();
+                for (Widget wdgThis : checkablesThis.values()) {
+                    Widget wdgOther = checkablesOther.get(wdgThis.getId());
+                    if (wdgOther == null)
+                        return false;
+                    if (wdgOther.isChecked() != wdgThis.isChecked())
+                        return false;
+                }
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     /**
