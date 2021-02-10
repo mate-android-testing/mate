@@ -29,6 +29,8 @@ import org.mate.utils.Utils;
 import java.util.List;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
+import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
  * Created by marceloeler on 08/03/17.
@@ -185,16 +187,10 @@ public class DeviceMgr {
                 handleClear(selectedWidget);
                 break;
             case SWIPE_DOWN:
-                handleSwipe(selectedWidget, 0);
-                break;
             case SWIPE_UP:
-                handleSwipe(selectedWidget, 1);
-                break;
             case SWIPE_LEFT:
-                handleSwipe(selectedWidget, 2);
-                break;
             case SWIPE_RIGHT:
-                handleSwipe(selectedWidget, 3);
+                handleSwipe(selectedWidget, typeOfAction);
                 break;
             case BACK:
                 device.pressBack();
@@ -314,7 +310,7 @@ public class DeviceMgr {
      * @param widget The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
-    private void handleSwipe(Widget widget, int direction) {
+    private void handleSwipe(Widget widget, ActionType direction) {
 
         int pixelsmove = 300;
         int X = 0;
@@ -333,7 +329,7 @@ public class DeviceMgr {
         } else {
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
-            if (direction == 0 || direction == 1)
+            if (direction == SWIPE_DOWN || direction == SWIPE_UP)
                 pixelsmove = Y;
             else
                 pixelsmove = X;
@@ -341,16 +337,16 @@ public class DeviceMgr {
 
         // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
-            case 0:
+            case SWIPE_DOWN:
                 device.swipe(X, Y, X, Y - pixelsmove, steps);
                 break;
-            case 1:
+            case SWIPE_UP:
                 device.swipe(X, Y, X, Y + pixelsmove, steps);
                 break;
-            case 2:
+            case SWIPE_LEFT:
                 device.swipe(X, Y, X + pixelsmove, Y, steps);
                 break;
-            case 3:
+            case SWIPE_RIGHT:
                 device.swipe(X, Y, X - pixelsmove, Y, steps);
                 break;
         }
