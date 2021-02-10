@@ -13,11 +13,11 @@ import java.util.List;
 @Deprecated
 public interface IGUIModel {
 
-    public void moveToState(IScreenState screenState) throws InvalidScreenStateException;
-    public boolean updateModel(WidgetAction event, IScreenState screenState);
-    public String getCurrentStateId();
-    public IScreenState getStateById(String id);
-    public List<List<Action>> pathFromTo(String source, String target);
-    public List<IScreenState> getStates();
+    void moveToState(IScreenState screenState) throws InvalidScreenStateException;
+    boolean updateModel(WidgetAction event, IScreenState screenState);
+    String getCurrentStateId();
+    IScreenState getStateById(String id);
+    List<List<Action>> pathFromTo(String source, String target);
+    List<IScreenState> getStates();
 
 }
