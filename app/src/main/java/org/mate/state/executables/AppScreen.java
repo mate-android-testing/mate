@@ -94,16 +94,7 @@ public class AppScreen {
                 .getUiAutomation().getRootInActiveWindow();
 
         if (nodeInfo == null) {
-            MATE.log("APP DISCONNECTED");
-
-            // TODO: what is this?
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getInstrumentation().getContext());
-            if (prefs.getBoolean("isServiceEnabled", false)) {
-                MATE.log("ACCSERVICE FALSE");
-            } else {
-                MATE.log("ACCSERVICE TRUE");
-            }
-
+            MATE.log_acc("APP DISCONNECTED");
             // TODO: try to reconnect
         }
 
@@ -126,7 +117,7 @@ public class AppScreen {
 
             try {
                 widget = createWidget(node, parent, activityName);
-            } catch(StaleObjectException e){
+            } catch(StaleObjectException e) {
                 MATE.log_warn("Couldn't extract widget!");
                 e.printStackTrace();
             }
@@ -188,35 +179,30 @@ public class AppScreen {
         widget.setBounds(rec);
         MATE.log_debug("Widget boundaries: " + rec.toShortString());
 
-        int x1 = widget.getX1();
-        int x2 = widget.getX2();
-        int y1 = widget.getY1();
-        int y2 = widget.getY2();
-
         /*
         * The following checks verify whether the widget is outside of visibility.
         * Note that the point (0,0) is the left top corner. If so, the widget is
         * ignored.
          */
-        if (x1 < 0 || x2 < 0) {
+        if (widget.getX1() < 0 || widget.getX2() < 0) {
             MATE.log_debug("Widget outside of visibility: " + widget.getBounds().toShortString());
             this.hasToScrollLeft = true;
             return null;
         }
 
-        if (x2 > device.getDisplayWidth() || x1 > device.getDisplayWidth()) {
+        if (widget.getX1() > device.getDisplayWidth() || widget.getX2() > device.getDisplayWidth()) {
             MATE.log_debug("Widget outside of visibility: " + widget.getBounds().toShortString());
             this.hasToScrollRight = true;
             return null;
         }
 
-        if (y1 < 0 || y2 < 0) {
+        if (widget.getY1() < 0 || widget.getY2() < 0) {
             MATE.log_debug("Widget outside of visibility: " + widget.getBounds().toShortString());
             this.hasToScrollUp = true;
             return null;
         }
 
-        if (y2 > device.getDisplayHeight() || y1 > device.getDisplayHeight()) {
+        if (widget.getY1() > device.getDisplayHeight() || widget.getY2() > device.getDisplayHeight()) {
             MATE.log_debug("Widget outside of visibility: " + widget.getBounds().toShortString());
             this.hasToScrollDown = true;
             return null;
