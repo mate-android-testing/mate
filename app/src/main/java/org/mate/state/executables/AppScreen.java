@@ -223,7 +223,6 @@ public class AppScreen {
         }
 
         // FIXME: it seems like there is no way to retrieve the widget index from the node object
-        MATE.log_debug("Widget window id: " + node.getWindowId());
         widget.setIndex(0);
 
         widget.setCheckable(node.isCheckable());
