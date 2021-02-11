@@ -252,6 +252,9 @@ public class DeviceMgr {
             case TOGGLE_ROTATION:
                 Registry.getEnvironmentManager().toggleRotation();
                 break;
+            case MANUAL_ACTION:
+                // simulates a manual user interaction
+                break;
         }
 
         // if there is a progress bar associated to that action

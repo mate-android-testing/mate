@@ -179,7 +179,7 @@ public class AppScreen {
 
         String res = Objects.toString(node.getViewIdResourceName(), "");
         widget.setResourceID(res);
-        MATE.log_debug("Resource name: " + res);
+        MATE.log_debug("Widget resource name: " + res);
 
         widget.setParent(parent);
         widget.setText(text);
@@ -237,6 +237,7 @@ public class AppScreen {
         }
 
         // FIXME: it seems like there is no way to retrieve the widget index from the node object
+        MATE.log_debug("Widget window id: " + node.getWindowId());
         widget.setIndex(0);
 
         widget.setCheckable(node.isCheckable());
