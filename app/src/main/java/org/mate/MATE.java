@@ -73,6 +73,9 @@ public class MATE {
         
         device = UiDevice.getInstance(getInstrumentation());
 
+        MATE.log_debug("Display width: " + device.getDisplayWidth());
+        MATE.log_debug("Display height: " + device.getDisplayHeight());
+
         // checks whether user needs to authorize access to something on the device/emulator
         UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
 

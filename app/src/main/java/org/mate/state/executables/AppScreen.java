@@ -83,8 +83,6 @@ public class AppScreen {
 
         this.widgets = new ArrayList<>();
         this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
-        MATE.log_debug("Current activity name: " + activityName);
-        MATE.log_debug("Current package name: " + device.getCurrentPackageName());
 
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();
@@ -100,7 +98,7 @@ public class AppScreen {
 
             // TODO: what is this?
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getInstrumentation().getContext());
-            if (prefs.getBoolean("isServiceEnabled", false)){
+            if (prefs.getBoolean("isServiceEnabled", false)) {
                 MATE.log("ACCSERVICE FALSE");
             } else {
                 MATE.log("ACCSERVICE TRUE");
@@ -134,10 +132,6 @@ public class AppScreen {
             }
 
             if (widget != null) {
-                MATE.log_debug("Node package: " + node.getPackageName());
-                MATE.log_debug("Node id: " + node.getViewIdResourceName());
-                MATE.log_debug("Node actions: " + node.getActionList());
-                MATE.log_debug("Node content description: " + node.getContentDescription());
                 widgets.add(widget);
             }
 
@@ -198,14 +192,6 @@ public class AppScreen {
         int x2 = widget.getX2();
         int y1 = widget.getY1();
         int y2 = widget.getY2();
-
-        MATE.log_debug("Widget x1: " + x1);
-        MATE.log_debug("Widget x2: " + x2);
-        MATE.log_debug("Widget y1: " + y1);
-        MATE.log_debug("Widget y2: " + y2);
-
-        MATE.log_debug("Display width: " + device.getDisplayWidth());
-        MATE.log_debug("Display height: " + device.getDisplayHeight());
 
         /*
         * The following checks verify whether the widget is outside of visibility.
