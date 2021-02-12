@@ -11,6 +11,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.mate.exploration.Algorithm;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.IGUIModel;
@@ -144,6 +145,9 @@ public class MATE {
             MATE.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
         }
+
+        MATE.log_acc("[GE] bias percentage: " + Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND() * 100 / AndroidListBasedBiasedMapping.BIAS_100_PERCENT);
+        MATE.log_acc("[GE] sequence length: " + Properties.GE_SEQUENCE_LENGTH());
 
         runningTime = new Date().getTime();
 
