@@ -10,11 +10,13 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
-import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.IGUIModel;
+import org.mate.model.fsm.FSMModel;
+import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
 import org.mate.utils.Utils;
 
@@ -41,6 +43,8 @@ public class UIAbstractionLayer {
     private IScreenState lastScreenState;
     private int screenStateEnumeration;
 
+    private IGUIModel guiModel;
+
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
@@ -49,6 +53,8 @@ public class UIAbstractionLayer {
         lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         lastScreenState.setId("S0");
         screenStateEnumeration = 1;
+
+        guiModel = new FSMModel(lastScreenState);
     }
 
     /**
@@ -119,6 +125,7 @@ public class UIAbstractionLayer {
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
             edges.put(action, new Edge(action, lastScreenState, state));
+            guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
 
             return FAILURE_APP_CRASH;
@@ -158,27 +165,18 @@ public class UIAbstractionLayer {
             // TODO: what to do when the emulator crashes?
         }
 
+        // update gui model
+        state = toRecordedScreenState(state);
+        edges.put(action, new Edge(action, lastScreenState, state));
+        guiModel.update(lastScreenState, state, action);
+        lastScreenState = state;
+
         // check whether the package of the app currently running is from the app under test
-        // if it is not, restart app
+        // if it is not, this causes a restart of the app
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log("current package different from app package: " + currentPackageName);
-
-            state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, lastScreenState, state));
-            lastScreenState = state;
-
             return SUCCESS_OUTBOUND;
         } else {
-            // update model with new state
-            state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, lastScreenState, state));
-            lastScreenState = state;
-
-            /* Ignore this for now
-            if (edges.put(action, state)) {
-                MATE.log("New State found:" + state.getId());
-                return SUCCESS_NEW_STATE;
-            }*/
             return SUCCESS;
         }
     }
@@ -364,7 +362,12 @@ public class UIAbstractionLayer {
         return edges.get(action);
     }
 
-    public List<IScreenState> getRecordedScreenStates() {
+    /**
+     * Returns the list of recorded (distinct) screen states.
+     *
+     * @return Returns the list of recorded screen states.
+     */
+    private List<IScreenState> getRecordedScreenStates() {
         List<IScreenState> screenStates = new ArrayList<>();
         for (Edge edge : edges.values()) {
             if (!screenStates.contains(edge.source)) {
@@ -377,8 +380,16 @@ public class UIAbstractionLayer {
         return screenStates;
     }
 
-
-    public IScreenState toRecordedScreenState(IScreenState screenState) {
+    /**
+     * Checks whether the given screen state has been recorded earlier. If this is
+     * the case, the recorded screen state is returned, otherwise the screen state
+     * gets a new id assigned and is returned.
+     *
+     * @param screenState The given screen state.
+     * @return Returns the recorded screen state, i.e. a screen state assigned
+     *          with an id.
+     */
+    private IScreenState toRecordedScreenState(IScreenState screenState) {
         List<IScreenState> recordedScreenStates = getRecordedScreenStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
             if (recordedScreenState.equals(screenState)) {
@@ -390,6 +401,13 @@ public class UIAbstractionLayer {
         return screenState;
     }
 
+    /**
+     * Checks whether the screen state is new.
+     *
+     * @param screenState The screen state to check whether it is new.
+     * @return Returns {@code} if the screen state has not been recorded,
+     *          otherwise {@code} false is returned.
+     */
     public boolean checkIfNewState(IScreenState screenState) {
         List<IScreenState> recordedScreenStates = getRecordedScreenStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
@@ -398,16 +416,6 @@ public class UIAbstractionLayer {
             }
         }
         return true;
-    }
-
-    public IScreenState getStateFromModel(IScreenState screenState) {
-        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
-        for (IScreenState recordedScreenState : recordedScreenStates) {
-            if (recordedScreenState.equals(screenState)) {
-                return recordedScreenState;
-            }
-        }
-        return null;
     }
 
     /**
