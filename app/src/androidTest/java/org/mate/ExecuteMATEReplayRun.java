@@ -41,9 +41,6 @@ public class ExecuteMATEReplayRun {
         // reset the app once
         uiAbstractionLayer.resetApp();
 
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
-
         // as long as we find a test case for replaying
         while (testCase != null) {
 
@@ -68,9 +65,6 @@ public class ExecuteMATEReplayRun {
 
             // reset aut after each test case
             uiAbstractionLayer.resetApp();
-
-            // grant runtime permissions (read/write external storage) which are dropped after each reset
-            Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
         }
 
         MATE.log("Retry replaying " + failures.size() + " test cases!");
@@ -102,9 +96,6 @@ public class ExecuteMATEReplayRun {
 
                 // reset aut after each test case
                 uiAbstractionLayer.resetApp();
-
-                // grant runtime permissions (read/write external storage) which are dropped after each reset
-                Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
             }
         }
 

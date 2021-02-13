@@ -556,6 +556,10 @@ public class DeviceMgr {
     public void reinstallApp() {
         MATE.log("Reinstall app");
         Registry.getEnvironmentManager().clearAppData();
+
+        // grant runtime permissions (read/write external storage) which are dropped after each reset
+        MATE.log("Grant runtime permissions: "
+                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
         //sleep(1000);
     }
 
