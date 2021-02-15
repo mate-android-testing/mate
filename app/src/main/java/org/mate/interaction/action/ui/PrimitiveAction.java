@@ -60,4 +60,10 @@ public class PrimitiveAction extends Action {
     public String toString() {
         return "primitive action: " + actionType + " at (" + x + "," + y + ")";
     }
+
+    @NonNull
+    @Override
+    public String toShortString() {
+        return actionType + " at (" + x + "," + y + ")";
+    }
 }

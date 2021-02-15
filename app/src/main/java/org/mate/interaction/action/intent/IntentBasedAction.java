@@ -102,4 +102,14 @@ public class IntentBasedAction extends Action {
     public int hashCode() {
         return Objects.hash(intent);
     }
+
+    @NonNull
+    @Override
+    public String toShortString() {
+        if (intent.getAction() != null) {
+            return intent.getAction();
+        } else {
+            return "INTENT_WITHOUT_ACTION";
+        }
+    }
 }

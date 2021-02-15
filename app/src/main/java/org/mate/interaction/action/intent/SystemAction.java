@@ -93,4 +93,10 @@ public class SystemAction extends Action {
     public int hashCode() {
         return Objects.hash(receiver, dynamic, action);
     }
+
+    @NonNull
+    @Override
+    public String toShortString() {
+        return action;
+    }
 }

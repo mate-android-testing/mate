@@ -241,4 +241,14 @@ public class WidgetAction extends Action {
 
         return representation;
     }
+
+    @NonNull
+    @Override
+    public String toShortString() {
+        if (!widget.getId().isEmpty()) {
+            return actionType + "(" + widget.getId() + ")";
+        } else {
+            return String.valueOf(actionType);
+        }
+    }
 }

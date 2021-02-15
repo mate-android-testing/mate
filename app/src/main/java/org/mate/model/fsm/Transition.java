@@ -51,7 +51,7 @@ public class Transition {
     @NonNull
     @Override
     public String toString() {
-        return source + " -> " + target;
+        return "(" + source + ", " + action.toShortString() + ", " + target + ")";
     }
 }
 
