@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LineCoverageFitnessFunction<T> implements IFitnessFunction<T> {
-    public static final String FITNESS_FUNCTION_ID = "line_coverage_fitness_function";
 
     private final Map<IChromosome<T>, Double> cache;
 

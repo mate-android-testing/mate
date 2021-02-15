@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
@@ -32,7 +32,7 @@ public class ExecuteMATEOnePlusOne {
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                .withFitnessFunction(BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID)
+                .withFitnessFunction(FitnessFunction.BRANCH_DISTANCE)
                 .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .build();

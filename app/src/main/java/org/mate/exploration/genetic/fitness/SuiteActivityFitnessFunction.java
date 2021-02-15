@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SuiteActivityFitnessFunction implements IFitnessFunction<TestSuite> {
-    public static final String FITNESS_FUNCTION_ID = "suite_fitness_function";
 
     @Override
     public double getFitness(IChromosome<TestSuite> chromosome) {

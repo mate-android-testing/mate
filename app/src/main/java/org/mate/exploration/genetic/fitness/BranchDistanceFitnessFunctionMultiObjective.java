@@ -16,8 +16,6 @@ import java.util.Map;
  */
 public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessFunction<T> {
 
-    public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function_multi_objective";
-
     // a cache that stores for each branch the set of test cases and its fitness value
     private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
 

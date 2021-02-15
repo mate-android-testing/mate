@@ -236,7 +236,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/copy_fitness_data")
                 .withParameter("deviceId", emulator)
-                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION())
+                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
                 .withParameter("chromosome_src", sourceChromosome.toString())
                 .withParameter("chromosome_target", targetChromosome.toString())
                 .withParameter("entities", sb.toString());
@@ -495,7 +495,7 @@ public class EnvironmentManager {
         coveredTestCases.add(testcase);
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/store_fitness_data")
-                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION())
+                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosome", chromosomeId);

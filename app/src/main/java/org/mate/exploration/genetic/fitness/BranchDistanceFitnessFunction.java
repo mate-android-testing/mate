@@ -10,8 +10,6 @@ import java.util.Map;
 
 public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
-    public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function";
-
     private Map<IChromosome<T>, Double> cache = new HashMap<>();
 
     /**

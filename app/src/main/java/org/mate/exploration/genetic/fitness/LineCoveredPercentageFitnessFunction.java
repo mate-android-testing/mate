@@ -10,8 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This fitness function is only supposed to work a multi/many-objective algorithm
+ * like MOSA or MIO.
+ */
 public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<TestCase> {
-    public static final String FITNESS_FUNCTION_ID = "line_covered_percentage_fitness_function";
 
     //todo: find better solution than static map... (i know its ugly)
     private static final Map<String, Map<IChromosome<TestCase>, Double>> cache = new HashMap<>();

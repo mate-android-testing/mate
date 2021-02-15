@@ -5,7 +5,6 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 
 public class AmountCrashesFitnessFunction implements IFitnessFunction<TestSuite> {
-    public static final String FITNESS_FUNCTION_ID = "amount_crashes_fitness_function";
 
     @Override
     public double getFitness(IChromosome<TestSuite> chromosome) {

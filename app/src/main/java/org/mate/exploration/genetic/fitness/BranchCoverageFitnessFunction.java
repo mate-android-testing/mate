@@ -6,8 +6,6 @@ import org.mate.utils.FitnessUtils;
 
 public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
-    public static final String FITNESS_FUNCTION_ID = "branch_coverage_fitness_function";
-
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 

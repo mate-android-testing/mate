@@ -9,8 +9,7 @@ import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
-import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
@@ -33,8 +32,8 @@ public class ExecuteMATENSGAII {
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                .withFitnessFunction(ActivityFitnessFunction.FITNESS_FUNCTION_ID)
-                .withFitnessFunction(AndroidStateFitnessFunction.FITNESS_FUNCTION_ID)
+                .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
+                .withFitnessFunction(FitnessFunction.NUMBER_OF_STATES)
                 .withTerminationCondition(IterTerminationCondition.TERMINATION_CONDITION_ID)
                 .build();
 

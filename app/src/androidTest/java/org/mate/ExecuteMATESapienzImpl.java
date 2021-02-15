@@ -9,9 +9,7 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
-import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
-import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
-import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
@@ -35,9 +33,9 @@ public class ExecuteMATESapienzImpl {
                 .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
                 .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
                 .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
-                .withFitnessFunction(LineCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                .withFitnessFunction(AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID)
-                .withFitnessFunction(TestLengthFitnessFunction.FITNESS_FUNCTION_ID)
+                .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
+                .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
+                .withFitnessFunction(FitnessFunction.TEST_LENGTH)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())

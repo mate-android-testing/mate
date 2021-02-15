@@ -23,6 +23,7 @@ import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
@@ -298,51 +299,49 @@ public class GeneticAlgorithmProvider {
     }
 
     private <T> IFitnessFunction<T> initializeFitnessFunction(int index) {
+
         String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
                 .FITNESS_FUNCTION_KEY_FORMAT, index);
         String fitnessFunctionId = properties.getProperty(key);
 
-        switch (fitnessFunctionId) {
-            case AndroidStateFitnessFunction.FITNESS_FUNCTION_ID:
-                // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new AndroidStateFitnessFunction();
-            case ActivityFitnessFunction.FITNESS_FUNCTION_ID:
+        switch (FitnessFunction.valueOf(fitnessFunctionId)) {
+            case NUMBER_OF_ACTIVITIES:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new ActivityFitnessFunction();
-            case SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID:
+            case NUMBER_OF_ACTIVITIES_TEST_SUITES:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new SuiteActivityFitnessFunction();
+            case NUMBER_OF_CRASHES:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new AmountCrashesFitnessFunction();
+            case NUMBER_OF_STATES:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new AndroidStateFitnessFunction();
+            case COVERED_SPECIFIC_ACTIVITY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
-            case AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID:
+            case TEST_LENGTH:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IFitnessFunction<T>)
-                        new AmountCrashesFitnessFunction();
-            case TestLengthFitnessFunction.FITNESS_FUNCTION_ID:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>)
-                        new TestLengthFitnessFunction();
-            case SuiteActivityFitnessFunction.FITNESS_FUNCTION_ID:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>)
-                        new SuiteActivityFitnessFunction();
-            case LineCoverageFitnessFunction.FITNESS_FUNCTION_ID:
+                return (IFitnessFunction<T>) new TestLengthFitnessFunction();
+            case BRANCH_COVERAGE:
+                return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
+            case BRANCH_DISTANCE:
+                return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
+            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                return (IFitnessFunction<T>) new BranchDistanceFitnessFunctionMultiObjective(getFitnessFunctionArgument(index));
+            case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
-            case LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID:
+            case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
-            case BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID:
-                return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
-            case BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID:
-                return (IFitnessFunction<T>) new BranchDistanceFitnessFunctionMultiObjective(getFitnessFunctionArgument(index));
-            case BranchCoverageFitnessFunction.FITNESS_FUNCTION_ID:
-                return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

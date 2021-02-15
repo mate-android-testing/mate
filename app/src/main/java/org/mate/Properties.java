@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.graph.GraphType;
 import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
@@ -145,8 +146,7 @@ public class Properties {
         return propertyOr(10);
     }
 
-    // TODO: make use of an enum
-    public static String FITNESS_FUNCTION() {
+    public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
 
@@ -239,6 +239,17 @@ public class Properties {
     public Properties(Map<String, String> properties) {
         store = new HashMap<>();
         readProperties(properties);
+    }
+
+    /**
+     * Overrides a given property.
+     *
+     * @param key The property name.
+     * @param value The value for the property.
+     */
+    // TODO: Remove once all properties are enforced via the mate.properties file!
+    public static void setProperty(String key, Object value) {
+        Registry.getProperties().store.put(key, value);
     }
 
     private void readProperties(Map<String, String> properties) {

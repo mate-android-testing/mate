@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.builder;
 
 import org.mate.MATE;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -68,7 +69,7 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId) {
+    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction) {
         int amountFitnessFunctions = Integer.valueOf(
                 properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
         properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY,
@@ -76,11 +77,16 @@ public class GeneticAlgorithmBuilder {
 
         String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT,
                 amountFitnessFunctions);
-        properties.setProperty(key, fitnessFunctionId);
+        properties.setProperty(key, fitnessFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            org.mate.Properties.setProperty("fitness_function", fitnessFunction);
+        }
         return this;
     }
 
-    public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId, String arg1) {
+    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction, String arg1) {
         int amountFitnessFunctions = Integer.valueOf(
                 properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
 
@@ -89,7 +95,7 @@ public class GeneticAlgorithmBuilder {
 
         properties.setProperty(key, arg1);
 
-        withFitnessFunction(fitnessFunctionId);
+        withFitnessFunction(fitnessFunction);
         return this;
     }
 
