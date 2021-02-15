@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 
 import org.mate.interaction.action.Action;
 
+import java.util.Objects;
+
 /**
  * Describes a system event notification that should be broad-casted
  * to a certain receiver component.
@@ -71,5 +73,24 @@ public class SystemAction extends Action {
     @Override
     public String toString() {
         return "system action: act=" + action + " cmp=" + receiver;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            SystemAction that = (SystemAction) o;
+            return dynamic == that.dynamic &&
+                    Objects.equals(receiver, that.receiver) &&
+                    Objects.equals(action, that.action);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(receiver, dynamic, action);
     }
 }

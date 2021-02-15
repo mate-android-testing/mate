@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import org.mate.interaction.action.Action;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class IntentBasedAction extends Action {
@@ -85,5 +86,20 @@ public class IntentBasedAction extends Action {
         return builder.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            IntentBasedAction that = (IntentBasedAction) o;
+            return Objects.equals(intent, that.intent);
+        }
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(intent);
+    }
 }
