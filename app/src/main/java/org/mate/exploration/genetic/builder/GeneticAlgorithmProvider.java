@@ -48,6 +48,7 @@ import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.model.TestCase;
 
@@ -368,12 +369,12 @@ public class GeneticAlgorithmProvider {
         if (terminationConditionId == null) {
             return null;
         }
-        switch (terminationConditionId) {
-            case IterTerminationCondition.TERMINATION_CONDITION_ID:
+        switch (TerminationCondition.valueOf(terminationConditionId)) {
+            case ITERATION_TERMINATION:
                 return new IterTerminationCondition(getNumberIterations());
-            case NeverTerminationCondition.TERMINATION_CONDITION_ID:
+            case NEVER_TERMINATION:
                 return new NeverTerminationCondition();
-            case ConditionalTerminationCondition.TERMINATION_CONDITION_ID:
+            case CONDITIONAL_TERMINATION:
                 return new ConditionalTerminationCondition();
             default:
                 throw new UnsupportedOperationException("Unknown termination condition: "

@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
@@ -24,7 +24,7 @@ public class ExecuteMATERandomSearchGA {
                 .withAlgorithm(RandomSearch.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withFitnessFunction(Properties.FITNESS_FUNCTION())
-                .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
+                .withTerminationCondition(TerminationCondition.CONDITIONAL_TERMINATION)
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .build();
 

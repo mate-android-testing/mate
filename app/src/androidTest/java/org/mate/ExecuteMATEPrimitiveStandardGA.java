@@ -12,7 +12,7 @@ import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
@@ -32,7 +32,7 @@ public class ExecuteMATEPrimitiveStandardGA {
                 .withCrossoverFunction(CrossOverFunction.PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.PRIMITIVE_SHUFFLE_MUTATION)
                 .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
-                .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())

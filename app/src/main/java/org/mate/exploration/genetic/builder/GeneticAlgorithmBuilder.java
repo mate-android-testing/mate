@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -120,8 +121,14 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withTerminationCondition(String terminationConditionId) {
-        properties.setProperty(TERMINATION_CONDITION_KEY, terminationConditionId);
+    public GeneticAlgorithmBuilder withTerminationCondition(TerminationCondition terminationCondition) {
+        properties.setProperty(TERMINATION_CONDITION_KEY, terminationCondition.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            org.mate.Properties.setProperty("termination_condition", terminationCondition);
+        }
+
         return this;
     }
 

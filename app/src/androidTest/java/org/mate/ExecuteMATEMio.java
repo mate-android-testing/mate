@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public class ExecuteMATEMio {
                 .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
                 .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
-                .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())

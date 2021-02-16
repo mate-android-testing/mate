@@ -12,7 +12,7 @@ import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestSuite;
 
 @RunWith(AndroidJUnit4.class)
@@ -36,7 +36,7 @@ public class ExecuteMATESapienzImpl {
                 .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
                 .withFitnessFunction(FitnessFunction.TEST_LENGTH)
-                .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())

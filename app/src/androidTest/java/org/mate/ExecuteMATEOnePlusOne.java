@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 
@@ -33,7 +33,7 @@ public class ExecuteMATEOnePlusOne {
                 .withSelectionFunction(SelectionFunction.FITNESS_SELECTION)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
                 .withFitnessFunction(FitnessFunction.BRANCH_DISTANCE)
-                .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)
+                .withTerminationCondition(TerminationCondition.CONDITIONAL_TERMINATION)
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .build();
 

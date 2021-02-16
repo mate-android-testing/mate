@@ -4,6 +4,7 @@ import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.graph.GraphType;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
@@ -161,6 +162,8 @@ public class Properties {
     }
 
     public static CrossOverFunction CROSSOVER_FUNCTION() { return propertyOr(null); }
+
+    public static TerminationCondition TERMINATION_CONDITION() { return propertyOr(null); }
 
     /**
      * Indicates which objective should be used for the multi-/many-objective
