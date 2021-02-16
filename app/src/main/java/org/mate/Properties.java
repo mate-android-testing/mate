@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
@@ -158,6 +159,8 @@ public class Properties {
     public static MutationFunction MUTATION_FUNCTION() {
         return propertyOr(null);
     }
+
+    public static CrossOverFunction CROSSOVER_FUNCTION() { return propertyOr(null); }
 
     /**
      * Indicates which objective should be used for the multi-/many-objective

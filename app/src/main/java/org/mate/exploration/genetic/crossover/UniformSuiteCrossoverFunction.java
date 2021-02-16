@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSuite> {
-    public static final String CROSSOVER_FUNCTION_ID = "uniform_suite_crossover_function";
 
     @Override
     public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {

@@ -10,7 +10,7 @@ import org.mate.utils.Randomness;
 import java.util.List;
 
 public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
-    public static final String CROSSOVER_FUNCTION_ID = "primitive_test_case_merge_crossover_function";
+
     private boolean executeActions;
 
     public PrimitiveTestCaseMergeCrossOverFunction() {

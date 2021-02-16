@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
@@ -29,7 +29,7 @@ public class ExecuteMATEPrimitiveStandardGA {
                 .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                 .withChromosomeFactory(PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
-                .withCrossoverFunction(PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
+                .withCrossoverFunction(CrossOverFunction.PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.PRIMITIVE_SHUFFLE_MUTATION)
                 .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)

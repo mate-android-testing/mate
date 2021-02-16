@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
-    public static final String CROSSOVER_FUNCTION_ID = "test_case_merge_crossover_function";
+
     private static final double MAX_LENGTH_DEVIATION = 0.25;
     private boolean executeActions;
 

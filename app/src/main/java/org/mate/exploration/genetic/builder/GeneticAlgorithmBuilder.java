@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.builder;
 
 import org.mate.MATE;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
@@ -67,8 +68,14 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withCrossoverFunction(String crossoverFunctionId) {
-        properties.setProperty(CROSSOVER_FUNCTION_KEY, crossoverFunctionId);
+    public GeneticAlgorithmBuilder withCrossoverFunction(CrossOverFunction crossoverFunction) {
+        properties.setProperty(CROSSOVER_FUNCTION_KEY, crossoverFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            org.mate.Properties.setProperty("crossover_function", crossoverFunction);
+        }
+
         return this;
     }
 

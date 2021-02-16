@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
@@ -30,7 +30,7 @@ public class ExecuteMATEMio {
         final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Mio.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
+                .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
                 .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)

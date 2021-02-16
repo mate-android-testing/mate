@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
@@ -30,7 +30,7 @@ public class ExecuteMATEStandardGeneticAlgorithm {
                 .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
-                .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
+                .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)

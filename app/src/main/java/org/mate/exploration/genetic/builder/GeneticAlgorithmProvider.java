@@ -13,6 +13,7 @@ import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
@@ -241,14 +242,14 @@ public class GeneticAlgorithmProvider {
         if (crossOverFunctionId == null) {
             return null;
         } else {
-            switch (crossOverFunctionId) {
-                case TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+            switch (CrossOverFunction.valueOf(crossOverFunctionId)) {
+                case TEST_CASE_MERGE_CROSS_OVER:
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
-                case UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID:
+                case TEST_SUITE_UNIFORM_CROSS_OVER:
                     return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
-                case PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+                case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
                     return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
