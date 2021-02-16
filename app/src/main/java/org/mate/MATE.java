@@ -148,6 +148,7 @@ public class MATE {
 
         MATE.log_acc("[GE] bias percentage: " + Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND() * 100 / AndroidListBasedBiasedMapping.BIAS_100_PERCENT);
         MATE.log_acc("[GE] sequence length: " + Properties.GE_SEQUENCE_LENGTH());
+        MATE.log_acc("[GE] max number events: " + Properties.MAX_NUMBER_EVENTS());
 
         runningTime = new Date().getTime();
 
