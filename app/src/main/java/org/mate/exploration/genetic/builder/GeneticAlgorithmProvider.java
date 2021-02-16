@@ -32,9 +32,11 @@ import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
@@ -261,23 +263,27 @@ public class GeneticAlgorithmProvider {
         if (mutationFunctionId == null) {
             return null;
         } else {
-            switch (mutationFunctionId) {
-                case CutPointMutationFunction.MUTATION_FUNCTION_ID:
+            switch (MutationFunction.valueOf(mutationFunctionId)) {
+                case TEST_CASE_CUT_POINT_MUTATION:
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
-                case SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID:
+                case TEST_SUITE_CUT_POINT_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
-                case SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID:
+                case SAPIENZ_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPInnerMutate());
-                case PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID:
+                case PRIMITIVE_SHUFFLE_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
+                case SHUFFLE_MUTATION:
+                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);

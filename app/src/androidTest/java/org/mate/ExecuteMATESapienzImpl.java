@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromos
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
@@ -32,7 +33,7 @@ public class ExecuteMATESapienzImpl {
                 .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
                 .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
-                .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
+                .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)
                 .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
                 .withFitnessFunction(FitnessFunction.TEST_LENGTH)

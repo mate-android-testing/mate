@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
-    public static final String MUTATION_FUNCTION_ID = "cut_point_mutation_function";
 
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;

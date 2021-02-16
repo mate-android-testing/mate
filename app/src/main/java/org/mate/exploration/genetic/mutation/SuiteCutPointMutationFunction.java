@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuite> {
-    public static final String MUTATION_FUNCTION_ID = "suite_cut_point_mutation_function";
 
     private final CutPointMutationFunction cutPointMutationFunction;
 

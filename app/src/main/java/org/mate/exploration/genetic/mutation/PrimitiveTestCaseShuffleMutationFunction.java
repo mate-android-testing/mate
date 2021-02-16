@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFunction<TestCase> {
-    public static final String MUTATION_FUNCTION_ID = "primitive_test_case_shuffle_mutation_function";
 
     @Override
     public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> chromosome) {

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
-    public static final String MUTATION_FUNCTION_ID = "sapienz_suite_mutation_function";
 
     private final double pMutate;
     private final TestCaseMergeCrossOverFunction testCaseMergeCrossOverFunction;

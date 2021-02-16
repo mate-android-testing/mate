@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.builder;
 import org.mate.MATE;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 
 import java.util.Locale;
@@ -71,8 +72,14 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withMutationFunction(String mutationFunctionId) {
-        properties.setProperty(MUTATION_FUNCTION_KEY, mutationFunctionId);
+    public GeneticAlgorithmBuilder withMutationFunction(MutationFunction mutationFunction) {
+        properties.setProperty(MUTATION_FUNCTION_KEY, mutationFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            org.mate.Properties.setProperty("mutation_function", mutationFunction);
+        }
+
         return this;
     }
 
