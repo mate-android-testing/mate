@@ -30,7 +30,6 @@ public class ExecuteMATEStandardGeneticAlgorithm {
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                // .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
                 .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
                 .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
