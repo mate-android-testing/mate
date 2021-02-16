@@ -1,6 +1,7 @@
 package org.mate;
 
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.graph.GraphType;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
@@ -150,6 +151,8 @@ public class Properties {
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
+
+    public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
 
     /**
      * Indicates which objective should be used for the multi-/many-objective

@@ -9,9 +9,8 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
-import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestCase;
 
@@ -33,7 +32,7 @@ public class ExecuteMATEMio {
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
-                .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID) //todo: use better selection function
+                .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                 .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())

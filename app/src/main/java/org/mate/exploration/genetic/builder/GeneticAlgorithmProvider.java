@@ -40,6 +40,7 @@ import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
@@ -216,14 +217,14 @@ public class GeneticAlgorithmProvider {
         if (selectionFunctionId == null) {
             return null;
         } else {
-            switch (selectionFunctionId) {
-                case FitnessSelectionFunction.SELECTION_FUNCTION_ID:
+            switch (SelectionFunction.valueOf(selectionFunctionId)) {
+                case FITNESS_SELECTION:
                     return new FitnessSelectionFunction<T>();
-                case RandomSelectionFunction.SELECTION_FUNCTION_ID:
+                case RANDOM_SELECTION:
                     return new RandomSelectionFunction<>();
-                case FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID:
+                case FITNESS_PROPORTIONATE_SELECTION:
                     return new FitnessProportionateSelectionFunction<>();
-                case IdSelectionFunction.SELECTION_FUNCTION_ID:
+                case IDENTITY_SELECTION:
                     return new IdSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "

@@ -12,6 +12,7 @@ import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestCase;
 
@@ -29,7 +30,8 @@ public class ExecuteMATEStandardGeneticAlgorithm {
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
+                // .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
+                .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
                 .withCrossoverFunction(TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)

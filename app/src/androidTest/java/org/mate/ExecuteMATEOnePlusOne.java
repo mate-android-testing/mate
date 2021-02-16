@@ -10,7 +10,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
-import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.model.TestCase;
 
@@ -30,7 +30,7 @@ public class ExecuteMATEOnePlusOne {
         final IGeneticAlgorithm<TestCase> onePlusOne = new GeneticAlgorithmBuilder()
                 .withAlgorithm(org.mate.exploration.genetic.algorithm.OnePlusOne.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                .withSelectionFunction(SelectionFunction.FITNESS_SELECTION)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withFitnessFunction(FitnessFunction.BRANCH_DISTANCE)
                 .withTerminationCondition(ConditionalTerminationCondition.TERMINATION_CONDITION_ID)

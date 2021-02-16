@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
-import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.model.TestCase;
 
@@ -30,7 +30,7 @@ public class ExecuteMATENSGAII {
         IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
                 .withAlgorithm(NSGAII.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                .withSelectionFunction(FitnessSelectionFunction.SELECTION_FUNCTION_ID)
+                .withSelectionFunction(SelectionFunction.FITNESS_SELECTION)
                 .withMutationFunction(CutPointMutationFunction.MUTATION_FUNCTION_ID)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_STATES)

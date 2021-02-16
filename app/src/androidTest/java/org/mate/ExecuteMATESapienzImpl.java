@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
-import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.model.TestSuite;
 
@@ -31,7 +31,7 @@ public class ExecuteMATESapienzImpl {
                 .withAlgorithm(NSGAII.ALGORITHM_NAME)
                 .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
                 .withCrossoverFunction(UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID)
-                .withSelectionFunction(RandomSelectionFunction.SELECTION_FUNCTION_ID)
+                .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                 .withMutationFunction(SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID)
                 .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
