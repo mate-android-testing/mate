@@ -1,4 +1,4 @@
-package org.mate.utils;
+package org.mate.utils.testcase;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -35,19 +35,19 @@ public final class TestCaseOptimizer {
     public static TestCase optimise(TestCase testCase) {
 
         switch (Properties.OPTIMISATION_STRATEGY()) {
-            case 1:
+            case REMOVE_ALL_INTENT_ACTIONS:
                 // remove all intent based actions
                 return removeAllIntentBasedActions(testCase);
-            case 2:
+            case REMOVE_ALL_EXCEPT_LAST_ACTION:
                 // remove all except last action
                 return removeAllExceptLastAction(testCase);
-            case 3:
+            case REMOVE_ALL_ACTIONS_BEFORE_LAST_ACTIVITY_TRANSITION:
                 // execute all actions after last activity transition
                 return removeAllActionsBeforeLastActivityTransition(testCase);
-            case 4:
+            case REMOVE_ALL_NON_ACTIVITY_RELATED_ACTIONS:
                 // solely activity related actions (UI + intent)
                 return removeAllNonActivityRelatedActions(testCase);
-            case 5:
+            case REMOVE_ALL_UI_ACTIONS:
                 // remove all UI actions
                 return removeAllUIActions(testCase);
             default:

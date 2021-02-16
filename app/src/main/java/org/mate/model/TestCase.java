@@ -14,7 +14,7 @@ import org.mate.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
-import org.mate.utils.TestCaseStatistics;
+import org.mate.utils.testcase.TestCaseStatistics;
 
 import java.util.ArrayList;
 import java.util.HashMap;

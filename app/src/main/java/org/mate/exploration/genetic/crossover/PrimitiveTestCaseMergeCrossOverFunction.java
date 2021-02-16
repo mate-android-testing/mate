@@ -3,7 +3,7 @@ package org.mate.exploration.genetic.crossover;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 

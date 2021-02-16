@@ -10,7 +10,7 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.Coverage;
+import org.mate.utils.coverage.Coverage;
 import org.mate.utils.Objective;
 
 import java.io.IOException;

@@ -9,8 +9,8 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.utils.Coverage;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 

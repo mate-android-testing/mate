@@ -7,8 +7,8 @@ import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.utils.Coverage;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 

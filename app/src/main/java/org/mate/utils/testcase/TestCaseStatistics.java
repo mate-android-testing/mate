@@ -1,4 +1,4 @@
-package org.mate.utils;
+package org.mate.utils.testcase;
 
 import android.content.Intent;
 

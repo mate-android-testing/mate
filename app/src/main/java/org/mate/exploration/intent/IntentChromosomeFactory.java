@@ -10,7 +10,7 @@ import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentProvider;
 import org.mate.model.TestCase;
 import org.mate.interaction.action.Action;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 
 public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {

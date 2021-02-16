@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.coverage.Coverage;
 
 import java.util.EnumSet;
 import java.util.List;

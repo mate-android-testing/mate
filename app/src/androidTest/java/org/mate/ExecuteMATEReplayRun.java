@@ -8,8 +8,8 @@ import org.mate.model.TestCase;
 import org.mate.serialization.TestCaseSerializer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
-import org.mate.utils.TestCaseOptimizer;
-import org.mate.utils.TestCaseStatistics;
+import org.mate.utils.testcase.TestCaseOptimizer;
+import org.mate.utils.testcase.TestCaseStatistics;
 
 import java.util.List;
 import java.util.Map;
@@ -26,8 +26,8 @@ public class ExecuteMATEReplayRun {
     public void useAppContext() {
         MATE.log_acc("Starting ReplayRun...");
 
+        // init uiAbstractionLayer, properties, etc.
         MATE mate = new MATE();
-        String packageName = mate.getPackageName();
 
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
@@ -46,9 +46,8 @@ public class ExecuteMATEReplayRun {
 
             MATE.log("Replaying TestCase " + testCaseID);
 
-            if (Properties.OPTIMISE_TEST_CASE()) {
-                testCase = TestCaseOptimizer.optimise(testCase);
-            }
+            // apply optimisation strategy before replaying (optional)
+            testCase = TestCaseOptimizer.optimise(testCase);
 
             if (replayTestCase(testCase)) {
                 MATE.log("Replayed TestCase " + testCaseID);

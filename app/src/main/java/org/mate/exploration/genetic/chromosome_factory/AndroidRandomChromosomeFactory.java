@@ -6,7 +6,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 

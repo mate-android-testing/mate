@@ -1,10 +1,9 @@
-package org.mate.utils;
+package org.mate.utils.coverage;
 
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 

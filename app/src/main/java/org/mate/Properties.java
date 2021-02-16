@@ -2,9 +2,10 @@ package org.mate;
 
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.graph.GraphType;
-import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.testcase.OptimisationStrategy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -49,13 +50,13 @@ public class Properties {
      */
     public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
 
-    /*
-    * Whether to apply optimisation of test cases before replaying them.
+    /**
+     * The optimisation strategy that should be applied.
+     *
+     * @return Returns the applied optimisation strategy.
      */
-    public static boolean OPTIMISE_TEST_CASE() { return propertyOr(false);}
-
-    public static int OPTIMISATION_STRATEGY() {
-        return propertyOr(0);
+    public static OptimisationStrategy OPTIMISATION_STRATEGY() {
+        return propertyOr(OptimisationStrategy.NO_OPTIMISATION);
     }
 
     /*
@@ -150,6 +151,12 @@ public class Properties {
         return propertyOr(null);
     }
 
+    /**
+     * Indicates which objective should be used for the multi-/many-objective
+     * search, i.e. branches or lines.
+     *
+     * @return Returns the objective or {@code null} if none was specified.
+     */
     public static Objective OBJECTIVE() {
         return propertyOr(null);
     }
