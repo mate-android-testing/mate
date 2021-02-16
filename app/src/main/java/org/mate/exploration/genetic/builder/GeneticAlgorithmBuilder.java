@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.builder;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -49,8 +50,14 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withAlgorithm(String algorithmName) {
-        properties.setProperty(ALGORITHM_KEY, algorithmName);
+    public GeneticAlgorithmBuilder withAlgorithm(Algorithm algorithm) {
+        properties.setProperty(ALGORITHM_KEY, algorithm.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.ALGORITHM() == null) {
+            org.mate.Properties.setProperty("algorithm", algorithm);
+        }
+
         return this;
     }
 

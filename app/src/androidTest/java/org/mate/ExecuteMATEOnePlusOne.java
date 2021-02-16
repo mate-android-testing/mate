@@ -5,6 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -28,7 +29,7 @@ public class ExecuteMATEOnePlusOne {
         MATE mate = new MATE();
 
         final IGeneticAlgorithm<TestCase> onePlusOne = new GeneticAlgorithmBuilder()
-                .withAlgorithm(org.mate.exploration.genetic.algorithm.OnePlusOne.ALGORITHM_NAME)
+                .withAlgorithm(Algorithm.ONE_PLUS_ONE)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withSelectionFunction(SelectionFunction.FITNESS_SELECTION)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)

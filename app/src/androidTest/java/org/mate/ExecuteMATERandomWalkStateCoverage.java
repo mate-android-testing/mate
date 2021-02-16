@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.genetic.algorithm.RandomWalk;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -24,7 +24,7 @@ public class ExecuteMATERandomWalkStateCoverage {
         MATE.log("Starting random walk now ...");
 
         final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                .withAlgorithm(RandomWalk.ALGORITHM_NAME)
+                .withAlgorithm(Algorithm.RANDOM_WALK)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
                 .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)

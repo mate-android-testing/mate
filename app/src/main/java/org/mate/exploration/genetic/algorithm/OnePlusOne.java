@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OnePlusOne<T> extends GeneticAlgorithm<T> {
-    public static final String ALGORITHM_NAME = "OnePlusOne";
 
     public OnePlusOne(IChromosomeFactory<T> chromosomeFactory,
                       ISelectionFunction<T> selectionFunction,

@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.builder;
 
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.algorithm.NSGAII;
@@ -81,20 +82,20 @@ public class GeneticAlgorithmProvider {
         if (algorithmName == null) {
             throw new IllegalArgumentException("No algorithm specified");
         }
-        switch (algorithmName) {
-            case StandardGeneticAlgorithm.ALGORITHM_NAME:
+        switch (Algorithm.valueOf(algorithmName)) {
+            case STANDARD_GA:
                 return initializeGenericGeneticAlgorithm();
-            case OnePlusOne.ALGORITHM_NAME:
+            case ONE_PLUS_ONE:
                 return initializeOnePlusOne();
-            case NSGAII.ALGORITHM_NAME:
+            case NSGAII:
                 return initializeNSGAII();
-            case MOSA.ALGORITHM_NAME:
+            case MOSA:
                 return (GeneticAlgorithm<T>) initializeMOSA();
-            case Mio.ALGORITHM_NAME:
+            case MIO:
                 return initializeMio();
-            case RandomWalk.ALGORITHM_NAME:
+            case RANDOM_WALK:
                 return initializeRandomWalk();
-            case RandomSearch.ALGORITHM_NAME:
+            case RANDOM_SEARCH:
                 return initializeRandomSearch();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);

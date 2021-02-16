@@ -5,7 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -28,7 +28,7 @@ public class ExecuteMATENSGAII {
         MATE mate = new MATE();
 
         IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
-                .withAlgorithm(NSGAII.ALGORITHM_NAME)
+                .withAlgorithm(Algorithm.NSGAII)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withSelectionFunction(SelectionFunction.FITNESS_SELECTION)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)

@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -26,7 +26,7 @@ public class ExecuteMATEPrimitiveStandardGA {
         MATE mate = new MATE();
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
-                .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
+                .withAlgorithm(Algorithm.STANDARD_GA)
                 .withChromosomeFactory(ChromosomeFactory.PRIMITIVE_ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
                 .withCrossoverFunction(CrossOverFunction.PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER)

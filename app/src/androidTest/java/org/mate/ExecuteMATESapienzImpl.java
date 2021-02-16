@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -28,7 +28,7 @@ public class ExecuteMATESapienzImpl {
 
         final IGeneticAlgorithm<TestSuite> sapienz =
                 new GeneticAlgorithmBuilder()
-                .withAlgorithm(NSGAII.ALGORITHM_NAME)
+                .withAlgorithm(Algorithm.NSGAII)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_SUITE_RANDOM_CHROMOSOME_FACTORY)
                 .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
                 .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)

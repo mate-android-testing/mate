@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
@@ -167,6 +168,8 @@ public class Properties {
     public static TerminationCondition TERMINATION_CONDITION() { return propertyOr(null); }
 
     public static ChromosomeFactory CHROMOSOME_FACTORY() { return propertyOr(null); }
+
+    public static Algorithm ALGORITHM() { return propertyOr(null); }
 
     /**
      * Indicates which objective should be used for the multi-/many-objective

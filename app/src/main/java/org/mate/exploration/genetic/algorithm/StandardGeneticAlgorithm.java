@@ -11,7 +11,6 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import java.util.List;
 
 public class StandardGeneticAlgorithm<T> extends GeneticAlgorithm<T> {
-    public static final String ALGORITHM_NAME = "StandardGeneticAlgorithm";
 
     /**
      * Initializing the genetic algorithm with all necessary attributes

@@ -14,8 +14,6 @@ import java.util.List;
 
 public class RandomSearch<T> extends GeneticAlgorithm<T> {
 
-    public static final String ALGORITHM_NAME = "RandomSearch";
-
     public RandomSearch(IChromosomeFactory<T> chromosomeFactory, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition) {
         super(chromosomeFactory, null, null,null, fitnessFunctions, terminationCondition, 1, 2, 0, 0);
     }
