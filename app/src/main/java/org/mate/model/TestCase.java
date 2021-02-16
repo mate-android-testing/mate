@@ -94,11 +94,28 @@ public class TestCase {
     private String crashStackTrace = null;
 
     /**
+     * Should be used for the creation of dummy test cases.
+     * This suppresses the log that indicates a new test case
+     * for the AndroidAnalysis framework.
+     */
+    private TestCase() {
+        setId("dummy");
+        crashDetected = false;
+        visitedActivities = new HashSet<>();
+        visitedStates = new HashSet<>();
+        eventSequence = new ArrayList<>();
+        sparseness = 0;
+        statesMap = new HashMap<>();
+        featureVector = new HashMap<>();
+        activitySequence = new ArrayList<>();
+    }
+
+    /**
      * Creates a new test case object with the given id.
      *
      * @param id The (unique) test case id.
      */
-    public TestCase(String id){
+    public TestCase(String id) {
         MATE.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
@@ -386,7 +403,7 @@ public class TestCase {
      * @return Returns a dummy test case.
      */
     public static TestCase newDummy() {
-        return new TestCase("dummy");
+        return new TestCase();
     }
 
     /**

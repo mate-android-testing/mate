@@ -24,7 +24,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
         } else {
             List<Action> actions =  chromosome.getValue().getEventSequence();
             Randomness.shuffleList(actions);
-            TestCase mutatedTestCase = new TestCase("dummy");
+            TestCase mutatedTestCase = TestCase.newDummy();
             mutatedTestCase.getEventSequence().addAll(actions);
             IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutatedTestCase);
             return Arrays.asList(mutatedChromosome);

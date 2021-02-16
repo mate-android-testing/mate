@@ -136,7 +136,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         //keep final size within max deviation
         finalSize = Math.min(Math.max(all.size(), lowerChangeBound), upperChangeBound);
 
-        TestCase testCase = new TestCase("dummy");
+        TestCase testCase = TestCase.newDummy();
         testCase.setDesiredSize(Optional.some(finalSize));
         testCase.getEventSequence().addAll(all);
 
