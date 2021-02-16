@@ -9,7 +9,6 @@ import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
-    public static final String CHROMOSOME_FACTORY_ID = "android_suite_random_chromosome_factory";
 
     private final int numTestCases;
     private final AndroidRandomChromosomeFactory androidRandomChromosomeFactory;

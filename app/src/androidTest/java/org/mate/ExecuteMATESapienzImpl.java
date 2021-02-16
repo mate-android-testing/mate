@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
@@ -29,7 +29,7 @@ public class ExecuteMATESapienzImpl {
         final IGeneticAlgorithm<TestSuite> sapienz =
                 new GeneticAlgorithmBuilder()
                 .withAlgorithm(NSGAII.ALGORITHM_NAME)
-                .withChromosomeFactory(AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                .withChromosomeFactory(ChromosomeFactory.ANDROID_SUITE_RANDOM_CHROMOSOME_FACTORY)
                 .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
                 .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                 .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)

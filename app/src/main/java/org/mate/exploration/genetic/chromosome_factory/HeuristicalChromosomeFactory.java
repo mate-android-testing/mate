@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory {
-    public static final String CHROMOSOME_FACTORY_ID = "heuristical_chromosome_factory";
 
     //stores the number of executions of an actions
     private Map<Action, Integer> executionCounter = new HashMap<>();

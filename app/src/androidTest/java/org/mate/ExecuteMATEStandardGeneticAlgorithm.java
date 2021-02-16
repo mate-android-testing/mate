@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
@@ -28,7 +28,7 @@ public class ExecuteMATEStandardGeneticAlgorithm {
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                .withChromosomeFactory(AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
+                .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
                 .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)

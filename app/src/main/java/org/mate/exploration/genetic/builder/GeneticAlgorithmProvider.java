@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
@@ -190,24 +191,24 @@ public class GeneticAlgorithmProvider {
         if (chromosomeFactoryId == null) {
             return null;
         }
-        switch (chromosomeFactoryId) {
-            case AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+        switch (ChromosomeFactory.valueOf(chromosomeFactoryId)) {
+            case ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new AndroidRandomChromosomeFactory(getNumEvents());
-            case AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case ANDROID_SUITE_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new AndroidSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
-            case HeuristicalChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case HEURISTICAL_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new HeuristicalChromosomeFactory(getNumEvents());
-            case PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case PRIMITIVE_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
-            case IntentChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case INTENT_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "

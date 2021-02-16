@@ -11,7 +11,6 @@ import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
-    public static final String CHROMOSOME_FACTORY_ID = "android_random_chromosome_factory";
 
     protected UIAbstractionLayer uiAbstractionLayer;
     protected int maxNumEvents;

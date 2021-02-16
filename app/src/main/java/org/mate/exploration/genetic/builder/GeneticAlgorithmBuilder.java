@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.builder;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
@@ -53,8 +54,14 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withChromosomeFactory(String chromosomeFactoryId) {
-        properties.setProperty(CHROMOSOME_FACTORY_KEY, chromosomeFactoryId);
+    public GeneticAlgorithmBuilder withChromosomeFactory(ChromosomeFactory chromosomeFactory) {
+        properties.setProperty(CHROMOSOME_FACTORY_KEY, chromosomeFactory.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            org.mate.Properties.setProperty("chromosome_factory", chromosomeFactory);
+        }
+
         return this;
     }
 
