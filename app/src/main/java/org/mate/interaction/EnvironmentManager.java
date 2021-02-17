@@ -399,6 +399,7 @@ public class EnvironmentManager {
      * @return Returns {@code true} if the granting permissions succeeded,
      * otherwise {@code false}.
      */
+    // TODO: use InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission()
     public boolean grantRuntimePermissions(String packageName) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/grant_runtime_permissions")
