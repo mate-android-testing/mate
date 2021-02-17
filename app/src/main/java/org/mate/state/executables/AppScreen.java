@@ -94,8 +94,20 @@ public class AppScreen {
                 .getUiAutomation().getRootInActiveWindow();
 
         if (nodeInfo == null) {
-            MATE.log_acc("APP DISCONNECTED");
-            // TODO: try to reconnect
+            /*
+            * TODO: Check whether this is the expected behaviour. I would rather assume that
+            *  the UIAutomator throws an exception and we can't react it properly, similar
+            *  to what can happen when executing an action in the DeviceMgr.
+             */
+            MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+            
+            // try to reconnect
+            nodeInfo = InstrumentationRegistry.getInstrumentation()
+                    .getUiAutomation().getRootInActiveWindow();
+
+            if (nodeInfo == null) {
+                throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
+            }
         }
 
         // retrieve widgets from current screen
