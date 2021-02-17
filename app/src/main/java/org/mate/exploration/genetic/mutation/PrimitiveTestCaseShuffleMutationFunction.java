@@ -24,11 +24,9 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
 
         TestCase executedTestCase = TestCase.fromDummy(testCase);
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
-
         FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
         CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-
         MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
 
         return Arrays.asList(mutatedChromosome);

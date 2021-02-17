@@ -3,9 +3,9 @@ package org.mate.exploration.genetic.crossover;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 
@@ -44,7 +44,6 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
 
             return chromosome;
         }
-
         return new Chromosome<>(offspring);
     }
 }

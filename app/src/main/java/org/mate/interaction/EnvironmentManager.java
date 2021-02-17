@@ -229,9 +229,12 @@ public class EnvironmentManager {
 
         String prefix = "";
         for (TestCase testCase : testCases) {
-            sb.append(prefix);
-            prefix = ",";
-            sb.append(testCase);
+            // there is no coverage data for dummy test cases
+            if (!testCase.isDummy()) {
+                sb.append(prefix);
+                prefix = ",";
+                sb.append(testCase);
+            }
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/copy_fitness_data")
@@ -265,9 +268,12 @@ public class EnvironmentManager {
 
         String prefix = "";
         for (TestCase testCase : testCases) {
-            sb.append(prefix);
-            prefix = ",";
-            sb.append(testCase);
+            // there is no coverage data for dummy test cases
+            if (!testCase.isDummy()) {
+                sb.append(prefix);
+                prefix = ",";
+                sb.append(testCase);
+            }
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/copy")
@@ -481,11 +487,24 @@ public class EnvironmentManager {
     /**
      * Stores the fitness data for the given chromosome.
      *
-     * @param chromosomeId Identifies either a test case or a test suite.
+     * @param chromosome Refers either to a test case or to a test suite.
      * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
      *                     otherwise {@code null}.
      */
-    public void storeFitnessData(String chromosomeId, String entityId) {
+    public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId) {
+
+        if (entityId != null && entityId.equals("dummy")) {
+            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            return;
+        } else if (chromosome.getValue() instanceof TestCase) {
+            // there is no fitness data to store for dummy test cases
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to store fitness data of dummy test case...");
+                return;
+            }
+        }
+
+        String chromosomeId = chromosome.toString();
 
         String testcase = entityId == null ? chromosomeId : entityId;
         if (coveredTestCases.contains(testcase)) {
@@ -513,16 +532,24 @@ public class EnvironmentManager {
 
     /**
      * Retrieves the branch distance for the given chromosome. Note that
-     * {@link #storeFitnessData(String, String)} has to be called previously.
+     * {@link #storeFitnessData(IChromosome, String)} has to be called previously.
      *
-     * @param chromosomeId Identifies either a test case or a test suite.
+     * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the branch distance for the given chromosome.
      */
-    public double getBranchDistance(String chromosomeId) {
+    public <T> double getBranchDistance(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            // a dummy test case has a branch distance of 0.0 (0 is the worst in our case)
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve fitness data of dummy test case...");
+                return 0.0;
+            }
+        }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
                 .withParameter("deviceId", emulator)
-                .withParameter("chromosomes", chromosomeId);
+                .withParameter("chromosomes", chromosome.toString());
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("branch_distance"));
@@ -577,6 +604,7 @@ public class EnvironmentManager {
     /**
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
+     * This method is used to store the coverage data for the last incomplete test case.
      *
      * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
@@ -584,6 +612,50 @@ public class EnvironmentManager {
      *                     otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
+
+        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE) {
+            // check whether the storing of the traces/coverage file has been already requested
+            String testcase = entityId == null ? chromosomeId : entityId;
+            if (coveredTestCases.contains(testcase)) {
+                // don't fetch again traces/coverage file from emulator
+                return;
+            }
+            coveredTestCases.add(testcase);
+        }
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("chromosome", chromosomeId);
+        if (entityId != null) {
+            messageBuilder.withParameter("entity", entityId);
+        }
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Stores the coverage information of the given test case. By storing
+     * we mean that a trace/coverage file is generated/fetched from the emulator.
+     *
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosome Refers either to a test case or to a test suite.
+     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
+     *                     otherwise {@code null}.
+     */
+    public <T> void storeCoverageData(Coverage coverage, IChromosome<T> chromosome, String entityId) {
+
+        if (entityId != null && entityId.equals("dummy")) {
+            MATE.log_warn("Trying to store coverage data of dummy test case...");
+            return;
+        } else if (chromosome.getValue() instanceof TestCase) {
+            // there is no coverage data to store for dummy test cases
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to store coverage data of dummy test case...");
+                return;
+            }
+        }
+
+        String chromosomeId = chromosome.toString();
 
         if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
@@ -624,12 +696,21 @@ public class EnvironmentManager {
             StringBuilder chromosomeIds = new StringBuilder();
 
             for (IChromosome<T> chromosome : chromosomes) {
+                if (chromosome.getValue() instanceof TestCase) {
+                    // there is no coverage data to store for dummy test cases
+                    if (((TestCase) chromosome.getValue()).isDummy()) {
+                        MATE.log_warn("Trying to retrieve combined coverage of dummy test case...");
+                        continue;
+                    }
+                }
                 chromosomeIds.append(chromosome.getValue());
                 chromosomeIds.append("+");
             }
 
             // remove '+' at the end
-            chromosomeIds.setLength(chromosomeIds.length() - 1);
+            if (chromosomeIds.length() > 0) {
+                chromosomeIds.setLength(chromosomeIds.length() - 1);
+            }
 
             chromosomesParam = chromosomeIds.toString();
         }
@@ -648,7 +729,8 @@ public class EnvironmentManager {
 
     /**
      * Convenient function to request the coverage information for a given chromosome.
-     * A chromosome can be either a test case or a test suite.
+     * A chromosome can be either a test case or a test suite. This method is used
+     * to retrieve the coverage of the last incomplete test case.
      *
      * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
@@ -666,13 +748,40 @@ public class EnvironmentManager {
     }
 
     /**
+     * Convenient function to request the coverage information for a given chromosome.
+     * A chromosome can be either a test case or a test suite.
+     *
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param chromosome Refers either to a test case or to a test suite.
+     * @return Returns the coverage of the given test case.
+     */
+    public <T> double getCoverage(Coverage coverage, IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            // a dummy test case has a coverage of 0%
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve coverage of dummy test case...");
+                return 0.0;
+            }
+        }
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosomes", chromosome.toString());
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("coverage"));
+    }
+
+    /**
      * Returns a fitness vector for the given chromosome and the specified lines
      * where each entry indicates to which degree the line was covered.
      *
      * @param chromosome The given chromosome.
      * @param lines The lines for which coverage should be retrieved.
      * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
-     * @return
+     * @return Returns line percentage coverage vector.
      */
     public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
 

@@ -129,6 +129,16 @@ public class TestCase {
     }
 
     /**
+     * Checks whether this is a dummy test case.
+     *
+     * @return Returns {@code true} when this test case is a dummy test case,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isDummy() {
+        return getId().equals("dummy");
+    }
+
+    /**
      * Should be called (once) after the test case has been created and executed.
      *
      * Among other things, this method is responsible for the serialization

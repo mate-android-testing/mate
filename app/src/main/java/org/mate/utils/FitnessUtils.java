@@ -51,7 +51,7 @@ public class FitnessUtils {
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome.getValue().toString(), null);
+            Registry.getEnvironmentManager().storeFitnessData(chromosome, null);
         }
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
@@ -73,7 +73,7 @@ public class FitnessUtils {
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome.getValue().toString(), testCaseId);
+            Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
         }
     }
 
@@ -99,11 +99,11 @@ public class FitnessUtils {
     public static <T> double getFitness(IChromosome<T> chromosome) {
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.BRANCH_COVERAGE, chromosome.toString());
+            return Registry.getEnvironmentManager().getCoverage(Coverage.BRANCH_COVERAGE, chromosome);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
-            return Registry.getEnvironmentManager().getBranchDistance(chromosome.toString());
+            return Registry.getEnvironmentManager().getBranchDistance(chromosome);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.LINE_COVERAGE, chromosome.toString());
+            return Registry.getEnvironmentManager().getCoverage(Coverage.LINE_COVERAGE, chromosome);
         }
 
         throw new UnsupportedOperationException("Fitness function "
@@ -120,6 +120,8 @@ public class FitnessUtils {
      * @return Returns the fitness vector for the given chromosome.
      */
     public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives) {
+
+        // TODO: handle dummy test case
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
             return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome);

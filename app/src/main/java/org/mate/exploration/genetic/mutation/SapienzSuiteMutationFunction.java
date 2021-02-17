@@ -79,7 +79,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
 
         List<TestCase> copyTestCases = new ArrayList<>();
         for (TestCase testCase : afterInternalMutation) {
-            if (testCase.getId().equals("dummy")) {
+            if (testCase.isDummy()) {
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
 
