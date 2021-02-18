@@ -92,6 +92,12 @@ public class MATE {
         } else {
             throw new IllegalStateException("Emulator couldn't be properly allocated!");
         }
+
+        if (Properties.GRAPH_TYPE() != null) {
+            // initialise a graph
+            MATE.log_acc("Initialising graph!");
+            Registry.getEnvironmentManager().initGraph();
+        }
     }
 
     public void testApp(final Algorithm algorithm) {
@@ -99,12 +105,6 @@ public class MATE {
         MATE.log_acc("Activities:");
         for (String s : Registry.getEnvironmentManager().getActivityNames()) {
             MATE.log_acc("\t" + s);
-        }
-
-        if (Properties.GRAPH_TYPE() != null) {
-            // initialise a graph
-            MATE.log_acc("Initialising graph!");
-            Registry.getEnvironmentManager().initGraph();
         }
 
         try {
