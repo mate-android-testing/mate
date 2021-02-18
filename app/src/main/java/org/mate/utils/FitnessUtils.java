@@ -121,10 +121,8 @@ public class FitnessUtils {
      */
     public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives) {
 
-        // TODO: handle dummy test case
-
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome);
+            return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome, objectives);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
             return Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, objectives);
         }
