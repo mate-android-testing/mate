@@ -8,16 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AndroidListBasedBiasMapping<T> extends AndroidRandomChromosomeFactory implements IGenotypePhenotypeMapping<List<T>, TestCase> {
+public abstract class AndroidListBasedMapping<T> extends AndroidRandomChromosomeFactory implements IGenotypePhenotypeMapping<List<T>, TestCase> {
     protected final Map<IChromosome<List<T>>, IChromosome<TestCase>> associatedPhenotypeChromosome;
     protected IChromosome<List<T>> activeGenotypeChromosome;
     protected int activeGenotypeCurrentCodonIndex;
 
-    public AndroidListBasedBiasMapping(int maxNumEvents) {
+    public AndroidListBasedMapping(int maxNumEvents) {
         this(true, maxNumEvents);
     }
 
-    public AndroidListBasedBiasMapping(boolean resetApp, int maxNumEvents) {
+    public AndroidListBasedMapping(boolean resetApp, int maxNumEvents) {
         super(resetApp, maxNumEvents);
         associatedPhenotypeChromosome = new HashMap<>();
         activeGenotypeChromosome = null;

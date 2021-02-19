@@ -225,6 +225,10 @@ public class Properties {
         return propertyOr(AndroidListBasedBiasedMapping.BIAS_50_PERCENT);
     }
 
+    public static int GE_MUTATION_COUNT() {
+        return propertyOr(3);
+    }
+
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored

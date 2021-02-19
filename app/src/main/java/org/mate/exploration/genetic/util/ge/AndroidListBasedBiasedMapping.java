@@ -1,14 +1,12 @@
 package org.mate.exploration.genetic.util.ge;
 
-import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.ListUtils;
 
 import java.util.List;
 
-public class AndroidListBasedBiasedMapping extends AndroidListBasedBiasMapping<Integer> {
+public class AndroidListBasedBiasedMapping extends AndroidListBasedMapping<Integer> {
     public static final int BIAS_100_PERCENT = 10000;
     public static final int BIAS_50_PERCENT = BIAS_100_PERCENT / 2;
 

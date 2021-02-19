@@ -1,17 +1,12 @@
 package org.mate.exploration.genetic.util.ge;
 
-import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.WidgetAction;
 import org.mate.utils.ListUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class AndroidListBasedBinaryEqualWeightedDecisionMapping extends AndroidListBasedBiasMapping<Boolean> {
+public class AndroidListBasedBinaryEqualWeightedDecisionMapping extends AndroidListBasedMapping<Boolean> {
     public AndroidListBasedBinaryEqualWeightedDecisionMapping(int maxNumEvents) {
         this(true, maxNumEvents);
     }
