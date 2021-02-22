@@ -253,12 +253,18 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
-                // check for permission dialog
+                // check for permission dialog (API 25/28 tested)
                 if (screenState.getPackageName().equals("com.google.android.packageinstaller")
                         || screenState.getPackageName().equals("com.android.packageinstaller")) {
                     List<WidgetAction> actions = screenState.getActions();
                     for (WidgetAction action : actions) {
-                        if (action.getWidget().getId().contains("allow")) {
+                        /*
+                        * The resource id for the allow button stays the same for both API 25
+                        * and API 28, although the package name differs.
+                         */
+                        if (action.getWidget().getResourceID()
+                                .equals("com.android.packageinstaller:id/permission_allow_button")
+                                || action.getWidget().getText().toLowerCase().equals("allow")) {
                             try {
                                 deviceMgr.executeAction(action);
                             } catch (AUTCrashException e) {
