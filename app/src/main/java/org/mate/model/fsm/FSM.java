@@ -50,6 +50,16 @@ public class FSM {
         return newState;
     }
 
+    public boolean containsState(IScreenState screenState) {
+
+        for (State state : states) {
+            if (state.getScreenState().equals(screenState)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @NonNull
     @Override
     public String toString() {
