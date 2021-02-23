@@ -1,5 +1,6 @@
 package org.mate.state;
 
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 
@@ -15,10 +16,9 @@ public interface IScreenState {
     String getId();
     void setId(String stateId);
     List<Widget> getWidgets();
-    List<WidgetAction> getActions();
+    List<UIAction> getActions();
+    List<WidgetAction> getWidgetActions();
     String getActivityName();
     String getPackageName();
     ScreenStateType getType();
-    Widget getWidget(String id);
-    boolean differentColor(IScreenState visitedState);
 }

@@ -14,13 +14,6 @@ public class AccessibilityViolation {
     private boolean warning;
 
     public void reportFlaw(){
-        if (widget==null){
-            widget = new Widget("artificialId","artificialClass","artificialIdByActivity");
-            widget.setX1(0);
-            widget.setY1(0);
-            widget.setX2(10);
-            widget.setY2(10);
-        }
         String checkType = type.getValue();
         String packageName = state.getPackageName();
         String activityName = state.getActivityName();

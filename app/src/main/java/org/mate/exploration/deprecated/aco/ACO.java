@@ -128,7 +128,7 @@ public class ACO {
             // We will select the action randomly if this explored node is new or
             // this is the first generation
             if (isFirstExplored|| currentGeneration == 0){
-                List<WidgetAction> executableActions = state.getActions();
+                List<WidgetAction> executableActions = state.getWidgetActions();
                 //random select
                 int randNum = selectRandomAction(state.getActions().size());
                 action = executableActions.get(randNum);
@@ -141,7 +141,7 @@ public class ACO {
             }else {
                 //find the node from history
                 IScreenState historyScreenState = wholeModel.getStateById(currentStateId);
-                List<WidgetAction> executableActions = historyScreenState.getActions();
+                List<WidgetAction> executableActions = historyScreenState.getWidgetActions();
 
                 //select the best action at this state
                 action = selectBestWidget(executableActions);

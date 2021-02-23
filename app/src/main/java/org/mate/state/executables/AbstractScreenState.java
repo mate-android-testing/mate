@@ -1,13 +1,11 @@
 package org.mate.state.executables;
 
-import org.mate.state.IScreenState;
 import org.mate.interaction.action.ui.Widget;
+import org.mate.state.IScreenState;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Models an abstract screen state. That is nothing more than a screen with its widgets,
@@ -99,18 +97,33 @@ public abstract class AbstractScreenState implements IScreenState {
     }
 
     /**
-     * Returns the widget with the given id.
+     * Compares two abstract screen states for equality.
      *
-     * @param id The id of the widget.
-     * @return Returns the widget with the given id,
-     *          or {@code null} is returned if no such widget exists.
+     * @param o The other screen state to compare against.
+     * @return Returns {@code true} if both screen states are equal,
+     *          otherwise {@code false} is returned.
      */
     @Override
-    @SuppressWarnings("unused")
-    public Widget getWidget(String id){
-        for (Widget widget: widgets)
-            if (widget.getId().equals(id))
-                return widget;
-        return null;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            AbstractScreenState other = (AbstractScreenState) o;
+            return Objects.equals(activityName, other.activityName) &&
+                    Objects.equals(packageName, other.packageName) &&
+                    Objects.equals(widgets, other.widgets);
+        }
+    }
+
+    /**
+     * Computes a hash code for the abstract screen state.
+     *
+     * @return Returns the hash code associated with this screen state.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(activityName, packageName, widgets);
     }
 }

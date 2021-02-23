@@ -2,24 +2,27 @@ package org.mate.interaction.action.ui;
 
 
 import android.graphics.Rect;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import org.mate.MATE;
+
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
- * Created by marceloe on 08/12/16.
+ * Represents an element in the ui hierarchy, i.e. a wrapper around a {@link AccessibilityNodeInfo}
+ * object. Defines a parent, child and sibling relation.
  */
 public class Widget {
 
     /**
-     * A reference to the parent widget or {@code null}
-     * if it is the root widget.
+     * A reference to the parent widget or {@code null} if it is the root widget.
      */
-    private Widget parent;
+    private final Widget parent;
 
     /**
      * A list of direct descendants.
@@ -27,210 +30,262 @@ public class Widget {
     private List<Widget> children;
 
     /**
-     * The resource id or a custom representation.
-     * See the method createWidget() of the class {@link org.mate.state.executables.AppScreen#)}.
+     * A unique identifier for this widget, which is based on the activity name, the global
+     * and local index. This id is unique within the same ui hierarchy / screen.
      */
-    private String id;
-
-    /**
-     * A concatenation of the activity name and the id.
-     * See the method createWidget() of the class {@link org.mate.state.executables.AppScreen#)}.
-     */
-    private String idByActivity;
+    private final String id;
 
     /**
      * The widget class name, e.g. android.view.ListView, or the empty string.
      * See {@link AccessibilityNodeInfo#getClassName()}.
      */
-    private String clazz;
+    private final String clazz;
 
     /**
-     *  The resource id of the widget or the empty string.
-     *  See {@link AccessibilityNodeInfo#getViewIdResourceName()}.
+     * The resource id of the widget or the empty string.
+     * See {@link AccessibilityNodeInfo#getViewIdResourceName()}.
      */
-    private String resourceID;
+    private final String resourceID;
 
     /**
-     * The index of the widget in the ui hierarchy. Currently,
-     * the index is not set properly.
+     * A unique index within the ui hierarchy. This index is based on the order of BFS.
      */
-    @Deprecated
-    private int index;
+    private final int index;
 
     /**
-     * Only set if the widget stores a text, e.g. the text of an input box, otherwise the empty string.
-     * See {@link AccessibilityNodeInfo#getText()}.
+     * The index of the widget in the ui hierarchy. This conforms
+     * to the index of the 'uiautomatorviewer' tool. This is solely
+     * a local index for each widget's children, i.e. the children
+     * of a widget are labeled starting from 0.
      */
-    private String text;
+    private final int localIndex;
+
+    /**
+     * The depth of the widget in the ui hierarchy.
+     */
+    private final int depth;
+
+    /**
+     * The activity name derived from the package name.
+     */
+    private final String activity;
 
     /**
      * The package name the widget is referring to.
      * See {@link AccessibilityNodeInfo#getPackageName()}.
      */
-    private String packageName;
+    private final String packageName;
+
+    /**
+     * The coordinates/boundaries of the widget.
+     * <p>
+     * (0,0)      (xMax,0)
+     * left       right
+     * x1         x2 (X = x1 + x2 / 2)
+     * ------------
+     * |          |
+     * |          |
+     * |          |
+     * ------------
+     * y1         y2 (Y = y1 + y2 / 2)
+     * top        bottom
+     * (yMax,0)   (xMax,yMax)
+     */
+    private final Rect bounds;
+    private final int X;
+    private final int Y;
+    private final int x1;
+    private final int x2;
+    private final int y1;
+    private final int y2;
+
+    /**
+     * Only set if the widget stores a text, e.g. the text of an input box, otherwise the empty string.
+     * See {@link AccessibilityNodeInfo#getText()}.
+     */
+    private final String text;
 
     /**
      * A possible content description of the widget, otherwise the empty string.
      * See {@link AccessibilityNodeInfo#getContentDescription()}.
      */
-    private String contentDesc;
+    private final String contentDesc;
 
-    private String labeledBy;
-    private boolean showingHintText;
-    private String color;
-    private String maxminLum;
-    private boolean focused;
+    private final String labeledBy;
+    private final boolean showingHintText;
+    private final boolean focused;
+    private final String errorText;
+    private final boolean contextClickable;
+    private final boolean importantForAccessibility;
+    private final boolean accessibilityFocused;
+    private final String labelFor;
+    private final boolean checkable;
+    private final boolean checked;
+    private final boolean enabled;
+    private final boolean focusable;
+    private final boolean scrollable;
+    private final boolean selected;
+    private final boolean visible;
+    private final int maxTextLength;
+    private final boolean screenReaderFocusable;
+    private final int inputType;
+    private final boolean hasChildren;
+    private final boolean heading;
+    private final boolean password;
 
-    private String errorText;
-
-    private boolean contextClickable;
-    private boolean importantForAccessibility;
-    private boolean accessibilityFocused;
-    private String labelFor;
-    private boolean checkable;
-    private boolean checked;
-    private boolean enabled;
-    private boolean focusable;
-    private boolean scrollable;
+    // mutable properties
     private boolean clickable;
     private boolean longClickable;
-    private boolean password;
-    private boolean selected;
-    private boolean visibleToUser;
-
-    /**
-     *  The coordinates/boundaries of the widget.
-     *
-     *  (0,0)      (xMax,0)
-     *  left       right
-     *  x1         x2 (X = x1 + x2 / 2)
-     *  ------------
-     *  |          |
-     *  |          |
-     *  |          |
-     *  ------------
-     *  y1         y2 (Y = y1 + y2 / 2)
-     *  top        bottom
-     *  (yMax,0)   (xMax,yMax)
-     */
-    private Rect bounds;
-    private int X;
-    private int Y;
-    private int x1;
-    private int x2;
-    private int y1;
-    private int y2;
-
-    private int maxLength;
-    private boolean screenReaderFocusable;
-    private int inputType;
-    private boolean hasChildren;
-    private boolean usedAsStateDiff;
     private String hint;
-    private boolean heading;
+
+    // deprecated properties
+    private String color;
+    private String maxminLum;
 
     /**
      * Creates a new widget.
      *
-     * @param id A customized widget id, see createWidget() of the AppScreen class.
-     * @param clazz The class name the widget refers to, e.g. android.widget.TextView or the
-     *              empty string if not available.
-     * @param idByActivity Either the view id resource name, see {@link AccessibilityNodeInfo#getViewIdResourceName()}
-     *                     or a customized representation, check createWidget() of the AppScreen class.
+     * @param node       A node in the ui hierarchy.
+     * @param activity   The activity name the widget belongs to.
+     * @param depth      The depth of the node in the ui hierarchy.
+     * @param localIndex A local index for the widget's children.
      */
-    public Widget(String id, String clazz, String idByActivity) {
-        setId(id);
-        setClazz(clazz);
-        setBounds(new Rect());
-        setContentDesc("");
-        setText("");
+    public Widget(Widget parent, AccessibilityNodeInfo node, String activity,
+                  int depth, int index, int localIndex) {
+
+        this.parent = parent;
+        this.activity = activity;
+        this.packageName = activity.split("/")[0];
+        this.resourceID = Objects.toString(node.getViewIdResourceName(), "");
+        this.clazz = Objects.toString(node.getClassName(), "");
+        this.depth = depth;
+        this.index = index;
+        this.localIndex = localIndex;
+        this.id = activity + "->" + depth + "->" + index + "->" + localIndex;
         children = new ArrayList<>();
-        maxLength = -1;
-        this.idByActivity = idByActivity;
-        usedAsStateDiff = false;
-        hint = "";
-        color = "";
-    }
 
-    public boolean isContextClickable() {
-        return contextClickable;
-    }
+        // set the widget boundaries
+        Rect bounds = new Rect();
+        node.getBoundsInScreen(bounds);
+        this.bounds = bounds;
+        this.x1 = bounds.left;
+        this.x2 = bounds.right;
+        this.y1 = bounds.top;
+        this.y2 = bounds.bottom;
+        this.X = bounds.centerX();
+        this.Y = bounds.centerY();
 
-    public void setContextClickable(boolean contextClickable) {
-        this.contextClickable = contextClickable;
-    }
+        this.checkable = node.isCheckable();
+        this.password = node.isPassword();
+        this.enabled = node.isEnabled();
+        this.selected = node.isSelected();
+        this.checked = node.isChecked();
+        this.clickable = node.isClickable();
+        this.focusable = node.isFocusable();
+        this.focused = node.isFocused();
+        this.longClickable = node.isLongClickable();
+        this.scrollable = node.isScrollable();
+        this.maxTextLength = node.getMaxTextLength();
+        this.visible = node.isVisibleToUser();
+        this.inputType = node.getInputType();
+        this.accessibilityFocused = node.isAccessibilityFocused();
+        this.hasChildren = node.getChildCount() > 0;
 
-    public String getColor() {
-        return color;
-    }
+        this.text = Objects.toString(node.getText(), "");
+        this.contentDesc = Objects.toString(node.getContentDescription(), "");
+        this.errorText = Objects.toString(node.getError(), "");
 
-    public String getMaxminLum() {
-        return maxminLum;
-    }
-
-    public void setMaxminLum(String maxminLum) {
-        this.maxminLum = maxminLum;
-    }
-
-    public void setColor(String color) {
-
-        String parts[] = color.split("#");
-        if (parts.length==2) {
-            this.color = parts[0];
-            setMaxminLum(parts[1]);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            this.importantForAccessibility = node.isImportantForAccessibility();
+        } else {
+            this.importantForAccessibility = true;
         }
-        else{
-            this.color = color;
-            setMaxminLum("");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            this.screenReaderFocusable = node.isScreenReaderFocusable();
+        } else {
+            this.screenReaderFocusable = true;
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.showingHintText = node.isShowingHintText();
+        } else {
+            this.showingHintText = false;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            this.contextClickable = node.isContextClickable();
+        } else {
+            this.contextClickable = false;
+        }
+
+        AccessibilityNodeInfo.CollectionItemInfo cinfo = node.getCollectionItemInfo();
+        if (cinfo != null) {
+            this.heading = cinfo.isHeading();
+        } else {
+            this.heading = false;
+        }
+
+        AccessibilityNodeInfo lf = node.getLabelFor();
+        String labelFor = "";
+        if (lf != null) {
+            labelFor = Objects.toString(lf.getViewIdResourceName(), "");
+        }
+        this.labelFor = labelFor;
+
+        AccessibilityNodeInfo lb = node.getLabeledBy();
+        String labelBy = "";
+        if (lb != null) {
+            labelBy = Objects.toString(lb.getViewIdResourceName(), "");
+        }
+        this.labeledBy = labelBy;
     }
 
-    public String getErrorText() {
-        return errorText;
-    }
-
-    public void setErrorText(String errorText) {
-        this.errorText = errorText;
-    }
-
-    public boolean isHasChildren() {
-        return hasChildren;
-    }
-
-    public void setHasChildren(boolean hasChildren) {
-        this.hasChildren = hasChildren;
-    }
-
+    /**
+     * Returns the parent widget.
+     *
+     * @return Returns the parent widget or {@code null} if the widget is the root widget.
+     */
     public Widget getParent() {
         return parent;
     }
 
-    public void setParent(Widget parent) {
-        this.parent = parent;
-    }
-
+    /**
+     * Returns the unique id of the widget. This is a combination of activity name, depth,
+     * global and local index, see the constructor.
+     *
+     * @return Returns the widget id.
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Returns the class name of the widget, e.g. android.view.ViewGroup.
+     *
+     * @return Returns the widget's class name or the empty string if none is defined.
+     */
     public String getClazz() {
         return clazz;
     }
 
-    public void setVisibleToUser(boolean visibleToUser) {
-        this.visibleToUser = visibleToUser;
+    /**
+     * Returns the local index, i.e. the child number. Each widget that holds children, labels
+     * those widgets starting from 0. This index is only unique within the children of a widget.
+     *
+     * @return Returns the local index.
+     */
+    public int getLocalIndex() {
+        return localIndex;
     }
 
-    public boolean isVisibleToUser() {
-        return visibleToUser;
-    }
-
-    public void setClazz(String clazz) {
-        this.clazz = clazz;
+    /**
+     * Returns the resource id.
+     *
+     * @return Returns the resource id or the empty string if none is defined.
+     */
+    public String getResourceID() {
+        return resourceID;
     }
 
     /**
@@ -238,127 +293,209 @@ public class Widget {
      *
      * @return Returns the widget's index.
      */
-    @Deprecated
     public int getIndex() {
         return index;
     }
 
     /**
-     * Sets the widget's index.
+     * Returns the package name of the widget.
      *
-     * @param index The new index.
+     * @return Returns the package name of the widget.
      */
-    @Deprecated
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
     public String getPackageName() {
         return packageName;
     }
 
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
+    /**
+     * Returns the siblings of this widget. If there are no siblings, an empty list is returned.
+     *
+     * @return Returns the siblings of the widget.
+     */
+    public List<Widget> getSiblings() {
+
+        List<Widget> siblings = new ArrayList<>();
+
+        if (parent != null) {
+            for (Widget sibling : parent.getChildren()) {
+                if (this.localIndex != sibling.getLocalIndex()) {
+                    // only add siblings, not this widget itself
+                    siblings.add(sibling);
+                }
+            }
+        }
+
+        return Collections.unmodifiableList(siblings);
     }
 
+    /**
+     * Returns the list of children.
+     *
+     * @return Returns the widget's children.
+     */
+    public List<Widget> getChildren() {
+        return Collections.unmodifiableList(children);
+    }
+
+    /**
+     * Returns the x1 coordinate of the widget.
+     *
+     * @return Returns the x1 coordinate.
+     */
+    public int getX1() {
+        return x1;
+    }
+
+    /**
+     * Returns the x2 coordinate of the widget.
+     *
+     * @return Returns the x2 coordinate.
+     */
+    public int getX2() {
+        return x2;
+    }
+
+    /**
+     * Returns the y1 coordinate of the widget.
+     *
+     * @return Returns the y1 coordinate.
+     */
+    public int getY1() {
+        return y1;
+    }
+
+    /**
+     * Returns the y2 coordinate of the widget.
+     *
+     * @return Returns the y2 coordinate.
+     */
+    public int getY2() {
+        return y2;
+    }
+
+    /**
+     * Returns the X coordinate of the widget.
+     *
+     * @return Returns the X coordinate.
+     */
+    public int getX() {
+        return X;
+    }
+
+    /**
+     * Returns the Y coordinate of the widget.
+     *
+     * @return Returns the Y coordinate.
+     */
+    public int getY() {
+        return Y;
+    }
+
+    /**
+     * Retrieves the boundaries of the widget.
+     *
+     * @return Returns a rectangle describing the widget boundaries.
+     */
+    public Rect getBounds() {
+        return bounds;
+    }
+
+    /**
+     * Returns whether the widget has children.
+     *
+     * @return Returns {@code true} if the widget has children, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean hasChildren() {
+        return hasChildren;
+    }
+
+    /**
+     * Adds  a child widget.
+     *
+     * @param widget Adds a child widget.
+     */
+    public void addChild(Widget widget) {
+        children.add(widget);
+    }
+
+    /**
+     * Returns whether the widget is visible or not.
+     *
+     * @return Returns {@code true} if the widget is visible, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isVisible() {
+        return visible;
+    }
+
+    /**
+     * Returns the content description of the widget.
+     *
+     * @return Returns the content description or the empty string if undefined.
+     */
     public String getContentDesc() {
         return contentDesc;
     }
 
-    public void setContentDesc(String contentDesc) {
-        this.contentDesc = contentDesc;
+    public boolean isContextClickable() {
+        return contextClickable;
+    }
+
+    public String getErrorText() {
+        return errorText;
     }
 
     public boolean isCheckable() {
         return checkable;
     }
 
-    public void setCheckable(boolean checkable) {
-        this.checkable = checkable;
-    }
-
     public boolean isChecked() {
         return checked;
-    }
-
-    public void setChecked(boolean checked) {
-        this.checked = checked;
     }
 
     public boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
     public boolean isFocusable() {
         return focusable;
-    }
-
-    public void setFocusable(boolean focusable) {
-        this.focusable = focusable;
     }
 
     public boolean isScrollable() {
         return scrollable;
     }
 
-    public void setScrollable(boolean scrollable) {
-        this.scrollable = scrollable;
-    }
-
     public boolean isClickable() {
         return clickable;
     }
 
+    // TODO: verify whether this property should be immutable or not
     public void setClickable(boolean clickable) {
         this.clickable = clickable;
+    }
+
+    // TODO: verify whether this property should be immutable or not
+    public void setLongClickable(boolean longClickable) {
+        this.longClickable = longClickable;
     }
 
     public boolean isLongClickable() {
         return longClickable;
     }
 
-    public void setLongClickable(boolean longClickable) {
-        this.longClickable = longClickable;
-    }
-
-    public boolean isPassword() {
-        return password;
-    }
-
-    public void setPassword(boolean password) {
-        this.password = password;
-    }
-
     public boolean isSelected() {
         return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public boolean isShowingHintText() {
         return showingHintText;
     }
 
-    public void setShowingHintText(boolean showingHintText) {
-        this.showingHintText = showingHintText;
-    }
-
     public boolean isEditable() {
-        //MATE.log("--Analyse if class i/s editable: " + clazz);
         if (clazz.contains("android.widget.EditText"))
             return true;
         if (clazz.contains("AppCompatEditText"))
@@ -380,21 +517,15 @@ public class Widget {
         if (clazz.contains("TextInputEditText"))
             return true;
 
-
         Class<?> clazzx = null;
-        //MATE.log("Analyse if class is editable: " + clazzx);
         try {
             clazzx = Class.forName(clazz);
-            //MATE.log("Analyse if class is editable: " + clazzx);
-            boolean editType = 	android.widget.EditText.class.isAssignableFrom(clazzx);
+            boolean editType = android.widget.EditText.class.isAssignableFrom(clazzx);
             if (editType)
                 return true;
         } catch (ClassNotFoundException e) {
-            //MATE.log("ERRO - class not found: " + clazzx);
+            MATE.log_debug("Class " + getClazz() + " represents no edit text instance!");
         }
-
-
-
         return false;
     }
 
@@ -402,156 +533,23 @@ public class Widget {
         return clickable || longClickable || scrollable || isEditable();
     }
 
-    public int getX1() {
-        return x1;
-    }
-
-    public void setX1(int x1) {
-        this.x1 = x1;
-    }
-
-    public int getX2() {
-        return x2;
-    }
-
-    public void setX2(int x2) {
-        this.x2 = x2;
-    }
-
-    public int getY1() {
-        return y1;
-    }
-
-    public void setY1(int y1) {
-        this.y1 = y1;
-    }
-
-    public int getY2() {
-        return y2;
-    }
-
-    public void setY2(int y2) {
-        this.y2 = y2;
-    }
-
-    public int getX() {
-        return X;
-    }
-
-    public void setX(int x) {
-        X = x;
-    }
-
-    public int getY() {
-        return Y;
-    }
-
-    public void setY(int y) {
-        Y = y;
-    }
-
-    /**
-     * Defines the boundaries of the widget. As a side effect,
-     * the coordinates of the widget are adjusted.
-     *
-     * @param rectangle The rectangle defining the boundaries of the widget.
-     */
-    public void setBounds(Rect rectangle) {
-
-        this.bounds = rectangle;
-
-        setX1(rectangle.left);
-        setX2(rectangle.right);
-        setY1(rectangle.top);
-        setY2(rectangle.bottom);
-
-        // TODO: there is 'exactCenter()' for X and Y if desired
-        setX(rectangle.centerX());
-        setY(rectangle.centerY());
-    }
-
-    /**
-     * Retrieves the boundaries of the widget.
-     *
-     * @return Returns a rectangle describing the widget boundaries.
-     */
-    public Rect getBounds() {
-        return bounds;
-    }
-
     public boolean directSonOf(String type) {
-        Widget wparent = this.parent;
-        if (wparent != null)
-            if (wparent.getClazz().contains(type))
+        Widget parent = this.parent;
+        if (parent != null)
+            if (parent.getClazz().contains(type))
                 return true;
         return false;
     }
 
     public boolean isSonOf(String type) {
-        Widget wparent = this.parent;
-        while (wparent != null) {
-            if (wparent.getClazz().contains(type))
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.getClazz().contains(type))
                 return true;
             else
-                wparent = wparent.getParent();
+                parent = parent.getParent();
         }
         return false;
-    }
-
-
-    public List<Widget> getNextChildWithText() {
-        List<Widget> ws = new ArrayList<>();
-        for (Widget child : children) {
-            //System.out.println("has children: " + child.getText());
-            if (!child.getText().equals("")) {
-                ws.add(child);
-            }
-            ws.addAll(child.getNextChildWithText());
-        }
-
-        return ws;
-    }
-
-    public List<Widget> getNextChildWithDescContentText() {
-        List<Widget> ws = new ArrayList<>();
-
-        for (Widget child : children) {
-            //System.out.println("has children: " + child.getText());
-            if (!child.getContentDesc().equals("")) {
-                ws.add(child);
-
-            }
-            ws.addAll(child.getNextChildWithDescContentText());
-        }
-
-        return ws;
-    }
-
-    public void addChild(Widget widget) {
-        children.add(widget);
-    }
-
-    public String getNextChildsText() {
-        String childText = "";
-        for (Widget wg : getNextChildWithText())
-            childText += wg.getText() + " ";
-        return childText;
-    }
-
-    public String getIdByActivity() {
-        return idByActivity;
-    }
-
-    public void setIdByActivity(String idByActivity) {
-        this.idByActivity = idByActivity;
-    }
-
-    public String getResourceID() {
-        return resourceID;
-    }
-
-    public void setResourceID(String resourceID) {
-        this.resourceID = resourceID;
     }
 
     public boolean isSonOfLongClickable() {
@@ -565,39 +563,12 @@ public class Widget {
         return false;
     }
 
-    public boolean isSonOfScrollable() {
-        Widget wparent = this.parent;
-        while (wparent != null) {
-            if (wparent.isScrollable())
-                return true;
-            else
-                wparent = wparent.getParent();
-        }
-        return false;
-    }
-
-    public int getMaxLength() {
-        return maxLength;
-    }
-
-    public void setMaxLength(int maxLength) {
-        this.maxLength = maxLength;
+    public int getMaxTextLength() {
+        return maxTextLength;
     }
 
     public int getInputType() {
         return inputType;
-    }
-
-    public void setInputType(int inputType) {
-        this.inputType = inputType;
-    }
-
-    public boolean isUsedAsStateDiff() {
-        return usedAsStateDiff;
-    }
-
-    public void setUsedAsStateDiff(boolean usedAsStateDiff) {
-        this.usedAsStateDiff = usedAsStateDiff;
     }
 
     public void setHint(String hint) {
@@ -608,151 +579,94 @@ public class Widget {
         return hint;
     }
 
-    public boolean isEmpty() {
-        if (hint.equals(text))
-            return true;
-        if (text.equals(""))
-            return true;
-        return false;
-    }
-
-    public void setLabeledBy(String labeledBy) {
-        this.labeledBy = labeledBy;
-    }
-
     public String getLabeledBy() {
         return this.labeledBy;
     }
 
-    public void setLabelFor(String labelFor){
-        this.labelFor = labelFor;
-    }
-
-    public String getLabelFor(){
+    public String getLabelFor() {
         return this.labelFor;
-    }
-
-    public boolean needsContrastChecked() {
-        Set<String> excludedClasses = new HashSet<String>();
-       // excludedClasses.add("Layout");
-        //excludedClasses.add("ViewGroup");
-        //excludedClasses.add("ScrollView");
-        //excludedClasses.add("Spinner");
-        //excludedClasses.add("TableRow");
-        //excludedClasses.add("ListView");
-        //excludedClasses.add("GridView");
-
-        if (!this.isImportantForAccessibility())
-            return false;
-
-        if (this.bounds.equals("[0,0][0,0]"))
-            return false;
-
-        if (this.isEditable() && this.text.equals(""))
-            return false;
-
-        //if (this.getClazz().contains("Text") && this.getText().equals(""))
-          //  return false;
-
-        if (this.getClazz().contains("Image") && !this.isActionable())
-            return false;
-
-        for (String excluded : excludedClasses) {
-            if (this.clazz.contains(excluded))
-                return false;
-        }
-
-        if (!this.isActionable() && !this.getClazz().contains("Text"))
-            return false;
-
-
-        return true;
     }
 
     public boolean isScreenReaderFocusable() {
         return screenReaderFocusable;
     }
 
-    public void setScreenReaderFocusable(boolean screenReaderFocusable) {
-        this.screenReaderFocusable = screenReaderFocusable;
-    }
-
     public boolean isImportantForAccessibility() {
         return importantForAccessibility;
-    }
-
-    public void setImportantForAccessibility(boolean importantForAccessibility) {
-        this.importantForAccessibility = importantForAccessibility;
     }
 
     public boolean isAccessibilityFocused() {
         return accessibilityFocused;
     }
 
-    public void setAccessibilityFocused(boolean accessibilityFocused) {
-        this.accessibilityFocused = accessibilityFocused;
-    }
-
-    public List<Widget> getChildren() {
-        return children;
-    }
-
-    public void setHeading(boolean heading) {
-        this.heading = heading;
-    }
-
     public boolean isHeading() {
         return heading;
     }
 
-    public boolean isButtonType(){
+    public boolean isFocused() {
+        return focused;
+    }
 
+    /**
+     * Checks whether this widget represents a button.
+     *
+     * @return Returns {@code true} if this widget is a button, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isButtonType() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            boolean buttonType = android.widget.Button.class.isAssignableFrom(clazz);
-            return buttonType;
-        }
-        catch (ClassNotFoundException e) {
-            //e.printStackTrace();
+            return android.widget.Button.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException ignored) {
+            MATE.log_debug("Class " + getClazz() + " represents no button instance!");
         }
         return false;
     }
 
-    public boolean isImageButtonType(){
+    /**
+     * Checks whether this widget represents an image button.
+     *
+     * @return Returns {@code true} if this widget is an image button, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isImageButtonType() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            boolean imageButtonType = android.widget.ImageButton.class.isAssignableFrom(clazz);
-            return imageButtonType;
-        }
-        catch (ClassNotFoundException e) {
-            //e.printStackTrace();
+            return android.widget.ImageButton.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            MATE.log_debug("Class " + getClazz() + " represents no image button instance!");
         }
         return false;
     }
 
-    public boolean isImageSwitcherType(){
+    /**
+     * Checks whether this widget represents an image switcher.
+     *
+     * @return Returns {@code true} if this widget is an image switcher, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isImageSwitcherType() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            boolean imageSwitcherType = android.widget.ImageSwitcher.class.isAssignableFrom(clazz);
-            return imageSwitcherType;
-        }
-        catch (ClassNotFoundException e) {
-            //e.printStackTrace();
+            return android.widget.ImageSwitcher.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            MATE.log_debug("Class " + getClazz() + " represents no image switcher instance!");
         }
         return false;
     }
 
-    public boolean mightBeImage(){
-        //android.widget.TextView components are drawables - they can contain images
-        if (this.getClazz().contains("android.widget.TextView") && this.isClickable()){
-            if (this.getText().equals("")){
+    // TODO: find something more accurate if possible
+    public boolean mightBeImage() {
+        // android.widget.TextView components are drawables - they can contain images
+        if (this.getClazz().contains("android.widget.TextView") && this.isClickable()) {
+            if (this.getText().isEmpty()) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isImageType(){
+    public boolean isImageType() {
 
         if (this.clazz.contains("Image"))
             return true;
@@ -761,59 +675,87 @@ public class Widget {
 
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            boolean imageType = android.widget.ImageView.class.isAssignableFrom(clazz);
-            return imageType;
-        }
-        catch (ClassNotFoundException e) {
-           // e.printStackTrace();
+            return android.widget.ImageView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            MATE.log_debug("Class " + getClazz() + " represents no image type instance!");
         }
         return false;
-    }
-
-    public boolean isSpinnerType(){
-        try {
-            Class<?> clazz = Class.forName(this.getClazz());
-            boolean spinnerType = android.widget.AbsSpinner.class.isAssignableFrom(clazz);
-            return spinnerType;
-        }
-        catch (ClassNotFoundException e) {
-           // e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean isTextViewType(){
-        try {
-            Class<?> clazz = Class.forName(this.getClazz());
-            boolean textViewType = android.widget.TextView.class.isAssignableFrom(clazz);
-            return textViewType;
-        }
-        catch (ClassNotFoundException e) {
-            //e.printStackTrace();
-        }
-        return false;
-    }
-
-
-    public boolean isActionable() {
-        return this.isEditable()||this.isClickable()||this.isLongClickable()||this.isSpinnerType()||this.isCheckable();
-    }
-
-    public void setFocused(boolean focused) {
-        this.focused = focused;
-    }
-
-    public boolean isFocused(){
-        return focused;
     }
 
     /**
-     * Compares two widgets for equality. Note that
-     * this check might be not fully unique!
+     * Checks whether this widget represents a spinner.
+     *
+     * @return Returns {@code true} if this widget is a spinner, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isSpinnerType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.AbsSpinner.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            MATE.log_debug("Class " + getClazz() + " represents no spinner instance!");
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether this widget represents a text view.
+     *
+     * @return Returns {@code true} if this widget is a text view, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isTextViewType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.TextView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            MATE.log_debug("Class " + getClazz() + " represents no text view instance!");
+        }
+        return false;
+    }
+
+    public boolean isActionable() {
+        return this.isEditable() || this.isClickable() || this.isLongClickable()
+                || this.isSpinnerType() || this.isCheckable();
+    }
+
+    public boolean isPassword() {
+        return password;
+    }
+
+    @Deprecated
+    public String getColor() {
+        return color;
+    }
+
+    @Deprecated
+    public String getMaxminLum() {
+        return maxminLum;
+    }
+
+    @Deprecated
+    public void setMaxminLum(String maxminLum) {
+        this.maxminLum = maxminLum;
+    }
+
+    @Deprecated
+    public void setColor(String color) {
+
+        String parts[] = color.split("#");
+        if (parts.length == 2) {
+            this.color = parts[0];
+            setMaxminLum(parts[1]);
+        } else {
+            this.color = color;
+            setMaxminLum("");
+        }
+    }
+
+    /**
+     * Compares two widgets for equality.
      *
      * @param o The object to which we compare.
-     * @return Returns {@code true} if both widgets are equal,
-     *          otherwise {@code false} is returned.
+     * @return Returns {@code true} if both widgets are equal, otherwise {@code false} is returned.
      */
     @Override
     public boolean equals(Object o) {
@@ -823,8 +765,8 @@ public class Widget {
             return false;
         } else {
             Widget other = (Widget) o;
-            return Objects.equals(getIdByActivity(), other.getIdByActivity()) &&
-                    getX1() == other.getX1() &&
+            return getId().equals(other.getId())
+                    && getX1() == other.getX1() &&
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
                     getY2() == other.getY2();
@@ -839,10 +781,22 @@ public class Widget {
     @Override
     public int hashCode() {
         return Objects.hash(
-                getIdByActivity(),
+                getId(),
                 getX1(),
                 getX2(),
                 getY1(),
                 getY2());
+    }
+
+    /**
+     * A simple string representation of the widget.
+     *
+     * @return Returns a simple string representation of the widget.
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return "Widget{Activity: " + activity + ", resourceID: " + resourceID + ", clazz: " + clazz
+                + ", depth: " + depth + ", index: " + index + ", local index: " + localIndex + "}";
     }
 }

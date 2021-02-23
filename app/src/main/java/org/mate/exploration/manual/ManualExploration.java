@@ -10,8 +10,8 @@ import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibili
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
@@ -31,7 +31,7 @@ public class ManualExploration implements Algorithm {
     @Override
     public void run() {
 
-        Action manualAction = new WidgetAction(ActionType.MANUAL_ACTION);
+        Action manualAction = new UIAction(ActionType.MANUAL_ACTION);
 
         while (true) {
 

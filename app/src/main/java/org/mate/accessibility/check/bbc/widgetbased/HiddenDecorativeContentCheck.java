@@ -17,7 +17,7 @@ public class HiddenDecorativeContentCheck implements IWidgetAccessibilityCheck {
             return new AccessibilityViolation(AccessibilityViolationType.HIDDEN_DECORATIVE_CONTENT,widget,state,"");
         }
 
-        if (!widget.isVisibleToUser() && widget.isImportantForAccessibility()){
+        if (!widget.isVisible() && widget.isImportantForAccessibility()){
             return new AccessibilityViolation(AccessibilityViolationType.HIDDEN_DECORATIVE_CONTENT,widget,state,"");
         }
 
