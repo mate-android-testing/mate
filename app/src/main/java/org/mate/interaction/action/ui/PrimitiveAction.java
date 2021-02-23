@@ -4,21 +4,19 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.mate.MATE;
-import org.mate.interaction.action.Action;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public class PrimitiveAction extends Action {
+public class PrimitiveAction extends UIAction {
 
-    private final ActionType actionType;
     private final int x, y;
 
     public PrimitiveAction(int x, int y, ActionType actionType) {
+        super(actionType);
         this.x = x;
         this.y = y;
-        this.actionType = actionType;
     }
 
     public int getX() {
@@ -27,10 +25,6 @@ public class PrimitiveAction extends Action {
 
     public int getY() {
         return y;
-    }
-
-    public ActionType getActionType() {
-        return actionType;
     }
 
     /**
