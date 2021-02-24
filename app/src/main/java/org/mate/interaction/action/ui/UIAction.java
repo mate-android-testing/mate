@@ -19,12 +19,18 @@ public class UIAction extends Action {
     protected final ActionType actionType;
 
     /**
+     * The activity on which the action should be applied.
+     */
+    protected final String activityName;
+
+    /**
      * Constructs a new ui action with the given action type.
      *
      * @param actionType The type of action, e.g. CLICK.
      */
-    public UIAction(ActionType actionType) {
+    public UIAction(ActionType actionType, String activityName) {
         this.actionType = actionType;
+        this.activityName = activityName;
     }
 
     /**
@@ -37,6 +43,15 @@ public class UIAction extends Action {
     }
 
     /**
+     * Returns the activity name associated with the action.
+     *
+     * @return Returns the activity on which the action should be applied.
+     */
+    public String getActivityName() {
+        return activityName;
+    }
+
+    /**
      * A simple textual representation. This should conform with
      * the analysis framework.
      *
@@ -45,7 +60,7 @@ public class UIAction extends Action {
     @NonNull
     @Override
     public String toString() {
-        return "ui action: " + actionType;
+        return "ui action: " + actionType + " on activity: " + activityName;
     }
 
     /**
@@ -66,7 +81,7 @@ public class UIAction extends Action {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(actionType);
+        return Objects.hash(actionType, activityName);
     }
 
     /**
@@ -84,7 +99,8 @@ public class UIAction extends Action {
             return false;
         } else {
             UIAction other = (UIAction) o;
-            return actionType == other.actionType;
+            return actionType == other.actionType &&
+                    Objects.equals(activityName, other.activityName);
         }
     }
 }

@@ -13,8 +13,8 @@ public class PrimitiveAction extends UIAction {
 
     private final int x, y;
 
-    public PrimitiveAction(int x, int y, ActionType actionType) {
-        super(actionType);
+    public PrimitiveAction(int x, int y, ActionType actionType, String activity) {
+        super(actionType, activity);
         this.x = x;
         this.y = y;
     }
@@ -35,7 +35,9 @@ public class PrimitiveAction extends UIAction {
     public static PrimitiveAction randomAction() {
         int x = Randomness.getRnd().nextInt(MATE.device.getDisplayWidth());
         int y = Randomness.getRnd().nextInt(MATE.device.getDisplayHeight());
-        return new PrimitiveAction(x, y, Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)));
+        String activity = MATE.uiAbstractionLayer.getCurrentActivity();
+        return new PrimitiveAction(x, y,
+                Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)), activity);
     }
 
     /**

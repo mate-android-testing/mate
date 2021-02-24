@@ -67,6 +67,15 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Returns the name of the current activity.
+     *
+     * @return Returns the name of the current activity.
+     */
+    public String getCurrentActivity() {
+        return getLastScreenState().getActivityName();
+    }
+
+    /**
      * Executes the given action. Retries execution the action when the
      * UIAutomator is disconnected for a pre-defined number of times.
      *

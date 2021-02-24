@@ -46,7 +46,7 @@ public class WidgetAction extends UIAction {
      * @param actionType The kind of action, e.g. 'CLICK'.
      */
     public WidgetAction(Widget widget, ActionType actionType) {
-        super(actionType);
+        super(actionType, widget.getActivity());
         this.widget = widget;
         setExtraInfo("");
         adjActions = new ArrayList<>();

@@ -246,7 +246,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
             // if we found some editable widget, we should add the action 'ENTER'
             if (foundEditable && !enterAdded) {
-                executables.add(new UIAction(ActionType.ENTER));
+                executables.add(new UIAction(ActionType.ENTER, activityName));
                 enterAdded = true;
             }
         }
@@ -269,7 +269,7 @@ public class ActionsScreenState extends AbstractScreenState {
             MATE.log_acc("Reached GoogleOAuthActivity!");
             // we can't authenticate, so only allow to press 'BACK'
             executables = new ArrayList<>();
-            executables.add(new UIAction(ActionType.BACK));
+            executables.add(new UIAction(ActionType.BACK, activityName));
         } else {
             // those actions should be always applicable independent of the widget
             executables.addAll(getUIActions());
@@ -289,27 +289,27 @@ public class ActionsScreenState extends AbstractScreenState {
     private List<UIAction> getUIActions() {
 
         List<UIAction> executables = new ArrayList<>();
-        executables.add(new UIAction(ActionType.BACK));
-        executables.add(new UIAction(ActionType.MENU));
-        executables.add(new UIAction(ActionType.TOGGLE_ROTATION));
-        // executables.add(new UIAction(ActionType.HOME));
-        executables.add(new UIAction(ActionType.SEARCH));
-        // executables.add(new UIAction(ActionType.QUICK_SETTINGS));
-        // executables.add(new UIAction(ActionType.NOTIFICATIONS));
-        executables.add(new UIAction(ActionType.SLEEP));
-        executables.add(new UIAction(ActionType.WAKE_UP));
-        executables.add(new UIAction(ActionType.DELETE));
-        executables.add(new UIAction(ActionType.DPAD_CENTER));
-        executables.add(new UIAction(ActionType.DPAD_DOWN));
-        executables.add(new UIAction(ActionType.DPAP_UP));
-        executables.add(new UIAction(ActionType.DPAD_LEFT));
-        executables.add(new UIAction(ActionType.DPAD_RIGHT));
+        executables.add(new UIAction(ActionType.BACK, activityName));
+        executables.add(new UIAction(ActionType.MENU, activityName));
+        executables.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
+        // executables.add(new UIAction(ActionType.HOME, activityName));
+        executables.add(new UIAction(ActionType.SEARCH, activityName));
+        // executables.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
+        // executables.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
+        executables.add(new UIAction(ActionType.SLEEP, activityName));
+        executables.add(new UIAction(ActionType.WAKE_UP, activityName));
+        executables.add(new UIAction(ActionType.DELETE, activityName));
+        executables.add(new UIAction(ActionType.DPAD_CENTER, activityName));
+        executables.add(new UIAction(ActionType.DPAD_DOWN, activityName));
+        executables.add(new UIAction(ActionType.DPAP_UP, activityName));
+        executables.add(new UIAction(ActionType.DPAD_LEFT, activityName));
+        executables.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
 
         // swipes are both applicable to widgets and non-widgets
-        executables.add(new UIAction(ActionType.SWIPE_DOWN));
-        executables.add(new UIAction(ActionType.SWIPE_UP));
-        executables.add(new UIAction(ActionType.SWIPE_LEFT));
-        executables.add(new UIAction(ActionType.SWIPE_RIGHT));
+        executables.add(new UIAction(ActionType.SWIPE_DOWN, activityName));
+        executables.add(new UIAction(ActionType.SWIPE_UP, activityName));
+        executables.add(new UIAction(ActionType.SWIPE_LEFT, activityName));
+        executables.add(new UIAction(ActionType.SWIPE_RIGHT, activityName));
         return executables;
     }
 

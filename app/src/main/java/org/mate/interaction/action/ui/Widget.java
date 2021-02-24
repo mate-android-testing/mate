@@ -66,7 +66,7 @@ public class Widget {
     private final int depth;
 
     /**
-     * The activity name derived from the package name.
+     * The activity name.
      */
     private final String activity;
 
@@ -156,6 +156,8 @@ public class Widget {
         this.parent = parent;
         this.activity = activity;
         this.packageName = activity.split("/")[0];
+        MATE.log_debug("Package name 1: " + packageName);
+        MATE.log_debug("Package name 2: " + node.getPackageName());
         this.resourceID = Objects.toString(node.getViewIdResourceName(), "");
         this.clazz = Objects.toString(node.getClassName(), "");
         this.depth = depth;
@@ -239,6 +241,15 @@ public class Widget {
             labelBy = Objects.toString(lb.getViewIdResourceName(), "");
         }
         this.labeledBy = labelBy;
+    }
+
+    /**
+     * Returns the name of the activity the widget is placed on.
+     *
+     * @return Returns the full-qualified activity name.
+     */
+    public String getActivity() {
+        return activity;
     }
 
     /**
