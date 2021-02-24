@@ -155,9 +155,7 @@ public class Widget {
 
         this.parent = parent;
         this.activity = activity;
-        this.packageName = activity.split("/")[0];
-        MATE.log_debug("Package name 1: " + packageName);
-        MATE.log_debug("Package name 2: " + node.getPackageName());
+        this.packageName = Objects.toString(node.getPackageName(), activity.split("/")[0]);
         this.resourceID = Objects.toString(node.getViewIdResourceName(), "");
         this.clazz = Objects.toString(node.getClassName(), "");
         this.depth = depth;
