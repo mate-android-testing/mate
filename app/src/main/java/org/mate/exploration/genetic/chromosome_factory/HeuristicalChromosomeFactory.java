@@ -85,8 +85,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
 
             if (previousAction != null) {
                 //add previously executed action to list of actions preceding an available widget
-                String widgetId = uiAbstractionLayer.getLastScreenState().getActivityName()
-                        + "->" + action.getActionType().name();
+                String widgetId = action.getActivityName() + "->" + action.getActionType().name();
                 if (action instanceof WidgetAction) {
                     widgetId = ((WidgetAction) action).getWidget().getId();
                 }
@@ -102,8 +101,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         //select random element form candidates
         UIAction selectedAction = Randomness.randomElement(candidateActions);
 
-        String widgetId = uiAbstractionLayer.getLastScreenState().getActivityName() + "->"
-                + selectedAction.getActionType().name();
+        String widgetId = selectedAction.getActivityName() + "->" + selectedAction.getActionType().name();
 
         if (selectedAction instanceof WidgetAction) {
             widgetId = ((WidgetAction) selectedAction).getWidget().getId();
@@ -187,8 +185,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
             int count = 0;
             for (UIAction action : executableActions) {
 
-                String widgetId = uiAbstractionLayer.getLastScreenState().getActivityName()
-                        + "->" + action.getActionType().name();
+                String widgetId = action.getActivityName() + "->" + action.getActionType().name();
 
                 if (action instanceof WidgetAction) {
                     widgetId = ((WidgetAction) action).getWidget().getId();
