@@ -27,7 +27,7 @@ public class ExecuteMATEMOSA {
 
         MATE mate = new MATE();
 
-        final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
+        GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
@@ -45,7 +45,7 @@ public class ExecuteMATEMOSA {
 
         // we need to associate with each objective (branch, line) a fitness function
         for (String objective : objectives) {
-            builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
+            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
         }
 
         final IGeneticAlgorithm<TestCase> mosa = builder.build();

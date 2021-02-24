@@ -62,8 +62,65 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
                 }
             }
         }
+    }
 
+    /**
+     * Checks whether two screen states have a different color by
+     * comparing pairwise the widgets.
+     *
+     * @param state1 The first screen state.
+     * @param state2 The second screen state.
+     * @return Returns {@code true} if the screen states have a different color,
+     *          otherwise {@code false} is returned.
+     */
+    private boolean differentColor(IScreenState state1, IScreenState state2) {
 
+        if (state2== null) {
+            return true;
+        }
+
+        List<Widget> thisWidgets = state1.getWidgets();
+        List<Widget> otherWidgets = state2.getWidgets();
+
+        boolean found = false;
+
+        // compare pairwise the widgets
+        for (Widget wThis: thisWidgets) {
+            for (Widget wOther: otherWidgets) {
+                // check equality by id and text
+                if (wThis.getId().equals(wOther.getId()) &&
+                        wThis.getText().equals(wOther.getText())) {
+
+                    found = true;
+
+                    if (!wOther.getColor().equals(wThis.getColor()) &&
+                            !wOther.isFocused() &&
+                            wThis.isFocused() == wOther.isFocused() &&
+                            wOther.getHint().equals(wThis.getHint()) &&
+                            wOther.getContentDesc().equals(wThis.getContentDesc())) {
+                        return true;
+                    }
+                }
+            }
+
+            if (!found) {
+                // search by text
+                for (Widget wOther: otherWidgets) {
+
+                    if (wThis.getText().equals(wOther.getText())) {
+                        found = true;
+
+                        if (!wOther.getColor().equals(wThis.getColor()) &&
+                                !wOther.isFocused() &&
+                                wThis.isFocused() == wOther.isFocused() &&
+                                wOther.getHint().equals(wThis.getHint()) &&
+                                wOther.getContentDesc().equals(wThis.getContentDesc()))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -78,7 +135,7 @@ public class ColourMeaningAccessibilityCheck implements IScreenAccessibilityChec
             //MATE.log("CHECK IF COLOR CHANGED");
             //if state has been visited
             //   check whether any of their colors have changed
-            if (visitedState.differentColor(state)){
+            if (differentColor(visitedState, state)){
                 extraInfo = "Same state, different colors for some widgets!";
                 return new AccessibilityViolation(AccessibilityViolationType.COLOUR_MEANING,state,extraInfo);
                 //MATE.log("COR DIFERENTE");

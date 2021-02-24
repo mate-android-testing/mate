@@ -27,7 +27,7 @@ public class ExecuteMATEMio {
 
         MATE mate = new MATE();
 
-        final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
+        GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MIO)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
                 .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
@@ -45,7 +45,7 @@ public class ExecuteMATEMio {
         List<String> objectives = Registry.getEnvironmentManager().getObjectives(Properties.OBJECTIVE());
 
         for (String objective : objectives) {
-            builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
+            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
         }
 
         final IGeneticAlgorithm<TestCase> mio = builder.build();

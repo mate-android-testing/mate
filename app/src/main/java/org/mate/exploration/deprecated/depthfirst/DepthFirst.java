@@ -45,7 +45,7 @@ public class DepthFirst {
 
         //gets a list of all executable actions
         //TODO: how about selectState.getactions
-        List<WidgetAction> executableActions = selectedState.getActions();
+        List<WidgetAction> executableActions = selectedState.getWidgetActions();
         MATE.log(selectedStateId + " - activity: " + selectedState.getActivityName());
         for (WidgetAction act: executableActions){
             Widget widget = act.getWidget();

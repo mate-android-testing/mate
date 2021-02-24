@@ -11,7 +11,7 @@ public class PhantomElementCheck implements IWidgetAccessibilityCheck {
     public AccessibilityViolation check(IScreenState state, Widget widget) {
 
         if (widget.isImportantForAccessibility() &&
-                !widget.isVisibleToUser() &&
+                !widget.isVisible() &&
                 widget.isClickable()){
             return new AccessibilityViolation(AccessibilityViolationType.PHANTOM_ELEMENT,widget,state,widget.getId());
         }

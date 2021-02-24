@@ -20,6 +20,11 @@ public class FSMModel implements IGUIModel {
     }
 
     @Override
+    public boolean containsState(IScreenState screenState) {
+        return fsm.containsState(screenState);
+    }
+
+    @Override
     public String toString() {
         return fsm.toString();
     }

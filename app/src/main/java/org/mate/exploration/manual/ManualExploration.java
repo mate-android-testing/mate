@@ -8,10 +8,11 @@ import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.exploration.Algorithm;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
@@ -23,15 +24,18 @@ import org.mate.utils.Utils;
 public class ManualExploration implements Algorithm {
 
     private final boolean enableAccessibilityChecks;
+    private final UIAbstractionLayer uiAbstractionLayer;
 
     public ManualExploration(boolean enableAccessibilityChecks) {
         this.enableAccessibilityChecks = enableAccessibilityChecks;
+        this.uiAbstractionLayer = MATE.getUiAbstractionLayer();
     }
 
     @Override
     public void run() {
 
-        Action manualAction = new WidgetAction(ActionType.MANUAL_ACTION);
+        Action manualAction = new UIAction(ActionType.MANUAL_ACTION,
+                uiAbstractionLayer.getCurrentActivity());
 
         while (true) {
 
@@ -41,7 +45,7 @@ public class ManualExploration implements Algorithm {
 
             IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
-            boolean foundNewState  = MATE.uiAbstractionLayer.checkIfNewState(state);
+            boolean foundNewState  = uiAbstractionLayer.checkIfNewState(state);
 
             if (foundNewState) {
 
@@ -53,9 +57,9 @@ public class ManualExploration implements Algorithm {
 
                 // this basically simulates a dummy action, which in turn causes the state model
                 // to check for updates
-                MATE.uiAbstractionLayer.executeAction(manualAction);
+                uiAbstractionLayer.executeAction(manualAction);
 
-                state = MATE.uiAbstractionLayer.getLastScreenState();
+                state = uiAbstractionLayer.getLastScreenState();
                 MATE.log_acc("New state: " + state.getId());
                 MATE.log_acc("Visited activity: " + state.getActivityName());
 

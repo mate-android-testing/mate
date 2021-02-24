@@ -6,6 +6,7 @@ import org.mate.state.IScreenState;
 public interface IGUIModel {
 
     void update(IScreenState source, IScreenState target, Action action);
+    boolean containsState(IScreenState screenState);
     // boolean containsState(IScreenState screenState);
     // boolean moveToState(IScreenState screenState);
     // boolean moveToActivity(String activity);

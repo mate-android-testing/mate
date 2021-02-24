@@ -11,6 +11,7 @@ import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.IGUIModel;
@@ -53,7 +54,6 @@ public class UIAbstractionLayer {
         lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         lastScreenState.setId("S0");
         screenStateEnumeration = 1;
-
         guiModel = new FSMModel(lastScreenState);
     }
 
@@ -62,8 +62,17 @@ public class UIAbstractionLayer {
      *
      * @return Returns the list of executable widget actions.
      */
-    public List<WidgetAction> getExecutableActions() {
+    public List<UIAction> getExecutableActions() {
         return getLastScreenState().getActions();
+    }
+
+    /**
+     * Returns the name of the current activity.
+     *
+     * @return Returns the name of the current activity.
+     */
+    public String getCurrentActivity() {
+        return getLastScreenState().getActivityName();
     }
 
     /**
@@ -226,9 +235,10 @@ public class UIAbstractionLayer {
                 // check for outdated build warnings
                 IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 for (Widget widget : screenState.getWidgets()) {
-                    if (widget.getText().equals("This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.")) {
-                        for (WidgetAction action : screenState.getActions()) {
-                            if (action.getWidget().getText().equals("OK")) {
+                    if (widget.getText().equals("This app was built for an older version of Android " +
+                            "and may not work properly. Try checking for updates, or contact the developer.")) {
+                        for (UIAction action : screenState.getActions()) {
+                            if (action instanceof WidgetAction && ((WidgetAction) action).getWidget().getText().equals("OK")) {
                                 try {
                                     deviceMgr.executeAction(action);
                                     break;
@@ -253,18 +263,28 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
-                // check for permission dialog
+                // check for permission dialog (API 25/28 tested)
                 if (screenState.getPackageName().equals("com.google.android.packageinstaller")
                         || screenState.getPackageName().equals("com.android.packageinstaller")) {
-                    List<WidgetAction> actions = screenState.getActions();
-                    for (WidgetAction action : actions) {
-                        if (action.getWidget().getId().contains("allow")) {
-                            try {
-                                deviceMgr.executeAction(action);
-                            } catch (AUTCrashException e) {
-                                e.printStackTrace();
+                    List<UIAction> actions = screenState.getActions();
+                    for (UIAction action : actions) {
+                        if (action instanceof WidgetAction) {
+                            WidgetAction widgetAction = (WidgetAction) action;
+
+                            /*
+                             * The resource id for the allow button stays the same for both API 25
+                             * and API 28, although the package name differs.
+                             */
+                            if (widgetAction.getWidget().getResourceID()
+                                    .equals("com.android.packageinstaller:id/permission_allow_button")
+                                    || widgetAction.getWidget().getText().toLowerCase().equals("allow")) {
+                                try {
+                                    deviceMgr.executeAction(action);
+                                } catch (AUTCrashException e) {
+                                    e.printStackTrace();
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                     change = true;

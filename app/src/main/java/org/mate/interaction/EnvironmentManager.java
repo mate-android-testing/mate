@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -541,9 +542,9 @@ public class EnvironmentManager {
     public <T> double getBranchDistance(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
-            // a dummy test case has a branch distance of 0.0 (0 is the worst in our case)
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve fitness data of dummy test case...");
+                MATE.log_warn("Trying to retrieve branch distance of dummy test case...");
+                // a dummy test case has a branch distance of 0.0 (0 is the worst in our case)
                 return 0.0;
             }
         }
@@ -562,10 +563,19 @@ public class EnvironmentManager {
      * The nth entry in the vector refers to the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
+     * @param objectives The list of branches.
      * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome) {
+    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, List<String> objectives) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
+                // a dummy test case has a branch distance of 0.0 for each objective (0.0 == worst)
+                return Collections.nCopies(objectives.size(), 0.0);
+            }
+        }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance_vector")
                 .withParameter("deviceId", emulator)
@@ -785,6 +795,14 @@ public class EnvironmentManager {
      * @return Returns line percentage coverage vector.
      */
     public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve line percentage vector of dummy test case...");
+                // a dummy test case has a line percentage of 0.0 for each objective (0.0 == worst)
+                return Collections.nCopies(lines.size(), 0.0);
+            }
+        }
 
         // concatenate lines
         StringBuilder sb = new StringBuilder();

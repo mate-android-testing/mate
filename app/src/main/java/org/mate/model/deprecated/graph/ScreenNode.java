@@ -19,7 +19,7 @@ public class ScreenNode {
 
     public void initPheromone(){
         //TODO: how about selectState.getactions
-        List<WidgetAction> executableActions = screenState.getActions();
+        List<WidgetAction> executableActions = screenState.getWidgetActions();
         for (WidgetAction action:executableActions){
             action.setPheromone(Properties.INITIALIZATION_PHEROMONE());
         }

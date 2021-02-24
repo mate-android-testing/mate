@@ -4,20 +4,19 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.mate.MATE;
-import org.mate.interaction.action.Action;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public class PrimitiveAction extends Action {
-    ActionType actionType;
-    private int x, y;
+public class PrimitiveAction extends UIAction {
 
-    public PrimitiveAction(int x, int y, ActionType actionType) {
+    private final int x, y;
+
+    public PrimitiveAction(int x, int y, ActionType actionType, String activity) {
+        super(actionType, activity);
         this.x = x;
         this.y = y;
-        this.actionType = actionType;
     }
 
     public int getX() {
@@ -28,16 +27,26 @@ public class PrimitiveAction extends Action {
         return y;
     }
 
-    public ActionType getActionType() {
-        return actionType;
-    }
-
+    /**
+     * Generates a random primitive action, i.e. a random action on some random coordinates.
+     *
+     * @return Returns a randomly generated primitive action.
+     */
     public static PrimitiveAction randomAction() {
         int x = Randomness.getRnd().nextInt(MATE.device.getDisplayWidth());
         int y = Randomness.getRnd().nextInt(MATE.device.getDisplayHeight());
-        return new PrimitiveAction(x, y, Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)));
+        String activity = MATE.uiAbstractionLayer.getCurrentActivity();
+        return new PrimitiveAction(x, y,
+                Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)), activity);
     }
 
+    /**
+     * Compares two primitive actions for equality.
+     *
+     * @param o The object to which we compare.
+     * @return Returns {@code true} if both actions are equal,
+     *          otherwise {@code false} is returned.
+     */
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
@@ -50,17 +59,32 @@ public class PrimitiveAction extends Action {
         }
     }
 
+    /**
+     * Computes the hash code based on attributes used for {@link #equals(Object)}.
+     *
+     * @return Returns the associated hash code of the primitive action.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(x, y, actionType);
     }
 
+    /**
+     * The string representation used in combination with analysis framework.
+     *
+     * @return Returns the string representation of a primitive action.
+     */
     @NonNull
     @Override
     public String toString() {
         return "primitive action: " + actionType + " at (" + x + "," + y + ")";
     }
 
+    /**
+     * A simplified textual representation used for the {@link org.mate.model.IGUIModel}.
+     *
+     * @return Returns a simplified string representation.
+     */
     @NonNull
     @Override
     public String toShortString() {

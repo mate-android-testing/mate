@@ -19,6 +19,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.PrimitiveAction;
@@ -33,12 +34,13 @@ import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
- * Created by marceloeler on 08/03/17.
+ * The device manager is responsible for the actual execution of the various actions.
+ * Also provides functionality to check for crashes, restart or re-install the AUT, etc.
  */
 public class DeviceMgr {
 
-    private UiDevice device;
-    private String packageName;
+    private final UiDevice device;
+    private final String packageName;
 
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
@@ -52,6 +54,7 @@ public class DeviceMgr {
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
     public void executeAction(Action action) throws AUTCrashException {
+
         if (action instanceof WidgetAction) {
             executeAction((WidgetAction) action);
         } else if (action instanceof PrimitiveAction) {
@@ -60,8 +63,11 @@ public class DeviceMgr {
             executeAction((IntentBasedAction) action);
         } else if (action instanceof SystemAction) {
             executeAction((SystemAction) action);
+        } else if (action instanceof  UIAction) {
+            executeAction((UIAction) action);
         } else {
-            throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
+            throw new UnsupportedOperationException("Actions class "
+                    + action.getClass().getSimpleName() + " not yet supported");
         }
     }
 
@@ -70,128 +76,23 @@ public class DeviceMgr {
      *
      * @param event The system event.
      */
-    public void executeAction(SystemAction event) throws AUTCrashException {
+    private void executeAction(SystemAction event) throws AUTCrashException {
         Registry.getEnvironmentManager().executeSystemEvent(MATE.packageName, event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
         checkForCrash();
     }
 
     /**
-     * Executes an Intent-based action. Depending on the target component, either
-     * startActivity(), startService() or sendBroadcast() is invoked.
+     * Executes the given ui action.
      *
-     * @param action The action which contains the Intent to be sent.
+     * @param action The given ui action.
+     * @throws AUTCrashException If the app crashes.
      */
-    public void executeAction(IntentBasedAction action) throws AUTCrashException {
+    private void executeAction(UIAction action) throws AUTCrashException {
 
-        Intent intent = action.getIntent();
-
-        try {
-            switch (action.getComponentType()) {
-                case ACTIVITY:
-                    // intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                    InstrumentationRegistry.getTargetContext().startActivity(intent);
-                    break;
-                case SERVICE:
-                    InstrumentationRegistry.getTargetContext().startService(intent);
-                    break;
-                case BROADCAST_RECEIVER:
-                    InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Component type not supported yet!");
-            }
-        } catch (Exception e) {
-            final String msg = "Calling startActivity() from outside of an Activity  context " +
-                    "requires the FLAG_ACTIVITY_NEW_TASK flag.";
-            if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
-                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
-                try {
-                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                    InstrumentationRegistry.getTargetContext().startActivity(intent);
-                } catch (Exception ex) {
-                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
-            } else {
-                MATE.log("Executing Intent-based action failed: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        checkForCrash();
-    }
-
-    /**
-     * Executes a primitive action, e.g. a click on a specific coordinate.
-     *
-     * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
-     */
-    public void executeAction(PrimitiveAction action) throws AUTCrashException {
-
-        switch (action.getActionType()) {
-            case CLICK:
-                device.click(action.getX(), action.getY());
-                break;
-            case LONG_CLICK:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
-                break;
-            case SWIPE_DOWN:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() - 300, 15);
-                break;
-            case SWIPE_UP:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() + 300, 15);
-                break;
-            case SWIPE_LEFT:
-                device.swipe(action.getX(), action.getY(), action.getX() + 300, action.getY(), 15);
-                break;
-            case SWIPE_RIGHT:
-                device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
-                break;
-            case BACK:
-                device.pressBack();
-                break;
-            case MENU:
-                device.pressMenu();
-                break;
-            default:
-                throw new IllegalArgumentException("Action type " + action.getActionType() + " not implemented for primitive actions.");
-        }
-
-        checkForCrash();
-    }
-
-    /**
-     * Executes a widget action, e.g. a click on a certain widget.
-     *
-     * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
-     */
-    public void executeAction(WidgetAction action) throws AUTCrashException {
-        Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
 
         switch (typeOfAction) {
-            case CLICK:
-                handleClick(selectedWidget);
-                break;
-            case LONG_CLICK:
-                handleLongClick(selectedWidget);
-                break;
-            case TYPE_TEXT:
-                handleEdit(action);
-                break;
-            case TYPE_SPECIFIC_TEXT:
-                handleEdit(action);
-            case CLEAR_WIDGET:
-                handleClear(selectedWidget);
-                break;
-            case SWIPE_DOWN:
-            case SWIPE_UP:
-            case SWIPE_LEFT:
-            case SWIPE_RIGHT:
-                handleSwipe(selectedWidget, typeOfAction);
-                break;
             case BACK:
                 device.pressBack();
                 break;
@@ -203,6 +104,12 @@ public class DeviceMgr {
                 break;
             case HOME:
                 device.pressHome();
+                break;
+            case SWIPE_DOWN:
+            case SWIPE_UP:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+                handleSwipe(null, typeOfAction);
                 break;
             case QUICK_SETTINGS:
                 device.openQuickSettings();
@@ -255,6 +162,134 @@ public class DeviceMgr {
             case MANUAL_ACTION:
                 // simulates a manual user interaction
                 break;
+            default:
+                throw new UnsupportedOperationException("UI action "
+                        + action.getActionType() + " not yet supported!");
+        }
+        checkForCrash();
+    }
+
+    /**
+     * Executes an Intent-based action. Depending on the target component, either
+     * startActivity(), startService() or sendBroadcast() is invoked.
+     *
+     * @param action The action which contains the Intent to be sent.
+     */
+    private void executeAction(IntentBasedAction action) throws AUTCrashException {
+
+        Intent intent = action.getIntent();
+
+        try {
+            switch (action.getComponentType()) {
+                case ACTIVITY:
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                    break;
+                case SERVICE:
+                    InstrumentationRegistry.getTargetContext().startService(intent);
+                    break;
+                case BROADCAST_RECEIVER:
+                    InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Component type not supported yet!");
+            }
+        } catch (Exception e) {
+            final String msg = "Calling startActivity() from outside of an Activity  context " +
+                    "requires the FLAG_ACTIVITY_NEW_TASK flag.";
+            if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
+                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
+                try {
+                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                } catch (Exception ex) {
+                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            } else {
+                MATE.log("Executing Intent-based action failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        checkForCrash();
+    }
+
+    /**
+     * Executes a primitive action, e.g. a click on a specific coordinate.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
+    // TODO: make primitive actions subtype of ui actions + remove non widget related actions
+    private void executeAction(PrimitiveAction action) throws AUTCrashException {
+
+        switch (action.getActionType()) {
+            case CLICK:
+                device.click(action.getX(), action.getY());
+                break;
+            case LONG_CLICK:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
+                break;
+            case SWIPE_DOWN:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() - 300, 15);
+                break;
+            case SWIPE_UP:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() + 300, 15);
+                break;
+            case SWIPE_LEFT:
+                device.swipe(action.getX(), action.getY(), action.getX() + 300, action.getY(), 15);
+                break;
+            case SWIPE_RIGHT:
+                device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
+                break;
+            case BACK:
+                device.pressBack();
+                break;
+            case MENU:
+                device.pressMenu();
+                break;
+            default:
+                throw new IllegalArgumentException("Action type " + action.getActionType()
+                        + " not implemented for primitive actions.");
+        }
+
+        checkForCrash();
+    }
+
+    /**
+     * Executes a widget action, e.g. a click on a certain widget.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
+    private void executeAction(WidgetAction action) throws AUTCrashException {
+
+        Widget selectedWidget = action.getWidget();
+        ActionType typeOfAction = action.getActionType();
+
+        switch (typeOfAction) {
+            case CLICK:
+                handleClick(selectedWidget);
+                break;
+            case LONG_CLICK:
+                handleLongClick(selectedWidget);
+                break;
+            case TYPE_TEXT:
+                handleEdit(action);
+                break;
+            case TYPE_SPECIFIC_TEXT:
+                handleEdit(action);
+            case CLEAR_WIDGET:
+                handleClear(selectedWidget);
+                break;
+            case SWIPE_DOWN:
+            case SWIPE_UP:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+                handleSwipe(selectedWidget, typeOfAction);
+                break;
+            default:
+                throw new IllegalArgumentException("Action type " + action.getActionType()
+                        + " not implemented for widget actions.");
         }
 
         // if there is a progress bar associated to that action
@@ -307,13 +342,14 @@ public class DeviceMgr {
      * @param widget The widget whose input should be cleared.
      */
     private void handleClear(Widget widget) {
+        // TODO: should we reflect the change in the widget, i.e. call widget.setText()?
         UiObject2 obj = findObject(widget);
         if (obj != null)
             obj.setText("");
     }
 
     /**
-     * Executes a swipe upon a widget in a given direction.
+     * Executes a swipe (upon a widget) in a given direction.
      *
      * @param widget The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
@@ -325,7 +361,7 @@ public class DeviceMgr {
         int Y = 0;
         int steps = 15;
 
-        if (!widget.getClazz().isEmpty()) {
+        if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
                 X = obj.getVisibleBounds().centerX();
@@ -385,8 +421,8 @@ public class DeviceMgr {
      */
     private UiObject2 findObject(Widget widget) {
 
-        // retrieve all ui objects that match the given widget id
-        List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
+        // retrieve all ui objects that match the given widget resource id
+        List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
 
         if (objs != null) {
             if (objs.size() == 1) {
@@ -421,6 +457,7 @@ public class DeviceMgr {
         return null;
     }
 
+    // TODO: review this
     private void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
@@ -447,7 +484,7 @@ public class DeviceMgr {
                 }
             }
         } else {
-            List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
+            List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
             if (objs != null && objs.size() > 0) {
                 int i = 0;
                 int size = objs.size();
@@ -486,7 +523,7 @@ public class DeviceMgr {
 
         String textData = "";
         String inputType = "";
-        int maxLengthInt = widget.getMaxLength();
+        int maxLengthInt = widget.getMaxTextLength();
         if (action.getExtraInfo().isEmpty()) {
 
             if (maxLengthInt < 0)

@@ -15,8 +15,6 @@ import org.mate.utils.FitnessUtils;
 
 public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
-    public static final String CHROMOSOME_FACTORY_ID = "intent_chromosome_factory";
-
     // stores the relative amount ([0,1]) of intent based actions that should be used
     private final float relativeIntentAmount;
 

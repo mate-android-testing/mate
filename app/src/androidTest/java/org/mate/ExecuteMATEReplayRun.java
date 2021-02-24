@@ -168,7 +168,6 @@ public class ExecuteMATEReplayRun {
                     + " hint : " + selectedAction.getWidget().getHint()
                     + " Class : " + selectedAction.getWidget().getClazz()
                     + " ResourceID : " + selectedAction.getWidget().getResourceID()
-                    + " IdByActivity : " + selectedAction.getWidget().getIdByActivity()
                     + " X : " + selectedAction.getWidget().getX()
                     + " Y : " + selectedAction.getWidget().getY());
 
@@ -184,7 +183,6 @@ public class ExecuteMATEReplayRun {
                                 + " hint : " + widgetAction.getWidget().getHint()
                                 + " Class : " + widgetAction.getWidget().getClazz()
                                 + " ResourceID : " + widgetAction.getWidget().getResourceID()
-                                + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
                                 + " X : " + widgetAction.getWidget().getX()
                                 + " Y : " + widgetAction.getWidget().getY());
                     }

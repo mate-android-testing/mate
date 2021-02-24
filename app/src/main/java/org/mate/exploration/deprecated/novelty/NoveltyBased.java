@@ -322,7 +322,7 @@ public class NoveltyBased {
                 try {
                     //TODO:Verify it
                     //get a list of all executable actions as long as this state is different from last state
-                    executableActions = selectedScreenState.getActions();
+                    executableActions = selectedScreenState.getWidgetActions();
 
                     //select one action randomly
                     WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
@@ -513,7 +513,7 @@ public class NoveltyBased {
             while (goOn) {
 
                 IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-                List<WidgetAction> actions = screenState.getActions();
+                List<WidgetAction> actions = screenState.getWidgetActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
@@ -626,7 +626,7 @@ public class NoveltyBased {
             } else {
                 MATE.log("Random Action number: "+numberOfActions);
                 //get a list of all executable actions as long as this state is different from last state
-                executableActions = selectedScreenState.getActions();
+                executableActions = selectedScreenState.getWidgetActions();
                 //select one action randomly
                 action = executableActions.get(selectRandomAction(executableActions.size()));
                 MATE.log("EVENTO: " + action.getActionType() + "; GUI OBJECT: " + action.getWidget().getClazz());
