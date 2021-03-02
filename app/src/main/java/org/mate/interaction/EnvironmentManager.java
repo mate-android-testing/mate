@@ -238,7 +238,7 @@ public class EnvironmentManager {
             }
         }
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/copy_fitness_data")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/copy_fitness_data")
                 .withParameter("deviceId", emulator)
                 .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
                 .withParameter("chromosome_src", sourceChromosome.toString())
@@ -515,7 +515,7 @@ public class EnvironmentManager {
         }
         coveredTestCases.add(testcase);
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/store_fitness_data")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_fitness_data")
                 .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName)
@@ -624,7 +624,9 @@ public class EnvironmentManager {
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
 
-        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
+        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
+                || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE
+                || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
             String testcase = entityId == null ? chromosomeId : entityId;
             if (coveredTestCases.contains(testcase)) {
@@ -668,7 +670,9 @@ public class EnvironmentManager {
 
         String chromosomeId = chromosome.toString();
 
-        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE) {
+        if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
+                || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE
+                || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
             String testcase = entityId == null ? chromosomeId : entityId;
             if (coveredTestCases.contains(testcase)) {
