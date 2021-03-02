@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Evaluates the fitness value for a given test case as defined in:
- * "It Does Matter How You Normalise the Branch Distance in Search Based Software Testing"
+ * Provides a fitness metric based on branch distance for multi-objective algorithms. This requires
+ * that the AUT has been instrumented with the branch distance module. Based on the paper
+ * "It Does Matter How You Normalise the Branch Distance in Search Based Software Testing".
  *
- * @author Michael Auer
+ * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
 public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessFunction<T> {
 
