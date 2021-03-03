@@ -563,7 +563,7 @@ public class EnvironmentManager {
      * The nth entry in the vector refers to the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of branches.
+     * @param objectives The list of branches. Is not transmitted to avoid load on socket.
      * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */

@@ -52,7 +52,7 @@ public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessF
             branchDistance = cache.get(branch).get(chromosome);
         } else {
             // retrieves the fitness value for every single branch
-            List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, null);
+            List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, branches);
 
             // insert them into the cache
             for (int i = 0; i < branchDistanceVector.size(); i++) {
