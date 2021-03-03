@@ -360,7 +360,6 @@ public class EnvironmentManager {
     public List<String> getBasicBlocks() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_basic_blocks")
-                .withParameter("deviceId", emulator)
                 .withParameter("packageName", MATE.packageName);
 
         Message response = sendMessage(messageBuilder.build());
