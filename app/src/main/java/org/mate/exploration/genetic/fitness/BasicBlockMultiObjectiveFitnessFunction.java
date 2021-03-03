@@ -10,7 +10,8 @@ import java.util.Map;
 
 /**
  * Provides a fitness metric based on basic block coverage for multi-objective algorithms. This
- * requires that the AUT has been instrumented with the basic block coverage module.
+ * requires that the AUT has been instrumented with the basic block coverage module. A fitness
+ * value of '1' indicates that the basic block has been covered, '0' indicates non-covered.
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
@@ -38,7 +39,8 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
 
     /**
      * Retrieves the basic block fitness value for the given chromosome.
-     * A cache is employed to make subsequent requests faster.
+     * A cache is employed to make subsequent requests faster. A fitness value of '1' indicates
+     * that the basic block has been covered, '0' indicates non-covered.
      *
      * @param chromosome The chromosome for which we want to retrieve its fitness value.
      * @return Returns the fitness value for the given chromosome.
