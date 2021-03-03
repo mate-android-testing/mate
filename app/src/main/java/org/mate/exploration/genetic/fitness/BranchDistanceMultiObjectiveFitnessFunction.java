@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
-public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessFunction<T> {
+public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessFunction<T> {
 
     // a cache that stores for each branch the set of test cases and its fitness value
     private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
@@ -31,7 +31,7 @@ public class BranchDistanceFitnessFunctionMultiObjective<T> implements IFitnessF
      *
      * @param branch The target branch.
      */
-    public BranchDistanceFitnessFunctionMultiObjective(String branch) {
+    public BranchDistanceMultiObjectiveFitnessFunction(String branch) {
         this.branch = branch;
         branches.add(branch);
         cache.put(branch, new HashMap<IChromosome, Double>());

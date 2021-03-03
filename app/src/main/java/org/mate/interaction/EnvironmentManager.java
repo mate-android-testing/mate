@@ -343,9 +343,29 @@ public class EnvironmentManager {
             return getSourceLines();
         } else if (objective == Objective.BRANCHES) {
             return getBranches();
+        } else if (objective == Objective.BLOCKS) {
+            return getBlocks();
         }
 
         throw new UnsupportedOperationException("Objective not yet supported!");
+    }
+
+    /**
+     * Requests the list of basic blocks of the AUT. Each basic block typically represents
+     * an objective in the context of MIO/MOSA. Requires that the AUT has been instrumented
+     * with the basic block coverage module.
+     *
+     * @return Returns the list of basic blocks.
+     */
+    public List<String> getBlocks() {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_basic_blocks")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName);
+
+        Message response = sendMessage(messageBuilder.build());
+
+        return Arrays.asList(response.getParameter("blocks").split("\\+"));
     }
 
     /**
@@ -555,6 +575,44 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("branch_distance"));
+    }
+
+    /**
+     * Retrieves the basic block fitness vector for the given chromosome. A basic block fitness
+     * vector consists of n entries, where n refers to the number of basic blocks.
+     * The nth entry in the vector refers to the fitness value of the nth basic block.
+     *
+     * @param chromosome The given chromosome.
+     * @param objectives The list of basic blocks.
+     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @return Returns the basic block fitness vector for the given chromosome.
+     */
+    public <T> List<Double> getBasicBlockFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve basic block fitness vector of dummy test case...");
+                // a dummy test case has a basic block fitness of 0.0 for each objective (0.0 == worst)
+                return Collections.nCopies(objectives.size(), 0.0);
+            }
+        }
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/fitness/get_basic_block_fitness_vector")
+                .withParameter("deviceId", emulator)
+                // required for sending a broadcast to the AUT (target component)
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosomes", chromosome.getValue().toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        List<Double> basicBlockFitnessVector = new ArrayList<>();
+        String[] basicBlockFitnessValues = response.getParameter("basic_block_fitness_vector").split("\\+");
+
+        for (String basicBlockFitnessValue : basicBlockFitnessValues) {
+            basicBlockFitnessVector.add(Double.parseDouble(basicBlockFitnessValue));
+        }
+
+        return basicBlockFitnessVector;
     }
 
     /**
