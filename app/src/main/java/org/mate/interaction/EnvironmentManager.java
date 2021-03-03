@@ -344,7 +344,7 @@ public class EnvironmentManager {
         } else if (objective == Objective.BRANCHES) {
             return getBranches();
         } else if (objective == Objective.BLOCKS) {
-            return getBlocks();
+            return getBasicBlocks();
         }
 
         throw new UnsupportedOperationException("Objective not yet supported!");
@@ -357,7 +357,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of basic blocks.
      */
-    public List<String> getBlocks() {
+    public List<String> getBasicBlocks() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_basic_blocks")
                 .withParameter("deviceId", emulator)
