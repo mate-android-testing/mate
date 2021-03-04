@@ -598,8 +598,6 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/fitness/get_basic_block_fitness_vector")
-                .withParameter("deviceId", emulator)
-                // required for sending a broadcast to the AUT (target component)
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosomes", chromosome.getValue().toString());
 
