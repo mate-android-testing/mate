@@ -5,23 +5,23 @@ import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.utils.FitnessUtils;
 
 /**
- * Provides a fitness metric based on branch coverage. This requires that the
- * AUT has been instrumented with the branch coverage module.
+ * Provides a fitness metric based on basic block branch coverage. This requires that the
+ * AUT has been instrumented with the basic block coverage module.
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
-public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
+public class BasicBlockBranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double branchCoverage = FitnessUtils.getFitness(chromosome);
+        double basicBlockBranchCoverage = FitnessUtils.getFitness(chromosome);
 
-        if (branchCoverage == 100.0) {
+        if (basicBlockBranchCoverage == 100.0) {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
         // TODO: normalise fitness value in the range [0,1]
-        return branchCoverage;
+        return basicBlockBranchCoverage;
     }
 }

@@ -23,9 +23,12 @@ import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.fitness.BasicBlockBranchCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.BasicBlockLineCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -349,13 +352,19 @@ public class GeneticAlgorithmProvider {
             case BRANCH_DISTANCE:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchDistanceFitnessFunctionMultiObjective(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+            case BASIC_BLOCK_MULTI_OBJECTIVE:
+                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
             case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
             case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
+            case BASIC_BLOCK_LINE_COVERAGE:
+                return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+                return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

@@ -39,6 +39,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
                 Registry.getEnvironmentManager().copyCoverageData(sourceChromosome, targetChromosome, testCases);
                 break;
             default:
@@ -78,6 +80,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
                         Properties.COVERAGE(), chromosome, null);
                 break;
@@ -116,6 +120,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
                         Properties.COVERAGE(), chromosome, testCaseId);
                 break;
@@ -148,6 +154,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
                 MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(), chromosome));
@@ -212,6 +220,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, null);
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
@@ -247,6 +257,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, chromosomes);
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
@@ -275,6 +287,8 @@ public class CoverageUtils {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager().getCoverage(coverage, chromosome);
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
