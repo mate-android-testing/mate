@@ -32,7 +32,7 @@ public class FitnessUtils {
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
-                FitnessFunction.METHOD_COVERAGE);
+                FitnessFunction.METHOD_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
@@ -53,7 +53,7 @@ public class FitnessUtils {
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
-                FitnessFunction.METHOD_COVERAGE);
+                FitnessFunction.METHOD_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
@@ -79,7 +79,7 @@ public class FitnessUtils {
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
-                FitnessFunction.METHOD_COVERAGE);
+                FitnessFunction.METHOD_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
