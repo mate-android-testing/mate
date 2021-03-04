@@ -31,7 +31,8 @@ public class FitnessUtils {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE);
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
+                FitnessFunction.METHOD_COVERAGE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
@@ -48,7 +49,8 @@ public class FitnessUtils {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE);
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
+                FitnessFunction.METHOD_COVERAGE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome, null);
@@ -70,7 +72,8 @@ public class FitnessUtils {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE);
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
+                FitnessFunction.METHOD_COVERAGE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
@@ -104,6 +107,8 @@ public class FitnessUtils {
             return Registry.getEnvironmentManager().getBranchDistance(chromosome);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
             return Registry.getEnvironmentManager().getCoverage(Coverage.LINE_COVERAGE, chromosome);
+        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
+            return Registry.getEnvironmentManager().getCoverage(Coverage.METHOD_COVERAGE, chromosome);
         }
 
         throw new UnsupportedOperationException("Fitness function "

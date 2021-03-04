@@ -38,6 +38,7 @@ public class CoverageUtils {
         switch (Properties.COVERAGE()) {
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 Registry.getEnvironmentManager().copyCoverageData(sourceChromosome, targetChromosome, testCases);
                 break;
             default:
@@ -76,6 +77,7 @@ public class CoverageUtils {
                 break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
                         Properties.COVERAGE(), chromosome, null);
                 break;
@@ -113,6 +115,7 @@ public class CoverageUtils {
                 break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
                         Properties.COVERAGE(), chromosome, testCaseId);
                 break;
@@ -144,6 +147,7 @@ public class CoverageUtils {
                 break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(), chromosome));
@@ -207,6 +211,7 @@ public class CoverageUtils {
                 return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, null);
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
@@ -241,6 +246,7 @@ public class CoverageUtils {
                 return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, chromosomes);
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
@@ -268,6 +274,7 @@ public class CoverageUtils {
                 return (double) visitedActivities.get(chromosome).size() / getActivities().size() * 100;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
+            case METHOD_COVERAGE:
                 return Registry.getEnvironmentManager().getCoverage(coverage, chromosome);
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
