@@ -29,6 +29,7 @@ import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunct
 import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -349,6 +350,8 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new MethodCoverageFitnessFunction<>();
             case BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
+            case BRANCH_MULTI_OBJECTIVE:
+                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
             case BRANCH_DISTANCE:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:

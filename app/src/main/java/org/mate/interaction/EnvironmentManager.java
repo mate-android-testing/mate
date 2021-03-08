@@ -572,6 +572,42 @@ public class EnvironmentManager {
     }
 
     /**
+     * Retrieves the branch fitness vector for the given chromosome. A branch fitness
+     * vector consists of n entries, where n refers to the number of branches.
+     * The nth entry in the vector refers to the fitness value of the nth branch.
+     *
+     * @param chromosome The given chromosome.
+     * @param objectives The list of branches.
+     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @return Returns the branch fitness vector for the given chromosome.
+     */
+    public <T> List<Double> getBranchFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve branch fitness vector of dummy test case...");
+                // a dummy test case has a branch fitness of 0.0 for each objective (0.0 == worst)
+                return Collections.nCopies(objectives.size(), 0.0);
+            }
+        }
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/fitness/get_branch_fitness_vector")
+                .withParameter("packageName", MATE.packageName)
+                .withParameter("chromosomes", chromosome.getValue().toString());
+
+        Message response = sendMessage(messageBuilder.build());
+        List<Double> branchFitnessVector = new ArrayList<>();
+        String[] branchFitnessValues = response.getParameter("branch_fitness_vector").split("\\+");
+
+        for (String branchFitnessValue : branchFitnessValues) {
+            branchFitnessVector.add(Double.parseDouble(branchFitnessValue));
+        }
+
+        return branchFitnessVector;
+    }
+
+    /**
      * Retrieves the basic block fitness vector for the given chromosome. A basic block fitness
      * vector consists of n entries, where n refers to the number of basic blocks.
      * The nth entry in the vector refers to the fitness value of the nth basic block.
