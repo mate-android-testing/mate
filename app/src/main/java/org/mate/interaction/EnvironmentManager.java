@@ -488,20 +488,15 @@ public class EnvironmentManager {
     /**
      * Requests the list of branches of the AUT. Each branch typically
      * represents a testing target into the context of MIO/MOSA.
-     * A branch's representation coincides with the trace that is produced
-     * by the branchDistance instrumentation tool.
      *
      * @return Returns the list of branches.
      */
     public List<String> getBranches() {
 
-        GraphType graphType = Properties.GRAPH_TYPE();
-
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branches")
-                .withParameter("graph_type", graphType.name());
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_branches")
+                .withParameter("packageName", MATE.packageName);
 
         Message response = sendMessage(messageBuilder.build());
-
         return Arrays.asList(response.getParameter("branches").split("\\+"));
     }
 
@@ -569,7 +564,7 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosomes", chromosome.toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -633,8 +628,6 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance_vector")
-                .withParameter("deviceId", emulator)
-                // required for sending a broadcast to the AUT (target component), may use app name of graph from init request
                 .withParameter("packageName", MATE.packageName)
                 .withParameter("chromosomes", chromosome.getValue().toString());
 
