@@ -115,14 +115,13 @@ public class MATE {
                     return null;
                 }
             }, MATE.TIME_OUT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 CoverageUtils.logFinalCoverage();
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
 
             if (Properties.GRAPH_TYPE() != null) {
                 Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
