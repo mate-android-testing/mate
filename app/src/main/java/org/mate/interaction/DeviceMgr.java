@@ -468,7 +468,7 @@ public class DeviceMgr {
         else
             textData = action.getExtraInfo();
 
-        MATE.log("TEXT DATA: " + textData);
+        MATE.log_debug("Input text: " + textData);
 
         if (widget.getResourceID().isEmpty()) {
             if (!widget.getText().isEmpty()) {

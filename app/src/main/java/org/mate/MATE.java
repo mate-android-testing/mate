@@ -159,6 +159,10 @@ public class MATE {
         Log.w("warning", msg);
     }
 
+    public static void log_error(String msg) {
+        Log.e("error", msg);
+    }
+
     public static void log_vin(String msg) {
         Log.i("vinDebug", msg);
     }
