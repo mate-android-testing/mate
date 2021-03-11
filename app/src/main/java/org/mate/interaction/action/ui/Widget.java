@@ -121,6 +121,7 @@ public class Widget {
     private final String labelFor;
     private final boolean checkable;
     private final boolean checked;
+    private final boolean editable;
     private final boolean enabled;
     private final boolean focusable;
     private final boolean scrollable;
@@ -132,10 +133,10 @@ public class Widget {
     private final boolean hasChildren;
     private final boolean heading;
     private final boolean password;
+    private final boolean clickable;
+    private final boolean longClickable;
 
     // mutable properties
-    private boolean clickable;
-    private boolean longClickable;
     private String hint;
 
     // deprecated properties
@@ -174,7 +175,7 @@ public class Widget {
         this.y2 = bounds.bottom;
         this.X = bounds.centerX();
         this.Y = bounds.centerY();
-
+        this.editable = node.isEditable();
         this.checkable = node.isCheckable();
         this.password = node.isPassword();
         this.enabled = node.isEnabled();
@@ -446,6 +447,20 @@ public class Widget {
         return contentDesc;
     }
 
+    /**
+     * Returns whether this widget represents a container, e.g. a linear layout.
+     *
+     * @return Returns {@code true} if the widget is a container, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isContainer() {
+        // TODO: extend with layouts defined at https://developer.android.com/guide/topics/ui/declaring-layout
+        return getClazz().equals("android.widget.LinearLayout")
+                || getClazz().equals("android.widget.FrameLayout")
+                || getClazz().equals("android.widget.RelativeLayout")
+                || getClazz().equals("android.widget.GridLayout");
+    }
+
     public boolean isContextClickable() {
         return contextClickable;
     }
@@ -478,16 +493,6 @@ public class Widget {
         return clickable;
     }
 
-    // TODO: verify whether this property should be immutable or not
-    public void setClickable(boolean clickable) {
-        this.clickable = clickable;
-    }
-
-    // TODO: verify whether this property should be immutable or not
-    public void setLongClickable(boolean longClickable) {
-        this.longClickable = longClickable;
-    }
-
     public boolean isLongClickable() {
         return longClickable;
     }
@@ -505,6 +510,21 @@ public class Widget {
     }
 
     public boolean isEditable() {
+        return editable;
+    }
+
+    public boolean isEditTextType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.EditText.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isEditableOld() {
         if (clazz.contains("android.widget.EditText"))
             return true;
         if (clazz.contains("AppCompatEditText"))
@@ -526,30 +546,40 @@ public class Widget {
         if (clazz.contains("TextInputEditText"))
             return true;
 
-        Class<?> clazzx = null;
         try {
-            clazzx = Class.forName(clazz);
-            boolean editType = android.widget.EditText.class.isAssignableFrom(clazzx);
-            if (editType)
-                return true;
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.EditText.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_debug("Class " + getClazz() + " represents no edit text instance!");
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     public boolean isExecutable() {
         return clickable || longClickable || scrollable || isEditable();
     }
 
+    /**
+     * Checks whether the parent widget is of the given type, e.g. android.widget.TextView.
+     *
+     * @param type The type (class name) to check for.
+     * @return Returns {@code true} if the parent widget is of the given type,
+     *          otherwise {@code false} is returned.
+     */
     public boolean directSonOf(String type) {
         Widget parent = this.parent;
         if (parent != null)
-            if (parent.getClazz().contains(type))
-                return true;
+            return parent.getClazz().contains(type);
         return false;
     }
 
+    /**
+     * Checks whether any parent widget is of the given type, e.g. android.widget.TextView.
+     *
+     * @param type The type (class name) to check for.
+     * @return Returns {@code true} if any parent widget is of the given type,
+     *          otherwise {@code false} is returned.
+     */
     public boolean isSonOf(String type) {
         Widget parent = this.parent;
         while (parent != null) {
@@ -561,13 +591,53 @@ public class Widget {
         return false;
     }
 
-    public boolean isSonOfLongClickable() {
-        Widget wparent = this.parent;
-        while (wparent != null) {
-            if (wparent.isLongClickable())
+    /**
+     * Checks whether any parent widget is checkable.
+     *
+     * @return Returns {@code true} if a parent widget is checkable,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfCheckable() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isCheckable())
                 return true;
             else
-                wparent = wparent.getParent();
+                parent = parent.getParent();
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether any parent widget is long clickable.
+     *
+     * @return Returns {@code true} if a parent widget is long clickable,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfLongClickable() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isLongClickable())
+                return true;
+            else
+                parent = parent.getParent();
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether any parent widget is clickable.
+     *
+     * @return Returns {@code true} if a parent widget is clickable,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfClickable() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isClickable())
+                return true;
+            else
+                parent = parent.getParent();
         }
         return false;
     }
@@ -626,10 +696,10 @@ public class Widget {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.Button.class.isAssignableFrom(clazz);
-        } catch (ClassNotFoundException ignored) {
-            MATE.log_debug("Class " + getClazz() + " represents no button instance!");
+        } catch (ClassNotFoundException e) {
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     /**
@@ -643,9 +713,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.ImageButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_debug("Class " + getClazz() + " represents no image button instance!");
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     /**
@@ -659,9 +729,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.ImageSwitcher.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_debug("Class " + getClazz() + " represents no image switcher instance!");
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     // TODO: find something more accurate if possible
@@ -686,9 +756,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.ImageView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_debug("Class " + getClazz() + " represents no image type instance!");
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     /**
@@ -702,9 +772,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.AbsSpinner.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_debug("Class " + getClazz() + " represents no spinner instance!");
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     /**
@@ -718,9 +788,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.TextView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_debug("Class " + getClazz() + " represents no text view instance!");
+            MATE.log_error("Class " + getClazz() + " not found!");
+            throw new IllegalStateException(e);
         }
-        return false;
     }
 
     public boolean isActionable() {

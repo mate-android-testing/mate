@@ -10,9 +10,10 @@ import org.mate.state.ScreenStateType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 
 /**
  * Models a screen state and maintains the list of applicable widget actions.
@@ -45,7 +46,7 @@ public class ActionsScreenState extends AbstractScreenState {
      * Returns the maximal number of ...
      *
      * @param sameIDWidgets Stores a mapping of widget id to the amount the widget appeared.
-     * @param widgetId The widget id.
+     * @param widgetId      The widget id.
      * @return Returns the maximal number of ... or zero if no entry for the widget id exists.
      */
     private int getMaxAmountOfID(Map<String, List<Integer>> sameIDWidgets, String widgetId) {
@@ -115,7 +116,7 @@ public class ActionsScreenState extends AbstractScreenState {
         // a counter how often the same widget id (key) appears
         Map<String, Integer> idAmount = new Hashtable<>();
 
-        for (Widget widget: widgets) {
+        for (Widget widget : widgets) {
 
             selected = false;
 
@@ -205,7 +206,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 if (!widget.isEditable()) {
                     event = new WidgetAction(widget, ActionType.CLICK);
                     executables.add(event);
-                    widget.setClickable(true);
+                    // TODO: widget.setClickable(true);
                 }
 
                 if (widget.isEditable() || widget.getClazz().contains("Edit")) {
@@ -222,7 +223,7 @@ public class ActionsScreenState extends AbstractScreenState {
                             && !widget.getClazz().contains("TextView"))) {
                         event = new WidgetAction(widget, ActionType.LONG_CLICK);
                         executables.add(event);
-                        widget.setLongClickable(true);
+                        // TODO: widget.setLongClickable(true);
                     }
                 }
 
@@ -253,7 +254,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // TODO: review this
         // update number of ids
-        for (String id: idAmount.keySet()) {
+        for (String id : idAmount.keySet()) {
             List<Integer> amounts = sameIDWidgets.get(id);
             if (amounts.size() < 2) {
                 boolean sameAmount = false;
@@ -278,7 +279,196 @@ public class ActionsScreenState extends AbstractScreenState {
         actions = executables;
         MATE.log_debug("Number of ui actions: " + executables.size());
         MATE.log_debug("Number of widget actions: " + getWidgetActions().size());
+        MATE.log_debug("Widget actions: " + getWidgetActions());
+
+        retrieveUIActions();
+
         return Collections.unmodifiableList(executables);
+    }
+
+    @SuppressWarnings("debug")
+    private List<UIAction> retrieveUIActions() {
+
+        // check whether the actions have been requested once
+        if (actions != null) {
+            return actions;
+        }
+
+        if (activityName.contains("GoogleOAuthActivity")) {
+            MATE.log_acc("Reached GoogleOAuthActivity!");
+            // we can't authenticate here, so only allow to press 'BACK'
+            return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
+        }
+
+        MATE.log_debug("Retrieving widget actions for screen state...");
+        MATE.log_debug("Number of all widgets: " + this.widgets.size());
+
+        List<Widget> widgets = new ArrayList<>();
+
+        for (Widget widget : this.widgets) {
+            /*
+             * We ignore here primarily all widgets that are not visible, not enabled and don't
+             * represent leaf widgets in the ui hierarchy. There are two exceptions to this rule:
+             * 1) A spinner widget is not a leaf widget but represents a candidate for a widget
+             * action. The other possibility would be to apply the action to the text view
+             * that is the child element of the spinner.
+             * 2) There are widgets like android.support.v7.app.ActionBar$Tab that are
+             * (long-)clickable but don't represent leaf widgets. We should apply the action to
+             * the widget that is (long-)clickable and ignore the child widget instead, since
+             * a static analysis of event handlers can't properly match the widget otherwise.
+             * 3) Likewise, it may can happen that checkable widgets are no leaf widgets.
+             */
+            if ((!widget.hasChildren() || widget.isSpinnerType() || widget.isClickable()
+                    || widget.isLongClickable() || widget.isCheckable())
+                    && widget.isVisible() && widget.isEnabled()) {
+                widgets.add(widget);
+            }
+        }
+
+        MATE.log_debug("Number of relevant widgets: " + widgets.size());
+
+        /*
+         * We use here a LinkedHashSet to maintain the insertion order, since we later
+         * convert the set to a list and equals() builds on the list and inherently
+         * its order.
+         */
+        Set<WidgetAction> widgetActions = new LinkedHashSet<>();
+
+        for (Widget widget : widgets) {
+
+            MATE.log_debug("Widget: " + widget);
+
+            /*
+            * TODO: We should exclude widgets that are part of top status/symbol bar.
+            *  Otherwise, we may click unintentionally on the wifi symbol and cut off
+            *  the connection. For a device with a resolution of 1080x1920 this represents
+            *  the area [0,0][1080,72].
+             */
+
+            /*
+            * TODO: It can happen that multiple sibling widgets are overlapping each other.
+            *  We should define only for a single widget an action.
+             */
+
+            // TODO: support subtypes of spinner
+            if (widget.isSonOf("android.widget.Spinner")) {
+                MATE.log_debug("Spinner widget defines action itself!");
+                // we define the action directly on the parent representing the spinner widget
+                continue;
+            }
+
+            if (widget.isContainer()) {
+                MATE.log_debug("Container as a leaf widget!");
+                /*
+                * It can happen that leaf widgets actually represent containers like
+                * a linear layout in order to fill or introduce a gap.
+                 */
+                continue;
+            }
+
+            // TODO: Check whether we should only consider the direct parent widget?
+            if (widget.isSonOfLongClickable() || widget.isSonOfClickable()) {
+                MATE.log_debug("Parent widget that is clickable defines the action!");
+                // we define the action directly on the (long-)clickable parent widget
+                continue;
+            }
+
+            // TODO: Check whether we should only consider the direct parent widget?
+            if (widget.isSonOfCheckable()) {
+                MATE.log_debug("Parent widget that is checkable defines the action!");
+                // we define the action directly on the checkable parent widget
+                continue;
+            }
+
+            if (widget.isEditTextType()) {
+                MATE.log_debug("Widget is an edit text instance!");
+                widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+                // TODO: Do we need a corresponding clear widget action here?
+            }
+
+            if (widget.isButtonType()) {
+                MATE.log_debug("Widget is a button instance!");
+
+                if (widget.isClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+            }
+
+            if (widget.isSpinnerType()) {
+                MATE.log_debug("Widget is a spinner instance!");
+
+                // TODO: check whether there are spinners that are not clickable
+                if (widget.isClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                // TODO: check whether there are spinners that are not long clickable
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                if (widget.isScrollable()) {
+                    // TODO: add proper scroll action
+                }
+            }
+
+            /*
+             * The elements in a list view are typically of type android.widget.TextView
+             * and not clickable according to the underlying AccessibilityNodeInfo object,
+             * however those elements represent in most cases clickable widgets.
+             */
+            // TODO: support subtypes of list view
+            if (widget.isSonOf("android.widget.ListView")) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                // TODO: widget.setClickable(true);
+            }
+
+            if (widget.isCheckable()) {
+                // we check a widget by clicking on it
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
+
+            /*
+             * Right now, we can't tell whether any kind of view widget should be clickable
+             * or not, thus we assign to each leaf widget the click action. In the future,
+             * we should rely on an additional static analysis of the byte code to verify
+             * which leaf widget, in particular which text view, defines an event handler
+             * and thus should be clickable.
+             */
+            widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            // TODO: widget.setClickable(true);
+
+            if (widget.isClickable()) {
+                MATE.log_debug("Widget is clickable!");
+            }
+
+            if (widget.isLongClickable()) {
+                MATE.log_debug("Widget is long clickable!");
+            }
+
+            if (widget.isScrollable()) {
+                MATE.log_debug("Widget is scrollable!");
+            }
+
+            if (widget.isEditable()) {
+                MATE.log_debug("Widget is editable!");
+            }
+
+            if (widget.isCheckable()) {
+                MATE.log_debug("Widget is checkable!");
+            }
+        }
+
+        MATE.log_debug("Number of derived widget actions: " + widgetActions.size());
+        MATE.log_debug("Derived the following widget actions: " + widgetActions);
+
+        List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
+        uiActions.addAll(getUIActions());
+        return uiActions;
     }
 
     /**
@@ -288,29 +478,30 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     private List<UIAction> getUIActions() {
 
-        List<UIAction> executables = new ArrayList<>();
-        executables.add(new UIAction(ActionType.BACK, activityName));
-        executables.add(new UIAction(ActionType.MENU, activityName));
-        executables.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
-        // executables.add(new UIAction(ActionType.HOME, activityName));
-        executables.add(new UIAction(ActionType.SEARCH, activityName));
-        // executables.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
-        // executables.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
-        executables.add(new UIAction(ActionType.SLEEP, activityName));
-        executables.add(new UIAction(ActionType.WAKE_UP, activityName));
-        executables.add(new UIAction(ActionType.DELETE, activityName));
-        executables.add(new UIAction(ActionType.DPAD_CENTER, activityName));
-        executables.add(new UIAction(ActionType.DPAD_DOWN, activityName));
-        executables.add(new UIAction(ActionType.DPAP_UP, activityName));
-        executables.add(new UIAction(ActionType.DPAD_LEFT, activityName));
-        executables.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
+        List<UIAction> uiActions = new ArrayList<>();
+        uiActions.add(new UIAction(ActionType.BACK, activityName));
+        uiActions.add(new UIAction(ActionType.MENU, activityName));
+        uiActions.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
+        // uiActions.add(new UIAction(ActionType.HOME, activityName));
+        uiActions.add(new UIAction(ActionType.SEARCH, activityName));
+        // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
+        // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
+        uiActions.add(new UIAction(ActionType.SLEEP, activityName));
+        uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
+        uiActions.add(new UIAction(ActionType.DELETE, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
+        uiActions.add(new UIAction(ActionType.DPAP_UP, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
+        uiActions.add(new UIAction(ActionType.ENTER, activityName));
 
         // swipes are both applicable to widgets and non-widgets
-        executables.add(new UIAction(ActionType.SWIPE_DOWN, activityName));
-        executables.add(new UIAction(ActionType.SWIPE_UP, activityName));
-        executables.add(new UIAction(ActionType.SWIPE_LEFT, activityName));
-        executables.add(new UIAction(ActionType.SWIPE_RIGHT, activityName));
-        return executables;
+        uiActions.add(new UIAction(ActionType.SWIPE_DOWN, activityName));
+        uiActions.add(new UIAction(ActionType.SWIPE_UP, activityName));
+        uiActions.add(new UIAction(ActionType.SWIPE_LEFT, activityName));
+        uiActions.add(new UIAction(ActionType.SWIPE_RIGHT, activityName));
+        return uiActions;
     }
 
     /**
@@ -320,7 +511,7 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public int hashCode() {
-        return super.hashCode() + Objects.hashCode(actions);
+        return super.hashCode();
     }
 
     /**
@@ -328,7 +519,7 @@ public class ActionsScreenState extends AbstractScreenState {
      *
      * @param o The other screen state to compare against.
      * @return Returns {@code true} if the two screen states are identical,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     @Override
     public boolean equals(Object o) {
@@ -337,8 +528,12 @@ public class ActionsScreenState extends AbstractScreenState {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         } else {
-            ActionsScreenState other = (ActionsScreenState) o;
-            return super.equals(other) && Objects.equals(actions, other.actions);
+            /*
+             * Since we want to cache screen states and the actions are constructed lazily,
+             * a comparison on those actions is not useful. A cached screen state has its
+             * actions initialized while a new screen state has not.
+             */
+            return super.equals(o);
         }
     }
 

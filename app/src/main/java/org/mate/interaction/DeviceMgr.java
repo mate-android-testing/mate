@@ -219,7 +219,6 @@ public class DeviceMgr {
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    // TODO: make primitive actions subtype of ui actions + remove non widget related actions
     private void executeAction(PrimitiveAction action) throws AUTCrashException {
 
         switch (action.getActionType()) {
@@ -279,6 +278,8 @@ public class DeviceMgr {
             case TYPE_SPECIFIC_TEXT:
                 handleEdit(action);
             case CLEAR_WIDGET:
+                // TODO: Do we actually need this action?
+                //  A 'type text' action overwrites the previous text anyways.
                 handleClear(selectedWidget);
                 break;
             case SWIPE_DOWN:
@@ -402,6 +403,7 @@ public class DeviceMgr {
      * @param widget The widget on which a long click should be applied.
      */
     private void handleLongClick(Widget widget) {
+        // TODO: consider https://stackoverflow.com/questions/21432561/how-to-achieve-long-click-in-uiautomator
         UiObject2 obj = findObject(widget);
         int X = widget.getX();
         int Y = widget.getY();
@@ -463,10 +465,13 @@ public class DeviceMgr {
         Widget widget = action.getWidget();
         String textData = "";
 
-        if (action.getExtraInfo().isEmpty())
+        if (action.getExtraInfo().isEmpty()) {
             textData = generateTextData(action);
-        else
+        } else {
+            // TODO: I believe that this information is not present, the widget is generated
+            //  new for each iteration. Moreover, should we really re-use an previous input again?
             textData = action.getExtraInfo();
+        }
 
         MATE.log_debug("Input text: " + textData);
 
@@ -498,7 +503,6 @@ public class DeviceMgr {
                         if (objText.equals(widget.getText())) {
                             obj.setText(textData);
                             objfound = true;
-
                         }
                     }
                     i++;
@@ -531,6 +535,7 @@ public class DeviceMgr {
             if (maxLengthInt > 15)
                 maxLengthInt = 15;
 
+            // TODO: consider https://developer.android.com/reference/android/text/InputType
             if (widget.getInputType() == (InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER))
                 inputType = "number";
             if (widget.getInputType() == InputType.TYPE_CLASS_PHONE)

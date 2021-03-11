@@ -33,8 +33,9 @@ public class FSM {
         }
 
         Transition transition = new Transition(source, target, action);
-        transitions.add(transition);
-        MATE.log_debug(String.valueOf(this));
+        if (transitions.add(transition)) {
+            MATE.log_debug(String.valueOf(this));
+        }
     }
 
     public State getState(IScreenState screenState) {

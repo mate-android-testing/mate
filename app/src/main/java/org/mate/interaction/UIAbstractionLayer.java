@@ -413,6 +413,12 @@ public class UIAbstractionLayer {
         List<IScreenState> recordedScreenStates = getRecordedScreenStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
             if (recordedScreenState.equals(screenState)) {
+                MATE.log_debug("Using cached screen state!");
+                /*
+                * NOTE: We should only return the cached screen state if we can ensure
+                * that equals() actually compares the widgets. Otherwise, we can end up with
+                * widget actions that are not applicable on the current screen.
+                 */
                 return recordedScreenState;
             }
         }
