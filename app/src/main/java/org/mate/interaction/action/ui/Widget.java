@@ -513,45 +513,20 @@ public class Widget {
         return editable;
     }
 
+    /**
+     * Checks whether this widget represents an edit text widget.
+     *
+     * @return Returns {@code true} if this widget is an edit text widget, otherwise {@code false}
+     *          is returned.
+     */
     public boolean isEditTextType() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.EditText.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public boolean isEditableOld() {
-        if (clazz.contains("android.widget.EditText"))
-            return true;
-        if (clazz.contains("AppCompatEditText"))
-            return true;
-        if (clazz.contains("AutoCompleteTextView"))
-            return true;
-        if (clazz.contains("ExtractEditText"))
-            return true;
-        if (clazz.contains("GuidedActionEditText"))
-            return true;
-        if (clazz.contains("SearchEditText"))
-            return true;
-        if (clazz.contains("AppCompatAutoCompleteTextView"))
-            return true;
-        if (clazz.contains("AppCompatMultiAutoCompleteTextView"))
-            return true;
-        if (clazz.contains("MultiAutoCompleteTextView"))
-            return true;
-        if (clazz.contains("TextInputEditText"))
-            return true;
-
-        try {
-            Class<?> clazz = Class.forName(this.getClazz());
-            return android.widget.EditText.class.isAssignableFrom(clazz);
-        } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 
@@ -642,6 +617,23 @@ public class Widget {
         return false;
     }
 
+    /**
+     * Checks whether any parent widget is scrollable.
+     *
+     * @return Returns {@code true} if a parent widget is scrollable,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfScrollable() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isScrollable())
+                return true;
+            else
+                parent = parent.getParent();
+        }
+        return false;
+    }
+
     public int getMaxTextLength() {
         return maxTextLength;
     }
@@ -697,8 +689,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.Button.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 
@@ -713,8 +706,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.ImageButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 
@@ -729,8 +723,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.ImageSwitcher.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 
@@ -756,13 +751,63 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.ImageView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 
     /**
-     * Checks whether this widget represents a spinner.
+     * Checks whether the widget represents a vertical or horizontal scroll view.
+     *
+     * @return Returns {@code true} if this widget is a scrollview,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isScrollView() {
+        return isVerticalScrollView() || isHorizontalScrollView();
+    }
+
+    /**
+     * Checks whether this widget represents a vertical scrollview, see
+     * https://developer.android.com/reference/android/widget/ScrollView.
+     *
+     * @return Returns {@code true} if this widget is a vertical scrollview,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isVerticalScrollView() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.ScrollView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a horizontal scrollview, see
+     * https://developer.android.com/reference/android/widget/HorizontalScrollView and
+     * https://developer.android.com/reference/android/support/v4/view/ViewPager.html.
+     *
+     * @return Returns {@code true} if this widget is a horizontal scrollview,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isHorizontalScrollView() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.HorizontalScrollView.class.isAssignableFrom(clazz)
+                    || android.support.v4.view.ViewPager.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a spinner, see
+     * https://developer.android.com/reference/android/widget/AbsSpinner.
      *
      * @return Returns {@code true} if this widget is a spinner, otherwise {@code false}
      *          is returned.
@@ -772,8 +817,9 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.AbsSpinner.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 
@@ -788,8 +834,27 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.TextView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
-            MATE.log_error("Class " + getClazz() + " not found!");
-            throw new IllegalStateException(e);
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget implements the checkable interface, see
+     * https://developer.android.com/reference/android/widget/Checkable.
+     *
+     * @return Returns {@code true} if this widget implements checkable, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isCheckableType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.Checkable.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
         }
     }
 

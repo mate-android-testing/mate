@@ -1,6 +1,7 @@
 package org.mate.state.executables;
 
 import android.app.Instrumentation;
+import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -221,6 +222,45 @@ public class AppScreen {
      */
     public String getPackageName() {
         return packageName;
+    }
+
+    /**
+     * Returns the bounding box of the status bar. This depends on display width
+     * and has a fixed height of 72 pixels, e.g. [0,0][1080][72].
+     *
+     * @return Returns the bounding box of the status bar.
+     */
+    public Rect getStatusBarBoundingBox() {
+        return new Rect(0, 0, getWidth(), 72);
+    }
+
+    /**
+     * Returns the bounding box of the app screen. This depends on display width
+     * and the display height, e.g. [0,0][1080][1920].
+     *
+     * @return Returns the bounding box of the app screen.
+     */
+    @SuppressWarnings("unused")
+    public Rect getBoundingBox() {
+        return new Rect(0, 0, getWidth(), getHeight());
+    }
+
+    /**
+     * Returns the screen width.
+     *
+     * @return Returns the screen width in pixels.
+     */
+    public int getWidth() {
+        return device.getDisplayWidth();
+    }
+
+    /**
+     * Returns the screen height.
+     *
+     * @return Returns the screen height in pixels.
+     */
+    public int getHeight() {
+        return device.getDisplayHeight();
     }
 
     /**
