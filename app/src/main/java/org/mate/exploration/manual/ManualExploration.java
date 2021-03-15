@@ -14,9 +14,10 @@ import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
-import org.mate.state.ScreenStateType;
 import org.mate.utils.Utils;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Enables the manual exploration of an app.
@@ -37,17 +38,16 @@ public class ManualExploration implements Algorithm {
         Action manualAction = new UIAction(ActionType.MANUAL_ACTION,
                 uiAbstractionLayer.getCurrentActivity());
 
+        Set<IScreenState> screenStates = new HashSet<>();
+
         while (true) {
 
-            // the interval the user has to time to explore the app (before the screen state
-            // is re-evaluated)
-            Utils.sleep(1000);
+            IScreenState state = uiAbstractionLayer.getLastScreenState();
 
-            IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+            // check for new state
+            if (!screenStates.contains(state)) {
 
-            boolean foundNewState  = uiAbstractionLayer.checkIfNewState(state);
-
-            if (foundNewState) {
+                screenStates.add(state);
 
                 MATE.log("Widgets on screen: ");
                 for (Widget w: state.getWidgets()) {
@@ -55,18 +55,15 @@ public class ManualExploration implements Algorithm {
                             + "-" + w.getBounds().toShortString());
                 }
 
-                // this basically simulates a dummy action, which in turn causes the state model
-                // to check for updates
-                uiAbstractionLayer.executeAction(manualAction);
-
-                state = uiAbstractionLayer.getLastScreenState();
                 MATE.log_acc("New state: " + state.getId());
                 MATE.log_acc("Visited activity: " + state.getActivityName());
 
-                // record screenshots of new states
-                Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(), state.getId());
 
                 if (enableAccessibilityChecks) {
+
+                    // record screenshots of new states
+                    Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(), state.getId());
+
                     AccessibilityViolationChecker.runAccessibilityChecks(state);
 
                     MultipleContentDescCheck multipleContentDescCheck
@@ -94,6 +91,14 @@ public class ManualExploration implements Algorithm {
                     }
                 }
             }
+
+            // the interval the user has to time to explore the app (before the screen state
+            // is re-evaluated)
+            Utils.sleep(5000);
+
+            // this basically simulates a dummy action, which in turn causes the state model
+            // to check for updates
+            uiAbstractionLayer.executeAction(manualAction);
         }
     }
 }
