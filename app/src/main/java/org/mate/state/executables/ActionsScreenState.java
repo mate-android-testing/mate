@@ -73,7 +73,7 @@ public class ActionsScreenState extends AbstractScreenState {
             // we can't authenticate here, so only allow to press 'BACK'
             return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
         }
-
+        
         MATE.log_debug("Retrieving widget actions for screen state...");
         MATE.log_debug("Number of all widgets: " + this.widgets.size());
 
@@ -173,7 +173,8 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            if (widget.isSonOfLongClickable() || widget.isSonOfClickable() || widget.isSonOfCheckable()) {
+            if ((widget.isSonOfLongClickable() || widget.isSonOfClickable()
+                    || widget.isSonOfCheckable()) && !widget.isSonOfActionableContainer()) {
                 MATE.log_debug("Parent widget defines the action!");
                 // we define the action directly on the parent widget
                 continue;

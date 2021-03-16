@@ -461,6 +461,34 @@ public class Widget {
                 || getClazz().equals("android.widget.GridLayout");
     }
 
+    /**
+     * Checks whether the widget is a son of an actionable container, e.g. a clickable
+     * linear layout.
+     *
+     * @return Returns {@code true} if this widget is a son of an actionable container,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfActionableContainer() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isActionable() && parent.isContainer())
+                return true;
+            else
+                parent = parent.getParent();
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the widget is either clickable, long-clickable or checkable.
+     *
+     * @return Returns {@code true} if this widget is actionable,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isActionable() {
+        return isClickable() || isLongClickable() || isCheckable();
+    }
+
     public boolean isContextClickable() {
         return contextClickable;
     }
@@ -856,11 +884,6 @@ public class Widget {
             MATE.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
-    }
-
-    public boolean isActionable() {
-        return this.isEditable() || this.isClickable() || this.isLongClickable()
-                || this.isSpinnerType() || this.isCheckable();
     }
 
     public boolean isPassword() {
