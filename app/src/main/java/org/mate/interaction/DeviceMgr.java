@@ -409,7 +409,8 @@ public class DeviceMgr {
     }
 
     /**
-     * Tries to return a ui object matching the given widget.
+     * Tries to return a ui object matching the given widget. This is a
+     * best effort approach.
      *
      * @param widget The widget whose ui object should be looked up.
      * @return Returns the corresponding ui object or {@code null} if no
@@ -424,7 +425,10 @@ public class DeviceMgr {
             if (objs.size() == 1) {
                 return objs.get(0);
             } else {
-                // check for a match based on the text attribute
+                /*
+                * It can happen that multiple widgets share the same resource id,
+                * thus we need to compare on the text attribute.
+                 */
                 for (UiObject2 uiObject2 : objs) {
                     if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
                         return uiObject2;
