@@ -142,7 +142,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            if (widget.isSonOf("android.widget.Spinner")) {
+            if (widget.isSonOfSpinner()) {
 
                 MATE.log_debug("Spinner widget defines scrolling action itself!");
 

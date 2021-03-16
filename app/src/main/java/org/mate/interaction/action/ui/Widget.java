@@ -869,6 +869,23 @@ public class Widget {
     }
 
     /**
+     * Checks whether a parent widget represents an abstract spinner.
+     *
+     * @return Returns {@code true} if a parent widget is a spinner,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfSpinner() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isSpinnerType())
+                return true;
+            else
+                parent = parent.getParent();
+        }
+        return false;
+    }
+
+    /**
      * Checks whether this widget represents an abstract list view.
      *
      * @return Returns {@code true} if this widget is an abstract list view, otherwise {@code false}
