@@ -262,8 +262,7 @@ public class ActionsScreenState extends AbstractScreenState {
              * and not clickable according to the underlying AccessibilityNodeInfo object,
              * however those elements represent in most cases clickable widgets.
              */
-            // TODO: support subtypes of list view
-            if (widget.isSonOf("android.widget.ListView")) {
+            if (widget.isSonOfListView()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 

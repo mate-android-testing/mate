@@ -852,6 +852,40 @@ public class Widget {
     }
 
     /**
+     * Checks whether a parent widget represents an abstract list view.
+     *
+     * @return Returns {@code true} if a parent widget is an abstract list view,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isSonOfListView() {
+        Widget parent = this.parent;
+        while (parent != null) {
+            if (parent.isListViewType())
+                return true;
+            else
+                parent = parent.getParent();
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether this widget represents an abstract list view.
+     *
+     * @return Returns {@code true} if this widget is an abstract list view, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isListViewType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.AbsListView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents a text view.
      *
      * @return Returns {@code true} if this widget is a text view, otherwise {@code false}
