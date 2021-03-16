@@ -238,25 +238,21 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             if (widget.isScrollable() && !widget.isSpinnerType() && !widget.isSonOfScrollable()) {
-                // TODO: fix direction of scrolling!
-                // define the scroll action on the parent widget
-                if (widget.isVerticalScrollView()) {
-                    MATE.log_debug("Widget is a vertical scrollview!");
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
-                } else if (widget.isHorizontalScrollView()) {
-                    MATE.log_debug("Widget is a horizontal scrollview!");
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
-                } else {
-                    MATE.log_debug("Scrollable widget not recognized!");
-                    // could be an instance of android.support.v7.widget.RecyclerView
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
-                    widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
-                }
-                // it doesn't make sense to add another action to scrollable widget
+
+                MATE.log_debug("Widget is a scrollview!");
+
+                /*
+                * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
+                * a horizontal scroll view like android.support.v4.view.ViewPager is used for
+                * vertical scrolling by nesting layouts, so it is not possible to determine
+                * the direction of the scroll view. Thus, we add swipes for all directions.
+                 */
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
+
+                // it doesn't make sense to add another action to scrollable widgets
                 continue;
             }
 
