@@ -105,12 +105,6 @@ public class DeviceMgr {
             case HOME:
                 device.pressHome();
                 break;
-            case SWIPE_DOWN:
-            case SWIPE_UP:
-            case SWIPE_LEFT:
-            case SWIPE_RIGHT:
-                handleSwipe(null, typeOfAction);
-                break;
             case QUICK_SETTINGS:
                 device.openQuickSettings();
                 break;

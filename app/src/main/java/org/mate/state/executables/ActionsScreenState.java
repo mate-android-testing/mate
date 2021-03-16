@@ -377,13 +377,6 @@ public class ActionsScreenState extends AbstractScreenState {
         uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
-
-        // swipes are both applicable to widgets and non-widgets
-        // TODO: remove once scrolling has been implemented on individual widgets
-        uiActions.add(new UIAction(ActionType.SWIPE_DOWN, activityName));
-        uiActions.add(new UIAction(ActionType.SWIPE_UP, activityName));
-        uiActions.add(new UIAction(ActionType.SWIPE_LEFT, activityName));
-        uiActions.add(new UIAction(ActionType.SWIPE_RIGHT, activityName));
         return uiActions;
     }
 
