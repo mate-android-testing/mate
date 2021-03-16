@@ -454,11 +454,22 @@ public class Widget {
      *          is returned.
      */
     public boolean isContainer() {
-        // TODO: extend with layouts defined at https://developer.android.com/guide/topics/ui/declaring-layout
+        // TODO: extend with layouts defined at https://developer.android.com/reference/androidx/classes.html
         return getClazz().equals("android.widget.LinearLayout")
                 || getClazz().equals("android.widget.FrameLayout")
                 || getClazz().equals("android.widget.RelativeLayout")
-                || getClazz().equals("android.widget.GridLayout");
+                || getClazz().equals("android.widget.AbsoluteLayout")
+                || getClazz().equals("android.widget.TableLayout")
+                || getClazz().equals("android.widget.GridLayout")
+                || getClazz().equals("androidx.constraintlayout.motion.widget.MotionLayout")
+                || getClazz().equals("androidx.drawerlayout.widget.DrawerLayout")
+                || getClazz().equals("androidx.constraintlayout.widget.ConstraintLayout")
+                || getClazz().equals("androidx.appcompat.widget.LinearLayoutCompat")
+                || getClazz().equals("androidx.coordinatorlayout.widget.CoordinatorLayout")
+                || getClazz().equals("androidx.gridlayout.widget.GridLayout")
+                || getClazz().equals("android.support.v4.widget.DrawerLayout")
+                || getClazz().equals("android.support.v7.widget.GridLayout")
+                || getClazz().equals("android.support.v7.widget.LinearLayoutCompat");
     }
 
     /**
