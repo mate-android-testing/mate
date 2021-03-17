@@ -153,4 +153,8 @@ public class GUIWalker {
             }
         }
     }
+
+    // boolean moveToState(IScreenState screenState);
+    // boolean moveToActivity(String activity);
+    // boolean moveToMainActivity();
 }

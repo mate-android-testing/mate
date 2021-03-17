@@ -16,9 +16,6 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 import org.mate.utils.Utils;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Enables the manual exploration of an app.
  */
@@ -38,25 +35,21 @@ public class ManualExploration implements Algorithm {
         Action manualAction = new UIAction(ActionType.MANUAL_ACTION,
                 uiAbstractionLayer.getCurrentActivity());
 
-        Set<IScreenState> screenStates = new HashSet<>();
-
         while (true) {
 
-            IScreenState state = uiAbstractionLayer.getLastScreenState();
-
             // check for new state
-            if (!screenStates.contains(state)) {
+            if (uiAbstractionLayer.reachedNewState()) {
 
-                screenStates.add(state);
+                IScreenState state = uiAbstractionLayer.getLastScreenState();
 
-                MATE.log("Widgets on screen: ");
+                MATE.log_debug("Widgets on screen: ");
                 for (Widget w: state.getWidgets()) {
                     MATE.log(w.getClazz() + "-" + w.getId() + "-" + w.getText()
                             + "-" + w.getBounds().toShortString());
                 }
 
                 MATE.log_acc("New state: " + state.getId());
-                MATE.log_acc("Visited activity: " + state.getActivityName());
+                MATE.log_acc("Activity: " + state.getActivityName());
 
 
                 if (enableAccessibilityChecks) {

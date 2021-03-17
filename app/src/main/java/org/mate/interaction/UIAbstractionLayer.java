@@ -14,6 +14,7 @@ import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
@@ -21,11 +22,9 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
 import org.mate.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static org.mate.MATE.device;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
@@ -40,20 +39,18 @@ public class UIAbstractionLayer {
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
     private String packageName;
     private DeviceMgr deviceMgr;
-    private Map<Action, Edge> edges;
     private IScreenState lastScreenState;
-    private int screenStateEnumeration;
+    private int lastScreenStateNumber = 0;
 
     private IGUIModel guiModel;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
-        edges = new HashMap<>();
         clearScreen();
         lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-        lastScreenState.setId("S0");
-        screenStateEnumeration = 1;
+        lastScreenState.setId("S" + lastScreenStateNumber);
+        lastScreenStateNumber++;
         guiModel = new FSMModel(lastScreenState);
     }
 
@@ -133,7 +130,6 @@ public class UIAbstractionLayer {
             // update screen state model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
-            edges.put(action, new Edge(action, lastScreenState, state));
             guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
 
@@ -176,7 +172,6 @@ public class UIAbstractionLayer {
 
         // update gui model
         state = toRecordedScreenState(state);
-        edges.put(action, new Edge(action, lastScreenState, state));
         guiModel.update(lastScreenState, state, action);
         lastScreenState = state;
 
@@ -373,44 +368,24 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the edge (a pair of screen states) that is described by the given action.
+     * Returns the edges (a pair of screen states) that is described by the given action.
      *
      * @param action The given action.
-     * @return Returns the edge belonging to the action.
+     * @return Returns the edges labeled by the given action.
      */
-    public Edge getEdge(Action action) {
-        return edges.get(action);
-    }
-
-    /**
-     * Returns the list of recorded (distinct) screen states.
-     *
-     * @return Returns the list of recorded screen states.
-     */
-    private List<IScreenState> getRecordedScreenStates() {
-        List<IScreenState> screenStates = new ArrayList<>();
-        for (Edge edge : edges.values()) {
-            if (!screenStates.contains(edge.source)) {
-                screenStates.add(edge.source);
-            }
-            if (!screenStates.contains(edge.target)) {
-                screenStates.add(edge.target);
-            }
-        }
-        return screenStates;
+    public Set<Edge> getEdges(Action action) {
+        return guiModel.getEdges(action);
     }
 
     /**
      * Checks whether the given screen state has been recorded earlier. If this is
-     * the case, the recorded screen state is returned, otherwise the screen state
-     * gets a new id assigned and is returned.
+     * the case, the recorded screen state is returned, otherwise the given state is returned.
      *
      * @param screenState The given screen state.
-     * @return Returns the recorded screen state, i.e. a screen state assigned
-     *          with an id.
+     * @return Returns the cached screen state, otherwise the given screen state.
      */
     private IScreenState toRecordedScreenState(IScreenState screenState) {
-        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
+        Set<IScreenState> recordedScreenStates = guiModel.getStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
             if (recordedScreenState.equals(screenState)) {
                 /*
@@ -421,27 +396,19 @@ public class UIAbstractionLayer {
                 return recordedScreenState;
             }
         }
-        screenState.setId("S" + screenStateEnumeration);
-        screenStateEnumeration++;
+        screenState.setId("S" + lastScreenStateNumber);
+        lastScreenStateNumber++;
         return screenState;
     }
 
     /**
-     * Checks whether the screen state is new.
+     * Checks whether the last action lead to a new screen state.
      *
-     * @param screenState The screen state to check whether it is new.
-     * @return Returns {@code} if the screen state has not been recorded,
+     * @return Returns {@code} if a new screen state has been reached,
      *          otherwise {@code} false is returned.
      */
-    @SuppressWarnings("unused")
-    public boolean checkIfNewState(IScreenState screenState) {
-        List<IScreenState> recordedScreenStates = getRecordedScreenStates();
-        for (IScreenState recordedScreenState : recordedScreenStates) {
-            if (recordedScreenState.equals(screenState)) {
-                return false;
-            }
-        }
-        return true;
+    public boolean reachedNewState() {
+        return guiModel.reachedNewState();
     }
 
     /**
@@ -449,34 +416,5 @@ public class UIAbstractionLayer {
      */
     public enum ActionResult {
         FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
-    }
-
-    /**
-     * Represents an edge that links the connection between two screen states by an action.
-     * Or more simply, executing the action on the source screen state leads to the target
-     * screen state.
-     */
-    public static class Edge {
-        private Action action;
-        private IScreenState source;
-        private IScreenState target;
-
-        public Edge(Action action, IScreenState source, IScreenState target) {
-            this.action = action;
-            this.source = source;
-            this.target = target;
-        }
-
-        public Action getAction() {
-            return action;
-        }
-
-        public IScreenState getSource() {
-            return source;
-        }
-
-        public IScreenState getTarget() {
-            return target;
-        }
     }
 }

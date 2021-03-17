@@ -339,7 +339,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 // check whether any sibling overlaps with the current widget
                 for (Widget sibling : siblings) {
                     if (sibling.getBounds().equals(widget.getBounds())) {
-                        MATE.log_debug("Widget " + widget + "overlaps with " + sibling + "!");
+                        MATE.log_debug("Widget " + widget + " overlaps with " + sibling + "!");
                         return true;
                     }
                 }
