@@ -96,31 +96,33 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         for (int i = 0; i < l.size(); i++) {
             int idx = start + d;
 
-            for (Edge e1 : MATE.uiAbstractionLayer.getEdges(from)) {
-                for (Edge e2 : MATE.uiAbstractionLayer.getEdges(l.get(idx))) {
+            if (idx >= 0 && idx < l.size()) {
+                for (Edge e1 : MATE.uiAbstractionLayer.getEdges(from)) {
+                    for (Edge e2 : MATE.uiAbstractionLayer.getEdges(l.get(idx))) {
 
-                    if (e1 != null && e2 != null
-                            && e1.getTarget().equals(e2.getSource())) {
-                        return Optional.some(idx);
-                    }
+                        if (e1 != null && e2 != null
+                                && e1.getTarget().equals(e2.getSource())) {
+                            return Optional.some(idx);
+                        }
 
-                    if (right) {
-                        if (d < 0) {
-                            d = -d;
+                        if (right) {
+                            if (d < 0) {
+                                d = -d;
+                            } else {
+                                d = d + 1;
+                            }
+                            if (start - d - 1 >= 0) {
+                                right = false;
+                            }
                         } else {
-                            d = d + 1;
-                        }
-                        if (start - d - 1>= 0) {
-                            right = false;
-                        }
-                    } else {
-                        if (d > 0) {
-                            d = -d;
-                        }
-                        d -= 1;
+                            if (d > 0) {
+                                d = -d;
+                            }
+                            d -= 1;
 
-                        if (start - d < l.size()) {
-                            right = true;
+                            if (start - d < l.size()) {
+                                right = true;
+                            }
                         }
                     }
                 }
