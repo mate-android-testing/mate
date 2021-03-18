@@ -21,7 +21,7 @@ public enum ActionType {
     SLEEP,
     WAKE_UP,
     DELETE,
-    DPAP_UP,
+    DPAD_UP,
     DPAD_DOWN,
     DPAD_LEFT,
     DPAD_RIGHT,

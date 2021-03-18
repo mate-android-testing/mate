@@ -48,6 +48,15 @@ public class DeviceMgr {
     }
 
     /**
+     * Returns the ui device instance.
+     *
+     * @return Returns the ui device instance.
+     */
+    public UiDevice getDevice() {
+        return device;
+    }
+
+    /**
      * Executes a given action.
      *
      * @param action The action to be executed.
@@ -132,7 +141,7 @@ public class DeviceMgr {
             case DELETE:
                 device.pressDelete();
                 break;
-            case DPAP_UP:
+            case DPAD_UP:
                 device.pressDPadUp();
                 break;
             case DPAD_DOWN:
