@@ -170,18 +170,19 @@ public class WidgetAction extends UIAction {
     }
 
     /**
-     * The string representation used in combination with analysis framework.
+     * The string representation used in combination with the analysis framework.
      *
      * @return Returns the string representation of a widget action.
      */
-    // TODO: adjust representation + fix analysis framework
     @NonNull
     @Override
     public String toString() {
         String representation = "widget-based action: " + actionType + " ";
 
+        representation += "id=" + widget.getId() + " ";
+
         if (widget.getResourceID() != null && !widget.getResourceID().isEmpty()) {
-            representation += "resource=" + widget.getResourceID() + " ";
+            representation += "resource_id=" + widget.getResourceID() + " ";
         }
 
         if (widget.getClazz() != null && !widget.getClazz().isEmpty()) {
