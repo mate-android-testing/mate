@@ -26,7 +26,7 @@ public class ManualExploration implements Algorithm {
 
     public ManualExploration(boolean enableAccessibilityChecks) {
         this.enableAccessibilityChecks = enableAccessibilityChecks;
-        this.uiAbstractionLayer = MATE.getUiAbstractionLayer();
+        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
     }
 
     @Override

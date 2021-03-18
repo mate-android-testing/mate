@@ -1,15 +1,17 @@
 package org.mate.exploration.deprecated.evolutionary;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.model.TestCase;
-import org.mate.model.deprecated.graph.GraphGUIModel;
-import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.TestCase;
+import org.mate.model.deprecated.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.mate.MATE.device;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.GREEDY_EPSILON;
 import static org.mate.Properties.MAX_NUMBER_EVENTS;
@@ -299,7 +301,7 @@ public class OnePlusOne {
                     }
                 }
 
-                currentPackage = device.getCurrentPackageName();
+                currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
                 MATE.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)

@@ -1024,9 +1024,8 @@ public class EnvironmentManager {
      */
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
 
-        // TODO: retrieves this values via the DeviceMgr
-        int maxw = MATE.device.getDisplayWidth();
-        int maxh = MATE.device.getDisplayHeight();
+        int maxw = MATE.uiAbstractionLayer.getScreenWidth();
+        int maxh = MATE.uiAbstractionLayer.getScreenHeight();
 
         int x1 = widget.getX1();
         int x2 = widget.getX2();
@@ -1070,9 +1069,8 @@ public class EnvironmentManager {
      */
     public String getLuminance(String packageName, String stateId, Widget widget) {
 
-        // TODO: retrieves this values via the DeviceMgr
-        int maxw = MATE.device.getDisplayWidth();
-        int maxh = MATE.device.getDisplayHeight();
+        int maxw = MATE.uiAbstractionLayer.getScreenWidth();
+        int maxh = MATE.uiAbstractionLayer.getScreenHeight();
 
         int x1 = widget.getX1();
         int x2 = widget.getX2();

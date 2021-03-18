@@ -100,11 +100,11 @@ public class GraphGUIModel implements IGUIModel {
             addRootNode(screenState);
             updated=true;
 
-            MATE.log_vin("New state name: "+stateId);
-            MATE.log_vin("Activity name: "+screenState.getActivityName());
-            MATE.log_vin("Widgets: " );
+            MATE.log_debug("New state name: "+stateId);
+            MATE.log_debug("Activity name: "+screenState.getActivityName());
+            MATE.log_debug("Widgets: " );
             for (Widget w: screenState.getWidgets()) {
-                MATE.log_vin(w.getId() + " " + w.getClazz());
+                MATE.log_debug(w.getId() + " " + w.getClazz());
             }
         }
         else {
@@ -116,11 +116,11 @@ public class GraphGUIModel implements IGUIModel {
                     //new state
                     stateId = "S" + String.valueOf(nodeCount++);
 
-                    MATE.log_vin("New state name: "+stateId);
-                    MATE.log_vin("Activity name: "+screenState.getActivityName());
-                    MATE.log_vin("Widgets: " );
+                    MATE.log_debug("New state name: "+stateId);
+                    MATE.log_debug("Activity name: "+screenState.getActivityName());
+                    MATE.log_debug("Widgets: " );
                     for (Widget w: screenState.getWidgets()){
-                        MATE.log_vin(w.getId()+ " " + w.getClazz());
+                        MATE.log_debug(w.getId()+ " " + w.getClazz());
                     }
 
                     screenState.setId(stateId);

@@ -26,13 +26,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.mate.MATE.device;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
 
+// TODO: make singleton
 public class UIAbstractionLayer {
 
     private static final int UiAutomatorDisconnectedRetries = 3;
@@ -47,6 +47,7 @@ public class UIAbstractionLayer {
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
+        // check for any kind of dialogs (permission, crash, ...) initially
         clearScreen();
         lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         lastScreenState.setId("S" + lastScreenStateNumber);
@@ -194,10 +195,6 @@ public class UIAbstractionLayer {
         return lastScreenState;
     }
 
-    private void clearScreen() {
-        clearScreen(deviceMgr);
-    }
-
     /**
      * Clears the screen from all sorts of dialogs. In particular, whenever
      * a permission dialog pops up, the permission is granted. If a crash dialog
@@ -205,7 +202,7 @@ public class UIAbstractionLayer {
      * button is pressed to return to the AUT. Clicks on 'OK' when a build
      * warning pops up.
      */
-    public static void clearScreen(DeviceMgr deviceMgr) {
+    public void clearScreen() {
         boolean change = true;
         boolean retry = true;
         int retryCount = 0;
@@ -216,8 +213,10 @@ public class UIAbstractionLayer {
             try {
 
                 // check for crash dialog
-                UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
-                UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
+                UiObject crashDialog1 = deviceMgr.getDevice().findObject(new UiSelector()
+                        .packageName("android").textContains("keeps stopping"));
+                UiObject crashDialog2 = deviceMgr.getDevice().findObject(new UiSelector()
+                        .packageName("android").textContains("has stopped"));
 
                 if (crashDialog1.exists() || crashDialog2.exists()) {
                     // TODO: Click 'OK' on crash dialog window rather than 'HOME'?
@@ -335,11 +334,29 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Returns the screen width.
+     *
+     * @return Returns the screen width in pixels.
+     */
+    public int getScreenWidth() {
+        return deviceMgr.getScreenWidth();
+    }
+
+    /**
+     * Returns the screen height.
+     *
+     * @return Returns the screen height in pixels.
+     */
+    public int getScreenHeight() {
+        return deviceMgr.getScreenHeight();
+    }
+
+    /**
      * Resets an app, i.e. clearing the app cache and restarting the app.
      */
     public void resetApp() {
         try {
-            device.wakeUp();
+            deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
             MATE.log("Wake up couldn't be performed");
             e.printStackTrace();

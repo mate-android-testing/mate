@@ -1,27 +1,29 @@
 package org.mate.exploration.deprecated.random;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
-import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
-import org.mate.accessibility.AccessibilitySummaryResults;
+import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import static org.mate.MATE.device;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 @Deprecated
 public class UniformRandomForAccessibility {
@@ -91,7 +93,7 @@ public class UniformRandomForAccessibility {
                     }
                     //if current package is null, emulator has crashed/closed
                     if (currentPackageName==null) {
-                        MATE.logsum("CURRENT PACKAGE: NULL");
+                        MATE.log_debug("CURRENT PACKAGE: NULL");
                         return;
                     }
 
@@ -149,7 +151,7 @@ public class UniformRandomForAccessibility {
         //updates the current activity name
         currentActivityName = state.getActivityName();
         MATE.log("start ACCESSIBILITY CHECKS: " );
-        MATE.logactivity(state.getActivityName());
+        MATE.log_acc("ACTIVITY_VISITED: " + state.getActivityName());
 
 
         //prepare for collecting results
@@ -259,7 +261,7 @@ public class UniformRandomForAccessibility {
                     }
                 }
 
-                currentPackage = device.getCurrentPackageName();
+                currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
                 MATE.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)

@@ -33,8 +33,8 @@ public class PrimitiveAction extends UIAction {
      * @return Returns a randomly generated primitive action.
      */
     public static PrimitiveAction randomAction() {
-        int x = Randomness.getRnd().nextInt(MATE.device.getDisplayWidth());
-        int y = Randomness.getRnd().nextInt(MATE.device.getDisplayHeight());
+        int x = Randomness.getRnd().nextInt(MATE.uiAbstractionLayer.getScreenWidth());
+        int y = Randomness.getRnd().nextInt(MATE.uiAbstractionLayer.getScreenHeight());
         String activity = MATE.uiAbstractionLayer.getCurrentActivity();
         return new PrimitiveAction(x, y,
                 Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)), activity);

@@ -16,6 +16,8 @@ import org.mate.state.ScreenStateType;
 
 import java.util.Date;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+
 /**
  * Created by marceloeler on 11/07/17.
  */
@@ -39,8 +41,7 @@ public class ExecuteMATEAccTestingRandom {
         MATE.log("start testing acc");
         MATE mate = new MATE();
 
-        device = mate.getDevice();
-        packageName = mate.getPackageName();
+        device = UiDevice.getInstance(getInstrumentation());
         String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
         runningTime = new Date().getTime();
         this.guiModel = new GraphGUIModel();

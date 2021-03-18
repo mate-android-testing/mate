@@ -25,14 +25,23 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class MATE {
 
-    // TODO: remove this field once its references are resolved
-    public static UiDevice device;
-    // TODO: make private
+    /**
+     * An abstraction of the app screen enabling the execution
+     * of actions and various other tasks.
+     */
     public static UIAbstractionLayer uiAbstractionLayer;
+
+    /**
+     * The package name of the AUT.
+     */
     public static String packageName;
-    private DeviceMgr deviceMgr;
+
+    /**
+     * The time out in milli seconds.
+     */
     public static long TIME_OUT;
 
+    // TODO: make singleton
     public MATE() {
 
         // should resolve android.os.FileUriExposedException
@@ -70,25 +79,26 @@ public class MATE {
 
         MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
         MATE.TIME_OUT = Properties.TIMEOUT() * 60 * 1000;
-        
-        device = UiDevice.getInstance(getInstrumentation());
 
-        MATE.log_debug("Default launcher package: " + device.getLauncherPackageName());
+        packageName = InstrumentationRegistry.getArguments().getString("packageName");
+        MATE.log_acc("Package name: " + packageName);
 
-        // checks whether user needs to authorize access to something on the device/emulator
-        UIAbstractionLayer.clearScreen(new DeviceMgr(device, ""));
+        UiDevice device = UiDevice.getInstance(getInstrumentation());
+        DeviceMgr deviceMgr = new DeviceMgr(device, packageName);
+        // internally checks for permission dialogs and grants permissions if required
+        uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
 
-        // get the name of the package of the app currently running
-        this.packageName = device.getCurrentPackageName();
-        MATE.log_acc("Package name: " + this.packageName);
+        // check whether the AUT could be successfully started
+        if (!packageName.equals(device.getCurrentPackageName())) {
+            MATE.log_acc("Currently displayed app: " + device.getCurrentPackageName());
+            throw new IllegalStateException("Couldn't launch app under test!");
+        }
 
-        String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
+        // try to allocate emulator
+        String emulator = Registry.getEnvironmentManager().allocateEmulator(packageName);
         MATE.log_acc("Emulator: " + emulator);
 
-        if (emulator != null && !emulator.isEmpty()) {
-            this.deviceMgr = new DeviceMgr(device, packageName);
-            uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
-        } else {
+        if (emulator == null || emulator.isEmpty()) {
             throw new IllegalStateException("Emulator couldn't be properly allocated!");
         }
 
@@ -142,10 +152,6 @@ public class MATE {
         Log.i("apptest", msg);
     }
 
-    public static void logsum(String msg) {
-        Log.e("acc", msg);
-    }
-
     public static void log_acc(String msg) {
         Log.e("acc", msg);
     }
@@ -160,25 +166,5 @@ public class MATE {
 
     public static void log_error(String msg) {
         Log.e("error", msg);
-    }
-
-    public static void log_vin(String msg) {
-        Log.i("vinDebug", msg);
-    }
-
-    public String getPackageName() {
-        return packageName;
-    }
-
-    public UiDevice getDevice() {
-        return device;
-    }
-
-    public static UIAbstractionLayer getUiAbstractionLayer() {
-        return uiAbstractionLayer;
-    }
-
-    public static void logactivity(String activityName) {
-        Log.i("acc", "ACTIVITY_VISITED: " + activityName);
     }
 }

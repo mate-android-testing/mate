@@ -600,6 +600,24 @@ public class DeviceMgr {
     }
 
     /**
+     * Returns the screen width.
+     *
+     * @return Returns the screen width in pixels.
+     */
+    public int getScreenWidth() {
+        return device.getDisplayWidth();
+    }
+
+    /**
+     * Returns the screen height.
+     *
+     * @return Returns the screen height in pixels.
+     */
+    public int getScreenHeight() {
+        return device.getDisplayHeight();
+    }
+
+    /**
      * Doesn't actually re-install the app, solely deletes the app cache.
      */
     public void reinstallApp() {
