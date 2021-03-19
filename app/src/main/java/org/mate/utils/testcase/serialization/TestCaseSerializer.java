@@ -1,4 +1,4 @@
-package org.mate.serialization;
+package org.mate.utils.testcase.serialization;
 
 
 import android.support.test.InstrumentationRegistry;
@@ -57,6 +57,7 @@ public final class TestCaseSerializer {
         // convert test case to xml
         XStream xstream = new XStream();
         xstream.registerConverter(new IntentBasedActionConverter());
+        xstream.registerConverter(new WidgetActionConverter());
         String testCaseXML = xstream.toXML(testCase);
 
         try (Writer fileWriter = new FileWriter(testCaseFile)) {
@@ -128,6 +129,7 @@ public final class TestCaseSerializer {
             XStream xstream = new XStream();
             xstream.ignoreUnknownElements();
             xstream.registerConverter(new IntentBasedActionConverter());
+            xstream.registerConverter(new WidgetActionConverter());
 
             TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
             MATE.log("Number of Actions: " + testCase.getEventSequence().size());

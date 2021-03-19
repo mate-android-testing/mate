@@ -1,4 +1,4 @@
-package org.mate.serialization;
+package org.mate.utils.testcase.serialization;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -127,7 +127,6 @@ public final class IntentBasedActionConverter implements Converter {
 
         if (reader.getNodeName().equals("type")) {
             String type = reader.getValue();
-            // System.out.println("Component type: " + type);
             componentType = ComponentType.mapStringToComponent(type);
         }
 
@@ -136,7 +135,6 @@ public final class IntentBasedActionConverter implements Converter {
 
         // enter 'intent' tag
         reader.moveDown();
-        // System.out.println("Inspecting node: " + reader.getNodeName());
 
         Intent intent = new Intent();
 
@@ -145,20 +143,14 @@ public final class IntentBasedActionConverter implements Converter {
 
             reader.moveDown();
 
-            // System.out.println("Inspecting (inner) node: " + reader.getNodeName());
-
             if (reader.getNodeName().equals("action")) {
-                // System.out.println("Action: " + reader.getValue());
                 intent.setAction(reader.getValue());
             } else if (reader.getNodeName().equals("categories")) {
-                // System.out.println("Categories: " + reader.getValue());
                 String[] categories = reader.getValue().substring(1, reader.getValue().length()-1).split(",");
                 for (String category : categories) {
-                    // System.out.println("Category extracted: " + category);
                     intent.addCategory(category);
                 }
             } else if (reader.getNodeName().equals("data")) {
-                // System.out.println("Data: " + reader.getValue());
                 intent.setData(Uri.parse(reader.getValue()));
             } else if (reader.getNodeName().equals("target")) {
                 String[] tokens = reader.getValue().substring(1, reader.getValue()
@@ -166,7 +158,6 @@ public final class IntentBasedActionConverter implements Converter {
                 intent.setComponent(new ComponentName(tokens[0], tokens[1]));
             } else if (reader.getNodeName().equals("extras")) {
                 Bundle bundle = (Bundle)context.convertAnother(intent, Bundle.class);
-                // System.out.println("Extras: " + bundle);
                 intent.putExtras(bundle);
             } else if (reader.getNodeName().equals("mime")) {
                 // TODO: consider the internal restrictions of setType()
@@ -174,7 +165,6 @@ public final class IntentBasedActionConverter implements Converter {
                 intent.setType(reader.getValue());
             } else if (reader.getNodeName().equals("package")) {
                 // TODO: consider the internal restrictions of setPackage()
-                System.out.println("Package: " + reader.getValue());
                 intent.setPackage(reader.getValue());
             }
 

@@ -10,7 +10,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.serialization.TestCaseSerializer;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;

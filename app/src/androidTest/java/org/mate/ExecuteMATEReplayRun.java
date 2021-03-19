@@ -5,7 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.model.TestCase;
-import org.mate.serialization.TestCaseSerializer;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.utils.testcase.TestCaseOptimizer;
