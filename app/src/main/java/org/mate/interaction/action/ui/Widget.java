@@ -165,7 +165,13 @@ public class Widget {
         this.id = activity + "->" + depth + "->" + index + "->" + localIndex;
         children = new ArrayList<>();
 
-        // set the widget boundaries
+        /*
+        * NOTE: An AccessibilityNodeInfo object is only valid (non null) for a certain
+        * amount of time, afterwards it expires. This means, we can't re-use this object
+        * to get an up-to-date state of the widget, e.g. the currently displayed text.
+        * Thus, we need to save all node attributes in dedicated variables and request
+        * an ui object instead of performing the action directly on the node object.
+         */
         Rect bounds = new Rect();
         node.getBoundsInScreen(bounds);
         this.bounds = bounds;
