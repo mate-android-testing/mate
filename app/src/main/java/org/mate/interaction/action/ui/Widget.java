@@ -103,7 +103,7 @@ public class Widget {
      * Only set if the widget stores a text, e.g. the text of an input box, otherwise the empty string.
      * See {@link AccessibilityNodeInfo#getText()}.
      */
-    private final String text;
+    private String text;
 
     /**
      * A possible content description of the widget, otherwise the empty string.
@@ -246,6 +246,15 @@ public class Widget {
             labelBy = Objects.toString(lb.getViewIdResourceName(), "");
         }
         this.labeledBy = labelBy;
+    }
+
+    /**
+     * Updates the text of the widget (only internally).
+     *
+     * @param text The new text for the widget.
+     */
+    public void setText(String text) {
+        this.text = text;
     }
 
     /**

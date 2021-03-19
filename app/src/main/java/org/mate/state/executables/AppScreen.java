@@ -184,11 +184,6 @@ public class AppScreen {
                     if (!widget.getResourceID().isEmpty()) {
                         editTextHints.put(widget.getResourceID(), hint);
                     }
-
-                    // TODO: I don't understand this check.
-                    if (textAfterClear.equals(textBeforeClear)) {
-                        uiObject.setText("");
-                    }
                 }
             }
 

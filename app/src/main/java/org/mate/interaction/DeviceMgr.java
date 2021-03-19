@@ -72,7 +72,7 @@ public class DeviceMgr {
             executeAction((IntentBasedAction) action);
         } else if (action instanceof SystemAction) {
             executeAction((SystemAction) action);
-        } else if (action instanceof  UIAction) {
+        } else if (action instanceof UIAction) {
             executeAction((UIAction) action);
         } else {
             throw new UnsupportedOperationException("Actions class "
@@ -307,7 +307,7 @@ public class DeviceMgr {
      * @throws AUTCrashException Thrown when the last action caused a crash of the application.
      */
     private void checkForCrash() throws AUTCrashException {
-        
+
         // handle app crashes
         UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
         UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
@@ -346,16 +346,18 @@ public class DeviceMgr {
      * @param widget The widget whose input should be cleared.
      */
     private void handleClear(Widget widget) {
-        // TODO: should we reflect the change in the widget, i.e. call widget.setText()?
         UiObject2 obj = findObject(widget);
-        if (obj != null)
+        if (obj != null) {
             obj.setText("");
+            // reflect change since we cache screen states and findObject() relies on it
+            widget.setText("");
+        }
     }
 
     /**
      * Executes a swipe (upon a widget) in a given direction.
      *
-     * @param widget The widget at which position the swipe should be performed.
+     * @param widget    The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
     private void handleSwipe(Widget widget, ActionType direction) {
@@ -435,8 +437,8 @@ public class DeviceMgr {
                 return objs.get(0);
             } else {
                 /*
-                * It can happen that multiple widgets share the same resource id,
-                * thus we need to compare on the text attribute.
+                 * It can happen that multiple widgets share the same resource id,
+                 * thus we need to compare on the text attribute.
                  */
                 for (UiObject2 uiObject2 : objs) {
                     if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
@@ -466,64 +468,44 @@ public class DeviceMgr {
         return null;
     }
 
-    // TODO: review this
+    /**
+     * Handles the insertion of a text in some editable widget.
+     *
+     * @param action The widget action to be performed.
+     */
     private void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
-        String textData = "";
-
-        if (action.getExtraInfo().isEmpty()) {
-            textData = generateTextData(action);
-        } else {
-            // TODO: I believe that this information is not present, the widget is generated
-            //  new for each iteration. Moreover, should we really re-use an previous input again?
-            textData = action.getExtraInfo();
-        }
-
+        String textData = generateTextData(action);
         MATE.log_debug("Input text: " + textData);
+        MATE.log_debug("Previous text: " + widget.getText());
 
-        if (widget.getResourceID().isEmpty()) {
-            if (!widget.getText().isEmpty()) {
-                UiObject2 obj = device.findObject(By.text(widget.getText()));
-                if (obj != null) {
-                    obj.setText(textData);
-                }
-            } else {
-                device.click(widget.getX(), widget.getY());
-                UiObject2 obj = device.findObject(By.focused(true));
-                if (obj != null) {
-                    obj.setText(textData);
-                }
-            }
+        UiObject2 uiObject = findObject(widget);
+
+        if (uiObject != null) {
+            uiObject.setText(textData);
+            // reflect change since we cache screen states and findObject() relies on it
+            widget.setText(textData);
         } else {
-            List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
-            if (objs != null && objs.size() > 0) {
-                int i = 0;
-                int size = objs.size();
-                boolean objfound = false;
-                while (i < size && !objfound) {
-                    UiObject2 obj = objs.get(i);
-                    if (obj != null) {
-                        String objText = "";
-                        if (obj.getText() != null)
-                            objText = obj.getText();
-                        if (objText.equals(widget.getText())) {
-                            obj.setText(textData);
-                            objfound = true;
-                        }
-                    }
-                    i++;
-                }
-                if (!objfound)
-                    MATE.log("  ********* obj " + widget.getId() + "  not found");
+            // try to click on the widget, which in turn should get focused
+            device.click(widget.getX(), widget.getY());
+            UiObject2 obj = device.findObject(By.focused(true));
+            if (obj != null) {
+                obj.setText(textData);
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText(textData);
             } else {
                 MATE.log("  ********* obj " + widget.getId() + "  not found");
             }
         }
-
-        action.setExtraInfo(textData);
     }
 
+    /**
+     * Generates a text input for the given editable widget.
+     *
+     * @param action The widget action containing the editable widget.
+     * @return Returns a text input for the editable widget.
+     */
     private String generateTextData(WidgetAction action) {
 
         Widget widget = action.getWidget();
@@ -532,71 +514,74 @@ public class DeviceMgr {
         if (widgetText.isEmpty())
             widgetText = widget.getHint();
 
-        String textData = "";
-        String inputType = "";
+        // -1 if no limit has been set
         int maxLengthInt = widget.getMaxTextLength();
-        if (action.getExtraInfo().isEmpty()) {
 
-            if (maxLengthInt < 0)
-                maxLengthInt = 15;
-            if (maxLengthInt > 15)
-                maxLengthInt = 15;
+        // allow a max length of 15 characters
+        if (maxLengthInt < 0)
+            maxLengthInt = 15;
+        if (maxLengthInt > 15)
+            maxLengthInt = 15;
 
-            // TODO: consider https://developer.android.com/reference/android/text/InputType
-            if (widget.getInputType() == (InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER))
-                inputType = "number";
-            if (widget.getInputType() == InputType.TYPE_CLASS_PHONE)
-                inputType = "phone";
-            if (widget.getInputType() == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-                inputType = "email";
-            if (widget.getInputType() == InputType.TYPE_TEXT_VARIATION_URI)
-                inputType = "uri";
+        // consider https://developer.android.com/reference/android/text/InputType
+        int inputType =  widget.getInputType();
 
+        // check whether the input consists solely of digits (ignoring dots and comas)
+        widgetText = widgetText.replace(".", "");
+        widgetText = widgetText.replace(",", "");
 
-            widgetText = widgetText.replace(".", "");
-            widgetText = widgetText.replace(",", "");
-            if (inputType.isEmpty() && !widgetText.isEmpty() && android.text.TextUtils.isDigitsOnly(widgetText)) {
-                inputType = "number";
-            }
+        if (inputType == InputType.TYPE_NULL && !widgetText.isEmpty()
+                && android.text.TextUtils.isDigitsOnly(widgetText)) {
+            inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER;
+        }
 
-            if (inputType.isEmpty()) {
-                String desc = widget.getContentDesc();
-                if (desc != null) {
-                    if (desc.contains("email") || desc.contains("e-mail") || desc.contains("E-mail") || desc.contains("Email"))
-                        inputType = "email";
+        // check whether we can derive the input via the content description
+        if (inputType == InputType.TYPE_NULL) {
+            String desc = widget.getContentDesc();
+            if (desc != null) {
+                if (desc.contains("email") || desc.contains("e-mail")
+                        || desc.contains("E-mail") || desc.contains("Email")) {
+                    inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
                 }
             }
-            if (inputType.isEmpty())
-                inputType = "text";
-
-
-            textData = getRandomData(inputType, maxLengthInt);
-        } else {
-            textData = action.getExtraInfo();
         }
-        return textData;
+
+        // assume text input if input type not derivable
+        if (inputType == InputType.TYPE_NULL) {
+            inputType = InputType.TYPE_CLASS_TEXT;
+        }
+
+        return getRandomData(inputType, maxLengthInt);
     }
 
-    private String getRandomData(String inputType, int maxLengthInt) {
-        //need to also generate random invalid string, number, email, uri, ...
-        String textData = "";
-        DataGenerator dataGen = new DataGenerator();
-        if (inputType != null) {
+    /**
+     * Generates a random input for the given input type on a best effort basis.
+     *
+     * @param inputType    The input type, e.g. phone number.
+     * @param maxLengthInt The maximal length for the input.
+     * @return Returns a random input matching the input type.
+     */
+    private String getRandomData(int inputType, int maxLengthInt) {
 
-            if (inputType.contains("phone") || inputType.contains("number")
-                    || inputType.contains("Phone") || inputType.contains("Number")) {
-                textData = dataGen.getRandomValidNumber(maxLengthInt);
-                // textData = dataGen.getRandomValidNumber();
-            } else if (inputType.contains("Email") || inputType.contains("email")) {
-                textData = dataGen.getRandomValidEmail(maxLengthInt);
-            } else if (inputType.contains("uri") || inputType.contains("URI")) {
-                textData = dataGen.getRandomUri(maxLengthInt);
-            } else {
-                textData = dataGen.getRandomValidString(maxLengthInt);
-            }
-        } else
-            textData = dataGen.getRandomValidString(maxLengthInt);
-        return textData;
+        // TODO: consider the generation of invalid strings, numbers, emails, uris, ...
+        DataGenerator dataGen = new DataGenerator();
+
+        switch (inputType) {
+            case InputType.TYPE_NUMBER_FLAG_DECIMAL:
+            case InputType.TYPE_CLASS_NUMBER:
+            case InputType.TYPE_CLASS_PHONE:
+            case InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL:
+                return dataGen.getRandomValidNumber(maxLengthInt);
+            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
+                return dataGen.getRandomValidEmail(maxLengthInt);
+            case InputType.TYPE_TEXT_VARIATION_URI:
+                return dataGen.getRandomUri(maxLengthInt);
+            case InputType.TYPE_CLASS_TEXT:
+                return dataGen.getRandomValidString(maxLengthInt);
+            default:
+                MATE.log_debug("Input type: " + inputType + " not explicitly supported yet!");
+                return dataGen.getRandomValidString(maxLengthInt);
+        }
     }
 
     /**

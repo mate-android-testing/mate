@@ -26,6 +26,7 @@ public class WidgetAction extends UIAction {
      * The text that should be inserted in the underlying widget.
      * Only applicable for editable widgets.
      */
+    @Deprecated
     private String extraInfo;
 
     /**
@@ -66,6 +67,7 @@ public class WidgetAction extends UIAction {
      *
      * @return Returns the text input of the widget.
      */
+    @Deprecated
     public String getExtraInfo() {
         return extraInfo;
     }
@@ -76,6 +78,7 @@ public class WidgetAction extends UIAction {
      *
      * @param extraInfo A text input for the widget.
      */
+    @Deprecated
     public void setExtraInfo(String extraInfo) {
         this.extraInfo = extraInfo;
     }
