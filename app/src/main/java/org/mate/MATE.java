@@ -109,6 +109,11 @@ public class MATE {
         }
     }
 
+    /**
+     * Executes the given algorithm in a timeout controlled loop.
+     *
+     * @param algorithm The algorithm to be executed, e.g. random exploration.
+     */
     public void testApp(final Algorithm algorithm) {
 
         MATE.log_acc("Activities:");
