@@ -57,7 +57,7 @@ Replace `ExecuteMATERandomExploration` with the desired testing strategy and `<p
 
 Most properties necessary for the various algorithms can be now specified dynamically by providing a file called `mate.properties`.
 For instance, you can run an arbitrary genetic algorithm by
-specifying `org.mate.ExecuteMATEStandardGeneticAlgorithm`
+specifying `org.mate.ExecuteMATEGeneticAlgorithm`
 as testing strategy (see above) and provide the following properties file:
 ```
 # the time out in minutes
