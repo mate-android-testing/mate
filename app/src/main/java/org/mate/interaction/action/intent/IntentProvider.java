@@ -87,6 +87,7 @@ public class IntentProvider {
            add("com.google.android.gms.measurement.AppMeasurementInstallReferrerReceiver");
            add("com.google.android.gms.measurement.AppMeasurementService");
            add("com.google.android.gms.measurement.AppMeasurementJobService");
+           add("com.google.firebase.iid.FirebaseInstanceIdReceiver");
         }};
 
         for (ComponentDescription component : components) {
