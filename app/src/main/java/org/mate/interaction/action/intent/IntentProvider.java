@@ -79,6 +79,8 @@ public class IntentProvider {
            add("com.google.android.gms.analytics.AnalyticsReceiver");
            add("com.google.android.gms.analytics.CampaignTrackingReceiver");
            add("com.google.android.apps.analytics.AnalyticsReceiver");
+           add("com.google.android.gms.measurement.AppMeasurementReceiver");
+           add("com.google.android.gms.measurement.AppMeasurementInstallReferrerReceiver");
         }};
 
         for (ComponentDescription component : components) {
