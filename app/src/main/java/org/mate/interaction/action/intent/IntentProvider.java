@@ -74,20 +74,26 @@ public class IntentProvider {
         final String BRANCH_DISTANCE_TRACER = "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer";
         final String TRACER = "de.uni_passau.fim.auermich.tracer.Tracer";
 
-        // these receivers are often not available because the Google Analytics SDK is missing on emulators
-        final Set<String> GOOGLE_ANALYTICS_RECEIVERS = new HashSet() {{
+        /*
+        * These components are often not available because the Google Analytics SDK is
+        * missing on emulators. Moreover, those components don't belong to the app's
+        * core functionality.
+         */
+        final Set<String> GOOGLE_ANALYTICS_COMPONENTS = new HashSet() {{
            add("com.google.android.gms.analytics.AnalyticsReceiver");
            add("com.google.android.gms.analytics.CampaignTrackingReceiver");
            add("com.google.android.apps.analytics.AnalyticsReceiver");
            add("com.google.android.gms.measurement.AppMeasurementReceiver");
            add("com.google.android.gms.measurement.AppMeasurementInstallReferrerReceiver");
+           add("com.google.android.gms.measurement.AppMeasurementService");
+           add("com.google.android.gms.measurement.AppMeasurementJobService");
         }};
 
         for (ComponentDescription component : components) {
             if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
                     || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)
                     || component.getFullyQualifiedName().equals(TRACER)
-                    || GOOGLE_ANALYTICS_RECEIVERS.contains(component.getFullyQualifiedName())) {
+                    || GOOGLE_ANALYTICS_COMPONENTS.contains(component.getFullyQualifiedName())) {
                 toBeRemoved.add(component);
             }
         }
