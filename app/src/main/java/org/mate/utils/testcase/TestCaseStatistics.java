@@ -80,12 +80,12 @@ public final class TestCaseStatistics {
 
         // print how often each widget has been triggered
         for (Map.Entry<String, Integer> widgetEntry : widgetActions.entrySet()) {
-            MATE.log_acc("Widget " + widgetEntry.getKey()
+            MATE.log("Widget " + widgetEntry.getKey()
                     + " has been triggered: " + widgetEntry.getValue() + " times!");
         }
 
         // print the number of unrelated widget actions
-        MATE.log_acc("Number of unrelated widget actions: " + widgetUnrelatedActions);
+        MATE.log("Number of unrelated widget actions: " + widgetUnrelatedActions);
     }
 
     /**
