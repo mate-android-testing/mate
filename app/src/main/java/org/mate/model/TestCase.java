@@ -508,7 +508,7 @@ public class TestCase {
         }
 
         String activityBeforeAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
-        MATE.log("executing action " + actionID);
+        MATE.log("executing action " + actionID + ": " + action);
 
         addEvent(action);
         UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);

@@ -120,7 +120,6 @@ public class ExecuteMATEReplayRun {
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
             Action nextAction = actions.get(i);
-            MATE.log("Next action to be replayed: " + nextAction);
 
             // check whether the UI action is applicable on the current state
             if (nextAction instanceof WidgetAction
@@ -130,7 +129,7 @@ public class ExecuteMATEReplayRun {
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
-                    MATE.log("replaying action " + i);
+                    MATE.log("replaying action " + i + ": " + repairedAction);
                     uiAbstractionLayer.executeAction(repairedAction);
                     MATE.log("replayed action " + i + ": " + repairedAction);
                 } else {
@@ -138,7 +137,7 @@ public class ExecuteMATEReplayRun {
                     return false;
                 }
             } else {
-                MATE.log("replaying action " + i);
+                MATE.log("replaying action " + i + ": " + nextAction);
                 uiAbstractionLayer.executeAction(nextAction);
                 MATE.log("replayed action " + i + ": " + nextAction);
             }
