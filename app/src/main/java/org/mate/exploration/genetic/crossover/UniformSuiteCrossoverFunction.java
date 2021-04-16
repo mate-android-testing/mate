@@ -1,14 +1,11 @@
 package org.mate.exploration.genetic.crossover;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.Coverage;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
@@ -16,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSuite> {
-    public static final String CROSSOVER_FUNCTION_ID = "uniform_suite_crossover_function";
 
     @Override
     public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {

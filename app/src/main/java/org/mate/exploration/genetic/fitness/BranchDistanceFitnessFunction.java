@@ -8,9 +8,13 @@ import org.mate.utils.FitnessUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Provides a fitness metric based on branch distance. This requires that the
+ * AUT has been instrumented with the branch distance  module.
+ *
+ * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
+ */
 public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
-
-    public static final String FITNESS_FUNCTION_ID = "branch_distance_fitness_function";
 
     private Map<IChromosome<T>, Double> cache = new HashMap<>();
 

@@ -1,7 +1,7 @@
 package org.mate.exploration.deprecated.Fitness;
 
 import org.mate.exploration.deprecated.aco.Ant;
-import org.mate.model.graph.EventEdge;
+import org.mate.model.deprecated.graph.EventEdge;
 import org.mate.state.IScreenState;
 
 /**

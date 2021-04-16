@@ -5,11 +5,11 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.model.TestCase;
-import org.mate.serialization.TestCaseSerializer;
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
-import org.mate.utils.TestCaseOptimizer;
-import org.mate.utils.TestCaseStatistics;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.utils.testcase.TestCaseOptimizer;
+import org.mate.utils.testcase.TestCaseStatistics;
 
 import java.util.List;
 import java.util.Map;
@@ -26,8 +26,8 @@ public class ExecuteMATEReplayRun {
     public void useAppContext() {
         MATE.log_acc("Starting ReplayRun...");
 
+        // init uiAbstractionLayer, properties, etc.
         MATE mate = new MATE();
-        String packageName = mate.getPackageName();
 
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
@@ -41,17 +41,13 @@ public class ExecuteMATEReplayRun {
         // reset the app once
         uiAbstractionLayer.resetApp();
 
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
-
         // as long as we find a test case for replaying
         while (testCase != null) {
 
             MATE.log("Replaying TestCase " + testCaseID);
 
-            if (Properties.OPTIMISE_TEST_CASE()) {
-                testCase = TestCaseOptimizer.optimise(testCase);
-            }
+            // apply optimisation strategy before replaying (optional)
+            testCase = TestCaseOptimizer.optimise(testCase);
 
             if (replayTestCase(testCase)) {
                 MATE.log("Replayed TestCase " + testCaseID);
@@ -68,9 +64,6 @@ public class ExecuteMATEReplayRun {
 
             // reset aut after each test case
             uiAbstractionLayer.resetApp();
-
-            // grant runtime permissions (read/write external storage) which are dropped after each reset
-            Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
         }
 
         MATE.log("Retry replaying " + failures.size() + " test cases!");
@@ -102,9 +95,6 @@ public class ExecuteMATEReplayRun {
 
                 // reset aut after each test case
                 uiAbstractionLayer.resetApp();
-
-                // grant runtime permissions (read/write external storage) which are dropped after each reset
-                Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
             }
         }
 
@@ -130,7 +120,6 @@ public class ExecuteMATEReplayRun {
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
             Action nextAction = actions.get(i);
-            MATE.log("Next action to be replayed: " + nextAction);
 
             // check whether the UI action is applicable on the current state
             if (nextAction instanceof WidgetAction
@@ -140,7 +129,7 @@ public class ExecuteMATEReplayRun {
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
-                    MATE.log("replaying action " + i);
+                    MATE.log("replaying action " + i + ": " + repairedAction);
                     uiAbstractionLayer.executeAction(repairedAction);
                     MATE.log("replayed action " + i + ": " + repairedAction);
                 } else {
@@ -148,7 +137,7 @@ public class ExecuteMATEReplayRun {
                     return false;
                 }
             } else {
-                MATE.log("replaying action " + i);
+                MATE.log("replaying action " + i + ": " + nextAction);
                 uiAbstractionLayer.executeAction(nextAction);
                 MATE.log("replayed action " + i + ": " + nextAction);
             }
@@ -178,7 +167,6 @@ public class ExecuteMATEReplayRun {
                     + " hint : " + selectedAction.getWidget().getHint()
                     + " Class : " + selectedAction.getWidget().getClazz()
                     + " ResourceID : " + selectedAction.getWidget().getResourceID()
-                    + " IdByActivity : " + selectedAction.getWidget().getIdByActivity()
                     + " X : " + selectedAction.getWidget().getX()
                     + " Y : " + selectedAction.getWidget().getY());
 
@@ -194,7 +182,6 @@ public class ExecuteMATEReplayRun {
                                 + " hint : " + widgetAction.getWidget().getHint()
                                 + " Class : " + widgetAction.getWidget().getClazz()
                                 + " ResourceID : " + widgetAction.getWidget().getResourceID()
-                                + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
                                 + " X : " + widgetAction.getWidget().getX()
                                 + " Y : " + widgetAction.getWidget().getY());
                     }

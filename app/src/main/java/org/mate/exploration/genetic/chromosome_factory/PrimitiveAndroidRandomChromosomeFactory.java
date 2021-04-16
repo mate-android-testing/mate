@@ -1,10 +1,9 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.ui.Action;
-import org.mate.ui.PrimitiveAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.PrimitiveAction;
 
 public class PrimitiveAndroidRandomChromosomeFactory extends AndroidRandomChromosomeFactory {
-    public static final String CHROMOSOME_FACTORY_ID = "primitive_android_random_chromosome_factory";
 
     public PrimitiveAndroidRandomChromosomeFactory(int maxNumEvents) {
         super(maxNumEvents);

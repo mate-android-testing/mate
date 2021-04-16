@@ -3,14 +3,14 @@ package org.mate.exploration.genetic.crossover;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.utils.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 
 public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
-    public static final String CROSSOVER_FUNCTION_ID = "primitive_test_case_merge_crossover_function";
+
     private boolean executeActions;
 
     public PrimitiveTestCaseMergeCrossOverFunction() {
@@ -44,7 +44,6 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
 
             return chromosome;
         }
-
         return new Chromosome<>(offspring);
     }
 }

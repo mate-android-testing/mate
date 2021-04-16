@@ -1,23 +1,25 @@
 package org.mate.exploration.deprecated.depthfirst;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.IApp;
-import org.mate.model.IGUIModel;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.ActionType;
-import org.mate.ui.Widget;
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.mate.MATE.device;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.mate.MATE.log;
 
 /**
@@ -26,7 +28,7 @@ import static org.mate.MATE.log;
 
 @Deprecated
 public class DepthFirst {
-    private IApp deviceMgr;
+    private DeviceMgr deviceMgr;
     private String packageName;
     private IGUIModel guiModel;
     List<String> statesVisited;
@@ -45,7 +47,7 @@ public class DepthFirst {
 
         //gets a list of all executable actions
         //TODO: how about selectState.getactions
-        List<WidgetAction> executableActions = selectedState.getActions();
+        List<WidgetAction> executableActions = selectedState.getWidgetActions();
         MATE.log(selectedStateId + " - activity: " + selectedState.getActivityName());
         for (WidgetAction act: executableActions){
             Widget widget = act.getWidget();
@@ -103,13 +105,13 @@ public class DepthFirst {
 
 //                    action.setAdjActions(adjActions);
 
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     long timeToWait = waitForProgressBar(state);
                     if (timeToWait>300)
                         timeToWait+=2000;
                     action.setTimeToWait(timeToWait);
-                    state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     MATE.log("\n\nnumber of actions (new state?): " + state.getActions().size()+"\n\n");
 
@@ -130,7 +132,7 @@ public class DepthFirst {
                         log("out of the application - different package");
                         log("package: " + state.getPackageName());
                         deviceMgr.restartApp();
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         try {
                             guiModel.moveToState(state);
                         } catch (InvalidScreenStateException e) {
@@ -140,7 +142,7 @@ public class DepthFirst {
                         }
                     }
                 } catch (AUTCrashException e) {
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                 }
             }
             else{
@@ -148,13 +150,13 @@ public class DepthFirst {
             }
 
             t2 = new Date().getTime();
-            deviceClosed = device.getCurrentPackageName()==null;
+            deviceClosed = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName()==null;
             if (deviceClosed ||!stateFound || (t2-t1>MATE.TIME_OUT)) {
                 stopExecution = true;
                 MATE.log("STOP execution");
             }
         }
-        MATE.total_time=t2-t1;
+
         MATE.log("EXIT STATE: "+selectedStateId);
     }
 

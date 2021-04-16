@@ -3,14 +3,15 @@ package org.mate.exploration.deprecated.aco;
 import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.deprecated.Fitness.ActivityCoverage;
-import org.mate.interaction.IApp;
-import org.mate.model.graph.EventEdge;
-import org.mate.model.graph.GraphGUIModel;
-import org.mate.model.graph.ScreenNode;
+import org.mate.interaction.DeviceMgr;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.deprecated.graph.EventEdge;
+import org.mate.model.deprecated.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.ScreenNode;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +26,7 @@ import java.util.Random;
 @Deprecated
 public class ACO {
 
-    private IApp deviceMgr;
+    private DeviceMgr deviceMgr;
     private String packageName;
     private GraphGUIModel wholeModel;
     private List<String> statesVisited;
@@ -40,7 +41,7 @@ public class ACO {
     private boolean isExitApp = false;
     private WidgetAction exitAction = null;
 
-    public ACO(IApp deviceMgr,String packageName,GraphGUIModel completeModel){
+    public ACO(DeviceMgr deviceMgr,String packageName,GraphGUIModel completeModel){
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         this.wholeModel = completeModel;
@@ -84,7 +85,7 @@ public class ACO {
             }else {
                 //if this app is restarted due to exiting from this app,
                 //we need to "scan" this state and get this launching activity.
-                state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 stateId = wholeModel.getNewNodeName(state);
                 if (stateId.equals("")){
                     //if this app is restarted and the launching state is new
@@ -107,7 +108,7 @@ public class ACO {
     public IScreenState handleFirstNodeOfAnt(IScreenState state, Ant ant, int l) {
         //if it is the first event of an ant
         if (l==0){
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             screenState = state;
             if (!isFirstNodeOfCompleteModel){
                 ant.getCoveredActivity().add(state.getActivityName());
@@ -127,7 +128,7 @@ public class ACO {
             // We will select the action randomly if this explored node is new or
             // this is the first generation
             if (isFirstExplored|| currentGeneration == 0){
-                List<WidgetAction> executableActions = state.getActions();
+                List<WidgetAction> executableActions = state.getWidgetActions();
                 //random select
                 int randNum = selectRandomAction(state.getActions().size());
                 action = executableActions.get(randNum);
@@ -140,7 +141,7 @@ public class ACO {
             }else {
                 //find the node from history
                 IScreenState historyScreenState = wholeModel.getStateById(currentStateId);
-                List<WidgetAction> executableActions = historyScreenState.getActions();
+                List<WidgetAction> executableActions = historyScreenState.getWidgetActions();
 
                 //select the best action at this state
                 action = selectBestWidget(executableActions);
@@ -179,7 +180,7 @@ public class ACO {
                 }
             }
             //renew a state, thus all of data about this state will be clean.
-            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             String newPackageName = state.getPackageName();
         //TODO:it's a unknown error about newPackageName is null
         if (newPackageName!=null){

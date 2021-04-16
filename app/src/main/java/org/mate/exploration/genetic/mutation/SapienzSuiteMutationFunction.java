@@ -1,14 +1,13 @@
 package org.mate.exploration.genetic.mutation;
 
 import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.Coverage;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
@@ -17,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
-    public static final String MUTATION_FUNCTION_ID = "sapienz_suite_mutation_function";
 
     private final double pMutate;
     private final TestCaseMergeCrossOverFunction testCaseMergeCrossOverFunction;
@@ -81,7 +79,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
 
         List<TestCase> copyTestCases = new ArrayList<>();
         for (TestCase testCase : afterInternalMutation) {
-            if (testCase.getId().equals("dummy")) {
+            if (testCase.isDummy()) {
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
 

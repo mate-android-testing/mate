@@ -5,7 +5,7 @@ import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +36,10 @@ public class VisibleFocusCheck implements IWidgetAccessibilityCheck {
             if (!sameStatesID.contains(newID)){
                 sameStatesID.add(newID);
                 state.setId(newID);
-                Registry.getEnvironmentManager().screenShot(state.getPackageName(),visitedState.getId());
+                Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),visitedState.getId());
             }
 
-            String luminances = Registry.getEnvironmentManager().getLuminances(state.getPackageName(),state.getId(),widget);
+            String luminances = Registry.getEnvironmentManager().getLuminance(state.getPackageName(),state.getId(),widget);
             if (!luminances.equals("0,0")) {
                 widget.setColor(luminances);
             }

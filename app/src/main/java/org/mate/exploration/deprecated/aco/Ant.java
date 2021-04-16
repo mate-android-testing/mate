@@ -1,6 +1,6 @@
 package org.mate.exploration.deprecated.aco;
 
-import org.mate.model.graph.EventEdge;
+import org.mate.model.deprecated.graph.EventEdge;
 
 import java.util.ArrayList;
 import java.util.Comparator;

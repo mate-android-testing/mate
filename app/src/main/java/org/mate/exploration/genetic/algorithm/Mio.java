@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Mio<T> extends GeneticAlgorithm<T> {
-    public static final String ALGORITHM_NAME = "Mio";
 
     private final int populationSizeStart;
     private final long startTime;

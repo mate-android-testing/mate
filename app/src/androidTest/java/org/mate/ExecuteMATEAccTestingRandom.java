@@ -8,12 +8,15 @@ import org.junit.runner.RunWith;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.exploration.deprecated.random.UniformRandomForAccessibility;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
-import org.mate.model.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.model.deprecated.graph.GraphGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
+import org.mate.state.ScreenStateType;
 
 import java.util.Date;
+
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Created by marceloeler on 11/07/17.
@@ -38,16 +41,15 @@ public class ExecuteMATEAccTestingRandom {
         MATE.log("start testing acc");
         MATE mate = new MATE();
 
-        device = mate.getDevice();
-        packageName = mate.getPackageName();
-        String emulator = Registry.getEnvironmentManager().detectEmulator(this.packageName);
+        device = UiDevice.getInstance(getInstrumentation());
+        String emulator = Registry.getEnvironmentManager().allocateEmulator(this.packageName);
         runningTime = new Date().getTime();
-        guiModel = mate.getGuiModel();
+        this.guiModel = new GraphGUIModel();
 
         if (emulator != null && !emulator.equals("")) {
             this.deviceMgr = new DeviceMgr(device, packageName);
 
-            IScreenState initialScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            IScreenState initialScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             //creates the graph that represents the GUI model
             this.guiModel = new GraphGUIModel();
             //first state (root node - action ==null)

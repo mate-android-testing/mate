@@ -4,17 +4,16 @@ import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
-import org.mate.ui.WidgetAction;
-import org.mate.utils.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
-    public static final String MUTATION_FUNCTION_ID = "cut_point_mutation_function";
 
     private UIAbstractionLayer uiAbstractionLayer;
     private int maxNumEvents;
@@ -46,10 +45,10 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
         try {
             for (int i = 0; i < maxNumEvents; i++) {
-                WidgetAction newAction;
+                UIAction newAction;
                 if (i < cutPoint) {
                     //Todo: highlight that this class can only be used for widget based execution
-                    newAction = (WidgetAction) chromosome.getValue().getEventSequence().get(i);
+                    newAction = (UIAction) chromosome.getValue().getEventSequence().get(i);
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }

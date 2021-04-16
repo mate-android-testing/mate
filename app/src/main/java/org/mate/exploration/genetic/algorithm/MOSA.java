@@ -40,7 +40,6 @@ import static org.mate.exploration.genetic.core.GAUtils.updateCrowdingDistance;
  * @param <T> Type wrapped by the chromosome implementation. Has to be a {@link TestCase} or sub class.
  */
 public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
-    public static final String ALGORITHM_NAME = "MOSA";
 
     /**
      * <em>"MOSA uses a second population, called archive, to keep track of the best test cases that cover branches

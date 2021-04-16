@@ -1,22 +1,22 @@
 package org.mate.model;
 
+import android.support.annotation.NonNull;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.serialization.TestCaseSerializer;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
-import org.mate.ui.Action;
-import org.mate.ui.ActionType;
-import org.mate.ui.PrimitiveAction;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
-import org.mate.utils.TestCaseStatistics;
+import org.mate.utils.testcase.TestCaseStatistics;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,21 +25,97 @@ import java.util.Set;
 import java.util.UUID;
 
 public class TestCase {
+
+    /**
+     * A random generated id that uniquely identifies the test case.
+     * Also used as the string representation.
+     */
     private String id;
+
+    /**
+     * The set of visited activities.
+     */
     private Set<String> visitedActivities;
+
+    /**
+     * The set of visited screen states (ids).
+     */
     private Set<String> visitedStates;
+
+    /**
+     * The actions that has been executed by this test case.
+     */
     private List<Action> eventSequence;
+
+    /**
+     * The visited activities in the order they appeared.
+     */
     private List<String> activitySequence;
+
+    /**
+     * A novelty score based on novelty search, not yet implemented.
+     * Consider https://hal.archives-ouvertes.fr/hal-01121228/document as a reference.
+     */
     private float novelty;
-    private boolean crashDetected;
+
+    /**
+     * A sparseness value used for novelty search, not yet implemented.
+     * Consider https://hal.archives-ouvertes.fr/hal-01121228/document as a reference.
+     */
     private double sparseness;
-    private HashMap<String, String> statesMap;
-    private HashMap<String, Integer> featureVector;
+
+    /**
+     * Whether a crash has been triggered by an action of the test case.
+     */
+    private boolean crashDetected;
+
+    /**
+     * A mapping of a screen state (id) to an action (id).
+     * The implementation is currently considered as deprecated.
+     */
+    private Map<String, String> statesMap;
+
+    /**
+     * A feature vector that maps a screen state to the value 0 (unvisited) or 1 (visited).
+     * The implementation is currently considered as deprecated.
+     */
+    private Map<String, Integer> featureVector;
+
+    /**
+     * The desired size of the test case, i.e. the desired length
+     * of the test case. This doesn't enforce any size restriction yet.
+     */
     private Optional<Integer> desiredSize = Optional.none();
+
+    /**
+     * The stack trace that has been triggered by a potential crash.
+     * Only recorded when {@link org.mate.Properties#RECORD_STACK_TRACE()} is defined.
+     */
     private String crashStackTrace = null;
 
+    /**
+     * Should be used for the creation of dummy test cases.
+     * This suppresses the log that indicates a new test case
+     * for the AndroidAnalysis framework.
+     */
+    private TestCase() {
+        setId("dummy");
+        crashDetected = false;
+        visitedActivities = new HashSet<>();
+        visitedStates = new HashSet<>();
+        eventSequence = new ArrayList<>();
+        sparseness = 0;
+        statesMap = new HashMap<>();
+        featureVector = new HashMap<>();
+        activitySequence = new ArrayList<>();
+    }
 
-    public TestCase(String id){
+    /**
+     * Creates a new test case object with the given id.
+     *
+     * @param id The (unique) test case id.
+     */
+    public TestCase(String id) {
         MATE.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
@@ -48,14 +124,26 @@ public class TestCase {
         eventSequence = new ArrayList<>();
         sparseness = 0;
         statesMap = new HashMap<>();
-        featureVector = new HashMap<String, Integer>();
+        featureVector = new HashMap<>();
         activitySequence = new ArrayList<>();
     }
 
     /**
-     * Should be called after the test case has been executed.
-     * Among other things, this method is responsible for creating
-     * coverage information if desired.
+     * Checks whether this is a dummy test case.
+     *
+     * @return Returns {@code true} when this test case is a dummy test case,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean isDummy() {
+        return getId().equals("dummy");
+    }
+
+    /**
+     * Should be called (once) after the test case has been created and executed.
+     *
+     * Among other things, this method is responsible for the serialization
+     * of a test case (if desired), the recording of test case stats (if desired)
+     * and so on.
      */
     // TODO: ensure that finish() is properly called after each test case
     public void finish() {
@@ -82,54 +170,6 @@ public class TestCase {
     }
 
     /**
-     * Prints how often each widget has been triggered by a certain action.
-     */
-    public void print() {
-
-        // count how many actions per widgets have been executed
-        Map<String, Integer> widgetActions = new HashMap<>();
-
-        EnumSet<ActionType> widgetRelatedActions = EnumSet.of(ActionType.CLICK, ActionType.LONG_CLICK,
-                ActionType.CLEAR_WIDGET, ActionType.TYPE_TEXT);
-
-        // track the number of unrelated widget actions
-        int widgetUnrelatedActions = 0;
-
-        for (Action action : eventSequence) {
-            if (action instanceof WidgetAction) {
-
-                ActionType actionType = ((WidgetAction) action).getActionType();
-
-                if (!widgetRelatedActions.contains(actionType)) {
-                    widgetUnrelatedActions++;
-                    continue;
-                }
-
-                Widget widget = ((WidgetAction) action).getWidget();
-
-                String widgetName = widget.getClazz() + ":" + widget.getId();
-
-                // with API level 24 (Java 8): Map.merge(key, 1, Integer::sum)
-                if (widgetActions.containsKey(widgetName)) {
-                    int currentCount = widgetActions.get(widgetName);
-                    widgetActions.put(widgetName, currentCount+1);
-                } else {
-                    widgetActions.put(widgetName, 1);
-                }
-            }
-        }
-
-        // print how often each widget has been triggered
-        for (Map.Entry<String, Integer> widgetEntry : widgetActions.entrySet()) {
-            MATE.log_acc("Widget " + widgetEntry.getKey()
-                    + " has been triggered: " + widgetEntry.getValue() + " times!");
-        }
-
-        // print the number of unrelated widget actions
-        MATE.log_acc("Number of unrelated widget actions: " + widgetUnrelatedActions);
-    }
-
-    /**
      * Returns the activity name before the execution of the given action.
      * @param actionIndex The action index.
      * @return Returns the activity in foreground before the given action was executed.
@@ -150,88 +190,212 @@ public class TestCase {
         return activitySequence.get(actionIndex + 1);
     }
 
+    /**
+     * Sets a desired length for the test case, i.e. the maximum
+     * number of of actions. This doesn't enforce any size restriction yet.
+     *
+     * @param desiredSize A desired length for the test case.
+     */
     public void setDesiredSize(Optional<Integer> desiredSize) {
         this.desiredSize = desiredSize;
     }
 
+    /**
+     * Returns the desired size for the test case, i.e. a desired
+     * length of the test case.
+     *
+     * @return Returns the desired size.
+     */
+    @SuppressWarnings("unused")
     public Optional<Integer> getDesiredSize() {
         return desiredSize;
     }
 
+    /**
+     * Returns the unique id of the test case.
+     *
+     * @return Returns the test case id.
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Sets the test case id to the given value.
+     *
+     * @param id The new test case id.
+     */
     private void setId(String id) {
         this.id = id;
     }
 
+    /**
+     * Adds a new action to the list of executed actions.
+     *
+     * @param event The action to be added.
+     */
     public void addEvent(Action event) {
         this.eventSequence.add(event);
     }
 
+    /**
+     * Updates the set of visited activities.
+     *
+     * @param activity A new activity to be added.
+     */
     public void updateVisitedActivities(String activity) {
         this.visitedActivities.add(activity);
     }
 
+    /**
+     * Returns the set of visited activities.
+     *
+     * @return Returns the visited activities.
+     */
     public Set<String> getVisitedActivities() {
         return visitedActivities;
     }
 
+    /**
+     * Updates the visited states with a new screen state.
+     *
+     * @param GUIState The new screen state.
+     */
     public void updateVisitedStates(IScreenState GUIState) {
         this.visitedStates.add(GUIState.getId());
     }
 
+    /**
+     * Returns the visited screen states, actually the screen state ids.
+     *
+     * @return Returns the visited states.
+     */
     public Set<String> getVisitedStates() {
         return visitedStates;
     }
 
+    /**
+     * Returns the list of executed actions.
+     *
+     * @return Returns the action sequence.
+     */
     public List<Action> getEventSequence() {
         return this.eventSequence;
     }
 
+    /**
+     * Checks whether the test case caused a crash.
+     *
+     * @return Returns {@code true} if the test case caused a crash,
+     *          otherwise {@code false} is returned.
+     */
     public boolean getCrashDetected() {
         return this.crashDetected;
     }
 
+    /**
+     * Sets the crash flag.
+     */
     public void setCrashDetected() {
-        this.crashDetected=true;
+        this.crashDetected = true;
     }
 
+    /**
+     * Returns the stack trace triggered by a crash of the test case.
+     *
+     * @return Returns the stack trace caused by the test case;
+     *          this should be typically the last action.
+     */
+    @SuppressWarnings("unused")
     public String getCrashStackTrace() {
-        return crashStackTrace;
+        if (Properties.RECORD_STACK_TRACE()) {
+            return crashStackTrace;
+        } else {
+            throw new IllegalStateException("Recording stack trace is not enabled!");
+        }
     }
 
+    /**
+     * Sets a novelty value for the test case.
+     *
+     * @param novelty The new novelty score.
+     */
+    @SuppressWarnings("unused")
     public void setNovelty(float novelty) {
         this.novelty = novelty;
     }
 
+    /**
+     * Gets the novelty score of the test case.
+     *
+     * @return Returns the novelty score.
+     */
+    @SuppressWarnings("unused")
     public float getNovelty() {
         return novelty;
     }
 
+    /**
+     * Gets the sparseness of the test case.
+     *
+     * @return Returns the test case's sparseness.
+     */
+    @SuppressWarnings("unused")
     public double getSparseness() {
         return sparseness;
     }
 
+    /**
+     * Sets the sparseness of the test case.
+     *
+     * @param sparseness The new sparseness of the test case.
+     */
+    @SuppressWarnings("unused")
     public void setSparseness(double sparseness) {
         this.sparseness = sparseness;
     }
 
+    /**
+     * Updates the state map.
+     *
+     * @param state Represents the id of a screen state.
+     * @param event Represents the id of an action.
+     */
+    @Deprecated
     public void updateStatesMap(String state, String event) {
         if (!statesMap.containsKey(state)){
             statesMap.put(state, event);
-            //MATE.log_acc("TEST___added to states map the state: "+state+" at event: "+event);
         }
     }
-    public HashMap<String, String> getStatesMap() {
+
+    /**
+     * Returns a mapping of screen states to actions.
+     *
+     * @return Returns a screen state to action mapping.
+     */
+    @Deprecated
+    public Map<String, String> getStatesMap() {
         return statesMap;
     }
 
-    public HashMap<String, Integer> getFeatureVector() {
+    /**
+     * Returns the feature vector, i.e. a mapping of a screen state
+     * to the value 0 (unvisited) or 1 (visited).
+     *
+     * @return Returns the feature vector.
+     */
+    @Deprecated
+    public Map<String, Integer> getFeatureVector() {
         return featureVector;
     }
 
+    /**
+     * Updates the feature vector. Assign to each screen state defined
+     * by the given gui model either the value 0 (unvisited) or 1 (visited).
+     *
+     * @param guiModel A gui model wrapping screen states.
+     */
+    @Deprecated
     public void updateFeatureVector(IGUIModel guiModel) {
         List<IScreenState> guiStates = guiModel.getStates();
         for(IScreenState state : guiStates){
@@ -243,12 +407,24 @@ public class TestCase {
         }
     }
 
+    /**
+     * Creates a dummy test case intended to be not used for execution.
+     *
+     * @return Returns a dummy test case.
+     */
     public static TestCase newDummy() {
-        return new TestCase("dummy");
+        return new TestCase();
     }
 
-    //TODO: Load test case from cache if it was executed before
+    /**
+     * Creates a test case from a given dummy test case. This
+     * causes the execution of actions declared by the dummy test case.
+     *
+     * @param testCase The dummy test case.
+     * @return Returns a test case that executed the actions of the dummy.
+     */
     public static TestCase fromDummy(TestCase testCase) {
+
         MATE.uiAbstractionLayer.resetApp();
         TestCase resultingTc = newInitializedTestCase();
 
@@ -293,14 +469,22 @@ public class TestCase {
         }
     }
 
+    /**
+     * Returns the string representation of a test case.
+     * This is the unique test case id for now.
+     *
+     * @return Returns the test case representation.
+     */
+    @NonNull
     @Override
     public String toString() {
         return getId();
     }
 
     /**
-     * Initializes
-     * @return
+     * Initializes a new test case with a random id.
+     *
+     * @return Returns a new test case with a random id.
      */
     public static TestCase newInitializedTestCase() {
         TestCase tc = new TestCase(UUID.randomUUID().toString());
@@ -309,11 +493,12 @@ public class TestCase {
     }
 
     /**
-     * Perform action and update TestCase accordingly.
+     * Executes the given action and updates the test case accordingly.
      *
-     * @param action The action to be performed.
+     * @param action The action to be executed.
      * @param actionID The id of the action.
-     * @return True if action successful inbound false if outbound, crash, or some unkown failure
+     * @return Returns {@code true} if the given action didn't cause a crash of the app
+     *          or left the AUT, otherwise {@code false} is returned.
      */
     public boolean updateTestCase(Action action, int actionID) {
 
@@ -323,7 +508,7 @@ public class TestCase {
         }
 
         String activityBeforeAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
-        MATE.log("executing action " + actionID);
+        MATE.log("executing action " + actionID + ": " + action);
 
         addEvent(action);
         UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);
@@ -362,6 +547,11 @@ public class TestCase {
         }
     }
 
+    /**
+     * Updates the test case with the given event.
+     *
+     * @param event A new event, e.g. the action id.
+     */
     private void updateTestCase(String event) {
         IScreenState currentScreenstate = MATE.uiAbstractionLayer.getLastScreenState();
 

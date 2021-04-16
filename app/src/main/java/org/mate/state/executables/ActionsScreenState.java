@@ -1,437 +1,421 @@
 package org.mate.state.executables;
 
-import android.view.accessibility.AccessibilityNodeInfo;
-
 import org.mate.MATE;
-import org.mate.state.IScreenState;
-import org.mate.ui.Action;
-import org.mate.ui.ActionType;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
- * Created by marceloeler on 21/06/17.
+ * Models a screen state and maintains the list of applicable widget actions.
  */
-
 public class ActionsScreenState extends AbstractScreenState {
 
-    private List<WidgetAction> actions;
-    private static Hashtable<String,Hashtable<String,List<Integer>>> idSizes = new Hashtable<>();
-    private List<Float> pheromone;
-    private Map<Action,Float> actionsWithPheromone;
-    private Map<Action,Float> actionWithFitness;
-    private String id;
-    private AppScreen appScreen;
-    private AccessibilityNodeInfo rootNodeInfo;
+    /**
+     * Defines the actions that are applicable on the associated screen.
+     */
+    private List<UIAction> actions;
 
-    @Override
-    public String getId() {
-        return id;
-    }
+    /**
+     * Represents the app screen with its widgets.
+     */
+    private final AppScreen appScreen;
 
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public ActionsScreenState(AppScreen appScreen){
-        super(appScreen.getPackageName(),appScreen.getActivityName());
-        this.widgets = appScreen.getWidgets();
-        this.rootNodeInfo = appScreen.getRootNodeInfo();
-        actions=null;
+    /**
+     * Creates a new screen state based on the given {@link AppScreen}.
+     *
+     * @param appScreen The given app screen.
+     */
+    public ActionsScreenState(AppScreen appScreen) {
+        super(appScreen.getPackageName(), appScreen.getActivityName(), appScreen.getWidgets());
         this.appScreen = appScreen;
-
+        this.actions = null;
     }
 
-    private int getMaxAmountOfID(Hashtable<String, List<Integer>> sameIDWidgets, String wid){
-         List<Integer> amounts = sameIDWidgets.get(wid);
-        if (amounts==null) {
-            amounts = new ArrayList<>();
-            sameIDWidgets.put(wid,amounts);
-            return 0;
+    /**
+     * Returns the list of widget actions.
+     *
+     * @return Returns the list of widget actions.
+     */
+    @Override
+    public List<WidgetAction> getWidgetActions() {
+        List<WidgetAction> widgetActions = new ArrayList<>();
+        for (UIAction uiAction : actions) {
+            if (uiAction instanceof WidgetAction) {
+                widgetActions.add((WidgetAction) uiAction);
+            }
         }
-
-        if (amounts.size()==0)
-            return 0;
-
-        int max = amounts.get(0);
-        int i=1;
-        while (i<amounts.size()){
-            if (max<amounts.get(i))
-                max = amounts.get(i);
-            i++;
-        }
-        return max;
+        return Collections.unmodifiableList(widgetActions);
     }
 
-    public List<WidgetAction> getActions(){
-        if (actions!=null)
+    /**
+     * Extracts the list of applicable ui actions on the underlying screen.
+     *
+     * @return Returns the list of ui actions.
+     */
+    @Override
+    public List<UIAction> getActions() {
+
+        // check whether the actions have been requested once
+        if (actions != null) {
             return actions;
-
-        Hashtable<String,List<Integer>> sameIDWidgets = idSizes.get(activityName);
-        if (sameIDWidgets==null){
-            sameIDWidgets = new Hashtable<>();
-            idSizes.put(activityName,sameIDWidgets);
         }
 
-        List<WidgetAction> executables = new ArrayList<>();
-        int editables = 0;
-        boolean enterAdded = false;
-        Hashtable<String,Integer> idAmount = new Hashtable<String,Integer>();
-        boolean selected;
+        if (activityName.contains("GoogleOAuthActivity")) {
+            MATE.log_acc("Reached GoogleOAuthActivity!");
+            // we can't authenticate here, so only allow to press 'BACK'
+            return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
+        }
+        
+        MATE.log_debug("Retrieving widget actions for screen state...");
+        MATE.log_debug("Number of all widgets: " + this.widgets.size());
 
-        // TODO: move the following code in an own method 'hostsAction()' of the class Widget
-        for (Widget widget: widgets){
-            selected = false;
+        List<Widget> widgets = new ArrayList<>();
 
-            if (widget.getClazz().contains("Button"))
-                selected=true;
-
-            if (widget.isClickable() || widget.isLongClickable() || widget.isScrollable() || widget.isEditable() ){
-                selected=true;
-            }
-
-            if (widget.directSonOf("ListView")||widget.directSonOf("GridView")) {
-                if (widget.getParent().isClickable())
-                    selected = true;
-
-            }
-
-//            if (widget.getClazz().contains("ImageView"))
-//                selected=true;
-
-            if (widget.getClazz().equals("android.view.View")&&(!widget.getContentDesc().equals("")||!widget.getText().equals(""))){
-                selected=true;
-            }
-
-            if (widget.getClazz().contains("Spinner")){
-                selected=true;
-            }
-
-            //for skype test
-            if (widget.getClazz().contains("ViewGroup")){
-                if (!widget.getContentDesc().equals(""))
-                    selected=true;
-            }
-
-            Integer amount = idAmount.get(widget.getId());
-            if (amount==null){
-                idAmount.put(widget.getId(),1);
-                amount = idAmount.get(widget.getId());
-            }
-            else{
-                idAmount.put(widget.getId(),++amount);
-                amount = idAmount.get(widget.getId());
-            }
-
-            if (amount>getMaxAmountOfID(sameIDWidgets,widget.getId()) && sameIDWidgets.get(widget.getId()).size()==2){
-                selected=false;
-            }
-
-            if (selected){
-                if (widget.getClazz().equals("android.widget.GridView"))
-                    selected=false;
-            }
-
-            if (selected){
-                if (widget.getClazz().equals("android.view.View")){
-                    if (!widget.isClickable()&&!widget.isLongClickable()&&!widget.isScrollable()&&widget.getText().equals("")&&widget.getContentDesc().equals("")){
-                        selected=false;
-                    }
-                }
-            }
-
-            if (selected){
-                if (widget.getClazz().contains("ListView"))
-                    selected=false;
-            }
-
-            if (selected){
-                if (widget.getClazz().contains("ScrollView"))
-                    selected=false;
-            }
-
-            if (selected){
-                if (widget.isSonOf("android.webkit.WebView"))
-                    selected=false;
-            }
-
-            if (!widget.isEnabled())
-                selected=false;
-
-            if (selected){
-                WidgetAction event;
-                if (!widget.isEditable()){
-                    event = new WidgetAction(widget, ActionType.CLICK);
-                    executables.add(event);
-                    widget.setClickable(true);
-                }
-
-                if (widget.isEditable() || widget.getClazz().contains("Edit")){
-                    event = new WidgetAction(widget,ActionType.TYPE_TEXT);
-                    executables.add(0,event);
-                    editables++;
-                }
-
-
-                if (widget.isLongClickable()&&!widget.isEditable()){
-                    event = new WidgetAction(widget, ActionType.LONG_CLICK);
-                    executables.add(event);
-                    widget.setLongClickable(true);
-                }
-                else
-                {
-                    if ((widget.isSonOfLongClickable()) && (!widget.isEditable()&& !widget.getClazz().contains("TextView"))){
-                        event = new WidgetAction(widget, ActionType.LONG_CLICK);
-                        executables.add(event);
-                        widget.setLongClickable(true);
-                    }
-                }
-
-
-                if (widget.isScrollable()){
-
-                    if (!widget.getClazz().contains("Spinner")&&!widget.isSonOf("Spinner")){
-                        event = new WidgetAction(widget,ActionType.SWIPE_LEFT);
-                        executables.add(event);
-
-                        event = new WidgetAction(widget,ActionType.SWIPE_RIGHT);
-                        executables.add(event);
-
-                        event = new WidgetAction(widget,ActionType.SWIPE_UP);
-                        executables.add(event);
-
-                        event = new WidgetAction(widget,ActionType.SWIPE_DOWN);
-                        executables.add(event);
-
-                        widget.setScrollable(true);
-                    }
-                }
-            }
-
-            if (editables>0 && !enterAdded){
-                executables.add(editables,new WidgetAction(ActionType.ENTER));
-                enterAdded=true;
+        for (Widget widget : this.widgets) {
+            /*
+             * We ignore here primarily all widgets that are not visible, not enabled and don't
+             * represent leaf widgets in the ui hierarchy. There are four exceptions to this rule:
+             * 1) A spinner widget is not a leaf widget but represents a candidate for a widget
+             * action. The other possibility would be to apply the action to the text view
+             * that is the child element of the spinner.
+             * 2) There are widgets like android.support.v7.app.ActionBar$Tab that are
+             * (long-)clickable but don't represent leaf widgets. We should apply the action to
+             * the widget that is (long-)clickable and ignore the child widget instead, since
+             * a static analysis of event handlers can't properly match the widget otherwise.
+             * 3) Likewise, it may can happen that checkable widgets are no leaf widgets.
+             * 4) Same like spinner widgets, scroll views are no leaf widgets.
+             */
+            if ((!widget.hasChildren() || widget.isSpinnerType() || widget.isClickable()
+                    || widget.isLongClickable() || widget.isCheckable()
+                    || widget.isScrollView() || widget.isScrollable())
+                    && widget.isVisible() && widget.isEnabled()) {
+                widgets.add(widget);
             }
         }
 
-        //update number of ids
-        for (String id: idAmount.keySet()){
-            List<Integer> amounts = sameIDWidgets.get(id);
-            if (amounts.size()<2){
-                boolean sameAmount=false;
-                for (int i=0; i<amounts.size(); i++)
-                    if (amounts.get(i)==idAmount.get(id))
-                        sameAmount=true;
-                if (!sameAmount)
-                    amounts.add(idAmount.get(id));
+        MATE.log_debug("Number of relevant widgets: " + widgets.size());
+
+        /*
+         * We use here a LinkedHashSet to maintain the insertion order, since we later
+         * convert the set to a list and equals() builds on the list and inherently
+         * its order.
+         */
+        Set<WidgetAction> widgetActions = new LinkedHashSet<>();
+
+        for (Widget widget : widgets) {
+
+            MATE.log_debug("Widget: " + widget);
+            logWidgetProperties(widget);
+
+            /*
+            * TODO: We assign a clickable and long-clickable action if
+            *  a widget defines both attributes as true. However, in most cases
+            *  the action will refer to the same event handler. We should base
+            *  our selection on static analysis in the future.
+             */
+
+            /*
+             * We should exclude widgets that are part of top status/symbol bar.
+             * Otherwise, we may click unintentionally on the wifi symbol and cut off
+             * the connection, which in turn breaks MATE's execution. For a device with a
+             * resolution of 1080x1920 this represents the area [0,0][1080,72].
+             */
+            if (appScreen.getStatusBarBoundingBox().contains(widget.getBounds())) {
+                MATE.log_debug("Widget within status bar: " + widget.getBounds());
+                continue;
             }
+
+            /*
+            * It can happen that multiple sibling widgets are completely overlapping each other.
+            *  We should define only for a single widget an action.
+             */
+            if (hasOverlappingSiblingWidgetAction(widget, widgetActions)) {
+                MATE.log_debug("Overlapping sibling action!");
+                continue;
+            }
+
+            if (widget.isSonOfSpinner()) {
+
+                MATE.log_debug("Spinner widget defines scrolling action itself!");
+
+                /*
+                * A spinner typically hosts text views as entries, but it could happen
+                * that buttons or checkboxes are encapsulated, so we need to check
+                * for this properties here. The scrolling action is directly employed
+                * on the spinner widget itself.
+                 */
+                if (widget.isClickable() || widget.isCheckable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                // we define the scrolling action directly on the spinner widget
+                continue;
+            }
+
+            /*
+             * It can happen that leaf widgets actually represent containers like
+             * a linear layout in order to fill or introduce a gap.
+             */
+            if (widget.isContainer()) {
+                MATE.log_debug("Container as a leaf widget!");
+                continue;
+            }
+
+            if ((widget.isSonOfLongClickable() || widget.isSonOfClickable()
+                    || widget.isSonOfCheckable()) && !widget.isSonOfActionableContainer()) {
+                MATE.log_debug("Parent widget defines the action!");
+                // we define the action directly on the parent widget
+                continue;
+            }
+
+            if (widget.isCheckableType()) {
+                MATE.log_debug("Widget implements checkable interface!");
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
+
+            if (widget.isEditTextType()) {
+                MATE.log_debug("Widget is an edit text instance!");
+                widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+
+               /*
+               * TODO: Use static analysis to detect whether an onclick handler is registered.
+               * Editable widgets are by default also clickable and long-clickable, but
+               * it is untypical to define such action as well. What should happen?
+               * We can only imagine that some sort of pop up appears showing some additional
+               * hint. Since it's uncommon that editable widgets define an onclick listener,
+               * we ignore such action right now.
+                */
+               continue;
+            }
+
+            if (widget.isButtonType()) {
+                MATE.log_debug("Widget is a button instance!");
+
+                // TODO: Use static analysis to detect whether click/long click refer to the same
+                //  event handler.
+                if (widget.isClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+            }
+
+            if (widget.isSpinnerType()) {
+                MATE.log_debug("Widget is a spinner instance!");
+
+                /*
+                * TODO: Add a proper scrolling action. Right now we simply
+                *  click on the spinner, which in turn opens a list view,
+                *  on which we can click again. However, the better option would
+                *  be some sort of motif gene that does this two step operation
+                *  in one step.
+                 */
+
+                if (widget.isClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                    // it doesn't make sense to add another action to spinner instance
+                    continue;
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                    // it doesn't make sense to add another action to spinner instance
+                    continue;
+                }
+            }
+
+            if (widget.isScrollable() && !widget.isSpinnerType() && !widget.isSonOfScrollable()) {
+
+                MATE.log_debug("Widget is a scrollview!");
+
+                /*
+                * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
+                * a horizontal scroll view like android.support.v4.view.ViewPager is used for
+                * vertical scrolling by nesting layouts, so it is not possible to determine
+                * the direction of the scroll view. Thus, we add swipes for all directions.
+                 */
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
+
+                // it doesn't make sense to add another action to scrollable widgets
+                continue;
+            }
+
+            /*
+             * The elements in a list view are typically of type android.widget.TextView
+             * and not clickable according to the underlying AccessibilityNodeInfo object,
+             * however those elements represent in most cases clickable widgets.
+             */
+            if (widget.isSonOfListView()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
+
+            // TODO: might be redundant with isCheckableType()
+            if (widget.isCheckable()) {
+                // we check a widget by clicking on it
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
+
+            /*
+             * Right now, we can't tell whether any kind of view widget should be clickable
+             * or not, thus we assign to each leaf widget the click action. In the future,
+             * we should rely on an additional static analysis of the byte code to verify
+             * which leaf widget, in particular which text view, defines an event handler
+             * and thus should be clickable.
+             */
+            widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
         }
 
-        if (executables.size()==0)
-            executables.add(new WidgetAction(ActionType.BACK));
+        MATE.log_debug("Number of widget actions: " + widgetActions.size());
+        MATE.log_debug("Derived the following widget actions: " + widgetActions);
 
-        if (appScreen.isHastoScrollDown()||appScreen.isHasToScrollUp()){
-            executables.add(new WidgetAction(ActionType.SWIPE_DOWN));
-            executables.add(new WidgetAction(ActionType.SWIPE_UP));
-        }
-
-        if (appScreen.isHasToScrollLeft()||appScreen.isHasToScrollRight()){
-            executables.add(new WidgetAction(ActionType.SWIPE_LEFT));
-            executables.add(new WidgetAction(ActionType.SWIPE_RIGHT));
-        }
-
-        if (activityName.contains("GoogleOAuthActivity"))
-            executables = new ArrayList<>();
-        executables.add(new WidgetAction(ActionType.BACK));
-        executables.add(new WidgetAction(ActionType.MENU));
-
-        // those actions should be always applicable independent of the widget
-        executables.add(new WidgetAction(ActionType.TOGGLE_ROTATION));
-        //executables.add(new WidgetAction(ActionType.HOME));
-        executables.add(new WidgetAction(ActionType.SEARCH));
-        //executables.add(new WidgetAction(ActionType.QUICK_SETTINGS));
-        //executables.add(new WidgetAction(ActionType.NOTIFICATIONS));
-        executables.add(new WidgetAction(ActionType.SLEEP));
-        executables.add(new WidgetAction(ActionType.WAKE_UP));
-        executables.add(new WidgetAction(ActionType.DELETE));
-        executables.add(new WidgetAction(ActionType.DPAD_CENTER));
-        executables.add(new WidgetAction(ActionType.DPAD_DOWN));
-        executables.add(new WidgetAction(ActionType.DPAP_UP));
-        executables.add(new WidgetAction(ActionType.DPAD_LEFT));
-        executables.add(new WidgetAction(ActionType.DPAD_RIGHT));
-
-        actions = executables;
-        return executables;
+        List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
+        uiActions.addAll(getUIActions());
+        return Collections.unmodifiableList(uiActions);
     }
 
-     //Todo: add hashcode method
+    @SuppressWarnings("debug")
+    private void logWidgetProperties(Widget widget) {
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ActionsScreenState that = (ActionsScreenState) o;
-
-        if (!this.activityName.equals(that.getActivityName())){
-            //MATE.log_acc("Strobe 1: State "+this.id+"different from State: "+object.getId());
-            return false;
+        if (widget.isClickable()) {
+            MATE.log_debug("Widget is clickable!");
         }
 
-
-        if (!this.packageName.equals(that.getPackageName())){
-            //MATE.log_acc("Strobe 2: State "+this.id+"different from State: "+object.getId());
-            return false;
+        if (widget.isLongClickable()) {
+            MATE.log_debug("Widget is long clickable!");
         }
 
-
-        ActionsScreenState screenState = (ActionsScreenState) that;
-
-        List<WidgetAction> actionsThis = this.getActions();
-        List<WidgetAction> actionsOther = screenState.getActions();
-
-        List<String> setActThis = new ArrayList<>();
-        List<String> setActOther = new ArrayList<>();
-        for (WidgetAction act: actionsThis) {
-            if (act.getWidget()!=null) {
-                if (act.getWidget().getClazz().contains("Button"))
-                    setActThis.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
-                else
-                    setActThis.add(act.getWidget().getId() + "-" + act.getActionType());
-            }
-
-        }
-        for (WidgetAction act: actionsOther) {
-            if (act.getWidget()!=null) {
-                if (act.getWidget().getClazz().contains("Button"))
-                    setActOther.add(act.getWidget().getId() + "-" + act.getActionType()+"-"+act.getWidget().getText());
-                else
-                    setActOther.add(act.getWidget().getId() + "-" + act.getActionType());
-            }
+        if (widget.isScrollable()) {
+            MATE.log_debug("Widget is scrollable!");
         }
 
-        if (setActThis.size()==setActOther.size()){
-
-            for (String strActThis: setActThis){
-                if (!setActOther.contains(strActThis)) {
-                    //MATE.log_acc("Strobe 3: State "+this.id+"different from State: "+object.getId());
-                    return false;
-                }
-            }
-
-            Hashtable<String, Widget> editablesThis = this.getEditableWidgets();
-            Hashtable<String, Widget> editablesOther = screenState.getEditableWidgets();
-
-            for (Widget wdgThis: editablesThis.values()){
-
-                Widget wdgOther = editablesOther.get(wdgThis.getId());
-                if (wdgOther==null) {
-                    //MATE.log_acc("Strobe 4 State "+this.id+"different from State: "+object.getId());
-                    return false;
-                }
-
-
-                if (wdgOther.isEmpty() != wdgThis.isEmpty()) {
-                    //MATE.log_acc("Strobe 5: State "+this.id+"different from State: "+object.getId());
-                    return false;
-                }
-            }
-
-
-            //as for the checkables it considers two GUIs equals if they have the same objects checked
-            Hashtable<String,Widget> checkablesThis = this.getCheckableWidgets();
-            Hashtable<String,Widget> checkablesOther = screenState.getCheckableWidgets();
-            for (Widget wdgThis: checkablesThis.values()){
-                Widget wdgOther = checkablesOther.get(wdgThis.getId());
-                if (wdgOther==null)
-                    return false;
-                if (wdgOther.isChecked()!=wdgThis.isChecked())
-                    return false;
-            }
-
-
-            return true;
+        if (widget.isEditable()) {
+            MATE.log_debug("Widget is editable!");
         }
-        return false;
+
+        if (widget.isCheckable()) {
+            MATE.log_debug("Widget is checkable!");
+        }
     }
 
-    public String getType(){
-        return "ActionsScreenState";
-    }
+    /**
+     * Checks whether any sibling widget of the given widget defines already some widget action
+     * and overlaps completely with the given widget.
+     * This phenomenon was discovered on the bbc app, where multiple siblings were completely
+     * overlapping (which is strange per-se) for a video container. One would expect that
+     * completely overlapping widgets (same coordinates) are actually not in a siblings relation
+     * but rather in a child-parent relation. Moreover, all of these siblings were leaf widgets,
+     * which would cause our procedure to assign multiple actions to the same 'abstract' widget.
+     *
+     * @param widget The current widget.
+     * @param widgetActions The widget actions collected so far.
+     * @return Returns {@code true} if any sibling of the given widget already defines a widget
+     *           action and overlaps with the given widget, otherwise {@code false} is returned.
+     */
+    private boolean hasOverlappingSiblingWidgetAction(Widget widget, Set<WidgetAction> widgetActions) {
 
+        List<Widget> siblings = widget.getSiblings();
 
-    //yan
-    @Override
-    public void updatePheromone(Action triggeredAction) {
-        //find pheromone in hashMap and update
-    }
+        for (WidgetAction widgetAction : widgetActions) {
 
-    //yan
-    @Override
-    public Map<Action, Float> getActionsWithPheromone() {
-        return actionsWithPheromone;
-    }
-
-    //yan
-    @Override
-    public AccessibilityNodeInfo getRootAccessibilityNodeInfo() {
-        return rootNodeInfo;
-    }
-
-    @Override
-    public boolean differentColor(IScreenState visitedState) {
-        if (visitedState==null) {
-            //MATE.log("visited state = null");
-            return true;
-        }
-        ActionsScreenState that = (ActionsScreenState) visitedState;
-
-        List<Widget> thisWidgets = this.getWidgets();
-        List<Widget> otherWidgets = visitedState.getWidgets();
-
-        boolean found = false;
-        for (Widget wThis: thisWidgets){
-            //search by id
-            for (Widget wOther: otherWidgets){
-                if (wThis.getId().equals(wOther.getId()) &&
-                        wThis.getText().equals(wOther.getText())){
-
-                    found = true;
-
-                    if (!wOther.getColor().equals(wThis.getColor()) &&
-                            !wOther.isFocused() &&
-                            wThis.isFocused()==wOther.isFocused() &&
-                            wOther.getHint().equals(wThis.getHint()) &&
-                            wOther.getContentDesc().equals(wThis.getContentDesc())){
+            // check whether any sibling defines already an action
+            if (siblings.contains(widgetAction.getWidget())) {
+                // check whether any sibling overlaps with the current widget
+                for (Widget sibling : siblings) {
+                    if (sibling.getBounds().equals(widget.getBounds())) {
+                        MATE.log_debug("Widget " + widget + " overlaps with " + sibling + "!");
                         return true;
                     }
                 }
             }
-
-            if (!found){
-                //search by text
-                for (Widget wOther: otherWidgets){
-
-                    if (wThis.getText().equals(wOther.getText())){
-                        found = true;
-
-                        if (!wOther.getColor().equals(wThis.getColor()) &&
-                                !wOther.isFocused() &&
-                                wThis.isFocused()==wOther.isFocused() &&
-                                wOther.getHint().equals(wThis.getHint()) &&
-                                wOther.getContentDesc().equals(wThis.getContentDesc()))
-                            return true;
-                    }
-                }
-            }
         }
-        return false;
 
+        return false;
     }
 
+    /**
+     * Returns the list of actions are applicable independent on any widgets.
+     *
+     * @return Returns the list of actions applicable on any screen.
+     */
+    private List<UIAction> getUIActions() {
+
+        List<UIAction> uiActions = new ArrayList<>();
+        uiActions.add(new UIAction(ActionType.BACK, activityName));
+        uiActions.add(new UIAction(ActionType.MENU, activityName));
+        uiActions.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
+        // uiActions.add(new UIAction(ActionType.HOME, activityName));
+        uiActions.add(new UIAction(ActionType.SEARCH, activityName));
+        // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
+        // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
+        uiActions.add(new UIAction(ActionType.SLEEP, activityName));
+        uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
+        uiActions.add(new UIAction(ActionType.DELETE, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
+        uiActions.add(new UIAction(ActionType.ENTER, activityName));
+        return uiActions;
+    }
+
+    /**
+     * Returns the hash code of this screen state.
+     *
+     * @return Returns the hash code.
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * Compares two screen states for equality.
+     *
+     * @param o The other screen state to compare against.
+     * @return Returns {@code true} if the two screen states are identical,
+     * otherwise {@code false} is returned.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            /*
+             * Since we want to cache screen states and the actions are constructed lazily,
+             * a comparison on those actions is not useful. A cached screen state has its
+             * actions initialized while a new screen state has not.
+             */
+            return super.equals(o);
+        }
+    }
+
+    /**
+     * Returns the screen state type.
+     *
+     * @return Returns the screen state types.
+     */
+    @Override
+    public ScreenStateType getType() {
+        return ScreenStateType.ACTION_SCREEN_STATE;
+    }
 }

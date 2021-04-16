@@ -4,9 +4,13 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.utils.FitnessUtils;
 
+/**
+ * Provides a fitness metric based on branch coverage. This requires that the
+ * AUT has been instrumented with the branch coverage module.
+ *
+ * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
+ */
 public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
-
-    public static final String FITNESS_FUNCTION_ID = "branch_coverage_fitness_function";
 
     @Override
     public double getFitness(IChromosome<T> chromosome) {

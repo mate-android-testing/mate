@@ -1,17 +1,20 @@
 package org.mate.exploration.deprecated.novelty;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
-import org.mate.model.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 import org.mate.utils.MersenneTwister;
 
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.mate.MATE.device;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.GREEDY_EPSILON;
 import static org.mate.Properties.MAX_NUMBER_EVENTS;
@@ -272,14 +275,14 @@ public class NoveltyBased {
 
 
             //Gets the first state
-            selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             guiModel.updateModelEVO(null,selectedScreenState);
-            //IScreenState statedebug = ScreenStateFactory.getScreenState("ActionsScreenState");
+            //IScreenState statedebug = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             //guiModel.updateModelEVO(null,statedebug);
             //MATE.log_acc("DEBUG: MATE STATE "+guiModel.getNewNodeName(statedebug)+" state updated? ");
             //MATE.log_acc("DEBUG: MATE STATE "+guiModel.getCurrentStateId()+" state updated? ");
 
-                //IScreenState s = ScreenStateFactory.getScreenState("ActionsScreenState");
+                //IScreenState s = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 //guiModel.updateModel(null,s);
                 //MATE.log_acc("DEBUG: INITIAL STATE "+s.getId());
 
@@ -306,7 +309,7 @@ public class NoveltyBased {
 
 
                 //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
-                Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_");
+                Registry.getEnvironmentManager().takeScreenshot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+numberOfActions+"_before_");
 
                 //TODO: is it necessary?
                 testcase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
@@ -321,7 +324,7 @@ public class NoveltyBased {
                 try {
                     //TODO:Verify it
                     //get a list of all executable actions as long as this state is different from last state
-                    executableActions = selectedScreenState.getActions();
+                    executableActions = selectedScreenState.getWidgetActions();
 
                     //select one action randomly
                     WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
@@ -341,7 +344,7 @@ public class NoveltyBased {
 
                         //create an object that represents the screen
                         //using type: ActionScreenState
-                        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                         //check whether there is a progress bar on the screen
                         long timeToWait = waitForProgressBar(state);
@@ -352,7 +355,7 @@ public class NoveltyBased {
                             //set that the current action needs to wait before new action
                             action.setTimeToWait(timeToWait);
                             //get a new state
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         }
 
                         //get the package name of the app currently running
@@ -385,7 +388,7 @@ public class NoveltyBased {
                             deviceMgr.restartApp();
                             Thread.sleep(2000);
                             //TODO: get state when restarts the app
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                             //numberOfActions = 0;
                             //numberOfTCs++;
                             //if(numberOfTCs < maxNumTCs){
@@ -398,7 +401,7 @@ public class NoveltyBased {
                             //it the current screen is a screen not explored before,
                             //   then a new state is created (newstate = true)
                             //TODO: is this useless?
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                             //testcase.updateVisitedActivities(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getActivityName());
                             //testcase.updateVisitedStates(this.guiModel.getStateById(this.guiModel.getCurrentStateId()));
@@ -411,7 +414,7 @@ public class NoveltyBased {
                             updateCoverageArchive(state.getId(),testcase.getId());
 
                             //Registry.getEnvironmentManager().screenShot(state.getPackageName(),"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
-                            Registry.getEnvironmentManager().screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter");
+                            Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+numberOfTCs+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter");
 
 
 
@@ -433,7 +436,7 @@ public class NoveltyBased {
                         MATE.log_acc("CRASH MESSAGE"+e.getMessage());
                         testcase.setCrashDetected();
                         crashArchive.add(testcase);
-                        deviceMgr.handleCrashDialog();
+                        deviceMgr.pressHome();
                         isApp=false;
 
                         deviceMgr.reinstallApp();
@@ -460,7 +463,7 @@ public class NoveltyBased {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                selectedScreenState=ScreenStateFactory.getScreenState("ActionsScreenState");
+                selectedScreenState=ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             }
         }
 
@@ -511,8 +514,8 @@ public class NoveltyBased {
             boolean goOn = true;
             while (goOn) {
 
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<WidgetAction> actions = screenState.getActions();
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+                List<WidgetAction> actions = screenState.getWidgetActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
@@ -524,7 +527,7 @@ public class NoveltyBased {
                     }
                 }
 
-                currentPackage = device.getCurrentPackageName();
+                currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
                 MATE.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)
@@ -556,7 +559,7 @@ public class NoveltyBased {
 
 
 
-        selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         guiModel.updateModelEVO(null,selectedScreenState);
 
         //add initial state to mutant test case
@@ -602,7 +605,7 @@ public class NoveltyBased {
         while ((numberOfActions < MAX_NUMBER_EVENTS())&&(isApp)) {
 
             //Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),"_TC"+TCcounter+"_EVENT"+numberOfActions+"_before_"+selectedScreenState.getId());
-            Registry.getEnvironmentManager().screenShot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
+            Registry.getEnvironmentManager().takeScreenshot(this.guiModel.getStateById(this.guiModel.getCurrentStateId()).getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions)+"_before");
 
 
             //MATE.log("Mutation Iteration number: " + numberOfActions +
@@ -625,7 +628,7 @@ public class NoveltyBased {
             } else {
                 MATE.log("Random Action number: "+numberOfActions);
                 //get a list of all executable actions as long as this state is different from last state
-                executableActions = selectedScreenState.getActions();
+                executableActions = selectedScreenState.getWidgetActions();
                 //select one action randomly
                 action = executableActions.get(selectRandomAction(executableActions.size()));
                 MATE.log("EVENTO: " + action.getActionType() + "; GUI OBJECT: " + action.getWidget().getClazz());
@@ -651,7 +654,7 @@ public class NoveltyBased {
 
                     //create an object that represents the screen
                     //using type: ActionScreenState
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     //check whether there is a progress bar on the screen
                     long timeToWait = waitForProgressBar(state);
@@ -662,7 +665,7 @@ public class NoveltyBased {
                         //set that the current action needs to wait before new action
                         action.setTimeToWait(timeToWait);
                         //get a new state
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }
 
                     //get the package name of the app currently running
@@ -696,7 +699,7 @@ public class NoveltyBased {
                         Thread.sleep(5000);
                         deviceMgr.restartApp();
                         Thread.sleep(2000);
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         //numberOfActions = 0;
                         //numberOfTCs++;
                         //if(numberOfTCs < maxNumTCs){
@@ -709,14 +712,14 @@ public class NoveltyBased {
                         //it the current screen is a screen not explored before,
                         //   then a new state is created (newstate = true)
                         //TODO: non mi trovo
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         boolean newState = guiModel.updateModel(action, state);
                         mutantTestCase.updateVisitedActivities(state.getActivityName());
                         mutantTestCase.updateVisitedStates(state);
                         updateCoverageArchive(state.getId(),mutantTestCase.getId());
 
                         //Registry.getEnvironmentManager().screenShot(state.getPackageName(),"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
-                        Registry.getEnvironmentManager().screenShot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
+                        Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),this.guiModel.getCurrentStateId()+"_TC"+TCcounter+"_EVENT"+String.valueOf(numberOfActions-1)+"_zafter_"+this.guiModel.getCurrentStateId());
 
 
                         //if it is a new state or the initial screen (first action)
@@ -736,7 +739,7 @@ public class NoveltyBased {
                     MATE.log_acc("CRASH MESSAGE" + e.getMessage());
                     mutantTestCase.setCrashDetected();
                     crashArchive.add(mutantTestCase);
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                     isApp = false;
 
                     deviceMgr.reinstallApp();
@@ -1050,7 +1053,7 @@ public class NoveltyBased {
     }
 
     private int chooseCutpoint(TestCase tc) {
-        HashMap<String, String> statesMap = tc.getStatesMap();
+        Map<String, String> statesMap = tc.getStatesMap();
         float bestSparseness = 0;
         String bestCutpoint = null;
         //MATE.log_acc("Possibile bug, tc: "+tc.getId()+", covered states: "+statesMap.keySet());
@@ -1073,7 +1076,7 @@ public class NoveltyBased {
         int cutpoint = 0;
         if(rand.nextDouble()<=1-GREEDY_EPSILON()){
             MATE.log_acc("choose best cutpoint");
-            HashMap<String, String> statesMap = tc.getStatesMap();
+            Map<String, String> statesMap = tc.getStatesMap();
             float bestSparseness = 0;
             String bestCutpoint = null;
             //MATE.log_acc("Possibile bug, tc: "+tc.getId()+", covered states: "+statesMap.keySet());

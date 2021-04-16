@@ -1,331 +1,302 @@
 package org.mate.state.executables;
 
 import android.app.Instrumentation;
-import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.os.Build;
-import android.os.RemoteException;
-import android.preference.PreferenceManager;
-import android.support.annotation.RequiresApi;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.StaleObjectException;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.content.Context;
-
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.ui.Widget;
-import org.mate.ui.EnvironmentManager;
+import org.mate.interaction.EnvironmentManager;
+import org.mate.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
- * Created by marceloeler on 21/06/17.
+ * Models an app screen with all (discoverable) widgets on it.
  */
-
 public class AppScreen {
 
-    private String activityName;
-    private String packageName;
-    private List<Widget> widgets;
-    private static Hashtable<String,String> editTextHints = new Hashtable<String,String>();
-    private UiDevice device;
-    private boolean hasToScrollUp;
-    private boolean  hastoScrollDown;
-    private boolean  hasToScrollLeft;
-    private boolean  hasToScrollRight;
-    private AccessibilityNodeInfo rootNodeInfo;
+    /**
+     * Defines the activity name that corresponds to the app screen.
+     */
+    private final String activityName;
 
-    public AppScreen(){
+    /**
+     * Defines the package name that corresponds to the app screen.
+     */
+    private final String packageName;
+
+    /**
+     * A list of discovered widgets on the app screen.
+     */
+    private List<Widget> widgets;
+
+    /**
+     * Collects the text hints for editable fields over all app screens.
+     * The key is defined through the resource id of the widget.
+     */
+    private static Map<String, String> editTextHints = new Hashtable<String,String>();
+
+    /**
+     * Stores relevant information about the device, e.g. the display height.
+     * Also enables the interaction with the device, e.g. perform a click on some ui element.
+     */
+    private final UiDevice device;
+
+    /**
+     * Creates a new app screen containing the widgets on it.
+     */
+    public AppScreen() {
+
         Instrumentation instrumentation = getInstrumentation();
-        device = UiDevice.getInstance(instrumentation);
+        this.device = UiDevice.getInstance(instrumentation);
 
         this.widgets = new ArrayList<>();
         this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
+
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();
         } else {
             this.packageName = activityName.split("/")[0];
         }
-        AccessibilityNodeInfo ninfo= InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
-        if (ninfo==null) {
-            MATE.log("APP DISCONNECTED");
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getInstrumentation().getContext());
-            if (prefs.getBoolean("isServiceEnabled", false)){
-                MATE.log("ACCSERVICE FALSE");
+        AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation().getRootInActiveWindow();
+
+        if (rootNode == null) {
+            /*
+            * TODO: Check whether this is the expected behaviour. I would rather assume that
+            *  the UIAutomator throws an exception and we can't react it properly, similar
+            *  to what can happen when executing an action in the DeviceMgr.
+             */
+            MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+
+            // try to reconnect
+            rootNode = InstrumentationRegistry.getInstrumentation()
+                    .getUiAutomation().getRootInActiveWindow();
+
+            if (rootNode == null) {
+                throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
             }
-            else
-                MATE.log("ACCSERVICE TRUE");
-            //Try to reconnect
         }
-        rootNodeInfo = ninfo;
-        readNodes(ninfo,null);
+
+        // retrieve widgets from current screen
+        MATE.log_debug("AppScreen: " + activityName);
+        parseWidgets(rootNode, null, 0, 0, 0);
+        MATE.log_debug("Number of widgets: " + widgets.size());
     }
 
-    public void readNodes(AccessibilityNodeInfo obj, Widget parent){
-        Widget widget = null;
-        if (obj!=null) {
+    /**
+     * Extracts the widgets from the ui hierarchy.
+     *
+     * @param node Describes a node in the ui hierarchy. Initially, the root node.
+     * @param parent The parent widget, {@code null} for the root node.
+     * @param depth The depth of the node in the ui hierarchy (tree).
+     * @param globalIndex A global index based on DFS order.
+     * @param localIndex A local index for each child widget, i.e. the child number.
+     * @return Returns the current global index.
+     */
+    private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
+                             int globalIndex, final int localIndex) {
 
-            //obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            //obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            ///obj.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-            try {
-                widget = createWidget(obj, parent, activityName);
-            }
-            catch(StaleObjectException e){
-                MATE.log("StaleObjectException");
-            }
-            if (widget!=null)
-                widgets.add(widget);
-            else{
-                Rect rec = new Rect();
-                obj.getBoundsInScreen(rec);
-                //MATE.log("WIDGET NULL: "+ rec.toShortString());
+        MATE.log_debug("Node: " + node.getViewIdResourceName() + ", depth: " + depth
+                + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
+        MATE.log_debug("Node class: " + node.getClassName());
 
+        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
+        checkForHint(node, widget);
+        widgets.add(widget);
 
-
-            }
-            for (int i=0; i<obj.getChildCount(); i++)
-                readNodes(obj.getChild(i),widget);
+        if (parent != null) {
+            parent.addChild(widget);
         }
+
+        depth++;
+        globalIndex++;
+
+        // traverse children
+        for (int i = 0; i < node.getChildCount(); i++) {
+            // the local index is simply the child number
+            globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
+        }
+        return globalIndex;
     }
 
-    private Widget createWidget(AccessibilityNodeInfo obj, Widget parent, String activityName){
-        String parentResourceId = this.getValidResourceIDFromTree(parent);
+    /**
+     * Checks whether a widget displays some hint. Globally collects
+     * all hints.
+     *
+     * @param node A node in the ui hierarchy.
+     * @param widget The widget corresponding to the node.
+     */
+    private void checkForHint(AccessibilityNodeInfo node, Widget widget) {
 
+        /*
+         * TODO: We should replace the following code with node.isShowingHintText()
+         *  and node.getHintText() in the future, however this requires min API level 26.
+         */
+        // try to retrieve the hint of a widget
+        if (widget.isEditable()) {
 
+            String hint = editTextHints.get(widget.getResourceID());
 
-        String id = obj.getViewIdResourceName();
-        if (id==null)
-            id="";
+            if (hint == null) {
 
-        String clazz = "null";
-        if (obj.getClassName()!=null)
-            clazz = obj.getClassName().toString();
+                UiObject2 uiObject = null;
 
-        String text = "";
-        if (obj.getText()!=null)
-            text = obj.getText().toString();
+                if (widget.getResourceID().isEmpty()) {
+                    uiObject = device.findObject(By.text(widget.getText()));
+                } else {
+                    uiObject = device.findObject(By.res(widget.getResourceID()));
+                }
 
-        String newId = clazz;
-        if (id.equals("")) {
+                if (uiObject != null) {
 
-            if (parent!=null && !parentResourceId.equals("")){
+                    /*
+                     * In order to retrieve the hint of a widget, we have to clear the
+                     * input, and this in turn should display the hint if we are lucky.
+                     */
 
-                id = parentResourceId+"-child-"+parent.getChildren().size()+"#"+clazz;
-            }
-            else
-                id = clazz+"-"+text;
-        }
+                    // save original input
+                    String textBeforeClear = Objects.toString(uiObject.getText(), "");
 
-        String idByActivity = activityName+"_"+id;
-        Widget widget = new Widget(id, clazz, idByActivity);
+                    // reset input and hope that this causes a hint to be set
+                    uiObject.setText("");
+                    String textAfterClear = Objects.toString(uiObject.getText(), "");
 
-        String res = obj.getViewIdResourceName();
-        if (res==null)
-            res="";
-        widget.setResourceID(res);
-
-        widget.setParent(parent);
-        widget.setText(text);
-        String wpackageName = "null";
-        if (obj.getPackageName()!=null)
-            wpackageName = obj.getPackageName().toString();
-        widget.setPackageName(wpackageName);
-        widget.setEnabled(obj.isEnabled());
-
-        Rect rec = new Rect();
-        obj.getBoundsInScreen(rec);
-        widget.setBounds(rec.toShortString());
-
-        int x1=widget.getX1();
-        int x2=widget.getX2();
-        int y1=widget.getY1();
-        int y2=widget.getY2();
-        if (x1<0 || x2<0){
-            this.hasToScrollLeft=true;
-            return null;
-        }
-        if (x2>device.getDisplayWidth() || x1>device.getDisplayWidth()) {
-            this.hasToScrollRight = true;
-            return null;
-        }
-        if (y1<0 || y2<0) {
-            this.hasToScrollUp = true;
-            return null;
-        }
-        if (y2>device.getDisplayHeight()||y1>device.getDisplayHeight()) {
-            this.hastoScrollDown = true;
-            return null;
-        }
-
-        widget.setCheckable(obj.isCheckable());
-        widget.setChecked(obj.isChecked());
-        widget.setClickable(obj.isClickable());
-        String contentDesc = "";
-        if (obj.getContentDescription()!=null)
-            contentDesc = obj.getContentDescription().toString();
-        if (contentDesc==null)
-            contentDesc="";
-
-        String textError = "";
-        if (obj.getError()!=null)
-            textError=obj.getError().toString();
-        widget.setErrorText(textError);
-
-        widget.setContentDesc(contentDesc);
-        widget.setFocusable(obj.isFocusable());
-        widget.setHasChildren(obj.getChildCount()!=0);
-        widget.setIndex(0);
-        widget.setLongClickable(obj.isLongClickable());
-        widget.setPassword(false);
-        widget.setScrollable(obj.isScrollable());
-        widget.setSelected(obj.isSelected());
-        widget.setMaxLength(obj.getMaxTextLength());
-        widget.setInputType(obj.getInputType());
-        widget.setVisibleToUser(obj.isVisibleToUser());
-        widget.setAccessibilityFocused(obj.isAccessibilityFocused());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            widget.setImportantForAccessibility(obj.isImportantForAccessibility());
-        }
-        else
-            widget.setImportantForAccessibility(true);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            widget.setScreenReaderFocusable(obj.isScreenReaderFocusable());
-        }
-        else
-            widget.setScreenReaderFocusable(true);
-
-        AccessibilityNodeInfo.CollectionItemInfo cinfo = obj.getCollectionItemInfo();
-        if (cinfo!=null)
-            widget.setHeading(cinfo.isHeading());
-        else
-            widget.setHeading(false);
-
-        AccessibilityNodeInfo lf = obj.getLabelFor();
-        if (lf!=null){
-            String lfstr = lf.getViewIdResourceName();
-            if (lfstr==null)
-                lfstr="";
-            widget.setLabelFor(lfstr);
-        }
-        else
-            widget.setLabelFor("");
-
-        AccessibilityNodeInfo lb = obj.getLabeledBy();
-        if (lb!=null){
-            String lbstr = lb.getViewIdResourceName();
-            if (lbstr==null)
-                lbstr = "";
-            widget.setLabeledBy(lbstr);
-        }
-        else widget.setLabeledBy("");
-
-        if (widget.isEditable()){
-
-            String hint = editTextHints.get(id);
-
-            if (hint==null){
-                UiObject2 uiobject = null;
-                if (widget.getResourceID().equals(""))
-                    uiobject = device.findObject(By.text(widget.getText()));
-                else
-                    uiobject = device.findObject(By.res(id));
-                if (uiobject!=null) {
-                    String textBeforeClear = uiobject.getText();
-                    if (textBeforeClear==null)
-                        textBeforeClear="";
-
-                    uiobject.setText("");
-                    String textAfterClear = uiobject.getText();
-
-                    if (textAfterClear==null)
-                        textAfterClear="";
-                    uiobject.setText(textBeforeClear);
+                    // restore original input
+                    uiObject.setText(textBeforeClear);
 
                     hint = textAfterClear;
-                    if (!widget.getResourceID().equals(""))
-                        editTextHints.put(id,hint);
 
-                    if (textAfterClear.equals(textBeforeClear))
-                        uiobject.setText("");
+                    if (!widget.getResourceID().isEmpty()) {
+                        editTextHints.put(widget.getResourceID(), hint);
+                    }
                 }
             }
-            if (hint==null)
-                hint="";
+
+            hint = Objects.toString(hint, "");
             widget.setHint(hint);
-            widget.setContentDesc(hint);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                widget.setShowingHintText(obj.isShowingHintText());
-            }
         }
-
-        widget.setFocused(obj.isFocused());
-
-        if (parent!=null)
-            parent.addChild(widget);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            widget.setContextClickable(obj.isContextClickable());
-        }
-        return widget;
     }
 
-    private String getValidResourceIDFromTree(Widget obj){
-        String rid="";
-        while(obj!=null && rid.equals("")){
-            if (obj.getResourceID()!=null&&!obj.getResourceID().equals(""))
-                rid=obj.getResourceID();
-            else
-                obj = obj.getParent();
-        }
-        return rid;
-    }
-
+    /**
+     * Returns the activity name that app screen corresponds to.
+     *
+     * @return Returns the activity name.
+     */
     public String getActivityName() {
         return activityName;
     }
 
+    /**
+     * Returns the widgets linked to the app screen.
+     *
+     * @return Returns the widgets of the app screen.
+     */
     public List<Widget> getWidgets(){
-        return widgets;
+        return Collections.unmodifiableList(widgets);
     }
 
+    /**
+     * Returns the package name the app screens corresponds to.
+     *
+     * @return Returns the package name.
+     */
     public String getPackageName() {
         return packageName;
     }
 
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
+    /**
+     * Returns the bounding box of the status bar. This depends on display width
+     * and has a fixed height of 72 pixels, e.g. [0,0][1080][72].
+     *
+     * @return Returns the bounding box of the status bar.
+     */
+    public Rect getStatusBarBoundingBox() {
+        return new Rect(0, 0, getWidth(), 72);
     }
 
-    public boolean isHasToScrollUp() {
-        return hasToScrollUp;
+    /**
+     * Returns the bounding box of the app screen. This depends on display width
+     * and the display height, e.g. [0,0][1080][1920].
+     *
+     * @return Returns the bounding box of the app screen.
+     */
+    @SuppressWarnings("unused")
+    public Rect getBoundingBox() {
+        return new Rect(0, 0, getWidth(), getHeight());
     }
 
-    public boolean isHastoScrollDown() {
-        return hastoScrollDown;
+    /**
+     * Returns the screen width.
+     *
+     * @return Returns the screen width in pixels.
+     */
+    public int getWidth() {
+        return device.getDisplayWidth();
     }
 
-    public boolean isHasToScrollLeft() {
-        return hasToScrollLeft;
+    /**
+     * Returns the screen height.
+     *
+     * @return Returns the screen height in pixels.
+     */
+    public int getHeight() {
+        return device.getDisplayHeight();
     }
 
-    public boolean isHasToScrollRight() {
-        return hasToScrollRight;
+    /**
+     * Compares two app screens for equality.
+     *
+     * @param o The other app screen to compare against.
+     * @return Returns {@code true} if the two app screens are identical,
+     *          otherwise {@code false} is returned.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            AppScreen appScreen = (AppScreen) o;
+            return Objects.equals(activityName, appScreen.activityName) &&
+                    Objects.equals(packageName, appScreen.packageName) &&
+                    Objects.equals(widgets, appScreen.widgets);
+        }
     }
 
-    public AccessibilityNodeInfo getRootNodeInfo(){
-        return this.rootNodeInfo;
+    /**
+     * Computes the hash code based on attributes used for {@link #equals(Object)}.
+     *
+     * @return Returns the associated hash code of the app screen.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(activityName, packageName, widgets);
+    }
+
+    /**
+     * A simple textual representation of the app screen.
+     *
+     * @return Returns the string representation of the app screen.
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return "AppScreen{activity: " + activityName + ", widgets: " + widgets.size() + "}";
     }
 }

@@ -1,25 +1,29 @@
 package org.mate.exploration.deprecated.random;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
-import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
-import org.mate.accessibility.AccessibilitySummaryResults;
+import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import static org.mate.MATE.device;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 @Deprecated
 public class UniformRandomForAccessibility {
@@ -52,7 +56,7 @@ public class UniformRandomForAccessibility {
 
             try{
                 //get a list of all executable actions as long as this state is different from last state
-                executableActions = selectedScreenState.getActions();
+                executableActions = selectedScreenState.getWidgetActions();
 
                 //select one action randomly
                 WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
@@ -67,7 +71,7 @@ public class UniformRandomForAccessibility {
 
                     //create an object that represents the screen
                     //using type: ActionScreenState
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     //check whether there is a progress bar on the screen
                     long timeToWait = waitForProgressBar(state);
@@ -78,7 +82,7 @@ public class UniformRandomForAccessibility {
                         //set that the current action needs to wait before new action
                         action.setTimeToWait(timeToWait);
                         //get a new state
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }
 
                     //get the package name of the app currently running
@@ -89,17 +93,17 @@ public class UniformRandomForAccessibility {
                     }
                     //if current package is null, emulator has crashed/closed
                     if (currentPackageName==null) {
-                        MATE.logsum("CURRENT PACKAGE: NULL");
+                        MATE.log_debug("CURRENT PACKAGE: NULL");
                         return;
                     }
 
                     //check whether the package of the app currently running is from the app under test
                     //if it is not, restart app
                     //check also whether the limit number of actions before restart has been reached
-                    if (!currentPackageName.equals(this.packageName)||numberOfActions>=MATE.RANDOM_LENGH) {
+                    if (!currentPackageName.equals(this.packageName)||numberOfActions>= Properties.MAX_NUMBER_EVENTS()) {
                         MATE.log("package name: " + this.packageName);
                         deviceMgr.restartApp();
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         numberOfActions=0;
                     }
                     else{
@@ -124,7 +128,7 @@ public class UniformRandomForAccessibility {
                     selectedScreenState = state;
 
                 } catch (AUTCrashException e) {
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                 }
             }
             catch(Exception e){
@@ -142,12 +146,12 @@ public class UniformRandomForAccessibility {
     private void runAccessibilityChecks(IScreenState state, IScreenState selectedScreenState) {
 
 
-        Registry.getEnvironmentManager().screenShot(state.getPackageName(),state.getId());
+        Registry.getEnvironmentManager().takeScreenshot(state.getPackageName(),state.getId());
 
         //updates the current activity name
         currentActivityName = state.getActivityName();
         MATE.log("start ACCESSIBILITY CHECKS: " );
-        MATE.logactivity(state.getActivityName());
+        MATE.log_acc("ACTIVITY_VISITED: " + state.getActivityName());
 
 
         //prepare for collecting results
@@ -244,8 +248,8 @@ public class UniformRandomForAccessibility {
             boolean goOn = true;
             while (goOn) {
 
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<WidgetAction> actions = screenState.getActions();
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+                List<WidgetAction> actions = screenState.getWidgetActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
@@ -257,7 +261,7 @@ public class UniformRandomForAccessibility {
                     }
                 }
 
-                currentPackage = device.getCurrentPackageName();
+                currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
                 MATE.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)

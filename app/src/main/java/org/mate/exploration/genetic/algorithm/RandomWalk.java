@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RandomWalk<T> extends GeneticAlgorithm<T> {
-    public static final String ALGORITHM_NAME = "RandomWalk";
 
     /**
      * Initializing the genetic algorithm with all necessary attributes

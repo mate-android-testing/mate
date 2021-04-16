@@ -1,7 +1,14 @@
 package org.mate.exploration.genetic.builder;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.algorithm.Algorithm;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -29,7 +36,6 @@ public class GeneticAlgorithmBuilder {
     public static final String BIG_POPULATION_SIZE_KEY = "big_population_size";
     public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
     public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
-    public static final String RELATIVE_INTENT_AMOUNT = "relative_intent_amount";
 
     private Properties properties;
 
@@ -44,32 +50,62 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    public GeneticAlgorithmBuilder withAlgorithm(String algorithmName) {
-        properties.setProperty(ALGORITHM_KEY, algorithmName);
+    public GeneticAlgorithmBuilder withAlgorithm(Algorithm algorithm) {
+        properties.setProperty(ALGORITHM_KEY, algorithm.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.ALGORITHM() == null) {
+            org.mate.Properties.setProperty("algorithm", algorithm);
+        }
+
         return this;
     }
 
-    public GeneticAlgorithmBuilder withChromosomeFactory(String chromosomeFactoryId) {
-        properties.setProperty(CHROMOSOME_FACTORY_KEY, chromosomeFactoryId);
+    public GeneticAlgorithmBuilder withChromosomeFactory(ChromosomeFactory chromosomeFactory) {
+        properties.setProperty(CHROMOSOME_FACTORY_KEY, chromosomeFactory.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            org.mate.Properties.setProperty("chromosome_factory", chromosomeFactory);
+        }
+
         return this;
     }
 
-    public GeneticAlgorithmBuilder withSelectionFunction(String selectionFunctionId) {
-        properties.setProperty(SELECTION_FUNCTION_KEY, selectionFunctionId);
+    public GeneticAlgorithmBuilder withSelectionFunction(SelectionFunction selectionFunction) {
+        properties.setProperty(SELECTION_FUNCTION_KEY, selectionFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            org.mate.Properties.setProperty("selection_function", selectionFunction);
+        }
+
         return this;
     }
 
-    public GeneticAlgorithmBuilder withCrossoverFunction(String crossoverFunctionId) {
-        properties.setProperty(CROSSOVER_FUNCTION_KEY, crossoverFunctionId);
+    public GeneticAlgorithmBuilder withCrossoverFunction(CrossOverFunction crossoverFunction) {
+        properties.setProperty(CROSSOVER_FUNCTION_KEY, crossoverFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            org.mate.Properties.setProperty("crossover_function", crossoverFunction);
+        }
+
         return this;
     }
 
-    public GeneticAlgorithmBuilder withMutationFunction(String mutationFunctionId) {
-        properties.setProperty(MUTATION_FUNCTION_KEY, mutationFunctionId);
+    public GeneticAlgorithmBuilder withMutationFunction(MutationFunction mutationFunction) {
+        properties.setProperty(MUTATION_FUNCTION_KEY, mutationFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            org.mate.Properties.setProperty("mutation_function", mutationFunction);
+        }
+
         return this;
     }
 
-    public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId) {
+    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction) {
         int amountFitnessFunctions = Integer.valueOf(
                 properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
         properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY,
@@ -77,11 +113,16 @@ public class GeneticAlgorithmBuilder {
 
         String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT,
                 amountFitnessFunctions);
-        properties.setProperty(key, fitnessFunctionId);
+        properties.setProperty(key, fitnessFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            org.mate.Properties.setProperty("fitness_function", fitnessFunction);
+        }
         return this;
     }
 
-    public GeneticAlgorithmBuilder withFitnessFunction(String fitnessFunctionId, String arg1) {
+    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction, String arg1) {
         int amountFitnessFunctions = Integer.valueOf(
                 properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
 
@@ -90,12 +131,18 @@ public class GeneticAlgorithmBuilder {
 
         properties.setProperty(key, arg1);
 
-        withFitnessFunction(fitnessFunctionId);
+        withFitnessFunction(fitnessFunction);
         return this;
     }
 
-    public GeneticAlgorithmBuilder withTerminationCondition(String terminationConditionId) {
-        properties.setProperty(TERMINATION_CONDITION_KEY, terminationConditionId);
+    public GeneticAlgorithmBuilder withTerminationCondition(TerminationCondition terminationCondition) {
+        properties.setProperty(TERMINATION_CONDITION_KEY, terminationCondition.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            org.mate.Properties.setProperty("termination_condition", terminationCondition);
+        }
+
         return this;
     }
 

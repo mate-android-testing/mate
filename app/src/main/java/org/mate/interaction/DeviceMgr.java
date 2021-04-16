@@ -15,33 +15,45 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
-import org.mate.interaction.intent.ComponentType;
-import org.mate.interaction.intent.IntentBasedAction;
-import org.mate.interaction.intent.SystemAction;
-import org.mate.model.IGUIModel;
-import org.mate.ui.Action;
-import org.mate.ui.ActionType;
-import org.mate.ui.PrimitiveAction;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.ComponentType;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.utils.Utils;
 
 import java.util.List;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
+import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
- * Created by marceloeler on 08/03/17.
+ * The device manager is responsible for the actual execution of the various actions.
+ * Also provides functionality to check for crashes, restart or re-install the AUT, etc.
  */
+public class DeviceMgr {
 
-public class DeviceMgr implements IApp {
-
-    private UiDevice device;
-    private String packageName;
+    private final UiDevice device;
+    private final String packageName;
 
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
+    }
+
+    /**
+     * Returns the ui device instance.
+     *
+     * @return Returns the ui device instance.
+     */
+    public UiDevice getDevice() {
+        return device;
     }
 
     /**
@@ -51,6 +63,7 @@ public class DeviceMgr implements IApp {
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
     public void executeAction(Action action) throws AUTCrashException {
+
         if (action instanceof WidgetAction) {
             executeAction((WidgetAction) action);
         } else if (action instanceof PrimitiveAction) {
@@ -59,8 +72,11 @@ public class DeviceMgr implements IApp {
             executeAction((IntentBasedAction) action);
         } else if (action instanceof SystemAction) {
             executeAction((SystemAction) action);
+        } else if (action instanceof UIAction) {
+            executeAction((UIAction) action);
         } else {
-            throw new UnsupportedOperationException("Actions class " + action.getClass().getSimpleName() + " not yet supported");
+            throw new UnsupportedOperationException("Actions class "
+                    + action.getClass().getSimpleName() + " not yet supported");
         }
     }
 
@@ -69,134 +85,23 @@ public class DeviceMgr implements IApp {
      *
      * @param event The system event.
      */
-    public void executeAction(SystemAction event) throws AUTCrashException {
+    private void executeAction(SystemAction event) throws AUTCrashException {
         Registry.getEnvironmentManager().executeSystemEvent(MATE.packageName, event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
         checkForCrash();
     }
 
     /**
-     * Executes an Intent-based action. Depending on the target component, either
-     * startActivity(), startService() or sendBroadcast() is invoked.
+     * Executes the given ui action.
      *
-     * @param action The action which contains the Intent to be sent.
+     * @param action The given ui action.
+     * @throws AUTCrashException If the app crashes.
      */
-    public void executeAction(IntentBasedAction action) throws AUTCrashException {
+    private void executeAction(UIAction action) throws AUTCrashException {
 
-        Intent intent = action.getIntent();
-
-        try {
-            switch (action.getComponentType()) {
-                case ACTIVITY:
-                    // intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                    InstrumentationRegistry.getTargetContext().startActivity(intent);
-                    break;
-                case SERVICE:
-                    InstrumentationRegistry.getTargetContext().startService(intent);
-                    break;
-                case BROADCAST_RECEIVER:
-                    InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Component type not supported yet!");
-            }
-        } catch (Exception e) {
-            final String msg = "Calling startActivity() from outside of an Activity  context " +
-                    "requires the FLAG_ACTIVITY_NEW_TASK flag.";
-            if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
-                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
-                try {
-                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                    InstrumentationRegistry.getTargetContext().startActivity(intent);
-                } catch (Exception ex) {
-                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
-            } else {
-                MATE.log("Executing Intent-based action failed: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        checkForCrash();
-    }
-
-    /**
-     * Executes a primitive action, e.g. a click on a specific coordinate.
-     *
-     * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
-     */
-    public void executeAction(PrimitiveAction action) throws AUTCrashException {
-
-        switch (action.getActionType()) {
-            case CLICK:
-                device.click(action.getX(), action.getY());
-                break;
-            case LONG_CLICK:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
-                break;
-            case SWIPE_DOWN:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() - 300, 15);
-                break;
-            case SWIPE_UP:
-                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() + 300, 15);
-                break;
-            case SWIPE_LEFT:
-                device.swipe(action.getX(), action.getY(), action.getX() + 300, action.getY(), 15);
-                break;
-            case SWIPE_RIGHT:
-                device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
-                break;
-            case BACK:
-                device.pressBack();
-                break;
-            case MENU:
-                device.pressMenu();
-                break;
-            default:
-                throw new IllegalArgumentException("Action type " + action.getActionType() + " not implemented for primitive actions.");
-        }
-
-        checkForCrash();
-    }
-
-    /**
-     * Executes a widget action, e.g. a click on a certain widget.
-     *
-     * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
-     */
-    public void executeAction(WidgetAction action) throws AUTCrashException {
-        Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
 
         switch (typeOfAction) {
-            case CLICK:
-                handleClick(selectedWidget);
-                break;
-            case LONG_CLICK:
-                handleLongPress(selectedWidget);
-                break;
-            case TYPE_TEXT:
-                handleEdit(action);
-                break;
-            case TYPE_SPECIFIC_TEXT:
-                handleEdit(action);
-            case CLEAR_WIDGET:
-                handleClear(selectedWidget);
-                break;
-            case SWIPE_DOWN:
-                handleSwipe(selectedWidget, 0);
-                break;
-            case SWIPE_UP:
-                handleSwipe(selectedWidget, 1);
-                break;
-            case SWIPE_LEFT:
-                handleSwipe(selectedWidget, 2);
-                break;
-            case SWIPE_RIGHT:
-                handleSwipe(selectedWidget, 3);
-                break;
             case BACK:
                 device.pressBack();
                 break;
@@ -236,7 +141,7 @@ public class DeviceMgr implements IApp {
             case DELETE:
                 device.pressDelete();
                 break;
-            case DPAP_UP:
+            case DPAD_UP:
                 device.pressDPadUp();
                 break;
             case DPAD_DOWN:
@@ -257,6 +162,138 @@ public class DeviceMgr implements IApp {
             case TOGGLE_ROTATION:
                 Registry.getEnvironmentManager().toggleRotation();
                 break;
+            case MANUAL_ACTION:
+                // simulates a manual user interaction
+                break;
+            default:
+                throw new UnsupportedOperationException("UI action "
+                        + action.getActionType() + " not yet supported!");
+        }
+        checkForCrash();
+    }
+
+    /**
+     * Executes an Intent-based action. Depending on the target component, either
+     * startActivity(), startService() or sendBroadcast() is invoked.
+     *
+     * @param action The action which contains the Intent to be sent.
+     */
+    private void executeAction(IntentBasedAction action) throws AUTCrashException {
+
+        Intent intent = action.getIntent();
+
+        try {
+            switch (action.getComponentType()) {
+                case ACTIVITY:
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                    break;
+                case SERVICE:
+                    InstrumentationRegistry.getTargetContext().startService(intent);
+                    break;
+                case BROADCAST_RECEIVER:
+                    InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Component type not supported yet!");
+            }
+        } catch (Exception e) {
+            final String msg = "Calling startActivity() from outside of an Activity  context " +
+                    "requires the FLAG_ACTIVITY_NEW_TASK flag.";
+            if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
+                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
+                try {
+                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                } catch (Exception ex) {
+                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            } else {
+                MATE.log("Executing Intent-based action failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        checkForCrash();
+    }
+
+    /**
+     * Executes a primitive action, e.g. a click on a specific coordinate.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
+    private void executeAction(PrimitiveAction action) throws AUTCrashException {
+
+        switch (action.getActionType()) {
+            case CLICK:
+                device.click(action.getX(), action.getY());
+                break;
+            case LONG_CLICK:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
+                break;
+            case SWIPE_DOWN:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() - 300, 15);
+                break;
+            case SWIPE_UP:
+                device.swipe(action.getX(), action.getY(), action.getX(), action.getY() + 300, 15);
+                break;
+            case SWIPE_LEFT:
+                device.swipe(action.getX(), action.getY(), action.getX() + 300, action.getY(), 15);
+                break;
+            case SWIPE_RIGHT:
+                device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
+                break;
+            case BACK:
+                device.pressBack();
+                break;
+            case MENU:
+                device.pressMenu();
+                break;
+            default:
+                throw new IllegalArgumentException("Action type " + action.getActionType()
+                        + " not implemented for primitive actions.");
+        }
+
+        checkForCrash();
+    }
+
+    /**
+     * Executes a widget action, e.g. a click on a certain widget.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
+    private void executeAction(WidgetAction action) throws AUTCrashException {
+
+        Widget selectedWidget = action.getWidget();
+        ActionType typeOfAction = action.getActionType();
+
+        switch (typeOfAction) {
+            case CLICK:
+                handleClick(selectedWidget);
+                break;
+            case LONG_CLICK:
+                handleLongClick(selectedWidget);
+                break;
+            case TYPE_TEXT:
+                handleEdit(action);
+                break;
+            case TYPE_SPECIFIC_TEXT:
+                handleEdit(action);
+            case CLEAR_WIDGET:
+                // TODO: Do we actually need this action?
+                //  A 'type text' action overwrites the previous text anyways.
+                handleClear(selectedWidget);
+                break;
+            case SWIPE_DOWN:
+            case SWIPE_UP:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+                handleSwipe(selectedWidget, typeOfAction);
+                break;
+            default:
+                throw new IllegalArgumentException("Action type " + action.getActionType()
+                        + " not implemented for widget actions.");
         }
 
         // if there is a progress bar associated to that action
@@ -270,8 +307,8 @@ public class DeviceMgr implements IApp {
      * @throws AUTCrashException Thrown when the last action caused a crash of the application.
      */
     private void checkForCrash() throws AUTCrashException {
-        
-        //handle app crashes
+
+        // handle app crashes
         UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
         UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
 
@@ -303,26 +340,34 @@ public class DeviceMgr implements IApp {
         device.click(widget.getX(), widget.getY());
     }
 
+    /**
+     * Clears the widget's text.
+     *
+     * @param widget The widget whose input should be cleared.
+     */
     private void handleClear(Widget widget) {
         UiObject2 obj = findObject(widget);
-        if (obj != null)
+        if (obj != null) {
             obj.setText("");
+            // reflect change since we cache screen states and findObject() relies on it
+            widget.setText("");
+        }
     }
 
     /**
-     * Executes a swipe upon a widget in a given direction.
+     * Executes a swipe (upon a widget) in a given direction.
      *
-     * @param widget The widget at which position the swipe should be performed.
+     * @param widget    The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
-    private void handleSwipe(Widget widget, int direction) {
+    private void handleSwipe(Widget widget, ActionType direction) {
 
         int pixelsmove = 300;
         int X = 0;
         int Y = 0;
         int steps = 15;
 
-        if (!widget.getClazz().equals("")) {
+        if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
                 X = obj.getVisibleBounds().centerX();
@@ -334,7 +379,7 @@ public class DeviceMgr implements IApp {
         } else {
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
-            if (direction == 0 || direction == 1)
+            if (direction == SWIPE_DOWN || direction == SWIPE_UP)
                 pixelsmove = Y;
             else
                 pixelsmove = X;
@@ -342,22 +387,28 @@ public class DeviceMgr implements IApp {
 
         // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
-            case 0:
+            case SWIPE_DOWN:
                 device.swipe(X, Y, X, Y - pixelsmove, steps);
                 break;
-            case 1:
+            case SWIPE_UP:
                 device.swipe(X, Y, X, Y + pixelsmove, steps);
                 break;
-            case 2:
+            case SWIPE_LEFT:
                 device.swipe(X, Y, X + pixelsmove, Y, steps);
                 break;
-            case 3:
+            case SWIPE_RIGHT:
                 device.swipe(X, Y, X - pixelsmove, Y, steps);
                 break;
         }
     }
 
-    private void handleLongPress(Widget widget) {
+    /**
+     * Performs a long click on the given widget.
+     *
+     * @param widget The widget on which a long click should be applied.
+     */
+    private void handleLongClick(Widget widget) {
+        // TODO: consider https://stackoverflow.com/questions/21432561/how-to-achieve-long-click-in-uiautomator
         UiObject2 obj = findObject(widget);
         int X = widget.getX();
         int Y = widget.getY();
@@ -368,12 +419,27 @@ public class DeviceMgr implements IApp {
         device.swipe(X, Y, X, Y, 120);
     }
 
+    /**
+     * Tries to return a ui object matching the given widget. This is a
+     * best effort approach.
+     *
+     * @param widget The widget whose ui object should be looked up.
+     * @return Returns the corresponding ui object or {@code null} if no
+     *          such ui object could be found.
+     */
     private UiObject2 findObject(Widget widget) {
-        List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
+
+        // retrieve all ui objects that match the given widget resource id
+        List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+
         if (objs != null) {
-            if (objs.size() == 1)
+            if (objs.size() == 1) {
                 return objs.get(0);
-            else {
+            } else {
+                /*
+                 * It can happen that multiple widgets share the same resource id,
+                 * thus we need to compare on the text attribute.
+                 */
                 for (UiObject2 uiObject2 : objs) {
                     if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
                         return uiObject2;
@@ -381,15 +447,20 @@ public class DeviceMgr implements IApp {
             }
         }
 
-        //if no obj has been found by id, and then text if there is more than one object with the same id
+        // if no match for id, try to find the object by text match
         objs = device.findObjects(By.text(widget.getText()));
+
         if (objs != null) {
-            if (objs.size() == 1)
+            if (objs.size() == 1) {
                 return objs.get(0);
-            else {
+            } else {
+                // try to match by content description or widget boundary
                 for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getContentDescription() != null && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
-                            (uiObject2.getVisibleBounds() != null && uiObject2.getVisibleBounds().centerX() == widget.getX() && uiObject2.getVisibleBounds().centerY() == widget.getY()))
+                    if (uiObject2.getContentDescription() != null
+                            && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
+                            (uiObject2.getVisibleBounds() != null
+                                    && uiObject2.getVisibleBounds().centerX() == widget.getX()
+                                    && uiObject2.getVisibleBounds().centerY() == widget.getY()))
                         return uiObject2;
                 }
             }
@@ -397,132 +468,138 @@ public class DeviceMgr implements IApp {
         return null;
     }
 
+    /**
+     * Handles the insertion of a text in some editable widget.
+     *
+     * @param action The widget action to be performed.
+     */
     private void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
-        String textData = "";
+        String textData = generateTextData(action);
+        MATE.log_debug("Input text: " + textData);
+        MATE.log_debug("Previous text: " + widget.getText());
 
-        if (action.getExtraInfo().equals(""))
-            textData = generateTextData(action);
-        else
-            textData = action.getExtraInfo();
+        UiObject2 uiObject = findObject(widget);
 
-        MATE.log("TEXT DATA: " + textData);
-
-        if (widget.getResourceID().equals("")) {
-            if (!widget.getText().equals("")) {
-                UiObject2 obj = device.findObject(By.text(widget.getText()));
-                if (obj != null) {
-                    obj.setText(textData);
-                }
-            } else {
-                device.click(widget.getX(), widget.getY());
-                UiObject2 obj = device.findObject(By.focused(true));
-                if (obj != null) {
-                    obj.setText(textData);
-                }
-            }
+        if (uiObject != null) {
+            uiObject.setText(textData);
+            // reflect change since we cache screen states and findObject() relies on it
+            widget.setText(textData);
         } else {
-            List<UiObject2> objs = device.findObjects(By.res(widget.getId()));
-            if (objs != null && objs.size() > 0) {
-                int i = 0;
-                int size = objs.size();
-                boolean objfound = false;
-                while (i < size && !objfound) {
-                    UiObject2 obj = objs.get(i);
-                    if (obj != null) {
-                        String objText = "";
-                        if (obj.getText() != null)
-                            objText = obj.getText();
-                        if (objText.equals(widget.getText())) {
-                            obj.setText(textData);
-                            objfound = true;
-
-                        }
-                    }
-                    i++;
-                }
-                if (!objfound)
-                    MATE.log("  ********* obj " + widget.getId() + "  not found");
+            // try to click on the widget, which in turn should get focused
+            device.click(widget.getX(), widget.getY());
+            UiObject2 obj = device.findObject(By.focused(true));
+            if (obj != null) {
+                obj.setText(textData);
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText(textData);
             } else {
                 MATE.log("  ********* obj " + widget.getId() + "  not found");
             }
         }
-
-        action.setExtraInfo(textData);
-
     }
 
+    /**
+     * Generates a text input for the given editable widget.
+     *
+     * @param action The widget action containing the editable widget.
+     * @return Returns a text input for the editable widget.
+     */
     private String generateTextData(WidgetAction action) {
+
         Widget widget = action.getWidget();
 
         String widgetText = widget.getText();
-        if (widgetText.equals(""))
+        if (widgetText.isEmpty())
             widgetText = widget.getHint();
 
-        String textData = "";
-        String inputType = "";
-        int maxLengthInt = widget.getMaxLength();
-        if (action.getExtraInfo().equals("")) {
+        // -1 if no limit has been set
+        int maxLengthInt = widget.getMaxTextLength();
 
-            if (maxLengthInt < 0)
-                maxLengthInt = 15;
-            if (maxLengthInt > 15)
-                maxLengthInt = 15;
+        // allow a max length of 15 characters
+        if (maxLengthInt < 0)
+            maxLengthInt = 15;
+        if (maxLengthInt > 15)
+            maxLengthInt = 15;
 
-            if (widget.getInputType() == (InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER))
-                inputType = "number";
-            if (widget.getInputType() == InputType.TYPE_CLASS_PHONE)
-                inputType = "phone";
-            if (widget.getInputType() == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-                inputType = "email";
-            if (widget.getInputType() == InputType.TYPE_TEXT_VARIATION_URI)
-                inputType = "uri";
+        // consider https://developer.android.com/reference/android/text/InputType
+        int inputType =  widget.getInputType();
 
+        // check whether the input consists solely of digits (ignoring dots and comas)
+        widgetText = widgetText.replace(".", "");
+        widgetText = widgetText.replace(",", "");
 
-            widgetText = widgetText.replace(".", "");
-            widgetText = widgetText.replace(",", "");
-            if (inputType.equals("") && !widgetText.equals("") && android.text.TextUtils.isDigitsOnly(widgetText)) {
-                inputType = "number";
-            }
+        if (inputType == InputType.TYPE_NULL && !widgetText.isEmpty()
+                && android.text.TextUtils.isDigitsOnly(widgetText)) {
+            inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER;
+        }
 
-            if (inputType.equals("")) {
-                String desc = widget.getContentDesc();
-                if (desc != null) {
-                    if (desc.contains("email") || desc.contains("e-mail") || desc.contains("E-mail") || desc.contains("Email"))
-                        inputType = "email";
+        // check whether we can derive the input via the content description
+        if (inputType == InputType.TYPE_NULL) {
+            String desc = widget.getContentDesc();
+            if (desc != null) {
+                if (desc.contains("email") || desc.contains("e-mail")
+                        || desc.contains("E-mail") || desc.contains("Email")) {
+                    inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
                 }
             }
-            if (inputType.equals(""))
-                inputType = "text";
-
-
-            textData = getRandomData(inputType, maxLengthInt);
-        } else {
-            textData = action.getExtraInfo();
         }
-        return textData;
+
+        // assume text input if input type not derivable
+        if (inputType == InputType.TYPE_NULL) {
+            inputType = InputType.TYPE_CLASS_TEXT;
+        }
+
+        return getRandomData(inputType, maxLengthInt);
     }
 
-    private String getRandomData(String inputType, int maxLengthInt) {
-        //need to also generate random invalid string, number, email, uri, ...
-        String textData = "";
-        DataGenerator dataGen = new DataGenerator();
-        if (inputType != null) {
+    /**
+     * Generates a random input for the given input type on a best effort basis.
+     *
+     * @param inputType    The input type, e.g. phone number.
+     * @param maxLengthInt The maximal length for the input.
+     * @return Returns a random input matching the input type.
+     */
+    private String getRandomData(int inputType, int maxLengthInt) {
 
-            if (inputType.contains("phone") || inputType.contains("number") || inputType.contains("Phone") || inputType.contains("Number")) {
-                textData = dataGen.getRandomValidNumber(maxLengthInt);
-                // textData = dataGen.getRandomValidNumber();
-            } else if (inputType.contains("Email") || inputType.contains("email")) {
-                textData = dataGen.getRandomValidEmail(maxLengthInt);
-            } else if (inputType.contains("uri") || inputType.contains("URI")) {
-                textData = dataGen.getRandomUri(maxLengthInt);
-            } else {
-                textData = dataGen.getRandomValidString(maxLengthInt);
-            }
-        } else
-            textData = dataGen.getRandomValidString(maxLengthInt);
-        return textData;
+        // TODO: consider the generation of invalid strings, numbers, emails, uris, ...
+        DataGenerator dataGen = new DataGenerator();
+
+        switch (inputType) {
+            case InputType.TYPE_NUMBER_FLAG_DECIMAL:
+            case InputType.TYPE_CLASS_NUMBER:
+            case InputType.TYPE_CLASS_PHONE:
+            case InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL:
+                return dataGen.getRandomValidNumber(maxLengthInt);
+            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
+                return dataGen.getRandomValidEmail(maxLengthInt);
+            case InputType.TYPE_TEXT_VARIATION_URI:
+                return dataGen.getRandomUri(maxLengthInt);
+            case InputType.TYPE_CLASS_TEXT:
+                return dataGen.getRandomValidString(maxLengthInt);
+            default:
+                MATE.log_debug("Input type: " + inputType + " not explicitly supported yet!");
+                return dataGen.getRandomValidString(maxLengthInt);
+        }
+    }
+
+    /**
+     * Returns the screen width.
+     *
+     * @return Returns the screen width in pixels.
+     */
+    public int getScreenWidth() {
+        return device.getDisplayWidth();
+    }
+
+    /**
+     * Returns the screen height.
+     *
+     * @return Returns the screen height in pixels.
+     */
+    public int getScreenHeight() {
+        return device.getDisplayHeight();
     }
 
     /**
@@ -531,6 +608,10 @@ public class DeviceMgr implements IApp {
     public void reinstallApp() {
         MATE.log("Reinstall app");
         Registry.getEnvironmentManager().clearAppData();
+
+        // grant runtime permissions (read/write external storage) which are dropped after each reset
+        MATE.log("Grant runtime permissions: "
+                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
         //sleep(1000);
     }
 
@@ -554,11 +635,10 @@ public class DeviceMgr implements IApp {
         // sleep(1000);
     }
 
-    // TODO: rename to 'pressHome()' once IApp interface is fixed/removed
     /**
      * Emulates pressing the 'HOME' button.
      */
-    public void handleCrashDialog() {
+    public void pressHome() {
         device.pressHome();
     }
 
@@ -569,6 +649,7 @@ public class DeviceMgr implements IApp {
         device.pressBack();
     }
 
+    @Deprecated
     public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
         return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
     }
