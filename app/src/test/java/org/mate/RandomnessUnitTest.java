@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RandomnessUnitTest {
+    
     @Test
     public void shuffleTest() throws Exception {
         List<Integer> a = new ArrayList<>();
