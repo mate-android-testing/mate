@@ -425,7 +425,7 @@ public class TestCase {
      */
     public static TestCase fromDummy(TestCase testCase) {
 
-        MATE.uiAbstractionLayer.resetApp();
+        Registry.getUiAbstractionLayer().resetApp();
         TestCase resultingTc = newInitializedTestCase();
 
         int finalSize = testCase.eventSequence.size();
@@ -438,7 +438,7 @@ public class TestCase {
             int count = 0;
             for (Action action0 : testCase.eventSequence) {
                 if (count < finalSize) {
-                    if (!(action0 instanceof WidgetAction) || MATE.uiAbstractionLayer.getExecutableActions().contains(action0)) {
+                    if (!(action0 instanceof WidgetAction) || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
                         if (!resultingTc.updateTestCase(action0, count)) {
                             return resultingTc;
                         }
@@ -453,7 +453,7 @@ public class TestCase {
             for (; count < finalSize; count++) {
                 Action action;
                 if (Properties.WIDGET_BASED_ACTIONS()) {
-                    action = Randomness.randomElement(MATE.uiAbstractionLayer.getExecutableActions());
+                    action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
                 } else {
                     action = PrimitiveAction.randomAction();
                 }
@@ -503,18 +503,18 @@ public class TestCase {
     public boolean updateTestCase(Action action, int actionID) {
 
         if (action instanceof WidgetAction
-                && !MATE.uiAbstractionLayer.getExecutableActions().contains(action)) {
+                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
             throw new IllegalStateException("Action not applicable to current state!");
         }
 
-        String activityBeforeAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
+        String activityBeforeAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
         MATE.log("executing action " + actionID + ": " + action);
 
         addEvent(action);
-        UIAbstractionLayer.ActionResult actionResult = MATE.uiAbstractionLayer.executeAction(action);
+        UIAbstractionLayer.ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
         // track the activity transitions of each action
-        String activityAfterAction = MATE.uiAbstractionLayer.getLastScreenState().getActivityName();
+        String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
 
         if (actionID == 0) {
             activitySequence.add(activityBeforeAction);
@@ -553,7 +553,7 @@ public class TestCase {
      * @param event A new event, e.g. the action id.
      */
     private void updateTestCase(String event) {
-        IScreenState currentScreenstate = MATE.uiAbstractionLayer.getLastScreenState();
+        IScreenState currentScreenstate = Registry.getUiAbstractionLayer().getLastScreenState();
 
         updateVisitedStates(currentScreenstate);
         updateVisitedActivities(currentScreenstate.getActivityName());

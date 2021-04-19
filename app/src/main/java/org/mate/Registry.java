@@ -1,14 +1,77 @@
 package org.mate;
 
 import org.mate.interaction.EnvironmentManager;
+import org.mate.interaction.UIAbstractionLayer;
 
 import java.io.IOException;
 import java.util.Random;
 
 public class Registry {
+
     private static EnvironmentManager environmentManager;
     private static Properties properties;
     private static Random random;
+
+    /**
+     * An abstraction of the app screen enabling the execution
+     * of actions and various other tasks.
+     */
+    private static UIAbstractionLayer uiAbstractionLayer;
+
+    /**
+     * The package name of the AUT.
+     */
+    private static String packageName;
+
+    /**
+     * The time out in milli seconds.
+     */
+    private static Long timeout;
+
+    public static void registerUiAbstractionLayer(UIAbstractionLayer uiAbstractionLayer) {
+        Registry.uiAbstractionLayer = uiAbstractionLayer;
+    }
+
+    public static void unregisterUiAbstractionLayer() {
+        uiAbstractionLayer = null;
+    }
+
+    public static UIAbstractionLayer getUiAbstractionLayer() {
+        if (uiAbstractionLayer == null) {
+            throw new IllegalStateException("No UiAbstractionLayer registered!");
+        }
+        return uiAbstractionLayer;
+    }
+
+    public static void registerTimeout(long timeout) {
+        Registry.timeout = timeout;
+    }
+
+    public static void unregisterTimeout() {
+        timeout = null;
+    }
+
+    public static long getTimeout() {
+        if (timeout == null) {
+            throw new IllegalStateException("No UiAbstractionLayer registered!");
+        }
+        return timeout;
+    }
+
+    public static void registerPackageName(String packageName) {
+        Registry.packageName = packageName;
+    }
+
+    public static void unregisterPackageName() {
+        packageName = null;
+    }
+
+    public static String getPackageName() {
+        if (packageName == null) {
+            throw new IllegalStateException("No packageName registered!");
+        }
+        return packageName;
+    }
 
     public static EnvironmentManager getEnvironmentManager() {
         if (environmentManager == null) {
@@ -17,27 +80,27 @@ public class Registry {
         return environmentManager;
     }
 
-    static void registerEnvironmentManager(EnvironmentManager environmentManager) {
+    public static void registerEnvironmentManager(EnvironmentManager environmentManager) {
         Registry.environmentManager = environmentManager;
     }
 
-    static void unregisterEnvironmentManager() throws IOException {
+    public static void unregisterEnvironmentManager() throws IOException {
         environmentManager.close();
         environmentManager = null;
     }
 
-    static Properties getProperties() {
+    public static Properties getProperties() {
         if (properties == null) {
             throw new IllegalStateException("No Properties registered!");
         }
         return properties;
     }
 
-    static void registerProperties(Properties properties) {
+    public static void registerProperties(Properties properties) {
         Registry.properties = properties;
     }
 
-    static void unregisterProperties() {
+    public static void unregisterProperties() {
         properties = null;
     }
 
@@ -48,11 +111,11 @@ public class Registry {
         return random;
     }
 
-    static void registerRandom(Random random) {
+    public static void registerRandom(Random random) {
         Registry.random = random;
     }
 
-    static void unregisterRandom() {
+    public static void unregisterRandom() {
         random = null;
     }
 }

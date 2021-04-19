@@ -422,10 +422,10 @@ public class IntentProvider {
          */
         if (dynamicReceiver) {
             // will result in implicit resolution restricted to application package
-            intent.setPackage(MATE.packageName);
+            intent.setPackage(Registry.getPackageName());
         } else {
             // make every other intent explicit
-            intent.setComponent(new ComponentName(MATE.packageName, component.getFullyQualifiedName()));
+            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
         }
 
         // construct suitable key-value pairs

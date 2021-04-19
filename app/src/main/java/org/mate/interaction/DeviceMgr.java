@@ -86,7 +86,7 @@ public class DeviceMgr {
      * @param event The system event.
      */
     private void executeAction(SystemAction event) throws AUTCrashException {
-        Registry.getEnvironmentManager().executeSystemEvent(MATE.packageName, event.getReceiver(),
+        Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(), event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
         checkForCrash();
     }
@@ -611,7 +611,7 @@ public class DeviceMgr {
 
         // grant runtime permissions (read/write external storage) which are dropped after each reset
         MATE.log("Grant runtime permissions: "
-                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
+                + Registry.getEnvironmentManager().grantRuntimePermissions(Registry.getPackageName()));
         //sleep(1000);
     }
 

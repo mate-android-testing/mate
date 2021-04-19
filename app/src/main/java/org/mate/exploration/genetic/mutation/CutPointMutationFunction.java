@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
@@ -21,7 +21,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     private boolean isTestSuiteExecution = false;
 
     public CutPointMutationFunction(int maxNumEvents) {
-        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
+        this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
     }
 

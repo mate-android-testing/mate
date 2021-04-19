@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.utils.Randomness;
 
 import java.io.File;
@@ -297,7 +298,7 @@ public class IntentFilterDescription {
                         String[] pathParts = Uri.fromFile(
                                 new File(InstrumentationRegistry.getTargetContext().getFilesDir(), fileName)).toString().split("/");
 
-                        pathParts[pathParts.length - 3] = MATE.packageName;
+                        pathParts[pathParts.length - 3] = Registry.getPackageName();
 
                         for (int i = 0; i < pathParts.length - 1; i++) {
                             uriBuilder.append(pathParts[i]).append("/");

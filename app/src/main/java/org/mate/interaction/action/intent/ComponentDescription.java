@@ -6,6 +6,7 @@ import android.util.Size;
 import android.util.SizeF;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.utils.DataPool;
 import org.mate.utils.Randomness;
 
@@ -107,7 +108,7 @@ public class ComponentDescription {
     public String getFullyQualifiedName() {
 
         if (name.startsWith(".")) {
-            return MATE.packageName + name;
+            return Registry.getPackageName() + name;
         } else {
             return name;
         }

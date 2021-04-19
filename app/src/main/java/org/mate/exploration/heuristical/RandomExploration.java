@@ -1,6 +1,7 @@
 package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.intent.IntentChromosomeFactory;
@@ -34,13 +35,13 @@ public class RandomExploration implements Algorithm {
 
     public void run() {
         if (!alwaysReset) {
-            MATE.uiAbstractionLayer.resetApp();
+            Registry.getUiAbstractionLayer().resetApp();
         }
         for (int i = 0; true; i++) {
             MATE.log_acc("Exploration #" + (i + 1));
             randomChromosomeFactory.createChromosome();
             if (!alwaysReset) {
-                MATE.uiAbstractionLayer.restartApp();
+                Registry.getUiAbstractionLayer().restartApp();
             }
         }
     }

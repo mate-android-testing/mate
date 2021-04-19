@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
@@ -22,7 +22,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     }
 
     public AndroidRandomChromosomeFactory( boolean resetApp, int maxNumEvents) {
-        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
+        this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
         isTestSuiteExecution = false;

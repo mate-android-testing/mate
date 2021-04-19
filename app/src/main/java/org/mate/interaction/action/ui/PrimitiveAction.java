@@ -3,7 +3,7 @@ package org.mate.interaction.action.ui;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;
@@ -33,9 +33,9 @@ public class PrimitiveAction extends UIAction {
      * @return Returns a randomly generated primitive action.
      */
     public static PrimitiveAction randomAction() {
-        int x = Randomness.getRnd().nextInt(MATE.uiAbstractionLayer.getScreenWidth());
-        int y = Randomness.getRnd().nextInt(MATE.uiAbstractionLayer.getScreenHeight());
-        String activity = MATE.uiAbstractionLayer.getCurrentActivity();
+        int x = Randomness.getRnd().nextInt(Registry.getUiAbstractionLayer().getScreenWidth());
+        int y = Randomness.getRnd().nextInt(Registry.getUiAbstractionLayer().getScreenHeight());
+        String activity = Registry.getUiAbstractionLayer().getCurrentActivity();
         return new PrimitiveAction(x, y,
                 Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)), activity);
     }
