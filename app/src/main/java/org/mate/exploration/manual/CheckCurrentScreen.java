@@ -87,7 +87,7 @@ public class CheckCurrentScreen {
 
         */
 
-        IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
+        IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         String currentPackageName = screenState.getPackageName();
 

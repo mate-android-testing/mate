@@ -4,20 +4,18 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.model.TestCase;
-import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.TestCase;
 import org.mate.utils.testcase.TestCaseOptimizer;
 import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import static org.mate.MATE.uiAbstractionLayer;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEReplayRun {
@@ -39,7 +37,7 @@ public class ExecuteMATEReplayRun {
         TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
         // reset the app once
-        uiAbstractionLayer.resetApp();
+        Registry.getUiAbstractionLayer().resetApp();
 
         // as long as we find a test case for replaying
         while (testCase != null) {
@@ -63,7 +61,7 @@ public class ExecuteMATEReplayRun {
             testCaseID++;
 
             // reset aut after each test case
-            uiAbstractionLayer.resetApp();
+            Registry.getUiAbstractionLayer().resetApp();
         }
 
         MATE.log("Retry replaying " + failures.size() + " test cases!");
@@ -94,7 +92,7 @@ public class ExecuteMATEReplayRun {
                 }
 
                 // reset aut after each test case
-                uiAbstractionLayer.resetApp();
+                Registry.getUiAbstractionLayer().resetApp();
             }
         }
 
@@ -123,14 +121,14 @@ public class ExecuteMATEReplayRun {
 
             // check whether the UI action is applicable on the current state
             if (nextAction instanceof WidgetAction
-                    && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
+                    && !Registry.getUiAbstractionLayer().getExecutableActions().contains(nextAction)) {
 
                 // try to repair UI action
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
                     MATE.log("replaying action " + i + ": " + repairedAction);
-                    uiAbstractionLayer.executeAction(repairedAction);
+                    Registry.getUiAbstractionLayer().executeAction(repairedAction);
                     MATE.log("replayed action " + i + ": " + repairedAction);
                 } else {
                     MATE.log("Action not applicable!");
@@ -138,7 +136,7 @@ public class ExecuteMATEReplayRun {
                 }
             } else {
                 MATE.log("replaying action " + i + ": " + nextAction);
-                uiAbstractionLayer.executeAction(nextAction);
+                Registry.getUiAbstractionLayer().executeAction(nextAction);
                 MATE.log("replayed action " + i + ": " + nextAction);
             }
         }
@@ -158,7 +156,7 @@ public class ExecuteMATEReplayRun {
         // TODO: provide appropriate repair mechanism!
 
         // log information about selected and available actions
-        if (a instanceof WidgetAction && !uiAbstractionLayer.getExecutableActions().contains(a)) {
+        if (a instanceof WidgetAction && !Registry.getUiAbstractionLayer().getExecutableActions().contains(a)) {
 
             WidgetAction selectedAction = (WidgetAction) a;
 
@@ -172,7 +170,7 @@ public class ExecuteMATEReplayRun {
 
             MATE.log("------------------------------------------");
 
-            for (Action action : uiAbstractionLayer.getExecutableActions()) {
+            for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
 
                 if (action instanceof WidgetAction) {
                     if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {

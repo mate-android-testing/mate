@@ -1,12 +1,12 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
@@ -185,14 +185,14 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         // We also need to shrink the population at this point
         long currentTime = System.currentTimeMillis();
         long expiredTime = (currentTime - startTime);
-        long focusedStartAbsolute = (long) (MATE.TIME_OUT * focusedSearchStart);
+        long focusedStartAbsolute = (long) (Registry.getTimeout() * focusedSearchStart);
 
         if (expiredTime >= focusedStartAbsolute) {
             MATE.log_acc("Starting focused search.");
             pSampleRandom = 0;
             populationSize = 1;
         } else {
-            double expiredTimePercent = expiredTime / (MATE.TIME_OUT / 100);
+            double expiredTimePercent = expiredTime / (Registry.getTimeout() / 100);
             double decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
             populationSize = (int) (populationSizeStart * (1 - decreasePercent));
             pSampleRandom = (int) pSampleRandomStart * (1 - decreasePercent);

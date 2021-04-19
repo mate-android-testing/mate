@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.crossover;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
@@ -50,10 +51,10 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         for (int i = 0; i < l1.size(); i++) {
             int idx = choice + d;
 
-            for (Edge e1 : MATE.uiAbstractionLayer.getEdges(l1.get(idx))) {
+            for (Edge e1 : Registry.getUiAbstractionLayer().getEdges(l1.get(idx))) {
 
                 // don't consider actions that result in leaving the app
-                if (e1 != null && e1.getTarget().getPackageName().equals(MATE.packageName)) {
+                if (e1 != null && e1.getTarget().getPackageName().equals(Registry.getPackageName())) {
                     int cc = l2.size() / 2 + (l1.size() + 1) / 2 - idx;
                     // keep starting index within list bounds
                     cc = Math.min(Math.max(0, cc), l1.size() - 1);
@@ -97,8 +98,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             int idx = start + d;
 
             if (idx >= 0 && idx < l.size()) {
-                for (Edge e1 : MATE.uiAbstractionLayer.getEdges(from)) {
-                    for (Edge e2 : MATE.uiAbstractionLayer.getEdges(l.get(idx))) {
+                for (Edge e1 : Registry.getUiAbstractionLayer().getEdges(from)) {
+                    for (Edge e2 : Registry.getUiAbstractionLayer().getEdges(l.get(idx))) {
 
                         if (e1 != null && e2 != null
                                 && e1.getTarget().equals(e2.getSource())) {

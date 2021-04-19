@@ -3,6 +3,7 @@ package org.mate.interaction.action.intent;
 import android.util.Xml;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -46,9 +47,9 @@ public final class ComponentParser {
         // move on to the first tag and verify that the package attribute matches the package name of the AUT
         parser.nextTag();
         parser.require(XmlPullParser.START_TAG, null, "manifest");
-        if (!parser.getAttributeValue(null, "package").equals(MATE.packageName)) {
+        if (!parser.getAttributeValue(null, "package").equals(Registry.getPackageName())) {
             throw new IllegalArgumentException("Wrong manifest file! Found package was "
-                    + parser.getAttributeValue(null, "package") + ", but should be " + MATE.packageName);
+                    + parser.getAttributeValue(null, "package") + ", but should be " + Registry.getPackageName());
         }
 
         List<ComponentDescription> components = new ArrayList<>();

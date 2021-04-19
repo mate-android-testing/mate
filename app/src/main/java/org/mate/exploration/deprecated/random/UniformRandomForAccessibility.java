@@ -52,7 +52,7 @@ public class UniformRandomForAccessibility {
         long currentTime = new Date().getTime();
         int numberOfActions = 0;
         int totalNumberOfActions = 0;
-        while (currentTime - runningTime <= MATE.TIME_OUT){
+        while (currentTime - runningTime <= Registry.getTimeout()){
 
             try{
                 //get a list of all executable actions as long as this state is different from last state

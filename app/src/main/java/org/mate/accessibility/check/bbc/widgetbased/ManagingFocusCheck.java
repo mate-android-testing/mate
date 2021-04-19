@@ -1,6 +1,6 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
-import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
@@ -22,7 +22,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                 //MATE.log("Focused before: " + widget.isFocused());
                 WidgetAction wclick = new WidgetAction(widget, ActionType.CLICK);
                 //MATE.log(" CLICK on : " + widget.getId() + " " + widget.getClazz() + " " + widget.getText());
-                MATE.uiAbstractionLayer.executeAction(wclick);
+                Registry.getUiAbstractionLayer().executeAction(wclick);
                 //MATE.log("AFTER CLICK");
                 IScreenState nState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 //MATE.log("AFTER NEW STATE");
@@ -34,7 +34,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                         return new AccessibilityViolation(AccessibilityViolationType.MANAGING_FOCUS,widget,state,"");
 
                     WidgetAction editAction = new WidgetAction(widget,ActionType.TYPE_TEXT);
-                    MATE.uiAbstractionLayer.executeAction(editAction);
+                    Registry.getUiAbstractionLayer().executeAction(editAction);
                     //MATE.log("AFTER EDIT TEXT");
                     nState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     wd = findWidget(nState, widget);
@@ -47,13 +47,13 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
                         if (widget.getText().equals(widget.getHint())|| widget.getText().equals(widget.getContentDesc())){
                             //MATE.log("MUST CLEAR");
                             WidgetAction clearField = new WidgetAction(wd,ActionType.CLEAR_WIDGET);
-                            MATE.uiAbstractionLayer.executeAction(clearField);
+                            Registry.getUiAbstractionLayer().executeAction(clearField);
                         }
                         else{
                             //MATE.log("MUST INSERT SP TEXT");
                             WidgetAction textSpecific = new WidgetAction(wd,ActionType.TYPE_SPECIFIC_TEXT);
                             textSpecific.setExtraInfo(widget.getText());
-                            MATE.uiAbstractionLayer.executeAction(textSpecific);
+                            Registry.getUiAbstractionLayer().executeAction(textSpecific);
                         }
                     }
                 }

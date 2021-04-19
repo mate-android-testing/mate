@@ -25,22 +25,6 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class MATE {
 
-    /**
-     * An abstraction of the app screen enabling the execution
-     * of actions and various other tasks.
-     */
-    public static UIAbstractionLayer uiAbstractionLayer;
-
-    /**
-     * The package name of the AUT.
-     */
-    public static String packageName;
-
-    /**
-     * The time out in milli seconds.
-     */
-    public static long TIME_OUT;
-
     // TODO: make singleton
     public MATE() {
 
@@ -78,24 +62,24 @@ public class MATE {
         Registry.registerRandom(rnd);
 
         MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
-        MATE.TIME_OUT = Properties.TIMEOUT() * 60 * 1000;
+        Registry.registerTimeout(Properties.TIMEOUT() * 60 * 1000);
 
-        packageName = InstrumentationRegistry.getArguments().getString("packageName");
-        MATE.log_acc("Package name: " + packageName);
+        Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
+        MATE.log_acc("Package name: " + Registry.getPackageName());
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
-        DeviceMgr deviceMgr = new DeviceMgr(device, packageName);
+        DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
         // internally checks for permission dialogs and grants permissions if required
-        uiAbstractionLayer = new UIAbstractionLayer(deviceMgr, packageName);
+        Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
         // check whether the AUT could be successfully started
-        if (!packageName.equals(device.getCurrentPackageName())) {
+        if (!Registry.getPackageName().equals(device.getCurrentPackageName())) {
             MATE.log_acc("Currently displayed app: " + device.getCurrentPackageName());
             throw new IllegalStateException("Couldn't launch app under test!");
         }
 
         // try to allocate emulator
-        String emulator = Registry.getEnvironmentManager().allocateEmulator(packageName);
+        String emulator = Registry.getEnvironmentManager().allocateEmulator(Registry.getPackageName());
         MATE.log_acc("Emulator: " + emulator);
 
         if (emulator == null || emulator.isEmpty()) {
@@ -128,7 +112,7 @@ public class MATE {
                     algorithm.run();
                     return null;
                 }
-            }, MATE.TIME_OUT);
+            }, Registry.getTimeout());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -145,8 +129,11 @@ public class MATE {
             // EnvironmentManager.deleteAllScreenShots(packageName);
             try {
                 Registry.unregisterEnvironmentManager();
+                Registry.unregisterUiAbstractionLayer();
                 Registry.unregisterProperties();
                 Registry.unregisterRandom();
+                Registry.getPackageName();
+                Registry.unregisterTimeout();
             } catch (IOException e) {
                 e.printStackTrace();
             }

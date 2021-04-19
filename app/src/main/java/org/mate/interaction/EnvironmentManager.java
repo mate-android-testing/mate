@@ -2,6 +2,7 @@ package org.mate.interaction;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.graph.GraphType;
 import org.mate.interaction.action.ui.Widget;
@@ -360,7 +361,7 @@ public class EnvironmentManager {
     public List<String> getBasicBlocks() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_basic_blocks")
-                .withParameter("packageName", MATE.packageName);
+                .withParameter("packageName", Registry.getPackageName());
 
         Message response = sendMessage(messageBuilder.build());
 
@@ -453,7 +454,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/init")
                 .withParameter("deviceId", emulator)
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("graph_type", graphType.name())
                 .withParameter("apk", Properties.APK())
                 .withParameter("target", Properties.TARGET());
@@ -494,7 +495,7 @@ public class EnvironmentManager {
     public List<String> getBranches() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_branches")
-                .withParameter("packageName", MATE.packageName);
+                .withParameter("packageName", Registry.getPackageName());
 
         Message response = sendMessage(messageBuilder.build());
         return Arrays.asList(response.getParameter("branches").split("\\+"));
@@ -532,7 +533,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_fitness_data")
                 .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
                 .withParameter("deviceId", emulator)
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
@@ -564,7 +565,7 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosome.toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -593,7 +594,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/fitness/get_branch_fitness_vector")
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosome.getValue().toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -629,7 +630,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/fitness/get_basic_block_fitness_vector")
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosome.getValue().toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -664,7 +665,7 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance_vector")
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosome.getValue().toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -816,7 +817,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("coverage_type", coverage.name());
         if (chromosomesParam != null) {
             messageBuilder.withParameter("chromosomes", chromosomesParam);
@@ -840,7 +841,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));
@@ -867,7 +868,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
-                .withParameter("packageName", MATE.packageName)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosome.toString());
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));
@@ -1024,8 +1025,8 @@ public class EnvironmentManager {
      */
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
 
-        int maxw = MATE.uiAbstractionLayer.getScreenWidth();
-        int maxh = MATE.uiAbstractionLayer.getScreenHeight();
+        int maxw = Registry.getUiAbstractionLayer().getScreenWidth();
+        int maxh = Registry.getUiAbstractionLayer().getScreenHeight();
 
         int x1 = widget.getX1();
         int x2 = widget.getX2();
@@ -1069,8 +1070,8 @@ public class EnvironmentManager {
      */
     public String getLuminance(String packageName, String stateId, Widget widget) {
 
-        int maxw = MATE.uiAbstractionLayer.getScreenWidth();
-        int maxh = MATE.uiAbstractionLayer.getScreenHeight();
+        int maxw = Registry.getUiAbstractionLayer().getScreenWidth();
+        int maxh = Registry.getUiAbstractionLayer().getScreenHeight();
 
         int x1 = widget.getX1();
         int x2 = widget.getX2();

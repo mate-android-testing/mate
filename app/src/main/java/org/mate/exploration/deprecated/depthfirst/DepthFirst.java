@@ -3,6 +3,7 @@ package org.mate.exploration.deprecated.depthfirst;
 import android.support.test.uiautomator.UiDevice;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.DeviceMgr;
@@ -151,7 +152,7 @@ public class DepthFirst {
 
             t2 = new Date().getTime();
             deviceClosed = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName()==null;
-            if (deviceClosed ||!stateFound || (t2-t1>MATE.TIME_OUT)) {
+            if (deviceClosed ||!stateFound || (t2-t1> Registry.getTimeout())) {
                 stopExecution = true;
                 MATE.log("STOP execution");
             }
