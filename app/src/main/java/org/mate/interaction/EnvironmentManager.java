@@ -467,6 +467,7 @@ public class EnvironmentManager {
         if (graphType == GraphType.INTER_CFG) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
+            messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
         }
 
         sendMessage(messageBuilder.build());

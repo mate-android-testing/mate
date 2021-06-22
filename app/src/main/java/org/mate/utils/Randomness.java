@@ -1,6 +1,5 @@
 package org.mate.utils;
 
-import org.mate.MATE;
 import org.mate.Registry;
 
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 public class Randomness {
     public static Random getRnd() {
