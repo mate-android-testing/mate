@@ -30,6 +30,12 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
 
     @Override
     public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
+
+        if (parents.size() == 1) {
+            MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on single chromosome!");
+            return parents.get(0);
+        }
+
         List<Action> l1 = parents.get(0).getValue().getEventSequence();
         List<Action> l2 = parents.get(1).getValue().getEventSequence();
         if (l2.size() < l1.size()) {
@@ -87,7 +93,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
                 }
             }
         }
-        MATE.log_acc("No match found.");
+        MATE.log_warn("No match found.");
         return parents.get(0);
     }
 
