@@ -35,6 +35,16 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
 
     }
 
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
+        return 0;
+    }
+
     public static void retrieveFitnessValues(IChromosome<TestCase> chromosome) {
         if (lines.size() == 0) {
             return;

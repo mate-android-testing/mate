@@ -24,4 +24,14 @@ public class LineCoverageFitnessFunction<T> implements IFitnessFunction<T> {
         cache.put(chromosome, fitness);
         return fitness;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return 0;
+    }
 }

@@ -14,4 +14,14 @@ public class AmountCrashesFitnessFunction implements IFitnessFunction<TestSuite>
         }
         return amountCrashes;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<TestSuite> chromosome) {
+        return 0;
+    }
 }

@@ -24,4 +24,14 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
         // TODO: normalise fitness value in the range [0,1]
         return branchCoverage;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return 0;
+    }
 }

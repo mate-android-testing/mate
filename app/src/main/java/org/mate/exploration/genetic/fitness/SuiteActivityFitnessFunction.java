@@ -17,4 +17,14 @@ public class SuiteActivityFitnessFunction implements IFitnessFunction<TestSuite>
         }
         return activitiesCovered.size();
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<TestSuite> chromosome) {
+        return 0;
+    }
 }

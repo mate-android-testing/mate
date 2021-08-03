@@ -15,4 +15,14 @@ public class TestLengthFitnessFunction implements IFitnessFunction<TestSuite> {
         }
         return 1.0 / lengthSum;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<TestSuite> chromosome) {
+        return 0;
+    }
 }

@@ -16,4 +16,8 @@ public interface IFitnessFunction<T> {
      * @return fitness of chromosome
      */
     double getFitness(IChromosome<T> chromosome);
+
+    boolean isMaximizing();
+
+    double getNormalizedFitness(IChromosome<T> chromosome);
 }

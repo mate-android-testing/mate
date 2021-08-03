@@ -9,4 +9,14 @@ public class AndroidStateFitnessFunction implements IFitnessFunction<TestCase> {
     public double getFitness(IChromosome<TestCase> chromosome) {
         return chromosome.getValue().getVisitedStates().size();
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
+        return 0;
+    }
 }

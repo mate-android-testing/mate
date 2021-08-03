@@ -65,4 +65,14 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
 
         return branchDistance;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return 0;
+    }
 }

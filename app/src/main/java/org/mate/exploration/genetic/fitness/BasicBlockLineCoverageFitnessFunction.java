@@ -24,4 +24,14 @@ public class BasicBlockLineCoverageFitnessFunction<T> implements IFitnessFunctio
         // TODO: normalise fitness value in the range [0,1]
         return basicBlockLineCoverage;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return 0;
+    }
 }
