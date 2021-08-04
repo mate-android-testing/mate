@@ -3,17 +3,13 @@ package org.mate.utils;
 import android.content.Intent;
 
 import org.mate.MATE;
-
-import org.mate.interaction.intent.ComponentDescription;
 import org.mate.interaction.intent.IntentBasedAction;
-import org.mate.interaction.intent.IntentFilterDescription;
 import org.mate.interaction.intent.SystemAction;
 import org.mate.model.TestCase;
 import org.mate.ui.Action;
 import org.mate.ui.WidgetAction;
 
 import java.util.List;
-import java.util.Set;
 
 public final class TestCaseStatistics {
 
@@ -26,7 +22,7 @@ public final class TestCaseStatistics {
 
         MATE.log("Visited Activities in Order:");
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
-            MATE.log(testCase.getActivityAfterAction(i));
+            MATE.log(testCase.getActivityBeforeAction(i));
         }
 
         countInvalidURIs(testCase);

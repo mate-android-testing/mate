@@ -15,6 +15,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.interaction.intent.ComponentType;
 import org.mate.interaction.intent.IntentBasedAction;
 import org.mate.interaction.intent.SystemAction;
 import org.mate.model.IGUIModel;
@@ -23,6 +24,7 @@ import org.mate.ui.ActionType;
 import org.mate.ui.PrimitiveAction;
 import org.mate.ui.Widget;
 import org.mate.ui.WidgetAction;
+import org.mate.utils.Utils;
 
 import java.util.List;
 
@@ -40,10 +42,14 @@ public class DeviceMgr implements IApp {
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
-
-
     }
 
+    /**
+     * Executes a given action.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
     public void executeAction(Action action) throws AUTCrashException {
         if (action instanceof WidgetAction) {
             executeAction((WidgetAction) action);
@@ -64,7 +70,6 @@ public class DeviceMgr implements IApp {
      * @param event The system event.
      */
     public void executeAction(SystemAction event) throws AUTCrashException {
-        MATE.log(" ___ execute system action: " + event);
         Registry.getEnvironmentManager().executeSystemEvent(MATE.packageName, event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
         checkForCrash();
@@ -77,10 +82,6 @@ public class DeviceMgr implements IApp {
      * @param action The action which contains the Intent to be sent.
      */
     public void executeAction(IntentBasedAction action) throws AUTCrashException {
-
-        // TODO: check if we can react to a crash
-        MATE.log(" ___ execute intent based action: " + action.getIntent() + System.lineSeparator()
-            + " Extras: " + action.getIntent().getExtras());
 
         Intent intent = action.getIntent();
 
@@ -100,51 +101,58 @@ public class DeviceMgr implements IApp {
                     throw new UnsupportedOperationException("Component type not supported yet!");
             }
         } catch (Exception e) {
-            MATE.log("Executing Intent-based action failed: " + e.getMessage());
-            e.printStackTrace();
+            final String msg = "Calling startActivity() from outside of an Activity  context " +
+                    "requires the FLAG_ACTIVITY_NEW_TASK flag.";
+            if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
+                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
+                try {
+                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    InstrumentationRegistry.getTargetContext().startActivity(intent);
+                } catch (Exception ex) {
+                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            } else {
+                MATE.log("Executing Intent-based action failed: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
         checkForCrash();
     }
 
+    /**
+     * Executes a primitive action, e.g. a click on a specific coordinate.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
     public void executeAction(PrimitiveAction action) throws AUTCrashException {
-        MATE.log(" ____ execute primitive action at " + action.getX() + ", " + action.getY());
-
 
         switch (action.getActionType()) {
             case CLICK:
                 device.click(action.getX(), action.getY());
                 break;
-
             case LONG_CLICK:
                 device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
                 break;
-
             case SWIPE_DOWN:
                 device.swipe(action.getX(), action.getY(), action.getX(), action.getY() - 300, 15);
                 break;
-
             case SWIPE_UP:
                 device.swipe(action.getX(), action.getY(), action.getX(), action.getY() + 300, 15);
                 break;
-
             case SWIPE_LEFT:
                 device.swipe(action.getX(), action.getY(), action.getX() + 300, action.getY(), 15);
                 break;
-
             case SWIPE_RIGHT:
                 device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
                 break;
-
             case BACK:
                 device.pressBack();
-                ;
                 break;
-
             case MENU:
                 device.pressMenu();
                 break;
-
-
             default:
                 throw new IllegalArgumentException("Action type " + action.getActionType() + " not implemented for primitive actions.");
         }
@@ -152,74 +160,64 @@ public class DeviceMgr implements IApp {
         checkForCrash();
     }
 
+    /**
+     * Executes a widget action, e.g. a click on a certain widget.
+     *
+     * @param action The action to be executed.
+     * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     */
     public void executeAction(WidgetAction action) throws AUTCrashException {
-        MATE.log(" ____ execute " + action.getActionType() + " on " + action.getWidget().getId() + "  : " + action.getWidget().getText() + "  hint: " + action.getWidget().getHint());
         Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
 
         switch (typeOfAction) {
-
             case CLICK:
                 handleClick(selectedWidget);
                 break;
-
             case LONG_CLICK:
                 handleLongPress(selectedWidget);
                 break;
-
             case TYPE_TEXT:
                 handleEdit(action);
                 break;
-
             case TYPE_SPECIFIC_TEXT:
                 handleEdit(action);
-
             case CLEAR_WIDGET:
                 handleClear(selectedWidget);
                 break;
-
             case SWIPE_DOWN:
                 handleSwipe(selectedWidget, 0);
                 break;
-
             case SWIPE_UP:
                 handleSwipe(selectedWidget, 1);
                 break;
-
             case SWIPE_LEFT:
                 handleSwipe(selectedWidget, 2);
                 break;
-
             case SWIPE_RIGHT:
                 handleSwipe(selectedWidget, 3);
                 break;
-
             case BACK:
                 device.pressBack();
                 break;
-
             case MENU:
                 device.pressMenu();
                 break;
-
             case ENTER:
                 device.pressEnter();
                 break;
-
             case HOME:
                 device.pressHome();
                 break;
-
             case QUICK_SETTINGS:
                 device.openQuickSettings();
                 break;
-
             case SEARCH:
                 device.pressSearch();
                 break;
-
-                // dunno if this makes sense
             case SLEEP:
+                // Only reasonable when a wake up is performed soon, otherwise
+                // succeeding actions have no effect.
                 try {
                     device.sleep();
                 } catch (RemoteException e) {
@@ -227,8 +225,6 @@ public class DeviceMgr implements IApp {
                     e.printStackTrace();
                 }
                 break;
-
-            // dunno if this makes sense
             case WAKE_UP:
                 try {
                     device.wakeUp();
@@ -237,46 +233,42 @@ public class DeviceMgr implements IApp {
                     e.printStackTrace();
                 }
                 break;
-
             case DELETE:
                 device.pressDelete();
                 break;
-
             case DPAP_UP:
                 device.pressDPadUp();
                 break;
-
             case DPAD_DOWN:
                 device.pressDPadDown();
                 break;
-
             case DPAD_LEFT:
                 device.pressDPadLeft();
                 break;
-
             case DPAD_RIGHT:
                 device.pressDPadRight();
                 break;
-
             case DPAD_CENTER:
                 device.pressDPadCenter();
                 break;
-
             case NOTIFICATIONS:
                 device.openNotification();
                 break;
-
             case TOGGLE_ROTATION:
                 Registry.getEnvironmentManager().toggleRotation();
                 break;
         }
 
-        //if there is a progress bar associated to that action
-        sleep(action.getTimeToWait());
-
+        // if there is a progress bar associated to that action
+        Utils.sleep(action.getTimeToWait());
         checkForCrash();
     }
 
+    /**
+     * Checks whether a crash dialog appeared on the screen.
+     *
+     * @throws AUTCrashException Thrown when the last action caused a crash of the application.
+     */
     private void checkForCrash() throws AUTCrashException {
         
         //handle app crashes
@@ -289,17 +281,41 @@ public class DeviceMgr implements IApp {
         }
     }
 
-    public void handleClick(Widget widget) {
+    /**
+     * Checks whether the given widget represents a progress bar.
+     *
+     * @param widget The given widget.
+     * @return Returns {@code true} if the widget refers to a progress bar,
+     *          otherwise {@code false} is returned.
+     */
+    public boolean checkForProgressBar(Widget widget) {
+        return widget.getClazz().contains("ProgressBar")
+                && widget.isEnabled()
+                && widget.getContentDesc().contains("Loading");
+    }
+
+    /**
+     * Executes a click on the given widget.
+     *
+     * @param widget The widget on which a click should be performed.
+     */
+    private void handleClick(Widget widget) {
         device.click(widget.getX(), widget.getY());
     }
 
-    public void handleClear(Widget widget) {
+    private void handleClear(Widget widget) {
         UiObject2 obj = findObject(widget);
         if (obj != null)
             obj.setText("");
     }
 
-    public void handleSwipe(Widget widget, int direction) {
+    /**
+     * Executes a swipe upon a widget in a given direction.
+     *
+     * @param widget The widget at which position the swipe should be performed.
+     * @param direction The direction of the swipe, e.g. swipe to the left.
+     */
+    private void handleSwipe(Widget widget, int direction) {
 
         int pixelsmove = 300;
         int X = 0;
@@ -324,12 +340,11 @@ public class DeviceMgr implements IApp {
                 pixelsmove = X;
         }
 
-        //50 pixels has been arbitrarily selected - create a properties file in the future
+        // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
             case 0:
                 device.swipe(X, Y, X, Y - pixelsmove, steps);
                 break;
-
             case 1:
                 device.swipe(X, Y, X, Y + pixelsmove, steps);
                 break;
@@ -342,7 +357,7 @@ public class DeviceMgr implements IApp {
         }
     }
 
-    public void handleLongPress(Widget widget) {
+    private void handleLongPress(Widget widget) {
         UiObject2 obj = findObject(widget);
         int X = widget.getX();
         int Y = widget.getY();
@@ -351,14 +366,6 @@ public class DeviceMgr implements IApp {
             Y = obj.getVisibleBounds().centerY();
         }
         device.swipe(X, Y, X, Y, 120);
-    }
-
-    public void sleep(long time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private UiObject2 findObject(Widget widget) {
@@ -390,7 +397,7 @@ public class DeviceMgr implements IApp {
         return null;
     }
 
-    public void handleEdit(WidgetAction action) {
+    private void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
         String textData = "";
@@ -518,12 +525,18 @@ public class DeviceMgr implements IApp {
         return textData;
     }
 
+    /**
+     * Doesn't actually re-install the app, solely deletes the app cache.
+     */
     public void reinstallApp() {
         MATE.log("Reinstall app");
         Registry.getEnvironmentManager().clearAppData();
         //sleep(1000);
     }
 
+    /**
+     * Restarts the AUT.
+     */
     public void restartApp() {
         MATE.log("Restarting app");
         // Launch the app
@@ -539,13 +552,22 @@ public class DeviceMgr implements IApp {
         }
         context.startActivity(intent);
         // sleep(1000);
-
     }
 
+    // TODO: rename to 'pressHome()' once IApp interface is fixed/removed
+    /**
+     * Emulates pressing the 'HOME' button.
+     */
     public void handleCrashDialog() {
         device.pressHome();
     }
 
+    /**
+     * Emulates pressing the 'BACK' button.
+     */
+    public void pressBack() {
+        device.pressBack();
+    }
 
     public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
         return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);

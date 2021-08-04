@@ -16,7 +16,7 @@ public class SystemAction extends Action {
     private final String action;
 
     // TODO: certain system events may also require a category, which should be included in the intent
-    // likewise data tags (URIs) could be relevant
+    //  likewise data tags (URIs) could be relevant
 
     /**
      * Initialises a system event.
@@ -60,6 +60,7 @@ public class SystemAction extends Action {
 
     @Override
     public String toString() {
-        return "system event receiver: " + receiver + ", system event: " + action;
+        // return "system event receiver: " + receiver + ", system event: " + action;
+        return "system action: act=" + action + " cmp=" + receiver;
     }
 }

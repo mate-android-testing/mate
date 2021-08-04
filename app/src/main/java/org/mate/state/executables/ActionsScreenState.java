@@ -84,6 +84,8 @@ public class ActionsScreenState extends AbstractScreenState {
         boolean enterAdded = false;
         Hashtable<String,Integer> idAmount = new Hashtable<String,Integer>();
         boolean selected;
+
+        // TODO: move the following code in an own method 'hostsAction()' of the class Widget
         for (Widget widget: widgets){
             selected = false;
 

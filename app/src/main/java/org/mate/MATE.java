@@ -28,7 +28,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -47,7 +46,6 @@ public class MATE {
     private DeviceMgr deviceMgr;
     public static long total_time;
     public static long RANDOM_LENGH;
-    private long runningTime = new Date().getTime();
     public static long TIME_OUT;
     public Instrumentation instrumentation;
 
@@ -98,14 +96,14 @@ public class MATE {
         if (timeout == 0)
             timeout = 30; //set default - 30 minutes
         MATE.TIME_OUT = timeout * 60 * 1000;
-        MATE.log("TIMEOUT : " + timeout);
+        MATE.log_acc("TIMEOUT: " + timeout);
 
         //get random length = number of actions before restarting the app
         long rlength = Registry.getEnvironmentManager().getRandomLength();
         if (rlength == 0)
             rlength = 1000; //default
         MATE.RANDOM_LENGH = rlength;
-        MATE.log("RANDOM length by server: " + MATE.RANDOM_LENGH);
+        MATE.log_acc("RANDOM length by server: " + MATE.RANDOM_LENGH);
 
         logMessage = "";
 
@@ -119,7 +117,7 @@ public class MATE {
 
         //get the name of the package of the app currently running
         this.packageName = device.getCurrentPackageName();
-        MATE.log("Package name: " + this.packageName);
+        MATE.log_acc("Package name: " + this.packageName);
 
         //list the activities of the app under test
         listActivities(instrumentation.getContext());
@@ -135,7 +133,7 @@ public class MATE {
 
     public void testApp(final Algorithm algorithm) {
 
-        MATE.log_acc("Activities");
+        MATE.log_acc("Activities:");
         for (String s : Registry.getEnvironmentManager().getActivityNames()) {
             MATE.log_acc("\t" + s);
         }
@@ -151,8 +149,6 @@ public class MATE {
         MATE.log_acc("[GE] mutation count: " + Properties.GE_MUTATION_COUNT());
         MATE.log_acc("[GE] max number events: " + Properties.MAX_NUMBER_EVENTS());
 
-        runningTime = new Date().getTime();
-
         try {
             TimeoutRun.timeoutRun(new Callable<Void>() {
                 @Override
@@ -166,13 +162,14 @@ public class MATE {
                 CoverageUtils.logFinalCoverage();
             }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
             if (Properties.GRAPH_TYPE() != null) {
                 Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
             Registry.getEnvironmentManager().releaseEmulator();
             //EnvironmentManager.deleteAllScreenShots(packageName);
             try {

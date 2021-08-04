@@ -8,7 +8,6 @@ import com.thoughtworks.xstream.XStream;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.model.TestCase;
-import org.mate.utils.TimeoutRun;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,24 +54,55 @@ public final class TestCaseSerializer {
         // the output file
         File testCaseFile = new File(dir, "TestCase" + recordCounter + ".xml");
 
-        try (Writer fileWriter = new FileWriter(testCaseFile)) {
+        // convert test case to xml
+        XStream xstream = new XStream();
+        xstream.registerConverter(new IntentBasedActionConverter());
+        String testCaseXML = xstream.toXML(testCase);
 
-            // convert test case to xml
-            XStream xstream = new XStream();
-            xstream.registerConverter(new IntentBasedActionConverter());
-            String testCaseXML = xstream.toXML(testCase);
+        try (Writer fileWriter = new FileWriter(testCaseFile)) {
 
             fileWriter.write(testCaseXML);
             fileWriter.flush();
 
             // fetch serialized test case from emulator + clean up
-            Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
+            boolean success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
                     "TestCase" + recordCounter + ".xml");
 
+            // retry on failure
+            if (!success) {
+                MATE.log("Retry serialization...!");
+                fileWriter.write(testCaseXML);
+                fileWriter.flush();
+                success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
+                        "TestCase" + recordCounter + ".xml");
+            }
+
+            if (!success) {
+                MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
+            }
         } catch (IOException e) {
-            MATE.log("Serializing TestCase " + recordCounter + " failed!");
-            e.printStackTrace();
             // TODO: we could try to write to external storage as a fallback if it is a memory issue
+
+            MATE.log("Retry serialization...!");
+
+            try (Writer fileWriter = new FileWriter(testCaseFile)) {
+
+                fileWriter.write(testCaseXML);
+                fileWriter.flush();
+
+                // fetch serialized test case from emulator + clean up
+                boolean success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
+                        "TestCase" + recordCounter + ".xml");
+
+                if (!success) {
+                    MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                    throw new IllegalStateException(e);
+                }
+            } catch (IOException ioe) {
+                MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                throw new IllegalStateException(e);
+            }
         }
 
         // update counter

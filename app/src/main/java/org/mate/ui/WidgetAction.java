@@ -1,5 +1,7 @@
 package org.mate.ui;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -108,7 +110,7 @@ public class WidgetAction extends Action {
                 widget.getX1() == action.widget.getX1() &&
                 widget.getX2() == action.widget.getX2() &&
                 widget.getY1() == action.widget.getY1() &&
-                widget.getX2() == action.widget.getY2();
+                widget.getY2() == action.widget.getY2();
     }
 
     @Override
@@ -120,5 +122,25 @@ public class WidgetAction extends Action {
                 widget.getX2(),
                 widget.getY1(),
                 widget.getY2());
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        String representation = "widget-based action: " + actionType + " ";
+
+        if (widget.getIdByActivity() != null && !widget.getIdByActivity().isEmpty()) {
+            representation += "widget=" + widget.getIdByActivity() + " ";
+        }
+
+        if (widget.getResourceID() != null && !widget.getResourceID().isEmpty()) {
+            representation += "resource=" + widget.getResourceID() + " ";
+        }
+
+        if (widget.getClazz() != null && !widget.getClazz().isEmpty()) {
+            representation += "clazz=" + widget.getClazz();
+        }
+
+        return representation;
     }
 }
