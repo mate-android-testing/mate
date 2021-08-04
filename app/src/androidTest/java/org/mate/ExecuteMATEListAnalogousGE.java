@@ -34,7 +34,7 @@ public class ExecuteMATEListAnalogousGE {
 
         List<IFitnessFunction<List<Integer>>> fitnessFunctions = new ArrayList<>();
         fitnessFunctions.add(new GenotypePhenotypeMappedFitnessFunction<>(
-                new AndroidListAnalogousMapping(Properties.MAX_NUMBER_EVENTS()),
+                new AndroidListAnalogousMapping(),
                 new LineCoverageFitnessFunction<TestCase>()
         ));
 

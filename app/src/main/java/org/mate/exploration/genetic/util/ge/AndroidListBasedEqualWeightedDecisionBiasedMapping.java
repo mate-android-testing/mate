@@ -6,17 +6,39 @@ import org.mate.utils.ListUtils;
 
 import java.util.List;
 
+/**
+ * An integer sequence to android {@link org.mate.model.TestCase} mapping where every codon based
+ * decision is a 50/50 decision. That means in order to choose an {@link org.mate.ui.Action} the
+ * list of available actions on the current screen state is divided in half multiple times until
+ * only a single actions remains. Which half should be halved again is determined by a codon.
+ */
 public class AndroidListBasedEqualWeightedDecisionBiasedMapping extends AndroidListBasedBiasedMapping {
-    public AndroidListBasedEqualWeightedDecisionBiasedMapping(int maxNumEvents) {
-        super(maxNumEvents);
+    /**
+     * A equal weighted integer sequence to android {@link org.mate.model.TestCase} mapping with
+     * a 50% test case ending bias.
+     */
+    public AndroidListBasedEqualWeightedDecisionBiasedMapping() {
+        super();
     }
 
-    public AndroidListBasedEqualWeightedDecisionBiasedMapping(int maxNumEvents, int stoppingBiasInPerTenthousand) {
-        super(maxNumEvents, stoppingBiasInPerTenthousand);
+    /**
+     * A equal weighted integer sequence to android {@link org.mate.model.TestCase} mapping with
+     * the given stopping bias per 10000, e.g. 1000 resulting in a 10% stopping bias
+     * @param stoppingBiasPerTenthousand stopping bias per 10000
+     */
+    public AndroidListBasedEqualWeightedDecisionBiasedMapping(int stoppingBiasPerTenthousand) {
+        super(stoppingBiasPerTenthousand);
     }
 
-    public AndroidListBasedEqualWeightedDecisionBiasedMapping(boolean resetApp, int maxNumEvents, int stoppingBias) {
-        super(resetApp, maxNumEvents, stoppingBias);
+    /**
+     * A equal weighted integer sequence to android {@link org.mate.model.TestCase} mapping with
+     * the given stopping bias per 10000, e.g. 1000 resulting in a 10% stopping bias and an
+     * indicator whether the app should be reset before starting the {@link org.mate.model.TestCase}
+     * @param resetApp whether to reset the app before starting a test case
+     * @param stoppingBiasPerTenthousand stopping bias per 10000
+     */
+    public AndroidListBasedEqualWeightedDecisionBiasedMapping(boolean resetApp, int stoppingBiasPerTenthousand) {
+        super(resetApp, stoppingBiasPerTenthousand);
     }
 
     @Override

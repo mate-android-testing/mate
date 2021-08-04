@@ -6,9 +6,17 @@ import org.mate.utils.ListUtils;
 
 import java.util.List;
 
+/**
+ * An integer sequence to android {@link org.mate.model.TestCase} mapping where each codon is
+ * directly mapped to an {@link Action} and the test case is ends when all codons where used to
+ * determine an action.
+ */
 public class AndroidListAnalogousMapping extends AndroidListBasedMapping<Integer> {
-    public AndroidListAnalogousMapping(int maxNumEvents) {
-        super(maxNumEvents);
+    /**
+     * The default list analogous mapping
+     */
+    public AndroidListAnalogousMapping() {
+        super(-1);
     }
 
     @Override

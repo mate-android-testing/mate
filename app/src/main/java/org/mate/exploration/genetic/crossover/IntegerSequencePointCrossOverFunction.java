@@ -7,6 +7,9 @@ import org.mate.utils.Randomness;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A cross over function that crosses two integer sequences at a random point
+ */
 public class IntegerSequencePointCrossOverFunction implements ICrossOverFunction<List<Integer>> {
     @Override
     public IChromosome<List<Integer>> cross(List<IChromosome<List<Integer>>> parents) {
