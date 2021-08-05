@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 public class CheckCurrentScreen {
 
@@ -87,11 +87,11 @@ public class CheckCurrentScreen {
 
         */
 
-        IScreenState screenState = MATE.uiAbstractionLayer.getLastScreenState();
+        IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         String currentPackageName = screenState.getPackageName();
 
-        Registry.getEnvironmentManager().screenShot(screenState.getPackageName(), screenState.getId());
+        Registry.getEnvironmentManager().takeScreenshot(screenState.getPackageName(), screenState.getId());
 
         MATE.log("Current screen state: " + screenState.getId());
 

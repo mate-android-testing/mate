@@ -4,15 +4,14 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.model.TestCase;
-import org.mate.ui.Action;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.utils.CoverageUtils;
+import org.mate.interaction.action.Action;
+import org.mate.model.TestCase;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
-    public static final String CHROMOSOME_FACTORY_ID = "android_random_chromosome_factory";
 
     protected UIAbstractionLayer uiAbstractionLayer;
     protected int maxNumEvents;
@@ -25,7 +24,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     }
 
     public AndroidRandomChromosomeFactory( boolean resetApp, int maxNumEvents) {
-        this.uiAbstractionLayer = MATE.uiAbstractionLayer;
+        this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
         isTestSuiteExecution = false;
@@ -71,6 +70,11 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         return actionsCount >= maxNumEvents;
     }
 
+    /**
+     * Selects a random ui action.
+     *
+     * @return Returns the randomly selected ui action.
+     */
     protected Action selectAction() {
         return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
     }

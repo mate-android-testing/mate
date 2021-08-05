@@ -1,10 +1,18 @@
 package org.mate;
 
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.exploration.genetic.algorithm.Algorithm;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.graph.GraphType;
-import org.mate.utils.Coverage;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.testcase.OptimisationStrategy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,6 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Properties {
+
+    // the timeout in minutes
+    public static int TIMEOUT() { return propertyOr(5); }
+
     public static int ANT_GENERATION() {
         return propertyOr(5);
     }
@@ -45,17 +57,13 @@ public class Properties {
      */
     public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
 
-    public static float SERVICE_SELECTION_PROBABILITY() { return propertyOr(0.1f); }
-
-    public static float BROADCAST_RECEIVER_SELECTION_PROBABILITY() { return propertyOr( 0.2f); }
-
-    /*
-    * Whether to apply optimisation of test cases before replaying them.
+    /**
+     * The optimisation strategy that should be applied.
+     *
+     * @return Returns the applied optimisation strategy.
      */
-    public static boolean OPTIMISE_TEST_CASE() { return propertyOr(false);}
-
-    public static int OPTIMISATION_STRATEGY() {
-        return propertyOr(0);
+    public static OptimisationStrategy OPTIMISATION_STRATEGY() {
+        return propertyOr(OptimisationStrategy.NO_OPTIMISATION);
     }
 
     /*
@@ -146,11 +154,30 @@ public class Properties {
         return propertyOr(10);
     }
 
-    // TODO: make use of an enum
-    public static String FITNESS_FUNCTION() {
+    public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
 
+    public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
+
+    public static MutationFunction MUTATION_FUNCTION() {
+        return propertyOr(null);
+    }
+
+    public static CrossOverFunction CROSSOVER_FUNCTION() { return propertyOr(null); }
+
+    public static TerminationCondition TERMINATION_CONDITION() { return propertyOr(null); }
+
+    public static ChromosomeFactory CHROMOSOME_FACTORY() { return propertyOr(null); }
+
+    public static Algorithm ALGORITHM() { return propertyOr(null); }
+
+    /**
+     * Indicates which objective should be used for the multi-/many-objective
+     * search, i.e. branches or lines.
+     *
+     * @return Returns the objective or {@code null} if none was specified.
+     */
     public static Objective OBJECTIVE() {
         return propertyOr(null);
     }
@@ -253,6 +280,17 @@ public class Properties {
     public Properties(Map<String, String> properties) {
         store = new HashMap<>();
         readProperties(properties);
+    }
+
+    /**
+     * Overrides a given property.
+     *
+     * @param key The property name.
+     * @param value The value for the property.
+     */
+    // TODO: Remove once all properties are enforced via the mate.properties file!
+    public static void setProperty(String key, Object value) {
+        Registry.getProperties().store.put(key, value);
     }
 
     private void readProperties(Map<String, String> properties) {

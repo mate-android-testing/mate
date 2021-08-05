@@ -1,16 +1,18 @@
 package org.mate.exploration.deprecated.evolutionary;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.model.IGUIModel;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
-import org.mate.model.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.GraphGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.ui.Action;
-import org.mate.ui.Widget;
-import org.mate.ui.WidgetAction;
+import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,10 +20,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.mate.MATE.device;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.mate.Properties.EVO_ITERATIONS_NUMBER;
 import static org.mate.Properties.GREEDY_EPSILON;
 import static org.mate.Properties.MAX_NUMBER_EVENTS;
@@ -108,7 +111,7 @@ public class OnePlusOne {
             TestCase testcase = testsuite.get(String.valueOf(TCcounter));
 
             //Get the first state
-            selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+            selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             guiModel.updateModelEVO(null, selectedScreenState);
 
             int numberOfActions = 0;
@@ -124,7 +127,7 @@ public class OnePlusOne {
 
                 try {
                     //get a list of all executable actions as long as this state is different from last state
-                    executableActions = selectedScreenState.getActions();
+                    executableActions = selectedScreenState.getWidgetActions();
 
                     //select one action randomly
                     WidgetAction action = executableActions.get(selectRandomAction(executableActions.size()));
@@ -141,7 +144,7 @@ public class OnePlusOne {
 
                         //create an object that represents the screen
                         //using type: ActionScreenState
-                        IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                         //check whether there is a progress bar on the screen
                         long timeToWait = waitForProgressBar(state);
@@ -152,7 +155,7 @@ public class OnePlusOne {
                             //set that the current action needs to wait before new action
                             action.setTimeToWait(timeToWait);
                             //get a new state
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         }
 
                         //get the package name of the app currently running
@@ -180,14 +183,14 @@ public class OnePlusOne {
                             deviceMgr.restartApp();
                             Thread.sleep(2000);
                             //TODO: get state when restarts the app
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         } else {
                             //if the app under test is running
                             //try to update GUI model with the current screen state
                             //it the current screen is a screen not explored before,
                             //   then a new state is created (newstate = true)
                             //TODO: is this useless?
-                            state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
 
                             //update model with new state
@@ -212,7 +215,7 @@ public class OnePlusOne {
                         MATE.log_acc("CRASH MESSAGE" + e.getMessage());
                         testcase.setCrashDetected();
                         crashArchive.add(testcase);
-                        deviceMgr.handleCrashDialog();
+                        deviceMgr.pressHome();
                         isApp = false;
 
                         deviceMgr.reinstallApp();
@@ -236,7 +239,7 @@ public class OnePlusOne {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+                selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             }
         }
 
@@ -285,8 +288,8 @@ public class OnePlusOne {
             boolean goOn = true;
             while (goOn) {
 
-                IScreenState screenState = ScreenStateFactory.getScreenState("ActionsScreenState");
-                List<WidgetAction> actions = screenState.getActions();
+                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+                List<WidgetAction> actions = screenState.getWidgetActions();
                 for (WidgetAction action : actions) {
                     if (action.getWidget().getId().contains("allow")) {
                         try {
@@ -298,7 +301,7 @@ public class OnePlusOne {
                     }
                 }
 
-                currentPackage = device.getCurrentPackageName();
+                currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
                 MATE.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)
@@ -322,7 +325,7 @@ public class OnePlusOne {
         TestCase mutantTestCase = new TestCase(String.valueOf(this.TCcounter));
 
 
-        selectedScreenState = ScreenStateFactory.getScreenState("ActionsScreenState");
+        selectedScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
         guiModel.updateModelEVO(null, selectedScreenState);
 
 
@@ -347,7 +350,7 @@ public class OnePlusOne {
             } else {
                 MATE.log("Random Action number: " + numberOfActions);
                 //get a list of all executable actions as long as this state is different from last state
-                executableActions = selectedScreenState.getActions();
+                executableActions = selectedScreenState.getWidgetActions();
                 //select one action randomly
                 action = executableActions.get(selectRandomAction(executableActions.size()));
                 MATE.log("EVENTO: " + action.getActionType() + "; GUI OBJECT: " + action.getWidget().getClazz());
@@ -364,7 +367,7 @@ public class OnePlusOne {
                     //TODO: trying sleep
                     Thread.sleep(2500);
 
-                    IScreenState state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                    IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     //check whether there is a progress bar on the screen
                     long timeToWait = waitForProgressBar(state);
@@ -375,7 +378,7 @@ public class OnePlusOne {
                         //set that the current action needs to wait before new action
                         action.setTimeToWait(timeToWait);
                         //get a new state
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }
 
                     //get the package name of the app currently running
@@ -401,14 +404,14 @@ public class OnePlusOne {
                         Thread.sleep(5000);
                         deviceMgr.restartApp();
                         Thread.sleep(2000);
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     } else {
                         //if the app under test is running
                         //try to update GUI model with the current screen state
                         //it the current screen is a screen not explored before,
                         //   then a new state is created (newstate = true)
-                        state = ScreenStateFactory.getScreenState("ActionsScreenState");
+                        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         boolean newState = guiModel.updateModel(action, state);
                         mutantTestCase.updateVisitedActivities(state.getActivityName());
                         mutantTestCase.updateVisitedStates(state);
@@ -431,7 +434,7 @@ public class OnePlusOne {
                     MATE.log_acc("CRASH MESSAGE" + e.getMessage());
                     mutantTestCase.setCrashDetected();
                     crashArchive.add(mutantTestCase);
-                    deviceMgr.handleCrashDialog();
+                    deviceMgr.pressHome();
                     isApp = false;
 
                     deviceMgr.reinstallApp();
@@ -464,7 +467,7 @@ public class OnePlusOne {
         int cutpoint = 0;
         if(rand.nextDouble()<=1-GREEDY_EPSILON()){
             MATE.log_acc("choose best cutpoint");
-            HashMap<String, String> statesMap = tc.getStatesMap();
+            Map<String, String> statesMap = tc.getStatesMap();
             float bestSparseness = 0;
             String bestCutpoint = null;
             //MATE.log_acc("Possibile bug, tc: "+tc.getId()+", covered states: "+statesMap.keySet());

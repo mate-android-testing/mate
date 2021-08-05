@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.builder;
 
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.algorithm.NSGAII;
@@ -8,11 +9,13 @@ import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
@@ -20,29 +23,39 @@ import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
+import org.mate.exploration.genetic.fitness.BasicBlockBranchCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.BasicBlockLineCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunctionMultiObjective;
+import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
+import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 import org.mate.model.TestCase;
 
@@ -74,20 +87,20 @@ public class GeneticAlgorithmProvider {
         if (algorithmName == null) {
             throw new IllegalArgumentException("No algorithm specified");
         }
-        switch (algorithmName) {
-            case StandardGeneticAlgorithm.ALGORITHM_NAME:
+        switch (Algorithm.valueOf(algorithmName)) {
+            case STANDARD_GA:
                 return initializeGenericGeneticAlgorithm();
-            case OnePlusOne.ALGORITHM_NAME:
+            case ONE_PLUS_ONE:
                 return initializeOnePlusOne();
-            case NSGAII.ALGORITHM_NAME:
+            case NSGAII:
                 return initializeNSGAII();
-            case MOSA.ALGORITHM_NAME:
+            case MOSA:
                 return (GeneticAlgorithm<T>) initializeMOSA();
-            case Mio.ALGORITHM_NAME:
+            case MIO:
                 return initializeMio();
-            case RandomWalk.ALGORITHM_NAME:
+            case RANDOM_WALK:
                 return initializeRandomWalk();
-            case RandomSearch.ALGORITHM_NAME:
+            case RANDOM_SEARCH:
                 return initializeRandomSearch();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
@@ -184,24 +197,24 @@ public class GeneticAlgorithmProvider {
         if (chromosomeFactoryId == null) {
             return null;
         }
-        switch (chromosomeFactoryId) {
-            case AndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+        switch (ChromosomeFactory.valueOf(chromosomeFactoryId)) {
+            case ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new AndroidRandomChromosomeFactory(getNumEvents());
-            case AndroidSuiteRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case ANDROID_SUITE_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new AndroidSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
-            case HeuristicalChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case HEURISTICAL_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new HeuristicalChromosomeFactory(getNumEvents());
-            case PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case PRIMITIVE_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
-            case IntentChromosomeFactory.CHROMOSOME_FACTORY_ID:
+            case INTENT_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
@@ -215,14 +228,14 @@ public class GeneticAlgorithmProvider {
         if (selectionFunctionId == null) {
             return null;
         } else {
-            switch (selectionFunctionId) {
-                case FitnessSelectionFunction.SELECTION_FUNCTION_ID:
+            switch (SelectionFunction.valueOf(selectionFunctionId)) {
+                case FITNESS_SELECTION:
                     return new FitnessSelectionFunction<T>();
-                case RandomSelectionFunction.SELECTION_FUNCTION_ID:
+                case RANDOM_SELECTION:
                     return new RandomSelectionFunction<>();
-                case FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID:
+                case FITNESS_PROPORTIONATE_SELECTION:
                     return new FitnessProportionateSelectionFunction<>();
-                case IdSelectionFunction.SELECTION_FUNCTION_ID:
+                case IDENTITY_SELECTION:
                     return new IdSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
@@ -237,14 +250,14 @@ public class GeneticAlgorithmProvider {
         if (crossOverFunctionId == null) {
             return null;
         } else {
-            switch (crossOverFunctionId) {
-                case TestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+            switch (CrossOverFunction.valueOf(crossOverFunctionId)) {
+                case TEST_CASE_MERGE_CROSS_OVER:
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
-                case UniformSuiteCrossoverFunction.CROSSOVER_FUNCTION_ID:
+                case TEST_SUITE_UNIFORM_CROSS_OVER:
                     return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
-                case PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID:
+                case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
                     return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
@@ -259,23 +272,27 @@ public class GeneticAlgorithmProvider {
         if (mutationFunctionId == null) {
             return null;
         } else {
-            switch (mutationFunctionId) {
-                case CutPointMutationFunction.MUTATION_FUNCTION_ID:
+            switch (MutationFunction.valueOf(mutationFunctionId)) {
+                case TEST_CASE_CUT_POINT_MUTATION:
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
-                case SuiteCutPointMutationFunction.MUTATION_FUNCTION_ID:
+                case TEST_SUITE_CUT_POINT_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
-                case SapienzSuiteMutationFunction.MUTATION_FUNCTION_ID:
+                case SAPIENZ_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPInnerMutate());
-                case PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID:
+                case PRIMITIVE_SHUFFLE_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
+                case SHUFFLE_MUTATION:
+                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                    // different T for their chromosomes
+                    return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -298,51 +315,59 @@ public class GeneticAlgorithmProvider {
     }
 
     private <T> IFitnessFunction<T> initializeFitnessFunction(int index) {
+
         String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
                 .FITNESS_FUNCTION_KEY_FORMAT, index);
         String fitnessFunctionId = properties.getProperty(key);
 
-        switch (fitnessFunctionId) {
-            case AndroidStateFitnessFunction.FITNESS_FUNCTION_ID:
-                // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new AndroidStateFitnessFunction();
-            case ActivityFitnessFunction.FITNESS_FUNCTION_ID:
+        switch (FitnessFunction.valueOf(fitnessFunctionId)) {
+            case NUMBER_OF_ACTIVITIES:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new ActivityFitnessFunction();
-            case SpecificActivityCoveredFitnessFunction.FITNESS_FUNCTION_ID:
+            case NUMBER_OF_ACTIVITIES_TEST_SUITES:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new SuiteActivityFitnessFunction();
+            case NUMBER_OF_CRASHES:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new AmountCrashesFitnessFunction();
+            case NUMBER_OF_STATES:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IFitnessFunction<T>) new AndroidStateFitnessFunction();
+            case COVERED_SPECIFIC_ACTIVITY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
-            case AmountCrashesFitnessFunction.FITNESS_FUNCTION_ID:
+            case TEST_LENGTH:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IFitnessFunction<T>)
-                        new AmountCrashesFitnessFunction();
-            case TestLengthFitnessFunction.FITNESS_FUNCTION_ID:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>)
-                        new TestLengthFitnessFunction();
-            case SuiteActivityFitnessFunction.FITNESS_FUNCTION_ID:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>)
-                        new SuiteActivityFitnessFunction();
-            case LineCoverageFitnessFunction.FITNESS_FUNCTION_ID:
+                return (IFitnessFunction<T>) new TestLengthFitnessFunction();
+            case METHOD_COVERAGE:
+                return (IFitnessFunction<T>) new MethodCoverageFitnessFunction<>();
+            case BRANCH_COVERAGE:
+                return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
+            case BRANCH_MULTI_OBJECTIVE:
+                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+            case BRANCH_DISTANCE:
+                return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
+            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+            case BASIC_BLOCK_MULTI_OBJECTIVE:
+                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+            case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
-            case LineCoveredPercentageFitnessFunction.FITNESS_FUNCTION_ID:
+            case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
-            case BranchDistanceFitnessFunction.FITNESS_FUNCTION_ID:
-                return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
-            case BranchDistanceFitnessFunctionMultiObjective.FITNESS_FUNCTION_ID:
-                return (IFitnessFunction<T>) new BranchDistanceFitnessFunctionMultiObjective(getFitnessFunctionArgument(index));
-            case BranchCoverageFitnessFunction.FITNESS_FUNCTION_ID:
-                return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
+            case BASIC_BLOCK_LINE_COVERAGE:
+                return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+                return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
@@ -361,12 +386,12 @@ public class GeneticAlgorithmProvider {
         if (terminationConditionId == null) {
             return null;
         }
-        switch (terminationConditionId) {
-            case IterTerminationCondition.TERMINATION_CONDITION_ID:
+        switch (TerminationCondition.valueOf(terminationConditionId)) {
+            case ITERATION_TERMINATION:
                 return new IterTerminationCondition(getNumberIterations());
-            case NeverTerminationCondition.TERMINATION_CONDITION_ID:
+            case NEVER_TERMINATION:
                 return new NeverTerminationCondition();
-            case ConditionalTerminationCondition.TERMINATION_CONDITION_ID:
+            case CONDITIONAL_TERMINATION:
                 return new ConditionalTerminationCondition();
             default:
                 throw new UnsupportedOperationException("Unknown termination condition: "

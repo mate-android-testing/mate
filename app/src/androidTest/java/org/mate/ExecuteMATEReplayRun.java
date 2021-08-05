@@ -4,20 +4,18 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
-import org.mate.serialization.TestCaseSerializer;
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
-import org.mate.utils.TestCaseOptimizer;
-import org.mate.utils.TestCaseStatistics;
+import org.mate.utils.testcase.TestCaseOptimizer;
+import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import static org.mate.MATE.uiAbstractionLayer;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEReplayRun {
@@ -26,8 +24,8 @@ public class ExecuteMATEReplayRun {
     public void useAppContext() {
         MATE.log_acc("Starting ReplayRun...");
 
+        // init uiAbstractionLayer, properties, etc.
         MATE mate = new MATE();
-        String packageName = mate.getPackageName();
 
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
@@ -39,19 +37,15 @@ public class ExecuteMATEReplayRun {
         TestCase testCase = TestCaseSerializer.deserializeTestCase();
 
         // reset the app once
-        uiAbstractionLayer.resetApp();
-
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
+        Registry.getUiAbstractionLayer().resetApp();
 
         // as long as we find a test case for replaying
         while (testCase != null) {
 
             MATE.log("Replaying TestCase " + testCaseID);
 
-            if (Properties.OPTIMISE_TEST_CASE()) {
-                testCase = TestCaseOptimizer.optimise(testCase);
-            }
+            // apply optimisation strategy before replaying (optional)
+            testCase = TestCaseOptimizer.optimise(testCase);
 
             if (replayTestCase(testCase)) {
                 MATE.log("Replayed TestCase " + testCaseID);
@@ -67,10 +61,7 @@ public class ExecuteMATEReplayRun {
             testCaseID++;
 
             // reset aut after each test case
-            uiAbstractionLayer.resetApp();
-
-            // grant runtime permissions (read/write external storage) which are dropped after each reset
-            Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
+            Registry.getUiAbstractionLayer().resetApp();
         }
 
         MATE.log("Retry replaying " + failures.size() + " test cases!");
@@ -101,10 +92,7 @@ public class ExecuteMATEReplayRun {
                 }
 
                 // reset aut after each test case
-                uiAbstractionLayer.resetApp();
-
-                // grant runtime permissions (read/write external storage) which are dropped after each reset
-                Registry.getEnvironmentManager().grantRuntimePermissions(packageName);
+                Registry.getUiAbstractionLayer().resetApp();
             }
         }
 
@@ -130,26 +118,25 @@ public class ExecuteMATEReplayRun {
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
             Action nextAction = actions.get(i);
-            MATE.log("Next action to be replayed: " + nextAction);
 
             // check whether the UI action is applicable on the current state
             if (nextAction instanceof WidgetAction
-                    && !uiAbstractionLayer.getExecutableActions().contains(nextAction)) {
+                    && !Registry.getUiAbstractionLayer().getExecutableActions().contains(nextAction)) {
 
                 // try to repair UI action
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
-                    MATE.log("replaying action " + i);
-                    uiAbstractionLayer.executeAction(repairedAction);
+                    MATE.log("replaying action " + i + ": " + repairedAction);
+                    Registry.getUiAbstractionLayer().executeAction(repairedAction);
                     MATE.log("replayed action " + i + ": " + repairedAction);
                 } else {
                     MATE.log("Action not applicable!");
                     return false;
                 }
             } else {
-                MATE.log("replaying action " + i);
-                uiAbstractionLayer.executeAction(nextAction);
+                MATE.log("replaying action " + i + ": " + nextAction);
+                Registry.getUiAbstractionLayer().executeAction(nextAction);
                 MATE.log("replayed action " + i + ": " + nextAction);
             }
         }
@@ -169,7 +156,7 @@ public class ExecuteMATEReplayRun {
         // TODO: provide appropriate repair mechanism!
 
         // log information about selected and available actions
-        if (a instanceof WidgetAction && !uiAbstractionLayer.getExecutableActions().contains(a)) {
+        if (a instanceof WidgetAction && !Registry.getUiAbstractionLayer().getExecutableActions().contains(a)) {
 
             WidgetAction selectedAction = (WidgetAction) a;
 
@@ -178,13 +165,12 @@ public class ExecuteMATEReplayRun {
                     + " hint : " + selectedAction.getWidget().getHint()
                     + " Class : " + selectedAction.getWidget().getClazz()
                     + " ResourceID : " + selectedAction.getWidget().getResourceID()
-                    + " IdByActivity : " + selectedAction.getWidget().getIdByActivity()
                     + " X : " + selectedAction.getWidget().getX()
                     + " Y : " + selectedAction.getWidget().getY());
 
             MATE.log("------------------------------------------");
 
-            for (Action action : uiAbstractionLayer.getExecutableActions()) {
+            for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
 
                 if (action instanceof WidgetAction) {
                     if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {
@@ -194,7 +180,6 @@ public class ExecuteMATEReplayRun {
                                 + " hint : " + widgetAction.getWidget().getHint()
                                 + " Class : " + widgetAction.getWidget().getClazz()
                                 + " ResourceID : " + widgetAction.getWidget().getResourceID()
-                                + " IdByActivity : " + widgetAction.getWidget().getIdByActivity()
                                 + " X : " + widgetAction.getWidget().getX()
                                 + " Y : " + widgetAction.getWidget().getY());
                     }

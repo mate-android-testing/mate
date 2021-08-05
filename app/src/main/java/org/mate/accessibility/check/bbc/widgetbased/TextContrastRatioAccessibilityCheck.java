@@ -1,12 +1,14 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
+import android.graphics.Rect;
+
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilitySettings;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 /**
  * Created by marceloeler on 26/06/17.
@@ -46,7 +48,7 @@ public class TextContrastRatioAccessibilityCheck implements IWidgetAccessibility
         if (!widget.isImportantForAccessibility())
             return false;
 
-        if (widget.getBounds().equals("[0,0][0,0]"))
+        if (widget.getBounds().equals(new Rect()))
             return false;
 
         if (widget.getClazz().contains(("Image")))

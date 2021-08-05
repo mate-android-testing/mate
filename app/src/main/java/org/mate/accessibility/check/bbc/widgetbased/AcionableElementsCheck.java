@@ -6,7 +6,7 @@ import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
     @Override

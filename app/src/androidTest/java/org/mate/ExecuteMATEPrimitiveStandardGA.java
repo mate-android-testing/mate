@@ -4,15 +4,15 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
-import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
-import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
-import org.mate.exploration.genetic.termination.NeverTerminationCondition;
+import org.mate.exploration.genetic.crossover.CrossOverFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.mutation.MutationFunction;
+import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
@@ -26,13 +26,13 @@ public class ExecuteMATEPrimitiveStandardGA {
         MATE mate = new MATE();
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
-                .withAlgorithm(StandardGeneticAlgorithm.ALGORITHM_NAME)
-                .withChromosomeFactory(PrimitiveAndroidRandomChromosomeFactory.CHROMOSOME_FACTORY_ID)
-                .withSelectionFunction(FitnessProportionateSelectionFunction.SELECTION_FUNCTION_ID)
-                .withCrossoverFunction(PrimitiveTestCaseMergeCrossOverFunction.CROSSOVER_FUNCTION_ID)
-                .withMutationFunction(PrimitiveTestCaseShuffleMutationFunction.MUTATION_FUNCTION_ID)
-                .withFitnessFunction(LineCoverageFitnessFunction.FITNESS_FUNCTION_ID)
-                .withTerminationCondition(NeverTerminationCondition.TERMINATION_CONDITION_ID)
+                .withAlgorithm(Algorithm.STANDARD_GA)
+                .withChromosomeFactory(ChromosomeFactory.PRIMITIVE_ANDROID_RANDOM_CHROMOSOME_FACTORY)
+                .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
+                .withCrossoverFunction(CrossOverFunction.PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER)
+                .withMutationFunction(MutationFunction.PRIMITIVE_SHUFFLE_MUTATION)
+                .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
+                .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())

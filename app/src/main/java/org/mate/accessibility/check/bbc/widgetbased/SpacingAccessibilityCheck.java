@@ -1,14 +1,18 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck {
 
@@ -19,8 +23,8 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck {
 
     private void loadMatrix(IScreenState state){
         //MATE.log("LLLOOOOADDD MATRIX");
-        int maxw = MATE.device.getDisplayWidth();
-        int maxh = MATE.device.getDisplayHeight();
+        int maxw = UiDevice.getInstance(getInstrumentation()).getDisplayWidth();
+        int maxh = UiDevice.getInstance(getInstrumentation()).getDisplayHeight();
         matrix = new int[maxw][maxh];
 
         for (int i=0; i<maxw; i++)
@@ -52,8 +56,8 @@ public class SpacingAccessibilityCheck implements IWidgetAccessibilityCheck {
             if (!widget.isImportantForAccessibility())
                 return null;
 
-            int maxw = MATE.device.getDisplayWidth();
-            int maxh = MATE.device.getDisplayHeight();
+            int maxw = UiDevice.getInstance(getInstrumentation()).getDisplayWidth();
+            int maxh = UiDevice.getInstance(getInstrumentation()).getDisplayHeight();
 
             if (matrix == null)
                 loadMatrix(state);

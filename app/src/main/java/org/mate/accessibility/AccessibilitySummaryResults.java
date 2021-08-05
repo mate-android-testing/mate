@@ -6,9 +6,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.utils.AccessibilityUtils;
-import org.mate.model.IGUIModel;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
-import org.mate.ui.Widget;
+import org.mate.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -150,7 +150,7 @@ public class AccessibilitySummaryResults {
         int y2 = Integer.valueOf(second[1]);
 
 
-        String stateId = MATE.uiAbstractionLayer.getLastScreenState().getId();
+        String stateId = Registry.getUiAbstractionLayer().getLastScreenState().getId();
         //INCLUDE COORDINATES
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + clazz + ":" + widgetid + ":"+ widgetText+":"+extraInfo;
         flawMsg+=":"+x1+":"+y1+":"+x2+":"+y2;
@@ -183,7 +183,7 @@ public class AccessibilitySummaryResults {
         if (extraInfo.equals(""))
             extraInfo=" ";
 
-        String stateId = MATE.uiAbstractionLayer.getLastScreenState().getId();
+        String stateId = Registry.getUiAbstractionLayer().getLastScreenState().getId();
 
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + widget.getClazz() + ":" + widgetid + ":"+ widgetText;
         flawMsg+=":"+extraInfo+":"+widget.getX1()+":"+widget.getY1()+":"+widget.getX2()+":"+widget.getY2();
@@ -219,7 +219,7 @@ public class AccessibilitySummaryResults {
                     cont+=flawsByActivity.size();
                 }
             }
-            MATE.logsum(etype.replace("_"," ") + ": " + cont);
+            MATE.log_debug(etype.replace("_"," ") + ": " + cont);
             summaryStr+=String.valueOf(cont)+",";
             flawscount[i]=cont;
             total+=cont;
@@ -227,18 +227,18 @@ public class AccessibilitySummaryResults {
         if (summaryStr.length()>0)
             summaryStr = summaryStr.substring(0,summaryStr.length()-1);
 
-        MATE.logsum("ACC_SUMMARY:"+currentPackageName+","+total+","+summaryStr);
+        MATE.log_debug("ACC_SUMMARY:"+currentPackageName+","+total+","+summaryStr);
 
-        MATE.logsum("STATES_VISITED_BY_MATE:"+guiModel.getStates().size());
+        MATE.log_debug("STATES_VISITED_BY_MATE:"+guiModel.getStates().size());
         Set<String> uniqueActivities = new HashSet<String>();
         for (IScreenState state: guiModel.getStates()){
             if (state.getActivityName().contains(currentPackageName))
                 uniqueActivities.add(state.getActivityName());
         }
 
-        MATE.logsum("ACTIVITIES_VISITED_BY_MATE:"+uniqueActivities.size());
+        MATE.log_debug("ACTIVITIES_VISITED_BY_MATE:"+uniqueActivities.size());
         for (String st: uniqueActivities){
-             MATE.logsum("activity: " + st);
+             MATE.log_debug("activity: " + st);
         }
     }
 

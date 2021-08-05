@@ -1,11 +1,10 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.CoverageUtils;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
@@ -14,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuite> {
-    public static final String MUTATION_FUNCTION_ID = "suite_cut_point_mutation_function";
 
     private final CutPointMutationFunction cutPointMutationFunction;
 

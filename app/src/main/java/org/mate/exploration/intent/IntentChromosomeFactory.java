@@ -5,17 +5,15 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.interaction.intent.ComponentDescription;
-import org.mate.interaction.intent.ComponentType;
-import org.mate.interaction.intent.IntentProvider;
+import org.mate.interaction.action.intent.ComponentDescription;
+import org.mate.interaction.action.intent.ComponentType;
+import org.mate.interaction.action.intent.IntentProvider;
 import org.mate.model.TestCase;
-import org.mate.ui.Action;
-import org.mate.utils.CoverageUtils;
+import org.mate.interaction.action.Action;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 
 public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
-
-    public static final String CHROMOSOME_FACTORY_ID = "intent_chromosome_factory";
 
     // stores the relative amount ([0,1]) of intent based actions that should be used
     private final float relativeIntentAmount;
@@ -106,10 +104,6 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         // push dummy files onto sd card
         MATE.log("Pushing custom media files: "
                 + Registry.getEnvironmentManager().pushDummyFiles());
-
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        MATE.log("Grant runtime permissions: "
-                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);

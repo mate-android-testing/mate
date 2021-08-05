@@ -1,6 +1,7 @@
 package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.intent.IntentChromosomeFactory;
@@ -15,8 +16,8 @@ public class RandomExploration implements Algorithm {
 
     /**
      * Initialises the random exploration strategy including the use of
-     * {@link org.mate.interaction.intent.IntentBasedAction} and {@link org.mate.interaction.intent.SystemAction}
-     * in contrast to solely using {@link org.mate.ui.WidgetAction} (UI actions).
+     * {@link org.mate.interaction.action.intent.IntentBasedAction} and {@link org.mate.interaction.action.intent.SystemAction}
+     * in contrast to solely using {@link org.mate.interaction.action.ui.WidgetAction} (UI actions).
      *
      * @param alwaysReset Whether to reset the app after each creation and execution of a chromosome.
      * @param maxNumEvents The maximal number of actions for a chromosome.
@@ -34,13 +35,13 @@ public class RandomExploration implements Algorithm {
 
     public void run() {
         if (!alwaysReset) {
-            MATE.uiAbstractionLayer.resetApp();
+            Registry.getUiAbstractionLayer().resetApp();
         }
         for (int i = 0; true; i++) {
             MATE.log_acc("Exploration #" + (i + 1));
             randomChromosomeFactory.createChromosome();
             if (!alwaysReset) {
-                MATE.uiAbstractionLayer.restartApp();
+                Registry.getUiAbstractionLayer().restartApp();
             }
         }
     }
