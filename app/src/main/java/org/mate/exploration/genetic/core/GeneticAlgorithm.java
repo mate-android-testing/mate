@@ -159,9 +159,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            for (IChromosome<T> chromosome: population) {
-                fitnessFunctions.get(0).getFitness(chromosome);
-            }
             MATE.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
             if (population.size() <= 10) {

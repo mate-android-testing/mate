@@ -43,10 +43,6 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             uiAbstractionLayer.resetApp();
         }
 
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        MATE.log("Grant runtime permissions: "
-                + Registry.getEnvironmentManager().grantRuntimePermissions(MATE.packageName));
-
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
