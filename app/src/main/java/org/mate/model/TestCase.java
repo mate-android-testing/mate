@@ -553,10 +553,9 @@ public class TestCase {
      * @param event A new event, e.g. the action id.
      */
     private void updateTestCase(String event) {
-        IScreenState currentScreenstate = Registry.getUiAbstractionLayer().getLastScreenState();
-
-        updateVisitedStates(currentScreenstate);
-        updateVisitedActivities(currentScreenstate.getActivityName());
-        updateStatesMap(currentScreenstate.getId(), event);
+        IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
+        updateVisitedStates(currentScreenState);
+        updateVisitedActivities(currentScreenState.getActivityName());
+        updateStatesMap(currentScreenState.getId(), event);
     }
 }
