@@ -22,11 +22,11 @@ public class SpecificActivityCoveredFitnessFunction implements IFitnessFunction<
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        return 0;
+        return getFitness(chromosome);
     }
 }

@@ -12,11 +12,11 @@ public class AndroidStateFitnessFunction implements IFitnessFunction<TestCase> {
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        return 0;
+        return getFitness(chromosome) / Double.MAX_VALUE;
     }
 }

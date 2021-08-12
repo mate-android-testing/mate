@@ -23,6 +23,6 @@ public class TestLengthFitnessFunction implements IFitnessFunction<TestSuite> {
 
     @Override
     public double getNormalizedFitness(IChromosome<TestSuite> chromosome) {
-        return 0;
+        return getFitness(chromosome);
     }
 }

@@ -17,11 +17,11 @@ public class AmountCrashesFitnessFunction implements IFitnessFunction<TestSuite>
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<TestSuite> chromosome) {
-        return 0;
+        return getFitness(chromosome) / chromosome.getValue().getTestCases().size();
     }
 }

@@ -27,11 +27,11 @@ public class MethodCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return 0;
+        return getFitness(chromosome) / 100;
     }
 }

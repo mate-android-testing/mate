@@ -27,11 +27,11 @@ public class BasicBlockLineCoverageFitnessFunction<T> implements IFitnessFunctio
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return 0;
+        return getFitness(chromosome)/100;
     }
 }

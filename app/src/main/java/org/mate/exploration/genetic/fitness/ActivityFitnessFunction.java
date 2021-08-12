@@ -1,7 +1,10 @@
 package org.mate.exploration.genetic.fitness;
 
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
+
+import java.util.List;
 
 public class ActivityFitnessFunction implements IFitnessFunction<TestCase> {
 
@@ -12,11 +15,12 @@ public class ActivityFitnessFunction implements IFitnessFunction<TestCase> {
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        return 0;
+        List<String> activityNames = Registry.getEnvironmentManager().getActivityNames();
+        return getFitness(chromosome) / activityNames.size();
     }
 }

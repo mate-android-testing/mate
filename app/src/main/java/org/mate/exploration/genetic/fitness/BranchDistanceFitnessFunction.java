@@ -36,12 +36,12 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
         } else {
             branchDistance = FitnessUtils.getFitness(chromosome);
         }
-        
+
         /*
-        * TODO: This is a side effect, which is triggered multiple times, e.g. by logFitness().
-        *  Additionally, the decision when a 'target' is satisfied might depend on the
-        *  algorithm in use. Thus, a better option is to move this functionality. However, be
-        *  aware that the initial population can also satisfy this condition.
+         * TODO: This is a side effect, which is triggered multiple times, e.g. by logFitness().
+         *  Additionally, the decision when a 'target' is satisfied might depend on the
+         *  algorithm in use. Thus, a better option is to move this functionality. However, be
+         *  aware that the initial population can also satisfy this condition.
          */
         // we can end execution if we covered the target vertex
         if (branchDistance == 1.0) {
@@ -61,6 +61,6 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return 0;
+        return (getFitness(chromosome) - 1) / Double.MAX_VALUE;
     }
 }
