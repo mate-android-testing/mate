@@ -69,11 +69,11 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
 
     @Override
     public boolean isMaximizing() {
-        return false;
+        return true;
     }
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return 0;
+        return getFitness(chromosome);
     }
 }
