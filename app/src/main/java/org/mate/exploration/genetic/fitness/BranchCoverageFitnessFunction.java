@@ -21,7 +21,6 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
-        // TODO: normalise fitness value in the range [0,1]
         return branchCoverage;
     }
 

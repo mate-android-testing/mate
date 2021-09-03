@@ -21,7 +21,6 @@ public class BasicBlockLineCoverageFitnessFunction<T> implements IFitnessFunctio
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
-        // TODO: normalise fitness value in the range [0,1]
         return basicBlockLineCoverage;
     }
 

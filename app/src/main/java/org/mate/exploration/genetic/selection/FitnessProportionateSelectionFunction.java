@@ -25,7 +25,7 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
 
         int count = 0;
         for (IChromosome<T> chromosome : population) {
-            double proportionateFitness = fitnessFunction.getFitness(chromosome) * Randomness
+            double proportionateFitness = fitnessFunction.getNormalizedFitness(chromosome) * Randomness
                     .getRnd().nextDouble();
             proportionateFitnessValues.add(new Tuple<>(count, proportionateFitness));
             count ++;
