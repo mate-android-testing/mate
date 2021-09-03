@@ -33,18 +33,18 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     /**
      * Initializing the genetic algorithm with all necessary attributes
      *
-     * @param chromosomeFactory       see {@link IChromosomeFactory}
-     * @param selectionFunction       see {@link ISelectionFunction}
-     * @param crossOverFunction       see {@link ICrossOverFunction}
-     * @param mutationFunction        see {@link IMutationFunction}
-     * @param fitnessFunctions        see {@link IFitnessFunction}
-     * @param terminationCondition    see {@link ITerminationCondition}
-     * @param populationSize          size of population kept by the genetic algorithm
-     * @param bigPopulationSize amount of survivors of each generation
-     * @param pCrossover              probability that crossover occurs (between 0 and 1)
-     * @param pMutate                 probability that mutation occurs (between 0 and 1)
-     * @param pSampleRandom           probability that a random individual is sampled
-     * @param focusedSearchStart      percentage as decimal value (e.g 0.8) of time, after which the focused search starts
+     * @param chromosomeFactory    see {@link IChromosomeFactory}
+     * @param selectionFunction    see {@link ISelectionFunction}
+     * @param crossOverFunction    see {@link ICrossOverFunction}
+     * @param mutationFunction     see {@link IMutationFunction}
+     * @param fitnessFunctions     see {@link IFitnessFunction}
+     * @param terminationCondition see {@link ITerminationCondition}
+     * @param populationSize       size of population kept by the genetic algorithm
+     * @param bigPopulationSize    amount of survivors of each generation
+     * @param pCrossover           probability that crossover occurs (between 0 and 1)
+     * @param pMutate              probability that mutation occurs (between 0 and 1)
+     * @param pSampleRandom        probability that a random individual is sampled
+     * @param focusedSearchStart   percentage as decimal value (e.g 0.8) of time, after which the focused search starts
      */
     public Mio(IChromosomeFactory<T> chromosomeFactory,
                ISelectionFunction<T> selectionFunction,
@@ -99,26 +99,27 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
-            double fitness = fitnessFunction.getFitness(individual);
+            double fitness = fitnessFunction.getNormalizedFitness(individual);
             IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitness);
+
+            boolean maximizing = fitnessFunction.isMaximizing();
 
             if (isTargetCovered(fitnessFunction)) {
                 // Todo: We should actually check whether the new test could still be better by being
                 // shorter.
                 continue;
             }
-
-            if (fitness == 1) {
+            if (maximizing ? fitness == 1 : fitness == 0) {
                 // TODO: Can we check if one of them is better?
                 populations.get(fitnessFunction).clear();
                 populations.get(fitnessFunction).add(tuple);
                 archive.add(tuple.individual);
-            } else if (fitness > 0) {
+            } else if (maximizing ? fitness > 0 : fitness < 1) {
 
-                IndividualFitnessTuple worstTest = getWorstTest(populations.get(fitnessFunction));
+                IndividualFitnessTuple worstTest = getWorstTest(populations.get(fitnessFunction), maximizing);
                 populations.get(fitnessFunction).add(tuple);
 
-                if (worstTest.fitness < tuple.getFitness()) {
+                if (maximizing ? worstTest.fitness < tuple.getFitness() : worstTest.fitness > tuple.getFitness()) {
                     //Reset counter
                     samplingCounters.put(fitnessFunction, 0);
                 } else {
@@ -129,6 +130,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                     // Remove worst if we reached limit population limit
                     populations.get(fitnessFunction).remove(worstTest);
                 }
+
             }
         }
 
@@ -152,6 +154,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     }
 
     private boolean isTargetCovered(IFitnessFunction<T> target) {
+        boolean maximizing = target.isMaximizing();
         if (populations.get(target) == null) {
             throw new IllegalArgumentException("Cannot find population for Target");
         }
@@ -161,8 +164,9 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             //Covered targets only retain one individual
             return false;
         }
+        double fitnessTarget = populations.get(target).get(0).fitness;
 
-        return populations.get(target).get(0).fitness == 1;
+        return maximizing ? fitnessTarget == 1 : fitnessTarget == 0;
     }
 
     @Override
@@ -174,7 +178,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             }
 
             for (IChromosome<T> individual : this.population) {
-                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitnessFunction.getFitness(individual));
+                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitnessFunction.getNormalizedFitness(individual));
                 populations.get(fitnessFunction).add(tuple);
 
             }
@@ -199,14 +203,16 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
     }
 
-    private IndividualFitnessTuple getWorstTest(List<IndividualFitnessTuple> tuples) {
+    private IndividualFitnessTuple getWorstTest(List<IndividualFitnessTuple> tuples, boolean maximizing) {
         if (tuples == null || tuples.isEmpty()) {
             throw new IllegalArgumentException("Cannot find worst test if list is empty");
         }
 
         IndividualFitnessTuple worstTuple = tuples.get(0);
         for (IndividualFitnessTuple tuple : tuples) {
-            if (worstTuple.getFitness() > tuple.getFitness()) {
+            double fitnessWorstTuple = worstTuple.getFitness();
+            double fitnessTuple = tuple.getFitness();
+            if (maximizing ? fitnessWorstTuple > fitnessTuple : fitnessWorstTuple < fitnessTuple) {
                 worstTuple = tuple;
             }
         }

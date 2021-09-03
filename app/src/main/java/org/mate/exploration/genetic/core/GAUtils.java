@@ -49,7 +49,12 @@ public class GAUtils {
                 Collections.sort(paretoFront, new Comparator<IChromosome<T>>() {
                     @Override
                     public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                        double compared = fitnessFunction.getFitness(o2) - fitnessFunction.getFitness(o1);
+                        double compared = fitnessFunction.getNormalizedFitness(o2) - fitnessFunction.getNormalizedFitness(o1);
+                        return fitnessFunction.isMaximizing()
+                                ? compareFunctions(compared) : compareFunctions(compared) * (-1);
+                    }
+
+                    private int compareFunctions(double compared) {
                         if (isEpsEq(compared)) {
                             return 0;
                         } else if (compared < 0) {
@@ -60,8 +65,8 @@ public class GAUtils {
                     }
                 });
 
-                double minObjective = fitnessFunction.getFitness(paretoFront.get(0));
-                double maxObjective = fitnessFunction.getFitness(paretoFront.get(n -1));
+                double minObjective = fitnessFunction.getNormalizedFitness(paretoFront.get(0));
+                double maxObjective = fitnessFunction.getNormalizedFitness(paretoFront.get(n - 1));
 
                 if (!isEpsEq(minObjective, maxObjective)) {
                     crowdingDistanceMap.put(paretoFront.get(0), Double.POSITIVE_INFINITY);
@@ -70,8 +75,8 @@ public class GAUtils {
                     for (int i = 1; i < n - 1; i++) {
                         IChromosome<T> paretoElement = paretoFront.get(i);
                         double distance = crowdingDistanceMap.get(paretoElement);
-                        distance += (fitnessFunction.getFitness(paretoFront.get(i + 1)) -
-                                fitnessFunction.getFitness(paretoFront.get(i - 1)))
+                        distance += (fitnessFunction.getNormalizedFitness(paretoFront.get(i + 1)) -
+                                fitnessFunction.getNormalizedFitness(paretoFront.get(i - 1)))
                                 / (maxObjective - minObjective);
                         crowdingDistanceMap.put(paretoElement, distance);
                     }
@@ -85,7 +90,7 @@ public class GAUtils {
         double distance = 0.0;
 
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-            distance += Math.pow(fitnessFunction.getFitness(c1) - fitnessFunction.getFitness(c2), 2.0);
+            distance += Math.pow(fitnessFunction.getNormalizedFitness(c1) - fitnessFunction.getNormalizedFitness(c2), 2.0);
         }
         return Math.sqrt(distance);
     }
@@ -101,7 +106,7 @@ public class GAUtils {
                 boolean worseInOne = false;
                 boolean betterInOne = false;
                 for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-                    double compared = fitnessFunction.getFitness(chromosome) - fitnessFunction.getFitness(frontElement);
+                    double compared = fitnessFunction.getNormalizedFitness(chromosome) - fitnessFunction.getNormalizedFitness(frontElement);
                     if (isEpsEq(compared)) {
                         continue;
                     }

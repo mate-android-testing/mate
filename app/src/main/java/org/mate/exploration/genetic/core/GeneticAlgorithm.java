@@ -150,7 +150,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": "
-                            + fitnessFunction.getFitness(chromosome));
+                            + fitnessFunction.getNormalizedFitness(chromosome));
                 }
             }
             if (fitnessFunctions.size() > 5) {
@@ -167,5 +167,18 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
     }
-
+    protected void compareFitnessValues(boolean logFitness) {
+        // Discard old chromosome if not better than new one.
+        IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
+        double compared = fitnessFunction.getNormalizedFitness(population.get(0))
+                - fitnessFunction.getNormalizedFitness(population.get(1));
+        if(logFitness){
+            this.logCurrentFitness();
+        }
+        if (fitnessFunction.isMaximizing()) {
+            population.remove(compared > 0 ? 1 : 0);
+        } else {
+            population.remove(compared < 0 ? 1 : 0);
+        }
+    }
 }

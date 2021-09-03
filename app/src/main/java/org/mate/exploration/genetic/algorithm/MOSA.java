@@ -138,17 +138,18 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         List<IFitnessFunction<T>> toRemove = new ArrayList<>();
         for (IFitnessFunction<T> fitnessFunction : uncoveredFitnessFunctions) {
             IChromosome<T> best = population.get(0);
-            double bestFitness = fitnessFunction.getFitness(best);
+            boolean maximizing = fitnessFunction.isMaximizing();
+            double bestFitness = fitnessFunction.getNormalizedFitness(best);
             for (IChromosome<T> chrom : population) {
-                final double chromFitness = fitnessFunction.getFitness(chrom);
-                if (chromFitness > bestFitness) {
+                final double chromFitness = fitnessFunction.getNormalizedFitness(chrom);
+                if (maximizing ? chromFitness > bestFitness : chromFitness < bestFitness) {
                     best = chrom;
                     bestFitness = chromFitness;
                 }
             }
 
             // fitness function is now covered
-            if (bestFitness == 1) {
+            if (maximizing ? bestFitness == 1 : bestFitness == 0) {
                 toRemove.add(fitnessFunction);
             }
 
@@ -174,12 +175,12 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
             double bestLength = Double.POSITIVE_INFINITY;
             IChromosome<T> best = null;
-
+            boolean maximizing = fitnessFunction.isMaximizing();
             for (IChromosome<T> survivor : allChromosomes) {
-                final double score = fitnessFunction.getFitness(survivor);
+                final double score = fitnessFunction.getNormalizedFitness(survivor);
                 final double length = survivor.getValue().getEventSequence().size();
 
-                if (score == 1 && length <= bestLength) {
+                if ((maximizing ? score == 1 : score ==0 ) && length <= bestLength) {
                     best = survivor;
                     bestLength = length;
                 }

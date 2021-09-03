@@ -27,16 +27,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
         population.add(chromosomeFactory.createChromosome());
 
         // Discard old chromosome if not better than new one.
-        double compared = fitnessFunctions.get(0).getFitness(population.get(0))
-                - fitnessFunctions.get(0).getFitness(population.get(1));
-
-        logCurrentFitness();
-
-        if (compared > 0) {
-            population.remove(1);
-        } else {
-            population.remove(0);
-        }
+        compareFitnessValues(true);
 
         currentGenerationNumber++;
     }
@@ -50,7 +41,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
             for (int j = 0; j < population.size(); j++) {
                 IChromosome<T> chromosome = population.get(j);
                 MATE.log_acc("Chromosome " + (j + 1) + " Fitness: "
-                        + fitnessFunction.getFitness(chromosome));
+                        + fitnessFunction.getNormalizedFitness(chromosome));
 
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE
                         && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {

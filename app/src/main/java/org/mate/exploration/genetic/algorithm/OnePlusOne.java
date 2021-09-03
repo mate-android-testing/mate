@@ -34,17 +34,11 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
 
         // Add offspring to population
         super.evolve();
-
-        // Discard old chromosome if not better than new one.
-        double compared = fitnessFunctions.get(0).getFitness(population.get(0))
-                          - fitnessFunctions.get(0).getFitness(population.get(1));
-        if (compared > 0) {
-            population.remove(1);
-        } else {
-            population.remove(0);
-        }
+        compareFitnessValues(false);
 
         // Revert population size back to normal;
         populationSize--;
     }
+
+
 }
