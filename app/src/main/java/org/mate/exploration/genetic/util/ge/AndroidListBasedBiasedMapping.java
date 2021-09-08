@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.util.ge;
 
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.ListUtils;
 
 import java.util.List;
@@ -59,8 +59,8 @@ public class AndroidListBasedBiasedMapping extends AndroidListBasedMapping<Integ
 
     @Override
     protected Action selectAction() {
-        List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
-        WidgetAction selectedAction = ListUtils.wrappedGet(
+        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        UIAction selectedAction = ListUtils.wrappedGet(
                 executableActions,
                 ListUtils.wrappedGet(
                         activeGenotypeChromosome.getValue(), activeGenotypeCurrentCodonIndex));

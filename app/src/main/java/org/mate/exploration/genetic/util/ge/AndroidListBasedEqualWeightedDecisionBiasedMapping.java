@@ -1,14 +1,14 @@
 package org.mate.exploration.genetic.util.ge;
 
-import org.mate.ui.Action;
-import org.mate.ui.WidgetAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.ListUtils;
 
 import java.util.List;
 
 /**
  * An integer sequence to android {@link org.mate.model.TestCase} mapping where every codon based
- * decision is a 50/50 decision. That means in order to choose an {@link org.mate.ui.Action} the
+ * decision is a 50/50 decision. That means in order to choose an {@link Action} the
  * list of available actions on the current screen state is divided in half multiple times until
  * only a single actions remains. Which half should be halved again is determined by a codon.
  */
@@ -43,7 +43,7 @@ public class AndroidListBasedEqualWeightedDecisionBiasedMapping extends AndroidL
 
     @Override
     protected Action selectAction() {
-        List<WidgetAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
         int lowBound = 0;
         int highBound = executableActions.size() - 1;
         while (lowBound != highBound) {
