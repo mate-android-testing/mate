@@ -5,8 +5,8 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
+import org.mate.utils.coverage.CoverageUtils;
 
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
 
