@@ -1,4 +1,4 @@
-package org.mate.exploration.qlearning.qbe.util;
+package org.mate.utils;
 
 import java.util.Objects;
 

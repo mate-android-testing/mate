@@ -9,7 +9,7 @@ import org.mate.exploration.qlearning.qbe.interfaces.Application;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
-import org.mate.exploration.qlearning.qbe.util.Pair;
+import org.mate.utils.Pair;
 
 import java.time.Duration;
 import java.time.Instant;

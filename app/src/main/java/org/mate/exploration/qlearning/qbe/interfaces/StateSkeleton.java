@@ -4,7 +4,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 
 import org.mate.exploration.qlearning.qbe.util.CosineSimilarity;
-import org.mate.exploration.qlearning.qbe.util.Pair;
+import org.mate.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.HashSet;
