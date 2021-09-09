@@ -6,24 +6,18 @@ import android.support.annotation.RequiresApi;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.utils.Randomness;
 
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class RandomExploration<S extends State<A>, A extends Action> implements
         ExplorationStrategy<S, A> {
 
-  private final Random random = new Random();
-
   @Override
   public Optional<A> chooseAction(final S currentState) {
     final Set<A> possibleActions = currentState.getActions();
-    if (possibleActions.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return possibleActions.stream().skip(random.nextInt(possibleActions.size())).findFirst();
-    }
+    return possibleActions.isEmpty() ? Optional.empty() : Optional.of(Randomness.randomElement(possibleActions));
   }
 }

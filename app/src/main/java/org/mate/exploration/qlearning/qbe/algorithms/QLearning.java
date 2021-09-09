@@ -8,6 +8,7 @@ import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
+import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -28,7 +28,6 @@ public final class QLearning<S extends State<A>, A extends Action> {
   private final double epsilonUpdateFactor;
   private final int maximumNumberOfActions;
   private final double discountFactor;
-  private final Random random = new Random();
 
   public QLearning(final Objective<S, A> objective,
                    final QMatrix.AbstractStates<S, A> abstractStates,
@@ -120,9 +119,9 @@ public final class QLearning<S extends State<A>, A extends Action> {
     final Set<A> candidateActions = transitionSystem.nextActions(currentState);
     if (candidateActions.isEmpty()) {
       return Optional.empty();
-    } else if (random.nextDouble() < epsilon) {
+    } else if (Randomness.getRnd().nextDouble() < epsilon) {
       return Optional.of(
-              candidateActions.stream().skip(random.nextInt(candidateActions.size())).findFirst().get());
+              candidateActions.stream().skip(Randomness.getRnd().nextInt(candidateActions.size())).findFirst().get());
     } else {
       return Optional.of(candidateActions.stream()
               .max(Comparator.comparingDouble(a -> qMatrix.getValue(currentState, a))).get());

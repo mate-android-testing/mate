@@ -7,11 +7,11 @@ import android.support.annotation.RequiresApi;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.utils.Randomness;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,7 +22,6 @@ public final class QBE<S extends State<A>, A extends Action> implements Explorat
 
   private final QMatrix<S, A> qmatrix;
   private final QMatrix.AbstractActions<A> abstractActions;
-  private final Random random = new Random();
 
 
   public QBE(final QMatrix<S, A> qmatrix) {
@@ -43,7 +42,7 @@ public final class QBE<S extends State<A>, A extends Action> implements Explorat
       final Set<A> possibleActions = currentState.getActions().stream()
               .filter(a -> abstractActions.getAbstractActionIndex(a) == chosenAbstractActionIndex)
               .collect(Collectors.toSet());
-      return possibleActions.stream().skip(random.nextInt(possibleActions.size())).findFirst();
+      return Optional.of(Randomness.randomElement(possibleActions));
     }
   }
 }
