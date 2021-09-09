@@ -3,7 +3,7 @@ package org.mate.exploration.qlearning.qbe.interfaces;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import org.mate.exploration.qlearning.qbe.util.CosineSimilarity;
+import org.mate.utils.MathUtils;
 import org.mate.utils.Pair;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
       } else {
         final Pair<List<Double>, List<Double>> contentVectors = featureMapToContentVectors(
                 this.getFeatureMap(), o.getFeatureMap());
-        return CosineSimilarity.cosineSimilarity(contentVectors.first, contentVectors.second)
+        return MathUtils.cosineSimilarity(contentVectors.first, contentVectors.second)
                 > COSINE_SIMILARITY_THRESHOLD;
       }
     }
