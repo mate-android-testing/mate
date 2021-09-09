@@ -15,7 +15,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.mate.exploration.qlearning.qbe.util.DistributionRandomNumberGenerator.getDistributedRandomNumber;
+import static org.mate.utils.Randomness.getDistributedRandomNumber;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class QBE<S extends State<A>, A extends Action> implements ExplorationStrategy<S, A> {

@@ -1,14 +1,13 @@
 package org.mate.utils;
 
-import org.mate.MATE;
 import org.mate.Registry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 public class Randomness {
     public static Random getRnd() {
@@ -227,12 +226,53 @@ public class Randomness {
         Random random = getRnd();
         char[] result = new char[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             // a-z: https://stackoverflow.com/a/2627801/6110448
-            result[i] = (char)(random.nextInt(26) + 'a');
+            result[i] = (char) (random.nextInt(26) + 'a');
         }
 
         return result;
+    }
+
+    /**
+     * Choose a key of the given map randomly , such that the probability of a particular key being
+     * selected is proportionally to its value.
+     * Note: The distribution (the key values) need not be normalized.
+     */
+    public static <T> T getDistributedRandomNumber(final Map<T, Double> distribution) {
+        if (distribution.isEmpty()) {
+            throw new IllegalArgumentException("Distribution must not be empty.");
+        }
+
+        double distSum = 0.0;
+        for (Double d : distribution.values()) {
+            if (d == null) {
+                throw new NullPointerException("The distribution may not contain null entries");
+            } else if (d < 0) {
+                throw new IllegalArgumentException(
+                        "The distribution has to consist of non-negative doubles");
+            } else {
+                double v = d;
+                distSum += v;
+            }
+        }
+
+        if (distSum == 0.0) {
+            return randomElement(distribution.keySet());
+        } else {
+            final double ratio = 1.0 / distSum;
+            final double rand = getRnd().nextDouble();
+
+            double tempDist = 0;
+            for (final T t : distribution.keySet()) {
+                //noinspection ConstantConditions
+                tempDist += distribution.get(t);
+                if (rand / ratio <= tempDist) {
+                    return t;
+                }
+            }
+        }
+
+        throw new AssertionError("Should never reach here.");
     }
 }
