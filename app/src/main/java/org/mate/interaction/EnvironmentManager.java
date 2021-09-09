@@ -830,6 +830,27 @@ public class EnvironmentManager {
     }
 
     /**
+     * A convenient function to retrieve the coverage of a single test case within
+     * a test suite.
+     *
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param testSuiteId Identifies the test suite.
+     * @param testCaseId Identifies the individual test case.
+     * @return Returns the coverage of the given test case.
+     */
+    public double getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/get")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("testSuiteId", testSuiteId)
+                .withParameter("testCaseId", testCaseId);
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("coverage"));
+    }
+
+    /**
      * Convenient function to request the coverage information for a given chromosome.
      * A chromosome can be either a test case or a test suite. This method is used
      * to retrieve the coverage of the last incomplete test case.
