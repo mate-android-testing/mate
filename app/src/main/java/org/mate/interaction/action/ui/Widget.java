@@ -27,7 +27,7 @@ public class Widget {
     /**
      * A list of direct descendants.
      */
-    private List<Widget> children;
+    private final List<Widget> children;
 
     /**
      * A unique identifier for this widget, which is based on the activity name, the global
@@ -302,6 +302,15 @@ public class Widget {
      */
     public int getLocalIndex() {
         return localIndex;
+    }
+
+    /**
+     * Returns the depth of the widget in the widget hierarchy. The root widget has a depth of 0.
+     *
+     * @return the depth of the widget the widget hirachy.
+     */
+    public int getDepth() {
+        return depth;
     }
 
     /**
@@ -787,9 +796,7 @@ public class Widget {
     public boolean mightBeImage() {
         // android.widget.TextView components are drawables - they can contain images
         if (this.getClazz().contains("android.widget.TextView") && this.isClickable()) {
-            if (this.getText().isEmpty()) {
-                return true;
-            }
+            return this.getText().isEmpty();
         }
         return false;
     }
@@ -985,7 +992,7 @@ public class Widget {
     @Deprecated
     public void setColor(String color) {
 
-        String parts[] = color.split("#");
+        String[] parts = color.split("#");
         if (parts.length == 2) {
             this.color = parts[0];
             setMaxminLum(parts[1]);
