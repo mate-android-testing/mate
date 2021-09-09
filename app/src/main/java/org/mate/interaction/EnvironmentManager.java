@@ -240,7 +240,7 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/copy_fitness_data")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
                 .withParameter("chromosome_src", sourceChromosome.toString())
                 .withParameter("chromosome_target", targetChromosome.toString())
@@ -279,7 +279,7 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/copy")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("coverage_type", Properties.COVERAGE().name())
                 .withParameter("chromosome_src", sourceChromosome.toString())
                 .withParameter("chromosome_target", targetChromosome.toString())
@@ -688,7 +688,7 @@ public class EnvironmentManager {
      */
     public List<String> getSourceLines() {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/getSourceLines")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .build());
         if (!"/coverage/getSourceLines".equals(response.getSubject())) {
             MATE.log_acc("ERROR: unable to retrieve source lines");
@@ -725,6 +725,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
@@ -772,6 +773,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
@@ -818,7 +820,6 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
-                .withParameter("deviceId", emulator)
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("coverage_type", coverage.name());
         if (chromosomesParam != null) {
@@ -928,7 +929,7 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("lines", sb.toString())
                 .withParameter("chromosomes", chromosome.toString());
         Message response = sendMessage(messageBuilder.build());
