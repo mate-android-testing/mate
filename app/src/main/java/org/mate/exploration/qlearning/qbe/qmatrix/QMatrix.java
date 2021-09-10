@@ -37,6 +37,24 @@ public final class QMatrix<S extends State<A>, A extends Action> {
     matrix = new double[numberOfAbstractStates * numberOfAbstractActions];
   }
 
+  public QMatrix(final AbstractStates<S, A> abstractStates, final AbstractActions<A> abstractActions, final double[] values) {
+    this.abstractStates = Objects.requireNonNull(abstractStates);
+    this.abstractActions = Objects.requireNonNull(abstractActions);
+    numberOfAbstractStates = abstractStates.getNumberOfAbstractStates();
+    numberOfAbstractActions = abstractActions.getNumberOfAbstractActions();
+
+    if (numberOfAbstractStates <= 0 || numberOfAbstractActions <= 0) {
+      throw new IllegalArgumentException(
+              "Number of abstract state and number of abstract actions need to be at least 1");
+    }
+
+    if (abstractStates.getNumberOfAbstractStates() * abstractActions.getNumberOfAbstractActions() != values.length) {
+      throw new IllegalArgumentException("The number of values does not match the number of abstract states and abstract actions");
+    }
+
+    matrix = values.clone();
+  }
+
   public AbstractActions<A> getActionLabelingFunction() {
     return abstractActions;
   }
