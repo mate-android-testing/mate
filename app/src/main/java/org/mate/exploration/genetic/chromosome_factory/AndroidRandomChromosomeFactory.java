@@ -46,7 +46,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            for (actionsCount = 0; actionsCount < maxNumEvents; actionsCount++) {
+            for (actionsCount = 0; !finishTestCase(); actionsCount++) {
                 if (!testCase.updateTestCase(selectAction(), actionsCount)) {
                     return chromosome;
                 }
@@ -64,6 +64,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             testCase.finish();
         }
         return chromosome;
+    }
+
+    protected boolean finishTestCase() {
+        return actionsCount >= maxNumEvents;
     }
 
     /**
