@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RequiresApi(api = Build.VERSION_CODES.O)
+@RequiresApi(api = Build.VERSION_CODES.N)
 public final class ApplicationTester<S extends State<A>, A extends Action> implements Algorithm {
 
   private final Application<S, A> app;
