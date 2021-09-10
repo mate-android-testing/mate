@@ -14,10 +14,10 @@ import java.util.Map;
  * This fitness function is only supposed to work a multi/many-objective algorithm
  * like MOSA or MIO.
  */
-public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<TestCase> {
+public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction<T> {
 
     //todo: find better solution than static map... (i know its ugly)
-    private static final Map<String, Map<IChromosome<TestCase>, Double>> cache = new HashMap<>();
+    private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
     private static List<String> lines = new ArrayList<>();
     private final String line;
 
@@ -27,7 +27,7 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
     }
 
     @Override
-    public double getFitness(IChromosome<TestCase> chromosome) {
+    public double getFitness(IChromosome<T> chromosome) {
         if (!cache.get(line).containsKey(chromosome)) {
             throw new IllegalStateException("Fitness for chromosome " + chromosome + " not in cache. Must fetch fitness previously or performance reasons");
         }
@@ -35,14 +35,14 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
 
     }
 
-    public static void retrieveFitnessValues(IChromosome<TestCase> chromosome) {
+    public static <T> void retrieveFitnessValues(IChromosome<T> chromosome) {
         if (lines.size() == 0) {
             return;
         }
 
         if (cache.size() == 0) {
             for (String line : lines) {
-                cache.put(line, new HashMap<IChromosome<TestCase>, Double>());
+                cache.put(line, new HashMap<IChromosome, Double>());
             }
         }
 
@@ -61,15 +61,15 @@ public class LineCoveredPercentageFitnessFunction implements IFitnessFunction<Te
             return;
         }
 
-        List<IChromosome<TestCase>> activeChromosomes = new ArrayList<>();
+        List<IChromosome<T>> activeChromosomes = new ArrayList<>();
         for (IChromosome<T> chromosome: activeChromosomesAnon) {
-            activeChromosomes.add((IChromosome<TestCase>) chromosome);
+            activeChromosomes.add((IChromosome<T>) chromosome);
         }
 
         int count = 0;
         for (String line : lines) {
-            Map<IChromosome<TestCase>, Double> lineCache =  cache.get(line);
-            for (IChromosome<TestCase> chromosome: new ArrayList<>(lineCache.keySet())) {
+            Map<IChromosome, Double> lineCache =  cache.get(line);
+            for (IChromosome chromosome: new ArrayList<>(lineCache.keySet())) {
                 if (!activeChromosomes.contains(chromosome)) {
                     lineCache.remove(chromosome);
                     count++;

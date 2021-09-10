@@ -32,7 +32,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.0";
+    private static final String MESSAGE_PROTOCOL_VERSION = "2.1";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -235,15 +235,15 @@ public class EnvironmentManager {
             if (!testCase.isDummy()) {
                 sb.append(prefix);
                 prefix = ",";
-                sb.append(testCase);
+                sb.append(testCase.getId());
             }
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/copy_fitness_data")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
-                .withParameter("chromosome_src", sourceChromosome.toString())
-                .withParameter("chromosome_target", targetChromosome.toString())
+                .withParameter("chromosome_src", sourceChromosome.getValue().getId())
+                .withParameter("chromosome_target", targetChromosome.getValue().getId())
                 .withParameter("entities", sb.toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -274,15 +274,15 @@ public class EnvironmentManager {
             if (!testCase.isDummy()) {
                 sb.append(prefix);
                 prefix = ",";
-                sb.append(testCase);
+                sb.append(testCase.getId());
             }
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/copy")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("coverage_type", Properties.COVERAGE().name())
-                .withParameter("chromosome_src", sourceChromosome.toString())
-                .withParameter("chromosome_target", targetChromosome.toString())
+                .withParameter("chromosome_src", sourceChromosome.getValue().getId())
+                .withParameter("chromosome_target", targetChromosome.getValue().getId())
                 .withParameter("entities", sb.toString());
 
         Message response = sendMessage(messageBuilder.build());
@@ -293,13 +293,10 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the name of the currently visible activity.
-     * It can happen that the AUT just crashed and the
-     * activity name wasn't updated, then the string 'unknown'
-     * is returned.
+     * Retrieves the name of the currently visible activity. It can happen that the AUT just crashed
+     * and the activity name wasn't updated, then the string 'unknown' is returned.
      *
-     * @return Returns the name of the current activity or
-     *          the string 'unknown' if extraction failed.
+     * @return Returns the name of the current activity or the string 'unknown' if extraction failed.
      */
     public String getCurrentActivityName() {
 
@@ -410,15 +407,13 @@ public class EnvironmentManager {
     }
 
     /**
-     * API level 23 and higher requires that permissions are also granted
-     * at runtime. This can be done at install time with the flag -g,
-     * i.e. adb install -g apk, or via adb shell pm grant packageName permission.
-     * However, the intermediate reset/restart of the app causes the
+     * API level 23 and higher requires that permissions are also granted at runtime. This can be
+     * done at install time with the flag -g, i.e. adb install -g apk, or via adb shell pm grant
+     * packageName permission. However, the intermediate reset/restart of the app causes the
      * loss of those runtime permissions.
      *
      * @param packageName The app that requires the permissions.
-     * @return Returns {@code true} if the granting permissions succeeded,
-     * otherwise {@code false}.
+     * @return Returns {@code true} if the granting permissions succeeded, otherwise {@code false}.
      */
     // TODO: use InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission()
     public boolean grantRuntimePermissions(String packageName) {
@@ -431,9 +426,8 @@ public class EnvironmentManager {
     }
 
     /**
-     * Pushes dummy files for various data types, e.g. video, onto
-     * the external storage (sd card). This method should be only used in combination
-     * with the intent fuzzing functionality.
+     * Pushes dummy files for various data types, e.g. video, onto the external storage (sd card).
+     * This method should be only used in combination with the intent fuzzing functionality.
      *
      * @return Returns whether the push operation succeeded or not.
      */
@@ -488,8 +482,8 @@ public class EnvironmentManager {
     }
 
     /**
-     * Requests the list of branches of the AUT. Each branch typically
-     * represents a testing target into the context of MIO/MOSA.
+     * Requests the list of branches of the AUT. Each branch typically represents a testing target
+     * into the context of MIO/MOSA.
      *
      * @return Returns the list of branches.
      */
@@ -522,7 +516,7 @@ public class EnvironmentManager {
             }
         }
 
-        String chromosomeId = chromosome.toString();
+        String chromosomeId = getChromosomeId(chromosome);
 
         String testcase = entityId == null ? chromosomeId : entityId;
         if (coveredTestCases.contains(testcase)) {
@@ -565,9 +559,11 @@ public class EnvironmentManager {
             }
         }
 
+        String chromosomeId = getChromosomeId(chromosome);
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosomes", chromosome.toString());
+                .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("branch_distance"));
@@ -593,10 +589,12 @@ public class EnvironmentManager {
             }
         }
 
+        String chromosomeId = getChromosomeId(chromosome);
+
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/fitness/get_branch_fitness_vector")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosomes", chromosome.getValue().toString());
+                .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
         List<Double> branchFitnessVector = new ArrayList<>();
@@ -629,10 +627,12 @@ public class EnvironmentManager {
             }
         }
 
+        String chromosomeId = getChromosomeId(chromosome);
+
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/fitness/get_basic_block_fitness_vector")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosomes", chromosome.getValue().toString());
+                .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
         List<Double> basicBlockFitnessVector = new ArrayList<>();
@@ -665,9 +665,11 @@ public class EnvironmentManager {
             }
         }
 
+        String chromosomeId = getChromosomeId(chromosome);
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_branch_distance_vector")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosomes", chromosome.getValue().toString());
+                .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
         List<Double> branchDistanceVector = new ArrayList<>();
@@ -689,7 +691,7 @@ public class EnvironmentManager {
      */
     public List<String> getSourceLines() {
         Message response = sendMessage(new Message.MessageBuilder("/coverage/getSourceLines")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .build());
         if (!"/coverage/getSourceLines".equals(response.getSubject())) {
             MATE.log_acc("ERROR: unable to retrieve source lines");
@@ -711,6 +713,7 @@ public class EnvironmentManager {
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
 
         if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
+                || coverage == Coverage.METHOD_COVERAGE
                 || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE
                 || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
@@ -725,6 +728,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
@@ -754,9 +758,10 @@ public class EnvironmentManager {
             }
         }
 
-        String chromosomeId = chromosome.toString();
+        String chromosomeId = getChromosomeId(chromosome);
 
         if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
+                || coverage == Coverage.METHOD_COVERAGE
                 || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE
                 || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
@@ -771,6 +776,7 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/store")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
         if (entityId != null) {
             messageBuilder.withParameter("entity", entityId);
@@ -804,7 +810,7 @@ public class EnvironmentManager {
                         continue;
                     }
                 }
-                chromosomeIds.append(chromosome.getValue());
+                chromosomeIds.append(getChromosomeId(chromosome));
                 chromosomeIds.append("+");
             }
 
@@ -817,13 +823,33 @@ public class EnvironmentManager {
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
-                .withParameter("deviceId", emulator)
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("coverage_type", coverage.name());
         if (chromosomesParam != null) {
             messageBuilder.withParameter("chromosomes", chromosomesParam);
         }
 
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("coverage"));
+    }
+
+    /**
+     * A convenient function to retrieve the coverage of a single test case within
+     * a test suite.
+     *
+     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param testSuiteId Identifies the test suite.
+     * @param testCaseId Identifies the individual test case.
+     * @return Returns the coverage of the given test case.
+     */
+    public double getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/get")
+                .withParameter("deviceId", emulator)
+                .withParameter("coverage_type", coverage.name())
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("testSuiteId", testSuiteId)
+                .withParameter("testCaseId", testCaseId);
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));
     }
@@ -866,11 +892,13 @@ public class EnvironmentManager {
             }
         }
 
+        String chromosomeId = getChromosomeId(chromosome);
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
                 .withParameter("coverage_type", coverage.name())
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosomes", chromosome.toString());
+                .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("coverage"));
     }
@@ -905,10 +933,12 @@ public class EnvironmentManager {
             sb.setLength(sb.length() - 1);
         }
 
+        String chromosomeId = getChromosomeId(chromosome);
+
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
-                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
                 .withParameter("lines", sb.toString())
-                .withParameter("chromosomes", chromosome.toString());
+                .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
 
         if (response.getSubject().equals("/error")) {
@@ -1135,5 +1165,27 @@ public class EnvironmentManager {
         if (!"/emulator/interaction".equals(response.getSubject())) {
             MATE.log_acc("ERROR: unable to toggle rotation of emulator");
         }
+    }
+
+    /**
+     * Returns the chromosome id of the given chromosome.
+     *
+     * @param chromosome The chromosome.
+     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
+     * @return Returns the chromosome id of the given chromosome.
+     */
+    private <T> String getChromosomeId(IChromosome<T> chromosome) {
+
+        String chromosomeId = null;
+
+        if (chromosome.getValue() instanceof TestCase) {
+            chromosomeId = ((TestCase) chromosome.getValue()).getId();
+        } else if (chromosome.getValue() instanceof TestSuite) {
+            chromosomeId = ((TestSuite) chromosome.getValue()).getId();
+        } else {
+            throw new IllegalStateException("Couldn't derive chromosome id for chromosome "
+                    + chromosome + "!");
+        }
+        return chromosomeId;
     }
 }
