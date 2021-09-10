@@ -36,15 +36,14 @@ public class SuiteCutPointMutationFunction implements IMutationFunction<TestSuit
             FitnessUtils.copyFitnessData(chromosome, mutatedChromosome, copyCoverageDataFor);
         }
 
-        //Todo: handle coverage
         for (int i = 0; i < chromosome.getValue().getTestCases().size(); i++) {
             if (i == randomElementIndex) {
                 TestCase mutatedTestCase = cutPointMutationFunction.mutate(new Chromosome<>(
                         chromosome.getValue().getTestCases().get(i))).get(0).getValue();
                 mutatedTestSuite.getTestCases().add(mutatedTestCase);
 
-                FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, mutatedTestCase.toString());
-                CoverageUtils.storeTestSuiteChromosomeCoverage(mutatedChromosome, mutatedTestCase.toString());
+                FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, mutatedTestCase);
+                CoverageUtils.storeTestSuiteChromosomeCoverage(mutatedChromosome, mutatedTestCase);
                 CoverageUtils.logChromosomeCoverage(mutatedChromosome);
             } else {
                 mutatedTestSuite.getTestCases().add(chromosome.getValue().getTestCases().get(i));
