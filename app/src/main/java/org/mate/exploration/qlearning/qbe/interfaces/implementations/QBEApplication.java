@@ -21,8 +21,8 @@ public class QBEApplication implements Application<QBEState, QBEAction> {
     }
 
     @Override
-    public QBEState getInitialState() {
-        return null; // TODO!
+    public QBEState getCurrentState() {
+        return new QBEState(uiAbstractionLayer.getLastScreenState());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

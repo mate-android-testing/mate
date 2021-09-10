@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public interface Application<S extends State<A>, A extends Action> {
 
-  S getInitialState();
+  S getCurrentState();
 
   Optional<S> executeAction(A action);
 

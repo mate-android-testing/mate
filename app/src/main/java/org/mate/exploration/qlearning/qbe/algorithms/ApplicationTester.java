@@ -35,7 +35,9 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     this.app = Objects.requireNonNull(app);
     this.explorationStrategy = Objects.requireNonNull(explorationStrategy);
     this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
-    this.transitionSystem = new TransitionSystem<>(app.getInitialState());
+
+    app.reset();
+    this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
 
     if (maximumNumberOfActionPerTestcase <= 0) {
       throw new IllegalArgumentException(
@@ -55,7 +57,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     //noinspection InfiniteLoopStatement
     while (true) {
       app.reset();
-      S currentState = app.getInitialState();
+      S currentState = app.getCurrentState();
       final List<TransitionRelation<S, A>> testcase = new ArrayList<>();
 
       boolean noCrash = true; // Initialization is not necessary, but the compiler cannot figure it out.
