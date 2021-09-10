@@ -21,7 +21,7 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
 
     protected static final double COSINE_SIMILARITY_THRESHOLD = 0.95;
     private static final AtomicInteger dummyComponentIndex = new AtomicInteger();
-    private Set<Integer> dummyComponents;
+    private final Set<Integer> dummyComponents = new HashSet<>();
 
     /*
      * Matches the keys of both map. Missing values are set to 0.
