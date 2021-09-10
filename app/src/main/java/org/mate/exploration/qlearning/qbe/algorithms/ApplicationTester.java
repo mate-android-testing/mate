@@ -3,16 +3,14 @@ package org.mate.exploration.qlearning.qbe.algorithms;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import org.mate.exploration.Algorithm;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.Application;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
-import org.mate.utils.Pair;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,24 +20,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
-public final class ApplicationTester<S extends State<A>, A extends Action> {
+public final class ApplicationTester<S extends State<A>, A extends Action> implements Algorithm {
 
   private final Application<S, A> app;
   private final ExplorationStrategy<S, A> explorationStrategy;
-  private final Duration timeout;
   private final int maximumNumberOfActionPerTestcase;
+
+  private final Set<List<TransitionRelation<S, A>>> testsuite = new HashSet<>();
+  private final TransitionSystem<S, A> transitionSystem;
 
   public ApplicationTester(final Application<S, A> app,
                            final ExplorationStrategy<S, A> explorationStrategy,
-                           final Duration timeout, final int maximumNumberOfActionPerTestcase) {
+                           final int maximumNumberOfActionPerTestcase) {
     this.app = Objects.requireNonNull(app);
     this.explorationStrategy = Objects.requireNonNull(explorationStrategy);
-    this.timeout = Objects.requireNonNull(timeout);
     this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
-
-    if (timeout.isZero() || timeout.isNegative()) {
-      throw new IllegalArgumentException("Timeout needs to be a positive duration.");
-    }
+    this.transitionSystem = new TransitionSystem<>(app.getInitialState());
 
     if (maximumNumberOfActionPerTestcase <= 0) {
       throw new IllegalArgumentException(
@@ -47,12 +43,17 @@ public final class ApplicationTester<S extends State<A>, A extends Action> {
     }
   }
 
-  public Pair<TransitionSystem<S, A>, Set<List<TransitionRelation<S, A>>>> exploreApplication() {
-    final Set<List<TransitionRelation<S, A>>> testsuite = new HashSet<>();
-    final TransitionSystem<S, A> transitionSystem = new TransitionSystem<>(app.getInitialState());
+  public Set<List<TransitionRelation<S, A>>> getTestsuite() {
+    return testsuite;
+  }
 
-    final Instant startTime = Instant.now();
-    while (noTimeout(startTime)) {
+  public TransitionSystem<S, A> getTransitionSystem() {
+    return transitionSystem;
+  }
+
+  public void run() {
+    //noinspection InfiniteLoopStatement
+    while (true) {
       app.reset();
       S currentState = app.getInitialState();
       final List<TransitionRelation<S, A>> testcase = new ArrayList<>();
@@ -81,15 +82,10 @@ public final class ApplicationTester<S extends State<A>, A extends Action> {
             currentState = nextState.get();
           }
         }
-      } while (noTerminalState && noCrash && noTimeout(startTime)
-              && testcase.size() < maximumNumberOfActionPerTestcase);
+      } while (noTerminalState && noCrash && testcase.size() < maximumNumberOfActionPerTestcase);
 
       testsuite.add(testcase);
     }
-
-    transitionSystem.removeUnreachableStates();
-    assert transitionSystem.isDeterministic();
-    return new Pair<>(transitionSystem, testsuite);
   }
 
   private void passiveLearn(
@@ -137,8 +133,5 @@ public final class ApplicationTester<S extends State<A>, A extends Action> {
     assert ts.isDeterministic() : "The transition system should be deterministic after applying passiveLearn";
   }
 
-  private boolean noTimeout(final Instant startTime) {
-    return timeout.compareTo(Duration.between(startTime, Instant.now())) > 0;
-  }
 }
 
