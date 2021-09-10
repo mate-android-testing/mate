@@ -66,6 +66,12 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         return chromosome;
     }
 
+    /**
+     * Defines when the test case creation, i.e. the filling with actions, should be stopped.
+     *
+     * @return Returns {@code true} when the test case creation should be stopped,
+     *          otherwise {@code false} is returned.
+     */
     protected boolean finishTestCase() {
         return actionsCount >= maxNumEvents;
     }
