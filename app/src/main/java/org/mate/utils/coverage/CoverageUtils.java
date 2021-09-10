@@ -84,9 +84,9 @@ public class CoverageUtils {
     }
 
     /**
-     * Store coverage data for the given TestCase based chromosome
+     * Stores coverage data for the given test case chromosome.
      *
-     * @param chromosome store coverage for this chromosome
+     * @param chromosome The test case chromosome.
      */
     public static void storeTestCaseChromosomeCoverage(IChromosome<TestCase> chromosome) {
 
@@ -320,7 +320,7 @@ public class CoverageUtils {
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(coverage, testSuite.toString(), testCase.toString());
+                        .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
         }
