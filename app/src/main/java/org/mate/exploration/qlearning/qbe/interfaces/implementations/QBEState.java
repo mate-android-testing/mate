@@ -58,4 +58,34 @@ public final class QBEState extends StateSkeleton<QBEAction> implements State<QB
     protected Map<String, Integer> getFeatureMap() {
         return Collections.unmodifiableMap(featureMap);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("{\"actions\":[");
+        boolean firstEntry = true;
+        for (final QBEAction action : actions) {
+            if (!firstEntry) {
+                sb.append(",");
+            } else {
+                firstEntry = false;
+            }
+            sb.append(action);
+        }
+        sb.append("],\"featureMap\":{");
+        firstEntry = true;
+        for (final Map.Entry<String, Integer> entry : featureMap.entrySet()) {
+            if (!firstEntry) {
+                sb.append(",");
+            } else {
+                firstEntry = false;
+            }
+            sb.append("\"");
+            sb.append(entry.getKey());
+            sb.append("\":");
+            sb.append(entry.getValue());
+        }
+        sb.append("}}");
+        return sb.toString();
+    }
 }

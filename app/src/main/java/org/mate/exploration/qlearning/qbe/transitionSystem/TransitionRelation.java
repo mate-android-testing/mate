@@ -38,4 +38,9 @@ public final class TransitionRelation<S extends State<A>, A extends Action> {
   public int hashCode() {
     return 31 * 31 * from.hashCode() + 31 * trigger.hashCode() + (to != null ? to.hashCode() : 0);
   }
+
+  @Override
+  public String toString() {
+    return "{\"from\":" + from + ",\"trigger\":" + trigger + ",\"to\":" + to + "}";
+  }
 }

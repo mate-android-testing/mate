@@ -96,4 +96,24 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
     return true;
   }
 
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder();
+    sb.append("{\"initialState\":");
+    sb.append(initialState);
+    sb.append(",\"transitions\":[");
+
+    boolean firstEntry = true;
+    for (final TransitionRelation<S, A> transition : transitions) {
+      if (!firstEntry) {
+        sb.append(",");
+      } else {
+        firstEntry = false;
+      }
+      sb.append(transition);
+    }
+    sb.append("]}");
+    return sb.toString();
+  }
+
 }

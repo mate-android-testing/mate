@@ -15,4 +15,9 @@ public final class QBEAction implements Action {
     public UIAction getUiAction() {
         return uiAction;
     }
+
+    @Override
+    public String toString() {
+        return "{\"uiAction\":{\"actionType\":\"" + uiAction.getActionType() + "\",\"activityName\":\"" + uiAction.getActivityName() + "\"}}";
+    }
 }
