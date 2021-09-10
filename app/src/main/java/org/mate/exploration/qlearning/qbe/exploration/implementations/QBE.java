@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mate.utils.Randomness.getDistributedRandomNumber;
+import static org.mate.utils.StreamUtils.distinctByKey;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class QBE<S extends State<A>, A extends Action> implements ExplorationStrategy<S, A> {
@@ -36,9 +37,11 @@ public final class QBE<S extends State<A>, A extends Action> implements Explorat
     if (currentActions.isEmpty()) {
       return Optional.empty();
     } else {
-      final Map<Integer, Double> qMap = currentActions.stream().collect(
-              Collectors.toMap(abstractActions::getAbstractActionIndex,
-                      action -> qmatrix.getValue(currentState, action)));
+      final Map<Integer, Double> qMap = currentActions.stream()
+              .filter(distinctByKey(abstractActions::getAbstractActionIndex))
+              .collect(
+                      Collectors.toMap(abstractActions::getAbstractActionIndex,
+                              action -> qmatrix.getValue(currentState, action)));
       final int chosenAbstractActionIndex = getDistributedRandomNumber(qMap);
       final Set<A> possibleActions = currentState.getActions().stream()
               .filter(a -> abstractActions.getAbstractActionIndex(a) == chosenAbstractActionIndex)
