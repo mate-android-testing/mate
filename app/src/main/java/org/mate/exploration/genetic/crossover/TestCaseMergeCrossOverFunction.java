@@ -30,6 +30,12 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
 
     @Override
     public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
+
+        if (parents.size() == 1) {
+            MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on single chromosome!");
+            return parents.get(0);
+        }
+
         List<Action> l1 = parents.get(0).getValue().getEventSequence();
         List<Action> l2 = parents.get(1).getValue().getEventSequence();
         if (l2.size() < l1.size()) {
@@ -51,41 +57,43 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         for (int i = 0; i < l1.size(); i++) {
             int idx = choice + d;
 
-            for (Edge e1 : Registry.getUiAbstractionLayer().getEdges(l1.get(idx))) {
+            if (idx < l1.size()) {
+                for (Edge e1 : Registry.getUiAbstractionLayer().getEdges(l1.get(idx))) {
 
-                // don't consider actions that result in leaving the app
-                if (e1 != null && e1.getTarget().getPackageName().equals(Registry.getPackageName())) {
-                    int cc = l2.size() / 2 + (l1.size() + 1) / 2 - idx;
-                    // keep starting index within list bounds
-                    cc = Math.min(Math.max(0, cc), l1.size() - 1);
-                    Optional<Integer> match = findMatch(l1.get(idx), l2, cc);
-                    if (match.hasValue()) {
-                        MATE.log_acc("Found match: " + idx + ", " + match.getValue());
-                        return merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize);
+                    // don't consider actions that result in leaving the app
+                    if (e1 != null && e1.getTarget().getPackageName().equals(Registry.getPackageName())) {
+                        int cc = l2.size() / 2 + (l1.size() + 1) / 2 - idx;
+                        // keep starting index within list bounds
+                        cc = Math.min(Math.max(0, cc), l1.size() - 1);
+                        Optional<Integer> match = findMatch(l1.get(idx), l2, cc);
+                        if (match.hasValue()) {
+                            MATE.log_acc("Found match: " + idx + ", " + match.getValue());
+                            return merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize);
+                        }
                     }
-                }
 
-                if (right) {
-                    if (d < 0) {
-                        d = -d;
-                    }
-                    d = d + 1;
-                    if (choice - d >= 0) {
-                        right = false;
-                    }
-                } else {
-                    if (d > 0) {
-                        d = -d;
+                    if (right) {
+                        if (d < 0) {
+                            d = -d;
+                        }
+                        d = d + 1;
+                        if (choice - d >= 0) {
+                            right = false;
+                        }
                     } else {
-                        d -= 1;
-                    }
-                    if (choice - d + 1 < l1.size()) {
-                        right = true;
+                        if (d > 0) {
+                            d = -d;
+                        } else {
+                            d -= 1;
+                        }
+                        if (choice - d + 1 < l1.size()) {
+                            right = true;
+                        }
                     }
                 }
             }
         }
-        MATE.log_acc("No match found.");
+        MATE.log_warn("No match found.");
         return parents.get(0);
     }
 

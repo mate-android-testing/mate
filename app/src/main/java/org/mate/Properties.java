@@ -213,6 +213,11 @@ public class Properties {
         return propertyOr(true);
     }
 
+    // whether only AUT classes should be resolved
+    public static boolean RESOLVE_ONLY_AUT_CLASSES() {
+        return propertyOr(true);
+    }
+
     // whether ART classes should be excluded when constructing the graph
     public static boolean EXCLUDE_ART_CLASSES() {
         return propertyOr(true);

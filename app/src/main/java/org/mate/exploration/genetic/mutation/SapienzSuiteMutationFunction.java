@@ -83,8 +83,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase mutatedTestCase = TestCase.fromDummy(testCase);
                 executedTestCases.add(mutatedTestCase);
 
-                FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, mutatedTestCase.toString());
-                CoverageUtils.storeTestSuiteChromosomeCoverage(mutatedChromosome, mutatedTestCase.toString());
+                FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, mutatedTestCase);
+                CoverageUtils.storeTestSuiteChromosomeCoverage(mutatedChromosome, mutatedTestCase);
                 CoverageUtils.logChromosomeCoverage(mutatedChromosome);
 
             } else {
