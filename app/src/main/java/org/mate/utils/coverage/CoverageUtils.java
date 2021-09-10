@@ -36,6 +36,23 @@ public class CoverageUtils {
                                         IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
         switch (Properties.COVERAGE()) {
+            case ACTIVITY_COVERAGE:
+                /*
+                * Since we request the activity coverage from the coverage map, we need to
+                * keep it up-to-date. Note that we assume that there is no coverage data
+                * for the target chromosome present yet.
+                 */
+                Set<String> visitedActivitiesOfTestCases = new HashSet<>();
+                for (TestCase testCase : testCases) {
+                    visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
+                }
+
+                if (visitedActivities.containsKey(targetChromosome)) {
+                    MATE.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
+                }
+
+                visitedActivities.put(targetChromosome, visitedActivitiesOfTestCases);
+                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -91,24 +108,23 @@ public class CoverageUtils {
     }
 
     /**
-     * Store coverage data of a single TestCase of the given TestSuite based chromosome
+     * Stores the coverage data of a single test case within a test suite.
      *
-     * @param chromosome store coverage for this chromosome
-     * @param testCaseId store coverage for this TestCase
+     * @param chromosome The test suite.
+     * @param testCase The test case within the test suite.
      */
     public static void storeTestSuiteChromosomeCoverage(
-            IChromosome<TestSuite> chromosome,
-            String testCaseId) {
+            IChromosome<TestSuite> chromosome, TestCase testCase) {
 
         switch (Properties.COVERAGE()) {
             case ACTIVITY_COVERAGE:
-                // only add the visited activities by the specified test case
-                Set<String> visitedActivitiesByTestCase = new HashSet<>();
-                for (TestCase testCase : chromosome.getValue().getTestCases()) {
-                    if (testCase.toString().equals(testCaseId)) {
-                        visitedActivitiesByTestCase.addAll(testCase.getVisitedActivities());
-                    }
-                }
+                /*
+                * We store here the activity coverage per test suite, not per test case.
+                * This simplifies the implementation. In case someone needs access to the
+                * coverage of the individual test cases, one has to iterate over the
+                * test cases manually.
+                 */
+                Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
 
                 // merge with already visited activities of other test cases in the test suite
                 if (visitedActivities.containsKey(chromosome)) {
@@ -123,7 +139,7 @@ public class CoverageUtils {
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
-                        Properties.COVERAGE(), chromosome, testCaseId);
+                        Properties.COVERAGE(), chromosome, testCase.getId());
                 break;
             default:
                 break;
@@ -150,6 +166,14 @@ public class CoverageUtils {
                         / getActivities().size() * 100;
                 MATE.log("Coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + activityCoverage);
+
+                if (chromosome.getValue() instanceof TestSuite) {
+                    for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
+                        MATE.log("Coverage of individual chromosome " + testCase + ": "
+                                + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
+                    }
+                }
+
                 break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
@@ -159,6 +183,13 @@ public class CoverageUtils {
                 MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(), chromosome));
+
+                if (chromosome.getValue() instanceof TestSuite) {
+                    for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
+                        MATE.log("Coverage of individual chromosome " + testCase + ": "
+                                + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
+                    }
+                }
                 break;
             default:
                 break;
@@ -260,6 +291,36 @@ public class CoverageUtils {
             case BASIC_BLOCK_BRANCH_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, chromosomes);
+            default:
+                throw new UnsupportedOperationException("Coverage type not yet supported!");
+        }
+    }
+
+    /**
+     * A convenient function to retrieve the coverage of a single test case within a test suite.
+     *
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param testSuite The test suite.
+     * @param testCase The single test case within the test suite.
+     * @return Returns the coverage for the given test case.
+     */
+    public static double getCoverage(Coverage coverage, IChromosome<TestSuite> testSuite, TestCase testCase) {
+
+        switch (Properties.COVERAGE()) {
+
+            case ACTIVITY_COVERAGE:
+                /*
+                 * We store the activity coverage per test suite, hence we can't request that
+                 * information from the visited activities coverage map.
+                 */
+                return (double) testCase.getVisitedActivities().size() / getActivities().size() * 100;
+            case BRANCH_COVERAGE:
+            case LINE_COVERAGE:
+            case METHOD_COVERAGE:
+            case BASIC_BLOCK_LINE_COVERAGE:
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getCoverage(coverage, testSuite.toString(), testCase.toString());
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
         }

@@ -72,9 +72,9 @@ public class FitnessUtils {
      * fetched from the emulator when dealing with branch distance fitness.
      *
      * @param chromosome The given test suite.
-     * @param testCaseId The test case id.
+     * @param testCase The test case within the test suite.
      */
-    public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, String testCaseId) {
+    public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, TestCase testCase) {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
@@ -84,7 +84,7 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
+            Registry.getEnvironmentManager().storeFitnessData(chromosome, testCase.getId());
         }
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {

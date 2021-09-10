@@ -16,6 +16,7 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
 
     @Override
     public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {
+
         TestSuite t1 = parents.get(0).getValue();
         TestSuite t2 = parents.get(1).getValue();
 

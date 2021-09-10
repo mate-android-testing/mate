@@ -29,8 +29,8 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
             MATE.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
-            FitnessUtils.storeTestSuiteChromosomeFitness(chromosome, tc.toString());
-            CoverageUtils.storeTestSuiteChromosomeCoverage(chromosome, tc.toString());
+            FitnessUtils.storeTestSuiteChromosomeFitness(chromosome, tc);
+            CoverageUtils.storeTestSuiteChromosomeCoverage(chromosome, tc);
         }
         CoverageUtils.logChromosomeCoverage(chromosome);
         return chromosome;
