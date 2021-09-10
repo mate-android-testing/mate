@@ -1,4 +1,4 @@
-package org.mate.exploration.qlearning.qbe.exploration.implementations;
+package org.mate.exploration.qlearning.qbe.qmatrix;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;

@@ -7,6 +7,7 @@ import android.support.annotation.RequiresApi;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.exploration.qlearning.qbe.qmatrix.QMatrix;
 import org.mate.utils.Randomness;
 
 import java.util.Map;

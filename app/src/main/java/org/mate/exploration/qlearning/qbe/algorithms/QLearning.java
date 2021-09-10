@@ -3,9 +3,9 @@ package org.mate.exploration.qlearning.qbe.algorithms;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import org.mate.exploration.qlearning.qbe.exploration.implementations.QMatrix;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.exploration.qlearning.qbe.qmatrix.QMatrix;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
 import org.mate.utils.Randomness;
