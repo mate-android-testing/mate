@@ -17,6 +17,11 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
     @Override
     public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {
 
+        if (parents.size() == 1) {
+            MATE.log_warn("UniformSuiteCrossoverFunction not applicable on single chromosome!");
+            return parents.get(0);
+        }
+
         TestSuite t1 = parents.get(0).getValue();
         TestSuite t2 = parents.get(1).getValue();
 
