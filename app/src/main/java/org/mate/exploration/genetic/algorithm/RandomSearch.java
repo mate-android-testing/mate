@@ -23,11 +23,21 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
 
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
-        // add temporary a second random chromosome
+        // Add temporary a second random chromosome.
         population.add(chromosomeFactory.createChromosome());
 
         // Discard old chromosome if not better than new one.
-        compareFitnessValues(true);
+        IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
+        double compared = fitnessFunction.getNormalizedFitness(population.get(0))
+                - fitnessFunction.getNormalizedFitness(population.get(1));
+
+        logCurrentFitness();
+
+        if (fitnessFunction.isMaximizing()) {
+            population.remove(compared > 0 ? 1 : 0);
+        } else {
+            population.remove(compared < 0 ? 1 : 0);
+        }
 
         currentGenerationNumber++;
     }

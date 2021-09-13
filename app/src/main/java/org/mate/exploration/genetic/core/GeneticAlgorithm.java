@@ -9,9 +9,9 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
+import org.mate.utils.Randomness;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
-import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -165,20 +165,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 MATE.log_acc("Combined coverage of current population: "
                         + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }
-        }
-    }
-    protected void compareFitnessValues(boolean logFitness) {
-        // Discard old chromosome if not better than new one.
-        IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
-        double compared = fitnessFunction.getNormalizedFitness(population.get(0))
-                - fitnessFunction.getNormalizedFitness(population.get(1));
-        if(logFitness){
-            this.logCurrentFitness();
-        }
-        if (fitnessFunction.isMaximizing()) {
-            population.remove(compared > 0 ? 1 : 0);
-        } else {
-            population.remove(compared < 0 ? 1 : 0);
         }
     }
 }
