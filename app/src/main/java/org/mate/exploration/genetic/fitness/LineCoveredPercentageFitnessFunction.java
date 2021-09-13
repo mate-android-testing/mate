@@ -41,7 +41,7 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return getFitness(chromosome)/100;
+        return getFitness(chromosome);
     }
 
     public static <T> void retrieveFitnessValues(IChromosome<T> chromosome) {
