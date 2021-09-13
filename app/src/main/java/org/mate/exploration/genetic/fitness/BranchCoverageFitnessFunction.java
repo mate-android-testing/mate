@@ -31,6 +31,6 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return getFitness(chromosome)/100;
+        return getFitness(chromosome) / 100;
     }
 }
