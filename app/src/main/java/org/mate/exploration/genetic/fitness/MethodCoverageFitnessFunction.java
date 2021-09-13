@@ -21,7 +21,6 @@ public class MethodCoverageFitnessFunction<T> implements IFitnessFunction<T> {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
-        // TODO: normalise fitness value in the range [0,1]
         return methodCoverage;
     }
 

@@ -10,8 +10,7 @@ import java.util.Map;
 
 /**
  * Provides a fitness metric based on branch distance for multi-objective algorithms. This requires
- * that the AUT has been instrumented with the branch distance module. Based on the paper
- * "It Does Matter How You Normalise the Branch Distance in Search Based Software Testing".
+ * that the AUT has been instrumented with the branch distance module.
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */

@@ -9,8 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides a fitness metric based on branch distance. This requires that the
- * AUT has been instrumented with the branch distance  module.
+ * Provides a fitness metric based on approach level + branch distance. This requires that the
+ * AUT has been instrumented with the branch distance module. The fitness value is already
+ * normalised in the range [0,1].
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
@@ -44,7 +45,7 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
          *  aware that the initial population can also satisfy this condition.
          */
         // we can end execution if we covered the target vertex
-        if (branchDistance == 1.0) {
+        if (branchDistance == 0.0) {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
