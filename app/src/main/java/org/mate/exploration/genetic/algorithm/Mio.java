@@ -23,11 +23,11 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
     private final int populationSizeStart;
     private final long startTime;
-    private HashMap<IFitnessFunction<T>, List<IndividualFitnessTuple>> populations;
+    private Map<IFitnessFunction<T>, List<IndividualFitnessTuple>> populations;
     private double pSampleRandom;
     private final double pSampleRandomStart;
     private final double focusedSearchStart;
-    private HashMap<IFitnessFunction<T>, Integer> samplingCounters;
+    private Map<IFitnessFunction<T>, Integer> samplingCounters;
     private List<IChromosome<T>> archive;
 
     /**
@@ -130,7 +130,6 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                     // Remove worst if we reached limit population limit
                     populations.get(fitnessFunction).remove(worstTest);
                 }
-
             }
         }
 
@@ -160,12 +159,12 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         if (populations.get(target).size() != 1) {
-            //If we have more or less than one individual we cannot have this covered yet.
-            //Covered targets only retain one individual
+            // If we have more or less than one individual we cannot have this covered yet.
+            // Covered targets only retain one individual.
             return false;
         }
-        double fitnessTarget = populations.get(target).get(0).fitness;
 
+        double fitnessTarget = populations.get(target).get(0).fitness;
         return maximizing ? fitnessTarget == 1 : fitnessTarget == 0;
     }
 
@@ -178,7 +177,8 @@ public class Mio<T> extends GeneticAlgorithm<T> {
             }
 
             for (IChromosome<T> individual : this.population) {
-                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual, fitnessFunction.getNormalizedFitness(individual));
+                IndividualFitnessTuple tuple = new IndividualFitnessTuple(individual,
+                        fitnessFunction.getNormalizedFitness(individual));
                 populations.get(fitnessFunction).add(tuple);
 
             }
@@ -186,7 +186,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     }
 
     private void updateParameters() {
-        // We also need to shrink the population at this point
+        // We also need to shrink the population at this point.
         long currentTime = System.currentTimeMillis();
         long expiredTime = (currentTime - startTime);
         long focusedStartAbsolute = (long) (Registry.getTimeout() * focusedSearchStart);
@@ -205,7 +205,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
     private IndividualFitnessTuple getWorstTest(List<IndividualFitnessTuple> tuples, boolean maximizing) {
         if (tuples == null || tuples.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find worst test if list is empty");
+            throw new IllegalArgumentException("Cannot find worst test if list is empty!");
         }
 
         IndividualFitnessTuple worstTuple = tuples.get(0);
@@ -223,7 +223,8 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private IFitnessFunction<T> getBestTarget() {
         Map.Entry<IFitnessFunction<T>, Integer> bestEntry = null;
         for (Map.Entry<IFitnessFunction<T>, Integer> entry : samplingCounters.entrySet()) {
-            if (bestEntry == null || (bestEntry.getValue() > entry.getValue() && !isTargetCovered(entry.getKey()))) {
+            if (bestEntry == null || (bestEntry.getValue() > entry.getValue()
+                    && !isTargetCovered(entry.getKey()))) {
                 bestEntry = entry;
             }
         }
