@@ -2,7 +2,6 @@ package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
@@ -35,18 +34,18 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
 
     }
 
-    public static <T> void retrieveFitnessValues(IChromosome<T> chromosome) {
     @Override
     public boolean isMaximizing() {
         return true;
     }
 
     @Override
-    public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome)/100;
     }
 
-    public static void retrieveFitnessValues(IChromosome<TestCase> chromosome) {
+    public static <T> void retrieveFitnessValues(IChromosome<T> chromosome) {
+
         if (lines.size() == 0) {
             return;
         }
@@ -72,10 +71,7 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
             return;
         }
 
-        List<IChromosome<T>> activeChromosomes = new ArrayList<>();
-        for (IChromosome<T> chromosome: activeChromosomesAnon) {
-            activeChromosomes.add((IChromosome<T>) chromosome);
-        }
+        List<IChromosome<T>> activeChromosomes = new ArrayList<>(activeChromosomesAnon);
 
         int count = 0;
         for (String line : lines) {
