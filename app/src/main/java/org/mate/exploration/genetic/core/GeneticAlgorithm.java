@@ -150,7 +150,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": "
-                            + fitnessFunction.getNormalizedFitness(chromosome));
+                            + fitnessFunction.getFitness(chromosome));
                 }
             }
             if (fitnessFunctions.size() > 5) {
