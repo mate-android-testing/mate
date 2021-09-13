@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.crossover;
 
+import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -21,9 +22,14 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
         this.executeActions = executeActions;
     }
 
-
     @Override
     public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
+
+        if (parents.size() == 1) {
+            MATE.log_warn("PrimitiveTestCaseMergeCrossOverFunction not applicable on single chromosome!");
+            return parents.get(0);
+        }
+        
         TestCase parent0 = parents.get(0).getValue();
         TestCase parent1 = parents.get(1).getValue();
         TestCase offspring = TestCase.newDummy();

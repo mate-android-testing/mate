@@ -52,7 +52,7 @@ public class FitnessUtils {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE,
                 FitnessFunction.METHOD_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
@@ -72,20 +72,23 @@ public class FitnessUtils {
      * fetched from the emulator when dealing with branch distance fitness.
      *
      * @param chromosome The given test suite.
-     * @param testCaseId The test case id.
+     * @param testCase The test case within the test suite.
      */
-    public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, String testCaseId) {
+    public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, TestCase testCase) {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
+            Registry.getEnvironmentManager().storeFitnessData(chromosome, testCase.getId());
+        }
+
+        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 
