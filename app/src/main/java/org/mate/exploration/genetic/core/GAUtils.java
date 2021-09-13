@@ -13,7 +13,11 @@ import java.util.Map;
 import static org.mate.utils.MathUtils.isEpsEq;
 
 public class GAUtils {
-    public static <T> void updateCrowdingDistance(List<IChromosome<T>> paretoFront, List<IFitnessFunction<T>> fitnessFunctions, Map<IChromosome<T>, Double> crowdingDistanceMap) {
+
+    public static <T> void updateCrowdingDistance(List<IChromosome<T>> paretoFront,
+                                                  List<IFitnessFunction<T>> fitnessFunctions,
+                                                  Map<IChromosome<T>, Double> crowdingDistanceMap) {
+
         for (IChromosome<T> chromosome : paretoFront) {
             crowdingDistanceMap.put(chromosome, 0.0);
         }
@@ -49,7 +53,8 @@ public class GAUtils {
                 Collections.sort(paretoFront, new Comparator<IChromosome<T>>() {
                     @Override
                     public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                        double compared = fitnessFunction.getNormalizedFitness(o2) - fitnessFunction.getNormalizedFitness(o1);
+                        double compared = fitnessFunction.getNormalizedFitness(o2)
+                                - fitnessFunction.getNormalizedFitness(o1);
                         return fitnessFunction.isMaximizing()
                                 ? compareFunctions(compared) : compareFunctions(compared) * (-1);
                     }
@@ -86,16 +91,19 @@ public class GAUtils {
         }
     }
 
-    public static <T> double calculateDistance(IChromosome<T> c1, IChromosome<T> c2, List<IFitnessFunction<T>> fitnessFunctions) {
+    public static <T> double calculateDistance(IChromosome<T> c1, IChromosome<T> c2,
+                                               List<IFitnessFunction<T>> fitnessFunctions) {
         double distance = 0.0;
 
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-            distance += Math.pow(fitnessFunction.getNormalizedFitness(c1) - fitnessFunction.getNormalizedFitness(c2), 2.0);
+            distance += Math.pow(fitnessFunction.getNormalizedFitness(c1)
+                    - fitnessFunction.getNormalizedFitness(c2), 2.0);
         }
         return Math.sqrt(distance);
     }
 
-    public static <T> List<IChromosome<T>> getParetoFront(List<IChromosome<T>> chromosomes, List<IFitnessFunction<T>> fitnessFunctions) {
+    public static <T> List<IChromosome<T>> getParetoFront(List<IChromosome<T>> chromosomes,
+                                                          List<IFitnessFunction<T>> fitnessFunctions) {
         List<IChromosome<T>> paretoFront = new ArrayList<>();
 
         for (IChromosome<T> chromosome : chromosomes) {
@@ -106,7 +114,8 @@ public class GAUtils {
                 boolean worseInOne = false;
                 boolean betterInOne = false;
                 for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-                    double compared = fitnessFunction.getNormalizedFitness(chromosome) - fitnessFunction.getNormalizedFitness(frontElement);
+                    double compared = fitnessFunction.getNormalizedFitness(chromosome)
+                            - fitnessFunction.getNormalizedFitness(frontElement);
                     if (isEpsEq(compared)) {
                         continue;
                     }
