@@ -91,8 +91,8 @@ public class GAUtils {
         }
     }
 
-    public static <T> double calculateDistance(IChromosome<T> c1, IChromosome<T> c2,
-                                               List<IFitnessFunction<T>> fitnessFunctions) {
+    private static <T> double calculateDistance(IChromosome<T> c1, IChromosome<T> c2,
+                                                List<IFitnessFunction<T>> fitnessFunctions) {
         double distance = 0.0;
 
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
