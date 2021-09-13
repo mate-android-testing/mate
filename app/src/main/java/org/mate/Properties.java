@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -246,6 +247,19 @@ public class Properties {
      * Added by stockinger on 28/09/2020
      */
     public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
+
+    //Grammatical Evolution Properties
+    public static int GE_SEQUENCE_LENGTH() {
+        return propertyOr(100);
+    }
+
+    public static int GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND() {
+        return propertyOr(AndroidListBasedBiasedMapping.BIAS_50_PERCENT);
+    }
+
+    public static int GE_MUTATION_COUNT() {
+        return propertyOr(3);
+    }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the

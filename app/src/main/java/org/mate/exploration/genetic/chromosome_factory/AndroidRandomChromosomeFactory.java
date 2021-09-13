@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -16,9 +17,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     protected int maxNumEvents;
     protected boolean resetApp;
     protected boolean isTestSuiteExecution;
+    private int actionsCount;
 
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
-        this( true, maxNumEvents);
+        this(true, maxNumEvents);
     }
 
     public AndroidRandomChromosomeFactory( boolean resetApp, int maxNumEvents) {
@@ -26,6 +28,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
         isTestSuiteExecution = false;
+        actionsCount = 0;
     }
 
     // TODO: might be replaceable with chromosome factory property in the future
@@ -43,8 +46,8 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            for (int i = 0; i < maxNumEvents; i++) {
-                if (!testCase.updateTestCase(selectAction(), i)) {
+            for (actionsCount = 0; !finishTestCase(); actionsCount++) {
+                if (!testCase.updateTestCase(selectAction(), actionsCount)) {
                     return chromosome;
                 }
             }
@@ -61,6 +64,16 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             testCase.finish();
         }
         return chromosome;
+    }
+
+    /**
+     * Defines when the test case creation, i.e. the filling with actions, should be stopped.
+     *
+     * @return Returns {@code true} when the test case creation should be stopped,
+     *          otherwise {@code false} is returned.
+     */
+    protected boolean finishTestCase() {
+        return actionsCount >= maxNumEvents;
     }
 
     /**

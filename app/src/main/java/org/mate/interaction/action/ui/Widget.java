@@ -850,8 +850,9 @@ public class Widget {
     public boolean isHorizontalScrollView() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            return android.widget.HorizontalScrollView.class.isAssignableFrom(clazz)
-                    || android.support.v4.view.ViewPager.class.isAssignableFrom(clazz);
+            return android.widget.HorizontalScrollView.class.isAssignableFrom(clazz);
+            // TODO: find androidX conform check
+            //       || android.support.v4.view.ViewPager.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
             MATE.log_warn("Class " + getClazz() + " not found!");
