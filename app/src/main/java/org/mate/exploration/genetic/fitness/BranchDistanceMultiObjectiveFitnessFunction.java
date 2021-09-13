@@ -73,6 +73,6 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return 0;
+        return getFitness(chromosome);
     }
 }

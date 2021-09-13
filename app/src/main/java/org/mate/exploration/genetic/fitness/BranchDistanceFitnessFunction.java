@@ -50,7 +50,6 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
         // cache fitness value for subsequent requests
         cache.put(chromosome, branchDistance);
-
         return branchDistance;
     }
 
@@ -61,6 +60,6 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return (getFitness(chromosome) - 1) / Double.MAX_VALUE;
+        return getFitness(chromosome);
     }
 }
