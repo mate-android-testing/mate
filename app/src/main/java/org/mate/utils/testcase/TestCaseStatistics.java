@@ -26,10 +26,8 @@ public final class TestCaseStatistics {
 
     public static void recordStats(TestCase testCase) {
 
-        MATE.log("Visited Activities in Order:");
-        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
-            MATE.log(testCase.getActivityBeforeAction(i));
-        }
+        MATE.log("Visited activities in order: " + testCase.getActivitySequence());
+        MATE.log("Visited activities: " + testCase.getVisitedActivities());
 
         // intent related statistics
         if (Properties.RELATIVE_INTENT_AMOUNT() > 0.0f) {
