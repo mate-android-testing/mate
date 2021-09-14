@@ -35,24 +35,24 @@ public class CoverageUtils {
     public static void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
                                         IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
+        /*
+         * We store (here copy) data about activity coverage in any case.
+         * Since we request the activity coverage from the coverage map, we need to
+         * keep it up-to-date. Note that we assume that there is no coverage data
+         * for the target chromosome present yet.
+         */
+        Set<String> visitedActivitiesOfTestCases = new HashSet<>();
+        for (TestCase testCase : testCases) {
+            visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
+        }
+
+        if (visitedActivities.containsKey(targetChromosome)) {
+            MATE.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
+        }
+
+        visitedActivities.put(targetChromosome, visitedActivitiesOfTestCases);
+
         switch (Properties.COVERAGE()) {
-            case ACTIVITY_COVERAGE:
-                /*
-                * Since we request the activity coverage from the coverage map, we need to
-                * keep it up-to-date. Note that we assume that there is no coverage data
-                * for the target chromosome present yet.
-                 */
-                Set<String> visitedActivitiesOfTestCases = new HashSet<>();
-                for (TestCase testCase : testCases) {
-                    visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
-                }
-
-                if (visitedActivities.containsKey(targetChromosome)) {
-                    MATE.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
-                }
-
-                visitedActivities.put(targetChromosome, visitedActivitiesOfTestCases);
-                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
