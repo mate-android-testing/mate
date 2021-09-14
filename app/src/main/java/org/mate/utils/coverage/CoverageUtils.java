@@ -90,10 +90,10 @@ public class CoverageUtils {
      */
     public static void storeTestCaseChromosomeCoverage(IChromosome<TestCase> chromosome) {
 
+        // store data about activity coverage in any case
+        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
+
         switch (Properties.COVERAGE()) {
-            case ACTIVITY_COVERAGE:
-                visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
-                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -116,23 +116,23 @@ public class CoverageUtils {
     public static void storeTestSuiteChromosomeCoverage(
             IChromosome<TestSuite> chromosome, TestCase testCase) {
 
+        /*
+         * We store data about activity coverage in any case. In particular,
+         * we store here the activity coverage per test suite, not per test case.
+         * This simplifies the implementation. In case someone needs access to the
+         * coverage of the individual test cases, one has to iterate over the
+         * test cases manually.
+         */
+        Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
+
+        // merge with already visited activities of other test cases in the test suite
+        if (visitedActivities.containsKey(chromosome)) {
+            visitedActivitiesByTestCase.addAll(visitedActivities.get(chromosome));
+        }
+
+        visitedActivities.put(chromosome, visitedActivitiesByTestCase);
+
         switch (Properties.COVERAGE()) {
-            case ACTIVITY_COVERAGE:
-                /*
-                * We store here the activity coverage per test suite, not per test case.
-                * This simplifies the implementation. In case someone needs access to the
-                * coverage of the individual test cases, one has to iterate over the
-                * test cases manually.
-                 */
-                Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
-
-                // merge with already visited activities of other test cases in the test suite
-                if (visitedActivities.containsKey(chromosome)) {
-                    visitedActivitiesByTestCase.addAll(visitedActivities.get(chromosome));
-                }
-
-                visitedActivities.put(chromosome, visitedActivitiesByTestCase);
-                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
