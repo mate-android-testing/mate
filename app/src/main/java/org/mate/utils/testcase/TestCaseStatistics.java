@@ -3,13 +3,14 @@ package org.mate.utils.testcase;
 import android.content.Intent;
 
 import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
-import org.mate.model.TestCase;
-import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.TestCase;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -30,12 +31,15 @@ public final class TestCaseStatistics {
             MATE.log(testCase.getActivityBeforeAction(i));
         }
 
-        countInvalidURIs(testCase);
-        countComponentsPerType(testCase);
-        countActionsPerType(testCase);
-        countNullValues(testCase);
-        printURIs(testCase);
-        countWidgetActivity(testCase);
+        // intent related statistics
+        if (Properties.RELATIVE_INTENT_AMOUNT() > 0.0f) {
+            countInvalidURIs(testCase);
+            countComponentsPerType(testCase);
+            countActionsPerType(testCase);
+            countNullValues(testCase);
+            printURIs(testCase);
+            countWidgetActivity(testCase);
+        }
     }
 
     /**
@@ -172,7 +176,6 @@ public final class TestCaseStatistics {
                 String uri = intent.getDataString();
 
                 if (uri != null) {
-                    // MATE.log("URI: " + uri);
                     countTotalURIs++;
                     if (uri.equals("content:///") || uri.equals("file:///")) {
                         countInvalidURIs++;
