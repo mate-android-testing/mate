@@ -11,23 +11,9 @@ import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEAction;
 import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEApplication;
 import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEState;
 import org.mate.exploration.qlearning.qbe.qmatrix.QBEMatrixFactory;
-import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEQBEActivityMatrix {
-
-   private static void writeTransitionSystem(final TransitionSystem<QBEState, QBEAction> transitionSystem, final String filePath) {
-      try (final PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(filePath)))) {
-         writer.write(transitionSystem.toString());
-      } catch (final IOException e) {
-         e.printStackTrace();
-      }
-   }
 
    @Test
    public void useAppContext() {
@@ -39,7 +25,7 @@ public class ExecuteMATEQBEActivityMatrix {
       MATE.log_acc("Starting timeout run...");
       tester.run();
       MATE.log_acc("Finished run due to timeout.");
-      writeTransitionSystem(tester.getTransitionSystem(), "/home/michael/transitionSystem.txt");
+      MATE.log(tester.getTransitionSystem().toString());
       mate.testApp(() -> {
       }); // De-register stuff.
    }
