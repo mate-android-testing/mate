@@ -256,7 +256,7 @@ public class CoverageUtils {
      */
     public static double getCombinedCoverage(Coverage coverage) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
                 Set<String> visitedActivitiesTotal = new HashSet<>();
 
@@ -287,7 +287,7 @@ public class CoverageUtils {
      */
     public static <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
                 Set<String> visitedActivitiesTotal = new HashSet<>();
 
@@ -323,7 +323,7 @@ public class CoverageUtils {
      */
     public static double getCoverage(Coverage coverage, IChromosome<TestSuite> testSuite, TestCase testCase) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
 
             case ACTIVITY_COVERAGE:
                 /*
@@ -353,7 +353,7 @@ public class CoverageUtils {
      */
     public static <T> double getCoverage(Coverage coverage, IChromosome<T> chromosome) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
 
                 if (!visitedActivities.containsKey(chromosome)) {
