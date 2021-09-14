@@ -3,6 +3,7 @@ package org.mate.exploration.qlearning.qbe.algorithms;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import org.mate.MATE;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
@@ -24,6 +25,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
   private final Application<S, A> app;
   private final ExplorationStrategy<S, A> explorationStrategy;
+  private final long timoutInMillisecounds;
   private final int maximumNumberOfActionPerTestcase;
 
   private final Set<List<TransitionRelation<S, A>>> testsuite = new HashSet<>();
@@ -31,12 +33,12 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
   public ApplicationTester(final Application<S, A> app,
                            final ExplorationStrategy<S, A> explorationStrategy,
-                           final int maximumNumberOfActionPerTestcase) {
+                           final long timeoutInMilliseconds, final int maximumNumberOfActionPerTestcase) {
     this.app = Objects.requireNonNull(app);
     this.explorationStrategy = Objects.requireNonNull(explorationStrategy);
+    this.timoutInMillisecounds = timeoutInMilliseconds;
     this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
 
-    app.reset();
     this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
 
     if (maximumNumberOfActionPerTestcase <= 0) {
@@ -54,8 +56,8 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
   }
 
   public void run() {
-    //noinspection InfiniteLoopStatement
-    while (true) {
+    final long startTime = System.currentTimeMillis();
+    while (noTimeout(startTime)) {
       app.reset();
       S currentState = app.getCurrentState();
       final List<TransitionRelation<S, A>> testcase = new ArrayList<>();
@@ -64,9 +66,11 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
       boolean noTerminalState;
       do {
         final Optional<A> chosenAction = explorationStrategy.chooseAction(currentState);
+        MATE.log_debug("Choose action:" + chosenAction.toString());
         noTerminalState = chosenAction.isPresent();
         if (noTerminalState) {
           final Optional<S> nextState = app.executeAction(chosenAction.get());
+          MATE.log_debug("Executed action action:" + chosenAction.get().toString());
           final TransitionRelation<S, A> transition = new TransitionRelation<>(currentState,
                   chosenAction.get(), nextState.orElse(null));
           final boolean nonDeterministic = transitionSystem.addTransition(transition);
@@ -84,7 +88,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
             currentState = nextState.get();
           }
         }
-      } while (noTerminalState && noCrash && testcase.size() < maximumNumberOfActionPerTestcase);
+      } while (noTerminalState && noCrash && testcase.size() < maximumNumberOfActionPerTestcase && noTimeout(startTime));
 
       testsuite.add(testcase);
     }
@@ -133,6 +137,11 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
     ts.removeUnreachableStates();
     assert ts.isDeterministic() : "The transition system should be deterministic after applying passiveLearn";
+  }
+
+  private boolean noTimeout(final long startTime) {
+    final long currentTime = System.currentTimeMillis();
+    return currentTime - startTime < timoutInMillisecounds;
   }
 
 }

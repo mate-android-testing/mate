@@ -35,10 +35,12 @@ public class ExecuteMATEQBEActivityMatrix {
       final MATE mate = new MATE();
       final QBEApplication app = new QBEApplication(Registry.getUiAbstractionLayer());
       final ExplorationStrategy<QBEState, QBEAction> explorationStrategy = new QBE<>(new QBEMatrixFactory().getMaximizeActivityCoverageQMatrix());
-      final ApplicationTester<QBEState, QBEAction> tester = new ApplicationTester<>(app, explorationStrategy, Properties.MAX_NUMBER_EVENTS());
-      mate.testApp(tester);
-
-      // TODO: Figure out how to makes this an option in mate.properties
+      final ApplicationTester<QBEState, QBEAction> tester = new ApplicationTester<>(app, explorationStrategy, Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
+      MATE.log_acc("Starting timeout run...");
+      tester.run();
+      MATE.log_acc("Finished run due to timeout.");
       writeTransitionSystem(tester.getTransitionSystem(), "/home/michael/transitionSystem.txt");
+      mate.testApp(() -> {
+      }); // De-register stuff.
    }
 }
