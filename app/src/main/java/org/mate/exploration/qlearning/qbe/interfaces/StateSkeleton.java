@@ -11,17 +11,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public abstract class StateSkeleton<A extends Action> implements State<A> {
 
     protected static final double COSINE_SIMILARITY_THRESHOLD = 0.95;
-    private static final AtomicInteger dummyComponentIndex = new AtomicInteger();
-    private final Set<Integer> dummyComponents = new HashSet<>();
 
     /*
      * Matches the keys of both map. Missing values are set to 0.
@@ -44,10 +40,6 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
         return new Pair<>(vector1, vector2);
     }
 
-    public void addDummyComponent() {
-        dummyComponents.add(dummyComponentIndex.getAndIncrement());
-    }
-
     protected abstract int getNumberOfComponent();
 
     protected abstract Map<String, Integer> getFeatureMap();
@@ -61,8 +53,7 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
         } else {
             final StateSkeleton<?> o = (StateSkeleton<?>) other;
             if (!this.getActions().equals(o.getActions())
-                    || this.getNumberOfComponent() != o.getNumberOfComponent()
-                    || !dummyComponents.equals(o.dummyComponents)) {
+                    || this.getNumberOfComponent() != o.getNumberOfComponent()) {
                 return false;
             } else {
                 final Pair<List<Double>, List<Double>> contentVectors = featureMapToContentVectors(
@@ -86,7 +77,6 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
         }
 
         hash = prime * hash + Long.hashCode(getActions().stream().mapToInt(Object::hashCode).sum());
-        hash = prime * hash + Long.hashCode(dummyComponents.stream().mapToInt(Objects::hashCode).sum());
         hash = prime * hash + Integer.hashCode(getNumberOfComponent());
         return hash;
     }

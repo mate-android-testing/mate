@@ -50,13 +50,16 @@ public final class QBEState extends StateSkeleton<QBEAction> implements State<QB
 
     @Override
     protected int getNumberOfComponent() {
-        // TODO: Which components?
-        return 0;
+        return featureMap.size();
     }
 
     @Override
     protected Map<String, Integer> getFeatureMap() {
         return Collections.unmodifiableMap(featureMap);
+    }
+
+    public void addDummyComponent() {
+        featureMap.merge("dummyComponent@-1", 0, (value, ignored) -> value + 1);
     }
 
     @Override
