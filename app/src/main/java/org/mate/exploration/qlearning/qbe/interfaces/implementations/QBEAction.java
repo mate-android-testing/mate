@@ -20,4 +20,21 @@ public final class QBEAction implements Action {
     public String toString() {
         return "{\"uiAction\":{\"actionType\":\"" + uiAction.getActionType() + "\",\"activityName\":\"" + uiAction.getActivityName() + "\"}}";
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            final QBEAction qbeAction = (QBEAction) o;
+            return uiAction.equals(qbeAction.uiAction);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return uiAction.hashCode();
+    }
 }
