@@ -25,7 +25,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
   private final Application<S, A> app;
   private final ExplorationStrategy<S, A> explorationStrategy;
-  private final long timoutInMillisecounds;
+  private final long timeoutInMilliseconds;
   private final int maximumNumberOfActionPerTestcase;
 
   private final Set<List<TransitionRelation<S, A>>> testsuite = new HashSet<>();
@@ -36,15 +36,20 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
                            final long timeoutInMilliseconds, final int maximumNumberOfActionPerTestcase) {
     this.app = Objects.requireNonNull(app);
     this.explorationStrategy = Objects.requireNonNull(explorationStrategy);
-    this.timoutInMillisecounds = timeoutInMilliseconds;
+    this.timeoutInMilliseconds = timeoutInMilliseconds;
     this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
 
     this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
+
+    if (timeoutInMilliseconds <= 0) {
+      throw new IllegalArgumentException("The timeout must be a positive value");
+    }
 
     if (maximumNumberOfActionPerTestcase <= 0) {
       throw new IllegalArgumentException(
               "The maximum number of actions per test case need to be at least 1.");
     }
+
   }
 
   public Set<List<TransitionRelation<S, A>>> getTestsuite() {
@@ -141,7 +146,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
   private boolean noTimeout(final long startTime) {
     final long currentTime = System.currentTimeMillis();
-    return currentTime - startTime < timoutInMillisecounds;
+    return currentTime - startTime < timeoutInMilliseconds;
   }
 
 }

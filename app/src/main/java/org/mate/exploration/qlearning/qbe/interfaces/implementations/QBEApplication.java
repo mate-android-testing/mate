@@ -12,7 +12,7 @@ import java.util.Optional;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
-public class QBEApplication implements Application<QBEState, QBEAction> {
+public final class QBEApplication implements Application<QBEState, QBEAction> {
 
     private final UIAbstractionLayer uiAbstractionLayer;
 
@@ -29,7 +29,6 @@ public class QBEApplication implements Application<QBEState, QBEAction> {
     @Override
     public Optional<QBEState> executeAction(final QBEAction action) {
         final ActionResult result = uiAbstractionLayer.executeAction(action.getUiAction());
-        // TODO: What if exited app?
         if (result == ActionResult.SUCCESS || result == ActionResult.SUCCESS_NEW_STATE) {
             return Optional.of(new QBEState(uiAbstractionLayer.getLastScreenState()));
         } else {
