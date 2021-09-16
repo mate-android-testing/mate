@@ -343,7 +343,7 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
-            case TEST_LENGTH:
+            case TEST_SUITE_LENGTH:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new TestSuiteLengthFitnessFunction();
