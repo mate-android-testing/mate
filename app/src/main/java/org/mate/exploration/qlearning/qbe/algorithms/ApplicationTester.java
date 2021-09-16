@@ -123,7 +123,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
     testsuite.forEach(testcase ->
             testcase.replaceAll(tr -> {
-              if (tr.from.equals(secondLastTransition.from) && tr.to.equals(secondLastTransition.to)) {
+              if (tr.from.equals(secondLastTransition.from) && Objects.equals(tr.to, secondLastTransition.to)) {
                 return new TransitionRelation<>(tr.from, tr.trigger, stateWithDummy);
               } else {
                 return tr;
