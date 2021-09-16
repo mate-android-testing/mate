@@ -38,6 +38,7 @@ import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFuncti
 import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestSuiteLengthFitnessFunction;
+import org.mate.exploration.genetic.fitness.TestCaseLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
@@ -346,6 +347,8 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new TestSuiteLengthFitnessFunction();
+            case TEST_CASE_LENGTH:
+                return (IFitnessFunction<T>) new TestCaseLengthFitnessFunction();
             case METHOD_COVERAGE:
                 return (IFitnessFunction<T>) new MethodCoverageFitnessFunction<>();
             case BRANCH_COVERAGE:
