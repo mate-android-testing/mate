@@ -14,6 +14,7 @@ import java.util.List;
  * Select chromosomes proportionate to the first
  * {@link org.mate.exploration.genetic.fitness.IFitnessFunction} given with an additional random
  * factor
+ *
  * @param <T> Type wrapped by the chromosome implementation
  */
 public class FitnessProportionateSelectionFunction<T> implements ISelectionFunction<T> {
@@ -24,17 +25,23 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
         List<Tuple<Integer, Double>> proportionateFitnessValues = new ArrayList<>();
 
         int count = 0;
+        final boolean maximizing = fitnessFunction.isMaximizing();
+
         for (IChromosome<T> chromosome : population) {
-            double proportionateFitness = fitnessFunction.getNormalizedFitness(chromosome) * Randomness
-                    .getRnd().nextDouble();
+            double normalizedFitnessValue = fitnessFunction.getNormalizedFitness(chromosome);
+            if (!maximizing) {
+                normalizedFitnessValue = invertFitnessValue(normalizedFitnessValue);
+            }
+            double proportionateFitness = normalizedFitnessValue * Randomness.getRnd().nextDouble();
             proportionateFitnessValues.add(new Tuple<>(count, proportionateFitness));
-            count ++;
+            count++;
         }
 
         Collections.sort(proportionateFitnessValues, new Comparator<Tuple<Integer, Double>>() {
             @Override
             public int compare(Tuple<Integer, Double> o1, Tuple<Integer, Double> o2) {
-                return o2.getY().compareTo(o1.getY());
+                int comparedValue = o2.getY().compareTo(o1.getY());
+                return maximizing ? comparedValue : comparedValue * (-1);
             }
         });
 
@@ -46,5 +53,15 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
 
         return selection;
 
+    }
+
+    /**
+     * This method inverts a fitness value - used in case of a minimizing fitness function.
+     *
+     * @param fitnessValue The fitness value to be inverted.
+     * @return The inverted fitness value.
+     */
+    private double invertFitnessValue(final double fitnessValue) {
+        return 1.0 / (fitnessValue + 1.0);
     }
 }
