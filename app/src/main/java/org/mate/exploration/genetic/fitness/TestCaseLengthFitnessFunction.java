@@ -3,6 +3,9 @@ package org.mate.exploration.genetic.fitness;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 
+/**
+ * A fitness function that prefers {@link TestCase}s with a shorter action sequence.
+ */
 public class TestCaseLengthFitnessFunction implements IFitnessFunction<TestCase> {
 
     @Override
@@ -11,11 +14,14 @@ public class TestCaseLengthFitnessFunction implements IFitnessFunction<TestCase>
         return 1.0 / testCaseLength;
     }
 
-    /*
-      The intention of this fitness function is to prefer chromosomes with a lower test case
-      length. Considering the way to compute the fitness value it's a maximizing function.
-      Assume you have a test suite with 4 and 8 test cases, then the respective fitness values
-      are 1/4 and 1/8 according to getFitness().
+    /**
+     * Although the intention of the fitness function is to minimise the test case length,
+     * the fitness function itself is maximising. The function '1.0 / test case length' describes
+     * a monotonically decreasing function, where a test case with a single action returns
+     * the best value, i.e. 1.0.
+     *
+     * @return Returns whether this fitness function is maximising, i.e. a greater value is
+     * better than a lower value, or minimising.
      */
     @Override
     public boolean isMaximizing() {
