@@ -552,8 +552,8 @@ public class EnvironmentManager {
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance of dummy test case...");
-                // a dummy test case has a branch distance of 0.0 (0 is the worst in our case)
-                return 0.0;
+                // a dummy test case has a branch distance of 1.0 (worst value)
+                return 1.0;
             }
         }
 
@@ -658,8 +658,8 @@ public class EnvironmentManager {
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
-                // a dummy test case has a branch distance of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(objectives.size(), 0.0);
+                // a dummy test case has a branch distance of 1.0 (worst value) for each objective
+                return Collections.nCopies(objectives.size(), 1.0);
             }
         }
 
