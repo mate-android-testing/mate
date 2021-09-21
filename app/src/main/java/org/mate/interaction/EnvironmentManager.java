@@ -337,15 +337,20 @@ public class EnvironmentManager {
 
         MATE.log_acc("Getting objectives...!");
 
+        List<String> objectives;
+
         if (objective == Objective.LINES) {
-            return getSourceLines();
+            objectives = getSourceLines();
         } else if (objective == Objective.BRANCHES) {
-            return getBranches();
+            objectives = getBranches();
         } else if (objective == Objective.BLOCKS) {
-            return getBasicBlocks();
+            objectives =  getBasicBlocks();
+        } else {
+            throw new UnsupportedOperationException("Objective " + objective + " not yet supported!");
         }
 
-        throw new UnsupportedOperationException("Objective not yet supported!");
+        MATE.log_acc("Number of objectives: " + objectives.size());
+        return objectives;
     }
 
     /**
