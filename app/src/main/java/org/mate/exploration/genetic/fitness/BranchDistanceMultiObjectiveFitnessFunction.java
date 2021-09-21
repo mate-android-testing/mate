@@ -10,7 +10,8 @@ import java.util.Map;
 
 /**
  * Provides a fitness metric based on branch distance for multi-objective algorithms. This requires
- * that the AUT has been instrumented with the branch distance module.
+ * that the AUT has been instrumented with the branch distance module. The retrieved fitness values
+ * are already normalised in the range [0,1].
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
@@ -46,23 +47,18 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double branchDistance;
+        if (!cache.get(branch).containsKey(chromosome)) {
 
-        if (cache.get(branch).containsKey(chromosome)) {
-            branchDistance = cache.get(branch).get(chromosome);
-        } else {
             // retrieves the fitness value for every single branch
             List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, branches);
 
-            // insert them into the cache
+            // update the cache
             for (int i = 0; i < branchDistanceVector.size(); i++) {
                 cache.get(branches.get(i)).put(chromosome, branchDistanceVector.get(i));
             }
-
-            branchDistance = cache.get(branch).get(chromosome);
         }
 
-        return branchDistance;
+        return cache.get(branch).get(chromosome);
     }
 
     @Override
