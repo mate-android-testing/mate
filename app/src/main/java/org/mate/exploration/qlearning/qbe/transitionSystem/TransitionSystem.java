@@ -16,6 +16,19 @@ import java.util.stream.Collectors;
 public final class TransitionSystem<S extends State<A>, A extends Action> {
 
   private final S initialState;
+
+  public Set<S> getStates() {
+    return states;
+  }
+
+  public Set<A> getActions() {
+    return actions;
+  }
+
+  public Set<TransitionRelation<S, A>> getTransitions() {
+    return transitions;
+  }
+
   private final Set<S> states = new HashSet<>();
   private final Set<A> actions = new HashSet<>();
   private final Set<TransitionRelation<S, A>> transitions = new HashSet<>();

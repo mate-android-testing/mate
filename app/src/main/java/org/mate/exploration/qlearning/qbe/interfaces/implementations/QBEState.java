@@ -54,7 +54,7 @@ public final class QBEState extends StateSkeleton<QBEAction> implements State<QB
     }
 
     @Override
-    protected Map<String, Integer> getFeatureMap() {
+    public Map<String, Integer> getFeatureMap() {
         return Collections.unmodifiableMap(featureMap);
     }
 
