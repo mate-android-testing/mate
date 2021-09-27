@@ -102,7 +102,7 @@ public final class TransitionSystemSerializer {
     }
 
     private void serializeTransitionRelation(final TransitionRelation<QBEState, QBEAction> tr, final Map<QBEState, Integer> stateIndexes, final Map<QBEAction, Integer> actionIndexes, final PrintWriter writer) {
-        writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d}", stateIndexes.get(tr.from), actionIndexes.get(tr.trigger), stateIndexes.get(tr.to));
+        writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d,\"actionResult\":\"%s\"}", stateIndexes.get(tr.from), actionIndexes.get(tr.trigger), stateIndexes.get(tr.to), tr.actionResult);
     }
 
 

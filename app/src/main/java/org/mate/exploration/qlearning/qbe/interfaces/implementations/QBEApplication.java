@@ -5,6 +5,7 @@ import android.support.annotation.RequiresApi;
 
 import org.mate.exploration.qlearning.qbe.interfaces.Application;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.utils.Pair;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -27,12 +28,12 @@ public final class QBEApplication implements Application<QBEState, QBEAction> {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public Optional<QBEState> executeAction(final QBEAction action) {
+    public Pair<Optional<QBEState>, ActionResult> executeAction(final QBEAction action) {
         final ActionResult result = uiAbstractionLayer.executeAction(action.getUiAction());
         if (result == ActionResult.SUCCESS || result == ActionResult.SUCCESS_NEW_STATE) {
-            return Optional.of(new QBEState(uiAbstractionLayer.getLastScreenState()));
+            return new Pair<>(Optional.of(new QBEState(uiAbstractionLayer.getLastScreenState())), result);
         } else {
-            return Optional.empty();
+            return new Pair<>(Optional.empty(), result);
         }
     }
 

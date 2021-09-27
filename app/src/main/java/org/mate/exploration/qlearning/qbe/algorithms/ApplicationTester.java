@@ -11,6 +11,7 @@ import org.mate.exploration.qlearning.qbe.interfaces.Application;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
+import org.mate.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class ApplicationTester<S extends State<A>, A extends Action> implements Algorithm {
@@ -74,16 +77,16 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
         MATE.log_debug("Choose action:" + chosenAction.toString());
         noTerminalState = chosenAction.isPresent();
         if (noTerminalState) {
-          final Optional<S> nextState = app.executeAction(chosenAction.get());
+          final Pair<Optional<S>, ActionResult> result = app.executeAction(chosenAction.get());
+          final Optional<S> nextState = result.first;
           MATE.log_debug("Executed action action:" + chosenAction.get().toString());
           final TransitionRelation<S, A> transition = new TransitionRelation<>(currentState,
-                  chosenAction.get(), nextState.orElse(null));
+                  chosenAction.get(), nextState.orElse(null), result.second);
           final boolean nonDeterministic = transitionSystem.addTransition(transition);
           testcase.add(transition);
 
           noCrash = nextState.isPresent();
           if (noCrash) {
-            // Not sure if updating the actions set is necessary but the paper does it.
             transitionSystem.addActions(nextState.get().getActions());
             if (nonDeterministic) {
               final List<TransitionRelation<S, A>> testcaseCopy = testcase.stream()
@@ -118,13 +121,11 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     ts.removeTransition(conflictingTransition);
     ts.removeTransition(secondLastTransition);
     ts.addTransition(
-            new TransitionRelation<>(secondLastTransition.from, secondLastTransition.trigger,
-                    stateWithDummy));
-
+            new TransitionRelation<>(secondLastTransition.from, secondLastTransition.trigger, stateWithDummy, secondLastTransition.actionResult));
     testsuite.forEach(testcase ->
             testcase.replaceAll(tr -> {
               if (tr.from.equals(secondLastTransition.from) && Objects.equals(tr.to, secondLastTransition.to)) {
-                return new TransitionRelation<>(tr.from, tr.trigger, stateWithDummy);
+                return new TransitionRelation<>(tr.from, tr.trigger, stateWithDummy, tr.actionResult);
               } else {
                 return tr;
               }
