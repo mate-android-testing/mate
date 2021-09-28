@@ -36,6 +36,7 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
   public TransitionSystem(final S initialState) {
     this.initialState = Objects.requireNonNull(initialState);
     states.add(initialState);
+    actions.addAll(initialState.getActions());
   }
 
   public S getInitialState() {
