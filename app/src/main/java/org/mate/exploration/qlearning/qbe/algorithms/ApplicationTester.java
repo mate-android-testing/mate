@@ -109,7 +109,25 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
     final int testcaseLength = nonDeterministicTestcase.size();
     if (testcaseLength < 2) {
-      throw new AssertionError("Passive Learn assumes that the test case length is at least 2.");
+      /*
+       * Passive learn simply assumes that the test case has a length of at least two.
+       * For very small apps (e.g. com.zola.bmi.akp) this assumption does not hold.
+       * TODO: Check whether this assumptions holds for bigger apps.
+       */
+      TransitionRelation<S, A> relation = nonDeterministicTestcase.remove(1);
+      MATE.log_warn("Passive learn: Found singe-transition testcase: " + relation);
+      boolean deterministic;
+      int iteration = 1;
+      do {
+        MATE.log_debug("Passive Learn: Edge case: Attempt " + iteration);
+        ts.removeTransition(relation); // Ensure the transition system remains
+        final S dummy = app.copyWithDummyComponent(relation.to);
+        relation = new TransitionRelation<>(relation.from, relation.trigger, dummy, relation.actionResult);
+        deterministic = ts.addTransition(relation);
+      } while (!deterministic);
+      MATE.log_debug("Passive Learn: Edge case: Done on iteration: " + iteration);
+      nonDeterministicTestcase.add(relation);
+      return;
     }
 
     testsuite.add(nonDeterministicTestcase);
