@@ -49,8 +49,8 @@ public class UIAbstractionLayer {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         // check for any kind of dialogs (permission, crash, ...) initially
-        clearScreen();
-        lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+        lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
         guiModel = new FSMModel(lastScreenState);
@@ -175,8 +175,7 @@ public class UIAbstractionLayer {
             return SUCCESS;
         }
         intermediateValuesEA.add(System.currentTimeMillis()); //4
-        clearScreen();
-        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+        state = clearScreen();
         intermediateValuesEA.add(System.currentTimeMillis()); //5
 
         // TODO: assess if timeout should be added to primitive actions as well
@@ -191,9 +190,8 @@ public class UIAbstractionLayer {
                 WidgetAction wa = (WidgetAction) action;
                 wa.setTimeToWait(timeToWait);
             }
-            clearScreen();
             // get a new state
-            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+            state = clearScreen();
         }
 
         // get the package name of the app currently running
@@ -265,9 +263,10 @@ public class UIAbstractionLayer {
      * button is pressed to return to the AUT. Clicks on 'OK' when a build
      * warning pops up.
      */
-    public void clearScreen() {
+    public IScreenState clearScreen() {
         long startTime = System.currentTimeMillis();
         intermediateValuesCS.add(startTime); //1
+        IScreenState screenState = null;
         boolean change = true;
         boolean retry = true;
         int retryCount = 0;
@@ -291,7 +290,7 @@ public class UIAbstractionLayer {
                 }
                 intermediateValuesCS.add(System.currentTimeMillis()); // 4
                 // check for outdated build warnings
-                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+                screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 intermediateValuesCS.add(System.currentTimeMillis()); // 5
                 for (Widget widget : screenState.getWidgets()) {
                     if (widget.getText().equals("This app was built for an older version of Android " +
@@ -361,6 +360,7 @@ public class UIAbstractionLayer {
             }
         }
         evaluateTime(startTime);
+        return screenState;
     }
 
     /**
@@ -432,9 +432,9 @@ public class UIAbstractionLayer {
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        clearScreen();
+        IScreenState state = clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+            lastScreenState = state;
         }
     }
 
@@ -444,9 +444,9 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        clearScreen();
+        IScreenState state = clearScreen();
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+            lastScreenState = state;
         }
     }
 
