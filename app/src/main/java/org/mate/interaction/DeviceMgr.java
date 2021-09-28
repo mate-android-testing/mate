@@ -27,6 +27,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -300,6 +301,31 @@ public class DeviceMgr {
         Utils.sleep(action.getTimeToWait());
         checkForCrash();
     }
+    static int numberEntries = 0;
+    public static List<Long> intermediateValues = new ArrayList<>();
+    static Long average = null;
+
+    static void evaluateTime(long startTime, boolean crash) {
+        long currentTime = System.currentTimeMillis();
+        StringBuilder stb = new StringBuilder("Intermediates: " + (crash ? "(Crash)": ""));
+        for (Long intermediate : intermediateValues) {
+            intermediate = intermediate - intermediateValues.get(0);
+            stb.append(intermediate);
+            stb.append("ms ");
+
+        }
+        stb.append("Duration: ");
+        stb.append(currentTime - startTime).append("ms");
+        numberEntries++;
+        if (average == null) {
+            average = currentTime - startTime;
+        } else {
+            average = ((numberEntries - 1) * average + (currentTime - startTime)) / numberEntries;
+        }
+        stb.append(" Average: ").append(average).append("ms");
+        intermediateValues.clear();
+        MATE.log_runtime(stb.toString(), "checkForCrash()");
+    }
 
     /**
      * Checks whether a crash dialog appeared on the screen.
@@ -307,15 +333,17 @@ public class DeviceMgr {
      * @throws AUTCrashException Thrown when the last action caused a crash of the application.
      */
     private void checkForCrash() throws AUTCrashException {
-
+        long startTime = System.currentTimeMillis();
         // handle app crashes
         UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
         UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
 
         if (crashDialog1.exists() || crashDialog2.exists()) {
             MATE.log("CRASH");
+            evaluateTime(startTime,true);
             throw new AUTCrashException("App crashed");
         }
+        evaluateTime(startTime, false);
     }
 
     /**
