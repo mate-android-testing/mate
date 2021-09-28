@@ -14,11 +14,12 @@ import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystem;
 import org.mate.utils.Pair;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.mate.interaction.UIAbstractionLayer.ActionResult;
@@ -31,7 +32,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
   private final long timeoutInMilliseconds;
   private final int maximumNumberOfActionPerTestcase;
 
-  private final Set<List<TransitionRelation<S, A>>> testsuite = new HashSet<>();
+  private final Set<List<TransitionRelation<S, A>>> testsuite = Collections.newSetFromMap(new ConcurrentHashMap<>());
   private final TransitionSystem<S, A> transitionSystem;
 
   public ApplicationTester(final Application<S, A> app,
@@ -140,6 +141,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     ts.removeTransition(secondLastTransition);
     ts.addTransition(
             new TransitionRelation<>(secondLastTransition.from, secondLastTransition.trigger, stateWithDummy, secondLastTransition.actionResult));
+
     testsuite.forEach(testcase ->
             testcase.replaceAll(tr -> {
               if (tr.from.equals(secondLastTransition.from) && Objects.equals(tr.to, secondLastTransition.to)) {
