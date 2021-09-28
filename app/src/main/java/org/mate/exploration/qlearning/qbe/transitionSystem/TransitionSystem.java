@@ -44,9 +44,11 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
 
   public boolean addTransition(final TransitionRelation<S, A> transitionRelation) {
     states.add(transitionRelation.from);
+    actions.addAll(transitionRelation.from.getActions());
     actions.add(transitionRelation.trigger);
     if (transitionRelation.to != null) {
       states.add(transitionRelation.to);
+      actions.addAll(transitionRelation.to.getActions());
     }
 
     final boolean nonDeterministicTransitionRelation = transitions.stream().anyMatch(
