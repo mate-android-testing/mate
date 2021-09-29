@@ -57,7 +57,7 @@ public final class TransitionSystemSerializer {
             if (index > 0) {
                 writer.write(",");
             }
-            writer.printf("\"%d\":\"%s\"", index, action);
+            writer.printf("\"%d\":%s", index, action);
             map.put(action, index);
             ++index;
         }
@@ -81,7 +81,7 @@ public final class TransitionSystemSerializer {
                 } else {
                     firstEntry = false;
                 }
-                writer.write(actionIndexes.get(action));
+                writer.write(actionIndexes.get(action).toString());
             }
             writer.write("],\"featureMap\":{");
             firstEntry = true;
