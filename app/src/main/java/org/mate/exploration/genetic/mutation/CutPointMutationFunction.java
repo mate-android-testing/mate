@@ -53,7 +53,8 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
-                if (!uiAbstractionLayer.getExecutableActions().contains(newAction) || !mutant.updateTestCase(newAction, i)) {
+                if (!uiAbstractionLayer.getExecutableActions().contains(newAction)
+                        || !mutant.updateTestCase(newAction, i)) {
                     break;
                 }
             }
@@ -64,7 +65,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         if (!isTestSuiteExecution) {
             /*
              * If we deal with a test suite execution, the storing of coverage
-             * and fitness data is handled by the AndroidSuiteRandomChromosomeFactory itself.
+             * and fitness data is handled by the test suite mutation operator itself.
              */
             FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
             CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
