@@ -397,8 +397,8 @@ public class EnvironmentManager {
     public boolean fetchTransitionSystem(String transitionSystemDir, String fileName) {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_transition_system")
                 .withParameter("deviceId", emulator)
-                .withParameter("testcaseDir", transitionSystemDir)
-                .withParameter("testcase", fileName);
+                .withParameter("transitionSystemDir", transitionSystemDir)
+                .withParameter("transitionSystemFile", fileName);
         Message response = sendMessage(messageBuilder.build());
         boolean success = Boolean.parseBoolean(response.getParameter("response"));
         MATE.log("Fetching transition system from emulator succeeded: " + success);
