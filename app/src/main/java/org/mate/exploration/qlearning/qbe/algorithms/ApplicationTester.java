@@ -115,7 +115,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
        * For very small apps (e.g. com.zola.bmi.akp) this assumption does not hold.
        * TODO: Check whether this assumptions holds for bigger apps.
        */
-      TransitionRelation<S, A> relation = nonDeterministicTestcase.remove(1);
+      TransitionRelation<S, A> relation = nonDeterministicTestcase.remove(0);
       MATE.log_warn("Passive learn: Found singe-transition testcase: " + relation);
       boolean deterministic;
       int iteration = 1;
