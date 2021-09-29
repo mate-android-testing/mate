@@ -11,8 +11,8 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.Coverage;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -46,7 +46,7 @@ public class EnvironmentManager {
      * test case the traces file multiple times. Otherwise, the last fetch trial overwrites
      * the traces file for the given test case with an empty file.
      */
-    private Set<String> coveredTestCases = new HashSet<>();
+    private final Set<String> coveredTestCases = new HashSet<>();
 
     /**
      * Initialises a new environment manager communicating with
@@ -384,6 +384,24 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
         boolean success = Boolean.parseBoolean(response.getParameter("response"));
         MATE.log("Fetching TestCase from emulator succeeded: " + success);
+        return success;
+    }
+
+    /**
+     * Fetches a serialized transition system from the internal storage of the emulator.
+     * Also removes the serialized transition system afterwards.
+     *
+     * @param transitionSystemDir The transition system directory.
+     * @param fileName            The name of the transition system file.
+     */
+    public boolean fetchTransitionSystem(String transitionSystemDir, String fileName) {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_transition_system")
+                .withParameter("deviceId", emulator)
+                .withParameter("testcaseDir", transitionSystemDir)
+                .withParameter("testcase", fileName);
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching transition system from emulator succeeded: " + success);
         return success;
     }
 

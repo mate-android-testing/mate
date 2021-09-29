@@ -30,6 +30,7 @@ public class ExecuteMATEQBEActivityMatrix {
       MATE.log_acc("Finished run due to timeout.");
       final TransitionSystemSerializer serializer = new TransitionSystemSerializer(TRANSITION_SYSTEM_DIR);
       serializer.serialize(tester.getTransitionSystem(), FILE_NAME);
+      Registry.getEnvironmentManager().fetchTransitionSystem(TRANSITION_SYSTEM_DIR, FILE_NAME);
       mate.testApp(() -> {
       }); // De-register stuff.
    }
