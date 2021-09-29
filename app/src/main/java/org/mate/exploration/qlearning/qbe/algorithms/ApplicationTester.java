@@ -1,5 +1,7 @@
 package org.mate.exploration.qlearning.qbe.algorithms;
 
+import static org.mate.interaction.UIAbstractionLayer.ActionResult;
+
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
@@ -21,8 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class ApplicationTester<S extends State<A>, A extends Action> implements Algorithm {
@@ -69,7 +69,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     while (noTimeout(startTime)) {
       app.reset();
       S currentState = app.getCurrentState();
-      final List<TransitionRelation<S, A>> testcase = new ArrayList<>();
+      List<TransitionRelation<S, A>> testcase = new ArrayList<>();
 
       boolean noCrash = true; // Initialization is not necessary, but the compiler cannot figure it out.
       boolean noTerminalState;
@@ -92,7 +92,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
             if (nonDeterministic) {
               final List<TransitionRelation<S, A>> testcaseCopy = testcase.stream()
                       .map(TransitionRelation::new).collect(Collectors.toList());
-              passiveLearn(transitionSystem, testsuite, testcaseCopy);
+              testcase = passiveLearn(transitionSystem, testsuite, testcaseCopy);
             }
             currentState = nextState.get();
           }
@@ -103,7 +103,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     }
   }
 
-  private void passiveLearn(
+  private List<TransitionRelation<S, A>> passiveLearn(
           final TransitionSystem<S, A> ts,
           final Set<List<TransitionRelation<S, A>>> testsuite,
           final List<TransitionRelation<S, A>> nonDeterministicTestcase) {
@@ -128,7 +128,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
       } while (!deterministic);
       MATE.log_debug("Passive Learn: Edge case: Done on iteration: " + iteration);
       nonDeterministicTestcase.add(relation);
-      return;
+      return nonDeterministicTestcase;
     }
 
     testsuite.add(nonDeterministicTestcase);
@@ -155,14 +155,16 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
       for (int i = 0; i < testcase.size(); ++i) {
         final boolean nonDeterministic = ts.addTransition(testcase.get(i));
         if (nonDeterministic) {
-          passiveLearn(ts, testsuite, testcase.subList(0, i + 1));
-          return;
+          final List<TransitionRelation<S, A>> testcaseCopy = testcase.subList(0, i + 1).stream().map(TransitionRelation::new).collect(Collectors.toList());
+          passiveLearn(ts, testsuite, testcaseCopy);
+          return nonDeterministicTestcase;
         }
       }
     }
 
     ts.removeUnreachableStates();
     assert ts.isDeterministic() : "The transition system should be deterministic after applying passiveLearn";
+    return nonDeterministicTestcase;
   }
 
   private boolean noTimeout(final long startTime) {
