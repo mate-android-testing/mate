@@ -107,6 +107,7 @@ public final class TransitionSystemSerializer {
 
 
     private void serializeTransitionSystem(final TransitionSystem<QBEState, QBEAction> ts, final PrintWriter writer) {
+        ts.removeUnreachableStates();
         writer.write("{\"actions\":");
         final Map<QBEAction, Integer> actionIndexes = serializeQBEActions(ts.getActions(), writer);
         writer.write(",\"states\":");
