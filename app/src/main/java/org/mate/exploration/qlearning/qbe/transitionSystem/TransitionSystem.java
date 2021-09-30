@@ -1,5 +1,7 @@
 package org.mate.exploration.qlearning.qbe.transitionSystem;
 
+import static java.util.stream.Collectors.toSet;
+
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
@@ -10,7 +12,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class TransitionSystem<S extends State<A>, A extends Action> {
@@ -69,13 +70,13 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
 
   public Set<A> nextActions(final S state) {
     return transitions.stream().filter(transitions -> transitions.from.equals(state))
-            .map(transition -> transition.trigger).collect(Collectors.toSet());
+            .map(transition -> transition.trigger).collect(toSet());
   }
 
   public Set<TransitionRelation<S, A>> nextStates(final S state, final A action) {
     return transitions.stream()
             .filter(transition -> transition.from.equals(state) && transition.trigger.equals(action))
-            .collect(Collectors.toSet());
+            .collect(toSet());
   }
 
   public void removeUnreachableStates() {
@@ -88,15 +89,16 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
     do {
       final Set<TransitionRelation<S, A>> newTransitions = transitions.stream()
               .filter(transitions -> reachableStates.contains(transitions.from))
-              .collect(Collectors.toSet());
+              .collect(toSet());
       final Set<S> newStates = newTransitions.stream().map(transition -> transition.to)
-              .collect(Collectors.toSet());
+              .collect(toSet());
       change = reachableTransitions.addAll(newTransitions);
       change = reachableStates.addAll(newStates) || change; // Beware of short-circuited logic.
     } while (change);
 
     states.retainAll(reachableStates);
     transitions.retainAll(reachableTransitions);
+    actions.retainAll(reachableStates.stream().flatMap(s -> s.getActions().stream()).collect(toSet()));
   }
 
   public boolean isDeterministic() {
