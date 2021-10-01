@@ -91,6 +91,7 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
               .filter(transitions -> reachableStates.contains(transitions.from))
               .collect(toSet());
       final Set<S> newStates = newTransitions.stream().map(transition -> transition.to)
+              .filter(Objects::nonNull)
               .collect(toSet());
       change = reachableTransitions.addAll(newTransitions);
       change = reachableStates.addAll(newStates) || change; // Beware of short-circuited logic.
