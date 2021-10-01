@@ -43,6 +43,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     this.timeoutInMilliseconds = timeoutInMilliseconds;
     this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
 
+    app.reset();
     this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
 
     if (timeoutInMilliseconds <= 0) {
@@ -90,9 +91,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
           if (noCrash) {
             transitionSystem.addActions(nextState.get().getActions());
             if (nonDeterministic) {
-              final List<TransitionRelation<S, A>> testcaseCopy = testcase.stream()
-                      .map(TransitionRelation::new).collect(Collectors.toList());
-              testcase = passiveLearn(transitionSystem, testsuite, testcaseCopy);
+              passiveLearn(transitionSystem, testsuite, testcase);
             }
             currentState = nextState.get();
           }
@@ -103,13 +102,13 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     }
   }
 
-  private List<TransitionRelation<S, A>> passiveLearn(
+  private void passiveLearn(
           final TransitionSystem<S, A> ts,
           final Set<List<TransitionRelation<S, A>>> testsuite,
           final List<TransitionRelation<S, A>> nonDeterministicTestcase) {
 
     final int testcaseLength = nonDeterministicTestcase.size();
-    if (testcaseLength < 2) {
+    if (testcaseLength == 1) {
       /*
        * Passive learn simply assumes that the test case has a length of at least two.
        * For very small apps (e.g. com.zola.bmi.akp) this assumption does not hold.
@@ -125,10 +124,11 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
         final S dummy = app.copyWithDummyComponent(relation.to);
         relation = new TransitionRelation<>(relation.from, relation.trigger, dummy, relation.actionResult);
         deterministic = ts.addTransition(relation);
+        ++iteration;
       } while (!deterministic);
       MATE.log_debug("Passive Learn: Edge case: Done on iteration: " + iteration);
       nonDeterministicTestcase.add(relation);
-      return nonDeterministicTestcase;
+      return;
     }
 
     testsuite.add(nonDeterministicTestcase);
@@ -157,14 +157,12 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
         if (nonDeterministic) {
           final List<TransitionRelation<S, A>> testcaseCopy = testcase.subList(0, i + 1).stream().map(TransitionRelation::new).collect(Collectors.toList());
           passiveLearn(ts, testsuite, testcaseCopy);
-          return nonDeterministicTestcase;
         }
       }
     }
 
     ts.removeUnreachableStates();
     assert ts.isDeterministic() : "The transition system should be deterministic after applying passiveLearn";
-    return nonDeterministicTestcase;
   }
 
   private boolean noTimeout(final long startTime) {
