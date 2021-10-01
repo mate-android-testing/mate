@@ -32,43 +32,88 @@ import java.util.Map;
  */
 public class Mio2<T> extends GeneticAlgorithm<T> {
 
-    private Map<IFitnessFunction<T>, List<ChromosomeFitnessTuple>> archive;
-
-    // see paper, variable PR
-    private double pSampleRandom;
-
-    // see paper, variable F
-    private double focusedSearchStart;
-
-    // maintain the start time to increase/decrease linearly PR and n
-    private long startTime;
-
-    // track whether focused search has begun
-    private boolean startedFocusedSearch = false;
-
-    // keep the initial values of n and PR
-    private final int populationSizeStart;
-    private final double pSampleRandomStart;
-
-    // how many mutations should be performed until the next sampling, see variable m
-    private int mutations;
-
-    // see variable ck
-    private final Map<IFitnessFunction<T>, Integer> samplingCounters;
+    /**
+     * The sampling probability P_r during focused search.
+     */
+    private final double pSampleRandomFocusedSearch = 0.0;
 
     /**
-     * Initializing the genetic algorithm with all necessary attributes
+     * The population size n during focused search.
+     */
+    private final int populationSizeFocusedSearch = 1;
+
+    /**
+     * The mutation rate m during focused search.
+     */
+    private final int mutationRateFocusedSearch = 10;
+
+    /**
+     * The archive maintains for each target k a population T_k of size up to n.
+     */
+    private final Map<IFitnessFunction<T>, List<ChromosomeFitnessTuple>> archive;
+
+    /**
+     * Represents the initial probability P_r for sampling a random chromosome.
+     */
+    private final double pSampleRandomStart;
+
+    /**
+     * Represents the initial population size n.
+     */
+    private final int populationSizeStart;
+
+    /**
+     * Represents the initial mutation rate m.
+     */
+    private final int mutationRateStart;
+
+    /**
+     * Represents the current probability P_r for sampling a random chromosome.
+     */
+    private double pSampleRandom;
+
+    /**
+     * Represents the current population size n.
+     */
+    private int populationSize;
+
+    /**
+     * Represents the current mutation rate m.
+     */
+    private int mutationRate;
+
+    /**
+     * Represents the percentage F that defines after which time the focused search should start.
+     * For example, F = 0.5 means that the focused search should start after 50% of the search
+     * budget is exhausted.
+     */
+    private final double focusedSearchStart;
+
+    // represents the variable c_k for each target k
+    private final Map<IFitnessFunction<T>, Integer> samplingCounters;
+
+    // tracks the start point of the search to measure when the focused search should start
+    private long startTime;
+
+    // whether the focused search phase has been started yet
+    private boolean startedFocusedSearch = false;
+
+    /**
+     * Initializes MIO with the relevant attributes.
      *
-     * @param chromosomeFactory    see {@link IChromosomeFactory}
-     * @param selectionFunction    see {@link ISelectionFunction}
-     * @param crossOverFunction    see {@link ICrossOverFunction}
-     * @param mutationFunction     see {@link IMutationFunction}
-     * @param iFitnessFunctions    see {@link IFitnessFunction}
-     * @param terminationCondition see {@link ITerminationCondition}
-     * @param populationSize       size of population kept by the genetic algorithm
-     * @param bigPopulationSize    size which population will temporarily be after creating offspring
-     * @param pCrossover           probability that crossover occurs (between 0 and 1)
-     * @param pMutate              probability that mutation occurs (between 0 and 1)
+     * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
+     * @param selectionFunction The unused selection function, see {@link ISelectionFunction}.
+     * @param crossOverFunction The unused crossover function, see {@link ICrossOverFunction}.
+     * @param mutationFunction The used mutation function, see {@link IMutationFunction}.
+     * @param iFitnessFunctions The used fitness function, see {@link IFitnessFunction}.
+     * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
+     * @param populationSize The population size n.
+     * @param bigPopulationSize The big population size, unused here.
+     * @param pCrossover The probability for crossover, unused here.
+     * @param pMutate The probability for mutation.
+     * @param mutationRate The mutation rate m.
+     * @param focusedSearchStart The percentage F.
+     * @param pSampleRandom The sampling probability P_r.
      */
     public Mio2(IChromosomeFactory<T> chromosomeFactory,
                 ISelectionFunction<T> selectionFunction,
@@ -81,32 +126,44 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
                 double pCrossover,
                 double pMutate,
                 double pSampleRandom,
-                double focusedSearchStart) {
+                double focusedSearchStart,
+                int mutationRate) {
 
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
                 iFitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
 
-        this.pSampleRandom = pSampleRandom;
-        this.focusedSearchStart = focusedSearchStart;
+        this.archive = new HashMap<>(); // (k -> T_k)
+        this.samplingCounters = new HashMap<>(); // (k -> c_k)
+
+        this.pSampleRandom = pSampleRandom; // P_r
+        this.populationSize = populationSize; // n
+        this.mutationRate = mutationRate; // m
+        this.focusedSearchStart = focusedSearchStart; // F
+
+        // the start values for P_r, n and m
         this.pSampleRandomStart = pSampleRandom;
         this.populationSizeStart = populationSize;
-        this.samplingCounters = new HashMap<>();
-        this.mutations = 1;
+        this.mutationRateStart = mutationRate;
+
+        MATE.log_acc("Initial Parameters: ");
+        MATE.log_acc("Random sampling probability P_r: " + pSampleRandomStart);
+        MATE.log_acc("Population size n: " + populationSizeStart);
+        MATE.log_acc("Mutation rate m: " + mutationRateStart);
 
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
 
-            // for each testing target we keep a population of up to size n
+            // for each testing target k we keep a population T_k of up to size n
             archive.put(fitnessFunction, new LinkedList<ChromosomeFitnessTuple>());
 
-            // initially the sampling counter for each testing target is zero
+            // initially the sampling counter c_k for each testing target k is zero
             samplingCounters.put(fitnessFunction, 0);
         }
     }
 
     /**
-     * MIO initially samples a random chromosome, evaluates its fitness and updates the
-     * archive accordingly.
+     * MIO initially samples a random chromosome, evaluates its fitness and updates the archive
+     * accordingly.
      */
     @Override
     public void createInitialPopulation() {
@@ -117,9 +174,9 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         IChromosome<T> chromosome = chromosomeFactory.createChromosome();
         population.add(chromosome);
 
-        for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
-            double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-            addToArchive(fitnessFunction, new ChromosomeFitnessTuple(chromosome, fitness));
+        for (IFitnessFunction<T> target : this.fitnessFunctions) {
+            double fitness = target.getNormalizedFitness(chromosome);
+            addToArchive(target, new ChromosomeFitnessTuple(chromosome, fitness));
         }
 
         logCurrentFitness();
@@ -187,40 +244,54 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         population.clear();
 
         if (Randomness.getRnd().nextDouble() < pSampleRandom) {
-            // sample random
-            population.add(chromosomeFactory.createChromosome());
+            // sample random chromosome with probability P_r
+            IChromosome<T> chromosome = chromosomeFactory.createChromosome();
+            population.add(chromosome);
+            MATE.log_acc("Sampled random chromosome " + chromosome + "!");
         } else {
-            // sample from archive, pick target with lowest sampling counter
+            /*
+            * Sample a chromosome from the archive with probability (1 - P_r). Pick a target k with
+            * the lowest sampling counter c_k. Then select randomly a chromosome from the
+            * population T_k in the archive.
+             */
             IFitnessFunction<T> target = getBestTarget();
-
-            // take a random element from the chosen target population
             ChromosomeFitnessTuple tuple = Randomness.randomElement(archive.get(target));
             IChromosome<T> chromosome = tuple.chromosome;
+            MATE.log_acc("Sampled chromosome " + chromosome + " from archive!");
 
-            // increase sampling counter, see section 3.3
+            // increase sampling counter c_k, see section 3.3
             Integer value = samplingCounters.get(target);
             samplingCounters.put(target, value + 1);
 
-            for (int i = 0; i < mutations; i++) {
+            // sample up to m mutants from the same base chromosome
+            for (int i = 0; i < mutationRate; i++) {
                 List<IChromosome<T>> mutants = mutationFunction.mutate(chromosome);
-                population.add(mutants.get(0));
+                IChromosome<T> mutant = mutants.get(0);
+                population.add(mutant);
+                MATE.log_acc("Sampled mutant " + mutant + "!");
             }
         }
 
-        for (IChromosome<T> chromosome : population) {
-            for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
+        MATE.log_acc("Updating Archive...");
 
-                // evaluate fitness and update archive
-                double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-                ChromosomeFitnessTuple tuple = new ChromosomeFitnessTuple(chromosome, fitness);
-                updateArchive(fitnessFunction, tuple);
+        // evaluate fitness and update archive
+        for (IChromosome<T> chromosome : population) {
+            for (IFitnessFunction<T> target : this.fitnessFunctions) {
+                double fitness = target.getNormalizedFitness(chromosome);
+                updateArchive(target, new ChromosomeFitnessTuple(chromosome, fitness));
             }
         }
 
         logCurrentFitness();
         currentGenerationNumber++;
 
-        updateParameters();
+        /*
+        * The parameters P_r, n and m linearly increase/decrease over time until the focused
+        * search is started.
+         */
+        if (!startedFocusedSearch) {
+            updateParameters();
+        }
 
         // TODO: Remove! This just tries to keep the cache size reasonable by dropping unused chromosomes.
         List<IChromosome<T>> activeChromosomes = new ArrayList<>();
@@ -232,41 +303,247 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         FitnessUtils.cleanCache(activeChromosomes);
     }
 
-    // section 3.1
-    private void updateArchive(IFitnessFunction<T> fitnessFunction, ChromosomeFitnessTuple tuple) {
+    /**
+     * Updates the archive according to the rules described in section 3.1.
+     *
+     * @param target The target k.
+     * @param chromosome The new chromosome that might be added to the archive or that might replace
+     *              another chromosome in the archive.
+     */
+    private void updateArchive(IFitnessFunction<T> target, ChromosomeFitnessTuple chromosome) {
 
-        if (isTargetNotReachable(fitnessFunction, tuple)) {
-            // h = 0, the chromosome is not added to the archive at all
-        } else if (isTargetCovered(fitnessFunction, tuple)) {
-            // h = 1, add to archive + shrink
-            if (archive.get(fitnessFunction).size() != 1) {
-                // no chromosome in the archive that fulfills the testing target, otherwise size == 1
-                archive.get(fitnessFunction).clear();
-                addToArchive(fitnessFunction, tuple);
+        if (isTargetNotReachable(target, chromosome)) {
+            // the target is unreachable for the chromosome, ignore it
+        } else if (isTargetCovered(target, chromosome)) {
+            // the chromosome covers the target, insert it if better
+            if (archive.get(target).isEmpty() || archive.get(target).size() > 1) {
+                /*
+                * No chromosome in the current population T_k covers the target, thus replace
+                * the current population with the new chromosome. Note, the population T_k will
+                * never expand again, i.e. |T_k| = 1 from now on.
+                 */
+                replaceAllInArchive(target, chromosome);
             } else {
-                ChromosomeFitnessTuple chromosomeFitnessTuple = archive.get(fitnessFunction).get(0);
-                if (!isTargetCovered(fitnessFunction, chromosomeFitnessTuple)) {
-                    // replace the chromosome
-                    archive.get(fitnessFunction).clear();
-                    addToArchive(fitnessFunction, tuple);
+                /*
+                * Check whether the single chromosome in the population T_k covers the target k.
+                * If this is not the case, we can simply replace the chromosome with the new one.
+                * Otherwise, we only replace the chromosome if the new chromosome is better in terms
+                * of size (shorter). If the size is identical, the chromosomes are compared on the
+                * remaining targets other than k.
+                 */
+                ChromosomeFitnessTuple oldChromosome = archive.get(target).get(0);
+                if (!isTargetCovered(target, oldChromosome)) {
+                    replaceInArchive(target, chromosome, oldChromosome);
                 } else {
-                    // replace only if better
-                    if (compareSizeAndOtherTargets(fitnessFunction, tuple, chromosomeFitnessTuple) > 0) {
-                        archive.get(fitnessFunction).clear();
-                        addToArchive(fitnessFunction, tuple);
+                    if (compareSizeAndOtherTargets(target, chromosome, oldChromosome) > 0) {
+                        replaceInArchive(target, chromosome, oldChromosome);
                     }
                 }
             }
-        } else if (!isPopulationFull(fitnessFunction)) {
-            addToArchive(fitnessFunction, tuple);
-        } else if (isPopulationFull(fitnessFunction)) {
-            // replace worst but only if better
-            ChromosomeFitnessTuple worst = getWorstInPopulation(fitnessFunction);
-            if (compareFitnessAndSize(fitnessFunction, tuple, worst) > 0) {
-                archive.get(fitnessFunction).clear();
-                addToArchive(fitnessFunction, tuple);
+        } else if (!isTargetPopulationFull(target)) {
+            // as long as the target population T_k is not full, i.e. |T_k| < n, we add it
+            addToArchive(target, chromosome);
+        } else if (isTargetPopulationFull(target)) {
+            // replace with worst chromosome in T_k but only if better in terms of fitness and size
+            ChromosomeFitnessTuple worstChromosome = getWorstChromosomeOfTargetPopulation(target);
+            if (compareFitnessAndSize(target, chromosome, worstChromosome) > 0) {
+                replaceInArchive(target, chromosome, worstChromosome);
             }
         }
+    }
+
+    /**
+     * Checks whether the given target is covered, i.e. there exits a single chromosome in the
+     * target population T_k that fulfills the target k.
+     *
+     * @param target The target k.
+     * @return Returns {@code true} if the target k is covered, otherwise {@code false} is returned.
+     */
+    private boolean isTargetCovered(IFitnessFunction<T> target) {
+        if (archive.get(target).size() != 1) {
+            /*
+            * By construction, the target k is only covered if the population T_k contains
+            * a single chromosome, since the population never expands once a chromosome covers
+            * the target.
+             */
+            return false;
+        } else {
+            // check whether the single chromosome covers the target k
+            ChromosomeFitnessTuple tuple = archive.get(target).get(0);
+            return isTargetCovered(target, tuple);
+        }
+    }
+
+    /**
+     * Checks whether the given chromosome covers the given target.
+     *
+     * @param target The target k.
+     * @param chromosome The chromosome to be checked.
+     * @return Returns {@code true} if the given chromosome covers the given target k,
+     *          otherwise {@code false} is returned.
+     */
+    private boolean isTargetCovered(IFitnessFunction<T> target, ChromosomeFitnessTuple chromosome) {
+        boolean isMaximising = target.isMaximizing();
+        return isMaximising ? chromosome.fitness == 1 : chromosome.fitness == 0;
+    }
+
+    /**
+     * Checks whether the given chromosome can't cover the given target k.
+     *
+     * @param target The target k.
+     * @param chromosome The chromosome to be checked.
+     * @return Returns {@code true} if the given chromosome does not cover the given target k,
+     *          otherwise {@code false} is returned.
+     */
+    private boolean isTargetNotReachable(IFitnessFunction<T> target, ChromosomeFitnessTuple chromosome) {
+        boolean isMaximising = target.isMaximizing();
+        return isMaximising ? chromosome.fitness == 0 : chromosome.fitness == 1;
+    }
+
+    /**
+     * Checks whether the target population T_k is full, i.e. |T_k| >= n.
+     *
+     * @param target The target k.
+     * @return Returns {@code true} if the target population T_k is full.
+     */
+    private boolean isTargetPopulationFull(IFitnessFunction<T> target) {
+        return archive.get(target).size() >= populationSize;
+    }
+
+    /**
+     * Adds the given chromosome to the given target population T_k.
+     *
+     * @param target The target k.
+     * @param chromosome The chromosome to be added.
+     */
+    private void addToArchive(IFitnessFunction<T> target, ChromosomeFitnessTuple chromosome) {
+
+        if (archive.get(target).size() >= populationSize) {
+            throw new IllegalStateException("Population T_k of is full, can't store chromosome!");
+        }
+
+        archive.get(target).add(chromosome);
+
+        // reset the sampling counter c_k for target k
+        samplingCounters.put(target, 0);
+    }
+
+    /**
+     * Replaces the old chromosome with the new chromosome in the target population T_k.
+     *
+     * @param target The target k.
+     * @param newChromosome The new chromosome.
+     * @param oldChromosome The old chromosome.
+     */
+    private void replaceInArchive(IFitnessFunction<T> target, ChromosomeFitnessTuple newChromosome,
+                                  ChromosomeFitnessTuple oldChromosome) {
+        archive.get(target).remove(oldChromosome);
+        addToArchive(target, newChromosome);
+    }
+
+    /**
+     * Replaces all chromosomes in the target population T_k with the given chromosome.
+     *
+     * @param target The target k.
+     * @param chromosome The new chromosome.
+     */
+    private void replaceAllInArchive(IFitnessFunction<T> target, ChromosomeFitnessTuple chromosome) {
+        archive.get(target).clear();
+        addToArchive(target, chromosome);
+    }
+
+    /**
+     * Retrieves the worst chromosome from the target population T_k, i.e. the chromosome with
+     * the worst fitness value and the worst size.
+     *
+     * @param target The target k.
+     * @return Returns the worst chromosome of the target population T_k.
+     */
+    private ChromosomeFitnessTuple getWorstChromosomeOfTargetPopulation(final IFitnessFunction<T> target) {
+
+        if (archive.get(target).isEmpty()) {
+            throw new IllegalStateException("Can't retrieve worst chromosome from empty archive!");
+        }
+
+        List<ChromosomeFitnessTuple> population = archive.get(target);
+        Collections.sort(population, new Comparator<ChromosomeFitnessTuple>() {
+            @Override
+            public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
+                int cmp = compareFitness(target, o1, o2);
+                return cmp != 0 ? cmp : compareSize(o1, o2);
+            }
+        });
+
+        // the worst chromosome comes first
+        return population.get(0);
+    }
+
+    /**
+     * Shrinks the archive. This is necessary once the parameters are updated, in particular the
+     * parameter n. It could happen that certain populations T_k violate the rule |T_k| <= n
+     * since n is linearly decreasing with the passing of time.
+     */
+    private void shrinkArchive() {
+
+        MATE.log_acc("Shrinking Archive...");
+
+        for (final IFitnessFunction<T> target : fitnessFunctions) {
+            List<ChromosomeFitnessTuple> population = archive.get(target);
+            if (population.size() > populationSize) {
+
+                // we need to discard the worst chromosomes
+                int discardAmount = population.size() - populationSize;
+
+                Collections.sort(population, new Comparator<ChromosomeFitnessTuple>() {
+                    @Override
+                    public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
+                        int cmp = compareFitness(target, o1, o2);
+                        return cmp != 0 ? cmp : compareSize(o1, o2);
+                    }
+                });
+
+                population.subList(0, discardAmount).clear();
+            }
+        }
+    }
+
+    /**
+     * Updates the parameters P_r, n and m. Those parameters linearly increase/decrease with the
+     * passing of time until the focused search is started. See section 3.2. for more details.
+     */
+    private void updateParameters() {
+
+        MATE.log_acc("Updating Parameters...");
+
+        long currentTime = System.currentTimeMillis();
+        long expiredTime = currentTime - startTime;
+        long focusedSearchStartTime = (long) (Registry.getTimeout() * focusedSearchStart);
+
+        if (expiredTime >= focusedSearchStartTime) {
+            MATE.log_acc("Starting focused search...");
+            startedFocusedSearch = true;
+            pSampleRandom = pSampleRandomFocusedSearch;
+            populationSize = populationSizeFocusedSearch;
+            mutationRate = mutationRateFocusedSearch;
+        } else {
+            float focusedSearchStartProgress = (float) expiredTime / focusedSearchStartTime;
+
+            populationSize = populationSizeStart
+                    + Math.round((populationSizeFocusedSearch - populationSizeStart) * focusedSearchStartProgress);
+
+            pSampleRandom = pSampleRandomStart
+                    + (pSampleRandomFocusedSearch - pSampleRandomStart) * focusedSearchStartProgress;
+
+            mutationRate = mutationRateStart
+                    + Math.round((mutationRateFocusedSearch - mutationRateStart) * focusedSearchStartProgress);
+        }
+
+        MATE.log_acc("New population size n: " + populationSize);
+        MATE.log_acc("New random sampling rate P_r: " + pSampleRandom);
+        MATE.log_acc("New mutation rate m: " + mutationRate);
+
+        // the population size is decreasing with time, thus we need to discard the worst chromosomes
+        shrinkArchive();
     }
 
     /**
@@ -294,6 +571,7 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         }
 
         if (bestEntry == null) {
+            MATE.log_acc("All testing targets covered, picking random target k.");
             // all non empty testing targets are covered, thus pick one randomly among them
             List<IFitnessFunction<T>> coveredTargets = new ArrayList<>();
 
@@ -309,43 +587,78 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         }
     }
 
-    private int compareFitnessAndSize(final IFitnessFunction<T> fitnessFunction,
+    /**
+     * Compares the two chromosomes based on its fitness and size.
+     *
+     * @param target The target k.
+     * @param first The first chromosome.
+     * @param second The second chromosome.
+     * @return Returns a comparison value that indicates the 'ordering' of the two chromosomes.
+     */
+    private int compareFitnessAndSize(final IFitnessFunction<T> target,
                                       ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
-        int cmp = compareFitness(fitnessFunction, first, second);
+        int cmp = compareFitness(target, first, second);
         return cmp != 0 ? cmp : compareSize(first, second);
     }
 
-    private int compareSizeAndOtherTargets(final IFitnessFunction<T> fitnessFunction,
+    /**
+     * Compares the two chromosomes based on its size and the targets other than k.
+     *
+     * @param target The target k.
+     * @param first The first chromosome.
+     * @param second The second chromosome.
+     * @return Returns a comparison value that indicates the 'ordering' of the two chromosomes.
+     */
+    private int compareSizeAndOtherTargets(final IFitnessFunction<T> target,
                                            ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
         int cmp = compareSize(first, second);
-        return cmp != 0 ? cmp : compareOtherTargets(fitnessFunction, first, second);
+        return cmp != 0 ? cmp : compareOtherTargets(target, first, second);
     }
 
-    private int compareOtherTargets(final IFitnessFunction<T> fitnessFunction,
+    /**
+     * Compares the two chromosomes based on the fitness values of every target other than k.
+     *
+     * @param target The target k.
+     * @param first The first chromosome.
+     * @param second The second chromosome.
+     * @return Returns a comparison value that indicates the 'ordering' of the two chromosomes.
+     */
+    private int compareOtherTargets(final IFitnessFunction<T> target,
                                     ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
 
         double fitnessValueSumFst = 0.0;
         double fitnessValueSumSnd = 0.0;
 
-        for (IFitnessFunction<T> target : fitnessFunctions) {
-            if (!target.equals(fitnessFunction)) {
+        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
+            if (!fitnessFunction.equals(target)) {
                 fitnessValueSumFst += target.getNormalizedFitness(first.chromosome);
                 fitnessValueSumSnd += target.getNormalizedFitness(second.chromosome);
             }
         }
 
-        return fitnessFunction.isMaximizing()
+        return target.isMaximizing()
+                // a higher fitness value is better
                 ? Double.compare(fitnessValueSumFst, fitnessValueSumSnd)
+                // a lower fitness value is better
                 : Double.compare(fitnessValueSumSnd, fitnessValueSumFst);
     }
 
-    private int compareFitness(final IFitnessFunction<T> fitnessFunction,
+    /**
+     * Compares the two chromosomes based on its fitness. Regards whether the fitness function
+     * is maximising or minimising.
+     *
+     * @param target The target k.
+     * @param first The first chromosome.
+     * @param second The second chromosome.
+     * @return Returns a comparison value that indicates the 'ordering' of the two chromosomes.
+     */
+    private int compareFitness(final IFitnessFunction<T> target,
                         ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
 
         Comparator<ChromosomeFitnessTuple> comparator = new Comparator<ChromosomeFitnessTuple>() {
             @Override
             public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
-                boolean isMaximising = fitnessFunction.isMaximizing();
+                boolean isMaximising = target.isMaximizing();
 
                 return isMaximising
                         ? Double.compare(o1.fitness, o2.fitness)
@@ -356,6 +669,14 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         return comparator.compare(first, second);
     }
 
+    /**
+     * Compares the two chromosomes based on its size. A shorter chromosome is considered better.
+     * This is in fact the reversed natural ordering of integers.
+     *
+     * @param first The first chromosome.
+     * @param second The second chromosome.
+     * @return Returns a comparison value that indicates the 'ordering' of the two chromosomes.
+     */
     private int compareSize(ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
 
         Comparator<ChromosomeFitnessTuple> comparator = new Comparator<ChromosomeFitnessTuple>() {
@@ -366,13 +687,14 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
                 IChromosome<T> snd = o2.chromosome;
 
                 if (fst.getValue() instanceof TestCase) {
-                    return ((TestCase) fst.getValue()).getEventSequence().size()
-                            - ((TestCase) snd.getValue()).getEventSequence().size();
+                    return ((TestCase) snd.getValue()).getEventSequence().size()
+                            - ((TestCase) fst.getValue()).getEventSequence().size();
                 } else if (fst.getValue() instanceof TestSuite) {
-                    return ((TestSuite) fst.getValue()).getTestCases().size()
-                            - ((TestSuite) snd.getValue()).getTestCases().size();
+                    return ((TestSuite) snd.getValue()).getTestCases().size()
+                            - ((TestSuite) fst.getValue()).getTestCases().size();
                 } else {
-                    throw new IllegalStateException("Chromosome type " + fst.getValue().getClass() + "not yet supported!");
+                    throw new IllegalStateException("Chromosome type " + fst.getValue().getClass()
+                            + "not yet supported!");
                 }
             }
         };
@@ -380,106 +702,9 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
         return comparator.compare(first, second);
     }
 
-    private boolean isTargetCovered(IFitnessFunction<T> fitnessFunction) {
-        if (archive.get(fitnessFunction).size() != 1) {
-            // only if the population size is 1, the target might be covered
-            return false;
-        } else {
-            ChromosomeFitnessTuple tuple = archive.get(fitnessFunction).get(0);
-            return isTargetCovered(fitnessFunction, tuple);
-        }
-    }
-
-    private boolean isTargetCovered(IFitnessFunction<T> fitnessFunction, ChromosomeFitnessTuple tuple) {
-        boolean isMaximising = fitnessFunction.isMaximizing();
-        return isMaximising ? tuple.fitness == 1 : tuple.fitness == 0;
-    }
-
-    private boolean isTargetNotReachable(IFitnessFunction<T> fitnessFunction, ChromosomeFitnessTuple tuple) {
-        boolean isMaximising = fitnessFunction.isMaximizing();
-        return isMaximising ? tuple.fitness == 0 : tuple.fitness == 1;
-    }
-
-    private boolean isPopulationFull(IFitnessFunction<T> fitnessFunction) {
-        return archive.get(fitnessFunction).size() == populationSize;
-    }
-
-    private void addToArchive(IFitnessFunction<T> fitnessFunction, ChromosomeFitnessTuple tuple) {
-
-        if (archive.get(fitnessFunction).size() >= populationSize) {
-            throw new IllegalStateException("Archive is overcrowded!");
-        }
-
-        archive.get(fitnessFunction).add(tuple);
-
-        // reset the sampling counter
-        samplingCounters.put(fitnessFunction, 0);
-    }
-
-    private ChromosomeFitnessTuple getWorstInPopulation(final IFitnessFunction<T> fitnessFunction) {
-
-        if (archive.get(fitnessFunction).isEmpty()) {
-            throw new IllegalStateException("Can't retrieve worst chromosome from empty archive!");
-        }
-
-        List<ChromosomeFitnessTuple> population = archive.get(fitnessFunction);
-        Collections.sort(population, new Comparator<ChromosomeFitnessTuple>() {
-            @Override
-            public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
-                int cmp = compareFitness(fitnessFunction, o1, o2);
-                return cmp != 0 ? cmp : compareSize(o1, o2);
-            }
-        });
-
-        return population.get(0);
-    }
-
-    private void shrinkArchive() {
-
-        for (final IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-            List<ChromosomeFitnessTuple> tuples = archive.get(fitnessFunction);
-            if (tuples.size() > populationSize) {
-
-                // we need to discard the worst chromosomes
-                int discardAmount = tuples.size() - populationSize;
-
-                Collections.sort(tuples, new Comparator<ChromosomeFitnessTuple>() {
-                    @Override
-                    public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
-                        int cmp = compareFitness(fitnessFunction, o1, o2);
-                        return cmp != 0 ? cmp : compareSize(o1, o2);
-                    }
-                });
-
-                tuples.subList(0, discardAmount).clear();
-            }
-        }
-    }
-
-    private void updateParameters() {
-
-        long currentTime = System.currentTimeMillis();
-        long expiredTime = (currentTime - startTime);
-        long focusedStartAbsolute = (long) (Registry.getTimeout() * focusedSearchStart);
-
-        if (expiredTime >= focusedStartAbsolute && !startedFocusedSearch) {
-            MATE.log_acc("Starting focused search.");
-            startedFocusedSearch = true;
-            pSampleRandom = 0.0;
-            populationSize = 1;
-            // TODO: the mutation rate also linearly increases over time
-            mutations = 10;
-        } else {
-            double expiredTimePercent = expiredTime / (Registry.getTimeout() / 100);
-            double decreasePercent = expiredTimePercent / (focusedSearchStart * 100);
-            populationSize = (int) (populationSizeStart * (1 - decreasePercent));
-            pSampleRandom = pSampleRandomStart * (1 - decreasePercent);
-        }
-
-        // the population size is decreasing with time, thus we need to discard the worst chromosomes
-        shrinkArchive();
-    }
-
+    /**
+     * Pairs a chromosome with its (normalised) fitness value.
+     */
     private class ChromosomeFitnessTuple {
 
         private final IChromosome<T> chromosome;
@@ -496,6 +721,49 @@ public class Mio2<T> extends GeneticAlgorithm<T> {
 
         public double getFitness() {
             return fitness;
+        }
+
+        @Override
+        public String toString() {
+
+            int size = -1;
+
+            if (chromosome.getValue() instanceof TestCase) {
+                size = ((TestCase) chromosome.getValue()).getEventSequence().size();
+            } else if (chromosome.getValue() instanceof TestSuite) {
+                size = ((TestSuite) chromosome.getValue()).getTestCases().size();
+            }
+
+            return "ChromosomeFitnessTuple{" +
+                    "chromosome=" + chromosome +
+                    ", fitness=" + fitness +
+                    ", size=" + size +
+                    '}';
+        }
+    }
+
+    @SuppressWarnings("debug")
+    private void debugArchive() {
+
+        MATE.log_debug("Archive: ");
+        int i = 0;
+        for (List<ChromosomeFitnessTuple> population: archive.values()) {
+            if (!population.isEmpty()) {
+                MATE.log_debug("Population: " + i);
+                for (ChromosomeFitnessTuple tuple : population) {
+                    MATE.log_debug(tuple.toString());
+                }
+            }
+            i++;
+        }
+    }
+
+    @SuppressWarnings("debug")
+    private void debugPopulation(List<ChromosomeFitnessTuple> population) {
+
+        MATE.log_debug("Population: ");
+        for (ChromosomeFitnessTuple tuple : population) {
+            MATE.log_debug(tuple.toString());
         }
     }
 }
