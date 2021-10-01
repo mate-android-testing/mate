@@ -18,7 +18,7 @@ public final class QBEAction implements Action {
 
     @Override
     public String toString() {
-        return "{\"uiAction\":{\"actionType\":\"" + uiAction.getActionType() + "\",\"activityName\":\"" + uiAction.getActivityName() + "\"}}";
+        return "{\"uiAction\":{\"actionType\":\"" + uiAction.getActionType() + "\",\"activityName\":\"" + uiAction.getActivityName() + "\",\"hash\":" + uiAction.hashCode() + "}}";
     }
 
     @Override
@@ -28,8 +28,9 @@ public final class QBEAction implements Action {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         } else {
-            final QBEAction qbeAction = (QBEAction) o;
-            return uiAction.equals(qbeAction.uiAction);
+            final UIAction action = ((QBEAction) o).uiAction;
+            return uiAction.getActivityName().equals(action.getActivityName())
+                    && uiAction.getActionType().equals(action.getActionType());
         }
     }
 

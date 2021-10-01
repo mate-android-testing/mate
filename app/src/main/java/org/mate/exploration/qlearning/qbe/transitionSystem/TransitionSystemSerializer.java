@@ -30,8 +30,14 @@ public final class TransitionSystemSerializer {
 
     public void serialize(final TransitionSystem<QBEState, QBEAction> ts, final String fileName) {
         Objects.requireNonNull(ts);
-        final File file = new File(directory, Objects.requireNonNull(fileName));
 
+        if (ts.getActions().stream().map(QBEAction::hashCode).distinct().count() != ts.getActions().size()) {
+            MATE.log_warn("Found hash collision while serializing.");
+            MATE.log_warn("The transition system will not be serialized!");
+            return;
+        }
+
+        final File file = new File(directory, Objects.requireNonNull(fileName));
         if (!directory.exists()) {
             MATE.log("Creating transition system folder succeeded: " + directory.mkdirs());
         }
