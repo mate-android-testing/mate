@@ -50,7 +50,7 @@ public final class QBEState extends StateSkeleton<QBEAction> implements State<QB
 
     @Override
     protected int getNumberOfComponent() {
-        return featureMap.size();
+        return (int) featureMap.values().stream().mapToInt(i -> i).sum();
     }
 
     @Override
