@@ -40,7 +40,8 @@ public class ExecuteMATEMio {
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
                 .withPSampleRandom(Properties.P_SAMPLE_RANDOM())
-                .withFocusedSearchStart(Properties.P_FOCUSED_SEARCH_START());
+                .withFocusedSearchStart(Properties.P_FOCUSED_SEARCH_START())
+                .withMutationRate(Properties.MUTATION_RATE());
 
         List<String> objectives = Registry.getEnvironmentManager().getObjectives(Properties.OBJECTIVE());
 
