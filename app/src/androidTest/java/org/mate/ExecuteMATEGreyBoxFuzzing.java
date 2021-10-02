@@ -4,7 +4,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.Algorithm;
 import org.mate.exploration.fuzzing.greybox.GreyBoxFuzzer;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
@@ -20,8 +19,8 @@ public class ExecuteMATEGreyBoxFuzzing {
 
         MATE mate = new MATE();
 
-        final Algorithm greyBoxFuzzer = new GreyBoxFuzzer<>(
-                // translate chromosome factory from property!
+        final GreyBoxFuzzer<?> greyBoxFuzzer = new GreyBoxFuzzer<>(
+                // TODO: translate chromosome factory from property + other properties as well
                 new AndroidRandomChromosomeFactory(true, Properties.MAX_NUMBER_EVENTS()),
                 new CutPointMutationFunction(Properties.MAX_NUMBER_EVENTS()),
                 new NeverTerminationCondition(),
@@ -29,5 +28,6 @@ public class ExecuteMATEGreyBoxFuzzing {
         );
 
         mate.testApp(greyBoxFuzzer);
+        MATE.log_acc("Total number of crashes: " + greyBoxFuzzer.getCrashingInputs().size());
     }
 }

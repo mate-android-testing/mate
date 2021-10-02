@@ -11,6 +11,11 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 
+/**
+ * A generic coverage based greybox fuzzing algorithm.
+ *
+ * @param <T> Either a {@link TestCase} or a {@link TestSuite}.
+ */
 public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
 
     /**
@@ -18,6 +23,25 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
      */
     private static final int MAX_ENERGY = 10;
 
+    /**
+     * We need to maintain the total coverage to check whether a mutated chromosome increased it.
+     * That way, we can decide whether a chromosome {@link #isInteresting(IChromosome)}.
+     */
+    private double totalCoverage = 0.0;
+
+    /**
+     * Whether the last considered chromosome s' fulfills {@link #isInteresting(IChromosome)}.
+     */
+    private boolean isInteresting = false;
+
+    /**
+     * Initialises the greybox fuzzer.
+     *
+     * @param chromosomeFactory The used chromosome factory.
+     * @param mutationFunction The used mutation function.
+     * @param terminationCondition The used termination condition.
+     * @param corpusSize The initial size of the seed corpus S.
+     */
     public GreyBoxFuzzer(IChromosomeFactory<T> chromosomeFactory,
                          IMutationFunction<T> mutationFunction,
                          ITerminationCondition terminationCondition,
@@ -57,13 +81,21 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
     @Override
     public int assignEnergy(IChromosome<T> s) {
 
+        /*
+        * We need to make a snapshot of the total coverage here in order to tell whether a
+        * mutated chromosome s' is going to increase the total coverage or not.
+         */
+        totalCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE());
+
         if (s.getValue() instanceof TestCase) {
             int size = ((TestCase) s.getValue()).getEventSequence().size();
-            return Math.max(1, Math.round(MAX_ENERGY - ((float) MAX_ENERGY / Properties.MAX_NUMBER_EVENTS()) * size));
+            return Math.max(1, Math.round(MAX_ENERGY
+                    - ((float) MAX_ENERGY / Properties.MAX_NUMBER_EVENTS()) * size));
         } else if (s.getValue() instanceof TestSuite) {
             // TODO: Test suites seems to have always a fixed size, pick another criteria for them!
             int size = ((TestSuite) s.getValue()).getTestCases().size();
-            return Math.max(1, Math.round(MAX_ENERGY - ((float) MAX_ENERGY / Properties.NUMBER_TESTCASES()) * size));
+            return Math.max(1, Math.round(MAX_ENERGY
+                    - ((float) MAX_ENERGY / Properties.NUMBER_TESTCASES()) * size));
         } else {
             throw new IllegalStateException("Chromosome type " + s.getValue().getClass()
                     + "not yet supported!");
@@ -80,7 +112,7 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
      */
     @Override
     public boolean isInteresting(IChromosome<T> s) {
-        return false;
+        return isInteresting;
     }
 
     /**
@@ -92,6 +124,19 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
      */
     @Override
     public boolean isCrashing(IChromosome<T> s) {
+
+        /*
+        * Since a mutated chromosome s' is considered here first, it might not undergo the
+        * subsequent isInteresting() check. Thus, we need to make that decision here and update
+        * the total coverage accordingly.
+         */
+        double combinedCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE());
+        if (combinedCoverage > totalCoverage) {
+            isInteresting = true;
+            totalCoverage = combinedCoverage;
+        } else {
+            isInteresting = false;
+        }
 
         if (s.getValue() instanceof TestCase) {
             return ((TestCase) s.getValue()).getCrashDetected();
