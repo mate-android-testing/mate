@@ -136,6 +136,9 @@ public abstract class GreyBoxFuzzing<T> implements Algorithm {
     @Override
     public void run() {
 
+        MATE.log_acc("Seed corpus size: " + corpusSize);
+        MATE.log_acc("Max assignable energy: " + maxEnergy);
+
         MATE.log_acc("Generating seed corpus S...");
         List<IChromosome<T>> seedCorpus = generateSeedCorpus();
 
