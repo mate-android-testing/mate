@@ -111,13 +111,28 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
           final List<TransitionRelation<S, A>> nonDeterministicTestcase) {
 
     final int testcaseLength = nonDeterministicTestcase.size();
-    MATE.log_debug("Found non-deterministic testcase of length " + nonDeterministicTestcase.size());
+    MATE.log_debug("Found non-deterministic testcase of length " + testcaseLength);
     if (testcaseLength == 1) {
+      /*
+       * The algorithm as described in the original QBE paper simply assumes 'testcaseLength >= 2'.
+       * This assumption does not hold in general. Moreover, there seems to be no good solution to
+       * edge-case. Removing the test from the testsuite and the transition from the
+       * TransitionSystem basically cases the transition to be ignored and at least keeps the
+       * transition system deterministic.
+       */
       testsuite.remove(nonDeterministicTestcase);
       final TransitionRelation<S, A> tr = nonDeterministicTestcase.remove(0);
       ts.removeTransition(tr);
     } else {
-      testsuite.add(nonDeterministicTestcase);
+      /*
+       * Added the the nonDeterministicTestcase to the testsuite should be done according to the
+       * algorithm as described in the QBE paper. However, doing so causes an infinite recursion.
+       * Not adding the testcase does not seem to hurt while preventing the infinite recursion.
+       * Therefor the next line should be kept commendted out.
+       *
+       * TODO: Investigate the exact cause of the infinite recursion and potential other fixes.
+       */
+      //testsuite.add(nonDeterministicTestcase);
       final TransitionRelation<S, A> conflictingTransition = nonDeterministicTestcase.get(
               testcaseLength - 1);
       final TransitionRelation<S, A> secondLastTransition = nonDeterministicTestcase.get(
