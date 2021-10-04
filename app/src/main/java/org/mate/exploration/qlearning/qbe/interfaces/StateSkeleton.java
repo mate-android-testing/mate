@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public abstract class StateSkeleton<A extends Action> implements State<A> {
@@ -66,17 +64,13 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
 
     @Override
     public final int hashCode() {
-        // Check: This hash function uses a lot of information, but it might be too slow.
+        // This hash function is correct, because equal states imply equal actions and equal number
+        // of components. These in turn imply a equal hash value.
+        //
+        // The hash function does not use the feature map because, different features maps could
+        // still imply equality if the two maps are similar enough (according to cosine similarity).
         final int prime = 31;
-        int hash = 1;
-
-        final List<Integer> vector = getFeatureMap().entrySet().stream().sorted(Entry.comparingByKey())
-                .map(Entry::getValue).collect(Collectors.toList());
-        for (final Integer count : vector) {
-            hash = prime * hash + count;
-        }
-
-        hash = prime * hash + Long.hashCode(getActions().stream().mapToInt(Object::hashCode).sum());
+        int hash = Long.hashCode(getActions().stream().mapToInt(Object::hashCode).sum());
         hash = prime * hash + Integer.hashCode(getNumberOfComponent());
         return hash;
     }

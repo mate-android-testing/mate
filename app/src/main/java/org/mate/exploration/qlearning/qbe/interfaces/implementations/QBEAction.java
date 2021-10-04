@@ -28,9 +28,8 @@ public final class QBEAction implements Action {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         } else {
-            final UIAction action = ((QBEAction) o).uiAction;
-            return uiAction.getActivityName().equals(action.getActivityName())
-                    && uiAction.getActionType().equals(action.getActionType());
+            final QBEAction action = (QBEAction) o;
+            return uiAction.equals(action.uiAction);
         }
     }
 
