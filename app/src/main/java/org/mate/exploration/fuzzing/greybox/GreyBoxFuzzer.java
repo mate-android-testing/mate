@@ -89,8 +89,15 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
             return Math.max(1, Math.round(maxEnergy
                     - ((float) maxEnergy / Properties.MAX_NUMBER_EVENTS()) * size));
         } else if (s.getValue() instanceof TestSuite) {
-            // TODO: Test suites seems to have always a fixed size, pick another criteria for them!
-            int size = ((TestSuite) s.getValue()).getTestCases().size();
+            /*
+            * Test suites have per construction a fixed number of test cases, thus we need to stick
+            * here to the size of the individual test cases, which may vary.
+             */
+            int size = 0;
+            List<TestCase> testCases = ((TestSuite) s.getValue()).getTestCases();
+            for (TestCase testCase : testCases) {
+                size += testCase.getEventSequence().size();
+            }
             return Math.max(1, Math.round(maxEnergy
                     - ((float) maxEnergy / Properties.NUMBER_TESTCASES()) * size));
         } else {
