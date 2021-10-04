@@ -14,6 +14,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,15 +31,16 @@ public final class QBEState extends StateSkeleton<QBEAction> implements State<QB
     public QBEState(final IScreenState screenState) {
         Objects.requireNonNull(screenState);
         featureMap = computeFeatureMap(screenState.getWidgets());
-        actions = screenState.getActions().stream().map(QBEAction::new).collect(toSet());
+        actions = Collections.unmodifiableSet(screenState.getActions().stream().map(QBEAction::new).collect(toSet()));
         numberOfComponents = featureMap.values().stream().mapToInt(i -> i).sum();
     }
 
     public QBEState(final QBEState state) {
-        // Note: Shallow copies are ok, because both fields are read-only.
         Objects.requireNonNull(state);
+        // actions is unmodifiable, so a shallow copy is ok.
         actions = state.actions;
-        featureMap = state.featureMap;
+        // Strings and Integers are immutable so a shallow copy is ok.
+        featureMap = new HashMap<>(state.featureMap);
         numberOfComponents = state.numberOfComponents;
     }
 
