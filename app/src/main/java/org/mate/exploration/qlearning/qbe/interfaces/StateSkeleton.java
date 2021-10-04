@@ -15,7 +15,7 @@ import java.util.Set;
 @RequiresApi(api = Build.VERSION_CODES.N)
 public abstract class StateSkeleton<A extends Action> implements State<A> {
 
-    protected static final double COSINE_SIMILARITY_THRESHOLD = 0.95;
+    private static final double COSINE_SIMILARITY_THRESHOLD = 0.95;
 
     /*
      * Matches the keys of both map. Missing values are set to 0.
@@ -69,9 +69,8 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
         //
         // The hash function does not use the feature map because, different features maps could
         // still imply equality if the two maps are similar enough (according to cosine similarity).
-        final int prime = 31;
-        int hash = Long.hashCode(getActions().stream().mapToInt(Object::hashCode).sum());
-        hash = prime * hash + Integer.hashCode(getNumberOfComponent());
+        int hash = Integer.hashCode(getActions().stream().mapToInt(Object::hashCode).sum());
+        hash = 31 * hash + Integer.hashCode(getNumberOfComponent());
         return hash;
     }
 
