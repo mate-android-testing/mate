@@ -68,7 +68,7 @@ public final class QBEState extends StateSkeleton<QBEAction> implements State<QB
     }
 
     public void addDummyComponent() {
-        featureMap.merge("dummyComponent@-1", 0, (value, ignored) -> value + 1);
+        featureMap.merge("dummyComponent@-1", 1, (value, ignored) -> value + 1);
         ++numberOfComponents;
     }
 
