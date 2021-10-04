@@ -91,14 +91,17 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
           if (noCrash) {
             transitionSystem.addActions(nextState.get().getActions());
             if (nonDeterministic) {
+              MATE.log_debug("Executing passive learn");
               passiveLearn(transitionSystem, testsuite, testcase);
+              transitionSystem.removeUnreachableStates();
+              if (!transitionSystem.isDeterministic()) {
+                throw new AssertionError("The transition system should be deterministic after applying passiveLearn");
+              }
             }
             currentState = nextState.get();
           }
         }
       } while (noTerminalState && noCrash && testcase.size() < maximumNumberOfActionPerTestcase && noTimeout(startTime));
-
-      testsuite.add(testcase);
     }
   }
 
@@ -108,61 +111,42 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
           final List<TransitionRelation<S, A>> nonDeterministicTestcase) {
 
     final int testcaseLength = nonDeterministicTestcase.size();
+    MATE.log_debug("Found non-deterministic testcase of length " + nonDeterministicTestcase.size());
     if (testcaseLength == 1) {
-      /*
-       * Passive learn simply assumes that the test case has a length of at least two.
-       * For very small apps (e.g. com.zola.bmi.akp) this assumption does not hold.
-       * TODO: Check whether this assumptions holds for bigger apps.
-       */
-      TransitionRelation<S, A> relation = nonDeterministicTestcase.remove(0);
-      MATE.log_warn("Passive learn: Found singe-transition testcase: " + relation);
-      boolean deterministic;
-      int iteration = 1;
-      do {
-        MATE.log_debug("Passive Learn: Edge case: Attempt " + iteration);
-        ts.removeTransition(relation); // Ensure the transition system remains
-        final S dummy = app.copyWithDummyComponent(relation.to);
-        relation = new TransitionRelation<>(relation.from, relation.trigger, dummy, relation.actionResult);
-        deterministic = ts.addTransition(relation);
-        ++iteration;
-      } while (!deterministic);
-      MATE.log_debug("Passive Learn: Edge case: Done on iteration: " + iteration);
-      nonDeterministicTestcase.add(relation);
-      return;
-    }
+      testsuite.remove(nonDeterministicTestcase);
+      final TransitionRelation<S, A> tr = nonDeterministicTestcase.remove(0);
+      ts.removeTransition(tr);
+    } else {
+      testsuite.add(nonDeterministicTestcase);
+      final TransitionRelation<S, A> conflictingTransition = nonDeterministicTestcase.get(
+              testcaseLength - 1);
+      final TransitionRelation<S, A> secondLastTransition = nonDeterministicTestcase.get(
+              testcaseLength - 2);
+      final S stateWithDummy = app.copyWithDummyComponent(conflictingTransition.from);
+      ts.removeTransition(conflictingTransition);
+      ts.removeTransition(secondLastTransition);
+      ts.addTransition(
+              new TransitionRelation<>(secondLastTransition.from, secondLastTransition.trigger, stateWithDummy, secondLastTransition.actionResult));
 
-    testsuite.add(nonDeterministicTestcase);
-    final TransitionRelation<S, A> conflictingTransition = nonDeterministicTestcase.get(
-            testcaseLength - 1);
-    final TransitionRelation<S, A> secondLastTransition = nonDeterministicTestcase.get(
-            testcaseLength - 2);
-    final S stateWithDummy = app.copyWithDummyComponent(conflictingTransition.from);
-    ts.removeTransition(conflictingTransition);
-    ts.removeTransition(secondLastTransition);
-    ts.addTransition(
-            new TransitionRelation<>(secondLastTransition.from, secondLastTransition.trigger, stateWithDummy, secondLastTransition.actionResult));
+      testsuite.forEach(testcase ->
+              testcase.replaceAll(tr -> {
+                if (tr.from.equals(secondLastTransition.from) && Objects.equals(tr.to, secondLastTransition.to)) {
+                  return new TransitionRelation<>(tr.from, tr.trigger, stateWithDummy, tr.actionResult);
+                } else {
+                  return tr;
+                }
+              }));
 
-    testsuite.forEach(testcase ->
-            testcase.replaceAll(tr -> {
-              if (tr.from.equals(secondLastTransition.from) && Objects.equals(tr.to, secondLastTransition.to)) {
-                return new TransitionRelation<>(tr.from, tr.trigger, stateWithDummy, tr.actionResult);
-              } else {
-                return tr;
-              }
-            }));
-
-    for (final List<TransitionRelation<S, A>> testcase : testsuite) {
-      for (int i = 0; i < testcase.size(); ++i) {
-        final boolean nonDeterministic = ts.addTransition(testcase.get(i));
-        if (nonDeterministic) {
-          final List<TransitionRelation<S, A>> testcaseCopy = testcase.subList(0, i + 1).stream().map(TransitionRelation::new).collect(Collectors.toList());
-          passiveLearn(ts, testsuite, testcaseCopy);
+      for (final List<TransitionRelation<S, A>> testcase : testsuite) {
+        for (int i = 0; i < testcase.size(); ++i) {
+          final boolean nonDeterministic = ts.addTransition(testcase.get(i));
+          if (nonDeterministic) {
+            final List<TransitionRelation<S, A>> testcaseCopy = testcase.subList(0, i + 1).stream().map(TransitionRelation::new).collect(Collectors.toList());
+            passiveLearn(ts, testsuite, testcaseCopy);
+          }
         }
       }
     }
-
-    ts.removeUnreachableStates();
-    assert ts.isDeterministic() : "The transition system should be deterministic after applying passiveLearn";
   }
 
   private boolean noTimeout(final long startTime) {
