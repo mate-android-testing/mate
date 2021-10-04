@@ -19,11 +19,6 @@ import java.util.List;
 public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
 
     /**
-     * Controls how many mutations should be performed upon the same chromosome s.
-     */
-    private static final int MAX_ENERGY = 10;
-
-    /**
      * We need to maintain the total coverage to check whether a mutated chromosome increased it.
      * That way, we can decide whether a chromosome {@link #isInteresting(IChromosome)}.
      */
@@ -41,12 +36,14 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
      * @param mutationFunction The used mutation function.
      * @param terminationCondition The used termination condition.
      * @param corpusSize The initial size of the seed corpus S.
+     * @param maxEnergy The maximal assignable energy p.
      */
     public GreyBoxFuzzer(IChromosomeFactory<T> chromosomeFactory,
                          IMutationFunction<T> mutationFunction,
                          ITerminationCondition terminationCondition,
-                         int corpusSize) {
-        super(chromosomeFactory, mutationFunction, terminationCondition, corpusSize);
+                         int corpusSize,
+                         int maxEnergy) {
+        super(chromosomeFactory, mutationFunction, terminationCondition, corpusSize, maxEnergy);
     }
 
     /**
@@ -89,13 +86,13 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
 
         if (s.getValue() instanceof TestCase) {
             int size = ((TestCase) s.getValue()).getEventSequence().size();
-            return Math.max(1, Math.round(MAX_ENERGY
-                    - ((float) MAX_ENERGY / Properties.MAX_NUMBER_EVENTS()) * size));
+            return Math.max(1, Math.round(maxEnergy
+                    - ((float) maxEnergy / Properties.MAX_NUMBER_EVENTS()) * size));
         } else if (s.getValue() instanceof TestSuite) {
             // TODO: Test suites seems to have always a fixed size, pick another criteria for them!
             int size = ((TestSuite) s.getValue()).getTestCases().size();
-            return Math.max(1, Math.round(MAX_ENERGY
-                    - ((float) MAX_ENERGY / Properties.NUMBER_TESTCASES()) * size));
+            return Math.max(1, Math.round(maxEnergy
+                    - ((float) maxEnergy / Properties.NUMBER_TESTCASES()) * size));
         } else {
             throw new IllegalStateException("Chromosome type " + s.getValue().getClass()
                     + "not yet supported!");

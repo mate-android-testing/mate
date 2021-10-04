@@ -41,6 +41,11 @@ public abstract class GreyBoxFuzzing<T> implements Algorithm {
     protected final int corpusSize;
 
     /**
+     * The maximal assignable energy p.
+     */
+    protected final int maxEnergy;
+
+    /**
      * The list of chromosomes that produce a crash.
      */
     protected final List<IChromosome<T>> crashingInputs;
@@ -52,16 +57,19 @@ public abstract class GreyBoxFuzzing<T> implements Algorithm {
      * @param mutationFunction The used mutation function.
      * @param terminationCondition The used termination condition.
      * @param corpusSize The initial size of the seed corpus S.
+     * @param maxEnergy The maximal assignable energy p.
      */
     public GreyBoxFuzzing(IChromosomeFactory<T> chromosomeFactory,
                           IMutationFunction<T> mutationFunction,
                           ITerminationCondition terminationCondition,
-                          int corpusSize) {
+                          int corpusSize,
+                          int maxEnergy) {
         this.chromosomeFactory = chromosomeFactory;
         this.mutationFunction = mutationFunction;
         this.terminationCondition = terminationCondition;
         this.crashingInputs = new ArrayList<>();
         this.corpusSize = corpusSize;
+        this.maxEnergy = maxEnergy;
     }
 
     /**

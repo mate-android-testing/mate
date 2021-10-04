@@ -24,7 +24,8 @@ public class ExecuteMATEGreyBoxFuzzing {
                 new AndroidRandomChromosomeFactory(true, Properties.MAX_NUMBER_EVENTS()),
                 new CutPointMutationFunction(Properties.MAX_NUMBER_EVENTS()),
                 new NeverTerminationCondition(),
-                10
+                Properties.SEED_CORPUS_SIZE(),
+                Properties.MAX_ENERGY()
         );
 
         mate.testApp(greyBoxFuzzer);
