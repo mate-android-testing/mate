@@ -9,10 +9,10 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.utils.coverage.Coverage;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -35,7 +35,7 @@ public class MATE {
         Integer serverPort = null;
         try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
-           // serverPort = Integer.valueOf(reader.readLine());
+            serverPort = Integer.valueOf(reader.readLine());
             MATE.log_acc("Using server port: " + serverPort);
         } catch (IOException e) {
             MATE.log_acc("Couldn't read server port, fall back to default port!");
@@ -64,8 +64,7 @@ public class MATE {
         MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
         Registry.registerTimeout(Properties.TIMEOUT() * 60 * 1000);
 
-      //  Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
-        Registry.registerPackageName("com.zola.bmi"); //TODO: UNDO
+        Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
@@ -154,7 +153,7 @@ public class MATE {
     }
 
     public static void log_runtime(String msg, String kind) {
-        Log.d("runtime", kind+": " +msg);
+        Log.d("runtime", kind + ": " + msg);
     }
 
     public static void log_warn(String msg) {
