@@ -347,6 +347,22 @@ public class DeviceMgr {
     }
 
     /**
+     * Checks whether a crash dialog is visible on the current screen.
+     *
+     * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean checkForCrashDialog() {
+
+        UiObject crashDialog1 = device.findObject(
+                new UiSelector().packageName("android").textContains("keeps stopping"));
+        UiObject crashDialog2 = device.findObject(
+                new UiSelector().packageName("android").textContains("has stopped"));
+
+        return crashDialog1.exists() || crashDialog2.exists();
+    }
+
+    /**
      * Checks whether the given widget represents a progress bar.
      *
      * @param widget The given widget.
