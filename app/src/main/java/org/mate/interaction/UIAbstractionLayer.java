@@ -24,6 +24,7 @@ import org.mate.utils.Utils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
@@ -307,7 +308,7 @@ public class UIAbstractionLayer {
 
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
-                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
                         && retryCount < UiAutomatorDisconnectedRetries) {
                     retry = true;
                     retryCount += 1;
