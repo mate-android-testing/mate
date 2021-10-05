@@ -154,6 +154,8 @@ public class UIAbstractionLayer {
             intermediateValuesEA.add(System.currentTimeMillis()); //3
         } catch (AUTCrashException e) {
 
+            intermediateValuesEA.add(System.currentTimeMillis()); //3
+
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.pressHome();
 
@@ -364,6 +366,41 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Checks whether the current screen shows a 'Google SignIn' dialog. If this is the case,
+     * we press the 'BACK' button as we can't login.
+     *
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleGoogleSignInDialog(IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.google.android.gms")) {
+            MATE.log("Detected Google SignIn Dialog!");
+            deviceMgr.pressBack();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a crash dialog. If this is the case,
+     * we press the 'HOME' button.
+     *
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleCrashDialog() {
+
+        if (deviceMgr.checkForCrashDialog()) {
+            MATE.log("Detected permission dialog!");
+            // TODO: Should we really press 'HOME' or better click 'OK' on the dialog?
+            deviceMgr.pressHome();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Checks whether the current screen shows a permission dialog. If this is the case,
      * the permission is tried to be granted by clicking on the 'allow button'.
      *
@@ -379,7 +416,7 @@ public class UIAbstractionLayer {
         if (screenState.getPackageName().equals("com.google.android.packageinstaller")
                 || screenState.getPackageName().equals("com.android.packageinstaller")) {
 
-            MATE.log("Detected crash dialog!");
+            MATE.log("Detected permission dialog!");
 
             for (WidgetAction action : screenState.getWidgetActions()) {
 
@@ -422,7 +459,7 @@ public class UIAbstractionLayer {
                     "and may not work properly. Try checking for updates, or contact the developer.")) {
 
                 MATE.log("Detected build warnings dialog!");
-                
+
                 for (WidgetAction action : screenState.getWidgetActions()) {
                     if (action.getActionType() == ActionType.CLICK
                             && action.getWidget().getText().equals("OK")) {
