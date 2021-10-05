@@ -19,12 +19,12 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 
 import java.util.ArrayList;
@@ -334,11 +334,8 @@ public class DeviceMgr {
      */
     private void checkForCrash() throws AUTCrashException {
         long startTime = System.currentTimeMillis();
-        // handle app crashes
-        UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
-        UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
 
-        if (crashDialog1.exists() || crashDialog2.exists()) {
+        if (checkForCrashDialog()) {
             MATE.log("CRASH");
             evaluateTime(startTime,true);
             throw new AUTCrashException("App crashed");

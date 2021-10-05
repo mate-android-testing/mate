@@ -1,8 +1,6 @@
 package org.mate.interaction;
 
 import android.os.RemoteException;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
 
 import org.mate.MATE;
@@ -259,11 +257,9 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Clears the screen from all sorts of dialogs. In particular, whenever
-     * a permission dialog pops up, the permission is granted. If a crash dialog
-     * appears, we press 'HOME'. If a google-sign dialog appears, the 'BACK'
-     * button is pressed to return to the AUT. Clicks on 'OK' when a build
-     * warning pops up.
+     * Clears the screen from all sorts of dialog, e.g. a permission dialog.
+     *
+     * @return Returns the current screen state.
      */
     public IScreenState clearScreen() {
         long startTime = System.currentTimeMillis();
@@ -273,83 +269,42 @@ public class UIAbstractionLayer {
         boolean retry = true;
         int retryCount = 0;
         intermediateValuesCS.add(System.currentTimeMillis()); // 2
+
+        // iterate over screen until no dialog appears anymore
         while (change || retry) {
             retry = false;
             change = false;
             try {
-                // check for crash dialog
-                UiObject crashDialog1 = deviceMgr.getDevice().findObject(new UiSelector()
-                        .packageName("android").textContains("keeps stopping"));
-                UiObject crashDialog2 = deviceMgr.getDevice().findObject(new UiSelector()
-                        .packageName("android").textContains("has stopped"));
-                intermediateValuesCS.add(System.currentTimeMillis()); // 3
-                if (crashDialog1.exists() || crashDialog2.exists()) {
-                    // TODO: Click 'OK' on crash dialog window rather than 'HOME'?
-                    // press 'HOME' button
-                    deviceMgr.pressHome();
+
+                // check for presence of crash dialog
+                if (handleCrashDialog()) {
                     change = true;
                     continue;
                 }
+                intermediateValuesCS.add(System.currentTimeMillis()); // 3
+
                 intermediateValuesCS.add(System.currentTimeMillis()); // 4
-                // check for outdated build warnings
                 screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 intermediateValuesCS.add(System.currentTimeMillis()); // 5
-                for (Widget widget : screenState.getWidgets()) {
-                    if (widget.getText().equals("This app was built for an older version of Android " +
-                            "and may not work properly. Try checking for updates, or contact the developer.")) {
-                        for (UIAction action : screenState.getActions()) {
-                            if (action instanceof WidgetAction && ((WidgetAction) action).getWidget().getText().equals("OK")) {
-                                try {
-                                    deviceMgr.executeAction(action);
-                                    break;
-                                } catch (AUTCrashException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                        change = true;
-                    }
-                }
-                if (change) {
+
+                // check for presence of build warnings dialog
+                if (handleBuildWarnings(screenState)) {
+                    change = true;
                     continue;
                 }
 
                 // check for google sign in dialog
-                if (screenState.getPackageName().equals("com.google.android.gms")) {
-                    // press BACK to return to AUT
-                    MATE.log("Google Sign Dialog detected! Returning.");
-                    deviceMgr.pressBack();
+                if (handleGoogleSignInDialog(screenState)) {
                     change = true;
                     continue;
                 }
 
-                // check for permission dialog (API 25/28 tested)
-                if (screenState.getPackageName().equals("com.google.android.packageinstaller")
-                        || screenState.getPackageName().equals("com.android.packageinstaller")) {
-                    List<UIAction> actions = screenState.getActions();
-                    for (UIAction action : actions) {
-                        if (action instanceof WidgetAction) {
-                            WidgetAction widgetAction = (WidgetAction) action;
-
-                            /*
-                             * The resource id for the allow button stays the same for both API 25
-                             * and API 28, although the package name differs.
-                             */
-                            if (widgetAction.getWidget().getResourceID()
-                                    .equals("com.android.packageinstaller:id/permission_allow_button")
-                                    || widgetAction.getWidget().getText().toLowerCase().equals("allow")) {
-                                try {
-                                    deviceMgr.executeAction(action);
-                                } catch (AUTCrashException e) {
-                                    e.printStackTrace();
-                                }
-                                break;
-                            }
-                        }
-                    }
+                // check for presence of permission dialog
+                if (handlePermissionDialog(screenState)) {
                     change = true;
                     continue;
                 }
+
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
                         && e.getMessage().equals(UiAutomatorDisconnectedMessage)
