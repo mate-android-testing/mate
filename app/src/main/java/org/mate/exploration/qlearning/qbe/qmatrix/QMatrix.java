@@ -8,8 +8,6 @@ import org.mate.exploration.qlearning.qbe.interfaces.State;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.UnaryOperator;
-import java.util.stream.IntStream;
 
 
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -90,31 +88,6 @@ public final class QMatrix<S extends State<A>, A extends Action> {
     } else {
       matrix[index] = value;
     }
-  }
-
-  public void updateValue(final S state, final A action, final UnaryOperator<Double> operator) {
-    final int index = getIndex(state, action);
-    final double newValue = operator.apply(matrix[index]);
-    if (!Double.isFinite(newValue) || newValue < 0) {
-      throw new IllegalArgumentException(
-              "The new updated value has to be finite and non-negative.");
-    } else {
-      matrix[index] = operator.apply(matrix[index]);
-    }
-  }
-
-  public void normalizeActions(final S state) {
-    final int stateIndex = abstractStates.getAbstractStateIndex(state);
-    if (stateIndex < 0 || stateIndex >= numberOfAbstractStates) {
-      throw new IndexOutOfBoundsException("Abstract state index is out of bounds.");
-    }
-
-    final double sum = IntStream.range(0, numberOfAbstractActions)
-            .mapToDouble(actionIndex -> matrix[getIndex(stateIndex, actionIndex)]).sum();
-    IntStream.range(0, numberOfAbstractActions).forEach(actionIndex -> {
-      final int index = getIndex(stateIndex, actionIndex);
-      matrix[index] = matrix[index] / sum;
-    });
   }
 
   @Override
