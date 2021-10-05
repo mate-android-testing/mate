@@ -346,7 +346,7 @@ public class UIAbstractionLayer {
     private boolean handleCrashDialog() {
 
         if (deviceMgr.checkForCrashDialog()) {
-            MATE.log("Detected permission dialog!");
+            MATE.log("Detected crash dialog!");
             // TODO: Should we really press 'HOME' or better click 'OK' on the dialog?
             deviceMgr.pressHome();
             return true;
