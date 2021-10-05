@@ -10,6 +10,7 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -49,7 +50,6 @@ public class UIAbstractionLayer {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         // check for any kind of dialogs (permission, crash, ...) initially
-
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
@@ -361,6 +361,83 @@ public class UIAbstractionLayer {
         }
         evaluateTime(startTime);
         return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows a permission dialog. If this is the case,
+     * the permission is tried to be granted by clicking on the 'allow button'.
+     *
+     * @param screenState The current screen.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handlePermissionDialog(IScreenState screenState) {
+
+        /*
+         * The permission dialog has a different package name depending on the API level.
+         * We currently support API level 25 and 28.
+         */
+        if (screenState.getPackageName().equals("com.google.android.packageinstaller")
+                || screenState.getPackageName().equals("com.android.packageinstaller")) {
+
+            MATE.log("Detected crash dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                Widget widget = action.getWidget();
+
+                /*
+                 * The resource id for the allow button stays the same for both API 25
+                 * and API 28, although the package name differs.
+                 */
+                if (action.getActionType() == ActionType.CLICK
+                        && (widget.getResourceID()
+                                .equals("com.android.packageinstaller:id/permission_allow_button")
+                            || widget.getText().toLowerCase().equals("allow"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on permission dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+            throw new IllegalStateException("Couldn't find any applicable action on permission dialog!");
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a build warnings dialog. If this is the case,
+     * we try to click on the 'OK' button.
+     *
+     * @param screenState The current screen.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleBuildWarnings(IScreenState screenState) {
+
+        for (Widget widget : screenState.getWidgets()) {
+            if (widget.getText().equals("This app was built for an older version of Android " +
+                    "and may not work properly. Try checking for updates, or contact the developer.")) {
+
+                MATE.log("Detected build warnings dialog!");
+                
+                for (WidgetAction action : screenState.getWidgetActions()) {
+                    if (action.getActionType() == ActionType.CLICK
+                            && action.getWidget().getText().equals("OK")) {
+                        try {
+                            deviceMgr.executeAction(action);
+                            return true;
+                        } catch (AUTCrashException e) {
+                            MATE.log_warn("Couldn't click on build warnings dialog!");
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
