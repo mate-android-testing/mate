@@ -81,9 +81,7 @@ public class AppScreen {
         String actName = null;
         try {
             actName = device.executeShellCommand("dumpsys activity top");
-            actName = actName.split("\n")[1];
-            String[] actNames = actName.split(" ");
-            actName = actNames[3];
+            actName = actName.split("\n")[1].split(" ")[3];
         } catch (IOException e) {
             actName = Registry.getEnvironmentManager().getCurrentActivityName();;
         }
@@ -94,7 +92,6 @@ public class AppScreen {
         } else {
             this.packageName = activityName.split("/")[0];
         }
-        Log.d("test123",actName+", " +activityName);
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().getRootInActiveWindow();
         ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); // 4
