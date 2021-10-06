@@ -132,7 +132,7 @@ public class MATE {
                 Registry.unregisterUiAbstractionLayer();
                 Registry.unregisterProperties();
                 Registry.unregisterRandom();
-                Registry.getPackageName();
+                Registry.unregisterPackageName();
                 Registry.unregisterTimeout();
             } catch (IOException e) {
                 e.printStackTrace();
