@@ -1,18 +1,12 @@
 package org.mate.state.executables;
 
-import android.app.Activity;
 import android.app.Instrumentation;
-import android.app.UiAutomation;
 import android.graphics.Rect;
-import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
-import android.support.test.runner.lifecycle.Stage;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
-import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
@@ -21,12 +15,9 @@ import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.state.ScreenStateFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,16 +67,7 @@ public class AppScreen {
 
         this.widgets = new ArrayList<>();
         ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); //2
-
-
-        String actName = null;
-        try {
-            actName = device.executeShellCommand("dumpsys activity top");
-            actName = actName.split("\n")[1].split(" ")[3];
-        } catch (IOException e) {
-            actName = Registry.getEnvironmentManager().getCurrentActivityName();;
-        }
-        this.activityName = actName;
+        this.activityName = Registry.getCurrentActivity();
         ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); // 3
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();
