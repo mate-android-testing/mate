@@ -64,15 +64,6 @@ public class UIAbstractionLayer {
         return getLastScreenState().getActions();
     }
 
-    /**
-     * Returns the name of the current activity.
-     *
-     * @return Returns the name of the current activity.
-     */
-    public String getCurrentActivity() {
-        return getLastScreenState().getActivityName();
-    }
-
     static Long startTime = null;
     static int numberEntriesEA = 0;
     public static List<Long> intermediateValuesEA = new ArrayList<>();
