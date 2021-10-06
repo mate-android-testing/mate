@@ -11,8 +11,8 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.Coverage;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -418,7 +418,8 @@ public class EnvironmentManager {
     // TODO: use InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission()
     public boolean grantRuntimePermissions(String packageName) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/grant_runtime_permissions")
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName);
         Message response = sendMessage(messageBuilder.build());
