@@ -1,6 +1,8 @@
 package org.mate;
 
 import android.app.Instrumentation;
+import android.os.Build;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 
 import org.mate.interaction.EnvironmentManager;
@@ -144,6 +146,54 @@ public class Registry {
 
             // fall back mechanism (slow)
             return Registry.getEnvironmentManager().getCurrentActivityName();
+        }
+    }
+
+    /**
+     * Grants the AUT the read and write runtime permissions for the external storage.
+     *
+     * Depending on the API level, we can either use the very fast method grantRuntimePermissions()
+     *  (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
+     *  MATE-Server granting those permissions directly before executing a privileged command in
+     *  order to avoid unnecessary requests.
+     *
+     * In order to verify that the runtime permissions got granted, check the output of the
+     * following command:
+     *           device.executeShellCommand("dumpsys package " + packageName);
+     *
+     * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
+     */
+    @SuppressWarnings("unused")
+    public static boolean grantRuntimePermissions() {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        UiDevice device = UiDevice.getInstance(instrumentation);
+
+        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
+        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            long start = System.currentTimeMillis();
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
+            return true;
+        }
+
+        try {
+            /*
+             * The operation executeShellCommand() is costly, but unfortunately it is not possible
+             * to concatenate two commands yet.
+             */
+            final String grantedReadPermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + readPermission);
+            final String grantedWritePermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + writePermission);
+
+            // an empty response indicates success of the operation
+            return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
+        } catch (IOException e) {
+            MATE.log_error("Couldn't grant runtime permissions!");
+            throw new IllegalStateException(e);
         }
     }
 }
