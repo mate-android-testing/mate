@@ -1,10 +1,15 @@
 package org.mate;
 
+import android.app.Instrumentation;
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
 
 import java.io.IOException;
 import java.util.Random;
+
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class Registry {
 
@@ -117,5 +122,28 @@ public class Registry {
 
     public static void unregisterRandom() {
         random = null;
+    }
+
+    /**
+     * Retrieves the name of the currently visible activity.
+     *
+     * @return Returns the name of the currently visible activity.
+     */
+    public static String getCurrentActivity() {
+
+        Instrumentation instrumentation = getInstrumentation();
+        UiDevice device = UiDevice.getInstance(instrumentation);
+
+        try {
+            // TODO: check whether the command is reliable on different images (APIs)
+            String output = device.executeShellCommand("dumpsys activity top");
+            return output.split("\n")[1].split(" ")[3];
+        } catch (IOException e) {
+            MATE.log_warn("Couldn't retrieve current activity name via local shell!");
+            MATE.log_warn(e.getMessage());
+
+            // fall back mechanism (slow)
+            return Registry.getEnvironmentManager().getCurrentActivityName();
+        }
     }
 }
