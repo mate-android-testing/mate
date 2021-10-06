@@ -649,11 +649,6 @@ public class DeviceMgr {
     public void reinstallApp() {
         MATE.log("Reinstall app");
         Registry.getEnvironmentManager().clearAppData();
-
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        MATE.log("Grant runtime permissions: "
-                + Registry.getEnvironmentManager().grantRuntimePermissions(Registry.getPackageName()));
-        //sleep(1000);
     }
 
     /**
@@ -673,7 +668,6 @@ public class DeviceMgr {
             MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
         }
         context.startActivity(intent);
-        // sleep(1000);
     }
 
     /**

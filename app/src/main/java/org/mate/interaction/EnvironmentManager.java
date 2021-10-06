@@ -1,5 +1,10 @@
 package org.mate.interaction;
 
+import android.app.Instrumentation;
+import android.os.Build;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -415,8 +420,21 @@ public class EnvironmentManager {
      * @param packageName The app that requires the permissions.
      * @return Returns {@code true} if the granting permissions succeeded, otherwise {@code false}.
      */
-    // TODO: use InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission()
+    @SuppressWarnings("unused")
     public boolean grantRuntimePermissions(String packageName) {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        UiDevice device = UiDevice.getInstance(instrumentation);
+
+        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
+        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+        // this method is far faster than the request via the server
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
+            return true;
+        }
 
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/android/grant_runtime_permissions")

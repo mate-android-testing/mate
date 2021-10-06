@@ -173,7 +173,6 @@ public class Registry {
         final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            long start = System.currentTimeMillis();
             instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
             instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
             return true;
