@@ -35,7 +35,7 @@ public class PrimitiveAction extends UIAction {
     public static PrimitiveAction randomAction() {
         int x = Randomness.getRnd().nextInt(Registry.getUiAbstractionLayer().getScreenWidth());
         int y = Randomness.getRnd().nextInt(Registry.getUiAbstractionLayer().getScreenHeight());
-        String activity = Registry.getUiAbstractionLayer().getCurrentActivity();
+        String activity = Registry.getCurrentActivity();
         return new PrimitiveAction(x, y,
                 Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)), activity);
     }
