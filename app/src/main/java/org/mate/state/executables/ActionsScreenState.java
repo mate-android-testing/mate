@@ -46,6 +46,12 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<WidgetAction> getWidgetActions() {
+
+        // actions get init lazily
+        if (actions == null) {
+            actions = getUIActions();
+        }
+
         List<WidgetAction> widgetActions = new ArrayList<>();
         for (UIAction uiAction : actions) {
             if (uiAction instanceof WidgetAction) {
