@@ -1,5 +1,9 @@
 package org.mate.exploration.qlearning.qbe.interfaces.implementations;
 
+import static org.mate.interaction.UIAbstractionLayer.ActionResult;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
+
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
@@ -9,8 +13,6 @@ import org.mate.utils.Pair;
 
 import java.util.Objects;
 import java.util.Optional;
-
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class QBEApplication implements Application<QBEState, QBEAction> {
@@ -29,8 +31,17 @@ public final class QBEApplication implements Application<QBEState, QBEAction> {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Pair<Optional<QBEState>, ActionResult> executeAction(final QBEAction action) {
-        final ActionResult result = uiAbstractionLayer.executeAction(action.getUiAction());
-        if (result == ActionResult.SUCCESS || result == ActionResult.SUCCESS_NEW_STATE) {
+        ActionResult result = uiAbstractionLayer.executeAction(action.getUiAction());
+        if (result == SUCCESS || result == SUCCESS_NEW_STATE) {
+            /*
+             * UiAbstractionLayer.executeAction(...) currently does not check whether a new state is
+             * reached. So SUCCESS is returned even if SUCCESS_NEW_STATE would be the more
+             * appropriate result. To check whether a new state is reached
+             * UiAbstractionLayer.reachedNewState() has to be used explicitly.
+             */
+            if (result == SUCCESS && uiAbstractionLayer.reachedNewState()) {
+                result = SUCCESS_NEW_STATE;
+            }
             return new Pair<>(Optional.of(new QBEState(uiAbstractionLayer.getLastScreenState())), result);
         } else {
             return new Pair<>(Optional.empty(), result);
