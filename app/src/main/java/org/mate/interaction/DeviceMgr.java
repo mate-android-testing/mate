@@ -307,7 +307,7 @@ public class DeviceMgr {
 
     static void evaluateTime(long startTime, boolean crash) {
         long currentTime = System.currentTimeMillis();
-        StringBuilder stb = new StringBuilder("Intermediates: " + (crash ? "(Crash)": ""));
+        StringBuilder stb = new StringBuilder("Intermediates: " + (crash ? "(Crash)" : ""));
         for (Long intermediate : intermediateValues) {
             intermediate = intermediate - intermediateValues.get(0);
             stb.append(intermediate);
@@ -337,7 +337,7 @@ public class DeviceMgr {
 
         if (checkForCrashDialog()) {
             MATE.log("CRASH");
-            evaluateTime(startTime,true);
+            evaluateTime(startTime, true);
             throw new AUTCrashException("App crashed");
         }
         evaluateTime(startTime, false);
@@ -565,7 +565,7 @@ public class DeviceMgr {
             maxLengthInt = 15;
 
         // consider https://developer.android.com/reference/android/text/InputType
-        int inputType =  widget.getInputType();
+        int inputType = widget.getInputType();
 
         // check whether the input consists solely of digits (ignoring dots and comas)
         widgetText = widgetText.replace(".", "");
