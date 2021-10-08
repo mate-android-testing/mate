@@ -138,8 +138,8 @@ public class Registry {
 
         try {
             // TODO: check whether the command is reliable on different images (APIs)
-            String output = device.executeShellCommand("dumpsys activity top");
-            return output.split("\n")[1].split(" ")[3];
+            String output = device.executeShellCommand("dumpsys activity activities");
+            return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
         } catch (IOException e) {
             MATE.log_warn("Couldn't retrieve current activity name via local shell!");
             MATE.log_warn(e.getMessage());
@@ -151,15 +151,15 @@ public class Registry {
 
     /**
      * Grants the AUT the read and write runtime permissions for the external storage.
-     *
+     * <p>
      * Depending on the API level, we can either use the very fast method grantRuntimePermissions()
-     *  (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
-     *  MATE-Server granting those permissions directly before executing a privileged command in
-     *  order to avoid unnecessary requests.
-     *
+     * (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
+     * MATE-Server granting those permissions directly before executing a privileged command in
+     * order to avoid unnecessary requests.
+     * <p>
      * In order to verify that the runtime permissions got granted, check the output of the
      * following command:
-     *           device.executeShellCommand("dumpsys package " + packageName);
+     * device.executeShellCommand("dumpsys package " + packageName);
      *
      * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
      */
