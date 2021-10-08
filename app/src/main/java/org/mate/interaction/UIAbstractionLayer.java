@@ -158,10 +158,8 @@ public class UIAbstractionLayer {
             state = toRecordedScreenState(state);
             guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
-
             return FAILURE_APP_CRASH;
         }
-
 
         if (action instanceof PrimitiveAction) {
             return SUCCESS;
@@ -268,6 +266,8 @@ public class UIAbstractionLayer {
             change = false;
             try {
 
+                screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
                 // check for presence of crash dialog
                 if (handleCrashDialog()) {
                     change = true;
@@ -276,7 +276,6 @@ public class UIAbstractionLayer {
                 intermediateValuesCS.add(System.currentTimeMillis()); // 3
 
                 intermediateValuesCS.add(System.currentTimeMillis()); // 4
-                screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                 intermediateValuesCS.add(System.currentTimeMillis()); // 5
 
                 // check for presence of build warnings dialog
