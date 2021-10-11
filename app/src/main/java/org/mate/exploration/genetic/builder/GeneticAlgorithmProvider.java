@@ -4,15 +4,16 @@ import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.algorithm.NoveltySearch;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
+import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
-import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -32,10 +33,11 @@ import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessF
 import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
-import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
@@ -102,6 +104,8 @@ public class GeneticAlgorithmProvider {
                 return initializeRandomWalk();
             case RANDOM_SEARCH:
                 return initializeRandomSearch();
+            case NOVELTY_SEARCH:
+                return initializeNoveltySearch();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -189,6 +193,20 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 this.initializeTerminationCondition());
+    }
+
+    private <T> NoveltySearch<T> initializeNoveltySearch() {
+        return new NoveltySearch<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getBigPopulationSize(),
+                getPCrossOver(),
+                getPMutate());
     }
 
     private <T> IChromosomeFactory<T> initializeChromosomeFactory() {
@@ -368,6 +386,8 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
+            case NOVELTY:
+                return (IFitnessFunction<T>) new NoveltyFitnessFunction<>();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
