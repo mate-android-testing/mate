@@ -1,20 +1,21 @@
 package org.mate.model;
 
+import static org.mate.interaction.UIAbstractionLayer.ActionResult;
+
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,22 +36,22 @@ public class TestCase {
     /**
      * The set of visited activities.
      */
-    private Set<String> visitedActivities;
+    private final Set<String> visitedActivities;
 
     /**
      * The set of visited screen states (ids).
      */
-    private Set<String> visitedStates;
+    private final Set<String> visitedStates;
 
     /**
      * The actions that has been executed by this test case.
      */
-    private List<Action> eventSequence;
+    private final List<Action> eventSequence;
 
     /**
      * The visited activities in the order they appeared.
      */
-    private List<String> activitySequence;
+    private final List<String> activitySequence;
 
     /**
      * A novelty score based on novelty search, not yet implemented.
@@ -73,13 +74,13 @@ public class TestCase {
      * A mapping of a screen state (id) to an action (id).
      * The implementation is currently considered as deprecated.
      */
-    private Map<String, String> statesMap;
+    private final Map<String, String> statesMap;
 
     /**
      * A feature vector that maps a screen state to the value 0 (unvisited) or 1 (visited).
      * The implementation is currently considered as deprecated.
      */
-    private Map<String, Integer> featureVector;
+    private final Map<String, Integer> featureVector;
 
     /**
      * The desired size of the test case, i.e. the desired length
@@ -501,7 +502,23 @@ public class TestCase {
      *          or left the AUT, otherwise {@code false} is returned.
      */
     public boolean updateTestCase(Action action, int actionID) {
+        ActionResult actionResult = updateTestCaseGetResult(action, actionID);
 
+        switch (actionResult) {
+            case SUCCESS:
+            case SUCCESS_NEW_STATE:
+                return true;
+            case FAILURE_APP_CRASH:
+            case SUCCESS_OUTBOUND:
+            case FAILURE_UNKNOWN:
+            case FAILURE_EMULATOR_CRASH:
+                return false;
+            default:
+                throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+        }
+    }
+
+    public ActionResult updateTestCaseGetResult(Action action, int actionID) {
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
             throw new IllegalStateException("Action not applicable to current state!");
@@ -511,7 +528,7 @@ public class TestCase {
         MATE.log("executing action " + actionID + ": " + action);
 
         addEvent(action);
-        UIAbstractionLayer.ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
         // track the activity transitions of each action
         String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
@@ -524,27 +541,28 @@ public class TestCase {
         }
 
         MATE.log("executed action " + actionID + ": " + action);
-        MATE.log("Activity Transition for action " +  actionID
-                + ":" + activityBeforeAction  + "->" + activityAfterAction);
+        MATE.log("Activity Transition for action " + actionID
+                + ":" + activityBeforeAction + "->" + activityAfterAction);
 
         switch (actionResult) {
             case SUCCESS:
             case SUCCESS_NEW_STATE:
                 updateTestCase(String.valueOf(actionID));
-                return true;
+                break;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
                 if (Properties.RECORD_STACK_TRACE()) {
                     crashStackTrace = Registry.getEnvironmentManager().getLastCrashStackTrace();
                 }
+                break;
             case SUCCESS_OUTBOUND:
-                return false;
             case FAILURE_UNKNOWN:
             case FAILURE_EMULATOR_CRASH:
-                return false;
+                break;
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
+        return actionResult;
     }
 
     /**

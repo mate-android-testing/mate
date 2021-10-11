@@ -7,9 +7,12 @@ import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_S
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.qlearning.qbe.interfaces.Application;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.TestCase;
 import org.mate.utils.Pair;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +21,8 @@ import java.util.Optional;
 public final class QBEApplication implements Application<QBEState, QBEAction> {
 
     private final UIAbstractionLayer uiAbstractionLayer;
+    private TestCase currentTestcase = TestCase.newInitializedTestCase();
+    private int testcaseLength = 0;
 
     public QBEApplication(final UIAbstractionLayer uiAbstractionLayer) {
         this.uiAbstractionLayer = Objects.requireNonNull(uiAbstractionLayer);
@@ -31,7 +36,7 @@ public final class QBEApplication implements Application<QBEState, QBEAction> {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Pair<Optional<QBEState>, ActionResult> executeAction(final QBEAction action) {
-        ActionResult result = uiAbstractionLayer.executeAction(action.getUiAction());
+        ActionResult result = currentTestcase.updateTestCaseGetResult(action.getUiAction(), testcaseLength++);
         if (result == SUCCESS || result == SUCCESS_NEW_STATE) {
             /*
              * UiAbstractionLayer.executeAction(...) currently does not check whether a new state is
@@ -50,6 +55,15 @@ public final class QBEApplication implements Application<QBEState, QBEAction> {
 
     @Override
     public void reset() {
+        if (testcaseLength > 0) {
+            final Chromosome<TestCase> chromosome = new Chromosome<>(currentTestcase);
+            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+            CoverageUtils.logChromosomeCoverage(chromosome);
+            currentTestcase.finish();
+            currentTestcase = TestCase.newInitializedTestCase();
+            testcaseLength = 0;
+
+        }
         uiAbstractionLayer.resetApp();
     }
 
