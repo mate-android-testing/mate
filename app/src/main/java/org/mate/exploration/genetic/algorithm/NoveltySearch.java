@@ -10,35 +10,67 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 
 import java.util.List;
 
+/**
+ * A novelty search implementation following the paper 'A Novelty Search Approach for Automatic Test
+ * Data Generation', see https://hal.archives-ouvertes.fr/hal-01121228/document.
+ *
+ * @param <T> Refers to either a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
+ */
 public class NoveltySearch<T> extends GeneticAlgorithm<T> {
 
+    // TODO: model archive
+
     /**
-     * Initializing the genetic algorithm with all necessary attributes
+     * The maximal size of the archive, denoted as L.
+     */
+    private final int limit;
+
+    /**
+     * The novelty threshold T.
+     */
+    private final double threshold;
+
+    /**
+     * The number of nearest neighbours that should be considered, denoted as k.
+     */
+    private final int nearestNeighbours;
+
+    /**
+     * Initializes the genetic algorithm with all the necessary attributes.
      *
-     * @param chromosomeFactory    see {@link IChromosomeFactory}
-     * @param selectionFunction    see {@link ISelectionFunction}
-     * @param crossOverFunction    see {@link ICrossOverFunction}
-     * @param mutationFunction     see {@link IMutationFunction}
-     * @param iFitnessFunctions    see {@link IFitnessFunction}
-     * @param terminationCondition see {@link ITerminationCondition}
-     * @param populationSize       size of population kept by the genetic algorithm
-     * @param bigPopulationSize    size which population will temporarily be after creating offspring
-     * @param pCrossover           probability that crossover occurs (between 0 and 1)
-     * @param pMutate              probability that mutation occurs (between 0 and 1)
+     * @param chromosomeFactory The used chromosome factory.
+     * @param selectionFunction The used selection function.
+     * @param crossOverFunction The used crossover function.
+     * @param mutationFunction The used mutation function.
+     * @param fitnessFunctions The used fitness/novelty function.
+     * @param terminationCondition The used termination condition.
+     * @param populationSize The population size.
+     * @param bigPopulationSize The big population size.
+     * @param pCrossover The probability for crossover.
+     * @param pMutate The probability for mutation.
+     * @param limit The maximal size (L) of the archive.
+     * @param threshold The novelty threshold T.
+     * @param nearestNeighbours The number of nearest neighbours k.
      */
     public NoveltySearch(IChromosomeFactory<T> chromosomeFactory,
                          ISelectionFunction<T> selectionFunction,
                          ICrossOverFunction<T> crossOverFunction,
                          IMutationFunction<T> mutationFunction,
-                         List<IFitnessFunction<T>> iFitnessFunctions,
+                         List<IFitnessFunction<T>> fitnessFunctions,
                          ITerminationCondition terminationCondition,
                          int populationSize,
                          int bigPopulationSize,
                          double pCrossover,
-                         double pMutate) {
+                         double pMutate,
+                         int nearestNeighbours,
+                         int limit,
+                         double threshold) {
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
-                iFitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
+                fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
+        this.nearestNeighbours = nearestNeighbours;
+        this.limit = limit;
+        this.threshold = threshold;
     }
 
     @Override

@@ -38,6 +38,9 @@ public class ExecuteMATENoveltySearch {
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
+                .withNoveltyThreshold(Properties.NOVELTY_THRESHOLD())
+                .withArchiveLimit(Properties.ARCHIVE_LIMIT())
+                .withNearestNeighbours(Properties.NEAREST_NEIGHBOURS())
                 .build();
 
         mate.testApp(noveltySearch);

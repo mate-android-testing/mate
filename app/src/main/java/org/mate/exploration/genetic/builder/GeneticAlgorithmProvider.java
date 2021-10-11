@@ -206,7 +206,55 @@ public class GeneticAlgorithmProvider {
                 getPopulationSize(),
                 getBigPopulationSize(),
                 getPCrossOver(),
-                getPMutate());
+                getPMutate(),
+                getNearestNeighbours(),
+                getArchiveLimit(),
+                getNoveltyThreshold());
+    }
+
+    private double getNoveltyThreshold() {
+        String noveltyThreshold
+                = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
+        if (noveltyThreshold == null) {
+            if (useDefaults) {
+                return org.mate.Properties.NOVELTY_THRESHOLD();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: novelty threshold not specified");
+            }
+        } else {
+            return Double.valueOf(noveltyThreshold);
+        }
+    }
+
+    private int getArchiveLimit() {
+        String archiveLimit
+                = properties.getProperty(GeneticAlgorithmBuilder.ARCHIVE_LIMIT_KEY);
+        if (archiveLimit == null) {
+            if (useDefaults) {
+                return org.mate.Properties.ARCHIVE_LIMIT();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: archive limit not specified");
+            }
+        } else {
+            return Integer.valueOf(archiveLimit);
+        }
+    }
+
+    private int getNearestNeighbours() {
+        String nearestNeighbours
+                = properties.getProperty(GeneticAlgorithmBuilder.NEAREST_NEIGHBOURS_KEY);
+        if (nearestNeighbours == null) {
+            if (useDefaults) {
+                return org.mate.Properties.NEAREST_NEIGHBOURS();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: nearest neighbours not specified");
+            }
+        } else {
+            return Integer.valueOf(nearestNeighbours);
+        }
     }
 
     private <T> IChromosomeFactory<T> initializeChromosomeFactory() {

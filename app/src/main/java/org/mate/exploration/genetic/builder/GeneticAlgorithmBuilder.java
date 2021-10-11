@@ -36,6 +36,9 @@ public class GeneticAlgorithmBuilder {
     public static final String BIG_POPULATION_SIZE_KEY = "big_population_size";
     public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
     public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
+    public static final String NOVELTY_THRESHOLD_KEY = "novelty_threshold";
+    public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
+    public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
 
     private Properties properties;
 
@@ -193,6 +196,21 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withFocusedSearchStart(double focusedSearchStart) {
         properties.setProperty(FOCUSED_SEARCH_START_KEY, String.valueOf(focusedSearchStart));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withNoveltyThreshold(double noveltyThreshold) {
+        properties.setProperty(NOVELTY_THRESHOLD_KEY, String.valueOf(noveltyThreshold));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withArchiveLimit(int archiveLimit) {
+        properties.setProperty(ARCHIVE_LIMIT_KEY, String.valueOf(archiveLimit));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withNearestNeighbours(int nearestNeighbours) {
+        properties.setProperty(NEAREST_NEIGHBOURS_KEY, String.valueOf(nearestNeighbours));
         return this;
     }
 

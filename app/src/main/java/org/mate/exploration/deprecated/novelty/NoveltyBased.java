@@ -883,7 +883,7 @@ public class NoveltyBased {
     private void addToArchive(TestCase tc) {
 
 
-        if(archive.size()< Properties.ARCHIVE_SIZE()){
+        if(archive.size()< Properties.ARCHIVE_LIMIT()){
             MATE.log_acc("Added to Archive the test case number: "+tc.getId());
             this.archive.put(tc.getId(), tc);
         }
