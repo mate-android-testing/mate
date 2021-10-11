@@ -11,16 +11,28 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Select chromosomes proportionate to the first
- * {@link org.mate.exploration.genetic.fitness.IFitnessFunction} given with an additional random
- * factor
+ * Performs a roulette wheel selection based on the fitness values. Only applicable where a single
+ * fitness function is used.
  *
- * @param <T> Type wrapped by the chromosome implementation
+ * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
 public class FitnessProportionateSelectionFunction<T> implements ISelectionFunction<T> {
 
+    /**
+     * Performs a roulette wheel selection proportionate to the fitness values. This is an iterative
+     * process. Every round, a new roulette wheel is constructed based on a list of chromosomes
+     * (initially the entire population). Then, a random number determines the selection of the next
+     * chromosome. After that, the chromosome is removed from the list and the next iteration starts.
+     * The iteration ends when the list of chromosomes is empty.
+     *
+     * @param population A pool of candidates for the selection.
+     * @param fitnessFunctions The fitness functions. Note, we assume that this method is called
+     *                         only with a single fitness function.
+     * @return Returns a list of chromosomes based on the order of the roulette wheel selection.
+     */
     @Override
     public List<IChromosome<T>> select(List<IChromosome<T>> population, List<IFitnessFunction<T>> fitnessFunctions) {
+
         IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
         List<Tuple<Integer, Double>> proportionateFitnessValues = new ArrayList<>();
 
