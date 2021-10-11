@@ -11,8 +11,8 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.Coverage;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -1187,5 +1187,33 @@ public class EnvironmentManager {
                     + chromosome + "!");
         }
         return chromosomeId;
+    }
+
+    /**
+     * Returns the novelty associated with the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String)} has to be called previously.
+     *
+     * @param chromosome The given chromosome.
+     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
+     * @return Returns the novelty associated with the given chromosome.
+     */
+    public <T> double getNovelty(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve novelty of dummy test case...");
+                // a dummy test case has a novelty of 0.0 (0 is the worst in our case)
+                return 0.0;
+            }
+        }
+
+        String chromosomeId = getChromosomeId(chromosome);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_novelty")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", chromosomeId);
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("novelty"));
     }
 }
