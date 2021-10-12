@@ -126,8 +126,6 @@ public class FitnessUtils {
             return Registry.getEnvironmentManager().getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
             return Registry.getEnvironmentManager().getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.NOVELTY) {
-            return Registry.getEnvironmentManager().getNovelty(chromosome);
         }
 
         throw new UnsupportedOperationException("Fitness function "
@@ -157,5 +155,21 @@ public class FitnessUtils {
 
         throw new UnsupportedOperationException("Fitness function "
                 + Properties.FITNESS_FUNCTION() + " not yet supported!");
+    }
+
+    /**
+     * Retrieves the novelty of the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     * @param population The chromosomes in the current population.
+     * @param archive The chromosomes in the current archive.
+     * @param nearestNeighbours The number of nearest neighbours k that should be considered.
+     * @param <T> Specifies whether the chromosome is a test suite or a test case.
+     * @return Returns the novelty of the given chromosome.
+     */
+    public static <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                                        List<IChromosome<T>> archive, int nearestNeighbours) {
+        return Registry.getEnvironmentManager()
+                .getNovelty(chromosome, population, archive, nearestNeighbours);
     }
 }

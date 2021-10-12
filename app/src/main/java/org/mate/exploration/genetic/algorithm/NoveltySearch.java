@@ -6,12 +6,15 @@ import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.Randomness;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -19,7 +22,9 @@ import java.util.List;
 
 /**
  * A novelty search implementation following the paper 'A Novelty Search Approach for Automatic Test
- * Data Generation', see https://hal.archives-ouvertes.fr/hal-01121228/document.
+ * Data Generation', see https://hal.archives-ouvertes.fr/hal-01121228/document. This is basically
+ * a standard genetic algorithm extended by an archive where the selection and fitness function are
+ * replaced with functions that focus on novelty.
  *
  * @param <T> Refers to either a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
@@ -48,7 +53,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     /**
      * The novelty function.
      */
-    private final IFitnessFunction<T> noveltyFunction;
+    private final NoveltyFitnessFunction<T> noveltyFunction;
 
     /**
      * Initializes the genetic algorithm with all the necessary attributes.
@@ -87,7 +92,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         this.nearestNeighbours = nearestNeighbours; // the number of nearest neighbours k
         this.archiveLimit = archiveLimit; // the archive limit L
         this.noveltyThreshold = noveltyThreshold; // the novelty threshold T
-        this.noveltyFunction = fitnessFunctions.get(0); // only a single fitness function is used
+        this.noveltyFunction = (NoveltyFitnessFunction<T>) fitnessFunctions.get(0);
     }
 
     /**
@@ -119,7 +124,8 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      */
     private void updateArchive(IChromosome<T> chromosome) {
 
-        double novelty = noveltyFunction.getFitness(chromosome);
+        double novelty = noveltyFunction.getFitness(chromosome, population,
+                getChromosomesOfArchive(archive), nearestNeighbours);
 
         if (novelty >= noveltyThreshold) {
             if (archive.size() < archiveLimit) {
@@ -158,9 +164,65 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         return archive.get(0);
     }
 
+    /**
+     * Represents the evolution process. In the context of Novelty Search, we stick here to
+     * the procedure of a standard genetic algorithm. The only difference is that we update our
+     * archive accordingly.
+     */
     @Override
     public void evolve() {
-        super.evolve();
+
+        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
+        List<IChromosome<T>> newGeneration = new ArrayList<>(population);
+
+        while (newGeneration.size() < bigPopulationSize) {
+            List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
+
+            IChromosome<T> parent;
+
+            if (Randomness.getRnd().nextDouble() < pCrossover) {
+                parent = crossOverFunction.cross(parents);
+            } else {
+                parent = parents.get(0);
+            }
+
+            List<IChromosome<T>> offspring = new ArrayList<>();
+            offspring.add(parent);
+            if (Randomness.getRnd().nextDouble() < pMutate) {
+                offspring = mutationFunction.mutate(parent);
+            }
+
+            for (IChromosome<T> chromosome : offspring) {
+                if (newGeneration.size() == bigPopulationSize) {
+                    break;
+                } else {
+                    newGeneration.add(chromosome);
+                    updateArchive(chromosome);
+                }
+            }
+        }
+
+        population.clear();
+        population.addAll(newGeneration);
+        List<IChromosome<T>> survivors = getGenerationSurvivors();
+        population.clear();
+        population.addAll(survivors);
+        logCurrentFitness();
+        currentGenerationNumber++;
+    }
+
+    /**
+     * Retrieves the chromosomes of the given archive.
+     *
+     * @param archive The given archive.
+     * @return Returns the chromosomes of the given archive.
+     */
+    private List<IChromosome<T>> getChromosomesOfArchive(List<ChromosomeNoveltyTuple> archive) {
+        List<IChromosome<T>> chromosomes = new LinkedList<>();
+        for (ChromosomeNoveltyTuple chromosome : archive) {
+            chromosomes.add(chromosome.chromosome);
+        }
+        return chromosomes;
     }
 
     /**

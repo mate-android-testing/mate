@@ -1194,10 +1194,14 @@ public class EnvironmentManager {
      * {@link #storeFitnessData(IChromosome, String)} has to be called previously.
      *
      * @param chromosome The given chromosome.
+     * @param population The chromosomes in the current population.
+     * @param archive The chromosomes in the current archive.
+     * @param nearestNeighbours The number of nearest neighbours k that should be considered.
      * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
      * @return Returns the novelty associated with the given chromosome.
      */
-    public <T> double getNovelty(IChromosome<T> chromosome) {
+    public <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                                 List<IChromosome<T>> archive, int nearestNeighbours) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
@@ -1211,9 +1215,37 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_novelty")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosome", chromosomeId);
+                .withParameter("chromosome", chromosomeId)
+                .withParameter("population", getChromosomeIds(population))
+                .withParameter("archive", getChromosomeIds(archive))
+                .withParameter("nearestNeighbours", String.valueOf(nearestNeighbours));
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("novelty"));
+    }
+
+    /**
+     * Concatenates the given chromosomes separated by '+' into a single {@link String}.
+     *
+     * @param chromosomes A list of chromosomes.
+     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
+     * @return Returns a single {@link String} containing the chromosome ids.
+     */
+    private <T> String getChromosomeIds(List<IChromosome<T>> chromosomes) {
+
+        // Java 8: String.join("+", chromosomeIds);
+        StringBuilder chromosomeIds = new StringBuilder();
+
+        for (IChromosome<T> chromosome : chromosomes) {
+            chromosomeIds.append(getChromosomeId(chromosome));
+            chromosomeIds.append("+");
+        }
+
+        // remove '+' at the end
+        if (chromosomeIds.length() > 0) {
+            chromosomeIds.setLength(chromosomeIds.length() - 1);
+        }
+
+        return chromosomeIds.toString();
     }
 }
