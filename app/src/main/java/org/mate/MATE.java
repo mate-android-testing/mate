@@ -9,10 +9,10 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.utils.coverage.Coverage;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -132,7 +132,7 @@ public class MATE {
                 Registry.unregisterUiAbstractionLayer();
                 Registry.unregisterProperties();
                 Registry.unregisterRandom();
-                Registry.getPackageName();
+                Registry.unregisterPackageName();
                 Registry.unregisterTimeout();
             } catch (IOException e) {
                 e.printStackTrace();

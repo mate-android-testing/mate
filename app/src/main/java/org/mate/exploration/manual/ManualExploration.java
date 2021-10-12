@@ -32,8 +32,7 @@ public class ManualExploration implements Algorithm {
     @Override
     public void run() {
 
-        Action manualAction = new UIAction(ActionType.MANUAL_ACTION,
-                uiAbstractionLayer.getCurrentActivity());
+        Action manualAction = new UIAction(ActionType.MANUAL_ACTION, Registry.getCurrentActivity());
 
         while (true) {
 

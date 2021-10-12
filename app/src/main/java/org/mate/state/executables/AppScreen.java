@@ -64,7 +64,7 @@ public class AppScreen {
         this.device = UiDevice.getInstance(instrumentation);
 
         this.widgets = new ArrayList<>();
-        this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
+        this.activityName = Registry.getCurrentActivity();
 
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();

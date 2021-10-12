@@ -6,6 +6,18 @@ machine which is responsible for some analysis that can not be performed by the
 instrumentation tests themselves. The repository containing the MATE server can be found
 [here](https://github.com/mate-android-testing/mate-server).
 
+## Supported Devices:
+
+We have tested MATE on the following devices:
+
+* Nexus 5 (API 25 & 28)
+* Pixel C (API 25 & 28)
+* Pixel XL (API 25 & 28)
+
+You have to employ on the emulator a *x86* image that is not provided by *Google*, i.e. don't use
+neither a *Google Play* nor a *Google API* image. This is due to recent changes that otherwise lead
+to permission issues.
+
 ## How to run MATE
 ### 1) Start the device
 Setup the emulator or attach your device via USB and enable USB-Debugging.
