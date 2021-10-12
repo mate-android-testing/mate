@@ -137,16 +137,43 @@ public class Registry {
         UiDevice device = UiDevice.getInstance(instrumentation);
 
         try {
-            // TODO: check whether the command is reliable on different images (APIs)
-            String output = device.executeShellCommand("dumpsys activity activities");
-            return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
-        } catch (IOException e) {
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
+                return getCurrentActivityAPI25(device);
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+                return getCurrentActivityAPI28(device);
+            } else {
+                // fall back mechanism (slow)
+                return Registry.getEnvironmentManager().getCurrentActivityName();
+            }
+        } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve current activity name via local shell!");
             MATE.log_warn(e.getMessage());
 
             // fall back mechanism (slow)
             return Registry.getEnvironmentManager().getCurrentActivityName();
         }
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 25.
+     *
+     * @param device The ui device.
+     * @return Returns the current activity name.
+     */
+    private static String getCurrentActivityAPI25(UiDevice device) throws IOException {
+        String output = device.executeShellCommand("dumpsys activity top");
+        return output.split("\n")[1].split(" ")[3];
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 28.
+     *
+     * @param device The ui device.
+     * @return Returns the current activity name.
+     */
+    private static String getCurrentActivityAPI28(UiDevice device) throws IOException {
+        String output = device.executeShellCommand("dumpsys activity activities");
+        return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
 
     /**
