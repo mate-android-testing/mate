@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public final class ApplicationTester<S extends State<A>, A extends Action> implements Algorithm {
@@ -32,18 +31,19 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
   private final long timeoutInMilliseconds;
   private final int maximumNumberOfActionPerTestcase;
 
-  private Set<List<TransitionRelation<S, A>>> testsuite = new HashSet<>();
+  private List<List<TransitionRelation<S, A>>> testsuite = new ArrayList<>();
   private final TransitionSystem<S, A> transitionSystem;
 
   public ApplicationTester(final Application<S, A> app,
                            final ExplorationStrategy<S, A> explorationStrategy,
-                           final long timeoutInMilliseconds, final int maximumNumberOfActionPerTestcase) {
+                           final long timeoutInMilliseconds,
+                           final int maximumNumberOfActionPerTestcase) {
     this.app = Objects.requireNonNull(app);
     this.explorationStrategy = Objects.requireNonNull(explorationStrategy);
     this.timeoutInMilliseconds = timeoutInMilliseconds;
     this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
 
-    app.reset();
+    app.reset(); // Ensure that app.getCurrentState() is the initial state of the app.
     this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
 
     if (timeoutInMilliseconds <= 0) {
@@ -58,7 +58,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
   }
 
   public Set<List<TransitionRelation<S, A>>> getTestsuite() {
-    return testsuite;
+    return new HashSet<>(testsuite);
   }
 
   public TransitionSystem<S, A> getTransitionSystem() {
@@ -70,11 +70,11 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     while (noTimeout(startTime)) {
       app.reset();
       S currentState = app.getCurrentState();
-      List<TransitionRelation<S, A>> testcase = new ArrayList<>();
+      final List<TransitionRelation<S, A>> testcase = new ArrayList<>();
 
-      boolean noCrash = true; // Initialization is not necessary, but the compiler cannot figure it out.
       boolean noTerminalState;
-      boolean nonDeterministic = false;
+      boolean noCrash = true; // Initialization not necessary, but the compiler cannot figure it out.
+      boolean nonDeterministic = false; // Initialization not necessary.
       do {
         final Optional<A> chosenAction = explorationStrategy.chooseAction(currentState);
         MATE.log_debug("Choose action:" + chosenAction.toString());
@@ -83,26 +83,30 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
           final Pair<Optional<S>, ActionResult> result = app.executeAction(chosenAction.get());
           final Optional<S> nextState = result.first;
           MATE.log_debug("Executed action action:" + chosenAction.get().toString());
-          final TransitionRelation<S, A> transition = new TransitionRelation<>(currentState,
-                  chosenAction.get(), nextState.orElse(null), result.second);
+          final TransitionRelation<S, A> transition = new TransitionRelation<>(
+                  currentState, chosenAction.get(), nextState.orElse(null), result.second);
           nonDeterministic = transitionSystem.addTransition(transition);
           testcase.add(transition);
 
           noCrash = nextState.isPresent();
           if (noCrash) {
             transitionSystem.addActions(nextState.get().getActions());
-            if (nonDeterministic) {
-              MATE.log_debug("Executing passive learn");
-              testsuite = new HashSet<>(passiveLearn(transitionSystem, new ArrayList<>(testsuite), testcase));
-              transitionSystem.removeUnreachableStates();
-              if (!transitionSystem.isDeterministic()) {
-                throw new AssertionError("The transition system should be deterministic after applying passiveLearn");
-              }
-            }
             currentState = nextState.get();
           }
+
+          if (nonDeterministic) {
+            MATE.log_debug("Executing passive learn");
+            testsuite = passiveLearn(transitionSystem, testsuite, testcase);
+            transitionSystem.removeUnreachableStates();
+            if (!transitionSystem.isDeterministic()) {
+              throw new AssertionError(
+                      "The transition system should be deterministic after applying passiveLearn");
+            }
+          }
+
         }
-      } while (noTerminalState && noCrash && !nonDeterministic && testcase.size() < maximumNumberOfActionPerTestcase && noTimeout(startTime));
+      } while (noTerminalState && noCrash && !nonDeterministic
+              && testcase.size() < maximumNumberOfActionPerTestcase && noTimeout(startTime));
       if (!nonDeterministic) testsuite.add(testcase);
     }
   }
@@ -115,78 +119,58 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     final int testcaseLength = nonDeterministicTestcase.size();
     MATE.log_debug("Found non-deterministic testcase of length " + testcaseLength);
     if (testcaseLength == 1) {
-      /*
-       * The algorithm as described in the original QBE paper simply assumes 'testcaseLength >= 2'.
-       * This assumption does not hold in general. Moreover, there seems to be no good solution to
-       * edge-case. Removing the test from the testsuite and the transition from the
-       * TransitionSystem basically cases the transition to be ignored and at least keeps the
-       * transition system deterministic.
-       */
-      testsuite = testsuite.stream().filter(testcase ->
-              !IntStream.range(0, nonDeterministicTestcase.size()).allMatch(i -> nonDeterministicTestcase.get(i).equals(testcase.get(i)))
-      ).collect(toList());
-      if (testsuite.contains(nonDeterministicTestcase)) throw new AssertionError();
       final TransitionRelation<S, A> tr = nonDeterministicTestcase.remove(0);
       ts.removeTransition(tr);
+      testsuite = testsuite.stream()
+              .filter(testcase -> testcase.isEmpty() || !tr.equals(testcase.get(0)))
+              .collect(toList());
+      if (testsuite.contains(nonDeterministicTestcase)) throw new AssertionError();
     } else {
-      /*
-       * Added the the nonDeterministicTestcase to the testsuite should be done according to the
-       * algorithm as described in the QBE paper. However, doing so causes an infinite recursion.
-       * Not adding the testcase does not seem to hurt while preventing the infinite recursion.
-       * Therefore the next line should be kept commented out.
-       *
-       * TODO: Investigate the exact cause of the infinite recursion and potential other fixes.
-       */
-      testsuite.add(nonDeterministicTestcase);
-      final TransitionRelation<S, A> conflictingTransition = nonDeterministicTestcase.get(
-              testcaseLength - 1);
-      final TransitionRelation<S, A> secondLastTransition = nonDeterministicTestcase.get(
-              testcaseLength - 2);
-      final S stateWithDummy = app.copyWithDummyComponent(conflictingTransition.from);
-      if (stateWithDummy.equals(conflictingTransition.from)) throw new AssertionError();
+      final TransitionRelation<S, A> conflictingTransition
+              = nonDeterministicTestcase.remove(testcaseLength - 1);
+      final TransitionRelation<S, A> secondLastTransition
+              = nonDeterministicTestcase.get(testcaseLength - 2);
+      final S stateWithDummy = app.copyWithDummyComponent(secondLastTransition.to);
       ts.removeTransition(conflictingTransition);
       ts.removeTransition(secondLastTransition);
-      ts.addTransition(new TransitionRelation<>(secondLastTransition.from, secondLastTransition.trigger, stateWithDummy, secondLastTransition.actionResult));
+      ts.addTransition(new TransitionRelation<>(secondLastTransition.from,
+              secondLastTransition.trigger,
+              stateWithDummy,
+              secondLastTransition.actionResult));
 
-      testsuite = testsuite.stream().map(testcase -> testcase.stream().map(tr ->
-              tr.from.equals(secondLastTransition.from) && Objects.equals(tr.to, secondLastTransition.to)
+      testsuite.add(nonDeterministicTestcase);
+      testsuite = testsuite.stream().map(testcase -> testcase.stream()
+              .map(tr -> tr.from.equals(secondLastTransition.from)
+                      && Objects.equals(tr.to, secondLastTransition.to)
                       ? new TransitionRelation<>(tr.from, tr.trigger, stateWithDummy, tr.actionResult)
                       : tr
-      ).collect(toList())).collect(toList());
+              ).collect(toList())).collect(toList());
 
-      /*
-      boolean nonDeterministic = false;
-      do {
-        for (final List<TransitionRelation<S, A>> testcase : testsuite) {
-          for (int i = 0; i < testcase.size(); ++i) {
-            nonDeterministic = ts.addTransition(testcase.get(i)) || nonDeterministic;
-            if (nonDeterministic) {
-              final List<TransitionRelation<S, A>> testcaseCopy = testcase.subList(0, i + 1).stream().map(TransitionRelation::new).collect(toList());
-              testsuite = passiveLearn(ts, testsuite, testcaseCopy);
+      outer:
+      for (int testsuiteIndex = 0; testsuiteIndex < testsuite.size(); ++testsuiteIndex) {
+        final List<TransitionRelation<S, A>> testcase = testsuite.get(testsuiteIndex);
+        for (int testcaseIndex = 0; testcaseIndex < testcase.size(); ++testcaseIndex) {
+          final boolean nonDeterministic = ts.addTransition(testcase.get(testcaseIndex));
+          if (nonDeterministic) {
+            testsuite.remove(testcase);
+            final List<TransitionRelation<S, A>> testcaseCopy
+                    = testcase.subList(0, testcaseIndex + 1)
+                    .stream()
+                    .map(TransitionRelation::new)
+                    .collect(toList());
+            testsuite = passiveLearn(ts, testsuite, testcaseCopy);
+            if (testcaseCopy.size() > 1) {
+              if (testcaseIndex + 1 < testcase.size())
+                testcase.subList(testcaseIndex + 1, testcase.size())
+                        .stream()
+                        .map(TransitionRelation::new)
+                        .forEach(testcaseCopy::add);
+              testsuite.add(testcaseCopy);
             }
+            break outer;
           }
-          if (nonDeterministic) break;
-        }
-      } while (nonDeterministic);
-       */
-
-      boolean nonDeterministic = false;
-      do {
-        int testsuiteIndex = 0;
-        int testcaseIndex = 0;
-        for (; testsuiteIndex < testsuite.size() && !nonDeterministic; ++testsuiteIndex) {
-          final List<TransitionRelation<S, A>> testcase = testsuite.get(testsuiteIndex);
-          for (; testcaseIndex < testcase.size() && !nonDeterministic; ++testcaseIndex) {
-            nonDeterministic = ts.addTransition(testcase.get(testcaseIndex));
           }
         }
-
-        if (nonDeterministic) {
-          final List<TransitionRelation<S, A>> testcaseCopy = testsuite.get(testsuiteIndex).subList(0, testcaseIndex + 1).stream().map(TransitionRelation::new).collect(toList());
-          testsuite = passiveLearn(ts, testsuite, testcaseCopy);
-        }
-      } while (nonDeterministic);
-
     }
     return testsuite;
   }
