@@ -5,7 +5,6 @@ import android.util.Log;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
