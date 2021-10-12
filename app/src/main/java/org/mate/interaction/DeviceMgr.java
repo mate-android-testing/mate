@@ -27,6 +27,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,12 +41,49 @@ import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
  */
 public class DeviceMgr {
 
+    /**
+     * The ADB command to to disable auto rotation.
+     */
+    private final String DISABLE_AUTO_ROTATION_CMD = "content insert " +
+            "--uri content://settings/system --bind name:s:accelerometer_rotation --bind value:i:0";
+
+    /**
+     * The ADB command to rotate the emulator into portrait mode.
+     */
+    private final String PORTRAIT_MODE_CMD = "content insert --uri content://settings/system " +
+            "--bind name:s:user_rotation --bind value:i:0";
+
+    /**
+     * The ADB command to rotate the emulator into landscape mode.
+     */
+    private final String LANDSCAPE_MODE_CMD = "content insert --uri content://settings/system " +
+            "--bind name:s:user_rotation --bind value:i:1";
+
+    /**
+     * The device instance provided by the instrumentation class to perform various actions.
+     */
     private final UiDevice device;
+
+    /**
+     * The package name of the AUT.
+     */
     private final String packageName;
+
+    /**
+     * Keeps track whether the emulator is in portrait or landscape mode.
+     */
+    private boolean isInPortraitMode;
+
+    /**
+     * Keeps track whether auto rotation has been disabled.
+     */
+    private boolean disabledAutoRotate;
 
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
+        this.isInPortraitMode = true;
+        this.disabledAutoRotate = false;
     }
 
     /**
@@ -161,7 +199,7 @@ public class DeviceMgr {
                 device.openNotification();
                 break;
             case TOGGLE_ROTATION:
-                Registry.getEnvironmentManager().toggleRotation();
+                toggleRotation();
                 break;
             case MANUAL_ACTION:
                 // simulates a manual user interaction
@@ -370,6 +408,75 @@ public class DeviceMgr {
         return widget.getClazz().contains("ProgressBar")
                 && widget.isEnabled()
                 && widget.getContentDesc().contains("Loading");
+    }
+
+    /**
+     * Toggles the rotation between portrait and landscape mode. Based on the following reference:
+     * https://stackoverflow.com/questions/25864385/changing-android-device-orientation-with-adb
+     */
+    private void toggleRotation() {
+
+        if (!disabledAutoRotate) {
+            disableAutoRotation();
+        }
+
+        try {
+            String output = device.executeShellCommand(isInPortraitMode ? LANDSCAPE_MODE_CMD : PORTRAIT_MODE_CMD);
+            if (!output.isEmpty()) {
+                MATE.log_warn("Couldn't toggle rotation: " + output);
+            }
+            isInPortraitMode = !isInPortraitMode;
+        } catch (IOException e) {
+            MATE.log_error("Couldn't change rotation!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Disables the auto rotation. Rotations don't have any effect if auto rotation is not disabled.
+     */
+    private void disableAutoRotation() {
+        try {
+            String output = device.executeShellCommand(DISABLE_AUTO_ROTATION_CMD);
+            if (!output.isEmpty()) {
+                MATE.log_warn("Couldn't disable auto rotation: " + output);
+            }
+            disabledAutoRotate = true;
+        } catch (IOException e) {
+            MATE.log_error("Couldn't disable auto rotation!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Brings the emulator back into portrait mode.
+     */
+    public void setPortraitMode() {
+
+        if (!disabledAutoRotate) {
+            disableAutoRotation();
+        }
+
+        try {
+            String output = device.executeShellCommand(PORTRAIT_MODE_CMD);
+            if (!output.isEmpty()) {
+                MATE.log_warn("Couldn't change to portrait mode: " + output);
+            }
+            isInPortraitMode = true;
+        } catch (IOException e) {
+            MATE.log_error("Couldn't change to portrait mode!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns whether the emulator is in portrait mode or not.
+     *
+     * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isInPortraitMode() {
+        return isInPortraitMode;
     }
 
     /**

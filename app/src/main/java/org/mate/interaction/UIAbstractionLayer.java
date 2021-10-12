@@ -481,13 +481,18 @@ public class UIAbstractionLayer {
      * Resets an app, i.e. clearing the app cache and restarting the app.
      */
     public void resetApp() {
+
         try {
             deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
             MATE.log("Wake up couldn't be performed");
             e.printStackTrace();
         }
-        Registry.getEnvironmentManager().setPortraitMode();
+
+        if (!deviceMgr.isInPortraitMode()) {
+            deviceMgr.setPortraitMode();
+        }
+
         deviceMgr.reinstallApp();
         Utils.sleep(5000);
         deviceMgr.restartApp();
