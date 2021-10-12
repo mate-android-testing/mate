@@ -163,9 +163,8 @@ public class UIAbstractionLayer {
         if (action instanceof PrimitiveAction) {
             return SUCCESS;
         }
-        intermediateValuesEA.add(System.currentTimeMillis()); //4
+
         state = clearScreen();
-        intermediateValuesEA.add(System.currentTimeMillis()); //5
 
         // TODO: assess if timeout should be added to primitive actions as well
         // check whether there is a progress bar on the screen
@@ -219,45 +218,17 @@ public class UIAbstractionLayer {
         return lastScreenState;
     }
 
-    static int numberEntriesCS = 0;
-    public static List<Long> intermediateValuesCS = new ArrayList<>();
-    static Long averageCS = null;
-
-    static void evaluateTime(long startTime) {
-        long currentTime = System.currentTimeMillis();
-        StringBuilder stb = new StringBuilder("Intermediates: ");
-        for (Long intermediate : intermediateValuesCS) {
-            intermediate = intermediate - intermediateValuesCS.get(0);
-            stb.append(intermediate);
-            stb.append("ms ");
-
-        }
-        stb.append("Duration: ");
-        stb.append(currentTime - startTime).append("ms");
-        numberEntriesCS++;
-        if (averageCS == null) {
-            averageCS = currentTime - startTime;
-        } else {
-            averageCS = ((numberEntriesCS - 1) * averageCS + (currentTime - startTime)) / numberEntriesCS;
-        }
-        stb.append(" Average: ").append(averageCS).append("ms");
-        intermediateValuesCS.clear();
-        MATE.log_runtime(stb.toString(), "clearScreen()");
-    }
-
     /**
      * Clears the screen from all sorts of dialog, e.g. a permission dialog.
      *
      * @return Returns the current screen state.
      */
     public IScreenState clearScreen() {
-        long startTime = System.currentTimeMillis();
-        intermediateValuesCS.add(startTime); //1
+
         IScreenState screenState = null;
         boolean change = true;
         boolean retry = true;
         int retryCount = 0;
-        intermediateValuesCS.add(System.currentTimeMillis()); // 2
 
         // iterate over screen until no dialog appears anymore
         while (change || retry) {
@@ -272,10 +243,6 @@ public class UIAbstractionLayer {
                     change = true;
                     continue;
                 }
-                intermediateValuesCS.add(System.currentTimeMillis()); // 3
-
-                intermediateValuesCS.add(System.currentTimeMillis()); // 4
-                intermediateValuesCS.add(System.currentTimeMillis()); // 5
 
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
@@ -306,7 +273,6 @@ public class UIAbstractionLayer {
                 Log.e("acc", "", e);
             }
         }
-        evaluateTime(startTime);
         return screenState;
     }
 

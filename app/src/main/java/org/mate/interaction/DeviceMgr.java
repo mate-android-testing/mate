@@ -28,7 +28,6 @@ import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -292,7 +291,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for primitive actions.");
         }
-
         checkForCrash();
     }
 
