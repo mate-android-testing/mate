@@ -49,7 +49,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // actions get init lazily
         if (actions == null) {
-            actions = getUIActions();
+            actions = getActions();
         }
 
         List<WidgetAction> widgetActions = new ArrayList<>();
