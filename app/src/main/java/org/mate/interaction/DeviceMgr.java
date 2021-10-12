@@ -19,14 +19,15 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 
+import java.io.IOException;
 import java.util.List;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -39,12 +40,49 @@ import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
  */
 public class DeviceMgr {
 
+    /**
+     * The ADB command to to disable auto rotation.
+     */
+    private final String DISABLE_AUTO_ROTATION_CMD = "content insert " +
+            "--uri content://settings/system --bind name:s:accelerometer_rotation --bind value:i:0";
+
+    /**
+     * The ADB command to rotate the emulator into portrait mode.
+     */
+    private final String PORTRAIT_MODE_CMD = "content insert --uri content://settings/system " +
+            "--bind name:s:user_rotation --bind value:i:0";
+
+    /**
+     * The ADB command to rotate the emulator into landscape mode.
+     */
+    private final String LANDSCAPE_MODE_CMD = "content insert --uri content://settings/system " +
+            "--bind name:s:user_rotation --bind value:i:1";
+
+    /**
+     * The device instance provided by the instrumentation class to perform various actions.
+     */
     private final UiDevice device;
+
+    /**
+     * The package name of the AUT.
+     */
     private final String packageName;
+
+    /**
+     * Keeps track whether the emulator is in portrait or landscape mode.
+     */
+    private boolean isInPortraitMode;
+
+    /**
+     * Keeps track whether auto rotation has been disabled.
+     */
+    private boolean disabledAutoRotate;
 
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
+        this.isInPortraitMode = true;
+        this.disabledAutoRotate = false;
     }
 
     /**
@@ -160,7 +198,7 @@ public class DeviceMgr {
                 device.openNotification();
                 break;
             case TOGGLE_ROTATION:
-                Registry.getEnvironmentManager().toggleRotation();
+                toggleRotation();
                 break;
             case MANUAL_ACTION:
                 // simulates a manual user interaction
@@ -253,7 +291,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for primitive actions.");
         }
-
         checkForCrash();
     }
 
@@ -308,14 +345,26 @@ public class DeviceMgr {
      */
     private void checkForCrash() throws AUTCrashException {
 
-        // handle app crashes
-        UiObject crashDialog1 = device.findObject(new UiSelector().packageName("android").textContains("keeps stopping"));
-        UiObject crashDialog2 = device.findObject(new UiSelector().packageName("android").textContains("has stopped"));
-
-        if (crashDialog1.exists() || crashDialog2.exists()) {
+        if (checkForCrashDialog()) {
             MATE.log("CRASH");
             throw new AUTCrashException("App crashed");
         }
+    }
+
+    /**
+     * Checks whether a crash dialog is visible on the current screen.
+     *
+     * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean checkForCrashDialog() {
+
+        UiObject crashDialog1 = device.findObject(
+                new UiSelector().packageName("android").textContains("keeps stopping"));
+        UiObject crashDialog2 = device.findObject(
+                new UiSelector().packageName("android").textContains("has stopped"));
+
+        return crashDialog1.exists() || crashDialog2.exists();
     }
 
     /**
@@ -329,6 +378,75 @@ public class DeviceMgr {
         return widget.getClazz().contains("ProgressBar")
                 && widget.isEnabled()
                 && widget.getContentDesc().contains("Loading");
+    }
+
+    /**
+     * Toggles the rotation between portrait and landscape mode. Based on the following reference:
+     * https://stackoverflow.com/questions/25864385/changing-android-device-orientation-with-adb
+     */
+    private void toggleRotation() {
+
+        if (!disabledAutoRotate) {
+            disableAutoRotation();
+        }
+
+        try {
+            String output = device.executeShellCommand(isInPortraitMode ? LANDSCAPE_MODE_CMD : PORTRAIT_MODE_CMD);
+            if (!output.isEmpty()) {
+                MATE.log_warn("Couldn't toggle rotation: " + output);
+            }
+            isInPortraitMode = !isInPortraitMode;
+        } catch (IOException e) {
+            MATE.log_error("Couldn't change rotation!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Disables the auto rotation. Rotations don't have any effect if auto rotation is not disabled.
+     */
+    private void disableAutoRotation() {
+        try {
+            String output = device.executeShellCommand(DISABLE_AUTO_ROTATION_CMD);
+            if (!output.isEmpty()) {
+                MATE.log_warn("Couldn't disable auto rotation: " + output);
+            }
+            disabledAutoRotate = true;
+        } catch (IOException e) {
+            MATE.log_error("Couldn't disable auto rotation!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Brings the emulator back into portrait mode.
+     */
+    public void setPortraitMode() {
+
+        if (!disabledAutoRotate) {
+            disableAutoRotation();
+        }
+
+        try {
+            String output = device.executeShellCommand(PORTRAIT_MODE_CMD);
+            if (!output.isEmpty()) {
+                MATE.log_warn("Couldn't change to portrait mode: " + output);
+            }
+            isInPortraitMode = true;
+        } catch (IOException e) {
+            MATE.log_error("Couldn't change to portrait mode!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns whether the emulator is in portrait mode or not.
+     *
+     * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isInPortraitMode() {
+        return isInPortraitMode;
     }
 
     /**
@@ -524,7 +642,7 @@ public class DeviceMgr {
             maxLengthInt = 15;
 
         // consider https://developer.android.com/reference/android/text/InputType
-        int inputType =  widget.getInputType();
+        int inputType = widget.getInputType();
 
         // check whether the input consists solely of digits (ignoring dots and comas)
         widgetText = widgetText.replace(".", "");
@@ -608,11 +726,6 @@ public class DeviceMgr {
     public void reinstallApp() {
         MATE.log("Reinstall app");
         Registry.getEnvironmentManager().clearAppData();
-
-        // grant runtime permissions (read/write external storage) which are dropped after each reset
-        MATE.log("Grant runtime permissions: "
-                + Registry.getEnvironmentManager().grantRuntimePermissions(Registry.getPackageName()));
-        //sleep(1000);
     }
 
     /**
@@ -632,7 +745,6 @@ public class DeviceMgr {
             MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
         }
         context.startActivity(intent);
-        // sleep(1000);
     }
 
     /**

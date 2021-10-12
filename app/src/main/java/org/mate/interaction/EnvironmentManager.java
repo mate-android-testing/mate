@@ -1,5 +1,10 @@
 package org.mate.interaction;
 
+import android.app.Instrumentation;
+import android.os.Build;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -11,8 +16,8 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.Coverage;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -32,7 +37,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.1";
+    private static final String MESSAGE_PROTOCOL_VERSION = "2.2";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -415,10 +420,24 @@ public class EnvironmentManager {
      * @param packageName The app that requires the permissions.
      * @return Returns {@code true} if the granting permissions succeeded, otherwise {@code false}.
      */
-    // TODO: use InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission()
+    @SuppressWarnings("unused")
     public boolean grantRuntimePermissions(String packageName) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/grant_runtime_permissions")
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        UiDevice device = UiDevice.getInstance(instrumentation);
+
+        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
+        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+        // this method is far faster than the request via the server
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
+            return true;
+        }
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName);
         Message response = sendMessage(messageBuilder.build());
@@ -1140,7 +1159,9 @@ public class EnvironmentManager {
 
     /**
      * Rotates the emulator into portrait mode.
+     * NOTE: The rotation operations are now directly performed by MATE itself.
      */
+    @SuppressWarnings("unused")
     public void setPortraitMode() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
@@ -1155,7 +1176,9 @@ public class EnvironmentManager {
 
     /**
      * Toggles rotation.
+     * NOTE: The rotation operations are now directly performed by MATE itself.
      */
+    @SuppressWarnings("unused")
     public void toggleRotation() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)

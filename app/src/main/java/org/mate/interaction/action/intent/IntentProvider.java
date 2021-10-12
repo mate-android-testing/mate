@@ -6,8 +6,8 @@ import android.net.Uri;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.interaction.action.Action;
 import org.mate.interaction.EnvironmentManager;
+import org.mate.interaction.action.Action;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -292,7 +292,7 @@ public class IntentProvider {
      */
     public boolean isCurrentActivityHandlingOnNewIntent() {
 
-        String name = Registry.getEnvironmentManager().getCurrentActivityName();
+        String name = Registry.getCurrentActivity();
 
         String[] tokens = name.split("/");
 
@@ -321,7 +321,7 @@ public class IntentProvider {
      */
     public IntentBasedAction generateIntentBasedActionForCurrentActivity() {
 
-        String name = Registry.getEnvironmentManager().getCurrentActivityName();
+        String name = Registry.getCurrentActivity();
 
         String[] tokens = name.split("/");
 
