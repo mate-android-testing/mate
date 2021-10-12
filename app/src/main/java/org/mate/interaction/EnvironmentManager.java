@@ -1159,7 +1159,9 @@ public class EnvironmentManager {
 
     /**
      * Rotates the emulator into portrait mode.
+     * NOTE: The rotation operations are now directly performed by MATE itself.
      */
+    @SuppressWarnings("unused")
     public void setPortraitMode() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
@@ -1174,7 +1176,9 @@ public class EnvironmentManager {
 
     /**
      * Toggles rotation.
+     * NOTE: The rotation operations are now directly performed by MATE itself.
      */
+    @SuppressWarnings("unused")
     public void toggleRotation() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
