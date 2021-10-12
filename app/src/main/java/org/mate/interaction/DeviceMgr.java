@@ -337,31 +337,6 @@ public class DeviceMgr {
         Utils.sleep(action.getTimeToWait());
         checkForCrash();
     }
-    static int numberEntries = 0;
-    public static List<Long> intermediateValues = new ArrayList<>();
-    static Long average = null;
-
-    static void evaluateTime(long startTime, boolean crash) {
-        long currentTime = System.currentTimeMillis();
-        StringBuilder stb = new StringBuilder("Intermediates: " + (crash ? "(Crash)" : ""));
-        for (Long intermediate : intermediateValues) {
-            intermediate = intermediate - intermediateValues.get(0);
-            stb.append(intermediate);
-            stb.append("ms ");
-
-        }
-        stb.append("Duration: ");
-        stb.append(currentTime - startTime).append("ms");
-        numberEntries++;
-        if (average == null) {
-            average = currentTime - startTime;
-        } else {
-            average = ((numberEntries - 1) * average + (currentTime - startTime)) / numberEntries;
-        }
-        stb.append(" Average: ").append(average).append("ms");
-        intermediateValues.clear();
-        MATE.log_runtime(stb.toString(), "checkForCrash()");
-    }
 
     /**
      * Checks whether a crash dialog appeared on the screen.
@@ -369,14 +344,11 @@ public class DeviceMgr {
      * @throws AUTCrashException Thrown when the last action caused a crash of the application.
      */
     private void checkForCrash() throws AUTCrashException {
-        long startTime = System.currentTimeMillis();
 
         if (checkForCrashDialog()) {
             MATE.log("CRASH");
-            evaluateTime(startTime, true);
             throw new AUTCrashException("App crashed");
         }
-        evaluateTime(startTime, false);
     }
 
     /**

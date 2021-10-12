@@ -152,10 +152,6 @@ public class MATE {
         Log.d("debug", msg);
     }
 
-    public static void log_runtime(String msg, String kind) {
-        Log.d("runtime", kind + ": " + msg);
-    }
-
     public static void log_warn(String msg) {
         Log.w("warning", msg);
     }

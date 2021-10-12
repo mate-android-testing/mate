@@ -13,7 +13,6 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
-import org.mate.state.ScreenStateFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
-
 
 /**
  * Models an app screen with all (discoverable) widgets on it.
@@ -66,17 +64,17 @@ public class AppScreen {
         this.device = UiDevice.getInstance(instrumentation);
 
         this.widgets = new ArrayList<>();
-        ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); //2
         this.activityName = Registry.getCurrentActivity();
-        ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); // 3
+
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();
         } else {
             this.packageName = activityName.split("/")[0];
         }
+
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().getRootInActiveWindow();
-        ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); // 4
+
         if (rootNode == null) {
             /*
             * TODO: Check whether this is the expected behaviour. I would rather assume that
@@ -98,7 +96,6 @@ public class AppScreen {
         MATE.log_debug("AppScreen: " + activityName);
         parseWidgets(rootNode, null, 0, 0, 0);
         MATE.log_debug("Number of widgets: " + widgets.size());
-        ScreenStateFactory.intermediateValues.add(System.currentTimeMillis()); //5
     }
 
     /**

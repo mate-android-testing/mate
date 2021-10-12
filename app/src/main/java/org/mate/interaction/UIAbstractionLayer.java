@@ -20,7 +20,6 @@ import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
 import org.mate.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -63,31 +62,13 @@ public class UIAbstractionLayer {
         return getLastScreenState().getActions();
     }
 
-    static Long startTime = null;
-    static int numberEntriesEA = 0;
-    public static List<Long> intermediateValuesEA = new ArrayList<>();
-    static Long averageEA = null;
-
-    static void evaluateTimeEA(long startTime) {
-        long currentTime = System.currentTimeMillis();
-        StringBuilder stb = new StringBuilder("Intermediates: ");
-        for (Long intermediate : intermediateValuesEA) {
-            intermediate = intermediate - intermediateValuesEA.get(0);
-            stb.append(intermediate);
-            stb.append("ms ");
-
-        }
-        stb.append("Duration: ");
-        stb.append(currentTime - startTime).append("ms");
-        numberEntriesEA++;
-        if (averageEA == null) {
-            averageEA = currentTime - startTime;
-        } else {
-            averageEA = ((numberEntriesEA - 1) * averageEA + (currentTime - startTime)) / numberEntriesEA;
-        }
-        stb.append(" Average: ").append(averageEA).append("ms");
-        intermediateValuesEA.clear();
-        MATE.log_runtime(stb.toString(), "executeAction()");
+    /**
+     * Returns the name of the current activity.
+     *
+     * @return Returns the name of the current activity.
+     */
+    public String getCurrentActivity() {
+        return getLastScreenState().getActivityName();
     }
 
     /**
@@ -98,16 +79,14 @@ public class UIAbstractionLayer {
      * @return Returns the outcome of the execution, e.g. success.
      */
     public ActionResult executeAction(Action action) {
-        startTime = System.currentTimeMillis();
-        intermediateValuesEA.add(startTime); //1
         boolean retry = true;
         int retryCount = 0;
 
         /*
-         * FIXME: The UIAutomator bug seems to be unresolvable right now.
-         *  We have tried to restart the ADB server, but afterwards the
-         *   connection is still broken. Fortunately, this bug seems to appear
-         *   very rarely recently.
+        * FIXME: The UIAutomator bug seems to be unresolvable right now.
+        *  We have tried to restart the ADB server, but afterwards the
+        *   connection is still broken. Fortunately, this bug seems to appear
+        *   very rarely recently.
          */
         while (retry) {
             retry = false;
@@ -123,7 +102,6 @@ public class UIAbstractionLayer {
                 }
                 Log.e("acc", "", e);
             }
-            //evaluateTimeEA(startTime);
         }
         return FAILURE_UNKNOWN;
     }
@@ -138,12 +116,8 @@ public class UIAbstractionLayer {
     private ActionResult executeActionUnsafe(Action action) {
         IScreenState state;
         try {
-            intermediateValuesEA.add(System.currentTimeMillis()); //2
             deviceMgr.executeAction(action);
-            intermediateValuesEA.add(System.currentTimeMillis()); //3
         } catch (AUTCrashException e) {
-
-            intermediateValuesEA.add(System.currentTimeMillis()); //3
 
             MATE.log_acc("CRASH MESSAGE" + e.getMessage());
             deviceMgr.pressHome();
@@ -196,15 +170,13 @@ public class UIAbstractionLayer {
         state = toRecordedScreenState(state);
         guiModel.update(lastScreenState, state, action);
         lastScreenState = state;
-        intermediateValuesEA.add(System.currentTimeMillis()); //6
+
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log("current package different from app package: " + currentPackageName);
-            evaluateTimeEA(startTime);
             return SUCCESS_OUTBOUND;
         } else {
-            evaluateTimeEA(startTime);
             return SUCCESS;
         }
     }
@@ -503,9 +475,9 @@ public class UIAbstractionLayer {
             if (recordedScreenState.equals(screenState)) {
                 MATE.log_debug("Using cached screen state!");
                 /*
-                 * NOTE: We should only return the cached screen state if we can ensure
-                 * that equals() actually compares the widgets. Otherwise, we can end up with
-                 * widget actions that are not applicable on the current screen.
+                * NOTE: We should only return the cached screen state if we can ensure
+                * that equals() actually compares the widgets. Otherwise, we can end up with
+                * widget actions that are not applicable on the current screen.
                  */
                 return recordedScreenState;
             }
@@ -519,7 +491,7 @@ public class UIAbstractionLayer {
      * Checks whether the last action lead to a new screen state.
      *
      * @return Returns {@code} if a new screen state has been reached,
-     * otherwise {@code} false is returned.
+     *          otherwise {@code} false is returned.
      */
     public boolean reachedNewState() {
         return guiModel.reachedNewState();
