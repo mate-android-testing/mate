@@ -115,8 +115,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 offspring = mutationFunction.mutate(parent);
             }
 
-
             for (IChromosome<T> chromosome : offspring) {
+                // as long as only a single offspring is generated, the check is redundant
                 if (newGeneration.size() == bigPopulationSize) {
                     break;
                 } else {
@@ -125,12 +125,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        //todo: beautify later when more time
+        // We need to shrink the big population back to a size of 'populationSize'.
         population.clear();
         population.addAll(newGeneration);
-        List<IChromosome<T>> tmp = getGenerationSurvivors();
+        List<IChromosome<T>> survivors = getGenerationSurvivors();
         population.clear();
-        population.addAll(tmp);
+        population.addAll(survivors);
         logCurrentFitness();
         currentGenerationNumber++;
     }
