@@ -166,5 +166,4 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
     }
-
 }

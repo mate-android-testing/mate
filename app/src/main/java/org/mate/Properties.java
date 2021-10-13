@@ -55,7 +55,7 @@ public class Properties {
     /*
     * Intent fuzzing related properties.
      */
-    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
+    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(0.0f); }
 
     /**
      * The optimisation strategy that should be applied.
@@ -141,6 +141,8 @@ public class Properties {
     public static int EVO_ITERATIONS_NUMBER() {
         return propertyOr(10);
     }
+
+    public static int MUTATION_RATE() { return propertyOr(1); }
 
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);

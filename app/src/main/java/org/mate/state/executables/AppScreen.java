@@ -64,7 +64,7 @@ public class AppScreen {
         this.device = UiDevice.getInstance(instrumentation);
 
         this.widgets = new ArrayList<>();
-        this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
+        this.activityName = Registry.getCurrentActivity();
 
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();
@@ -129,7 +129,11 @@ public class AppScreen {
         // traverse children
         for (int i = 0; i < node.getChildCount(); i++) {
             // the local index is simply the child number
-            globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
+            if (node.getChild(i) == null) {
+                MATE.log_warn("Child node " + i + " at depth " + depth + " not available!");
+            } else {
+                globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
+            }
         }
         return globalIndex;
     }

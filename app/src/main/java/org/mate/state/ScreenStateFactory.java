@@ -40,7 +40,7 @@ public class ScreenStateFactory {
                 while (retries < MAX_NUMBER_OF_RETRIES && state.getActions().size() == 0) {
                     MATE.log_debug("Retry fetching screen state!");
                     Utils.sleep(5000);
-                    state =  new ActionsScreenState(new AppScreen());
+                    state = new ActionsScreenState(new AppScreen());
                     retries++;
                 }
 

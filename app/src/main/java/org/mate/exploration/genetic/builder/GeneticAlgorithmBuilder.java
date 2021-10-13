@@ -39,6 +39,7 @@ public class GeneticAlgorithmBuilder {
     public static final String NOVELTY_THRESHOLD_KEY = "novelty_threshold";
     public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
     public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
+    public static final String MUTATION_RATE_KEY ="mutation_rate";
 
     private Properties properties;
 
@@ -211,6 +212,11 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withNearestNeighbours(int nearestNeighbours) {
         properties.setProperty(NEAREST_NEIGHBOURS_KEY, String.valueOf(nearestNeighbours));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withMutationRate(int mutationRate) {
+        properties.setProperty(MUTATION_RATE_KEY, String.valueOf(mutationRate));
         return this;
     }
 
