@@ -3,11 +3,9 @@ package org.mate.exploration.genetic.selection;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.utils.Randomness;
-import org.mate.utils.Tuple;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -33,47 +31,62 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
     @Override
     public List<IChromosome<T>> select(List<IChromosome<T>> population, List<IFitnessFunction<T>> fitnessFunctions) {
 
-        IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
-        List<Tuple<Integer, Double>> proportionateFitnessValues = new ArrayList<>();
-
-        int count = 0;
+        final IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
         final boolean maximizing = fitnessFunction.isMaximizing();
 
-        for (IChromosome<T> chromosome : population) {
-            double normalizedFitnessValue = fitnessFunction.getNormalizedFitness(chromosome);
-            if (!maximizing) {
-                normalizedFitnessValue = invertFitnessValue(normalizedFitnessValue);
-            }
-            double proportionateFitness = normalizedFitnessValue * Randomness.getRnd().nextDouble();
-            proportionateFitnessValues.add(new Tuple<>(count, proportionateFitness));
-            count++;
-        }
-
-        Collections.sort(proportionateFitnessValues, new Comparator<Tuple<Integer, Double>>() {
-            @Override
-            public int compare(Tuple<Integer, Double> o1, Tuple<Integer, Double> o2) {
-                int comparedValue = o2.getY().compareTo(o1.getY());
-                return maximizing ? comparedValue : comparedValue * (-1);
-            }
-        });
-
         List<IChromosome<T>> selection = new ArrayList<>();
+        List<IChromosome<T>> candidates = new LinkedList<>(population);
 
-        for (Tuple<Integer, Double> proportionateFitnessValue : proportionateFitnessValues) {
-            selection.add(population.get(proportionateFitnessValue.getX()));
+        for (int i = 0; i < population.size(); i++) {
+
+            /*
+            * Constructs the roulette wheel. Each chromosome is assigned a range proportionate
+            * to its fitness value. The first chromosome c1 covers the range [0.0,fitness(c1)],
+            * the second chromosome c2 the range (fitness(c1),fitness(c2)], and so on.
+             */
+            double sum = 0.0;
+
+            for (IChromosome<T> chromosome : candidates) {
+                double fitness = fitnessFunction.getNormalizedFitness(chromosome);
+                sum += maximizing ? fitness : invertFitnessValue(fitness);
+            }
+
+            /*
+            * The maximal spectrum of the roulette wheel is defined by the range [0.0,sum].
+            * Thus, we pick a random number in that spectrum. The candidate that covers the
+            * random number represents the selected chromosome.
+             */
+            double rnd = Randomness.getRandom(0.0, sum);
+            IChromosome<T> selected = null;
+
+            double start = 0.0;
+            for (IChromosome<T> chromosome : candidates) {
+                double fitness = fitnessFunction.getNormalizedFitness(chromosome);
+                double end = start + (maximizing ? fitness : invertFitnessValue(fitness));
+                if (rnd <= end) {
+                    selected = chromosome;
+                    break;
+                } else {
+                    start = end;
+                }
+            }
+
+            selection.add(selected);
+
+            // remove selected chromosome from roulette wheel
+            candidates.remove(selected);
         }
 
         return selection;
-
     }
 
     /**
      * This method inverts a fitness value - used in case of a minimizing fitness function.
      *
      * @param fitnessValue The fitness value to be inverted.
-     * @return The inverted fitness value.
+     * @return Returns the inverted fitness value.
      */
     private double invertFitnessValue(final double fitnessValue) {
-        return 1.0 / (fitnessValue + 1.0);
+        return 1.0 - fitnessValue;
     }
 }
