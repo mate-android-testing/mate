@@ -1,5 +1,7 @@
 package org.mate;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -21,9 +23,7 @@ import java.io.InputStreamReader;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-
-public class MATE {
+public class MATE implements AutoCloseable {
 
     // TODO: make singleton
     public MATE() {
@@ -116,27 +116,30 @@ public class MATE {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            close();
+        }
+    }
 
-            if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                CoverageUtils.logFinalCoverage();
-            }
+    public void close() {
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            CoverageUtils.logFinalCoverage();
+        }
 
-            if (Properties.GRAPH_TYPE() != null) {
-                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
-            }
+        if (Properties.GRAPH_TYPE() != null) {
+            Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+        }
 
-            Registry.getEnvironmentManager().releaseEmulator();
-            // EnvironmentManager.deleteAllScreenShots(packageName);
-            try {
-                Registry.unregisterEnvironmentManager();
-                Registry.unregisterUiAbstractionLayer();
-                Registry.unregisterProperties();
-                Registry.unregisterRandom();
-                Registry.unregisterPackageName();
-                Registry.unregisterTimeout();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        Registry.getEnvironmentManager().releaseEmulator();
+        // EnvironmentManager.deleteAllScreenShots(packageName);
+        try {
+            Registry.unregisterEnvironmentManager();
+            Registry.unregisterUiAbstractionLayer();
+            Registry.unregisterProperties();
+            Registry.unregisterRandom();
+            Registry.unregisterPackageName();
+            Registry.unregisterTimeout();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
