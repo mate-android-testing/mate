@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Randomness {
     public static Random getRnd() {
@@ -72,6 +73,17 @@ public class Randomness {
             result.add(randomElementOrNull(set));
         }
         return result;
+    }
+
+    /**
+     * Generates a random double in the range [min,max).
+     *
+     * @param min The minimal value (inclusive).
+     * @param max The maximal value (exclusive).
+     * @return Returns a random number in the range [min,max).
+     */
+    public static double getRandom(double min, double max) {
+        return ThreadLocalRandom.current().nextDouble(min, max);
     }
 
     public static int getInRangeStd(int range) {
