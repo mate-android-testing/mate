@@ -26,6 +26,23 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
     }
 
     /**
+     * The novelty fitness value can't be computed solely based on the given chromosome. Do not
+     * call this method, see {@link #getFitness(IChromosome, List, List, int)} for more information.
+     *
+     * @param chromosome The given chromosome.
+     * @return Returns an {@link UnsupportedOperationException}.
+     */
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        throw new UnsupportedOperationException("Do not call this method!");
+    }
+
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    /**
      * Computes the novelty of the given chromosome.
      *
      * @param chromosome The given chromosome.
