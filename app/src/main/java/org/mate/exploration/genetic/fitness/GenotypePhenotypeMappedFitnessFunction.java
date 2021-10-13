@@ -27,4 +27,14 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     public double getFitness(IChromosome<S> genotypeChromosome) {
         return phenotypeFitnessFunction.getFitness(genotypePhenotypeMapping.map(genotypeChromosome));
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return phenotypeFitnessFunction.isMaximizing();
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<S> genotypeChromosome) {
+        return phenotypeFitnessFunction.getNormalizedFitness(genotypePhenotypeMapping.map(genotypeChromosome));
+    }
 }

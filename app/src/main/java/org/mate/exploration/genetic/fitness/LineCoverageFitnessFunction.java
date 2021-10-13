@@ -19,9 +19,18 @@ public class LineCoverageFitnessFunction<T> implements IFitnessFunction<T> {
         if (cache.containsKey(chromosome)) {
             return cache.get(chromosome);
         }
-        // FIXME: statement coverage is not working right now
         double fitness = FitnessUtils.getFitness(chromosome);
         cache.put(chromosome, fitness);
         return fitness;
+    }
+
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome) / 100;
     }
 }
