@@ -31,7 +31,7 @@ public class ExecuteMATENoveltySearch {
                 .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                 .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
                 .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
-                .withFitnessFunction(FitnessFunction.BRANCH_DISTANCE)
+                .withFitnessFunction(FitnessFunction.NOVELTY)
                 .withTerminationCondition(TerminationCondition.CONDITIONAL_TERMINATION)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
