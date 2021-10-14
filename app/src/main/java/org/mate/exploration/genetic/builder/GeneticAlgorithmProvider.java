@@ -216,7 +216,7 @@ public class GeneticAlgorithmProvider {
 
     private double getNoveltyThreshold() {
         String noveltyThreshold
-                = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
+                = properties.getProperty(GeneticAlgorithmBuilder.NOVELTY_THRESHOLD_KEY);
         if (noveltyThreshold == null) {
             if (useDefaults) {
                 return org.mate.Properties.NOVELTY_THRESHOLD();

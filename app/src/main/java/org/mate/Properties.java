@@ -257,7 +257,7 @@ public class Properties {
      *
      * @return Returns the novelty threshold T.
      */
-    public static double NOVELTY_THRESHOLD() { return propertyOr(0); }
+    public static double NOVELTY_THRESHOLD() { return propertyOr(0.0); }
 
     /**
      * Novelty Search - Defines the maximal size of the archive.
