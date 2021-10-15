@@ -187,9 +187,11 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             }
 
             List<IChromosome<T>> offspring = new ArrayList<>();
-            offspring.add(parent);
+
             if (Randomness.getRnd().nextDouble() < pMutate) {
                 offspring = mutationFunction.mutate(parent);
+            } else {
+                offspring.add(parent);
             }
 
             for (IChromosome<T> chromosome : offspring) {
