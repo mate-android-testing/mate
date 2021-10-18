@@ -2,6 +2,7 @@ package org.mate.state.executables;
 
 import android.app.Instrumentation;
 import android.graphics.Rect;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -163,23 +164,11 @@ public class AppScreen {
                 }
 
                 if (uiObject != null) {
-
-                    /*
-                     * In order to retrieve the hint of a widget, we have to clear the
-                     * input, and this in turn should display the hint if we are lucky.
-                     */
-
-                    // save original input
-                    String textBeforeClear = Objects.toString(uiObject.getText(), "");
-
-                    // reset input and hope that this causes a hint to be set
-                    uiObject.setText("");
-                    String textAfterClear = Objects.toString(uiObject.getText(), "");
-
-                    // restore original input
-                    uiObject.setText(textBeforeClear);
-
-                    hint = textAfterClear;
+                    if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
+                        hint = getHintAPI25AndLower(uiObject);
+                    } else{
+                        hint = (String) node.getHintText();
+                    }
 
                     if (!widget.getResourceID().isEmpty()) {
                         editTextHints.put(widget.getResourceID(), hint);
@@ -190,6 +179,27 @@ public class AppScreen {
             hint = Objects.toString(hint, "");
             widget.setHint(hint);
         }
+    }
+
+    private String getHintAPI25AndLower(UiObject2 uiObject) {
+        String hint;
+        /*
+         * In order to retrieve the hint of a widget, we have to clear the
+         * input, and this in turn should display the hint if we are lucky.
+         */
+
+        // save original input
+        String textBeforeClear = Objects.toString(uiObject.getText(), "");
+
+        // reset input and hope that this causes a hint to be set
+        uiObject.setText("");
+        String textAfterClear = Objects.toString(uiObject.getText(), "");
+
+        // restore original input
+        uiObject.setText(textBeforeClear);
+
+        hint = textAfterClear;
+        return hint;
     }
 
     /**
