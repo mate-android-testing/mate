@@ -1,5 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
+import android.util.Pair;
+
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
@@ -9,16 +11,16 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
+import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.model.TestCase;
-import org.mate.model.TestSuite;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A novelty search implementation following the paper 'A Novelty Search Approach for Automatic Test
@@ -33,7 +35,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     /**
      * The archive containing the most diverse chromosomes.
      */
-    private List<ChromosomeNoveltyTuple> archive;
+    private List<IChromosome<T>> archive;
 
     /**
      * The maximal size of the archive, denoted as L.
@@ -51,9 +53,14 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     private final int nearestNeighbours;
 
     /**
-     * The novelty function.
+     * The novelty fitness function.
      */
-    private final NoveltyFitnessFunction<T> noveltyFunction;
+    private final NoveltyFitnessFunction<T> noveltyFitnessFunction;
+
+    /**
+     * The novelty selection function.
+     */
+    private final NoveltyRankSelectionFunction<T> noveltySelectionFunction;
 
     /**
      * Initializes the genetic algorithm with all the necessary attributes.
@@ -92,7 +99,8 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         this.nearestNeighbours = nearestNeighbours; // the number of nearest neighbours k
         this.archiveLimit = archiveLimit; // the archive limit L
         this.noveltyThreshold = noveltyThreshold; // the novelty threshold T
-        this.noveltyFunction = (NoveltyFitnessFunction<T>) fitnessFunctions.get(0);
+        this.noveltyFitnessFunction = (NoveltyFitnessFunction<T>) fitnessFunctions.get(0);
+        this.noveltySelectionFunction = (NoveltyRankSelectionFunction<T>) selectionFunction;
     }
 
     /**
@@ -106,7 +114,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         for (int i = 0; i < populationSize; i++) {
             IChromosome<T> chromosome = chromosomeFactory.createChromosome();
             population.add(chromosome);
-            updateArchive(chromosome);
+            updateArchive(chromosome, population, archive);
         }
 
         logCurrentFitness();
@@ -114,60 +122,124 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     }
 
     /**
-     * Updates the archive with the given chromosome if:
+     * Updates the archive with the new chromosome if one of the following conditions hold:
      *
-     * (1) The new chromosome has at least a novelty >= {@link #noveltyThreshold}.
-     * (2) The archive is not full yet or the given chromosome is more diverse than any other
-     *      chromosome in the archive. Replaces the chromosome in the latter case.
+     * (1) If the archive is empty.
+     * (2) The new chromosome has at least a novelty > {@link #noveltyThreshold} and the archive
+     *      is not full yet.
+     * (3) The new chromosome has at least a novelty > {@link #noveltyThreshold} and it is more
+     *      diverse than at least a single other chromosome in the current archive. This will
+     *      replace the new chromosome with the worst chromosome in the archive.
      *
-     * @param chromosome The new chromosome.
+     * @param chromosome The new chromosome (already contained in the current population!).
+     * @param population The current population.
+     * @param archive The current archive.
      */
-    private void updateArchive(IChromosome<T> chromosome) {
+    private void updateArchive(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                               List<IChromosome<T>> archive) {
 
-        double novelty = noveltyFunction.getFitness(chromosome, population,
-                getChromosomesOfArchive(archive), nearestNeighbours);
+        if (archive.isEmpty()) {
+            // the first chromosome also goes into the archive
+            archive.add(chromosome);
+        }
 
-        if (novelty >= noveltyThreshold) {
+        List<Double> noveltyVector = noveltyFitnessFunction.getFitness(population, archive, nearestNeighbours);
+        MATE.log_acc("Novelty of chromosomes: " + noveltyVector);
+
+        Pair<List<Double>, List<Double>> noveltyVectorPair
+                = getNoveltyScoresOfPopulationAndArchive(noveltyVector, population.size());
+
+        Map<IChromosome<T>, Double> populationNoveltyScores = convertToMap(population, noveltyVectorPair.first);
+        Map<IChromosome<T>, Double> archiveNoveltyScores = convertToMap(archive, noveltyVectorPair.second);
+
+        double novelty = populationNoveltyScores.get(chromosome);
+
+        if (novelty > noveltyThreshold) {
             if (archive.size() < archiveLimit) {
-                archive.add(new ChromosomeNoveltyTuple(chromosome, novelty));
+                // archive not full yet
+                archive.add(chromosome);
             } else {
                 // replace with worst if better than worst
-                ChromosomeNoveltyTuple worstChromosome = getWorstChromosomeOfArchive();
-                if (novelty > worstChromosome.novelty) {
-                    archive.remove(worstChromosome);
-                    archive.add(new ChromosomeNoveltyTuple(chromosome, novelty));
+                Map.Entry<IChromosome<T>, Double> worstChromosome = getWorstChromosomeOfArchive(archiveNoveltyScores);
+                if (novelty > worstChromosome.getValue()) {
+                    archive.remove(worstChromosome.getKey());
+                    archive.add(chromosome);
                 }
             }
         }
     }
 
     /**
+     * Splits the novelty vector into the scores belonging to the population and the archive.
+     *
+     * @param noveltyVector The novelty vector.
+     * @param populationSize The population size.
+     * @return Returns a pair where the first entry refers to the novelty scores of the population
+     *          and the second entry refers to the novelty scores of the archive.
+     */
+    private Pair<List<Double>, List<Double>> getNoveltyScoresOfPopulationAndArchive(
+            List<Double> noveltyVector, int populationSize) {
+        List<Double> populationNoveltyScores = noveltyVector.subList(0, populationSize);
+        List<Double> archiveNoveltyScores = noveltyVector.subList(populationSize, noveltyVector.size());
+        return new Pair<>(populationNoveltyScores, archiveNoveltyScores);
+    }
+
+    /**
+     * Converts a key and value list into a corresponding map. This assumes that the number of
+     * keys and values are identical.
+     *
+     * @param keys The list of keys.
+     * @param values The list of values.
+     * @return Returns a map with the respective key-value associations.
+     */
+    private Map<IChromosome<T>, Double> convertToMap(List<IChromosome<T>> keys, List<Double> values) {
+
+        if (keys.size() != values.size()) {
+            throw new IllegalStateException("Not the same number of keys and values!");
+        }
+
+        Map<IChromosome<T>, Double> map = new HashMap<>();
+        Iterator<IChromosome<T>> i1 = keys.iterator();
+        Iterator<Double> i2 = values.iterator();
+        while (i1.hasNext() && i2.hasNext()) {
+            map.put(i1.next(), i2.next());
+        }
+        return map;
+    }
+
+    /**
      * Returns the worst chromosome, i.e. the one with the lowest novelty/diversity score, from
      * the archive.
      *
+     * @param archiveNoveltyScores A mapping of chromosomes in the archive to its novelty score.
+     *
      * @return Returns the worst chromosome from the archive.
      */
-    private ChromosomeNoveltyTuple getWorstChromosomeOfArchive() {
+    private Map.Entry<IChromosome<T>, Double> getWorstChromosomeOfArchive(
+            Map<IChromosome<T>, Double> archiveNoveltyScores) {
 
-        if (archive.isEmpty()) {
+        if (archiveNoveltyScores.isEmpty()) {
             throw new IllegalStateException("Can't retrieve worst chromosome from empty archive!");
         }
 
-        Collections.sort(archive, new Comparator<ChromosomeNoveltyTuple>() {
-            @Override
-            public int compare(ChromosomeNoveltyTuple o1, ChromosomeNoveltyTuple o2) {
-                return Double.compare(o1.novelty, o2.novelty);
-            }
-        });
+        Map.Entry<IChromosome<T>, Double> worstChromosome = null;
 
-        // the worst chromosome comes first
-        return archive.get(0);
+        for (Map.Entry<IChromosome<T>, Double> chromosome : archiveNoveltyScores.entrySet()) {
+            if (worstChromosome == null) {
+                worstChromosome = chromosome;
+            } else if (chromosome.getValue() < worstChromosome.getValue()) {
+                // a lower novelty score is worse
+                worstChromosome = chromosome;
+            }
+        }
+
+        return worstChromosome;
     }
 
     /**
      * Represents the evolution process. In the context of Novelty Search, we stick here to
      * the procedure of a standard genetic algorithm. The only difference is that we update our
-     * archive accordingly.
+     * archive accordingly and that we use a specialised selection as well as fitness function.
      */
     @Override
     public void evolve() {
@@ -176,7 +248,9 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
         while (newGeneration.size() < bigPopulationSize) {
-            List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
+
+            List<IChromosome<T>> parents = noveltySelectionFunction.select(population, archive,
+                    nearestNeighbours, fitnessFunctions);
 
             IChromosome<T> parent;
 
@@ -199,7 +273,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                     break;
                 } else {
                     newGeneration.add(chromosome);
-                    updateArchive(chromosome);
+                    updateArchive(chromosome, newGeneration, archive);
                 }
             }
         }
@@ -213,57 +287,11 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         currentGenerationNumber++;
     }
 
-    /**
-     * Retrieves the chromosomes of the given archive.
-     *
-     * @param archive The given archive.
-     * @return Returns the chromosomes of the given archive.
-     */
-    private List<IChromosome<T>> getChromosomesOfArchive(List<ChromosomeNoveltyTuple> archive) {
-        List<IChromosome<T>> chromosomes = new LinkedList<>();
-        for (ChromosomeNoveltyTuple chromosome : archive) {
-            chromosomes.add(chromosome.chromosome);
-        }
-        return chromosomes;
+    // TODO: We can't use the default implementation, since the call to the fitness/novelty function
+    //  is different.
+    @Override
+    protected void logCurrentFitness() {
+
     }
 
-    /**
-     * Pairs a chromosome with its novelty/diversity value.
-     */
-    private class ChromosomeNoveltyTuple {
-
-        private final IChromosome<T> chromosome;
-        private final double novelty;
-
-        public ChromosomeNoveltyTuple(IChromosome<T> chromosome, double novelty) {
-            this.chromosome = chromosome;
-            this.novelty = novelty;
-        }
-
-        public IChromosome<T> getChromosome() {
-            return chromosome;
-        }
-
-        public double getNovelty() {
-            return novelty;
-        }
-
-        @Override
-        public String toString() {
-
-            int size = -1;
-
-            if (chromosome.getValue() instanceof TestCase) {
-                size = ((TestCase) chromosome.getValue()).getEventSequence().size();
-            } else if (chromosome.getValue() instanceof TestSuite) {
-                size = ((TestSuite) chromosome.getValue()).getTestCases().size();
-            }
-
-            return "ChromosomeNoveltyTuple{" +
-                    "chromosome=" + chromosome +
-                    ", novelty=" + novelty +
-                    ", size=" + size +
-                    '}';
-        }
-    }
 }

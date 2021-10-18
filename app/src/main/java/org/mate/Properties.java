@@ -164,7 +164,7 @@ public class Properties {
 
     /**
      * Indicates which objective should be used for the multi-/many-objective
-     * search, i.e. branches or lines.
+     * search, e.g. branches or lines.
      *
      * @return Returns the objective or {@code null} if none was specified.
      */

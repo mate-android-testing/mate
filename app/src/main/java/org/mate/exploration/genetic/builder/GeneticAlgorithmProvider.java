@@ -52,6 +52,7 @@ import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunct
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
+import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
@@ -305,6 +306,8 @@ public class GeneticAlgorithmProvider {
                     return new FitnessProportionateSelectionFunction<>();
                 case IDENTITY_SELECTION:
                     return new IdSelectionFunction<>();
+                case NOVELTY_RANK_SELECTION:
+                    return new NoveltyRankSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
@@ -439,7 +442,7 @@ public class GeneticAlgorithmProvider {
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
             case NOVELTY:
-                return (IFitnessFunction<T>) new NoveltyFitnessFunction<>();
+                return (IFitnessFunction<T>) new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

@@ -158,18 +158,19 @@ public class FitnessUtils {
     }
 
     /**
-     * Retrieves the novelty of the given chromosome.
+     * Retrieves the novelty vector for the chromosomes contained in the population and archive.
      *
-     * @param chromosome The given chromosome.
      * @param population The chromosomes in the current population.
      * @param archive The chromosomes in the current archive.
      * @param nearestNeighbours The number of nearest neighbours k that should be considered.
-     * @param <T> Specifies whether the chromosome is a test suite or a test case.
-     * @return Returns the novelty of the given chromosome.
+     * @param objectives The objectives type, e.g. branches.
+     * @param <T> Specifies the type of the chromosomes.
+     * @return Returns the novelty vector.
      */
-    public static <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
-                                        List<IChromosome<T>> archive, int nearestNeighbours) {
+    public static <T> List<Double> getNoveltyVector(List<IChromosome<T>> population,
+                                                List<IChromosome<T>> archive,
+                                                    int nearestNeighbours, String objectives) {
         return Registry.getEnvironmentManager()
-                .getNovelty(chromosome, population, archive, nearestNeighbours);
+                .getNoveltyVector(population, archive, nearestNeighbours, objectives);
     }
 }

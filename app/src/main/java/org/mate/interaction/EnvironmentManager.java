@@ -1216,38 +1216,37 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the novelty associated with the given chromosome. Note that
-     * {@link #storeFitnessData(IChromosome, String)} has to be called previously.
+     * Returns the novelty vector for the chromosomes contained in the population and in the archive.
+     * Note that {@link #storeFitnessData(IChromosome, String)} has to be called previously.
      *
-     * @param chromosome The given chromosome.
      * @param population The chromosomes in the current population.
      * @param archive The chromosomes in the current archive.
      * @param nearestNeighbours The number of nearest neighbours k that should be considered.
-     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
-     * @return Returns the novelty associated with the given chromosome.
+     * @param objectives The objectives type, e.g. branches.
+     * @param <T> Refers to the type of the chromosomes.
+     * @return Returns the novelty vector.
      */
-    public <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
-                                 List<IChromosome<T>> archive, int nearestNeighbours) {
+    public <T> List<Double> getNoveltyVector(List<IChromosome<T>> population,
+                                         List<IChromosome<T>> archive, int nearestNeighbours,
+                                             String objectives) {
 
-        if (chromosome.getValue() instanceof TestCase) {
-            if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve novelty of dummy test case...");
-                // a dummy test case has a novelty of 0.0 (0 is the worst in our case)
-                return 0.0;
-            }
-        }
-
-        String chromosomeId = getChromosomeId(chromosome);
-
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_novelty")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_novelty_vector")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("chromosome", chromosomeId)
                 .withParameter("population", getChromosomeIds(population))
                 .withParameter("archive", getChromosomeIds(archive))
-                .withParameter("nearestNeighbours", String.valueOf(nearestNeighbours));
+                .withParameter("nearestNeighbours", String.valueOf(nearestNeighbours))
+                .withParameter("objectives", objectives);
 
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("novelty"));
+
+        List<Double> noveltyVector = new ArrayList<>();
+        String[] noveltyScores = response.getParameter("novelty_vector").split("\\+");
+
+        for (String noveltyScore : noveltyScores) {
+            noveltyVector.add(Double.parseDouble(noveltyScore));
+        }
+
+        return noveltyVector;
     }
 
     /**

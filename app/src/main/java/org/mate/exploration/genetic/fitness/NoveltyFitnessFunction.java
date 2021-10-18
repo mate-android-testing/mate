@@ -7,15 +7,29 @@ import java.util.List;
 
 /**
  * Provides a fitness metric based on the novelty/diversity of a chromosome. This requires that the
- * AUT has been instrumented with the method coverage module.
+ * AUT has been instrumented with the respective coverage module.
  *
- * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
+ * @param <T> The type of the chromosome.
  */
 public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
 
     /**
+     * The underlying objectives, e.g. branches.
+     */
+    private final String objectives;
+
+    /**
+     * Initialises the novelty fitness function with the given objectives type.
+     *
+     * @param objectives The type of objectives, e.g. branches.
+     */
+    public NoveltyFitnessFunction(String objectives) {
+        this.objectives = objectives;
+    }
+
+    /**
      * The novelty fitness value can't be computed solely based on the given chromosome. Do not
-     * call this method, see {@link #getFitness(IChromosome, List, List, int)} for more information.
+     * call this method, see {@link #getFitness(List, List, int)} for more information.
      *
      * @param chromosome The given chromosome.
      * @return Returns an {@link UnsupportedOperationException}.
@@ -27,7 +41,7 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
 
     /**
      * The novelty fitness value can't be computed solely based on the given chromosome. Do not
-     * call this method, see {@link #getFitness(IChromosome, List, List, int)} for more information.
+     * call this method, see {@link #getFitness(List, List, int)} for more information.
      *
      * @param chromosome The given chromosome.
      * @return Returns an {@link UnsupportedOperationException}.
@@ -37,22 +51,27 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
         throw new UnsupportedOperationException("Do not call this method!");
     }
 
+    /**
+     * Returns whether this fitness function is maximising or minimising.
+     *
+     * @return Returns {@code true} since we aim for maximising novelty.
+     */
     @Override
     public boolean isMaximizing() {
         return true;
     }
 
     /**
-     * Computes the novelty of the given chromosome.
+     * Computes the novelty vector for the chromosomes contained in the either the population
+     * or the archive.
      *
-     * @param chromosome The given chromosome.
      * @param population The chromosomes in the current population.
      * @param archive The chromosomes in the current archive.
      * @param nearestNeighbours The number of nearest neighbours k.
-     * @return Returns the novelty of the given chromosome.
+     * @return Returns the novelty vector.
      */
-    public double getFitness(IChromosome<T> chromosome, List<IChromosome<T>> population,
+    public List<Double> getFitness(List<IChromosome<T>> population,
                              List<IChromosome<T>> archive, int nearestNeighbours) {
-        return FitnessUtils.getNovelty(chromosome, population, archive, nearestNeighbours);
+        return FitnessUtils.getNoveltyVector(population, archive, nearestNeighbours, objectives);
     }
 }
