@@ -29,6 +29,7 @@ import org.mate.utils.Utils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
@@ -625,7 +626,16 @@ public class DeviceMgr {
      * @return Returns a text input for the editable widget.
      */
     private String generateTextData(WidgetAction action) {
-
+        Widget widget = action.getWidget();
+        Random r = new Random();
+        double randomNumber = r.nextDouble();
+        //TOO
+        if(randomNumber<0.5){
+            return action.getWidget().getHint();
+        }
+        //TODO: make maxNumberMutation editable --> maybe a range from 0 - 5?
+        return mutateString(widget.getHint(),2);
+        /*
         Widget widget = action.getWidget();
 
         String widgetText = widget.getText();
@@ -670,7 +680,54 @@ public class DeviceMgr {
         }
 
         return getRandomData(inputType, maxLengthInt);
+        */
+
     }
+
+    private enum Mutation{
+        ADDITION,CHANGE,DELETE;
+        private static Mutation getRandomMutationType(){
+            Random r = new Random();
+            int randomNumber = r.nextInt(3);
+            if(randomNumber==0.5){
+                return ADDITION;
+            } else if (randomNumber == 1){
+                return CHANGE;
+            } else {
+                return DELETE;
+            }
+        }
+    }
+
+    private String mutateString(String hint, int maxNumberMutation){
+        StringBuilder stb = new StringBuilder(hint);
+        Random r = new Random();
+        for(int i = 0;i<maxNumberMutation;i++) {
+            Mutation mutation = Mutation.getRandomMutationType();
+            int randomNumber = r.nextInt(hint.length());
+            switch (mutation) {
+                case CHANGE:
+                    stb.replace(randomNumber, randomNumber + 1, generateRandomCharString(r));
+                    break;
+                case ADDITION:
+                    stb.replace(randomNumber, randomNumber, generateRandomCharString(r));
+                    break;
+                case DELETE:
+                    //TODO: What if stb.size() == 0?
+                    stb.replace(randomNumber, randomNumber + 1, "");
+                    break;
+                default:
+                    // TODO: Log message.
+                    return hint;
+            }
+        }
+        return stb.toString();
+    }
+
+    private String generateRandomCharString(Random r) {
+        return String.valueOf(((char) (r.nextInt(26) + 'a')));
+    }
+
 
     /**
      * Generates a random input for the given input type on a best effort basis.
