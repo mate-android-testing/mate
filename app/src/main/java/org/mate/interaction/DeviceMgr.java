@@ -399,6 +399,13 @@ public class DeviceMgr {
         } catch (IOException e) {
             MATE.log_error("Couldn't change rotation!");
             throw new IllegalStateException(e);
+        } finally {
+            /*
+            * After the rotation it takes some time that the device gets back in a stable state.
+            * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
+            * minimal waiting time to avoid this problem.
+             */
+            Utils.sleep(100);
         }
     }
 
