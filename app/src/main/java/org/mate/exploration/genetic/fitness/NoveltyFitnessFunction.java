@@ -62,8 +62,8 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
     }
 
     /**
-     * Computes the novelty vector for the chromosomes contained in the either the population
-     * or the archive.
+     * Computes the novelty vector for the chromosomes contained in the population and in the
+     * archive. Each novelty score is bounded in [0,1], where a higher novelty score is better.
      *
      * @param population The chromosomes in the current population.
      * @param archive The chromosomes in the current archive.
