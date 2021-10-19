@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.algorithm;
 import android.util.Pair;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -14,6 +15,8 @@ import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -287,11 +290,41 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         currentGenerationNumber++;
     }
 
-    // TODO: We can't use the default implementation, since the call to the fitness/novelty function
-    //  is different.
+    /**
+     * Logs the novelty of the chromosomes in the current population and the archive.
+     */
     @Override
     protected void logCurrentFitness() {
 
+        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
+
+        List<Double> noveltyVector = noveltyFitnessFunction.getFitness(population, archive, nearestNeighbours);
+        Pair<List<Double>, List<Double>> noveltyVectorPair
+                = getNoveltyScoresOfPopulationAndArchive(noveltyVector, population.size());
+
+        Map<IChromosome<T>, Double> populationNoveltyScores = convertToMap(population, noveltyVectorPair.first);
+        Map<IChromosome<T>, Double> archiveNoveltyScores = convertToMap(archive, noveltyVectorPair.second);
+
+        MATE.log_acc("Novelty of chromosomes in population: ");
+
+        for (Map.Entry<IChromosome<T>, Double> chromosome : populationNoveltyScores.entrySet()) {
+            MATE.log_acc("Chromosome " + chromosome.getKey() + ": " + chromosome.getValue());
+        }
+
+        MATE.log_acc("Novelty of chromosomes in archive: ");
+
+        for (Map.Entry<IChromosome<T>, Double> chromosome : archiveNoveltyScores.entrySet()) {
+            MATE.log_acc("Chromosome " + chromosome.getKey() + ": " + chromosome.getValue());
+        }
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            MATE.log_acc("Combined coverage until now: "
+                    + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
+            if (population.size() <= 10) {
+                MATE.log_acc("Combined coverage of current population: "
+                        + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
+            }
+        }
     }
 
 }
