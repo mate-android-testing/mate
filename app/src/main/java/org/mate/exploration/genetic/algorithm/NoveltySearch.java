@@ -147,7 +147,6 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         }
 
         List<Double> noveltyVector = noveltyFitnessFunction.getFitness(population, archive, nearestNeighbours);
-        MATE.log_acc("Novelty of chromosomes: " + noveltyVector);
 
         Pair<List<Double>, List<Double>> noveltyVectorPair
                 = getNoveltyScoresOfPopulationAndArchive(noveltyVector, population.size());
