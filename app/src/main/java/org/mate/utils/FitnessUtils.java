@@ -12,6 +12,10 @@ import org.mate.utils.coverage.Coverage;
 import java.util.EnumSet;
 import java.util.List;
 
+/**
+ * A utility class for handling any kind of fitness request, i.e. storing, copying and retrieving
+ * fitness data.
+ */
 public class FitnessUtils {
 
     private FitnessUtils() {
