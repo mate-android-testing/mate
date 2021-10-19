@@ -13,6 +13,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
+import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,12 +77,14 @@ public class AppScreen {
                 .getUiAutomation().getRootInActiveWindow();
 
         if (rootNode == null) {
+
             /*
-            * TODO: Check whether this is the expected behaviour. I would rather assume that
-            *  the UIAutomator throws an exception and we can't react it properly, similar
-            *  to what can happen when executing an action in the DeviceMgr.
+             * It can happen that the device is in an unstable state and hence the UIAutomator
+             * connection may get lost. In this case, we should wait some time until we try to
+             * re-connect.
              */
             MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+            Utils.sleep(1000);
 
             // try to reconnect
             rootNode = InstrumentationRegistry.getInstrumentation()
