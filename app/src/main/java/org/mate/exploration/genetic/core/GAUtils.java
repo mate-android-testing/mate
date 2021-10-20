@@ -189,4 +189,34 @@ public class GAUtils {
 
         return best;
     }
+
+    /**
+     * Sorts the chromosomes based on its fitness values. Considers whether the underlying
+     * fitness is minimising or maximising. NOTE: This function sorts the chromosomes in place.
+     *
+     * @param chromosomes The given list of chromosomes to be sorted.
+     * @param fitnessFunction The given fitness function.
+     * @param <T> The type of the chromosomes.
+     * @return Returns the chromosomes sorted based on its fitness values.
+     */
+    public static <T> List<IChromosome<T>> sortByFitness(List<IChromosome<T>> chromosomes,
+                                                         final IFitnessFunction<T> fitnessFunction) {
+
+        final boolean isMaximizing = fitnessFunction.isMaximizing();
+        Collections.sort(chromosomes, new Comparator<IChromosome<T>>() {
+            @Override
+            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
+                double fitnessChromosome1 = fitnessFunction.getNormalizedFitness(o1);
+                double fitnessChromosome2 = fitnessFunction.getNormalizedFitness(o2);
+
+                if (isMaximizing) {
+                    return Double.compare(fitnessChromosome1, fitnessChromosome2);
+                } else {
+                    return Double.compare(fitnessChromosome2, fitnessChromosome1);
+                }
+            }
+        });
+
+        return chromosomes;
+    }
 }

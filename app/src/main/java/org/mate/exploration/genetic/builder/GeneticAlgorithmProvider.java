@@ -51,6 +51,7 @@ import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.selection.RankSelectionFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.selection.TournamentSelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
@@ -242,6 +243,8 @@ public class GeneticAlgorithmProvider {
                     return new IdSelectionFunction<>();
                 case TOURNAMENT_SELECTION:
                     return new TournamentSelectionFunction<>(getTournamentSize());
+                case RANK_SELECTION:
+                    return new RankSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);

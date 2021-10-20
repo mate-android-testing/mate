@@ -158,6 +158,8 @@ public class Properties {
 
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
+    public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
+
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
