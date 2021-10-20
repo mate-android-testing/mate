@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides a fitness metric based on branch coverage for multi-objective algorithms. This
+ * Provides a fitness metric based on 'branch coverage' for multi-objective algorithms. This
  * requires that the AUT has been instrumented with the branch coverage module. A fitness
  * value of '1' indicates that the branch has been covered, '0' indicates non-covered.
  *
@@ -48,22 +48,27 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double branchFitnessValue;
+        if (!cache.get(branch).containsKey(chromosome)) {
 
-        if (cache.get(branch).containsKey(chromosome)) {
-            branchFitnessValue = cache.get(branch).get(chromosome);
-        } else {
             // retrieves the fitness value for every single branch
             List<Double> branchFitnessVector = FitnessUtils.getFitness(chromosome, branches);
 
-            // insert them into the cache
+            // update the cache
             for (int i = 0; i < branchFitnessVector.size(); i++) {
                 cache.get(branches.get(i)).put(chromosome, branchFitnessVector.get(i));
             }
-
-            branchFitnessValue = cache.get(branch).get(chromosome);
         }
 
-        return branchFitnessValue;
+        return cache.get(branch).get(chromosome);
+    }
+
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome);
     }
 }

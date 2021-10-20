@@ -19,4 +19,14 @@ public class SpecificActivityCoveredFitnessFunction implements IFitnessFunction<
             return 0;
         }
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
+        return getFitness(chromosome);
+    }
 }

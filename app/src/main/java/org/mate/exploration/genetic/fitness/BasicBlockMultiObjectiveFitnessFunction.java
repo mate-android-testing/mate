@@ -66,4 +66,14 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
 
         return basicBlockFitnessValue;
     }
+
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome);
+    }
 }

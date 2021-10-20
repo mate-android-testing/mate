@@ -1,5 +1,10 @@
 package org.mate.interaction;
 
+import android.app.Instrumentation;
+import android.os.Build;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -11,8 +16,8 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.Coverage;
 import org.mate.utils.Objective;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -32,7 +37,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.1";
+    private static final String MESSAGE_PROTOCOL_VERSION = "2.3";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -221,10 +226,10 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases The test cases belonging to the source chromosome.
+     * @param testCases        The test cases belonging to the source chromosome.
      */
     public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
-                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+                                IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -260,7 +265,7 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases The test cases belonging to the source chromosome.
+     * @param testCases        The test cases belonging to the source chromosome.
      */
     public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
                                  IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
@@ -337,15 +342,20 @@ public class EnvironmentManager {
 
         MATE.log_acc("Getting objectives...!");
 
+        List<String> objectives;
+
         if (objective == Objective.LINES) {
-            return getSourceLines();
+            objectives = getSourceLines();
         } else if (objective == Objective.BRANCHES) {
-            return getBranches();
+            objectives = getBranches();
         } else if (objective == Objective.BLOCKS) {
-            return getBasicBlocks();
+            objectives =  getBasicBlocks();
+        } else {
+            throw new UnsupportedOperationException("Objective " + objective + " not yet supported!");
         }
 
-        throw new UnsupportedOperationException("Objective not yet supported!");
+        MATE.log_acc("Number of objectives: " + objectives.size());
+        return objectives;
     }
 
     /**
@@ -415,10 +425,24 @@ public class EnvironmentManager {
      * @param packageName The app that requires the permissions.
      * @return Returns {@code true} if the granting permissions succeeded, otherwise {@code false}.
      */
-    // TODO: use InstrumentationRegistry.getInstrumentation().getUiAutomation().grantRuntimePermission()
+    @SuppressWarnings("unused")
     public boolean grantRuntimePermissions(String packageName) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/grant_runtime_permissions")
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        UiDevice device = UiDevice.getInstance(instrumentation);
+
+        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
+        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+        // this method is far faster than the request via the server
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
+            return true;
+        }
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName);
         Message response = sendMessage(messageBuilder.build());
@@ -456,9 +480,7 @@ public class EnvironmentManager {
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
-        }
-
-        if (graphType == GraphType.INTER_CFG) {
+        } else if (graphType == GraphType.INTER_CFG) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
             messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
@@ -500,8 +522,8 @@ public class EnvironmentManager {
      * Stores the fitness data for the given chromosome.
      *
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
-     *                     otherwise {@code null}.
+     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
+     *                   otherwise {@code null}.
      */
     public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId) {
 
@@ -554,8 +576,8 @@ public class EnvironmentManager {
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance of dummy test case...");
-                // a dummy test case has a branch distance of 0.0 (0 is the worst in our case)
-                return 0.0;
+                // a dummy test case has a branch distance of 1.0 (worst value)
+                return 1.0;
             }
         }
 
@@ -660,8 +682,8 @@ public class EnvironmentManager {
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
-                // a dummy test case has a branch distance of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(objectives.size(), 0.0);
+                // a dummy test case has a branch distance of 1.0 (worst value) for each objective
+                return Collections.nCopies(objectives.size(), 1.0);
             }
         }
 
@@ -685,7 +707,7 @@ public class EnvironmentManager {
     /**
      * Returns the list of source lines of the AUT. A single
      * source line has the following format:
-     *      package name + class name + line number
+     * package name + class name + line number
      *
      * @return Returns the sources lines of the AUT.
      */
@@ -740,10 +762,10 @@ public class EnvironmentManager {
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
-     *                     otherwise {@code null}.
+     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
+     *                   otherwise {@code null}.
      */
     public <T> void storeCoverageData(Coverage coverage, IChromosome<T> chromosome, String entityId) {
 
@@ -837,9 +859,9 @@ public class EnvironmentManager {
      * A convenient function to retrieve the coverage of a single test case within
      * a test suite.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
      * @param testSuiteId Identifies the test suite.
-     * @param testCaseId Identifies the individual test case.
+     * @param testCaseId  Identifies the individual test case.
      * @return Returns the coverage of the given test case.
      */
     public double getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
@@ -878,7 +900,7 @@ public class EnvironmentManager {
      * Convenient function to request the coverage information for a given chromosome.
      * A chromosome can be either a test case or a test suite.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the coverage of the given test case.
      */
@@ -908,8 +930,8 @@ public class EnvironmentManager {
      * where each entry indicates to which degree the line was covered.
      *
      * @param chromosome The given chromosome.
-     * @param lines The lines for which coverage should be retrieved.
-     * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
+     * @param lines      The lines for which coverage should be retrieved.
+     * @param <T>        Indicates the type of the chromosome, i.e. test case or test suite.
      * @return Returns line percentage coverage vector.
      */
     public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
@@ -981,7 +1003,7 @@ public class EnvironmentManager {
      * Records a screenshot.
      *
      * @param packageName The package name of the AUT.
-     * @param nodeId Some id of the screen state.
+     * @param nodeId      Some id of the screen state.
      */
     public void takeScreenshot(String packageName, String nodeId) {
 
@@ -997,9 +1019,9 @@ public class EnvironmentManager {
      * Checks whether a flickering of a screen state can be detected.
      *
      * @param packageName The package name of the screen state.
-     * @param stateId Identifies the screen state.
+     * @param stateId     Identifies the screen state.
      * @return Returns {@code true} if flickering was detected, otherwise
-     *          {@code false} is returned.
+     * {@code false} is returned.
      */
     public boolean checkForFlickering(String packageName, String stateId) {
 
@@ -1028,8 +1050,8 @@ public class EnvironmentManager {
      * Another accessibility function.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId The id of the screen state.
-     * @param widget The widget for which this metric should be evaluated.
+     * @param stateId     The id of the screen state.
+     * @param widget      The widget for which this metric should be evaluated.
      * @return Returns ...
      */
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget) {
@@ -1050,8 +1072,8 @@ public class EnvironmentManager {
      * Retrieves the contrast ratio of the widget residing on the screen state.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId Identifies the screens state.
-     * @param widget The widget on which the contrast ratio should be evaluated.
+     * @param stateId     Identifies the screens state.
+     * @param widget      The widget on which the contrast ratio should be evaluated.
      * @return Returns the contrast ratio.
      */
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
@@ -1095,8 +1117,8 @@ public class EnvironmentManager {
      * Gets the luminance of the given widget.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId Identifies the screens state.
-     * @param widget The widget on which the contrast ratio should be evaluated.
+     * @param stateId     Identifies the screens state.
+     * @param widget      The widget on which the contrast ratio should be evaluated.
      * @return Returns the luminance of the given widget.
      */
     public String getLuminance(String packageName, String stateId, Widget widget) {
@@ -1140,7 +1162,9 @@ public class EnvironmentManager {
 
     /**
      * Rotates the emulator into portrait mode.
+     * NOTE: The rotation operations are now directly performed by MATE itself.
      */
+    @SuppressWarnings("unused")
     public void setPortraitMode() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
@@ -1155,7 +1179,9 @@ public class EnvironmentManager {
 
     /**
      * Toggles rotation.
+     * NOTE: The rotation operations are now directly performed by MATE itself.
      */
+    @SuppressWarnings("unused")
     public void toggleRotation() {
         Message response = sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
@@ -1171,7 +1197,7 @@ public class EnvironmentManager {
      * Returns the chromosome id of the given chromosome.
      *
      * @param chromosome The chromosome.
-     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
+     * @param <T>        Refers either to a {@link TestCase} or a {@link TestSuite}.
      * @return Returns the chromosome id of the given chromosome.
      */
     private <T> String getChromosomeId(IChromosome<T> chromosome) {

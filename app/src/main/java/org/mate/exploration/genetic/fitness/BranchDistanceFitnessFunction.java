@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.utils.FitnessUtils;
@@ -9,8 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides a fitness metric based on branch distance. This requires that the
- * AUT has been instrumented with the branch distance  module.
+ * Provides a fitness metric based on approach level + branch distance. This requires that the
+ * AUT has been instrumented with the branch distance module. The fitness value is already
+ * normalised in the range [0,1].
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
@@ -31,26 +31,34 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
         double branchDistance;
 
         if (cache.containsKey(chromosome)) {
-            MATE.log_acc("Accessing cache for retrieving fitness value!");
             branchDistance = cache.get(chromosome);
         } else {
             branchDistance = FitnessUtils.getFitness(chromosome);
         }
-        
+
         /*
-        * TODO: This is a side effect, which is triggered multiple times, e.g. by logFitness().
-        *  Additionally, the decision when a 'target' is satisfied might depend on the
-        *  algorithm in use. Thus, a better option is to move this functionality. However, be
-        *  aware that the initial population can also satisfy this condition.
+         * TODO: This is a side effect, which is triggered multiple times, e.g. by logFitness().
+         *  Additionally, the decision when a 'target' is satisfied might depend on the
+         *  algorithm in use. Thus, a better option is to move this functionality. However, be
+         *  aware that the initial population can also satisfy this condition.
          */
         // we can end execution if we covered the target vertex
-        if (branchDistance == 1.0) {
+        if (branchDistance == 0.0) {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
         // cache fitness value for subsequent requests
         cache.put(chromosome, branchDistance);
-
         return branchDistance;
+    }
+
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome);
     }
 }

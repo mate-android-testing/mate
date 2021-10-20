@@ -9,9 +9,9 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
+import org.mate.utils.Randomness;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
-import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,5 +167,4 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
     }
-
 }

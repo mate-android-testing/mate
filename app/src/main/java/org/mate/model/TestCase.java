@@ -10,11 +10,11 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
-import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -145,7 +145,6 @@ public class TestCase {
      * of a test case (if desired), the recording of test case stats (if desired)
      * and so on.
      */
-    // TODO: ensure that finish() is properly called after each test case
     public void finish() {
         MATE.log("Finishing test case!");
 
@@ -160,11 +159,6 @@ public class TestCase {
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
         }
-
-        MATE.log("Visited activities in order: " + activitySequence);
-
-        // TODO: ensure that this log only appears here -> required for analysis framework
-        MATE.log("Visited activities: " + getVisitedActivities());
 
         // TODO: log the test case actions in a proper format
     }
@@ -188,6 +182,16 @@ public class TestCase {
     public String getActivityAfterAction(int actionIndex) {
         // the activity sequence models a 'activity-before-action' relation
         return activitySequence.get(actionIndex + 1);
+    }
+
+    /**
+     * Returns the activity sequence (in order) that has been covered through the execution
+     * of the test case actions.
+     *
+     * @return Returns the activity sequence in the order they have been visited.
+     */
+    public List<String> getActivitySequence() {
+        return activitySequence;
     }
 
     /**

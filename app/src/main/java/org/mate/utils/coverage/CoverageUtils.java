@@ -35,24 +35,24 @@ public class CoverageUtils {
     public static void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
                                         IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
+        /*
+         * We store (here copy) data about activity coverage in any case.
+         * Since we request the activity coverage from the coverage map, we need to
+         * keep it up-to-date. Note that we assume that there is no coverage data
+         * for the target chromosome present yet.
+         */
+        Set<String> visitedActivitiesOfTestCases = new HashSet<>();
+        for (TestCase testCase : testCases) {
+            visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
+        }
+
+        if (visitedActivities.containsKey(targetChromosome)) {
+            MATE.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
+        }
+
+        visitedActivities.put(targetChromosome, visitedActivitiesOfTestCases);
+
         switch (Properties.COVERAGE()) {
-            case ACTIVITY_COVERAGE:
-                /*
-                * Since we request the activity coverage from the coverage map, we need to
-                * keep it up-to-date. Note that we assume that there is no coverage data
-                * for the target chromosome present yet.
-                 */
-                Set<String> visitedActivitiesOfTestCases = new HashSet<>();
-                for (TestCase testCase : testCases) {
-                    visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
-                }
-
-                if (visitedActivities.containsKey(targetChromosome)) {
-                    MATE.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
-                }
-
-                visitedActivities.put(targetChromosome, visitedActivitiesOfTestCases);
-                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -90,10 +90,10 @@ public class CoverageUtils {
      */
     public static void storeTestCaseChromosomeCoverage(IChromosome<TestCase> chromosome) {
 
+        // store data about activity coverage in any case
+        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
+
         switch (Properties.COVERAGE()) {
-            case ACTIVITY_COVERAGE:
-                visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
-                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -116,23 +116,23 @@ public class CoverageUtils {
     public static void storeTestSuiteChromosomeCoverage(
             IChromosome<TestSuite> chromosome, TestCase testCase) {
 
+        /*
+         * We store data about activity coverage in any case. In particular,
+         * we store here the activity coverage per test suite, not per test case.
+         * This simplifies the implementation. In case someone needs access to the
+         * coverage of the individual test cases, one has to iterate over the
+         * test cases manually.
+         */
+        Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
+
+        // merge with already visited activities of other test cases in the test suite
+        if (visitedActivities.containsKey(chromosome)) {
+            visitedActivitiesByTestCase.addAll(visitedActivities.get(chromosome));
+        }
+
+        visitedActivities.put(chromosome, visitedActivitiesByTestCase);
+
         switch (Properties.COVERAGE()) {
-            case ACTIVITY_COVERAGE:
-                /*
-                * We store here the activity coverage per test suite, not per test case.
-                * This simplifies the implementation. In case someone needs access to the
-                * coverage of the individual test cases, one has to iterate over the
-                * test cases manually.
-                 */
-                Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
-
-                // merge with already visited activities of other test cases in the test suite
-                if (visitedActivities.containsKey(chromosome)) {
-                    visitedActivitiesByTestCase.addAll(visitedActivities.get(chromosome));
-                }
-
-                visitedActivities.put(chromosome, visitedActivitiesByTestCase);
-                break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -147,6 +147,17 @@ public class CoverageUtils {
     }
 
     /**
+     * Returns the activity coverage for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the activity coverage should be evaluated.
+     * @param <T> Refers either to a test case or a test suite.
+     * @return Returns the activity coverage of the given chromosome.
+     */
+    private static <T> double getActivityCoverage(IChromosome<T> chromosome) {
+        return (double) visitedActivities.get(chromosome).size() / getActivities().size() * 100;
+    }
+
+    /**
      * Log the coverage value of the given chromosome
      *
      * @param chromosome log coverage for this chromosome
@@ -154,18 +165,16 @@ public class CoverageUtils {
      */
     public static <T> void logChromosomeCoverage(IChromosome<T> chromosome) {
 
+        if (!visitedActivities.containsKey(chromosome)) {
+            throw new IllegalStateException("No visited activities for chromosome "
+                    + chromosome + "!");
+        }
+
         switch (Properties.COVERAGE()) {
             case ACTIVITY_COVERAGE:
 
-                if (!visitedActivities.containsKey(chromosome)) {
-                    throw new IllegalStateException("No visited activities for chromosome "
-                            + chromosome + "!");
-                }
-
-                double activityCoverage = (double) visitedActivities.get(chromosome).size()
-                        / getActivities().size() * 100;
                 MATE.log("Coverage of chromosome "
-                        + chromosome.getValue().toString() + ": " + activityCoverage);
+                        + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
 
                 if (chromosome.getValue() instanceof TestSuite) {
                     for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
@@ -173,13 +182,17 @@ public class CoverageUtils {
                                 + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
                     }
                 }
-
                 break;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
+
+                // log activity coverage in any cse
+                MATE.log("Activity coverage of chromosome "
+                        + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
+
                 MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(), chromosome));
@@ -216,6 +229,10 @@ public class CoverageUtils {
         // get combined coverage
         MATE.log_acc("Total coverage: " + getCombinedCoverage(Properties.COVERAGE()));
 
+        if (Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+            MATE.log_acc("Total activity coverage: " + getCombinedCoverage(Coverage.ACTIVITY_COVERAGE));
+        }
+
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
 
             Set<String> visitedActivitiesTotal = new HashSet<>();
@@ -224,7 +241,7 @@ public class CoverageUtils {
                 visitedActivitiesTotal.addAll(activities);
             }
 
-            MATE.log_acc("Visited Activities: ");
+            MATE.log_acc("Total visited activities: ");
             for (String activity : visitedActivitiesTotal) {
                     MATE.log_acc(activity);
             }
@@ -239,7 +256,7 @@ public class CoverageUtils {
      */
     public static double getCombinedCoverage(Coverage coverage) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
                 Set<String> visitedActivitiesTotal = new HashSet<>();
 
@@ -270,7 +287,7 @@ public class CoverageUtils {
      */
     public static <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
                 Set<String> visitedActivitiesTotal = new HashSet<>();
 
@@ -306,7 +323,7 @@ public class CoverageUtils {
      */
     public static double getCoverage(Coverage coverage, IChromosome<TestSuite> testSuite, TestCase testCase) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
 
             case ACTIVITY_COVERAGE:
                 /*
@@ -336,7 +353,7 @@ public class CoverageUtils {
      */
     public static <T> double getCoverage(Coverage coverage, IChromosome<T> chromosome) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
 
                 if (!visitedActivities.containsKey(chromosome)) {

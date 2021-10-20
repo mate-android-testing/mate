@@ -46,6 +46,12 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<WidgetAction> getWidgetActions() {
+
+        // actions get init lazily
+        if (actions == null) {
+            actions = getActions();
+        }
+
         List<WidgetAction> widgetActions = new ArrayList<>();
         for (UIAction uiAction : actions) {
             if (uiAction instanceof WidgetAction) {
@@ -364,8 +370,8 @@ public class ActionsScreenState extends AbstractScreenState {
         uiActions.add(new UIAction(ActionType.SEARCH, activityName));
         // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
         // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
-        uiActions.add(new UIAction(ActionType.SLEEP, activityName));
-        uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
+        // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
+        // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
         uiActions.add(new UIAction(ActionType.DELETE, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));

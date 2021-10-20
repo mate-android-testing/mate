@@ -21,7 +21,16 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
-        // TODO: normalise fitness value in the range [0,1]
         return branchCoverage;
+    }
+
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome) / 100;
     }
 }
