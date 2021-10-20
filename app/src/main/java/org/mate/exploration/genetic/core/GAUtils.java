@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -146,5 +147,46 @@ public class GAUtils {
             }
         }
         return paretoFront;
+    }
+
+    /**
+     * Retrieves the best chromosome from the list of chromosomes according to the given fitness function.
+     *
+     * @param chromosomes A non-empty list of chromosomes.
+     * @param fitnessFunction The given fitness function.
+     * @param <T> The type of the chromosomes.
+     * @return Returns the best chromosome from the given list of chromosomes.
+     */
+    public static <T> IChromosome<T> getBest(List<IChromosome<T>> chromosomes, IFitnessFunction<T> fitnessFunction) {
+
+        if (chromosomes.isEmpty()) {
+            throw new IllegalStateException("Can't retrieve best chromosome from empty list!");
+        }
+
+        // cache the fitness values
+        Map<IChromosome<T>, Double> cache = new HashMap<>();
+
+        final boolean isMaximizing = fitnessFunction.isMaximizing();
+        IChromosome<T> best = null;
+
+        for (IChromosome<T> chromosome : chromosomes) {
+
+            if (best == null) {
+                best = chromosome;
+                cache.put(best, fitnessFunction.getNormalizedFitness(best));
+            } else {
+
+                double bestFitness = cache.get(best);
+                double fitness = cache.containsKey(chromosome)
+                        ? cache.get(chromosome) : fitnessFunction.getNormalizedFitness(chromosome);
+                cache.put(chromosome, fitness);
+
+                if (isMaximizing ? fitness > bestFitness : fitness < bestFitness) {
+                    best = chromosome;
+                }
+            }
+        }
+
+        return best;
     }
 }

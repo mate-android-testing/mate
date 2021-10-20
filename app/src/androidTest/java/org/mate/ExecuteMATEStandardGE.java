@@ -26,7 +26,7 @@ import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
 public class ExecuteMATEStandardGE {
 
     @Test
-    public void useAppContext() throws Exception {
+    public void useAppContext() {
         MATE.log_acc("Starting Standard GE Algorithm...");
 
         MATE mate = new MATE();

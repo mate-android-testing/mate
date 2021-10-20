@@ -52,6 +52,7 @@ import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.selection.TournamentSelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
@@ -239,6 +240,8 @@ public class GeneticAlgorithmProvider {
                     return new FitnessProportionateSelectionFunction<>();
                 case IDENTITY_SELECTION:
                     return new IdSelectionFunction<>();
+                case TOURNAMENT_SELECTION:
+                    return new TournamentSelectionFunction<>(getTournamentSize());
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
@@ -563,6 +566,20 @@ public class GeneticAlgorithmProvider {
             }
         } else {
             return Integer.valueOf(mutationRate);
+        }
+    }
+
+    /**
+     * Returns the tournament size used for tournament selection.
+     *
+     * @return Returns the tournament size.
+     */
+    private int getTournamentSize() {
+        if (useDefaults) {
+            return org.mate.Properties.TOURNAMENT_SIZE();
+        } else {
+            throw new IllegalStateException(
+                    "Without using defaults: tournament size not specified");
         }
     }
 }
