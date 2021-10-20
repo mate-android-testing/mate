@@ -31,6 +31,21 @@ public class TestSuite {
         return testCases;
     }
 
+    /**
+     * Checks whether any of the test cases of the test suite produced a crash.
+     *
+     * @return Returns {@code true} if the test suite produced a crash, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean getCrashDetected() {
+        for (TestCase testCase : testCases) {
+            if (testCase.getCrashDetected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return id;
