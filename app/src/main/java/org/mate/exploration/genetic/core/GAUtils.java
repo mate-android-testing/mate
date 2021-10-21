@@ -191,8 +191,9 @@ public class GAUtils {
     }
 
     /**
-     * Sorts the chromosomes based on its fitness values. Considers whether the underlying
-     * fitness is minimising or maximising. NOTE: This function sorts the chromosomes in place.
+     * Sorts the chromosomes based on its fitness values in ascending order, i.e. the chromosome with
+     * the worst fitness value comes first, followed by the second worst chromosome and so on.
+     * NOTE: This method sorts the chromosomes in place.
      *
      * @param chromosomes The given list of chromosomes to be sorted.
      * @param fitnessFunction The given fitness function.
