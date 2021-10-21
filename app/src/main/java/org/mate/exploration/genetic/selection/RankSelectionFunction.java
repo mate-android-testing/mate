@@ -33,8 +33,9 @@ public class RankSelectionFunction<T> implements ISelectionFunction<T> {
 
         List<IChromosome<T>> selection = new ArrayList<>();
         List<IChromosome<T>> candidates = new LinkedList<>(population);
+        int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
 
-        for (int i = 0; i < Properties.DEFAULT_SELECTION_SIZE(); i++) {
+        for (int i = 0; i < size; i++) {
 
             /*
             * We shuffle the list that chromosomes with an identical fitness value get a 'fair'

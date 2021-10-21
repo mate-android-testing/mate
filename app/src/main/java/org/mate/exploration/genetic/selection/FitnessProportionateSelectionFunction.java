@@ -34,8 +34,9 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
 
         List<IChromosome<T>> selection = new ArrayList<>();
         List<IChromosome<T>> candidates = new LinkedList<>(population);
+        int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
 
-        for (int i = 0; i < Properties.DEFAULT_SELECTION_SIZE(); i++) {
+        for (int i = 0; i < size; i++) {
 
             /*
             * Constructs the roulette wheel. Each chromosome is assigned a range proportionate
