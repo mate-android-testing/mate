@@ -13,6 +13,10 @@ import java.util.Map;
 
 import static org.mate.utils.MathUtils.isEpsEq;
 
+/**
+ * Provides utility functions in the context genetic algorithms, e.g. retrieving the best individual
+ * of a population or sorting a population based on their fitness values.
+ */
 public class GAUtils {
 
     public static <T> void updateCrowdingDistance(List<IChromosome<T>> paretoFront,
