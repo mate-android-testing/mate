@@ -49,7 +49,6 @@ import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
-import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.selection.RankSelectionFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
@@ -239,8 +238,6 @@ public class GeneticAlgorithmProvider {
                     return new RandomSelectionFunction<>();
                 case FITNESS_PROPORTIONATE_SELECTION:
                     return new FitnessProportionateSelectionFunction<>();
-                case IDENTITY_SELECTION:
-                    return new IdSelectionFunction<>();
                 case TOURNAMENT_SELECTION:
                     return new TournamentSelectionFunction<>(getTournamentSize());
                 case RANK_SELECTION:
