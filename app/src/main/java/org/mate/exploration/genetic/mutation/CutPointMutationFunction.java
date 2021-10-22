@@ -11,44 +11,69 @@ import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Provides a cut point mutation function for {@link TestCase}s. Only applicable in combination
+ * with {@link UIAction}s.
+ */
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
-    private UIAbstractionLayer uiAbstractionLayer;
-    private int maxNumEvents;
+    /**
+     * Provides primarily information about the current screen.
+     */
+    private final UIAbstractionLayer uiAbstractionLayer;
 
+    /**
+     * The maximal number of actions per test case.
+     */
+    private final int maxNumEvents;
+
+    /**
+     * Whether we deal with a test suite execution, i.e. whether the used chromosome factory
+     * produces {@link org.mate.model.TestSuite}s or not.
+     */
     private boolean isTestSuiteExecution = false;
 
+    /**
+     * Initialises the cut point mutation function.
+     *
+     * @param maxNumEvents The maximal number of actions per test case.
+     */
     public CutPointMutationFunction(int maxNumEvents) {
         this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
     }
 
     // TODO: might be replaceable with chromosome factory property in the future
+    /**
+     * Defines whether we deal with a test suite execution or not.
+     *
+     * @param testSuiteExecution Indicates if we deal with a test suite execution or not.
+     */
     public void setTestSuiteExecution(boolean testSuiteExecution) {
         this.isTestSuiteExecution = testSuiteExecution;
     }
 
+    /**
+     * Performs a cut point mutation. First, the given test case is split at a chosen cut point.
+     * Then, the mutated test case is filled with the original actions up to the cut point and
+     * from the cut point onwards with random actions.
+     *
+     * @param chromosome The chromosome to be mutated.
+     * @return Returns the mutated chromosome.
+     */
     @Override
-    public List<IChromosome<TestCase>> mutate(IChromosome<TestCase> chromosome) {
+    public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome) {
+
         uiAbstractionLayer.resetApp();
-
-        List<IChromosome<TestCase>> mutations = new ArrayList<>();
-
         int cutPoint = chooseCutPoint(chromosome.getValue());
 
         TestCase mutant = TestCase.newInitializedTestCase();
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
 
-        mutations.add(mutatedChromosome);
-
         try {
             for (int i = 0; i < maxNumEvents; i++) {
                 UIAction newAction;
                 if (i < cutPoint) {
-                    //Todo: highlight that this class can only be used for widget based execution
                     newAction = (UIAction) chromosome.getValue().getEventSequence().get(i);
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
@@ -72,9 +97,15 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         }
 
-        return mutations;
+        return mutatedChromosome;
     }
 
+    /**
+     * Chooses a random cut point in the action sequence of the given test case.
+     *
+     * @param testCase The given test case.
+     * @return Returns the selected cut point.
+     */
     private int chooseCutPoint(TestCase testCase) {
         if (testCase.getEventSequence().isEmpty()) {
             MATE.log_warn("Choosing cut point from empty test case " + testCase + "!");

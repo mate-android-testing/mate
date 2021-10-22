@@ -1,5 +1,8 @@
 package org.mate.exploration.genetic.mutation;
 
+/**
+ * The set of supported mutation functions.
+ */
 public enum MutationFunction {
 
     TEST_CASE_CUT_POINT_MUTATION,

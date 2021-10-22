@@ -265,8 +265,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
 
             // sample up to m mutants from the same base chromosome
             for (int i = 0; i < mutationRate; i++) {
-                List<IChromosome<T>> mutants = mutationFunction.mutate(chromosome);
-                IChromosome<T> mutant = mutants.get(0);
+                IChromosome<T> mutant = mutationFunction.mutate(chromosome);
                 population.add(mutant);
                 MATE.log_acc("Sampled mutant " + mutant + "!");
             }

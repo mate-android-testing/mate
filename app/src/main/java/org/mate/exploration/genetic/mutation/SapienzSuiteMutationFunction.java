@@ -6,21 +6,42 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.Coverage;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Provides a mutation operator as defined in the Sapienz paper, see
+ * https://discovery.ucl.ac.uk/id/eprint/1508043/1/p_issta16_sapienz.pdf. In particular, have
+ * a look at section 3.1 and Algorithm 2.
+ */
 public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
 
+    /**
+     * The probability for mutation.
+     */
     private final double pMutate;
+
+    /**
+     * The inner-individual crossover operator as described in section 3.1.
+     */
     private final TestCaseMergeCrossOverFunction testCaseMergeCrossOverFunction;
+
+    /**
+     * The inner-individual mutation operator as described in section 3.1.
+     */
     private final TestCaseShuffleMutationFunction testCaseShuffleMutationFunction;
 
+    /**
+     * Initialises the mutation function.
+     *
+     * @param pMutate The probability for mutation.
+     */
     public SapienzSuiteMutationFunction(double pMutate) {
         this.pMutate = pMutate;
         testCaseMergeCrossOverFunction = new TestCaseMergeCrossOverFunction();
@@ -29,12 +50,17 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         testCaseShuffleMutationFunction.setExecuteActions(false);
     }
 
+    /**
+     * Performs variation as described in the Sapienz paper, see section 3.1 and Algorithm 2.
+     *
+     * @param chromosome The chromosome to be mutated.
+     * @return Returns the mutated chromosome.
+     */
     @Override
-    public List<IChromosome<TestSuite>> mutate(IChromosome<TestSuite> chromosome) {
+    public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome) {
+
         TestSuite mutatedTestSuite = new TestSuite();
-        List<IChromosome<TestSuite>> mutations = new ArrayList<>();
         IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
-        mutations.add(mutatedChromosome);
 
         List<TestCase> oldTestCases = chromosome.getValue().getTestCases();
         Randomness.shuffleList(oldTestCases);
@@ -58,7 +84,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 }
             }
         }
-        //add old testcase without crossover partner
+
+        // add old testcase without crossover partner
         if (oldTestCases.size() % 2 != 0) {
             afterOnePointCrossover.add(oldTestCases.get(oldTestCases.size() - 1));
         }
@@ -74,7 +101,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
             }
         }
         */
-        //remove this line, if lines above get uncommented
+
+        // remove this line, if lines above get uncommented
         afterInternalMutation.addAll(afterOnePointCrossover);
 
         List<TestCase> copyTestCases = new ArrayList<>();
@@ -101,7 +129,6 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         }
 
         mutatedTestSuite.getTestCases().addAll(executedTestCases);
-
-        return mutations;
+        return mutatedChromosome;
     }
 }

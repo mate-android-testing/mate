@@ -5,22 +5,24 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * An integer sequence mutation function that changes a randomly selected entry in the sequences
- * to a new random integer
+ * Provides a mutation function that alters a single gene by replacement with a random gene.
  */
 public class IntegerSequencePointMutationFunction implements IMutationFunction<List<Integer>> {
+
+    /**
+     * Mutates the chromosome by replacing a random gene with a new gene.
+     *
+     * @param chromosome The chromosome to be mutated.
+     * @return Returns the mutated chromosome.
+     */
     @Override
-    public List<IChromosome<List<Integer>>> mutate(IChromosome<List<Integer>> chromosome) {
+    public IChromosome<List<Integer>> mutate(IChromosome<List<Integer>> chromosome) {
         List<Integer> resultSequence = new ArrayList<>(chromosome.getValue());
         int index = Randomness.randomIndex(resultSequence);
         resultSequence.set(index, Randomness.getRnd().nextInt());
-
-        List<IChromosome<List<Integer>>> chromosomeList = new ArrayList<>();
-        chromosomeList.add(new Chromosome<>(resultSequence));
-        return chromosomeList;
+        return new Chromosome<>(resultSequence);
     }
 }
