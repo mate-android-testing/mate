@@ -639,9 +639,11 @@ public class DeviceMgr {
 
         //TODO: make maxNumberMutation editable --> maybe a range from 0 - 5?
         String hint = widget.getHint();
-        Log.d("inputType", hint + ":" + inputType);
+       // Log.d("inputType", hint + ":" + inputType);
 
-        return Mutation.mutateInput(inputType, hint);
+        String mutation = Mutation.mutateInput(inputType, hint);
+        Log.d("inputType",hint +"-->"+mutation);
+        return mutation;
 
 
         /*
