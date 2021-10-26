@@ -13,6 +13,7 @@ import android.text.InputType;
 import android.util.Log;
 
 import org.mate.MATE;
+import org.mate.Mutation;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
@@ -635,16 +636,39 @@ public class DeviceMgr {
             return action.getWidget().getHint();
         }
         int inputType = widget.getInputType();
-        Log.d("inputType", widget.getHint() + ":" + inputType);
+
         //TODO: make maxNumberMutation editable --> maybe a range from 0 - 5?
         String hint = widget.getHint();
+        Log.d("inputType", hint + ":" + inputType);
+
         switch (inputType) {
             case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT: //input field for person name
-                return mutateString(hint, 2);
+                return Mutation.mutateString(hint, 2);
             case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT: //input field for email address
-                return mutateEmailAddress(hint, 2);
+                return Mutation.mutateEmailAddress(hint, 2);
+            case InputType.TYPE_CLASS_PHONE:                                            //for phone number
+                return Mutation.mutatePhone(hint, 2);
+            case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT: // input field for cip code
+                return Mutation.mutateCIPCode(hint, 2);
+            case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:   //for pw
+                return Mutation.mutateString(hint, 2);
+            case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:      // for more lines input
+                return Mutation.mutateString(hint,2);
+            case InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER: // for more lines input
+                return Mutation.mutateString(hint,2);
+            case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
+                return Mutation.mutateString(hint,2);
+            case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
+                return Mutation.mutateString(hint,2);
+            case InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER:
+                return Mutation.mutateString(hint,2);
+            case InputType.TYPE_CLASS_NUMBER:
+                return Mutation.mutatePhone(hint,2);
+
+
             default:
-                return mutateString(hint+"",2);
+                Log.d("inputType", widget.getHint() + ":" + inputType + " (nonSucc)");
+                return Mutation.mutateString(hint + "", 2);
         }
 
 
@@ -695,55 +719,6 @@ public class DeviceMgr {
         return getRandomData(inputType, maxLengthInt);
         */
 
-    }
-
-    private enum Mutation {
-        ADDITION, CHANGE, DELETE;
-
-        private static Mutation getRandomMutationType() {
-            Random r = new Random();
-            int randomNumber = r.nextInt(3);
-            if (randomNumber == 0.5) {
-                return ADDITION;
-            } else if (randomNumber == 1) {
-                return CHANGE;
-            } else {
-                return DELETE;
-            }
-        }
-    }
-
-    private String mutateEmailAddress(String hint, int maxNumberMutation) {
-        return mutateString(hint, maxNumberMutation);
-    }
-
-    private String mutateString(String hint, int maxNumberMutation) {
-        StringBuilder stb = new StringBuilder(hint);
-        Random r = new Random();
-        for (int i = 0; i < maxNumberMutation; i++) {
-            Mutation mutation = Mutation.getRandomMutationType();
-            int randomNumber = r.nextInt(hint.length());
-            switch (mutation) {
-                case CHANGE:
-                    stb.replace(randomNumber, randomNumber + 1, generateRandomCharString(r));
-                    break;
-                case ADDITION:
-                    stb.replace(randomNumber, randomNumber, generateRandomCharString(r));
-                    break;
-                case DELETE:
-                    //TODO: What if stb.size() == 0?
-                    stb.replace(randomNumber, randomNumber + 1, "");
-                    break;
-                default:
-                    // TODO: Log message.
-                    return hint;
-            }
-        }
-        return stb.toString();
-    }
-
-    private String generateRandomCharString(Random r) {
-        return String.valueOf(((char) (r.nextInt(26) + 'a')));
     }
 
 
