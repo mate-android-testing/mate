@@ -10,6 +10,7 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
+import android.util.Log;
 
 import org.mate.MATE;
 import org.mate.Registry;
@@ -356,7 +357,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     *          is returned.
+     * is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -373,7 +374,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -444,7 +445,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     *          is returned.
+     * is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -544,7 +545,7 @@ public class DeviceMgr {
      *
      * @param widget The widget whose ui object should be looked up.
      * @return Returns the corresponding ui object or {@code null} if no
-     *          such ui object could be found.
+     * such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -630,11 +631,23 @@ public class DeviceMgr {
         Random r = new Random();
         double randomNumber = r.nextDouble();
         //TOO
-        if(randomNumber<0.5){
+        if (randomNumber < 0) {
             return action.getWidget().getHint();
         }
+        int inputType = widget.getInputType();
+        Log.d("inputType", widget.getHint() + ":" + inputType);
         //TODO: make maxNumberMutation editable --> maybe a range from 0 - 5?
-        return mutateString(widget.getHint(),2);
+        String hint = widget.getHint();
+        switch (inputType) {
+            case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT: //input field for person name
+                return mutateString(hint, 2);
+            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT: //input field for email address
+                return mutateEmailAddress(hint, 2);
+            default:
+                return mutateString(hint+"",2);
+        }
+
+
         /*
         Widget widget = action.getWidget();
 
@@ -684,14 +697,15 @@ public class DeviceMgr {
 
     }
 
-    private enum Mutation{
-        ADDITION,CHANGE,DELETE;
-        private static Mutation getRandomMutationType(){
+    private enum Mutation {
+        ADDITION, CHANGE, DELETE;
+
+        private static Mutation getRandomMutationType() {
             Random r = new Random();
             int randomNumber = r.nextInt(3);
-            if(randomNumber==0.5){
+            if (randomNumber == 0.5) {
                 return ADDITION;
-            } else if (randomNumber == 1){
+            } else if (randomNumber == 1) {
                 return CHANGE;
             } else {
                 return DELETE;
@@ -699,10 +713,14 @@ public class DeviceMgr {
         }
     }
 
-    private String mutateString(String hint, int maxNumberMutation){
+    private String mutateEmailAddress(String hint, int maxNumberMutation) {
+        return mutateString(hint, maxNumberMutation);
+    }
+
+    private String mutateString(String hint, int maxNumberMutation) {
         StringBuilder stb = new StringBuilder(hint);
         Random r = new Random();
-        for(int i = 0;i<maxNumberMutation;i++) {
+        for (int i = 0; i < maxNumberMutation; i++) {
             Mutation mutation = Mutation.getRandomMutationType();
             int randomNumber = r.nextInt(hint.length());
             switch (mutation) {
