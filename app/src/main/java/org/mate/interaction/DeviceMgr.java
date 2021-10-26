@@ -641,35 +641,7 @@ public class DeviceMgr {
         String hint = widget.getHint();
         Log.d("inputType", hint + ":" + inputType);
 
-        switch (inputType) {
-            case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT: //input field for person name
-                return Mutation.mutateString(hint, 2);
-            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT: //input field for email address
-                return Mutation.mutateEmailAddress(hint, 2);
-            case InputType.TYPE_CLASS_PHONE:                                            //for phone number
-                return Mutation.mutatePhone(hint, 2);
-            case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT: // input field for cip code
-                return Mutation.mutateCIPCode(hint, 2);
-            case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:   //for pw
-                return Mutation.mutateString(hint, 2);
-            case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:      // for more lines input
-                return Mutation.mutateString(hint,2);
-            case InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER: // for more lines input
-                return Mutation.mutateString(hint,2);
-            case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
-                return Mutation.mutateString(hint,2);
-            case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
-                return Mutation.mutateString(hint,2);
-            case InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER:
-                return Mutation.mutateString(hint,2);
-            case InputType.TYPE_CLASS_NUMBER:
-                return Mutation.mutatePhone(hint,2);
-
-
-            default:
-                Log.d("inputType", widget.getHint() + ":" + inputType + " (nonSucc)");
-                return Mutation.mutateString(hint + "", 2);
-        }
+        return Mutation.mutateInput(inputType, hint);
 
 
         /*
@@ -720,6 +692,8 @@ public class DeviceMgr {
         */
 
     }
+
+
 
 
     /**

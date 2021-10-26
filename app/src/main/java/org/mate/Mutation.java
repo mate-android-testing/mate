@@ -1,5 +1,10 @@
 package org.mate;
 
+import android.text.InputType;
+import android.util.Log;
+
+import org.mate.interaction.action.ui.Widget;
+
 import java.util.Random;
 
 public class Mutation {
@@ -18,6 +23,38 @@ public class Mutation {
             } else {
                 return DELETE;
             }
+        }
+    }
+
+    public static String mutateInput(int inputType, String hint) {
+        switch (inputType) {
+            case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT: //input field for person name
+                return mutateString(hint, 2);
+            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT: //input field for email address
+                return mutateEmailAddress(hint, 2);
+            case InputType.TYPE_CLASS_PHONE:                                            //for phone number
+                return mutatePhone(hint, 2);
+            case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT: // input field for cip code
+                return mutateCIPCode(hint, 2);
+            case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:   //for pw
+                return mutateString(hint, 2);
+            case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:      // for more lines input
+                return mutateString(hint,2);
+            case InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER: // for more lines input
+                return mutateString(hint,2);
+            case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
+                return mutateString(hint,2);
+            case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
+                return mutateString(hint,2);
+            case InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER:
+                return mutateString(hint,2);
+            case InputType.TYPE_CLASS_NUMBER:
+                return mutatePhone(hint,2);
+            case InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_CLASS_NUMBER:
+                return mutatePhone(hint,2);
+            default:
+                Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
+                return mutateString(hint + "", 2);
         }
     }
 
