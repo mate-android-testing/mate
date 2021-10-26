@@ -28,45 +28,37 @@ public class Mutation {
 
     public static String mutateInput(int inputType, String hint) {
         switch (inputType) {
-            case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT: //input field for person name
+            case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT:
+            case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:
+            case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:
+            case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT:
                 return mutateString(hint, 2);
-            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT: //input field for email address
+
+            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT:
                 return mutateEmailAddress(hint, 2);
-            case InputType.TYPE_CLASS_PHONE:                                            //for phone number
+
+            case InputType.TYPE_CLASS_PHONE:
                 return mutatePhone(hint, 2);
-            case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT: // input field for cip code
-                return mutateCIPCode(hint, 2);
-            case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:   //for pw
-                return mutateString(hint, 2);
-            case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:      // for more lines input
-                return mutateString(hint,2);
-            case InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER: // for more lines input
-                return mutateString(hint,2);
-            case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
-                return mutateString(hint,2);
-            case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
-                return mutateString(hint,2);
-            case InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER:
-                return mutateString(hint,2);
-            case InputType.TYPE_CLASS_NUMBER:
-                return mutatePhone(hint,2);
+
+            case InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER:
             case InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_CLASS_NUMBER:
-                return mutatePhone(hint,2);
+            case InputType.TYPE_CLASS_NUMBER:
+                return mutateNumber(hint, 2);
+            case InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER:
+                return mutateDecNumber(hint, 2);
+
+            case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
+                return mutateTime(hint, 2);
+            case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
+                return mutateDate(hint, 2);
+
             default:
                 Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
                 return mutateString(hint + "", 2);
         }
     }
 
-    public static String mutateEmailAddress(String hint, int maxNumberMutation) {
-        return mutateString(hint, maxNumberMutation);
-    }
-
-    public static String mutatePhone(String hint, int maxNumberMutation) {
-        return mutateString(hint, maxNumberMutation);
-    }
-
-    public static String mutateString(String hint, int maxNumberMutation) {
+    private static String mutateString(String hint, int maxNumberMutation) {
         StringBuilder stb = new StringBuilder(hint);
         Random r = new Random();
         for (int i = 0; i < maxNumberMutation; i++) {
@@ -91,11 +83,32 @@ public class Mutation {
         return stb.toString();
     }
 
-    private static String generateRandomCharString(Random r) {
-        return String.valueOf(((char) (r.nextInt(26) + 'a')));
+    private static String mutateEmailAddress(String hint, int maxNumberMutation) {
+        return mutateString(hint, maxNumberMutation);
     }
 
-    public static String mutateCIPCode(String hint, int mutationNumber) {
-        return mutateString(hint,mutationNumber);
+    private static String mutatePhone(String hint, int maxNumberMutation) {
+        return mutateString(hint, maxNumberMutation);
+    }
+
+    private static String mutateNumber(String number, int maxNumberMutation){
+        return mutateString(number, maxNumberMutation);
+    }
+
+    private static String mutateDecNumber(String number, int maxNumberMutation){
+        return mutateString(number, maxNumberMutation);
+    }
+
+    private static String mutateDate(String number, int maxNumberMutation){
+        return mutateString(number, maxNumberMutation);
+    }
+    private static String mutateTime(String number, int maxNumberMutation){
+        return mutateString(number, maxNumberMutation);
+    }
+
+
+
+    private static String generateRandomCharString(Random r) {
+        return String.valueOf(((char) (r.nextInt(26) + 'a')));
     }
 }
