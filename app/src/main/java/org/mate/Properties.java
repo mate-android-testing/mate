@@ -1,6 +1,5 @@
 package org.mate;
 
-import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -8,6 +7,7 @@ import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
@@ -74,14 +74,22 @@ public class Properties {
     }
 
     /*
-    * Whether to serialize a test case. Default: off.
+     * Whether to serialize a test case. Default: off.
      */
     public static boolean RECORD_TEST_CASE() {
         return propertyOr(false);
     }
 
+    /*
+     * Whether to record (and serialize) transition systems when using any oft the ExecuteMATEQBE*
+     * strategies. Has no effect for other exploration algorithms.
+     */
+    public static boolean QBE_RECORD_TRANSITION_SYSTEM() {
+        return propertyOr(false);
+    }
+
     /**
-     *  Added by vin on 24/05/2018
+     * Added by vin on 24/05/2018
      */
     // if 0 any point will be added to the archive
     public static float NOVELTY_THRESHOLD() {

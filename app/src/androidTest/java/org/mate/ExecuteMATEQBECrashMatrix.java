@@ -2,6 +2,7 @@ package org.mate;
 
 import org.junit.Test;
 import org.mate.exploration.qlearning.qbe.algorithms.ApplicationTester;
+import org.mate.exploration.qlearning.qbe.algorithms.SimpleTester;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.exploration.implementations.QBE;
 import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEAction;
@@ -20,12 +21,21 @@ public class ExecuteMATEQBECrashMatrix {
         try (final MATE ignored = new MATE()) {
             final QBEApplication app = new QBEApplication(Registry.getUiAbstractionLayer());
             final ExplorationStrategy<QBEState, QBEAction> explorationStrategy = new QBE<>(new QBEMatrixFactory().getMaximizesNumberOfCrashesQMatrix());
-            final ApplicationTester<QBEState, QBEAction> tester = new ApplicationTester<>(app, explorationStrategy, Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
-            MATE.log_acc("Starting timeout run...");
-            tester.run();
-            MATE.log_acc("Finished run due to timeout.");
-            final TransitionSystemSerializer serializer = new TransitionSystemSerializer(TRANSITION_SYSTEM_DIR);
-            serializer.serialize(tester.getTransitionSystem(), FILE_NAME);
+
+            if (Properties.QBE_RECORD_TRANSITION_SYSTEM()) {
+                final ApplicationTester<QBEState, QBEAction> tester = new ApplicationTester<>(app, explorationStrategy, Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
+                MATE.log_acc("Starting timeout run...");
+                tester.run();
+                MATE.log_acc("Finished run due to timeout.");
+                final TransitionSystemSerializer serializer = new TransitionSystemSerializer(TRANSITION_SYSTEM_DIR);
+                serializer.serialize(tester.getTransitionSystem(), FILE_NAME);
+            } else {
+                final SimpleTester<QBEState, QBEAction> tester = new SimpleTester<>(app, explorationStrategy, Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
+                MATE.log_acc("Starting timeout run...");
+                tester.run();
+                MATE.log_acc("Finished run due to timeout.");
+            }
+
             Registry.getEnvironmentManager().fetchTransitionSystem(TRANSITION_SYSTEM_DIR, FILE_NAME);
         }
     }
