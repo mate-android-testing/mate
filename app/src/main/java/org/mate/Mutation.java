@@ -61,13 +61,13 @@ public class Mutation {
                 return mutateDate(hint, 2);
 
             default:
-            //    Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
+                //    Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
                 return mutateString(hint + "", 2);
         }
     }
 
-    private static String mutateString(String hint, int maxNumberMutation){
-        return mutateString(hint, maxNumberMutation,SET_OF_LOW_LETTERS+SET_OF_BIG_LETTERS);
+    private static String mutateString(String hint, int maxNumberMutation) {
+        return mutateString(hint, maxNumberMutation, SET_OF_LOW_LETTERS + SET_OF_BIG_LETTERS);
     }
 
     private static String mutateString(String hint, int maxNumberMutation, String charSet) {
@@ -78,10 +78,10 @@ public class Mutation {
             int randomNumber = r.nextInt(hint.length());
             switch (mutationType) {
                 case CHANGE:
-                    stb.replace(randomNumber, randomNumber + 1, generateRandomCharString(r,charSet));
+                    stb.replace(randomNumber, randomNumber + 1, generateRandomCharString(r, charSet));
                     break;
                 case ADDITION:
-                    stb.replace(randomNumber, randomNumber, generateRandomCharString(r,charSet));
+                    stb.replace(randomNumber, randomNumber, generateRandomCharString(r, charSet));
                     break;
                 case DELETE:
                     //TODO: What if stb.size() == 0?
@@ -99,46 +99,61 @@ public class Mutation {
         String[] emailParts = hint.split("@");
         String mutatedMail;
         Random r = new Random();
-        if(r.nextDouble()<0.5){
+        if (r.nextDouble() < 0.5) {
             mutatedMail = hint;
-        } else{
+        } else {
             mutatedMail = emailParts[0];
-            if(emailParts.length >1){
-                mutatedMail +=emailParts[1];
+            if (emailParts.length > 1) {
+                mutatedMail += emailParts[1];
             }
         }
 
-        return mutateString(mutatedMail, maxNumberMutation,SET_OF_LOW_LETTERS+SET_OF_NUMBERS+SET_OF_SPECIAL_SIGNS);
+        return mutateString(mutatedMail, maxNumberMutation, SET_OF_LOW_LETTERS + SET_OF_NUMBERS + SET_OF_SPECIAL_SIGNS);
     }
 
     private static String mutatePhone(String hint, int maxNumberMutation) {
-        hint = hint.replace("/","");
-        return mutateNumber(hint, maxNumberMutation);
+        hint = hint.replace("/", "");
+        hint = mutateNumber(hint, maxNumberMutation);
+        Random r = new Random();
+        if (r.nextDouble() < 0.5) {
+            return hint;
+        } else {
+            int randomGenNumber = r.nextInt(hint.length());
+            StringBuilder stb = new StringBuilder(hint);
+            stb.replace(randomGenNumber, randomGenNumber, "\\");
+            return stb.toString();
+        }
     }
 
-    private static String mutateNumber(String hint, int maxNumberMutation){
-        try{
+    private static String mutateNumber(String hint, int maxNumberMutation) {
+        try {
             int number = Integer.parseInt(hint);
             Random r = new Random();
-           int randomGenNumber= r.nextInt(hint.length()*2)-hint.length();
-           number +=randomGenNumber;
-           return String.valueOf(number);
-        } catch (NumberFormatException e){
+            int randomGenNumber = r.nextInt(hint.length() * 2) - hint.length();
+            number += randomGenNumber;
+            return String.valueOf(number);
+        } catch (NumberFormatException e) {
             return mutateString(hint, maxNumberMutation);
         }
     }
 
-    private static String mutateDecNumber(String number, int maxNumberMutation){
+    private static String mutateDecNumber(String number, int maxNumberMutation) {
+        String[] parts = number.split("\\.");
+        StringBuilder stb = new StringBuilder();
+        stb.append(mutateNumber(parts[0], maxNumberMutation));
+        if (parts.length >= 2) {
+            stb.append(mutateNumber(parts[1], maxNumberMutation));
+        }
+        return stb.toString();
+    }
+
+    private static String mutateDate(String number, int maxNumberMutation) {
         return mutateString(number, maxNumberMutation);
     }
 
-    private static String mutateDate(String number, int maxNumberMutation){
+    private static String mutateTime(String number, int maxNumberMutation) {
         return mutateString(number, maxNumberMutation);
     }
-    private static String mutateTime(String number, int maxNumberMutation){
-        return mutateString(number, maxNumberMutation);
-    }
-
 
 
     private static String generateRandomCharString(Random r, String charSet) {
