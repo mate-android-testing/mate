@@ -84,8 +84,11 @@ public class Mutation {
                     stb.replace(randomNumber, randomNumber, generateRandomCharString(r, charSet));
                     break;
                 case DELETE:
-                    //TODO: What if stb.size() == 0?
-                    stb.replace(randomNumber, randomNumber + 1, "");
+                    if (stb.length() != 0){
+                        stb.replace(randomNumber, randomNumber + 1, "");
+                    } else {
+                        // TODO: Log message
+                    }
                     break;
                 default:
                     // TODO: Log message.
