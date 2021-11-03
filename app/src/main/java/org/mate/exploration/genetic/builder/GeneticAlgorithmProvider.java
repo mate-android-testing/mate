@@ -46,6 +46,7 @@ import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFun
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
@@ -242,6 +243,8 @@ public class GeneticAlgorithmProvider {
                     return new TournamentSelectionFunction<>(getTournamentSize());
                 case RANK_SELECTION:
                     return new RankSelectionFunction<>();
+                case CROWDED_TOURNAMENT_SELECTION:
+                    return new CrowdedTournamentSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
