@@ -161,7 +161,7 @@ public class Mutation {
         StringBuilder stb = new StringBuilder();
         Random r = new Random();
         for (int i = 0; i < dateTimes.length; i++) {
-            dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(), SET_OF_NUMBERS);
+            dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(), SET_OF_NUMBERS,MutationType.CHANGE);
             stb.append(dateTimes[i]);
             if (i + 1 != dateTimes.length && r.nextDouble() < PROBABILITY_POINT_IN_DATE_TIME) {
                 stb.append(replacedChar);
