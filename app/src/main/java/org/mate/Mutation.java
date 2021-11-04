@@ -1,9 +1,6 @@
 package org.mate;
 
 import android.text.InputType;
-import android.util.Log;
-
-import org.mate.interaction.action.ui.Widget;
 
 import java.util.Random;
 
@@ -17,20 +14,15 @@ public class Mutation {
 
     private static final String SET_OF_SPECIAL_SIGNS = "+-*/!\"§$%&/()=?´`_.,@€<>|{[]}\\:;^°";
 
+    private static final double PROBABILITY_POINT_IN_DATE_TIME = 0.8;
+
 
     private enum MutationType {
         ADDITION, CHANGE, DELETE;
 
         private static MutationType getRandomMutationType() {
             Random r = new Random();
-            int randomNumber = r.nextInt(3);
-            if (randomNumber == 0.5) {
-                return ADDITION;
-            } else if (randomNumber == 1) {
-                return CHANGE;
-            } else {
-                return DELETE;
-            }
+            return MutationType.values()[r.nextInt(MutationType.values().length)];
         }
     }
 
@@ -40,10 +32,10 @@ public class Mutation {
             case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:
             case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:
             case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT:
-                return mutateString(hint, 2); //DONE
+                return mutateString(hint, 2);
 
             case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT:
-                return mutateEmailAddress(hint, 2); //DONE
+                return mutateEmailAddress(hint, 2);
 
             case InputType.TYPE_CLASS_PHONE:
                 return mutatePhone(hint, 2);
@@ -56,9 +48,9 @@ public class Mutation {
                 return mutateDecNumber(hint, 2);
 
             case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
-                return mutateTime(hint, 2);
+                return mutateTime(hint);
             case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
-                return mutateDate(hint, 2);
+                return mutateDate(hint);
 
             default:
                 //    Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
@@ -71,10 +63,16 @@ public class Mutation {
     }
 
     private static String mutateString(String hint, int maxNumberMutation, String charSet) {
+        return mutateString(hint, maxNumberMutation, charSet, null);
+    }
+
+    private static String mutateString(String hint, int maxNumberMutation, String charSet, MutationType mutationType) {
         StringBuilder stb = new StringBuilder(hint);
         Random r = new Random();
         for (int i = 0; i < maxNumberMutation; i++) {
-            MutationType mutationType = MutationType.getRandomMutationType();
+            if (mutationType == null) {
+                mutationType = MutationType.getRandomMutationType();
+            }
             int randomNumber = r.nextInt(hint.length());
             switch (mutationType) {
                 case CHANGE:
@@ -84,7 +82,7 @@ public class Mutation {
                     stb.replace(randomNumber, randomNumber, generateRandomCharString(r, charSet));
                     break;
                 case DELETE:
-                    if (stb.length() != 0){
+                    if (stb.length() != 0) {
                         stb.replace(randomNumber, randomNumber + 1, "");
                     } else {
                         // TODO: Log message
@@ -150,12 +148,26 @@ public class Mutation {
         return stb.toString();
     }
 
-    private static String mutateDate(String number, int maxNumberMutation) {
-        return mutateString(number, maxNumberMutation);
+    private static String mutateDate(String date) {
+        return mutateDateOrTime(date, "\\.", '.');
     }
 
-    private static String mutateTime(String number, int maxNumberMutation) {
-        return mutateString(number, maxNumberMutation);
+    private static String mutateTime(String time) {
+        return mutateDateOrTime(time, ":", ':');
+    }
+
+    private static String mutateDateOrTime(String dateTime, String regex, char replacedChar) {
+        String[] dateTimes = dateTime.split(regex);
+        StringBuilder stb = new StringBuilder();
+        Random r = new Random();
+        for (int i = 0; i < dateTimes.length; i++) {
+            dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(), SET_OF_NUMBERS);
+            stb.append(dateTimes[i]);
+            if (i + 1 != dateTimes.length && r.nextDouble() < PROBABILITY_POINT_IN_DATE_TIME) {
+                stb.append(replacedChar);
+            }
+        }
+        return stb.toString();
     }
 
 
