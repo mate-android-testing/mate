@@ -157,6 +157,8 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
      */
     private Map<Integer, List<IChromosome<T>>> fastNonDominatedSort(List<IChromosome<T>> population) {
 
+        MATE.log_acc("Fast-Non-Dominated-Sort...");
+
         // associates the rank (pareto front) to the list of chromosomes belonging to it
         Map<Integer, List<IChromosome<T>>> paretoFronts = new HashMap<>();
 
@@ -176,6 +178,11 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
 
             for (IChromosome<T> q : population) {
 
+                if (p.equals(q)) {
+                    // p can't dominate itself
+                    continue;
+                }
+
                 int domination = comparator.compare(p, q);
 
                 if (domination > 0) {
@@ -191,18 +198,27 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
             dominationCounters.put(p, dominationCtr);
 
             if (dominationCtr == 0) {
+
                 // p belongs to the first front
                 int rank = 1;
-                List<IChromosome<T>> firstParetoFront = new LinkedList<>();
-                firstParetoFront.add(p);
-                paretoFronts.put(rank, firstParetoFront);
+
+                if (paretoFronts.containsKey(rank)) {
+                    paretoFronts.get(rank).add(p);
+                } else {
+                    List<IChromosome<T>> firstParetoFront = new LinkedList<>();
+                    firstParetoFront.add(p);
+                    paretoFronts.put(rank, firstParetoFront);
+                }
             }
         }
 
+        // derive the remaining pareto fronts
         int i = 1;
         List<IChromosome<T>> nextParetoFront = paretoFronts.get(i);
 
         while (!nextParetoFront.isEmpty()) {
+
+            MATE.log_acc("Pareto front " + i + ": " + nextParetoFront.size());
 
             List<IChromosome<T>> nextFront = new LinkedList<>();
 
@@ -212,16 +228,20 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
                     dominationCounters.put(q, dominationCtr);
                     if (dominationCtr == 0) {
                         // q belongs to the next front
-                        int rank = i + 1;
                         nextFront.add(q);
                     }
                 }
             }
+
             i = i + 1;
             nextParetoFront = nextFront;
-            paretoFronts.put(i, nextParetoFront);
+
+            if (!nextParetoFront.isEmpty()) {
+                paretoFronts.put(i, nextParetoFront);
+            }
         }
 
+        MATE.log_acc("Number of pareto fronts: " + paretoFronts.size());
         return paretoFronts;
     }
 
@@ -290,6 +310,9 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
     @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
 
+        MATE.log_acc("Get generation survivors...");
+        MATE.log_acc("Population size: " + population.size());
+
         /*
         * The current population consists of 2*N solutions where N refers to the population size, but
         * only N solutions can be part of the next generation. NSGA-II sorts the population based
@@ -303,23 +326,16 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
         Map<Integer, List<IChromosome<T>>> paretoFronts = fastNonDominatedSort(population);
         int i = 1;
 
-        MATE.log_acc("Get generation survivors...");
-        MATE.log_acc("Population size: " + population.size());
-        MATE.log_acc("Pareto fronts: " + paretoFronts.size());
-
-        for (Map.Entry<Integer, List<IChromosome<T>>> paretoFront : paretoFronts.entrySet()) {
-            MATE.log_acc("Pareto front: " + paretoFront.getKey());
-            MATE.log_acc("Pareto front members: " + paretoFront.getValue().size());
-        }
-
         // add solutions until a front can't be fully accommodated
         while (survivors.size() + paretoFronts.get(i).size() < populationSize) {
+            MATE.log_acc("Adding front " + i + "with " + paretoFronts.get(i).size() + " members!");
             survivors.addAll(paretoFronts.get(i));
             i = i + 1;
         }
 
         // sort last front in descending order of crowding distance
         List<IChromosome<T>> lastFront = paretoFronts.get(i);
+        MATE.log_acc("Size of last front: " + lastFront.size());
         final Map<IChromosome<T>, Double> crowdingDistances
                 = crowdingDistanceAssignment(lastFront, fitnessFunctions);
 
@@ -331,7 +347,7 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
         });
 
         // fill up the remaining slots with the least crowded chromosomes of the last front
-        survivors.addAll(lastFront.subList(0, populationSize - lastFront.size()));
+        survivors.addAll(lastFront.subList(0, populationSize - survivors.size()));
         return survivors;
     }
 
@@ -343,12 +359,13 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
      */
     private Map<IChromosome<T>, Integer> getRankMap(Map<Integer, List<IChromosome<T>>> paretoFronts) {
 
-        MATE.log_acc("Pareto fronts: " + paretoFronts.size());
+        MATE.log_acc("Getting rank map...");
 
         Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
 
         for (Map.Entry<Integer, List<IChromosome<T>>> paretoFront : paretoFronts.entrySet()) {
             int rank = paretoFront.getKey();
+            MATE.log_acc("Transforming front " + rank + " with " + paretoFront.getValue().size() + " members!");
             for (IChromosome<T> solution : paretoFront.getValue()) {
                 rankMap.put(solution, rank);
             }
