@@ -12,7 +12,6 @@ import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -120,7 +119,8 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         }
 
         // Sort all by rank and if rank is equal by crowding distance
-        Collections.sort(population, new NSGAII.RankComparator<>(rankMap, crowdingDistanceMap));
+        // FIXME: re-use artefacts of NSGAII implementation
+        // Collections.sort(population, new NSGAII.RankComparator<>(rankMap, crowdingDistanceMap));
 
         return population.subList(0, populationSize);
     }
