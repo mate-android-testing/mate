@@ -385,6 +385,8 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
     public Map<IChromosome<T>, Double> crowdingDistanceAssignment(List<IChromosome<T>> population,
                                                                  List<IFitnessFunction<T>> fitnessFunctions) {
 
+        MATE.log_acc("Crowding distance assignment...");
+
         List<IChromosome<T>> solutions = new LinkedList<>(population);
         int length = population.size();
 
@@ -397,18 +399,36 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
 
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
 
-            // TODO: shuffle solutions to allow a fair sorting of duplicates
-
             // sort in ascending order of magnitude
             GAUtils.sortByFitness(solutions, fitnessFunction);
 
-            // set boundary solutions to infinity (these solutions will be always included)
-            // TODO: consider all boundary points (there might be multiple...)
-            crowdingDistanceAssignments.put(solutions.get(0), Double.POSITIVE_INFINITY);
-            crowdingDistanceAssignments.put(solutions.get(length - 1), Double.POSITIVE_INFINITY);
+            double worstFitnessValue = fitnessFunction.getNormalizedFitness(solutions.get(0));
+            double bestFitnessValue = fitnessFunction.getNormalizedFitness(solutions.get(length - 1));
+
+            // set crowding distance of boundary solutions to infinity (these solutions will be always included)
+            int start = 0;
+            int end = length - 1;
+
+            for (int i = 0; i < length; i++) {
+
+                IChromosome<T> solution = solutions.get(i);
+                double fitness = fitnessFunction.getNormalizedFitness(solution);
+
+                if (fitness == worstFitnessValue) {
+                    crowdingDistanceAssignments.put(solution, Double.POSITIVE_INFINITY);
+                    start = i;
+                } else if (fitness == bestFitnessValue) {
+                    crowdingDistanceAssignments.put(solution, Double.POSITIVE_INFINITY);
+                    if (i < end) {
+                        end = i;
+                    }
+                }
+            }
 
             // assign crowding distance to every other solution
-            for (int i = 1; i < length - 2; i++) {
+            for (int i = start + 1; i < end; i++) {
+
+                IChromosome<T> solution = solutions.get(i);
 
                 double predecessorFitness = fitnessFunction.getNormalizedFitness(solutions.get(i - 1));
                 double successorFitness = fitnessFunction.getNormalizedFitness(solutions.get(i + 1));
@@ -418,8 +438,6 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
                     predecessorFitness = 1 - predecessorFitness;
                     successorFitness = 1 - successorFitness;
                 }
-
-                IChromosome<T> solution = solutions.get(i);
 
                 /*
                 * The actual formula is as follows:
