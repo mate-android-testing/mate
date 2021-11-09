@@ -285,23 +285,20 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
          */
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
 
-            double bestLength = Double.POSITIVE_INFINITY;
-            IChromosome<T> best = null;
+            IChromosome<T> best = archive.get(fitnessFunction); // null if none present yet
+            double bestLength = best == null ? Double.POSITIVE_INFINITY : best.getValue().getEventSequence().size();
+
             boolean maximizing = fitnessFunction.isMaximizing();
 
             for (IChromosome<T> chromosome : chromosomes) {
 
-                final double score = fitnessFunction.getNormalizedFitness(chromosome);
+                final double fitness = fitnessFunction.getNormalizedFitness(chromosome);
                 final double length = chromosome.getValue().getEventSequence().size();
 
-                if ((maximizing ? score == 1 : score == 0) && length <= bestLength) {
-                    best = chromosome;
+                if ((maximizing ? fitness == 1 : fitness == 0) && length < bestLength) {
+                    archive.put(fitnessFunction, chromosome);
                     bestLength = length;
                 }
-            }
-
-            if (best != null) {
-                archive.put(fitnessFunction, best);
             }
         }
     }
