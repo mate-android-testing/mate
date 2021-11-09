@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.core;
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.comparator.DominationComparator;
+import org.mate.exploration.genetic.comparator.FitnessAndLengthComparator;
 import org.mate.exploration.genetic.comparator.FitnessComparator;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
@@ -93,41 +94,7 @@ public class GAUtils {
      */
     public static <T> List<IChromosome<T>> sortByFitnessAndLength(List<IChromosome<T>> chromosomes,
                                                          final IFitnessFunction<T> fitnessFunction) {
-
-        final boolean isMaximizing = fitnessFunction.isMaximizing();
-        Collections.sort(chromosomes, new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-
-                double fitnessChromosome1 = fitnessFunction.getNormalizedFitness(o1);
-                double fitnessChromosome2 = fitnessFunction.getNormalizedFitness(o2);
-
-                if (fitnessChromosome1 == fitnessChromosome2) {
-
-                    // compare on length, sorts in descending order
-                    if (o1.getValue() instanceof TestCase) {
-                        return ((TestCase) o2.getValue()).getEventSequence().size()
-                                - ((TestCase) o1.getValue()).getEventSequence().size();
-                    } else if (o1.getValue() instanceof TestSuite) {
-                        return ((TestSuite) o2.getValue()).getTestCases().size()
-                                - ((TestSuite) o1.getValue()).getTestCases().size();
-                    } else {
-                        throw new IllegalStateException("Chromosome type " + o1.getValue().getClass()
-                                + "not yet supported!");
-                    }
-
-                } else {
-
-                    // compare on fitness, sorts in ascending order
-                    if (isMaximizing) {
-                        return Double.compare(fitnessChromosome1, fitnessChromosome2);
-                    } else {
-                        return Double.compare(fitnessChromosome2, fitnessChromosome1);
-                    }
-                }
-            }
-        });
-
+        Collections.sort(chromosomes, new FitnessAndLengthComparator<>(fitnessFunction));
         return chromosomes;
     }
 
