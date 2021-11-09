@@ -21,7 +21,7 @@ public class ExecuteMATEMio {
     @Test
     public void useAppContext() {
         MATE.log_acc("Starting Evolutionary Search...");
-        MATE.log_acc("Mio implementation");
+        MATE.log_acc("MIO algorithm");
 
         MATE mate = new MATE();
 
