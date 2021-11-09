@@ -6,10 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.model.TestCase;
 
 import java.util.List;
 
@@ -26,7 +24,7 @@ public class ExecuteMATEMOSA {
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)
-                .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
+                .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
                 .withMutationFunction(Properties.MUTATION_FUNCTION())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
@@ -45,8 +43,7 @@ public class ExecuteMATEMOSA {
             builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
         }
 
-        final IGeneticAlgorithm<TestCase> mosa = builder.build();
-
+        final IGeneticAlgorithm mosa = builder.build();
         mate.testApp(mosa);
     }
 }

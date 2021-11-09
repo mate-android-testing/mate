@@ -10,7 +10,6 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATENSGAII {
@@ -24,7 +23,7 @@ public class ExecuteMATENSGAII {
 
         MATE mate = new MATE();
 
-        IGeneticAlgorithm<TestCase> nsga = new GeneticAlgorithmBuilder()
+        IGeneticAlgorithm nsga = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NSGAII)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)

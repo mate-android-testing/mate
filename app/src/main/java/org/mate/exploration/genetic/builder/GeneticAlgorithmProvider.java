@@ -60,7 +60,6 @@ import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.intent.IntentChromosomeFactory;
-import org.mate.model.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +97,7 @@ public class GeneticAlgorithmProvider {
             case NSGAII:
                 return initializeNSGAII();
             case MOSA:
-                return (GeneticAlgorithm<T>) initializeMOSA();
+                return initializeMOSA();
             case MIO:
                 return initializeMio();
             case RANDOM_WALK:
@@ -146,7 +145,7 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
-    private <T extends TestCase> MOSA<T> initializeMOSA() {
+    private <T> MOSA<T> initializeMOSA() {
         return new MOSA<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),

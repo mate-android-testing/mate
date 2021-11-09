@@ -78,6 +78,5 @@ public class FitnessAndLengthComparator<T> implements Comparator<IChromosome<T>>
             throw new UnsupportedOperationException("Chromosome type "
                     + chromosome.getValue().getClass() + " not yet supported!");
         }
-
     }
 }

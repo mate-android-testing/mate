@@ -12,6 +12,7 @@ import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
+import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
@@ -29,9 +30,9 @@ import java.util.Set;
  * "Reformulating Branch Coverage as a Many-Objective Optimization Problem", see for more details:
  * https://ieeexplore.ieee.org/abstract/document/7102604
  *
- * @param <T> The type of the chromosomes. Needs to be a {@link TestCase} or a subclass of it.
+ * @param <T> The type of the chromosomes.
  */
-public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
+public class MOSA<T> extends GeneticAlgorithm<T> {
 
     /**
      * An archive that keeps track of the best chromosomes for each target.
@@ -271,20 +272,42 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
 
             IChromosome<T> best = archive.get(fitnessFunction); // null if none present yet
-            double bestLength = best == null ? Double.POSITIVE_INFINITY : best.getValue().getEventSequence().size();
+            double bestLength = best == null ? Double.POSITIVE_INFINITY : getChromosomeLength(best);
 
             boolean maximizing = fitnessFunction.isMaximizing();
 
             for (IChromosome<T> chromosome : chromosomes) {
 
                 final double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-                final double length = chromosome.getValue().getEventSequence().size();
+                final double length = getChromosomeLength(chromosome);
 
                 if ((maximizing ? fitness == 1 : fitness == 0) && length < bestLength) {
                     archive.put(fitnessFunction, chromosome);
                     bestLength = length;
                 }
             }
+        }
+    }
+
+    /**
+     * Determines the length of the given chromosome.
+     *
+     * @param chromosome The chromosome for which its length should be determined.
+     * @return Returns the length of the given chromosome.
+     */
+    private int getChromosomeLength(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+        } else if (chromosome.getValue() instanceof TestSuite) {
+            int length = 0;
+            for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
+                length += testCase.getEventSequence().size();
+            }
+            return length;
+        } else {
+            throw new UnsupportedOperationException("Chromosome type "
+                    + chromosome.getValue().getClass() + " not yet supported!");
         }
     }
 }
