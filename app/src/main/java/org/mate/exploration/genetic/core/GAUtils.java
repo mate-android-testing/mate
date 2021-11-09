@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.core;
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.comparator.DominationComparator;
+import org.mate.exploration.genetic.comparator.FitnessComparator;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
@@ -75,22 +76,7 @@ public class GAUtils {
      */
     public static <T> List<IChromosome<T>> sortByFitness(List<IChromosome<T>> chromosomes,
                                                          final IFitnessFunction<T> fitnessFunction) {
-
-        final boolean isMaximizing = fitnessFunction.isMaximizing();
-        Collections.sort(chromosomes, new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                double fitnessChromosome1 = fitnessFunction.getNormalizedFitness(o1);
-                double fitnessChromosome2 = fitnessFunction.getNormalizedFitness(o2);
-
-                if (isMaximizing) {
-                    return Double.compare(fitnessChromosome1, fitnessChromosome2);
-                } else {
-                    return Double.compare(fitnessChromosome2, fitnessChromosome1);
-                }
-            }
-        });
-
+        Collections.sort(chromosomes, new FitnessComparator<>(fitnessFunction));
         return chromosomes;
     }
 
