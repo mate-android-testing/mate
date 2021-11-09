@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.core;
 
-import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.comparator.CrowdingDistanceComparator;
 import org.mate.exploration.genetic.comparator.DominationComparator;
 import org.mate.exploration.genetic.comparator.FitnessAndLengthComparator;
 import org.mate.exploration.genetic.comparator.FitnessComparator;
@@ -75,8 +75,8 @@ public class GAUtils {
      * @param <T> The type of the chromosomes.
      * @return Returns the chromosomes sorted based on its fitness values.
      */
-    public static <T> List<IChromosome<T>> sortByFitness(List<IChromosome<T>> chromosomes,
-                                                         final IFitnessFunction<T> fitnessFunction) {
+    public static <T> List<IChromosome<T>> sortByFitness(
+            List<IChromosome<T>> chromosomes, final IFitnessFunction<T> fitnessFunction) {
         Collections.sort(chromosomes, new FitnessComparator<>(fitnessFunction));
         return chromosomes;
     }
@@ -92,9 +92,25 @@ public class GAUtils {
      * @param <T> The type of the chromosomes. Only {@link TestCase}s and {@link TestSuite}s are supported.
      * @return Returns the chromosomes sorted based on its fitness values and its lengths.
      */
-    public static <T> List<IChromosome<T>> sortByFitnessAndLength(List<IChromosome<T>> chromosomes,
-                                                         final IFitnessFunction<T> fitnessFunction) {
+    public static <T> List<IChromosome<T>> sortByFitnessAndLength(
+            List<IChromosome<T>> chromosomes, final IFitnessFunction<T> fitnessFunction) {
         Collections.sort(chromosomes, new FitnessAndLengthComparator<>(fitnessFunction));
+        return chromosomes;
+    }
+
+    /**
+     * Sorts the chromosomes based on the crowding distance. The chromosomes are sorted in descending
+     * order of the crowding distance.
+     * NOTE: This method sorts the chromosomes in place.
+     *
+     * @param chromosomes The given list of chromosomes to be sorted.
+     * @param crowdingDistanceMap A mapping of chromosomes to its crowding distance.
+     * @param <T> The type of the chromosomes. Only {@link TestCase}s and {@link TestSuite}s are supported.
+     * @return Returns the chromosomes sorted based on its crowding distance.
+     */
+    public static <T> List<IChromosome<T>> sortByCrowdingDistance(
+            List<IChromosome<T>> chromosomes, final Map<IChromosome<T>, Double> crowdingDistanceMap) {
+        Collections.sort(chromosomes, new CrowdingDistanceComparator<>(crowdingDistanceMap));
         return chromosomes;
     }
 
@@ -106,8 +122,6 @@ public class GAUtils {
      */
     public static <T> Map<Integer, List<IChromosome<T>>> fastNonDominatedSort(
             final List<IChromosome<T>> population, final List<IFitnessFunction<T>> fitnessFunctions) {
-
-        MATE.log_acc("Fast-Non-Dominated-Sort...");
 
         // associates the rank (pareto front) to the list of chromosomes belonging to it
         Map<Integer, List<IChromosome<T>>> paretoFronts = new HashMap<>();
@@ -165,21 +179,16 @@ public class GAUtils {
         // derive the remaining pareto fronts
         int i = 1;
         List<IChromosome<T>> nextParetoFront = paretoFronts.get(i);
-        MATE.log_acc("First pareto front: " + nextParetoFront);
 
         while (!nextParetoFront.isEmpty()) {
-
-            MATE.log_acc("Pareto front " + i + ": " + nextParetoFront.size());
 
             List<IChromosome<T>> nextFront = new LinkedList<>();
 
             for (IChromosome<T> p : nextParetoFront) {
                 for (IChromosome<T> q : dominationSets.get(p)) {
+
                     int dominationCtr = dominationCounters.get(q) - 1;
                     dominationCounters.put(q, dominationCtr);
-
-                    MATE.log_acc("Chromosome " + p + " dominates " + q);
-                    MATE.log_acc("New domination counter: " + dominationCtr);
 
                     if (dominationCtr == 0) {
                         // q belongs to the next front
@@ -192,12 +201,10 @@ public class GAUtils {
             nextParetoFront = nextFront;
 
             if (!nextParetoFront.isEmpty()) {
-                MATE.log_acc("Pareto front: " + nextParetoFront);
                 paretoFronts.put(i, nextParetoFront);
             }
         }
 
-        MATE.log_acc("Number of pareto fronts: " + paretoFronts.size());
         return paretoFronts;
     }
 
@@ -210,8 +217,6 @@ public class GAUtils {
      */
     public static <T> Map<IChromosome<T>, Double> crowdingDistanceAssignment(List<IChromosome<T>> population,
                                                                   List<IFitnessFunction<T>> fitnessFunctions) {
-
-        MATE.log_acc("Crowding distance assignment...");
 
         List<IChromosome<T>> solutions = new LinkedList<>(population);
         int length = population.size();
@@ -293,19 +298,15 @@ public class GAUtils {
      */
     public static <T> Map<IChromosome<T>, Integer> getRankMap(Map<Integer, List<IChromosome<T>>> paretoFronts) {
 
-        MATE.log_acc("Getting rank map...");
-
         Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
 
         for (Map.Entry<Integer, List<IChromosome<T>>> paretoFront : paretoFronts.entrySet()) {
             int rank = paretoFront.getKey();
-            MATE.log_acc("Transforming front " + rank + " with " + paretoFront.getValue().size() + " members!");
             for (IChromosome<T> solution : paretoFront.getValue()) {
                 rankMap.put(solution, rank);
             }
         }
 
-        MATE.log_acc("Rank map size: " + rankMap.size());
         return rankMap;
     }
 }

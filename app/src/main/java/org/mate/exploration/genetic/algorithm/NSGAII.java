@@ -14,8 +14,6 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -130,9 +128,6 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
     @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
 
-        MATE.log_acc("Get generation survivors...");
-        MATE.log_acc("Population size: " + population.size());
-
         /*
         * The current population consists of 2*N solutions where N refers to the population size, but
         * only N solutions can be part of the next generation. NSGA-II sorts the population based
@@ -149,23 +144,15 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
 
         // add solutions until a front can't be fully accommodated
         while (survivors.size() + paretoFronts.get(i).size() < populationSize) {
-            MATE.log_acc("Adding front " + i + " with " + paretoFronts.get(i).size() + " members!");
             survivors.addAll(paretoFronts.get(i));
             i = i + 1;
         }
 
-        // sort last front in descending order of crowding distance
+        // sort last front in descending order of the crowding distance
         List<IChromosome<T>> lastFront = paretoFronts.get(i);
-        MATE.log_acc("Size of last front: " + lastFront.size());
-        final Map<IChromosome<T>, Double> crowdingDistances
+        final Map<IChromosome<T>, Double> crowdingDistanceMap
                 = GAUtils.crowdingDistanceAssignment(lastFront, fitnessFunctions);
-
-        Collections.sort(lastFront, new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                return Double.compare(crowdingDistances.get(o2), crowdingDistances.get(o1));
-            }
-        });
+        lastFront = GAUtils.sortByCrowdingDistance(lastFront, crowdingDistanceMap);
 
         // fill up the remaining slots with the least crowded chromosomes of the last front
         survivors.addAll(lastFront.subList(0, populationSize - survivors.size()));

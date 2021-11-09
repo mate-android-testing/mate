@@ -17,7 +17,6 @@ import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -199,9 +198,6 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
     @Override
     public List<IChromosome<T>> getGenerationSurvivors() {
 
-        MATE.log_acc("Get generation survivors...");
-        MATE.log_acc("Population size: " + population.size());
-
         List<IChromosome<T>> survivors = new LinkedList<>();
 
         // fill up the new population P_t+1 with the pareto fronts as in NSGA-II
@@ -210,23 +206,15 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
 
         // add solutions until a front can't be fully accommodated
         while (survivors.size() + paretoFronts.get(i).size() < populationSize) {
-            MATE.log_acc("Adding front " + i + " with " + paretoFronts.get(i).size() + " members!");
             survivors.addAll(paretoFronts.get(i));
             i = i + 1;
         }
 
-        // sort last front in descending order of crowding distance
+        // sort last front in descending order of the crowding distance
         List<IChromosome<T>> lastFront = paretoFronts.get(i);
-        MATE.log_acc("Size of last front: " + lastFront.size());
-        final Map<IChromosome<T>, Double> crowdingDistances
+        final Map<IChromosome<T>, Double> crowdingDistanceMap
                 = GAUtils.crowdingDistanceAssignment(lastFront, fitnessFunctions);
-
-        Collections.sort(lastFront, new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                return Double.compare(crowdingDistances.get(o2), crowdingDistances.get(o1));
-            }
-        });
+        lastFront = GAUtils.sortByCrowdingDistance(lastFront, crowdingDistanceMap);
 
         // fill up the remaining slots with the least crowded chromosomes of the last front
         survivors.addAll(lastFront.subList(0, populationSize - survivors.size()));
@@ -242,8 +230,6 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
      */
     private Map<Integer, List<IChromosome<T>>> preferenceSorting(List<IChromosome<T>> population) {
 
-        MATE.log_acc("Preference Sorting...");
-
         Map<Integer, List<IChromosome<T>>> paretoFronts = new HashMap<>();
         List<IChromosome<T>> candidates = new ArrayList<>(population);
         List<IChromosome<T>> firstParetoFront = new ArrayList<>(); // F_0
@@ -258,7 +244,6 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
             firstParetoFront.add(best);
         }
 
-        MATE.log_acc("First pareto front: " + firstParetoFront.size());
         paretoFronts.put(0, firstParetoFront);
 
         // for all remaining test cases in T a fast-non-dominated-sort is used
