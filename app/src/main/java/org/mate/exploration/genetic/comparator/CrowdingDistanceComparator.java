@@ -28,7 +28,8 @@ public class CrowdingDistanceComparator<T> implements Comparator<IChromosome<T>>
     }
 
     /**
-     * Compares two {@link IChromosome}s based on their crowding distance.
+     * Compares two {@link IChromosome}s based on their crowding distance. The two chromosomes are
+     * sorted in descending order of their crowding distances.
      *
      * @param o1 The first chromosome.
      * @param o2 The second chromosome.

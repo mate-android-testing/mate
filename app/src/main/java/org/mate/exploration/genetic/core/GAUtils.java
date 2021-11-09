@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.core;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.comparator.CrowdedComparator;
 import org.mate.exploration.genetic.comparator.CrowdingDistanceComparator;
 import org.mate.exploration.genetic.comparator.DominationComparator;
 import org.mate.exploration.genetic.comparator.FitnessAndLengthComparator;
@@ -95,6 +96,25 @@ public class GAUtils {
     public static <T> List<IChromosome<T>> sortByFitnessAndLength(
             List<IChromosome<T>> chromosomes, final IFitnessFunction<T> fitnessFunction) {
         Collections.sort(chromosomes, new FitnessAndLengthComparator<>(fitnessFunction));
+        return chromosomes;
+    }
+
+    /**
+     * Sorts the chromosomes based on the rank and the crowding distance. The chromosomes are sorted
+     * in ascending order of the rank and in descending order of the crowding distance.
+     * NOTE: This method sorts the chromosomes in place.
+     *
+     * @param chromosomes The given list of chromosomes to be sorted.
+     * @param crowdingDistanceMap A mapping of chromosomes to its crowding distance.
+     * @param <T> The type of the chromosomes. Only {@link TestCase}s and {@link TestSuite}s are supported.
+     * @return Returns the chromosomes sorted based on its ranks and the crowding distances.
+     */
+    @SuppressWarnings("unused")
+    public static <T> List<IChromosome<T>> sortByRankAndCrowdingDistance(
+            List<IChromosome<T>> chromosomes,
+            final Map<IChromosome<T>, Double> crowdingDistanceMap,
+            final Map<IChromosome<T>, Integer> rankMap) {
+        Collections.sort(chromosomes, new CrowdedComparator<>(crowdingDistanceMap, rankMap));
         return chromosomes;
     }
 

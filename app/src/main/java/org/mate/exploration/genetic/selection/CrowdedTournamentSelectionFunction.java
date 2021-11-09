@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.selection;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.comparator.CrowdedComparator;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.utils.Randomness;
 
@@ -44,12 +44,10 @@ public class CrowdedTournamentSelectionFunction<T> implements ISelectionFunction
                                        Map<IChromosome<T>, Integer> rankMap,
                                        Map<IChromosome<T>, Double> crowdingDistanceMap) {
 
-        MATE.log_acc("Number of candidates: " + population.size());
-
         List<IChromosome<T>> selection = new ArrayList<>();
         List<IChromosome<T>> candidates = new LinkedList<>(population);
         int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
-        Comparator<IChromosome<T>> crowdedComparisonOperator = crowdedComparisonOperator(rankMap, crowdingDistanceMap);
+        Comparator<IChromosome<T>> crowdedComparisonOperator = new CrowdedComparator<>(crowdingDistanceMap, rankMap);
 
         for (int i = 0; i < size; i++) {
 
@@ -66,32 +64,5 @@ public class CrowdedTournamentSelectionFunction<T> implements ISelectionFunction
         }
 
         return selection;
-    }
-
-    /**
-     * Provides a comparison operators that considers both the rank and the crowding distance
-     * of the chromosomes. The chromosome with the lower rank, or in case of equal rank with a higher
-     * crowding distance, 'wins' the comparison.
-     *
-     * @param rankMap Maps each chromosome to its rank.
-     * @param crowdingDistanceMap Maps each chromosome to its crowding distance.
-     * @return Returns a value < 0 if o1 is better than o2, 0 if both are equal, or a value > 1 otherwise.
-     */
-    private Comparator<IChromosome<T>> crowdedComparisonOperator(final Map<IChromosome<T>, Integer> rankMap,
-                                                                 final Map<IChromosome<T>, Double> crowdingDistanceMap) {
-
-        return new Comparator<IChromosome<T>>() {
-            @Override
-            public int compare(IChromosome<T> o1, IChromosome<T> o2) {
-                // a lower rank is better
-                int rankCmp = Integer.compare(rankMap.get(o1), rankMap.get(o2));
-                if (rankCmp != 0) {
-                    return rankCmp;
-                } else {
-                    // a higher crowding distance is better
-                    return Double.compare(crowdingDistanceMap.get(o2), crowdingDistanceMap.get(o1));
-                }
-            }
-        };
     }
 }
