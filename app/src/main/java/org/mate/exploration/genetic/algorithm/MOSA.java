@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
@@ -26,7 +27,7 @@ import java.util.Set;
 
 /**
  * Implementation of the Many-Objective Sorting Algorithm (MOSA) based on the paper:
- * "Reformulating Branch Coverage as a Many-Objective Optimization Problem", see
+ * "Reformulating Branch Coverage as a Many-Objective Optimization Problem", see for more details:
  * https://ieeexplore.ieee.org/abstract/document/7102604
  *
  * @param <T> The type of the chromosomes. Needs to be a {@link TestCase} or a subclass of it.
@@ -36,12 +37,18 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
     /**
      * An archive that keeps track of the best chromosomes for each target.
      */
-    private Map<IFitnessFunction<T>, IChromosome<T>> archive = new HashMap<>();
+    private final Map<IFitnessFunction<T>, IChromosome<T>> archive = new HashMap<>();
 
     /**
      * The fitness functions or targets that haven't been covered yet.
      */
-    private List<IFitnessFunction<T>> uncoveredFitnessFunctions = new ArrayList<>();
+    private final List<IFitnessFunction<T>> uncoveredFitnessFunctions = new ArrayList<>();
+
+    /**
+     * MOSA uses a customized selection function that considers both the rank and the crowding
+     * distance for the selection as in NSGA-II.
+     */
+    private final CrowdedTournamentSelectionFunction<T> selectionFunction;
 
     /**
      * Initialises the MOSA algorithm with the necessary attributes.
@@ -71,16 +78,24 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
                 terminationCondition, populationSize, bigPopulationSize, pCrossover, pMutate);
 
         uncoveredFitnessFunctions.addAll(fitnessFunctions);
+        this.selectionFunction = (CrowdedTournamentSelectionFunction<T>) selectionFunction;
     }
 
     /**
      * MOSA generates a random population P_t and updates the archive accordingly, see line 3 and 4
-     * of Algorithm 1.
+     * of Algorithm 1. In addition, we need to update which fitness functions (targets) have been
+     * covered.
      */
     @Override
     public void createInitialPopulation() {
+
         super.createInitialPopulation();
         updateArchive(population);
+
+        // we need to filter the covered fitness functions (targets)
+        Set<IFitnessFunction<T>> coveredFitnessFunctions = getCoveredFitnessFunctions(
+                uncoveredFitnessFunctions, population);
+        uncoveredFitnessFunctions.removeAll(coveredFitnessFunctions);
     }
 
     /**
@@ -92,9 +107,21 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
+        /*
+         * We only need to compute the fronts F (= F1, F2,...) and the crowding distances once
+         * for the selection function. NOTE: We use here a preferenceSorting instead of the basic
+         * fastNonDominatedSort and assign the crowding distances based on the uncovered fitness
+         * functions (targets).
+         */
+        Map<Integer, List<IChromosome<T>>> paretoFronts = preferenceSorting(population);
+        Map<IChromosome<T>, Integer> rankMap = GAUtils.getRankMap(paretoFronts);
+        Map<IChromosome<T>, Double> crowdingDistanceMap
+                = GAUtils.crowdingDistanceAssignment(population, uncoveredFitnessFunctions);
+
         while (newGeneration.size() < bigPopulationSize) {
 
-            List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
+            // performs a binary tournament selection that considers both rank and crowding distance
+            List<IChromosome<T>> parents = selectionFunction.select(population, rankMap, crowdingDistanceMap);
 
             IChromosome<T> parent;
 
@@ -179,7 +206,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
 
         // fill up the new population P_t+1 with the pareto fronts as in NSGA-II
         Map<Integer, List<IChromosome<T>>> paretoFronts = preferenceSorting(population);
-        int i = 1;
+        int i = 0;
 
         // add solutions until a front can't be fully accommodated
         while (survivors.size() + paretoFronts.get(i).size() < populationSize) {
@@ -231,6 +258,7 @@ public class MOSA<T extends TestCase> extends GeneticAlgorithm<T> {
             firstParetoFront.add(best);
         }
 
+        MATE.log_acc("First pareto front: " + firstParetoFront.size());
         paretoFronts.put(0, firstParetoFront);
 
         // for all remaining test cases in T a fast-non-dominated-sort is used

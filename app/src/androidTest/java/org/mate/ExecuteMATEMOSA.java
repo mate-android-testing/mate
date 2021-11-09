@@ -5,14 +5,10 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.Algorithm;
-import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.CrossOverFunction;
-import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 import java.util.List;
@@ -24,16 +20,17 @@ public class ExecuteMATEMOSA {
     public void useAppContext() {
 
         MATE.log_acc("Starting Evolutionary Search...");
+        MATE.log_acc("MOSA algorithm");
 
         MATE mate = new MATE();
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)
                 .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
-                .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
-                .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
-                .withSelectionFunction(SelectionFunction.RANDOM_SELECTION) //todo: use better selection function
-                .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
+                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
+                .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())

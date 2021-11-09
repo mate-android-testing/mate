@@ -269,7 +269,7 @@ public class GAUtils {
 
                 } else {
 
-                    // sort on fitness, sorts in ascending order
+                    // compare on fitness, sorts in ascending order
                     if (isMaximizing) {
                         return Double.compare(fitnessChromosome1, fitnessChromosome2);
                     } else {
@@ -545,5 +545,29 @@ public class GAUtils {
         }
 
         return crowdingDistanceAssignments;
+    }
+
+    /**
+     * Converts the pareto fronts into a rank map.
+     *
+     * @param paretoFronts The given pareto fronts.
+     * @return Returns a mapping of chromosomes to its rank, i.e. the index of the pareto front.
+     */
+    public static <T> Map<IChromosome<T>, Integer> getRankMap(Map<Integer, List<IChromosome<T>>> paretoFronts) {
+
+        MATE.log_acc("Getting rank map...");
+
+        Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
+
+        for (Map.Entry<Integer, List<IChromosome<T>>> paretoFront : paretoFronts.entrySet()) {
+            int rank = paretoFront.getKey();
+            MATE.log_acc("Transforming front " + rank + " with " + paretoFront.getValue().size() + " members!");
+            for (IChromosome<T> solution : paretoFront.getValue()) {
+                rankMap.put(solution, rank);
+            }
+        }
+
+        MATE.log_acc("Rank map size: " + rankMap.size());
+        return rankMap;
     }
 }
