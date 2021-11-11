@@ -313,10 +313,10 @@ public class DeviceMgr {
                 handleLongClick(selectedWidget);
                 break;
             case TYPE_TEXT:
-                handleEdit(action);
+                handleEdit(selectedWidget);
                 break;
             case TYPE_SPECIFIC_TEXT:
-                handleEdit(action);
+                handleEdit(selectedWidget);
             case CLEAR_WIDGET:
                 // TODO: Do we actually need this action?
                 //  A 'type text' action overwrites the previous text anyways.
@@ -594,14 +594,13 @@ public class DeviceMgr {
     }
 
     /**
-     * Handles the insertion of a text in some editable widget.
+     * Handles the insertion of a text in the given editable widget.
      *
-     * @param action The widget action to be performed.
+     * @param widget The editable widget.
      */
-    private void handleEdit(WidgetAction action) {
+    private void handleEdit(Widget widget) {
 
-        Widget widget = action.getWidget();
-        String textData = generateTextData(action);
+        String textData = generateTextData(widget);
         MATE.log_debug("Input text: " + textData);
         MATE.log_debug("Previous text: " + widget.getText());
 
@@ -628,12 +627,10 @@ public class DeviceMgr {
     /**
      * Generates a text input for the given editable widget.
      *
-     * @param action The widget action containing the editable widget.
+     * @param widget The editable widget.
      * @return Returns a text input for the editable widget.
      */
-    private String generateTextData(WidgetAction action) {
-
-        Widget widget = action.getWidget();
+    private String generateTextData(Widget widget) {
 
         String widgetText = widget.getText();
         if (widgetText.isEmpty())

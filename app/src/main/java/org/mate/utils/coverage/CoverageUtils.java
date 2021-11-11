@@ -189,7 +189,7 @@ public class CoverageUtils {
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
 
-                // log activity coverage in any cse
+                // log activity coverage in any case
                 MATE.log("Activity coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
 
