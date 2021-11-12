@@ -7,7 +7,6 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
-import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -333,10 +332,26 @@ public class ActionsScreenState extends AbstractScreenState {
     private List<MotifAction> getMotifActions(Set<WidgetAction> widgetActions) {
 
         List<MotifAction> motifActions = new ArrayList<>();
+        motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
+
+        // TODO: add further motif genes, e.g. scroll + selection entry in list view
+
+        return motifActions;
+    }
+
+    /**
+     * Extracts the possible 'fill form and click submit button' motif actions.
+     *
+     * @param widgetActions The set of extracted widget actions.
+     * @return Returns the possible 'fill form and click submit button' actions if any.
+     */
+    private List<MotifAction> extractFillFormAndSubmitActions(Set<WidgetAction> widgetActions) {
+
+        List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
 
         /*
-        * TODO: Extract only those editable widgets and buttons that belong to the same form.
-        *  We should exploit the characteristics of the ui tree for that purpose.
+         * TODO: Extract only those editable widgets and buttons that belong to the same form.
+         *  We should exploit the characteristics of the ui tree for that purpose.
          */
 
         List<WidgetAction> textInsertActions = widgetActions.stream()
@@ -345,26 +360,21 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<WidgetAction> clickableButtonActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isButtonType()
-                            && widgetAction.getWidget().isClickable())
+                        && widgetAction.getWidget().isClickable())
                 .collect(Collectors.toList());
 
         if (!textInsertActions.isEmpty() && !clickableButtonActions.isEmpty()) {
 
-            // pick a random button, hopefully it's the submit button
-            WidgetAction clickableButtonAction = Randomness.randomElement(clickableButtonActions);
-
-            List<WidgetAction> fillFormAndSubmitActions = new ArrayList<>(textInsertActions);
-            fillFormAndSubmitActions.add(clickableButtonAction);
-
-            MotifAction fillFormAndSubmit
-                    = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, fillFormAndSubmitActions);
-
-            motifActions.add(fillFormAndSubmit);
+            clickableButtonActions.stream().forEach(clickableButtonAction -> {
+                List<WidgetAction> actions = new ArrayList<>(textInsertActions);
+                actions.add(clickableButtonAction);
+                MotifAction fillFormAndSubmitAction
+                        = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);
+                fillFormAndSubmitActions.add(fillFormAndSubmitAction);
+            });
         }
 
-        // TODO: add further motif genes, e.g. scroll + selection entry in list view
-
-        return motifActions;
+        return fillFormAndSubmitActions;
     }
 
     @SuppressWarnings("debug")
