@@ -146,8 +146,11 @@ public class DeviceMgr {
 
         switch (typeOfAction) {
             case FILL_FORM_AND_SUBMIT:
-                fillFormAndSubmit(action);
-              break;
+                handleFillFormAndSubmit(action);
+                break;
+            case SPINNER_SCROLLING:
+                handleSpinnerScrolling(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
@@ -160,7 +163,7 @@ public class DeviceMgr {
      *
      * @param action The given motif action.
      */
-    private void fillFormAndSubmit(MotifAction action) {
+    private void handleFillFormAndSubmit(MotifAction action) {
         if (Properties.WIDGET_BASED_ACTIONS()) {
             List<WidgetAction> widgetActions = action.getWidgetActions();
             for (int i = 0; i < widgetActions.size(); i++) {
@@ -174,6 +177,72 @@ public class DeviceMgr {
             }
         } else {
             // TODO: find all editable widgets plus buttons
+        }
+    }
+
+    /**
+     * Performs a scrolling action on a spinner, i.e. one combines the clicking on the spinner to
+     * open the drop-down menu (list view) and the selection of a (different) entry from the
+     * drop-down menu.
+     *
+     * @param action The given motif action.
+     */
+    private void handleSpinnerScrolling(MotifAction action) {
+
+        if (Properties.WIDGET_BASED_ACTIONS()) {
+
+            // get the currently displayed spinner entry
+            WidgetAction widgetAction = action.getWidgetActions().get(0);
+            Widget widget = widgetAction.getWidget();
+            Widget selectedWidget = widget.getChildren().get(0);
+
+            // click on the spinner first to open the drop-down menu
+            UiObject2 spinner = findObject(widget);
+
+            if (spinner == null) {
+                // we fall back to single click mechanism
+                MATE.log("Spinner element couldn't be found!");
+                handleClick(widget);
+                return;
+            }
+
+            Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
+
+            if (success != null && success) {
+
+                UiObject2 selectedEntry = findObject(selectedWidget);
+
+                if (selectedEntry == null) {
+                    // we fall back to single click mechanism
+                    MATE.log("Selected entry of spinner couldn't be found!");
+                    handleClick(widget);
+                    return;
+                }
+
+                // NOTE: We can't re-use the spinner object; it is not valid anymore!
+                UiObject2 dropDownMenu = selectedEntry.getParent();
+
+                if (dropDownMenu.getChildren().isEmpty()) {
+                    // we fall back to single click mechanism
+                    MATE.log("Spinner without drop-down menu!");
+                    handleClick(widget);
+                    return;
+                }
+
+                /*
+                * We need to make a deterministic selection, otherwise when we replay such an action,
+                * we may end up in a different state, which may break replay execution. Thus, we
+                * simply pick the next entry of the drop-down menu.
+                 */
+                int index = dropDownMenu.getChildren().indexOf(selectedEntry);
+                int nextIndex = index + 1 % dropDownMenu.getChildren().size();
+                UiObject2 newSelection = dropDownMenu.getChildren().get(nextIndex);
+
+                // click on new entry in order to select it
+                newSelection.click();
+            }
+        } else {
+            // TODO: find a clickable spinner and click on it
         }
     }
 
@@ -403,7 +472,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     *          is returned.
+     * is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -420,7 +489,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -449,9 +518,9 @@ public class DeviceMgr {
             throw new IllegalStateException(e);
         } finally {
             /*
-            * After the rotation it takes some time that the device gets back in a stable state.
-            * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
-            * minimal waiting time to avoid this problem.
+             * After the rotation it takes some time that the device gets back in a stable state.
+             * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
+             * minimal waiting time to avoid this problem.
              */
             Utils.sleep(100);
         }
@@ -498,7 +567,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     *          is returned.
+     * is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -597,8 +666,7 @@ public class DeviceMgr {
      * best effort approach.
      *
      * @param widget The widget whose ui object should be looked up.
-     * @return Returns the corresponding ui object or {@code null} if no
-     *          such ui object could be found.
+     * @return Returns the corresponding ui object or {@code null} if no such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -649,9 +717,9 @@ public class DeviceMgr {
     private void handleEdit(Widget widget) {
 
         /*
-        * If we run in replay mode, we should insert the text that we recorded, otherwise we may
-        * break execution, since a different (valid) input may lead to a different state, e.g. we
-        * end on a different activity and all subsequent widget actions are not applicable anymore.
+         * If we run in replay mode, we should insert the text that we recorded, otherwise we may
+         * break execution, since a different (valid) input may lead to a different state, e.g. we
+         * end on a different activity and all subsequent widget actions are not applicable anymore.
          */
         String textData = Registry.isReplayMode() ? widget.getText() : generateTextData(widget);
 

@@ -333,10 +333,39 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<MotifAction> motifActions = new ArrayList<>();
         motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
+        motifActions.addAll(extractSpinnerScrollActions(widgetActions));
 
-        // TODO: add further motif genes, e.g. scroll + selection entry in list view
+        // TODO: add further motif genes, e.g. scrolling on list views
 
         return motifActions;
+    }
+
+    /**
+     * Extracts the possible spinner scroll motif actions. A scroll motif action combines the
+     * clicking and scrolling on a spinner. Without this motif action, one has to click first on a
+     * spinner, which in turn opens the drop-down menu, and click or scroll to select a different
+     * entry.
+     *
+     * @param widgetActions The set of extracted widget actions.
+     * @return Returns the possible spinner motif actions if any.
+     */
+    private List<MotifAction> extractSpinnerScrollActions(Set<WidgetAction> widgetActions) {
+
+        List<MotifAction> spinnerScrollActions = new ArrayList<>();
+
+        List<WidgetAction> spinnerClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isClickable()
+                        && widgetAction.getWidget().isSpinnerType())
+                .collect(Collectors.toList());
+
+        spinnerClickActions.stream().forEach(spinnerClickAction -> {
+            MotifAction spinnerScrollAction
+                    = new MotifAction(ActionType.SPINNER_SCROLLING, activityName,
+                    Collections.singletonList(spinnerClickAction));
+            spinnerScrollActions.add(spinnerScrollAction);
+        });
+
+        return spinnerScrollActions;
     }
 
     /**
