@@ -12,6 +12,7 @@ import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
@@ -20,6 +21,7 @@ import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -110,6 +112,8 @@ public class DeviceMgr {
             executeAction((IntentBasedAction) action);
         } else if (action instanceof SystemAction) {
             executeAction((SystemAction) action);
+        } else if (action instanceof MotifAction) {
+            executeAction((MotifAction) action);
         } else if (action instanceof UIAction) {
             executeAction((UIAction) action);
         } else {
@@ -127,6 +131,49 @@ public class DeviceMgr {
         Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(), event.getReceiver(),
                 event.getAction(), event.isDynamicReceiver());
         checkForCrash();
+    }
+
+    /**
+     * Executes the given motif action.
+     *
+     * @param action The given motif action.
+     * @throws AUTCrashException If the app crashes.
+     */
+    private void executeAction(MotifAction action) throws AUTCrashException {
+
+        ActionType typeOfAction = action.getActionType();
+
+        switch (typeOfAction) {
+            case FILL_FORM_AND_SUBMIT:
+                fillFormAndSubmit(action);
+              break;
+            default:
+                throw new UnsupportedOperationException("UI action "
+                        + action.getActionType() + " not yet supported!");
+        }
+        checkForCrash();
+    }
+
+    /**
+     * Executes the motif action 'fill form and click submit' as used in the Sapienz paper.
+     *
+     * @param action The given motif action.
+     */
+    private void fillFormAndSubmit(MotifAction action) {
+        if (Properties.WIDGET_BASED_ACTIONS()) {
+            List<WidgetAction> widgetActions = action.getWidgetActions();
+            for (int i = 0; i < widgetActions.size(); i++) {
+                WidgetAction widgetAction = widgetActions.get(i);
+                if (i < widgetActions.size() - 1) {
+                    handleEdit(widgetAction.getWidget());
+                } else {
+                    // the last widget actions represents the click on the submit button
+                    handleClick(widgetAction.getWidget());
+                }
+            }
+        } else {
+            // TODO: find all editable widgets plus buttons
+        }
     }
 
     /**

@@ -26,7 +26,8 @@ public enum ActionType {
     DPAD_LEFT,
     DPAD_RIGHT,
     DPAD_CENTER,
-    ENTER;
+    ENTER,
+    FILL_FORM_AND_SUBMIT;
 
     public static final ActionType[] primitiveActionTypes = {
             CLICK,
@@ -37,5 +38,9 @@ public enum ActionType {
             SWIPE_RIGHT,
             BACK,
             MENU
+    };
+
+    public static final ActionType[] motifActionTypes = {
+      FILL_FORM_AND_SUBMIT
     };
 }
