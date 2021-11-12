@@ -2,13 +2,12 @@ package org.mate.utils.testcase;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.PrimitiveAction;
-import org.mate.interaction.action.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,8 +158,7 @@ public final class TestCaseOptimizer {
         List<Action> actions = testCase.getEventSequence();
 
         for (Action action : actions) {
-            if (action instanceof WidgetAction
-                    || action instanceof PrimitiveAction) {
+            if (action instanceof UIAction) {
                 continue;
             } else if (action instanceof IntentBasedAction
                     && ((IntentBasedAction) action).getComponentType() == ComponentType.ACTIVITY) {
@@ -188,7 +186,7 @@ public final class TestCaseOptimizer {
         List<Action> actions = testCase.getEventSequence();
 
         for (Action action : actions) {
-            if (action instanceof WidgetAction) {
+            if (action instanceof UIAction) {
                 toBeRemoved.add(action);
             }
         }

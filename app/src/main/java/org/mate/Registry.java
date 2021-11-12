@@ -35,6 +35,19 @@ public class Registry {
      */
     private static Long timeout;
 
+    /**
+     * Whether we are in replay mode. Default: Off
+     */
+    private static boolean replayMode;
+
+    public static void registerReplayMode() {
+        replayMode = true;
+    }
+
+    public static boolean isReplayMode() {
+        return replayMode;
+    }
+
     public static void registerUiAbstractionLayer(UIAbstractionLayer uiAbstractionLayer) {
         Registry.uiAbstractionLayer = uiAbstractionLayer;
     }

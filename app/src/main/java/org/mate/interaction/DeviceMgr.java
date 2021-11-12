@@ -9,6 +9,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
+import android.support.test.uiautomator.Until;
 import android.text.InputType;
 
 import org.mate.MATE;
@@ -647,7 +648,13 @@ public class DeviceMgr {
      */
     private void handleEdit(Widget widget) {
 
-        String textData = generateTextData(widget);
+        /*
+        * If we run in replay mode, we should insert the text that we recorded, otherwise we may
+        * break execution, since a different (valid) input may lead to a different state, e.g. we
+        * end on a different activity and all subsequent widget actions are not applicable anymore.
+         */
+        String textData = Registry.isReplayMode() ? widget.getText() : generateTextData(widget);
+
         MATE.log_debug("Input text: " + textData);
         MATE.log_debug("Previous text: " + widget.getText());
 
