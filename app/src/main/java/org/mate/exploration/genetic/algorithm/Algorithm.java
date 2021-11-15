@@ -9,4 +9,5 @@ public enum Algorithm {
     RANDOM_SEARCH,
     RANDOM_WALK,
     STANDARD_GA,
+    SAPIENZ;
 }

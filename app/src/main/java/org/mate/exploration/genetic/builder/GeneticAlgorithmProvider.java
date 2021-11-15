@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
+import org.mate.exploration.genetic.algorithm.Sapienz;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
@@ -106,6 +107,8 @@ public class GeneticAlgorithmProvider {
                 return initializeRandomWalk();
             case RANDOM_SEARCH:
                 return initializeRandomSearch();
+            case SAPIENZ:
+                return initializeSapienz();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -194,6 +197,20 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 this.initializeTerminationCondition());
+    }
+
+    private <T> Sapienz<T> initializeSapienz() {
+        return new Sapienz<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getBigPopulationSize(),
+                getPCrossOver(),
+                getPMutate());
     }
 
     private <T> IChromosomeFactory<T> initializeChromosomeFactory() {
