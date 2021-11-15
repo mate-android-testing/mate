@@ -323,7 +323,7 @@ public class GeneticAlgorithmProvider {
                 case SAPIENZ_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
-                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPInnerMutate());
+                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
                 case PRIMITIVE_SHUFFLE_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
@@ -536,21 +536,6 @@ public class GeneticAlgorithmProvider {
             }
         } else {
             return Double.valueOf(pMutate);
-        }
-    }
-
-    private double getPInnerMutate() {
-        String pInnerMutate
-                = properties.getProperty(GeneticAlgorithmBuilder.P_INNER_MUTATE_KEY);
-        if (pInnerMutate == null) {
-            if (useDefaults) {
-                return org.mate.Properties.P_INNER_MUTATE();
-            } else {
-                throw new IllegalStateException(
-                        "Without using defaults: p inner mutate not specified");
-            }
-        } else {
-            return Double.valueOf(pInnerMutate);
         }
     }
 

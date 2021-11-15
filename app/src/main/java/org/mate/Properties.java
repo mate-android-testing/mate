@@ -137,10 +137,6 @@ public class Properties {
     public static double P_MUTATE() {
         return propertyOr(0.3);
     }
-    // for mutation functions that apply multiple mutations based on the given probability
-    public static double P_INNER_MUTATE() {
-        return propertyOr(0.3);
-    }
 
     public static double P_SAMPLE_RANDOM() {
         return propertyOr(0.5);

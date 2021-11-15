@@ -41,7 +41,6 @@ public class ExecuteMATESapienzImpl {
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
-                .withPInnerMutate(Properties.P_INNER_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
                 .withNumTestCases(Properties.NUMBER_TESTCASES())
                 .build();

@@ -135,6 +135,12 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         return mutatedChromosome;
     }
 
+    /**
+     * Performs an (in-place) one-point crossover with the given two test cases.
+     *
+     * @param t1 The first test case.
+     * @param t2 The second test case.
+     */
     private void onePointCrossover(TestCase t1, TestCase t2) {
 
         TestCase copyT1 = TestCase.newDummy();
