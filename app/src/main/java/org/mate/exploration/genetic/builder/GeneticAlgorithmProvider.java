@@ -199,6 +199,12 @@ public class GeneticAlgorithmProvider {
     }
 
     private <T> Sapienz<T> initializeSapienz() {
+
+        if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
+            throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn" +
+                    "the property Properties.WIDGET_BASED_ACTIONS() off.");
+        }
+
         return new Sapienz<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),

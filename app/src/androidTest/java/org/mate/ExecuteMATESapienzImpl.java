@@ -35,7 +35,7 @@ public class ExecuteMATESapienzImpl {
                 .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)
                 .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
-                .withFitnessFunction(FitnessFunction.TEST_SUITE_LENGTH)
+                .withFitnessFunction(FitnessFunction.TEST_LENGTH)
                 .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())

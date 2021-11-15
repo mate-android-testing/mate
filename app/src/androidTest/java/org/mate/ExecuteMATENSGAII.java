@@ -30,7 +30,7 @@ public class ExecuteMATENSGAII {
                 .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
                 .withMutationFunction(Properties.MUTATION_FUNCTION())
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
-                .withFitnessFunction(FitnessFunction.TEST_CASE_LENGTH)
+                .withFitnessFunction(FitnessFunction.TEST_LENGTH)
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_STATES)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())

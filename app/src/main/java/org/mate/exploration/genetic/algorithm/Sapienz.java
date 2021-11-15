@@ -76,7 +76,8 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 * Sapienz uses a uniform crossover operator that takes two individuals x1, x2 as input
                 * and returns two individuals x1', x2'. The first individual x1' is added to the
                 * offspring population Q. Since x2' is not used further more, we can stick to the
-                * default crossover operators already implemented in MATE.
+                * default crossover operators already implemented in MATE. Note that the crossover
+                * function directly executes the offspring x1' if necessary.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
                 IChromosome<T> offspring = crossOverFunction.cross(parents);
@@ -86,6 +87,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 /*
                 * Sapienz mutates a randomly selected individual x1 in a multi-step mutation
                 * procedure and adds the mutated individual x1' to the offspring population Q.
+                * Note that the mutation function directly executes the mutated individual x1'.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
                 IChromosome<T> offspring = mutationFunction.mutate(parents.get(0));
