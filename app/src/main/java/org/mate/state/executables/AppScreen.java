@@ -1,5 +1,7 @@
 package org.mate.state.executables;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+
 import android.app.Instrumentation;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
@@ -21,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-
 /**
  * Models an app screen with all (discoverable) widgets on it.
  */
@@ -39,15 +39,14 @@ public class AppScreen {
     private final String packageName;
 
     /**
-     * A list of discovered widgets on the app screen.
-     */
-    private List<Widget> widgets;
-
-    /**
      * Collects the text hints for editable fields over all app screens.
      * The key is defined through the resource id of the widget.
      */
-    private static Map<String, String> editTextHints = new Hashtable<String,String>();
+    private static final Map<String, String> editTextHints = new Hashtable<String, String>();
+    /**
+     * A list of discovered widgets on the app screen.
+     */
+    private final List<Widget> widgets;
 
     /**
      * Stores relevant information about the device, e.g. the display height.
@@ -129,7 +128,10 @@ public class AppScreen {
         // traverse children
         for (int i = 0; i < node.getChildCount(); i++) {
             // the local index is simply the child number
-            globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
+            final AccessibilityNodeInfo child = node.getChild(i);
+            if (child != null) {
+                globalIndex = parseWidgets(child, widget, depth, globalIndex, i);
+            }
         }
         return globalIndex;
     }
