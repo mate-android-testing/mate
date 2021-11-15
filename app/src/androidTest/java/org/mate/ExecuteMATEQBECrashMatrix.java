@@ -29,14 +29,13 @@ public class ExecuteMATEQBECrashMatrix {
                 MATE.log_acc("Finished run due to timeout.");
                 final TransitionSystemSerializer serializer = new TransitionSystemSerializer(TRANSITION_SYSTEM_DIR);
                 serializer.serialize(tester.getTransitionSystem(), FILE_NAME);
+                Registry.getEnvironmentManager().fetchTransitionSystem(TRANSITION_SYSTEM_DIR, FILE_NAME);
             } else {
                 final SimpleTester<QBEState, QBEAction> tester = new SimpleTester<>(app, explorationStrategy, Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
                 MATE.log_acc("Starting timeout run...");
                 tester.run();
                 MATE.log_acc("Finished run due to timeout.");
             }
-
-            Registry.getEnvironmentManager().fetchTransitionSystem(TRANSITION_SYSTEM_DIR, FILE_NAME);
         }
     }
 }
