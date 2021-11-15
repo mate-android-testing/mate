@@ -105,7 +105,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
      * @param selectionFunction The unused selection function, see {@link ISelectionFunction}.
      * @param crossOverFunction The unused crossover function, see {@link ICrossOverFunction}.
      * @param mutationFunction The used mutation function, see {@link IMutationFunction}.
-     * @param iFitnessFunctions The used fitness function, see {@link IFitnessFunction}.
+     * @param fitnessFunctions The used fitness function, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
      * @param populationSize The population size n.
      * @param bigPopulationSize The big population size, unused here.
@@ -119,7 +119,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                ISelectionFunction<T> selectionFunction,
                ICrossOverFunction<T> crossOverFunction,
                IMutationFunction<T> mutationFunction,
-               List<IFitnessFunction<T>> iFitnessFunctions,
+               List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
                int populationSize,
                int bigPopulationSize,
@@ -130,7 +130,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                int mutationRate) {
 
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
-                iFitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
+                fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
 
         this.archive = new HashMap<>(); // (k -> T_k)
@@ -151,7 +151,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Population size n: " + populationSizeStart);
         MATE.log_acc("Mutation rate m: " + mutationRateStart);
 
-        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
+        for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
 
             // for each testing target k we keep a population T_k of up to size n
             archive.put(fitnessFunction, new LinkedList<ChromosomeFitnessTuple>());
