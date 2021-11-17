@@ -218,7 +218,7 @@ public class DeviceMgr {
                         .collect(Collectors.toList());
 
                 List<Widget> buttons = screenState.getWidgets().stream()
-                        .filter(Widget::isEditTextType)
+                        .filter(Widget::isButtonType)
                         .collect(Collectors.toList());
 
                 MATE.log("Number of buttons: " + buttons.size());
