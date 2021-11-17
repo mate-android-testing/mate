@@ -35,6 +35,7 @@ import org.mate.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -275,6 +276,62 @@ public class DeviceMgr {
     }
 
     /**
+     * Performs the spinner scrolling motif action, i.e. one combines the clicking and selecting
+     * of another entry in the drop-down menu.
+     *
+     * @param spinnerWidget The selected spinner.
+     * @param selectedWidget The currently selected entry of nested the drop-down menu.
+     */
+    private void handleSpinnerScrolling(Widget spinnerWidget, Widget selectedWidget) {
+
+        // click on the spinner first to open the drop-down menu
+        UiObject2 spinner = findObject(spinnerWidget);
+
+        if (spinner == null) {
+            // we fall back to single click mechanism
+            MATE.log("Spinner element couldn't be found!");
+            handleClick(spinnerWidget);
+            return;
+        }
+
+        Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
+
+        if (success != null && success) {
+
+            UiObject2 selectedEntry = findObject(selectedWidget);
+
+            if (selectedEntry == null) {
+                // we fall back to single click mechanism
+                MATE.log("Selected entry of spinner couldn't be found!");
+                handleClick(spinnerWidget);
+                return;
+            }
+
+            // NOTE: We can't re-use the spinner object; it is not valid anymore!
+            UiObject2 dropDownMenu = selectedEntry.getParent();
+
+            if (dropDownMenu.getChildren().isEmpty()) {
+                // we fall back to single click mechanism
+                MATE.log("Spinner without drop-down menu!");
+                handleClick(spinnerWidget);
+                return;
+            }
+
+            /*
+             * We need to make a deterministic selection, otherwise when we replay such an action,
+             * we may end up in a different state, which may break replay execution. Thus, we
+             * simply pick the next entry of the drop-down menu.
+             */
+            int index = dropDownMenu.getChildren().indexOf(selectedEntry);
+            int nextIndex = index + 1 % dropDownMenu.getChildren().size();
+            UiObject2 newSelection = dropDownMenu.getChildren().get(nextIndex);
+
+            // click on new entry in order to select it
+            newSelection.click();
+        }
+    }
+
+    /**
      * Performs a scrolling action on a spinner, i.e. one combines the clicking on the spinner to
      * open the drop-down menu (list view) and the selection of a (different) entry from the
      * drop-down menu.
@@ -285,57 +342,15 @@ public class DeviceMgr {
 
         if (Properties.WIDGET_BASED_ACTIONS()) {
 
-            // get the currently displayed spinner entry
             WidgetAction widgetAction = (WidgetAction) action.getUIActions().get(0);
+
+            // retrieve the spinner widget and the selected entry of the dropdown-menu
             Widget spinnerWidget = widgetAction.getWidget();
             Widget selectedWidget = spinnerWidget.getChildren().get(0);
 
-            // click on the spinner first to open the drop-down menu
-            UiObject2 spinner = findObject(spinnerWidget);
-
-            if (spinner == null) {
-                // we fall back to single click mechanism
-                MATE.log("Spinner element couldn't be found!");
-                handleClick(spinnerWidget);
-                return;
-            }
-
-            Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
-
-            if (success != null && success) {
-
-                UiObject2 selectedEntry = findObject(selectedWidget);
-
-                if (selectedEntry == null) {
-                    // we fall back to single click mechanism
-                    MATE.log("Selected entry of spinner couldn't be found!");
-                    handleClick(spinnerWidget);
-                    return;
-                }
-
-                // NOTE: We can't re-use the spinner object; it is not valid anymore!
-                UiObject2 dropDownMenu = selectedEntry.getParent();
-
-                if (dropDownMenu.getChildren().isEmpty()) {
-                    // we fall back to single click mechanism
-                    MATE.log("Spinner without drop-down menu!");
-                    handleClick(spinnerWidget);
-                    return;
-                }
-
-                /*
-                * We need to make a deterministic selection, otherwise when we replay such an action,
-                * we may end up in a different state, which may break replay execution. Thus, we
-                * simply pick the next entry of the drop-down menu.
-                 */
-                int index = dropDownMenu.getChildren().indexOf(selectedEntry);
-                int nextIndex = index + 1 % dropDownMenu.getChildren().size();
-                UiObject2 newSelection = dropDownMenu.getChildren().get(nextIndex);
-
-                // click on new entry in order to select it
-                newSelection.click();
-            }
+            handleSpinnerScrolling(spinnerWidget, selectedWidget);
         } else {
+
             if (Registry.isReplayMode()) {
 
                 // perform click on recorded spinner
@@ -353,69 +368,28 @@ public class DeviceMgr {
 
             } else {
 
+                /*
+                 * If we deal with primitive actions, then we elect a random spinner widget of
+                 * the current screen. In addition, we need to record the executed actions in order to
+                 * make replaying deterministic.
+                 */
                 IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
                 String currentActivity = screenState.getActivityName();
-
-                // we need to record the executed actions for a possible replaying
-                List<UIAction> uiActions = new ArrayList<>();
 
                 List<Widget> spinners = screenState.getWidgets().stream()
                         .filter(Widget::isClickable)
                         .filter(Widget::isSpinnerType)
                         .collect(Collectors.toList());
 
-                // pick a random spinner
+                // pick a random spinner and retrieve the selected drop-down menu entry
                 Widget spinnerWidget = Randomness.randomElement(spinners);
                 Widget selectedWidget = spinnerWidget.getChildren().get(0);
-                UiObject2 spinner = findObject(spinnerWidget);
 
-                // record selected spinner for possible replaying
-                uiActions.add(new PrimitiveAction(spinnerWidget.getX(), spinnerWidget.getY(),
-                                ActionType.CLICK, currentActivity));
-                action.setUiActions(uiActions);
+                handleSpinnerScrolling(spinnerWidget, selectedWidget);
 
-                if (spinner == null) {
-                    // we fall back to single click mechanism
-                    MATE.log("Spinner element couldn't be found!");
-                    handleClick(spinnerWidget);
-                    return;
-                }
-
-                Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
-
-                if (success != null && success) {
-
-                    UiObject2 selectedEntry = findObject(selectedWidget);
-
-                    if (selectedEntry == null) {
-                        // we fall back to single click mechanism
-                        MATE.log("Selected entry of spinner couldn't be found!");
-                        handleClick(spinnerWidget);
-                        return;
-                    }
-
-                    // NOTE: We can't re-use the spinner object; it is not valid anymore!
-                    UiObject2 dropDownMenu = selectedEntry.getParent();
-
-                    if (dropDownMenu.getChildren().isEmpty()) {
-                        // we fall back to single click mechanism
-                        MATE.log("Spinner without drop-down menu!");
-                        handleClick(spinnerWidget);
-                        return;
-                    }
-
-                    /*
-                     * We need to make a deterministic selection, otherwise when we replay such an action,
-                     * we may end up in a different state, which may break replay execution. Thus, we
-                     * simply pick the next entry of the drop-down menu.
-                     */
-                    int index = dropDownMenu.getChildren().indexOf(selectedEntry);
-                    int nextIndex = index + 1 % dropDownMenu.getChildren().size();
-                    UiObject2 newSelection = dropDownMenu.getChildren().get(nextIndex);
-
-                    // click on new entry in order to select it
-                    newSelection.click();
-                }
+                PrimitiveAction spinnerClick = new PrimitiveAction(spinnerWidget.getX(),
+                        spinnerWidget.getY(), ActionType.CLICK, currentActivity);
+                action.setUiActions(Collections.singletonList(spinnerClick));
             }
         }
     }
