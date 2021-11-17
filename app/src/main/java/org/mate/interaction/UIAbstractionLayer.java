@@ -52,7 +52,7 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the list of executable widget actions on the current screen.
+     * Returns the list of executable ui actions on the current screen.
      *
      * @return Returns the list of executable widget actions.
      */

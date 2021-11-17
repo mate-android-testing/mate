@@ -395,7 +395,7 @@ public class ActionsScreenState extends AbstractScreenState {
         if (!textInsertActions.isEmpty() && !clickableButtonActions.isEmpty()) {
 
             clickableButtonActions.stream().forEach(clickableButtonAction -> {
-                List<WidgetAction> actions = new ArrayList<>(textInsertActions);
+                List<UIAction> actions = new ArrayList<>(textInsertActions);
                 actions.add(clickableButtonAction);
                 MotifAction fillFormAndSubmitAction
                         = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);

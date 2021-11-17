@@ -9,22 +9,72 @@ import org.mate.utils.Randomness;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * A primitive action is not associated with a specific widget, but rather to (random) coordinates
+ * x and y. Hence, a primitive action can be applied in any circumstance, but it may has no effect
+ * if x and y don't refer to the location of a widget.
+ */
 public class PrimitiveAction extends UIAction {
 
+    /**
+     * The x and y coordinates at which the action should be applied.
+     */
     private final int x, y;
 
+    /**
+     * The text that was inserted to a possible input field at position x and y.
+     * We need to save the text in order to allow a deterministic replaying of actions.
+     */
+    private String text;
+
+    /**
+     * Initialises a primitive actions that should be applied at the given x and y coordinates.
+     *
+     * @param x The x coordinate.
+     * @param y The y coordinate.
+     * @param actionType The type of action, e.g. click.
+     * @param activity The current activity.
+     */
     public PrimitiveAction(int x, int y, ActionType actionType, String activity) {
         super(actionType, activity);
         this.x = x;
         this.y = y;
     }
 
+    /**
+     * Returns the x coordinate.
+     *
+     * @return Returns the x coordinate.
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * Returns the y coordinate.
+     *
+     * @return Returns the y coordinate.
+     */
     public int getY() {
         return y;
+    }
+
+    /**
+     * Returns the text that was used for a input field.
+     *
+     * @return Returns the text that was used for a input field or {@code null} if not set yet.
+     */
+    public String getText() {
+        return text;
+    }
+
+    /**
+     * Records the text that was used for an input field.
+     *
+     * @param text The text that was used for an input field.
+     */
+    public void setText(String text) {
+        this.text = text;
     }
 
     /**

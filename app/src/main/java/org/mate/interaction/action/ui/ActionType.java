@@ -37,6 +37,7 @@ public enum ActionType {
             SWIPE_DOWN,
             SWIPE_LEFT,
             SWIPE_RIGHT,
+            TYPE_TEXT,
             BACK,
             MENU
     };

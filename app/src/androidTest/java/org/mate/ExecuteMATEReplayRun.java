@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.utils.testcase.TestCaseOptimizer;
@@ -197,7 +198,7 @@ public class ExecuteMATEReplayRun {
 
             MATE.log(selectedAction.getActionType() + "on " + selectedAction.getActivityName());
 
-            for (WidgetAction widgetAction : selectedAction.getWidgetActions()) {
+            for (UIAction widgetAction : selectedAction.getUIActions()) {
                 MATE.log(widgetAction.toString());
             }
 
@@ -212,7 +213,7 @@ public class ExecuteMATEReplayRun {
 
                         MATE.log(motifAction.getActionType() + "on " + motifAction.getActivityName());
 
-                        for (WidgetAction widgetAction : motifAction.getWidgetActions()) {
+                        for (UIAction widgetAction : motifAction.getUIActions()) {
                             MATE.log(widgetAction.toString());
                         }
                     }

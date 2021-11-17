@@ -2,6 +2,7 @@ package org.mate.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.utils.Randomness;
 
@@ -17,15 +18,11 @@ import java.util.Objects;
  */
 public class MotifAction extends UIAction {
 
-    // TODO: Consider if we need to use the more generic ui actions to represent a motif gene.
-
     /**
-     * The list of widget actions that represent the motif gene. Only available when the respective
-     * {@link org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory} considers a
-     * {@link org.mate.state.IScreenState} for retrieving the actions, like in the traditional
-     * widget based exploration.
+     * The list of ui actions that represent the motif gene. Depending on whether we use widget-based
+     * or primitive actions, the list contains those type of actions.
      */
-    private final List<WidgetAction> widgetActions;
+    private List<UIAction> uiActions;
 
     /**
      * Constructs a new motif action as used in the
@@ -40,28 +37,35 @@ public class MotifAction extends UIAction {
     }
 
     /**
-     * Constructs a new motif action that is backed by a list of widget actions.
+     * Constructs a new motif action that is backed by a list of ui actions.
      *
      * @param actionType   The type of action, e.g. FILL_FORM_AND_SUBMIT.
      * @param activityName The name of the activity on which the action should be applied.
-     * @param widgetActions The list of widget actions that represent the motif gene.
+     * @param uiActions The list of ui actions that represent the motif gene.
      */
-    public MotifAction(ActionType actionType, String activityName, List<WidgetAction> widgetActions) {
+    public MotifAction(ActionType actionType, String activityName, List<UIAction> uiActions) {
         super(actionType, activityName);
-        this.widgetActions = widgetActions;
+        this.uiActions = uiActions;
     }
 
     /**
-     * Returns the widget actions that back the motif gene.
+     * Saves the ui actions. Should be only used when {@link Properties#WIDGET_BASED_ACTIONS()} is
+     * turned off, i.e. we use primitive actions. It is necessary to save the actions in order to
+     * replay them if desired.
      *
-     * @return Returns the widget actions that back the motif action.
+     * @param uiActions The list of ui actions that represent the motif gene.
      */
-    public List<WidgetAction> getWidgetActions() {
-        if (widgetActions == null) {
-            throw new IllegalStateException("The motif action is not backed by any widget actions!");
-        } else {
-            return Collections.unmodifiableList(widgetActions);
-        }
+    public void setUiActions(List<UIAction> uiActions) {
+        this.uiActions = uiActions;
+    }
+
+    /**
+     * Returns the ui actions that back the motif gene.
+     *
+     * @return Returns the ui actions that back the motif action.
+     */
+    public List<UIAction> getUIActions() {
+            return Collections.unmodifiableList(uiActions);
     }
 
     /**
@@ -90,7 +94,7 @@ public class MotifAction extends UIAction {
             return false;
         } else {
             MotifAction other = (MotifAction) o;
-            return actionType == other.actionType && Objects.equals(widgetActions, other.widgetActions);
+            return actionType == other.actionType && Objects.equals(uiActions, other.uiActions);
         }
     }
 
@@ -101,7 +105,7 @@ public class MotifAction extends UIAction {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(actionType) + Objects.hashCode(widgetActions);
+        return Objects.hashCode(actionType) + Objects.hashCode(uiActions);
     }
 
     /**

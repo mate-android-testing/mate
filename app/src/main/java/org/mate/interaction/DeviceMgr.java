@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.StaleObjectException;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
@@ -28,12 +29,18 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.state.IScreenState;
+import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.support.test.InstrumentationRegistry.getContext;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
@@ -164,20 +171,107 @@ public class DeviceMgr {
      * @param action The given motif action.
      */
     private void handleFillFormAndSubmit(MotifAction action) {
+
         if (Properties.WIDGET_BASED_ACTIONS()) {
-            List<WidgetAction> widgetActions = action.getWidgetActions();
+
+            List<UIAction> widgetActions = action.getUIActions();
+
             for (int i = 0; i < widgetActions.size(); i++) {
-                WidgetAction widgetAction = widgetActions.get(i);
+                WidgetAction widgetAction = (WidgetAction) widgetActions.get(i);
                 if (i < widgetActions.size() - 1) {
                     handleEdit(widgetAction.getWidget());
                 } else {
-                    // the last widget actions represents the click on the submit button
+                    // the last widget action represents the click on the submit button
                     handleClick(widgetAction.getWidget());
                 }
             }
         } else {
-            // TODO: find all editable widgets plus buttons
+
+            if (Registry.isReplayMode()) {
+                // we simply replay the recorded primitive actions of the motif gene
+
+                List<UIAction> primitiveActions = action.getUIActions();
+
+                for (int i = 0; i < primitiveActions.size(); i++) {
+                    PrimitiveAction primitiveAction = (PrimitiveAction) primitiveActions.get(i);
+                    if (i < primitiveActions.size() - 1) {
+                        handleEdit(primitiveAction);
+                    } else {
+                        // the last primitive action represents the click on the submit button
+                        handleClick(primitiveAction);
+                    }
+                }
+            } else {
+
+                /*
+                 * In the case we use primitive actions we stick to a more 'dynamic' approach. Instead of
+                 * iterating over fixed widgets, we explore the current screen for all available input
+                 * fields and buttons. Then, we fill all input fields and choose a random button for
+                 * clicking. Finally, we save the executed actions for a deterministic replaying.
+                 */
+                IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
+                String currentActivity = screenState.getActivityName();
+
+                List<Widget> inputFields = screenState.getWidgets().stream()
+                        .filter(Widget::isEditTextType)
+                        .collect(Collectors.toList());
+
+                List<Widget> buttons = screenState.getWidgets().stream()
+                        .filter(Widget::isEditTextType)
+                        .collect(Collectors.toList());
+
+                MATE.log("Number of buttons: " + buttons.size());
+
+                // we choose a button randomly on which we finally click
+                Widget button = Randomness.randomElement(buttons);
+                MATE.log("Selected button: " + button);
+
+                List<UIAction> uiActions = new ArrayList<>();
+
+                // execute 'type text' actions and save
+                inputFields.stream().forEach(widget -> {
+                    PrimitiveAction typeText = new PrimitiveAction(widget.getX(), widget.getY(),
+                            ActionType.TYPE_TEXT, currentActivity);
+                    handleEdit(typeText);
+                    uiActions.add(typeText);
+                });
+
+                // execute click and save
+                PrimitiveAction click = new PrimitiveAction(button.getX(), button.getY(),
+                        ActionType.CLICK, currentActivity);
+                handleClick(click);
+                uiActions.add(click);
+
+                // record the actions for a possible deterministic replaying
+                action.setUiActions(uiActions);
+            }
         }
+    }
+
+    /**
+     * Finds the corresponding widget to the given ui element if possible. This considers the
+     * class name, e.g. android.widget.EditText, the boundaries and the resource name for the
+     * comparison.
+     *
+     * @param uiElement The given ui element.
+     * @return Returns the corresponding widget or {@code null} if not possible.
+     */
+    private Widget findWidget(UiObject2 uiElement) {
+
+        IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
+
+        for (Widget widget : screenState.getWidgets()) {
+
+            String resourceID = widget.getResourceID().isEmpty() ? null : widget.getResourceID();
+
+            if (widget.getClazz().equals(uiElement.getClassName())
+                    && widget.getBounds().equals(uiElement.getVisibleBounds())
+                    && Objects.equals(resourceID, uiElement.getResourceName())) {
+                    return widget;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -192,17 +286,17 @@ public class DeviceMgr {
         if (Properties.WIDGET_BASED_ACTIONS()) {
 
             // get the currently displayed spinner entry
-            WidgetAction widgetAction = action.getWidgetActions().get(0);
-            Widget widget = widgetAction.getWidget();
-            Widget selectedWidget = widget.getChildren().get(0);
+            WidgetAction widgetAction = (WidgetAction) action.getUIActions().get(0);
+            Widget spinnerWidget = widgetAction.getWidget();
+            Widget selectedWidget = spinnerWidget.getChildren().get(0);
 
             // click on the spinner first to open the drop-down menu
-            UiObject2 spinner = findObject(widget);
+            UiObject2 spinner = findObject(spinnerWidget);
 
             if (spinner == null) {
                 // we fall back to single click mechanism
                 MATE.log("Spinner element couldn't be found!");
-                handleClick(widget);
+                handleClick(spinnerWidget);
                 return;
             }
 
@@ -215,7 +309,7 @@ public class DeviceMgr {
                 if (selectedEntry == null) {
                     // we fall back to single click mechanism
                     MATE.log("Selected entry of spinner couldn't be found!");
-                    handleClick(widget);
+                    handleClick(spinnerWidget);
                     return;
                 }
 
@@ -225,7 +319,7 @@ public class DeviceMgr {
                 if (dropDownMenu.getChildren().isEmpty()) {
                     // we fall back to single click mechanism
                     MATE.log("Spinner without drop-down menu!");
-                    handleClick(widget);
+                    handleClick(spinnerWidget);
                     return;
                 }
 
@@ -242,7 +336,87 @@ public class DeviceMgr {
                 newSelection.click();
             }
         } else {
-            // TODO: find a clickable spinner and click on it
+            if (Registry.isReplayMode()) {
+
+                // perform click on recorded spinner
+                PrimitiveAction spinnerClickAction = (PrimitiveAction) action.getUIActions().get(0);
+                handleClick(spinnerClickAction);
+
+                UiObject2 spinner = device.findObject(By.focused(true));
+
+                if (spinner != null) {
+                    MATE.log("Spinner class: " + spinner.getClassName());
+                    MATE.log("Spinner resource name: " + spinner.getResourceName());
+                    MATE.log("Spinner text: " + spinner.getText());
+                    MATE.log("Spinner bounds: " + spinner.getVisibleBounds());
+                }
+
+            } else {
+
+                IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
+                String currentActivity = screenState.getActivityName();
+
+                // we need to record the executed actions for a possible replaying
+                List<UIAction> uiActions = new ArrayList<>();
+
+                List<Widget> spinners = screenState.getWidgets().stream()
+                        .filter(Widget::isClickable)
+                        .filter(Widget::isSpinnerType)
+                        .collect(Collectors.toList());
+
+                // pick a random spinner
+                Widget spinnerWidget = Randomness.randomElement(spinners);
+                Widget selectedWidget = spinnerWidget.getChildren().get(0);
+                UiObject2 spinner = findObject(spinnerWidget);
+
+                // record selected spinner for possible replaying
+                uiActions.add(new PrimitiveAction(spinnerWidget.getX(), spinnerWidget.getY(),
+                                ActionType.CLICK, currentActivity));
+                action.setUiActions(uiActions);
+
+                if (spinner == null) {
+                    // we fall back to single click mechanism
+                    MATE.log("Spinner element couldn't be found!");
+                    handleClick(spinnerWidget);
+                    return;
+                }
+
+                Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
+
+                if (success != null && success) {
+
+                    UiObject2 selectedEntry = findObject(selectedWidget);
+
+                    if (selectedEntry == null) {
+                        // we fall back to single click mechanism
+                        MATE.log("Selected entry of spinner couldn't be found!");
+                        handleClick(spinnerWidget);
+                        return;
+                    }
+
+                    // NOTE: We can't re-use the spinner object; it is not valid anymore!
+                    UiObject2 dropDownMenu = selectedEntry.getParent();
+
+                    if (dropDownMenu.getChildren().isEmpty()) {
+                        // we fall back to single click mechanism
+                        MATE.log("Spinner without drop-down menu!");
+                        handleClick(spinnerWidget);
+                        return;
+                    }
+
+                    /*
+                     * We need to make a deterministic selection, otherwise when we replay such an action,
+                     * we may end up in a different state, which may break replay execution. Thus, we
+                     * simply pick the next entry of the drop-down menu.
+                     */
+                    int index = dropDownMenu.getChildren().indexOf(selectedEntry);
+                    int nextIndex = index + 1 % dropDownMenu.getChildren().size();
+                    UiObject2 newSelection = dropDownMenu.getChildren().get(nextIndex);
+
+                    // click on new entry in order to select it
+                    newSelection.click();
+                }
+            }
         }
     }
 
@@ -381,7 +555,7 @@ public class DeviceMgr {
 
         switch (action.getActionType()) {
             case CLICK:
-                device.click(action.getX(), action.getY());
+                handleClick(action);
                 break;
             case LONG_CLICK:
                 device.swipe(action.getX(), action.getY(), action.getX(), action.getY(), 120);
@@ -398,6 +572,9 @@ public class DeviceMgr {
             case SWIPE_RIGHT:
                 device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
                 break;
+            case TYPE_TEXT:
+                handleEdit(action);
+                break;
             case BACK:
                 device.pressBack();
                 break;
@@ -409,6 +586,75 @@ public class DeviceMgr {
                         + " not implemented for primitive actions.");
         }
         checkForCrash();
+    }
+
+    /**
+     * Performs a click based on the coordinates of the given action.
+     *
+     * @param action The given primitive action.
+     */
+    private void handleClick(PrimitiveAction action) {
+        device.click(action.getX(), action.getY());
+    }
+
+    /**
+     * Inserts a text into a input field based on the given primitive action.
+     *
+     * @param action The given primitive action.
+     */
+    private void handleEdit(PrimitiveAction action) {
+
+        // clicking on the screen should get a focus on the underlying 'widget'
+        device.click(action.getX(), action.getY());
+        UiObject2 uiElement = device.findObject(By.focused(true));
+
+        if (uiElement != null) {
+
+            Widget widget = null;
+
+            try {
+                /*
+                 * We resort here to the underlying widget, otherwise we have no idea what type of
+                 * text should be generated as input.
+                 */
+                widget = findWidget(uiElement);
+            } catch (StaleObjectException e) {
+
+                MATE.log_warn("Stale ui element!");
+                e.printStackTrace();
+
+                /*
+                * Unfortunately, it can happen that the requested ui element gets immediately stale.
+                * The only way to recover from such a situation is to call findObject() another time.
+                 */
+                uiElement = device.findObject(By.focused(true));
+                if (uiElement != null) {
+                    widget = findWidget(uiElement);
+                }
+            }
+
+            if (widget != null && widget.isEditTextType()) {
+
+                /*
+                * If we run in replay mode, we should use the recorded text instead of a new text
+                * that is randomly created. Otherwise, we may end up in a different state and
+                * subsequent actions might not show the same behaviour as in the recorded run.
+                 */
+                String textData = Registry.isReplayMode() ? action.getText() : generateTextData(widget);
+                textData = textData == null ? "" : textData;
+
+                MATE.log_debug("Inserting text: " + textData);
+                uiElement.setText(textData);
+
+                // record for possible replaying + findObject() relies on it
+                action.setText(textData);
+                widget.setText(textData);
+            }
+
+            // we need to close the soft keyboard, but only if it is present, see:
+            // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+            device.pressBack();
+        }
     }
 
     /**
@@ -723,13 +969,15 @@ public class DeviceMgr {
          */
         String textData = Registry.isReplayMode() ? widget.getText() : generateTextData(widget);
 
-        MATE.log_debug("Input text: " + textData);
+        MATE.log_debug("New text: " + textData);
         MATE.log_debug("Previous text: " + widget.getText());
 
         UiObject2 uiObject = findObject(widget);
 
         if (uiObject != null) {
+
             uiObject.setText(textData);
+
             // reflect change since we cache screen states and findObject() relies on it
             widget.setText(textData);
         } else {
@@ -738,8 +986,13 @@ public class DeviceMgr {
             UiObject2 obj = device.findObject(By.focused(true));
             if (obj != null) {
                 obj.setText(textData);
+
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText(textData);
+
+                // we need to close the soft keyboard, but only if it is present, see:
+                // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+                device.pressBack();
             } else {
                 MATE.log("  ********* obj " + widget.getId() + "  not found");
             }
@@ -755,7 +1008,7 @@ public class DeviceMgr {
     private String generateTextData(Widget widget) {
 
         String widgetText = widget.getText();
-        if (widgetText.isEmpty())
+        if (widgetText == null || widgetText.isEmpty())
             widgetText = widget.getHint();
 
         // -1 if no limit has been set
@@ -860,7 +1113,7 @@ public class DeviceMgr {
     public void restartApp() {
         MATE.log("Restarting app");
         // Launch the app
-        Context context = InstrumentationRegistry.getContext();
+        Context context = getContext();
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(packageName);
         // Clear out any previous instances
