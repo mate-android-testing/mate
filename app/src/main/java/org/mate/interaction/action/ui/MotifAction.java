@@ -33,7 +33,7 @@ public class MotifAction extends UIAction {
      * @param activityName The name of the activity on which the action should be applied.
      */
     public MotifAction(ActionType actionType, String activityName) {
-       this(actionType, activityName, null);
+       this(actionType, activityName, Collections.emptyList());
     }
 
     /**
@@ -50,8 +50,8 @@ public class MotifAction extends UIAction {
 
     /**
      * Saves the ui actions. Should be only used when {@link Properties#WIDGET_BASED_ACTIONS()} is
-     * turned off, i.e. we use primitive actions. It is necessary to save the actions in order to
-     * replay them if desired.
+     * turned off, i.e. when we use primitive actions. It is necessary to save the actions in order
+     * to replay them if desired.
      *
      * @param uiActions The list of ui actions that represent the motif gene.
      */
