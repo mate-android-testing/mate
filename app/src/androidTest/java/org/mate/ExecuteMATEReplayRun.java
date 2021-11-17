@@ -118,9 +118,11 @@ public class ExecuteMATEReplayRun {
 
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
 
+            // TODO: track for how many actions current and expected activity diverge
             MATE.log("Current Activity: " + Registry.getCurrentActivity());
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
+            // TODO: one should abort if a (primitive) action leaves the app, because there must be some divergence
             Action nextAction = actions.get(i);
 
             // check whether the UI action is applicable on the current state
