@@ -353,22 +353,30 @@ public class DeviceMgr {
 
             if (Registry.isReplayMode()) {
 
-                // retrieve the recorded spinner
-                PrimitiveAction spinnerClickAction = (PrimitiveAction) action.getUIActions().get(0);
-                Optional<Widget> spinner = screenState.getWidgets().stream()
-                        .filter(Widget::isClickable)
-                        .filter(Widget::isSpinnerType)
-                        .filter(widget -> widget.getX() == spinnerClickAction.getX())
-                        .filter(widget -> widget.getY() == spinnerClickAction.getY())
-                        .findAny();
+                /*
+                * It is possible that the spinner action wasn't actually executed at record time,
+                * because there was no spinner available. In this case, we can't do anything else
+                * than simply ignoring the action.
+                 */
+                if (!action.getUIActions().isEmpty()) {
 
-                if (spinner.isPresent()) {
-                    Widget spinnerWidget = spinner.get();
-                    Widget selectedWidget = spinnerWidget.getChildren().get(0);
-                    handleSpinnerScrolling(spinnerWidget, selectedWidget);
-                } else {
-                    MATE.log_warn("Couldn't locate spinner at location ("
-                            + spinnerClickAction.getX() + "," + spinnerClickAction.getY() + ")!");
+                    // retrieve the recorded spinner
+                    PrimitiveAction spinnerClickAction = (PrimitiveAction) action.getUIActions().get(0);
+                    Optional<Widget> spinner = screenState.getWidgets().stream()
+                            .filter(Widget::isClickable)
+                            .filter(Widget::isSpinnerType)
+                            .filter(widget -> widget.getX() == spinnerClickAction.getX())
+                            .filter(widget -> widget.getY() == spinnerClickAction.getY())
+                            .findAny();
+
+                    if (spinner.isPresent()) {
+                        Widget spinnerWidget = spinner.get();
+                        Widget selectedWidget = spinnerWidget.getChildren().get(0);
+                        handleSpinnerScrolling(spinnerWidget, selectedWidget);
+                    } else {
+                        MATE.log_warn("Couldn't locate spinner at location ("
+                                + spinnerClickAction.getX() + "," + spinnerClickAction.getY() + ")!");
+                    }
                 }
             } else {
 
@@ -382,15 +390,23 @@ public class DeviceMgr {
                         .filter(Widget::isSpinnerType)
                         .collect(Collectors.toList());
 
-                // pick a random spinner and retrieve the selected drop-down menu entry
-                Widget spinnerWidget = Randomness.randomElement(spinners);
-                Widget selectedWidget = spinnerWidget.getChildren().get(0);
+                /*
+                * If no spinner is available on the current screen, we simply do nothing alike
+                * a primitive action may have no effect, e.g. a click on a random coordinate which
+                * area is not covered by any clickable widget.
+                 */
+                if (!spinners.isEmpty()) {
 
-                handleSpinnerScrolling(spinnerWidget, selectedWidget);
+                    // pick a random spinner and retrieve the selected drop-down menu entry
+                    Widget spinnerWidget = Randomness.randomElement(spinners);
+                    Widget selectedWidget = spinnerWidget.getChildren().get(0);
 
-                PrimitiveAction spinnerClick = new PrimitiveAction(spinnerWidget.getX(),
-                        spinnerWidget.getY(), ActionType.CLICK, screenState.getActivityName());
-                action.setUiActions(Collections.singletonList(spinnerClick));
+                    handleSpinnerScrolling(spinnerWidget, selectedWidget);
+
+                    PrimitiveAction spinnerClick = new PrimitiveAction(spinnerWidget.getX(),
+                            spinnerWidget.getY(), ActionType.CLICK, screenState.getActivityName());
+                    action.setUiActions(Collections.singletonList(spinnerClick));
+                }
             }
         }
     }
