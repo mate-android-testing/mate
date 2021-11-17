@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -221,11 +222,8 @@ public class DeviceMgr {
                         .filter(Widget::isButtonType)
                         .collect(Collectors.toList());
 
-                MATE.log("Number of buttons: " + buttons.size());
-
                 // we choose a button randomly on which we finally click
                 Widget button = Randomness.randomElement(buttons);
-                MATE.log("Selected button: " + button);
 
                 List<UIAction> uiActions = new ArrayList<>();
 
@@ -289,7 +287,7 @@ public class DeviceMgr {
 
         if (spinner == null) {
             // we fall back to single click mechanism
-            MATE.log("Spinner element couldn't be found!");
+            MATE.log_warn("Spinner element couldn't be found!");
             handleClick(spinnerWidget);
             return;
         }
@@ -302,7 +300,7 @@ public class DeviceMgr {
 
             if (selectedEntry == null) {
                 // we fall back to single click mechanism
-                MATE.log("Selected entry of spinner couldn't be found!");
+                MATE.log_warn("Selected entry of spinner couldn't be found!");
                 handleClick(spinnerWidget);
                 return;
             }
@@ -312,7 +310,7 @@ public class DeviceMgr {
 
             if (dropDownMenu.getChildren().isEmpty()) {
                 // we fall back to single click mechanism
-                MATE.log("Spinner without drop-down menu!");
+                MATE.log_warn("Spinner without drop-down menu!");
                 handleClick(spinnerWidget);
                 return;
             }
@@ -351,21 +349,27 @@ public class DeviceMgr {
             handleSpinnerScrolling(spinnerWidget, selectedWidget);
         } else {
 
+            IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
+
             if (Registry.isReplayMode()) {
 
-                // perform click on recorded spinner
+                // retrieve the recorded spinner
                 PrimitiveAction spinnerClickAction = (PrimitiveAction) action.getUIActions().get(0);
-                handleClick(spinnerClickAction);
+                Optional<Widget> spinner = screenState.getWidgets().stream()
+                        .filter(Widget::isClickable)
+                        .filter(Widget::isSpinnerType)
+                        .filter(widget -> widget.getX() == spinnerClickAction.getX())
+                        .filter(widget -> widget.getY() == spinnerClickAction.getY())
+                        .findAny();
 
-                UiObject2 spinner = device.findObject(By.focused(true));
-
-                if (spinner != null) {
-                    MATE.log("Spinner class: " + spinner.getClassName());
-                    MATE.log("Spinner resource name: " + spinner.getResourceName());
-                    MATE.log("Spinner text: " + spinner.getText());
-                    MATE.log("Spinner bounds: " + spinner.getVisibleBounds());
+                if (spinner.isPresent()) {
+                    Widget spinnerWidget = spinner.get();
+                    Widget selectedWidget = spinnerWidget.getChildren().get(0);
+                    handleSpinnerScrolling(spinnerWidget, selectedWidget);
+                } else {
+                    MATE.log_warn("Couldn't locate spinner at location ("
+                            + spinnerClickAction.getX() + "," + spinnerClickAction.getY() + ")!");
                 }
-
             } else {
 
                 /*
@@ -373,9 +377,6 @@ public class DeviceMgr {
                  * the current screen. In addition, we need to record the executed actions in order to
                  * make replaying deterministic.
                  */
-                IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
-                String currentActivity = screenState.getActivityName();
-
                 List<Widget> spinners = screenState.getWidgets().stream()
                         .filter(Widget::isClickable)
                         .filter(Widget::isSpinnerType)
@@ -388,7 +389,7 @@ public class DeviceMgr {
                 handleSpinnerScrolling(spinnerWidget, selectedWidget);
 
                 PrimitiveAction spinnerClick = new PrimitiveAction(spinnerWidget.getX(),
-                        spinnerWidget.getY(), ActionType.CLICK, currentActivity);
+                        spinnerWidget.getY(), ActionType.CLICK, screenState.getActivityName());
                 action.setUiActions(Collections.singletonList(spinnerClick));
             }
         }
