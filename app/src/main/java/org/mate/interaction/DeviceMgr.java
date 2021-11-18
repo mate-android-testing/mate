@@ -222,27 +222,30 @@ public class DeviceMgr {
                         .filter(Widget::isButtonType)
                         .collect(Collectors.toList());
 
-                // we choose a button randomly on which we finally click
-                Widget button = Randomness.randomElement(buttons);
+                if (!inputFields.isEmpty() && !buttons.isEmpty()) {
 
-                List<UIAction> uiActions = new ArrayList<>();
+                    // we choose a button randomly on which we finally click
+                    Widget button = Randomness.randomElement(buttons);
 
-                // execute 'type text' actions and save
-                inputFields.stream().forEach(widget -> {
-                    PrimitiveAction typeText = new PrimitiveAction(widget.getX(), widget.getY(),
-                            ActionType.TYPE_TEXT, currentActivity);
-                    handleEdit(typeText);
-                    uiActions.add(typeText);
-                });
+                    List<UIAction> uiActions = new ArrayList<>();
 
-                // execute click and save
-                PrimitiveAction click = new PrimitiveAction(button.getX(), button.getY(),
-                        ActionType.CLICK, currentActivity);
-                handleClick(click);
-                uiActions.add(click);
+                    // execute 'type text' actions and save
+                    inputFields.stream().forEach(widget -> {
+                        PrimitiveAction typeText = new PrimitiveAction(widget.getX(), widget.getY(),
+                                ActionType.TYPE_TEXT, currentActivity);
+                        handleEdit(typeText);
+                        uiActions.add(typeText);
+                    });
 
-                // record the actions for a possible deterministic replaying
-                action.setUiActions(uiActions);
+                    // execute click and save
+                    PrimitiveAction click = new PrimitiveAction(button.getX(), button.getY(),
+                            ActionType.CLICK, currentActivity);
+                    handleClick(click);
+                    uiActions.add(click);
+
+                    // record the actions for a possible deterministic replaying
+                    action.setUiActions(uiActions);
+                }
             }
         }
     }
