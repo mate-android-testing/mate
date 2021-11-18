@@ -5,10 +5,8 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
-import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
@@ -102,8 +100,6 @@ public class Mio<T> extends GeneticAlgorithm<T> {
      * Initializes MIO with the relevant attributes.
      *
      * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
-     * @param selectionFunction The unused selection function, see {@link ISelectionFunction}.
-     * @param crossOverFunction The unused crossover function, see {@link ICrossOverFunction}.
      * @param mutationFunction The used mutation function, see {@link IMutationFunction}.
      * @param fitnessFunctions The used fitness function, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
@@ -116,8 +112,6 @@ public class Mio<T> extends GeneticAlgorithm<T> {
      * @param pSampleRandom The sampling probability P_r.
      */
     public Mio(IChromosomeFactory<T> chromosomeFactory,
-               ISelectionFunction<T> selectionFunction,
-               ICrossOverFunction<T> crossOverFunction,
                IMutationFunction<T> mutationFunction,
                List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
@@ -129,9 +123,16 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                double focusedSearchStart,
                int mutationRate) {
 
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
-                fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
-                pCrossover, pMutate);
+        super(chromosomeFactory,
+                null,
+                null,
+                mutationFunction,
+                fitnessFunctions,
+                terminationCondition,
+                populationSize,
+                bigPopulationSize,
+                pCrossover,
+                pMutate);
 
         this.archive = new HashMap<>(); // (k -> T_k)
         this.samplingCounters = new HashMap<>(); // (k -> c_k)
@@ -465,12 +466,9 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         }
 
         List<ChromosomeFitnessTuple> population = archive.get(target);
-        Collections.sort(population, new Comparator<ChromosomeFitnessTuple>() {
-            @Override
-            public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
-                int cmp = compareFitness(target, o1, o2);
-                return cmp != 0 ? cmp : compareSize(o1, o2);
-            }
+        Collections.sort(population, (o1, o2) -> {
+            int cmp = compareFitness(target, o1, o2);
+            return cmp != 0 ? cmp : compareSize(o1, o2);
         });
 
         // the worst chromosome comes first
@@ -654,15 +652,12 @@ public class Mio<T> extends GeneticAlgorithm<T> {
     private int compareFitness(final IFitnessFunction<T> target,
                         ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
 
-        Comparator<ChromosomeFitnessTuple> comparator = new Comparator<ChromosomeFitnessTuple>() {
-            @Override
-            public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
-                boolean isMaximising = target.isMaximizing();
+        Comparator<ChromosomeFitnessTuple> comparator = (o1, o2) -> {
+            boolean isMaximising = target.isMaximizing();
 
-                return isMaximising
-                        ? Double.compare(o1.fitness, o2.fitness)
-                        : Double.compare(o2.fitness, o1.fitness);
-            }
+            return isMaximising
+                    ? Double.compare(o1.fitness, o2.fitness)
+                    : Double.compare(o2.fitness, o1.fitness);
         };
 
         return comparator.compare(first, second);
@@ -678,23 +673,20 @@ public class Mio<T> extends GeneticAlgorithm<T> {
      */
     private int compareSize(ChromosomeFitnessTuple first, ChromosomeFitnessTuple second) {
 
-        Comparator<ChromosomeFitnessTuple> comparator = new Comparator<ChromosomeFitnessTuple>() {
-            @Override
-            public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
+        Comparator<ChromosomeFitnessTuple> comparator = (o1, o2) -> {
 
-                IChromosome<T> fst = o1.chromosome;
-                IChromosome<T> snd = o2.chromosome;
+            IChromosome<T> fst = o1.chromosome;
+            IChromosome<T> snd = o2.chromosome;
 
-                if (fst.getValue() instanceof TestCase) {
-                    return ((TestCase) snd.getValue()).getEventSequence().size()
-                            - ((TestCase) fst.getValue()).getEventSequence().size();
-                } else if (fst.getValue() instanceof TestSuite) {
-                    return ((TestSuite) snd.getValue()).getTestCases().size()
-                            - ((TestSuite) fst.getValue()).getTestCases().size();
-                } else {
-                    throw new IllegalStateException("Chromosome type " + fst.getValue().getClass()
-                            + "not yet supported!");
-                }
+            if (fst.getValue() instanceof TestCase) {
+                return ((TestCase) snd.getValue()).getEventSequence().size()
+                        - ((TestCase) fst.getValue()).getEventSequence().size();
+            } else if (fst.getValue() instanceof TestSuite) {
+                return ((TestSuite) snd.getValue()).getTestCases().size()
+                        - ((TestSuite) fst.getValue()).getTestCases().size();
+            } else {
+                throw new IllegalStateException("Chromosome type " + fst.getValue().getClass()
+                        + "not yet supported!");
             }
         };
 

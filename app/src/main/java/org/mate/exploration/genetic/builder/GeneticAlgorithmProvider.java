@@ -181,11 +181,33 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
+    /**
+     * Initialises the MIO algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the MIO algorithm.
+     */
     private <T> Mio<T> initializeMio() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("MIO requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("MIO requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("MIO requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("MIO requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.OBJECTIVE() == null) {
+            throw new IllegalStateException("MIO requires the type of objectives. You have to" +
+                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
+        }
+
         return new Mio<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
