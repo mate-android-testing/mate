@@ -128,7 +128,25 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
+    /**
+     * Initialises the random search algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the random search algorithm.
+     */
     private <T> RandomSearch<T> initializeRandomSearch() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("OnePlusOne requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new RandomSearch<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeFitnessFunctions(),
