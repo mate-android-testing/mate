@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -94,11 +93,6 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 notMutatedTestCases.remove(testCase);
             }
         }
-
-        MATE.log_acc("Number of test cases: " + testCases.size());
-        MATE.log_acc("Number of not mutated test cases: " + notMutatedTestCases.size());
-        int mutatedTestCases = testCases.size() - notMutatedTestCases.size();
-        MATE.log_acc("Number of mutated test cases: " + mutatedTestCases);
 
         // we need to execute those test cases that have been mutated
         for (TestCase testCase : testCases) {

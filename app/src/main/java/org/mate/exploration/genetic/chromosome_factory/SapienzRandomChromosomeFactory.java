@@ -20,10 +20,29 @@ import org.mate.utils.coverage.CoverageUtils;
  */
 public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
 
+    /**
+     * A reference to the ui abstraction layer, this allows to reset the AUT.
+     */
     private final UIAbstractionLayer uiAbstractionLayer;
+
+    /**
+     * The maximal number of actions per test case.
+     */
     private final int maxNumEvents;
+
+    /**
+     * Whether we want to reset the app before each test case.
+     */
     private final boolean resetApp;
+
+    /**
+     * Whether this chromosome factory is used within a test suite chromosome factory.
+     */
     private boolean isTestSuiteExecution;
+
+    /**
+     * The current action counter.
+     */
     private int actionsCount;
 
     /**
