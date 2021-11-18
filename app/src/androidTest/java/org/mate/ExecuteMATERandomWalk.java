@@ -21,10 +21,8 @@ public class ExecuteMATERandomWalk {
                     .withAlgorithm(Algorithm.RANDOM_WALK)
                     .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                     .withMutationFunction(Properties.MUTATION_FUNCTION())
-                    .withTerminationCondition(Properties.TERMINATION_CONDITION())
                     .withFitnessFunction(Properties.FITNESS_FUNCTION())
-                    .withNumTestCases(Properties.NUMBER_TESTCASES())
-                    .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS());
+                    .withTerminationCondition(Properties.TERMINATION_CONDITION());
 
             final IGeneticAlgorithm randomWalk = builder.build();
             mate.testApp(randomWalk);

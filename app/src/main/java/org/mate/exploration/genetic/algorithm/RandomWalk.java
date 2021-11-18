@@ -11,22 +11,25 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import java.util.List;
 
 /**
- * Provides a generic implementation of a random walk.
+ * Provides an implementation of a random walk. In the random walk algorithm an initially created
+ * chromosome is iteratively mutated until the termination condition is met.
  *
  * @param <T> The type of the chromosome.
  */
 public class RandomWalk<T> extends GeneticAlgorithm<T> {
 
     /**
-     * Initializes the random walk with all necessary attributes.
+     * Initialises the random walk with all necessary attributes.
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param mutationFunction The used mutation function.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      */
-    public RandomWalk(IChromosomeFactory<T> chromosomeFactory, IMutationFunction<T> mutationFunction,
-                      List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition) {
+    public RandomWalk(IChromosomeFactory<T> chromosomeFactory,
+                      IMutationFunction<T> mutationFunction,
+                      List<IFitnessFunction<T>> fitnessFunctions,
+                      ITerminationCondition terminationCondition) {
         super(
                 chromosomeFactory,
                 null,
@@ -41,19 +44,7 @@ public class RandomWalk<T> extends GeneticAlgorithm<T> {
     }
 
     /**
-     * A random walk initially samples a random chromosome that is iteratively mutated.
-     */
-    @Override
-    public void createInitialPopulation() {
-        MATE.log_acc("Creating generation #" + (currentGenerationNumber + 1));
-        IChromosome<T> chromosome = chromosomeFactory.createChromosome();
-        population.add(chromosome);
-        logCurrentFitness();
-        currentGenerationNumber++;
-    }
-
-    /**
-     * Mutates the chromosome from the previous generation.
+     * The single chromosome of the population is iteratively mutated.
      */
     @Override
     public void evolve() {
