@@ -324,7 +324,7 @@ public class DeviceMgr {
              * simply pick the next entry of the drop-down menu.
              */
             int index = dropDownMenu.getChildren().indexOf(selectedEntry);
-            int nextIndex = index + 1 % dropDownMenu.getChildren().size();
+            int nextIndex = (index + 1) % dropDownMenu.getChildren().size();
             UiObject2 newSelection = dropDownMenu.getChildren().get(nextIndex);
 
             // click on new entry in order to select it
