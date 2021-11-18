@@ -180,11 +180,34 @@ public class GeneticAlgorithmProvider {
                 getMutationRate());
     }
 
+    /**
+     * Initialises the OnePlusOne algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the OnePlusOne algorithm.
+     */
     private <T> OnePlusOne<T> initializeOnePlusOne() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("OnePlusOne requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new OnePlusOne<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition());
