@@ -131,8 +131,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the random search algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the random search algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the random search algorithm.
      */
     private <T> RandomSearch<T> initializeRandomSearch() {
 
@@ -156,8 +156,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the NSGA-II algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the NSGA-II algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the NSGA-II algorithm.
      */
     private <T> NSGAII<T> initializeNSGAII() {
 
@@ -200,8 +200,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the MOSA algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the MOSA algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the MOSA algorithm.
      */
     private <T> MOSA<T> initializeMOSA() {
 
@@ -244,8 +244,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the MIO algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the MIO algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the MIO algorithm.
      */
     private <T> MIO<T> initializeMIO() {
 
@@ -283,8 +283,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the OnePlusOne algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the OnePlusOne algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the OnePlusOne algorithm.
      */
     private <T> OnePlusOne<T> initializeOnePlusOne() {
 
@@ -312,8 +312,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the random walk algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the random walk algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the random walk algorithm.
      */
     private <T> RandomWalk<T> initializeRandomWalk() {
 
@@ -338,9 +338,33 @@ public class GeneticAlgorithmProvider {
                 this.initializeTerminationCondition());
     }
 
+    /**
+     * Initialises the Sapienz algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the Sapienz algorithm.
+     */
     private <T> Sapienz<T> initializeSapienz() {
 
-        if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("Sapienz requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a crossover function. You have to" +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("Sapienz requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
             throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn" +
                     "the property Properties.WIDGET_BASED_ACTIONS() off.");
         }
