@@ -9,7 +9,7 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATERandomSearchGA {
+public class ExecuteMATERandomSearch {
 
     @Test
     public void useAppContext() {
@@ -17,13 +17,13 @@ public class ExecuteMATERandomSearchGA {
 
         MATE mate = new MATE();
 
-        final IGeneticAlgorithm randomSearchGA = new GeneticAlgorithmBuilder()
+        final IGeneticAlgorithm randomSearch = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.RANDOM_SEARCH)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withFitnessFunction(Properties.FITNESS_FUNCTION())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .build();
 
-        mate.testApp(randomSearchGA);
+        mate.testApp(randomSearch);
     }
 }

@@ -1,7 +1,9 @@
 package org.mate.exploration.genetic.algorithm;
 
+/**
+ * The supported genetic algorithms.
+ */
 public enum Algorithm {
-
     MIO,
     MOSA,
     NSGAII,
