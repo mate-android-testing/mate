@@ -114,7 +114,34 @@ public class GeneticAlgorithmProvider {
 
     }
 
+    /**
+     * Initialises the standard genetic algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the standard genetic algorithm.
+     */
     private <T> StandardGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("StandardGA requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a crossover function. You have to" +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("StandardGA requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new StandardGeneticAlgorithm<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
