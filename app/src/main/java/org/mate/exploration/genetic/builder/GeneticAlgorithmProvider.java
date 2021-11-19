@@ -234,9 +234,6 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("OnePlusOne requires a mutation function. You have to" +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
-            throw new IllegalStateException("OnePlusOne requires a selection function. You have to" +
-                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
             throw new IllegalStateException("OnePlusOne requires a fitness function. You have to" +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
@@ -247,7 +244,6 @@ public class GeneticAlgorithmProvider {
 
         return new OnePlusOne<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeSelectionFunction(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition());

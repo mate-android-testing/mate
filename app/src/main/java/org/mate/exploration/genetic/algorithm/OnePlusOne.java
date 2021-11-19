@@ -1,11 +1,11 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
-import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 
 import java.util.List;
@@ -24,19 +24,24 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
      * Initialises the 1+1 genetic algorithm with the necessary attributes.
      *
      * @param chromosomeFactory The used chromosome factory.
-     * @param selectionFunction The used selection function.
      * @param mutationFunction The used mutation function.
      * @param fitnessFunctions The used fitness functions. Only a single fitness function is used here.
      * @param terminationCondition The used termination condition.
      */
     public OnePlusOne(IChromosomeFactory<T> chromosomeFactory,
-                      ISelectionFunction<T> selectionFunction,
                       IMutationFunction<T> mutationFunction,
                       List<IFitnessFunction<T>> fitnessFunctions,
                       ITerminationCondition terminationCondition) {
-        super(chromosomeFactory, selectionFunction, null, mutationFunction,
-                fitnessFunctions, terminationCondition, 1, 2,
-                0, 1);
+        super(chromosomeFactory,
+                null,
+                null,
+                mutationFunction,
+                fitnessFunctions,
+                terminationCondition,
+                1,
+                1,
+                0,
+                1);
     }
 
     /**
@@ -46,28 +51,27 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
      */
     @Override
     public void evolve() {
-        MATE.log_acc("Evolving into generation: " + (currentGenerationNumber + 1));
 
-        // Temporarily allow two chromosomes in the population.
-        populationSize++;
+        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
-        // Add offspring to population.
-        super.evolve();
+        // sample a single offspring by mutation
+        IChromosome<T> offspring = mutationFunction.mutate(population.get(0));
+        population.add(offspring);
 
-        // Discard old chromosome if not better than new one.
+        // evaluate fitness
         IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
         double compared = fitnessFunction.getNormalizedFitness(population.get(0))
                 - fitnessFunction.getNormalizedFitness(population.get(1));
 
         logCurrentFitness();
 
+        // discard the worse chromosome
         if (fitnessFunction.isMaximizing()) {
             population.remove(compared > 0 ? 1 : 0);
         } else {
             population.remove(compared < 0 ? 1 : 0);
         }
 
-        // Revert population size back to 1.
-        populationSize--;
+        currentGenerationNumber++;
     }
 }
