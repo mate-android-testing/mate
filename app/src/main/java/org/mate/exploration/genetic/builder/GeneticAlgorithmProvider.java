@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.builder;
 
 import org.mate.exploration.genetic.algorithm.Algorithm;
+import org.mate.exploration.genetic.algorithm.MIO;
 import org.mate.exploration.genetic.algorithm.MOSA;
-import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
@@ -101,7 +101,7 @@ public class GeneticAlgorithmProvider {
             case MOSA:
                 return initializeMOSA();
             case MIO:
-                return initializeMio();
+                return initializeMIO();
             case RANDOM_WALK:
                 return initializeRandomWalk();
             case RANDOM_SEARCH:
@@ -187,7 +187,7 @@ public class GeneticAlgorithmProvider {
      * @param <T> The type o the chromosomes.
      * @return Returns an instance o the MIO algorithm.
      */
-    private <T> Mio<T> initializeMio() {
+    private <T> MIO<T> initializeMIO() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("MIO requires a chromosome factory. You have to" +
@@ -206,7 +206,7 @@ public class GeneticAlgorithmProvider {
                     "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
-        return new Mio<>(
+        return new MIO<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
