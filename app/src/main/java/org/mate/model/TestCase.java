@@ -16,10 +16,8 @@ import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -57,12 +55,6 @@ public class TestCase {
     private boolean crashDetected;
 
     /**
-     * A mapping of a screen state (id) to an action (id).
-     * The implementation is currently considered as deprecated.
-     */
-    private Map<String, String> statesMap;
-
-    /**
      * The desired size of the test case, i.e. the desired length
      * of the test case. This doesn't enforce any size restriction yet.
      */
@@ -85,7 +77,6 @@ public class TestCase {
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
         eventSequence = new ArrayList<>();
-        statesMap = new HashMap<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -101,7 +92,6 @@ public class TestCase {
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
         eventSequence = new ArrayList<>();
-        statesMap = new HashMap<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -297,29 +287,6 @@ public class TestCase {
     }
 
     /**
-     * Updates the state map.
-     *
-     * @param state Represents the id of a screen state.
-     * @param event Represents the id of an action.
-     */
-    @Deprecated
-    public void updateStatesMap(String state, String event) {
-        if (!statesMap.containsKey(state)){
-            statesMap.put(state, event);
-        }
-    }
-
-    /**
-     * Returns a mapping of screen states to actions.
-     *
-     * @return Returns a screen state to action mapping.
-     */
-    @Deprecated
-    public Map<String, String> getStatesMap() {
-        return statesMap;
-    }
-
-    /**
      * Creates a dummy test case intended to be not used for execution.
      *
      * @return Returns a dummy test case.
@@ -469,6 +436,5 @@ public class TestCase {
         IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
         updateVisitedStates(currentScreenState);
         updateVisitedActivities(currentScreenState.getActivityName());
-        updateStatesMap(currentScreenState.getId(), event);
     }
 }
