@@ -174,7 +174,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                     break;
                 } else {
 
-                    if (population.contains(offspring)) {
+                    if (population.contains(chromosome)) {
                         MATE.log_acc("Offspring " + offspring + " represents duplicate!");
                     }
 
