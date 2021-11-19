@@ -196,7 +196,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 offspring = parent;
             }
 
-            // TODO: copy fitness/coverage data if chromosome has not been executed
             newGeneration.add(offspring);
         }
 
