@@ -34,7 +34,6 @@ public class ExecuteMATENSGAII {
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_STATES)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
-                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
