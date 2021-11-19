@@ -162,6 +162,28 @@ public class Properties {
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
 
+    /*
+     * Begin Greybox Fuzzing properties
+     */
+
+    /**
+     * The initial size of the seed corpus S.
+     *
+     * @return Returns the initial size of the seed corpus.
+     */
+    public static int SEED_CORPUS_SIZE() { return propertyOr(10); }
+
+    /**
+     * The maximal assignable energy p.
+     *
+     * @return Returns the maximal assignable energy.
+     */
+    public static int MAX_ENERGY() { return propertyOr(10); }
+
+    /*
+     * End Greybox Fuzzing properties
+     */
+
     /**
      * Indicates which objective should be used for the multi-/many-objective
      * search, e.g. branches or lines.

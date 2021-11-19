@@ -1,15 +1,14 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
 
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
 

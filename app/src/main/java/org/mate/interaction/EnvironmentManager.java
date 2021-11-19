@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Provides the interface to communicate with the MATE server.
@@ -821,27 +822,19 @@ public class EnvironmentManager {
 
         if (chromosomes != null) {
 
-            // Java 8: String.join("+", chromosomeIds);
-            StringBuilder chromosomeIds = new StringBuilder();
-
-            for (IChromosome<T> chromosome : chromosomes) {
-                if (chromosome.getValue() instanceof TestCase) {
-                    // there is no coverage data to store for dummy test cases
-                    if (((TestCase) chromosome.getValue()).isDummy()) {
-                        MATE.log_warn("Trying to retrieve combined coverage of dummy test case...");
-                        continue;
-                    }
-                }
-                chromosomeIds.append(getChromosomeId(chromosome));
-                chromosomeIds.append("+");
-            }
-
-            // remove '+' at the end
-            if (chromosomeIds.length() > 0) {
-                chromosomeIds.setLength(chromosomeIds.length() - 1);
-            }
-
-            chromosomesParam = chromosomeIds.toString();
+            chromosomesParam = chromosomes.stream()
+                    .filter(chromosome -> {
+                        if (chromosome.getValue() instanceof TestCase) {
+                            // there is no coverage data to store for dummy test cases
+                            if (((TestCase) chromosome.getValue()).isDummy()) {
+                                MATE.log_warn("Trying to retrieve combined coverage of dummy test case...");
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .map(this::getChromosomeId)
+                    .collect(Collectors.joining("+"));
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
@@ -944,22 +937,11 @@ public class EnvironmentManager {
             }
         }
 
-        // concatenate lines
-        StringBuilder sb = new StringBuilder();
-
-        for (String line : lines) {
-            sb.append(line);
-            sb.append("*");
-        }
-        if (!lines.isEmpty()) {
-            sb.setLength(sb.length() - 1);
-        }
-
         String chromosomeId = getChromosomeId(chromosome);
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("lines", sb.toString())
+                .withParameter("lines", lines.stream().collect(Collectors.joining("*")))
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
 
