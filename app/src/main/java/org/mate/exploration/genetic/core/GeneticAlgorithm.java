@@ -109,23 +109,18 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 parent = parents.get(0);
             }
 
-            List<IChromosome<T>> offspring = new ArrayList<>();
-            offspring.add(parent);
+            IChromosome<T> offspring;
+
             if (Randomness.getRnd().nextDouble() < pMutate) {
                 offspring = mutationFunction.mutate(parent);
+            } else {
+                offspring = parent;
             }
 
-            for (IChromosome<T> chromosome : offspring) {
-                // as long as only a single offspring is generated, the check is redundant
-                if (newGeneration.size() == bigPopulationSize) {
-                    break;
-                } else {
-                    newGeneration.add(chromosome);
-                }
-            }
+            newGeneration.add(offspring);
         }
 
-        // We need to shrink the big population back to a size of 'populationSize'.
+        // TODO: beautify later when more time
         population.clear();
         population.addAll(newGeneration);
         List<IChromosome<T>> survivors = getGenerationSurvivors();

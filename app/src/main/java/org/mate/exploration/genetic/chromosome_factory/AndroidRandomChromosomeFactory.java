@@ -22,7 +22,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         this(true, maxNumEvents);
     }
 
-    public AndroidRandomChromosomeFactory( boolean resetApp, int maxNumEvents) {
+    public AndroidRandomChromosomeFactory(boolean resetApp, int maxNumEvents) {
         this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;

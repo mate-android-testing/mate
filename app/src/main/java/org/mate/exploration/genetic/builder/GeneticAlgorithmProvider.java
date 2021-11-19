@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.algorithm.NoveltySearch;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
+import org.mate.exploration.genetic.algorithm.Sapienz;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
@@ -15,6 +16,8 @@ import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -39,8 +42,7 @@ import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
-import org.mate.exploration.genetic.fitness.TestCaseLengthFitnessFunction;
-import org.mate.exploration.genetic.fitness.TestSuiteLengthFitnessFunction;
+import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
@@ -48,20 +50,22 @@ import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFun
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
+import org.mate.exploration.genetic.selection.RankSelectionFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
+import org.mate.exploration.genetic.selection.TournamentSelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.intent.IntentChromosomeFactory;
-import org.mate.model.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,13 +103,15 @@ public class GeneticAlgorithmProvider {
             case NSGAII:
                 return initializeNSGAII();
             case MOSA:
-                return (GeneticAlgorithm<T>) initializeMOSA();
+                return initializeMOSA();
             case MIO:
                 return initializeMio();
             case RANDOM_WALK:
                 return initializeRandomWalk();
             case RANDOM_SEARCH:
                 return initializeRandomSearch();
+            case SAPIENZ:
+                return initializeSapienz();
             case NOVELTY_SEARCH:
                 return initializeNoveltySearch();
             default:
@@ -128,7 +134,25 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
+    /**
+     * Initialises the random search algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the random search algorithm.
+     */
     private <T> RandomSearch<T> initializeRandomSearch() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("RandomSearch requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("RandomSearch requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("RandomSearch requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new RandomSearch<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeFitnessFunctions(),
@@ -149,7 +173,7 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
-    private <T extends TestCase> MOSA<T> initializeMOSA() {
+    private <T> MOSA<T> initializeMOSA() {
         return new MOSA<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
@@ -163,11 +187,33 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
+    /**
+     * Initialises the MIO algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the MIO algorithm.
+     */
     private <T> Mio<T> initializeMio() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("MIO requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("MIO requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("MIO requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("MIO requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.OBJECTIVE() == null) {
+            throw new IllegalStateException("MIO requires the type of objectives. You have to" +
+                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
+        }
+
         return new Mio<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
@@ -180,17 +226,57 @@ public class GeneticAlgorithmProvider {
                 getMutationRate());
     }
 
+    /**
+     * Initialises the OnePlusOne algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the OnePlusOne algorithm.
+     */
     private <T> OnePlusOne<T> initializeOnePlusOne() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("OnePlusOne requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("OnePlusOne requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new OnePlusOne<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition());
     }
 
+    /**
+     * Initialises the random walk algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the random walk algorithm.
+     */
     private <T> RandomWalk<T> initializeRandomWalk() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("RandomWalk requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("RandomWalk requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("RandomWalk requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("RandomWalk requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new RandomWalk<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeMutationFunction(),
@@ -288,6 +374,26 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    private <T> Sapienz<T> initializeSapienz() {
+
+        if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
+            throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn" +
+                    "the property Properties.WIDGET_BASED_ACTIONS() off.");
+        }
+
+        return new Sapienz<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getBigPopulationSize(),
+                getPCrossOver(),
+                getPMutate());
+    }
+
     private <T> IChromosomeFactory<T> initializeChromosomeFactory() {
         String chromosomeFactoryId
                 = properties.getProperty(GeneticAlgorithmBuilder.CHROMOSOME_FACTORY_KEY);
@@ -313,6 +419,14 @@ public class GeneticAlgorithmProvider {
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
             case INTENT_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
+            case SAPIENZ_RANDOM_CHROMOSOME_FACTORY:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IChromosomeFactory<T>) new SapienzRandomChromosomeFactory(getNumEvents());
+            case SAPIENZ_SUITE_RANDOM_CHROMOSOME_FACTORY:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IChromosomeFactory<T>) new SapienzSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -332,6 +446,12 @@ public class GeneticAlgorithmProvider {
                     return new RandomSelectionFunction<>();
                 case FITNESS_PROPORTIONATE_SELECTION:
                     return new FitnessProportionateSelectionFunction<>();
+                case TOURNAMENT_SELECTION:
+                    return new TournamentSelectionFunction<>(getTournamentSize());
+                case RANK_SELECTION:
+                    return new RankSelectionFunction<>();
+                case CROWDED_TOURNAMENT_SELECTION:
+                    return new CrowdedTournamentSelectionFunction<>();
                 case IDENTITY_SELECTION:
                     return new IdSelectionFunction<>();
                 case NOVELTY_RANK_SELECTION:
@@ -383,7 +503,7 @@ public class GeneticAlgorithmProvider {
                 case SAPIENZ_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
-                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPInnerMutate());
+                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
                 case PRIMITIVE_SHUFFLE_MUTATION:
                     // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                     // different T for their chromosomes
@@ -441,12 +561,8 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
-            case TEST_SUITE_LENGTH:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new TestSuiteLengthFitnessFunction();
-            case TEST_CASE_LENGTH:
-                return (IFitnessFunction<T>) new TestCaseLengthFitnessFunction();
+            case TEST_LENGTH:
+                return (IFitnessFunction<T>) new TestLengthFitnessFunction<>();
             case METHOD_COVERAGE:
                 return (IFitnessFunction<T>) new MethodCoverageFitnessFunction<>();
             case BRANCH_COVERAGE:
@@ -605,21 +721,6 @@ public class GeneticAlgorithmProvider {
         }
     }
 
-    private double getPInnerMutate() {
-        String pInnerMutate
-                = properties.getProperty(GeneticAlgorithmBuilder.P_INNER_MUTATE_KEY);
-        if (pInnerMutate == null) {
-            if (useDefaults) {
-                return org.mate.Properties.P_INNER_MUTATE();
-            } else {
-                throw new IllegalStateException(
-                        "Without using defaults: p inner mutate not specified");
-            }
-        } else {
-            return Double.valueOf(pInnerMutate);
-        }
-    }
-
     private double getPSampleRandom() {
         String pSampleRandom
                 = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
@@ -662,6 +763,20 @@ public class GeneticAlgorithmProvider {
             }
         } else {
             return Integer.valueOf(mutationRate);
+        }
+    }
+
+    /**
+     * Returns the tournament size used for tournament selection.
+     *
+     * @return Returns the tournament size.
+     */
+    private int getTournamentSize() {
+        if (useDefaults) {
+            return org.mate.Properties.TOURNAMENT_SIZE();
+        } else {
+            throw new IllegalStateException(
+                    "Without using defaults: tournament size not specified");
         }
     }
 }

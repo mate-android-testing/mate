@@ -5,15 +5,28 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides a uniform crossover operation for {@link TestSuite}s, i.e. the offspring consists
+ * of a random combination of the genes from the parents t1 and t2.
+ */
 public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSuite> {
 
+    /**
+     * Performs a uniform crossover on the two given test suites. The offspring test suite
+     * consists of a random combination of the test cases from the parent test suites t1 and t2.
+     * Note that the offspring is not actually executed, but only the relevant coverage and fitness
+     * data are copied from the parents to the offspring.
+     *
+     * @param parents The two test suites on which crossover should be performed.
+     * @return Returns the offspring.
+     */
     @Override
     public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {
 
@@ -25,7 +38,7 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
         TestSuite t1 = parents.get(0).getValue();
         TestSuite t2 = parents.get(1).getValue();
 
-        //Randomly select whether final length should be floored or ceiled
+        // randomly select whether final length should be floored or ceiled
         int lengthBias = Randomness.getRnd().nextInt(2);
         int finalLength = (t1.getTestCases().size() + t2.getTestCases().size() + lengthBias) / 2;
         List<TestCase> testCasePool = new ArrayList<>();
@@ -34,12 +47,14 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
 
         TestSuite offspringSuite = new TestSuite();
         IChromosome<TestSuite> offspring = new Chromosome<>(offspringSuite);
-        MATE.log_acc("Uniform Suite Cross Over: crossing over chromosome: " + parents.get(0) + " and chromosome: " + parents.get(1));
-        MATE.log_acc("cross over result chromosome: " + offspring);
+        MATE.log_acc("Uniform Suite Cross Over: crossing over chromosome: "
+                + parents.get(0) + " and chromosome: " + parents.get(1));
+        MATE.log_acc("Cross over result chromosome: " + offspring);
 
         List<TestCase> copyTestCasesFromParent1 = new ArrayList<>();
         List<TestCase> copyTestCasesFromParent2 = new ArrayList<>();
 
+        // randomly select a test case from test suite t1 or t2
         for (int i = 0; i < finalLength; i++) {
             int choice = Randomness.randomIndex(testCasePool);
             TestCase tcChoice = testCasePool.get(choice);
@@ -52,12 +67,14 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
             testCasePool.remove(choice);
         }
 
+        // copy coverage and fitness data from first parent to offspring
         if (!copyTestCasesFromParent1.isEmpty()) {
             MATE.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
             CoverageUtils.copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
             FitnessUtils.copyFitnessData(parents.get(0), offspring, copyTestCasesFromParent1);
         }
 
+        // copy coverage and fitness data from second parent to offspring
         if (!copyTestCasesFromParent2.isEmpty()) {
             MATE.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
             CoverageUtils.copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);

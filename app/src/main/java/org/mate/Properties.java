@@ -125,10 +125,6 @@ public class Properties {
     public static double P_MUTATE() {
         return propertyOr(0.3);
     }
-    // for mutation functions that apply multiple mutations based on the given probability
-    public static double P_INNER_MUTATE() {
-        return propertyOr(0.3);
-    }
 
     public static double P_SAMPLE_RANDOM() {
         return propertyOr(0.5);
@@ -143,6 +139,10 @@ public class Properties {
     }
 
     public static int MUTATION_RATE() { return propertyOr(1); }
+
+    public static int TOURNAMENT_SIZE() { return propertyOr(2); }
+
+    public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
 
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);

@@ -5,6 +5,8 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.utils.testcase.TestCaseOptimizer;
@@ -26,6 +28,8 @@ public class ExecuteMATEReplayRun {
 
         // init uiAbstractionLayer, properties, etc.
         MATE mate = new MATE();
+
+        Registry.registerReplayMode();
 
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
@@ -114,13 +118,16 @@ public class ExecuteMATEReplayRun {
 
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
 
+            // TODO: track for how many actions current and expected activity diverge
             MATE.log("Current Activity: " + Registry.getCurrentActivity());
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
+            // TODO: one should abort if a (primitive) action leaves the app, because there must be some divergence
             Action nextAction = actions.get(i);
 
             // check whether the UI action is applicable on the current state
-            if (nextAction instanceof WidgetAction
+            if ((nextAction instanceof WidgetAction || (nextAction instanceof MotifAction
+                    && Properties.WIDGET_BASED_ACTIONS()))
                     && !Registry.getUiAbstractionLayer().getExecutableActions().contains(nextAction)) {
 
                 // try to repair UI action
@@ -169,6 +176,7 @@ public class ExecuteMATEReplayRun {
                     + " Y : " + selectedAction.getWidget().getY());
 
             MATE.log("------------------------------------------");
+            MATE.log("Applicable widget actions with same action type: ");
 
             for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
 
@@ -182,6 +190,34 @@ public class ExecuteMATEReplayRun {
                                 + " ResourceID : " + widgetAction.getWidget().getResourceID()
                                 + " X : " + widgetAction.getWidget().getX()
                                 + " Y : " + widgetAction.getWidget().getY());
+                    }
+                }
+            }
+        } else if (a instanceof MotifAction && Properties.WIDGET_BASED_ACTIONS()
+                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(a)) {
+
+            MotifAction selectedAction = (MotifAction) a;
+
+            MATE.log(selectedAction.getActionType() + "on " + selectedAction.getActivityName());
+
+            for (UIAction widgetAction : selectedAction.getUIActions()) {
+                MATE.log(widgetAction.toString());
+            }
+
+            MATE.log("------------------------------------------");
+            MATE.log("Applicable motif actions with same action type: ");
+
+            for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
+
+                if (action instanceof MotifAction) {
+                    MotifAction motifAction = (MotifAction) action;
+                    if (motifAction.getActionType() == selectedAction.getActionType()) {
+
+                        MATE.log(motifAction.getActionType() + "on " + motifAction.getActivityName());
+
+                        for (UIAction widgetAction : motifAction.getUIActions()) {
+                            MATE.log(widgetAction.toString());
+                        }
                     }
                 }
             }
