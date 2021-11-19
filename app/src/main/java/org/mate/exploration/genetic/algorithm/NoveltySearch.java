@@ -166,12 +166,6 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                 offspring = parent;
             }
 
-            // TODO: if the offspring was not changed at all by crossover and mutation, we need to copy
-            //  the fitness data
-            if (population.contains(offspring)) {
-                MATE.log_acc("Offspring " + offspring + " represents duplicate!");
-            }
-
             updateArchive(offspring, newGeneration, archive);
             newGeneration.add(offspring);
         }
