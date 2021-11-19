@@ -1232,6 +1232,33 @@ public class EnvironmentManager {
     }
 
     /**
+     * Retrieves the novelty score for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the novelty should be evaluated.
+     * @param population The current population.
+     * @param archive The current archive.
+     * @param nearestNeighbours The number of nearest neighbours k.
+     * @param objectives The kind of objectives, e.g. branches.
+     * @param <T> The type of the chromosomes.
+     * @return Returns the novelty for the given chromosome.
+     */
+    public <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                                 List<IChromosome<T>> archive, int nearestNeighbours,
+                                 String objectives) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_novelty")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", getChromosomeId(chromosome))
+                .withParameter("population", getChromosomeIds(population))
+                .withParameter("archive", getChromosomeIds(archive))
+                .withParameter("nearestNeighbours", String.valueOf(nearestNeighbours))
+                .withParameter("objectives", objectives);
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("novelty"));
+    }
+
+    /**
      * Concatenates the given chromosomes separated by '+' into a single {@link String}.
      *
      * @param chromosomes A list of chromosomes.

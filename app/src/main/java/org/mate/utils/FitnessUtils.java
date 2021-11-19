@@ -177,4 +177,22 @@ public class FitnessUtils {
         return Registry.getEnvironmentManager()
                 .getNoveltyVector(population, archive, nearestNeighbours, objectives);
     }
+
+    /**
+     * Retrieves the novelty score for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the novelty should be evaluated.
+     * @param population The current population.
+     * @param archive The current archive.
+     * @param nearestNeighbours The number of nearest neighbours k.
+     * @param objectives The kind of objectives, e.g. branches.
+     * @param <T> The type of the chromosomes.
+     * @return Returns the novelty for the given chromosome.
+     */
+    public static <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                                        List<IChromosome<T>> archive, int nearestNeighbours,
+                                        String objectives) {
+        return Registry.getEnvironmentManager()
+                .getNovelty(chromosome, population, archive, nearestNeighbours, objectives);
+    }
 }

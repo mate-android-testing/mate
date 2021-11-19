@@ -29,7 +29,7 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
 
     /**
      * The novelty fitness value can't be computed solely based on the given chromosome. Do not
-     * call this method, see {@link #getFitness(List, List, int)} for more information.
+     * call this method, see {@link #getFitness(IChromosome, List, List, int)} for more information.
      *
      * @param chromosome The given chromosome.
      * @return Returns an {@link UnsupportedOperationException}.
@@ -41,7 +41,7 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
 
     /**
      * The novelty fitness value can't be computed solely based on the given chromosome. Do not
-     * call this method, see {@link #getFitness(List, List, int)} for more information.
+     * call this method, see {@link #getFitness(IChromosome, List, List, int)} for more information.
      *
      * @param chromosome The given chromosome.
      * @return Returns an {@link UnsupportedOperationException}.
@@ -73,5 +73,20 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
     public List<Double> getFitness(List<IChromosome<T>> population,
                              List<IChromosome<T>> archive, int nearestNeighbours) {
         return FitnessUtils.getNoveltyVector(population, archive, nearestNeighbours, objectives);
+    }
+
+    /**
+     * Computes the novelty for the given chromosome. The resulting novelty is bounded in [0,1],
+     * where a higher novelty score is better.
+     *
+     * @param chromosome The chromosome for which the novelty should be evaluated.
+     * @param population The current population.
+     * @param archive The current archive.
+     * @param nearestNeighbours The number of nearest neighbours k.
+     * @return Returns the novelty for the given chromosome.
+     */
+    public double getFitness(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                             List<IChromosome<T>> archive, int nearestNeighbours) {
+        return FitnessUtils.getNovelty(chromosome, population, archive, nearestNeighbours, objectives);
     }
 }
