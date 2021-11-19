@@ -9,7 +9,6 @@ import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
@@ -53,18 +52,6 @@ public class TestCase {
     private List<String> activitySequence;
 
     /**
-     * A novelty score based on novelty search, not yet implemented.
-     * Consider https://hal.archives-ouvertes.fr/hal-01121228/document as a reference.
-     */
-    private float novelty;
-
-    /**
-     * A sparseness value used for novelty search, not yet implemented.
-     * Consider https://hal.archives-ouvertes.fr/hal-01121228/document as a reference.
-     */
-    private double sparseness;
-
-    /**
      * Whether a crash has been triggered by an action of the test case.
      */
     private boolean crashDetected;
@@ -74,12 +61,6 @@ public class TestCase {
      * The implementation is currently considered as deprecated.
      */
     private Map<String, String> statesMap;
-
-    /**
-     * A feature vector that maps a screen state to the value 0 (unvisited) or 1 (visited).
-     * The implementation is currently considered as deprecated.
-     */
-    private Map<String, Integer> featureVector;
 
     /**
      * The desired size of the test case, i.e. the desired length
@@ -104,9 +85,7 @@ public class TestCase {
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
         eventSequence = new ArrayList<>();
-        sparseness = 0;
         statesMap = new HashMap<>();
-        featureVector = new HashMap<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -122,9 +101,7 @@ public class TestCase {
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
         eventSequence = new ArrayList<>();
-        sparseness = 0;
         statesMap = new HashMap<>();
-        featureVector = new HashMap<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -320,46 +297,6 @@ public class TestCase {
     }
 
     /**
-     * Sets a novelty value for the test case.
-     *
-     * @param novelty The new novelty score.
-     */
-    @SuppressWarnings("unused")
-    public void setNovelty(float novelty) {
-        this.novelty = novelty;
-    }
-
-    /**
-     * Gets the novelty score of the test case.
-     *
-     * @return Returns the novelty score.
-     */
-    @SuppressWarnings("unused")
-    public float getNovelty() {
-        return novelty;
-    }
-
-    /**
-     * Gets the sparseness of the test case.
-     *
-     * @return Returns the test case's sparseness.
-     */
-    @SuppressWarnings("unused")
-    public double getSparseness() {
-        return sparseness;
-    }
-
-    /**
-     * Sets the sparseness of the test case.
-     *
-     * @param sparseness The new sparseness of the test case.
-     */
-    @SuppressWarnings("unused")
-    public void setSparseness(double sparseness) {
-        this.sparseness = sparseness;
-    }
-
-    /**
      * Updates the state map.
      *
      * @param state Represents the id of a screen state.
@@ -380,35 +317,6 @@ public class TestCase {
     @Deprecated
     public Map<String, String> getStatesMap() {
         return statesMap;
-    }
-
-    /**
-     * Returns the feature vector, i.e. a mapping of a screen state
-     * to the value 0 (unvisited) or 1 (visited).
-     *
-     * @return Returns the feature vector.
-     */
-    @Deprecated
-    public Map<String, Integer> getFeatureVector() {
-        return featureVector;
-    }
-
-    /**
-     * Updates the feature vector. Assign to each screen state defined
-     * by the given gui model either the value 0 (unvisited) or 1 (visited).
-     *
-     * @param guiModel A gui model wrapping screen states.
-     */
-    @Deprecated
-    public void updateFeatureVector(IGUIModel guiModel) {
-        List<IScreenState> guiStates = guiModel.getStates();
-        for(IScreenState state : guiStates){
-            if(this.visitedStates.contains(state.getId())){
-                featureVector.put(state.getId(),1);
-            } else {
-                featureVector.put(state.getId(),0);
-            }
-        }
     }
 
     /**
