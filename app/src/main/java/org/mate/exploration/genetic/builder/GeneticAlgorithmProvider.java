@@ -54,7 +54,6 @@ import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
-import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.selection.RankSelectionFunction;
@@ -452,8 +451,6 @@ public class GeneticAlgorithmProvider {
                     return new RankSelectionFunction<>();
                 case CROWDED_TOURNAMENT_SELECTION:
                     return new CrowdedTournamentSelectionFunction<>();
-                case IDENTITY_SELECTION:
-                    return new IdSelectionFunction<>();
                 case NOVELTY_RANK_SELECTION:
                     return new NoveltyRankSelectionFunction<>();
                 default:

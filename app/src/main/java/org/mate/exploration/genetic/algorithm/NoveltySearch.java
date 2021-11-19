@@ -158,30 +158,22 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                 parent = parents.get(0);
             }
 
-            List<IChromosome<T>> offspring = new ArrayList<>();
+            IChromosome<T> offspring;
 
             if (Randomness.getRnd().nextDouble() < pMutate) {
                 offspring = mutationFunction.mutate(parent);
             } else {
-                offspring.add(parent);
+                offspring = parent;
             }
 
             // TODO: if the offspring was not changed at all by crossover and mutation, we need to copy
             //  the fitness data
-
-            for (IChromosome<T> chromosome : offspring) {
-                if (newGeneration.size() == bigPopulationSize) {
-                    break;
-                } else {
-
-                    if (population.contains(chromosome)) {
-                        MATE.log_acc("Offspring " + offspring + " represents duplicate!");
-                    }
-
-                    updateArchive(chromosome, newGeneration, archive);
-                    newGeneration.add(chromosome);
-                }
+            if (population.contains(offspring)) {
+                MATE.log_acc("Offspring " + offspring + " represents duplicate!");
             }
+
+            updateArchive(offspring, newGeneration, archive);
+            newGeneration.add(offspring);
         }
 
         population.clear();
