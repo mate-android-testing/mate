@@ -1198,24 +1198,21 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the novelty vector for the chromosomes contained in the population and in the archive.
+     * Returns the novelty vector for the given chromosomes.
      * Note that {@link #storeFitnessData(IChromosome, String)} has to be called previously.
      *
-     * @param population The chromosomes in the current population.
-     * @param archive The chromosomes in the current archive.
+     * @param chromosomes The list of chromosomes for which the novelty should be computed.
      * @param nearestNeighbours The number of nearest neighbours k that should be considered.
      * @param objectives The objectives type, e.g. branches.
      * @param <T> Refers to the type of the chromosomes.
      * @return Returns the novelty vector.
      */
-    public <T> List<Double> getNoveltyVector(List<IChromosome<T>> population,
-                                         List<IChromosome<T>> archive, int nearestNeighbours,
-                                             String objectives) {
+    public <T> List<Double> getNoveltyVector(List<IChromosome<T>> chromosomes,
+                                             int nearestNeighbours, String objectives) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_novelty_vector")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("population", getChromosomeIds(population))
-                .withParameter("archive", getChromosomeIds(archive))
+                .withParameter("chromosomes", getChromosomeIds(chromosomes))
                 .withParameter("nearestNeighbours", String.valueOf(nearestNeighbours))
                 .withParameter("objectives", objectives);
 

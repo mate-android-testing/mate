@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.fitness;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.FitnessUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -62,17 +63,27 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
     }
 
     /**
-     * Computes the novelty vector for the chromosomes contained in the population and in the
-     * archive. Each novelty score is bounded in [0,1], where a higher novelty score is better.
+     * Computes the novelty vector for the given chromosomes. Each novelty score is bounded
+     * in [0,1], where a higher novelty score is better.
      *
-     * @param population The chromosomes in the current population.
-     * @param archive The chromosomes in the current archive.
+     * @param chromosomes The chromosomes for which novelty should be evaluated.
      * @param nearestNeighbours The number of nearest neighbours k.
      * @return Returns the novelty vector.
      */
-    public List<Double> getFitness(List<IChromosome<T>> population,
-                             List<IChromosome<T>> archive, int nearestNeighbours) {
-        return FitnessUtils.getNoveltyVector(population, archive, nearestNeighbours, objectives);
+    // TODO: We may can re-use this for the novelty vector.
+    @SuppressWarnings("unused")
+    public List<Double> getFitness(List<IChromosome<T>> chromosomes, int nearestNeighbours) {
+
+        if (chromosomes.size() == 1) {
+            /*
+            * If there is only a single chromosome, there is no way to compute novelty by comparing
+            * the chromosomes with each other, since there is no other chromosome. Thus, we can only
+            * assign the best novelty score in this case.
+             */
+            return Collections.singletonList(1.0);
+        } else {
+            return FitnessUtils.getNoveltyVector(chromosomes, nearestNeighbours, objectives);
+        }
     }
 
     /**

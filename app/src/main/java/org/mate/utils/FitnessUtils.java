@@ -162,20 +162,18 @@ public class FitnessUtils {
     }
 
     /**
-     * Retrieves the novelty vector for the chromosomes contained in the population and archive.
+     * Retrieves the novelty vector for the given chromosomes.
      *
-     * @param population The chromosomes in the current population.
-     * @param archive The chromosomes in the current archive.
+     * @param chromosomes The list of chromosomes for which the novelty should be computed.
      * @param nearestNeighbours The number of nearest neighbours k that should be considered.
      * @param objectives The objectives type, e.g. branches.
      * @param <T> Specifies the type of the chromosomes.
      * @return Returns the novelty vector.
      */
-    public static <T> List<Double> getNoveltyVector(List<IChromosome<T>> population,
-                                                List<IChromosome<T>> archive,
+    public static <T> List<Double> getNoveltyVector(List<IChromosome<T>> chromosomes,
                                                     int nearestNeighbours, String objectives) {
         return Registry.getEnvironmentManager()
-                .getNoveltyVector(population, archive, nearestNeighbours, objectives);
+                .getNoveltyVector(chromosomes, nearestNeighbours, objectives);
     }
 
     /**

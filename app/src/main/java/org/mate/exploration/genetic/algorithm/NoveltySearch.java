@@ -195,6 +195,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         population.clear();
         population.addAll(survivors);
 
+        // TODO: This may remove the wrong pairs since there can be duplicates!
         List<Pair<IChromosome<T>, Double>> toBeRemoved = noveltyPairs.stream()
                 .filter(pair -> !survivors.contains(pair.first))
                 .collect(Collectors.toList());
