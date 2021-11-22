@@ -15,19 +15,43 @@ import org.mate.utils.coverage.CoverageUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides a crossover function for {@link TestCase}s produced by the
+ * {@link org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory}.
+ */
 public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
 
     private static final double MAX_LENGTH_DEVIATION = 0.25;
+
+    /**
+     * Whether to execute the actions directly or not.
+     */
     private boolean executeActions;
 
+    /**
+     * Initialises a crossover function that is used for test cases consisting of
+     * {@link org.mate.interaction.action.ui.UIAction}, or more precisely
+     * {@link org.mate.interaction.action.ui.WidgetAction}.
+     */
     public TestCaseMergeCrossOverFunction() {
         executeActions = true;
     }
 
+    /**
+     * Sets whether the actions should be directly or not.
+     *
+     * @param executeActions Whether the actions should be directly executed.
+     */
     public void setExecuteActions(boolean executeActions) {
         this.executeActions = executeActions;
     }
 
+    /**
+     * Performs a crossover on the given parents.
+     *
+     * @param parents The parents that undergo crossover.
+     * @return Returns the generated offspring.
+     */
     @Override
     public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
 

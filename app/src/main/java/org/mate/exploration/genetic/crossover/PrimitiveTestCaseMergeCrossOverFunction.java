@@ -10,18 +10,40 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 
+/**
+ * Provides a crossover function for {@link TestCase}s produced by the
+ * {@link org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory}.
+ */
 public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
 
+    /**
+     * Whether to directly execute the actions during crossover or not.
+     */
     private boolean executeActions;
 
+    /**
+     * Initialises a new crossover function that is used for test cases produced by the primitive
+     * chromosome factory.
+     */
     public PrimitiveTestCaseMergeCrossOverFunction() {
         executeActions = false;
     }
 
+    /**
+     * Sets whether the actions should be directly or not.
+     *
+     * @param executeActions Whether the actions should be directly executed.
+     */
     public void setExecuteActions(boolean executeActions) {
         this.executeActions = executeActions;
     }
 
+    /**
+     * Performs a crossover on the given parents.
+     *
+     * @param parents The parents that undergo crossover.
+     * @return Returns the generated offspring.
+     */
     @Override
     public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
 

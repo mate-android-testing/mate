@@ -1,5 +1,8 @@
 package org.mate.exploration.genetic.crossover;
 
+/**
+ * The list of supported crossover functions in combination with genetic algorithms.
+ */
 public enum CrossOverFunction {
 
     TEST_CASE_MERGE_CROSS_OVER,

@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.crossover;
 
+import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.Randomness;
@@ -8,11 +9,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A cross over function that crosses two integer sequences at a random point
+ * A crossover function that crosses two integer sequences at a random point. This crossover function
+ * should be used in combination with a grammatical evolution strategy.
  */
 public class IntegerSequencePointCrossOverFunction implements ICrossOverFunction<List<Integer>> {
+
+    /**
+     * Performs a one point crossover on the given parents.
+     *
+     * @param parents The parents that undergo crossover.
+     * @return Returns the generated offspring.
+     */
     @Override
     public IChromosome<List<Integer>> cross(List<IChromosome<List<Integer>>> parents) {
+
+        if (parents.size() == 1) {
+            MATE.log_warn("IntegerSequencePointCrossOverFunction not applicable on single chromosome!");
+            return parents.get(0);
+        }
+
         List<Integer> sequence1 = parents.get(0).getValue();
         List<Integer> sequence2 = parents.get(1).getValue();
 
