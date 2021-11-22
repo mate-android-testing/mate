@@ -1,5 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
+import android.util.Pair;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -18,10 +20,9 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A novelty search implementation following the paper 'A Novelty Search Approach for Automatic Test
@@ -34,9 +35,9 @@ import java.util.Map;
 public class NoveltySearch<T> extends GeneticAlgorithm<T> {
 
     /**
-     * The archive containing the most diverse chromosomes.
+     * The archive contains the most novel chromosomes over the entire run.
      */
-    private final List<IChromosome<T>> archive;
+    private final List<Pair<IChromosome<T>, Double>> archive = new LinkedList<>();
 
     /**
      * The maximal size of the archive, denoted as L.
@@ -64,9 +65,9 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     private final NoveltyRankSelectionFunction<T> noveltySelectionFunction;
 
     /**
-     * A mapping of a chromosome to its novelty.
+     * Saves pairs where a pair associates a chromosome with its novelty value.
      */
-    private final Map<IChromosome<T>, Double> noveltyScores = new HashMap<>();
+    private final List<Pair<IChromosome<T>, Double>> noveltyPairs = new ArrayList<>();
 
     /**
      * Initializes the genetic algorithm with all the necessary attributes.
@@ -101,7 +102,6 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
-        this.archive = new LinkedList<>(); // the archive not bigger than limit L
         this.nearestNeighbours = nearestNeighbours; // the number of nearest neighbours k
         this.archiveLimit = archiveLimit; // the archive limit L
         this.noveltyThreshold = noveltyThreshold; // the novelty threshold T
@@ -119,8 +119,13 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
 
         for (int i = 0; i < populationSize; i++) {
             IChromosome<T> chromosome = chromosomeFactory.createChromosome();
-            updateArchive(chromosome, population, archive);
+
+            double novelty = noveltyFitnessFunction.getFitness(chromosome, population,
+                    archive.stream().map(p -> p.first).collect(Collectors.toList()), nearestNeighbours);
+            noveltyPairs.add(new Pair<>(chromosome, novelty));
+
             population.add(chromosome);
+            updateArchive(chromosome, archive);
         }
 
         logCurrentFitness();
@@ -139,16 +144,16 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
         /*
-        * As an offspring may represent a duplicate of the population, because no crossover and
-        * no mutation was applied, the novelty of this offspring would decrease, which in turn
-        * would influence the next selection process. Thus, we should work with a copy of the saved
-        * novelty scores.
+        * The selection process should not be influenced by changes on the underlying novelty pairs.
+        * In particular, we don't want to negatively influence the selection by introducing an
+        * offspring that neither went through crossover or mutation, thus leading a low novelty value.
+        * Thus, we work on a copy of the novelty pairs for the selection process.
          */
-        Map<IChromosome<T>, Double> noveltyScoresCopy = Collections.unmodifiableMap(noveltyScores);
+        List<Pair<IChromosome<T>, Double>> noveltyPairsCopy = Collections.unmodifiableList(noveltyPairs);
 
         while (newGeneration.size() < bigPopulationSize) {
 
-            List<IChromosome<T>> parents = noveltySelectionFunction.select(population, noveltyScoresCopy);
+            List<IChromosome<T>> parents = noveltySelectionFunction.select(noveltyPairsCopy);
 
             IChromosome<T> parent;
 
@@ -166,8 +171,22 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                 offspring = parent;
             }
 
-            updateArchive(offspring, newGeneration, archive);
+            /*
+            * TODO: We should force here the execution of the new offspring and its novelty
+            *  computation. Right now, crossover and mutation may internally execute the chromosome
+            *  and generate a new chromosome every time instead of updating the chromosome in place.
+             */
+
+            /*
+            * TODO: Should we exclude in the new generation the current population? At least this
+            *  would be consistent with the invocation of getFitness() in createInitialPopulation().
+             */
+            double novelty = noveltyFitnessFunction.getFitness(offspring, newGeneration,
+                    archive.stream().map(p -> p.first).collect(Collectors.toList()), nearestNeighbours);
+            noveltyPairs.add(new Pair<>(offspring, novelty));
+
             newGeneration.add(offspring);
+            updateArchive(offspring, archive);
         }
 
         population.clear();
@@ -175,6 +194,12 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         List<IChromosome<T>> survivors = getGenerationSurvivors();
         population.clear();
         population.addAll(survivors);
+
+        List<Pair<IChromosome<T>, Double>> toBeRemoved = noveltyPairs.stream()
+                .filter(pair -> !survivors.contains(pair.first))
+                .collect(Collectors.toList());
+        noveltyPairs.removeAll(toBeRemoved);
+
         logCurrentFitness();
         currentGenerationNumber++;
     }
@@ -188,13 +213,13 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
 
         MATE.log_acc("Novelty of chromosomes in population: ");
-        for (IChromosome<T> chromosome : population) {
-            MATE.log_acc("Chromosome " + chromosome + ": " + noveltyScores.get(chromosome));
+        for (Pair<IChromosome<T>, Double> chromosome : noveltyPairs) {
+            MATE.log_acc("Chromosome " + chromosome.first + ": " + chromosome.second);
         }
 
         MATE.log_acc("Novelty of chromosomes in archive: ");
-        for (IChromosome<T> chromosome : archive) {
-            MATE.log_acc("Chromosome " + chromosome + ": " + noveltyScores.get(chromosome));
+        for (Pair<IChromosome<T>, Double> chromosome : archive) {
+            MATE.log_acc("Chromosome " + chromosome.first + ": " + chromosome.second);
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
@@ -211,36 +236,34 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      * Updates the archive with the new chromosome if one of the following conditions hold:
      *
      * (1) If the archive is empty.
-     * (2) The new chromosome has at least a novelty > {@link #noveltyThreshold} and the archive
-     *      is not full yet.
-     * (3) The new chromosome has at least a novelty > {@link #noveltyThreshold} and it is more
-     *      diverse than at least a single other chromosome in the current archive. This will
-     *      replace the new chromosome with the worst chromosome in the archive.
+     * (2) The new chromosome has at least a novelty > {@link #noveltyThreshold}.
      *
-     * @param chromosome The new chromosome (already contained in the current population!).
-     * @param population The current population.
+     * @param chromosome The new chromosome that may get inserted into the archive.
      * @param archive The current archive.
      */
-    private void updateArchive(IChromosome<T> chromosome, List<IChromosome<T>> population,
-                               List<IChromosome<T>> archive) {
+    private void updateArchive(IChromosome<T> chromosome, List<Pair<IChromosome<T>, Double>> archive) {
 
         if (archive.isEmpty()) {
-            // the first chromosome always goes into the archive
-            noveltyScores.put(chromosome, 1.0);
-            archive.add(chromosome);
+            // the first chromosome always goes into the archive and gets assigned the highest novelty
+            archive.add(new Pair<>(chromosome, 1.0));
         } else {
 
-            double novelty = noveltyFitnessFunction.getFitness(chromosome, population, archive, nearestNeighbours);
-            noveltyScores.put(chromosome, novelty);
+            /*
+             * Here we compute the novelty again, but only compare the chromosome with the
+             * chromosomes from the archive and don't include the current population.
+             */
+            double novelty = noveltyFitnessFunction
+                    .getFitness(chromosome, Collections.emptyList(),
+                            archive.stream().map(p -> p.first).collect(Collectors.toList()),
+                            nearestNeighbours);
 
             if (novelty > noveltyThreshold) {
-                archive.add(chromosome);
+                archive.add(new Pair<>(chromosome, novelty));
             }
 
-            // TODO: replace with worst chromosome in archive or replace with oldest chromosome
-            //  this may requires a re-evaluation of the novelty scores
+            // TODO: find a proper replacement strategy if the archive is full
             if (archive.size() == archiveLimit) {
-                MATE.log_acc("Pre-defined archive limit is reached!");
+                throw new IllegalStateException("Pre-defined archive limit is reached!");
             }
         }
     }

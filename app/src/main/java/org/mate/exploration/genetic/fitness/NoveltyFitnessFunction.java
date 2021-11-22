@@ -87,6 +87,15 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
      */
     public double getFitness(IChromosome<T> chromosome, List<IChromosome<T>> population,
                              List<IChromosome<T>> archive, int nearestNeighbours) {
-        return FitnessUtils.getNovelty(chromosome, population, archive, nearestNeighbours, objectives);
+
+        if (population.isEmpty() && archive.isEmpty()) {
+            /*
+            * The first chromosome gets the highest assignable novelty value, since there is other
+            * chromosome to compare it against.
+             */
+            return 1.0;
+        } else {
+            return FitnessUtils.getNovelty(chromosome, population, archive, nearestNeighbours, objectives);
+        }
     }
 }

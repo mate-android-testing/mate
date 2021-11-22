@@ -1,5 +1,8 @@
 package org.mate.exploration.genetic.selection;
 
+import android.util.Pair;
+
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.utils.Randomness;
@@ -8,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A selection function for {@link org.mate.exploration.genetic.algorithm.NoveltySearch} that
@@ -19,7 +21,7 @@ import java.util.Map;
 public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
 
     /**
-     * Do not call this method, consider {@link #select(List, Map)} instead.
+     * Do not call this method, consider {@link #select(List)}  instead.
      *
      * @param population The given population.
      * @return Returns an {@link UnsupportedOperationException}.
@@ -31,22 +33,23 @@ public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
     }
 
     /**
-     * Performs a rank-based selection grounded on the novelty scores.
+     * Performs a rank-based selection, i.e. the chromosomes in the population are first ranked
+     * based on their novelty and afterwards a selection as in roulette-wheel selection is performed.
      *
-     * @param population The current population.
-     * @param noveltyScores A mapping of chromosome to its novelty.
-     * @return Returns the selected chromosomes.
+     * @param noveltyPairs A list of pairs where each pair associates a chromosome with its novelty.
+     *                     This list contains a pair for each chromosome in the current population.
+     * @return Returns {@link Properties#DEFAULT_SELECTION_SIZE()} chromosomes.
      */
-    public List<IChromosome<T>> select(List<IChromosome<T>> population,
-                                       Map<IChromosome<T>, Double> noveltyScores) {
+    public List<IChromosome<T>> select(List<Pair<IChromosome<T>, Double>> noveltyPairs) {
 
         List<IChromosome<T>> selection = new ArrayList<>();
 
         // initially all chromosomes represent candidates
-        List<IChromosome<T>> candidates = new LinkedList<>(population);
+        List<Pair<IChromosome<T>, Double>> candidates = new LinkedList<>(noveltyPairs);
+        int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
 
         // assign each chromosome in the population its rank and perform roulette-wheel selection
-        for (int i = 0; i < population.size(); i++) {
+        for (int i = 0; i < size; i++) {
 
             /*
              * We shuffle the list that chromosomes with an identical fitness value get a 'fair'
@@ -55,14 +58,14 @@ public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
              */
             Randomness.shuffleList(candidates);
 
-            // sort the chromosomes based on their fitness (novelty) in order to assign a rank
-            Collections.sort(candidates, (o1, o2) -> noveltyScores.get(o1).compareTo(noveltyScores.get(o2)));
+            // sort the chromosomes based on their novelty in order to assign a rank
+            Collections.sort(candidates, (o1, o2) -> o1.second.compareTo(o2.second));
 
             // evaluate the maximal spectrum of the roulette wheel
             int sum = 0;
             int rank = 1;
 
-            for (IChromosome<T> chromosome : candidates) {
+            for (Pair<IChromosome<T>, Double> candidate : candidates) {
                 sum += rank;
                 rank++;
             }
@@ -73,17 +76,17 @@ public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
              * random number represents the selected chromosome.
              */
             int rnd = Randomness.getRnd().nextInt(sum + 1);
-            IChromosome<T> selected = null;
+            Pair<IChromosome<T>, Double> selected = null;
 
             int start = 0;
             rank = 1;
 
-            for (IChromosome<T> chromosome : candidates) {
+            for (Pair<IChromosome<T>, Double> candidate : candidates) {
 
                 int end = start + rank;
 
                 if (rnd <= end) {
-                    selected = chromosome;
+                    selected = candidate;
                     break;
                 } else {
                     start = end;
@@ -91,7 +94,7 @@ public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
                 }
             }
 
-            selection.add(selected);
+            selection.add(selected.first);
 
             // remove selected chromosome from roulette wheel
             candidates.remove(selected);
