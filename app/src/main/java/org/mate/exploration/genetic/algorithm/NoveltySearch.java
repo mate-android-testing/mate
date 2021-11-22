@@ -36,7 +36,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     /**
      * The archive containing the most diverse chromosomes.
      */
-    private List<IChromosome<T>> archive;
+    private final List<IChromosome<T>> archive;
 
     /**
      * The maximal size of the archive, denoted as L.
