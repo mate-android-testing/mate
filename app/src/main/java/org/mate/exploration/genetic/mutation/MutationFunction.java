@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.mutation;
 
 /**
- * The set of supported mutation functions.
+ * The set of supported mutation functions in genetic algorithms.
  */
 public enum MutationFunction {
 

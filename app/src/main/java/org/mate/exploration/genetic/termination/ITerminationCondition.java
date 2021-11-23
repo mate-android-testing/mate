@@ -1,13 +1,16 @@
 package org.mate.exploration.genetic.termination;
 
 /**
- * Interface that determines if the termination condition of an
- * {@link org.mate.exploration.genetic.core.IGeneticAlgorithm} is met
+ * Provides the interface for a termination condition.
  */
 public interface ITerminationCondition {
+
     /**
-     * Check if termination condition is met
-     * @return whether termination condition is met
+     * Determines whether the termination condition is met or not, e.g. if the search budget is
+     * exhausted.
+     *
+     * @return Returns {@code} true if the termination condition is met, otherwise {@code false}
+     *          is returned.
      */
     boolean isMet();
 }
