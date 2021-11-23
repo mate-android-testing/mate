@@ -16,11 +16,13 @@ import java.util.Map;
  */
 public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
+    /**
+     * Caches for each chromosome the computed branch distance.
+     */
     private Map<IChromosome<T>, Double> cache = new HashMap<>();
 
     /**
-     * Retrieves the branch distance value for the given chromosome.
-     * As a side effect terminates execution if target vertex is reached.
+     * Computes the branch distance value for the given chromosome.
      *
      * @param chromosome The chromosome for which the fitness value should be retrieved.
      * @return Returns the fitness value (branch distance) for the given chromosome.
@@ -52,11 +54,22 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
         return branchDistance;
     }
 
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code false} since this fitness functions aims to minimise the branch distance.
+     */
     @Override
     public boolean isMaximizing() {
         return false;
     }
 
+    /**
+     * Returns the normalised fitness value, i.e. the branch distance between 0 and 1.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome);

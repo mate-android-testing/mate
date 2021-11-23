@@ -1,5 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
+/**
+ * The list of supported fitness functions in genetic algorithms.
+ */
 public enum FitnessFunction {
 
     NUMBER_OF_ACTIVITIES,
