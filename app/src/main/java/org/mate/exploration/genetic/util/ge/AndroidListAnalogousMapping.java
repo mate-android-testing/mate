@@ -12,18 +12,30 @@ import java.util.List;
  * determine an action.
  */
 public class AndroidListAnalogousMapping extends AndroidListBasedMapping<Integer> {
+
     /**
-     * The default list analogous mapping
+     * The default list analogous mapping.
      */
     public AndroidListAnalogousMapping() {
         super(-1);
     }
 
+    /**
+     * Whether the current test case should be stopped.
+     *
+     * @return Returns {@code true} if the test case should be stopped, otherwise {@code false}
+     *          is returned.
+     */
     @Override
     protected boolean finishTestCase() {
         return activeGenotypeChromosome.getValue().size() == activeGenotypeCurrentCodonIndex;
     }
 
+    /**
+     * The action that should be executed next.
+     *
+     * @return Returns the selected action.
+     */
     @Override
     protected Action selectAction() {
         List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
