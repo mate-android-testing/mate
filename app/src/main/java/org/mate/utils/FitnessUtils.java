@@ -12,6 +12,9 @@ import org.mate.utils.coverage.Coverage;
 import java.util.EnumSet;
 import java.util.List;
 
+/**
+ * Provides utility functions to retrieving fitness related information.
+ */
 public class FitnessUtils {
 
     private FitnessUtils() {
@@ -43,8 +46,8 @@ public class FitnessUtils {
     }
 
     /**
-     * Stores for the given test case the fitness data, e.g. the traces are
-     * fetched from the emulator when dealing with branch distance fitness.
+     * Stores for the given test case the fitness data, e.g. the traces are fetched from the emulator
+     * when dealing with branch distance fitness.
      *
      * @param chromosome The given test case.
      */
@@ -68,8 +71,8 @@ public class FitnessUtils {
     }
 
     /**
-     * Stores for the given test suite the fitness data, e.g. the traces are
-     * fetched from the emulator when dealing with branch distance fitness.
+     * Stores for the given test suite the fitness data, e.g. the traces are fetched from the emulator
+     * when dealing with branch distance fitness.
      *
      * @param chromosome The given test suite.
      * @param testCase The test case within the test suite.

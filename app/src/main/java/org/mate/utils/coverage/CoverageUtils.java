@@ -205,7 +205,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-            case ALL_COVERAGE:
 
                 // log activity coverage in any case
                 MATE.log("Activity coverage of chromosome "
@@ -214,6 +213,23 @@ public final class CoverageUtils {
                 MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(), chromosome));
+
+                if (chromosome.getValue() instanceof TestSuite) {
+                    for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
+                        MATE.log("Coverage of individual chromosome " + testCase + ": "
+                                + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
+                    }
+                }
+                break;
+            case ALL_COVERAGE:
+
+                CoverageDTO coverageDTO = Registry.getEnvironmentManager().getCoverage(
+                        Properties.COVERAGE(), chromosome);
+                double activityCoverage = getActivityCoverage(chromosome);
+                coverageDTO.setActivityCoverage(activityCoverage);
+
+                MATE.log("Coverage of chromosome "
+                        + chromosome.getValue().toString() + ": " + coverageDTO);
 
                 if (chromosome.getValue() instanceof TestSuite) {
                     for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
@@ -348,7 +364,7 @@ public final class CoverageUtils {
      * Computes the activity coverage for the given chromosomes.
      *
      * @param chromosomes The chromosomes for which activity coverage should be evaluated.
-     * @param <T> The type wrapped by the chromosomes.
+     * @param <T>         The type wrapped by the chromosomes.
      * @return Returns the activity coverage for the given chromosomes.
      */
     private static <T> double getActivityCoverage(List<IChromosome<T>> chromosomes) {
