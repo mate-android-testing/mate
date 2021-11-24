@@ -238,7 +238,8 @@ public final class CoverageUtils {
         MATE.log_acc("Total coverage: " + getCombinedCoverage(Properties.COVERAGE()));
 
         if (Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-            MATE.log_acc("Total activity coverage: " + getCombinedCoverage(Coverage.ACTIVITY_COVERAGE));
+            MATE.log_acc("Total activity coverage: "
+                    + getCombinedCoverage(Coverage.ACTIVITY_COVERAGE).getActivityCoverage());
         }
 
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
