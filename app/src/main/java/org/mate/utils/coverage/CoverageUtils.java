@@ -13,16 +13,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CoverageUtils {
+/**
+ * Provides utility functions to retrieve coverage-related information.
+ */
+public final class CoverageUtils {
 
     private CoverageUtils() {
+        throw new UnsupportedOperationException("utility class");
     }
 
-    // cache activities for activity coverage
+    /**
+     * Caches the activities of the AUT.
+     */
     private static Set<String> activities = null;
 
-    // tracks for each chromosome which activities have been visited
-    private static Map<IChromosome, Set<String>> visitedActivities = new HashMap<>();
+    /**
+     * Tracks for each chromosome which activities have been visited.
+     */
+    private static final Map<IChromosome, Set<String>> visitedActivities = new HashMap<>();
 
     /**
      * Copies the coverage data for the given test cases from a source chromosome to a
@@ -30,7 +38,7 @@ public class CoverageUtils {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases The test cases for which coverage data should be copied over.
+     * @param testCases        The test cases for which coverage data should be copied over.
      */
     public static void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
                                         IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
@@ -111,7 +119,7 @@ public class CoverageUtils {
      * Stores the coverage data of a single test case within a test suite.
      *
      * @param chromosome The test suite.
-     * @param testCase The test case within the test suite.
+     * @param testCase   The test case within the test suite.
      */
     public static void storeTestSuiteChromosomeCoverage(
             IChromosome<TestSuite> chromosome, TestCase testCase) {
@@ -150,7 +158,7 @@ public class CoverageUtils {
      * Returns the activity coverage for the given chromosome.
      *
      * @param chromosome The chromosome for which the activity coverage should be evaluated.
-     * @param <T> Refers either to a test case or a test suite.
+     * @param <T>        Refers either to a test case or a test suite.
      * @return Returns the activity coverage of the given chromosome.
      */
     private static <T> double getActivityCoverage(IChromosome<T> chromosome) {
@@ -210,8 +218,8 @@ public class CoverageUtils {
     }
 
     /**
-     * Logs the total coverage at the end of a run.
-     * As a side effect, the coverage of the last test case is stored.
+     * Logs the total coverage at the end of a run. As a side effect, the coverage of the last
+     * test case is stored.
      */
     public static void logFinalCoverage() {
 
@@ -243,18 +251,18 @@ public class CoverageUtils {
 
             MATE.log_acc("Total visited activities: ");
             for (String activity : visitedActivitiesTotal) {
-                    MATE.log_acc(activity);
+                MATE.log_acc(activity);
             }
         }
     }
 
     /**
-     *  Returns the total coverage for the given coverage type.
+     * Returns the total coverage for the given coverage type.
      *
      * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @return Returns the total coverage.
      */
-    public static double getCombinedCoverage(Coverage coverage) {
+    public static CoverageDTO getCombinedCoverage(Coverage coverage) {
 
         switch (coverage) {
             case ACTIVITY_COVERAGE:
@@ -264,7 +272,12 @@ public class CoverageUtils {
                     visitedActivitiesTotal.addAll(activities);
                 }
 
-                return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
+                double activityCoverage = (double) visitedActivitiesTotal.size()
+                        / getActivities().size() * 100;
+
+                CoverageDTO coverageDTO = new CoverageDTO();
+                coverageDTO.setActivityCoverage(activityCoverage);
+                return coverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -280,12 +293,12 @@ public class CoverageUtils {
      * Returns the total coverage for the given coverage type and the specified list of
      * chromosomes.
      *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomes A list of chromosomes.
-     * @param <T> The type parameter referring to test cases or test suites.
+     * @param <T>         The type parameter referring to test cases or test suites.
      * @return Returns the total coverage for the specified chromosomes.
      */
-    public static <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
+    public static <T> CoverageDTO getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
 
         switch (coverage) {
             case ACTIVITY_COVERAGE:
@@ -301,7 +314,12 @@ public class CoverageUtils {
                     visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
                 }
 
-                return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
+                double activityCoverage = (double) visitedActivitiesTotal.size()
+                        / getActivities().size() * 100;
+
+                CoverageDTO coverageDTO = new CoverageDTO();
+                coverageDTO.setActivityCoverage(activityCoverage);
+                return coverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -316,12 +334,12 @@ public class CoverageUtils {
     /**
      * A convenient function to retrieve the coverage of a single test case within a test suite.
      *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage  The coverage type, e.g. BRANCH_COVERAGE.
      * @param testSuite The test suite.
-     * @param testCase The single test case within the test suite.
+     * @param testCase  The single test case within the test suite.
      * @return Returns the coverage for the given test case.
      */
-    public static double getCoverage(Coverage coverage, IChromosome<TestSuite> testSuite, TestCase testCase) {
+    public static CoverageDTO getCoverage(Coverage coverage, IChromosome<TestSuite> testSuite, TestCase testCase) {
 
         switch (coverage) {
 
@@ -330,7 +348,11 @@ public class CoverageUtils {
                  * We store the activity coverage per test suite, hence we can't request that
                  * information from the visited activities coverage map.
                  */
-                return (double) testCase.getVisitedActivities().size() / getActivities().size() * 100;
+                double activityCoverage = (double) testCase.getVisitedActivities().size()
+                        / getActivities().size() * 100;
+                CoverageDTO coverageDTO = new CoverageDTO();
+                coverageDTO.setActivityCoverage(activityCoverage);
+                return coverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -346,12 +368,12 @@ public class CoverageUtils {
     /**
      * A convenient function to retrieve the coverage of a single chromosome.
      *
-     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome The given chromosome.
-     * @param <T> The type parameter indicating a test case or a test suite.
+     * @param <T>        The type parameter indicating a test case or a test suite.
      * @return Returns the coverage for the given chromosome.
      */
-    public static <T> double getCoverage(Coverage coverage, IChromosome<T> chromosome) {
+    public static <T> CoverageDTO getCoverage(Coverage coverage, IChromosome<T> chromosome) {
 
         switch (coverage) {
             case ACTIVITY_COVERAGE:
@@ -361,7 +383,12 @@ public class CoverageUtils {
                             + chromosome + "!");
                 }
 
-                return (double) visitedActivities.get(chromosome).size() / getActivities().size() * 100;
+                double activityCoverage = (double) visitedActivities.get(chromosome).size()
+                        / getActivities().size() * 100;
+
+                CoverageDTO coverageDTO = new CoverageDTO();
+                coverageDTO.setActivityCoverage(activityCoverage);
+                return coverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:

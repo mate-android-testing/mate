@@ -114,17 +114,22 @@ public class FitnessUtils {
     public static <T> double getFitness(IChromosome<T> chromosome) {
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.BRANCH_COVERAGE, chromosome);
+            return Registry.getEnvironmentManager()
+                    .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
             return Registry.getEnvironmentManager().getBranchDistance(chromosome);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.LINE_COVERAGE, chromosome);
+            return Registry.getEnvironmentManager()
+                    .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.METHOD_COVERAGE, chromosome);
+            return Registry.getEnvironmentManager()
+                    .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome);
+            return Registry.getEnvironmentManager()
+                    .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome).getLineCoverage();
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
-            return Registry.getEnvironmentManager().getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome);
+            return Registry.getEnvironmentManager()
+                    .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
         }
 
         throw new UnsupportedOperationException("Fitness function "
