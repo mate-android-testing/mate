@@ -172,7 +172,7 @@ public class CoverageDTO {
     @NonNull
     @Override
     public String toString() {
-        return "CoverageDTO{" +
+        return "Coverage{" +
                 "activityCoverage=" + activityCoverage +
                 ", methodCoverage=" + methodCoverage +
                 ", branchCoverage=" + branchCoverage +

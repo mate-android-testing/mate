@@ -66,6 +66,7 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
+            case ALL_COVERAGE:
                 Registry.getEnvironmentManager().copyCoverageData(sourceChromosome, targetChromosome, testCases);
                 break;
             default:
@@ -107,6 +108,7 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
+            case ALL_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
                         Properties.COVERAGE(), chromosome, null);
                 break;
@@ -146,6 +148,7 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
+            case ALL_COVERAGE:
                 Registry.getEnvironmentManager().storeCoverageData(
                         Properties.COVERAGE(), chromosome, testCase.getId());
                 break;
@@ -162,6 +165,12 @@ public final class CoverageUtils {
      * @return Returns the activity coverage of the given chromosome.
      */
     private static <T> double getActivityCoverage(IChromosome<T> chromosome) {
+
+        if (!visitedActivities.containsKey(chromosome)) {
+            throw new IllegalStateException("No visited activities for chromosome "
+                    + chromosome + "!");
+        }
+
         return (double) visitedActivities.get(chromosome).size() / getActivities().size() * 100;
     }
 
@@ -196,8 +205,9 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
+            case ALL_COVERAGE:
 
-                // log activity coverage in any cse
+                // log activity coverage in any case
                 MATE.log("Activity coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
 
@@ -267,27 +277,39 @@ public final class CoverageUtils {
 
         switch (coverage) {
             case ACTIVITY_COVERAGE:
-                Set<String> visitedActivitiesTotal = new HashSet<>();
-
-                for (Set<String> activities : visitedActivities.values()) {
-                    visitedActivitiesTotal.addAll(activities);
-                }
-
-                double activityCoverage = (double) visitedActivitiesTotal.size()
-                        / getActivities().size() * 100;
-
-                CoverageDTO coverageDTO = new CoverageDTO();
-                coverageDTO.setActivityCoverage(activityCoverage);
-                return coverageDTO;
+                CoverageDTO activityCoverageDTO = new CoverageDTO();
+                activityCoverageDTO.setActivityCoverage(getActivityCoverage());
+                return activityCoverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, null);
+            case ALL_COVERAGE:
+                CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                        .getCombinedCoverage(coverage, null);
+                coverageDTO.setActivityCoverage(getActivityCoverage());
+                return coverageDTO;
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
         }
+    }
+
+    /**
+     * Computes the total activity coverage.
+     *
+     * @return Returns the total activity coverage.
+     */
+    private static double getActivityCoverage() {
+
+        Set<String> visitedActivitiesTotal = new HashSet<>();
+
+        for (Set<String> activities : visitedActivities.values()) {
+            visitedActivitiesTotal.addAll(activities);
+        }
+
+        return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
     }
 
     /**
@@ -303,33 +325,47 @@ public final class CoverageUtils {
 
         switch (coverage) {
             case ACTIVITY_COVERAGE:
-                Set<String> visitedActivitiesTotal = new HashSet<>();
-
-                for (IChromosome<T> chromosome : chromosomes) {
-
-                    if (!visitedActivities.containsKey(chromosome)) {
-                        throw new IllegalStateException("No visited activities for chromosome "
-                                + chromosome + "!");
-                    }
-
-                    visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
-                }
-
-                double activityCoverage = (double) visitedActivitiesTotal.size()
-                        / getActivities().size() * 100;
-
-                CoverageDTO coverageDTO = new CoverageDTO();
-                coverageDTO.setActivityCoverage(activityCoverage);
-                return coverageDTO;
+                CoverageDTO activityCoverageDTO = new CoverageDTO();
+                activityCoverageDTO.setActivityCoverage(getActivityCoverage(chromosomes));
+                return activityCoverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
                 return Registry.getEnvironmentManager().getCombinedCoverage(coverage, chromosomes);
+            case ALL_COVERAGE:
+                CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                        .getCombinedCoverage(coverage, chromosomes);
+                coverageDTO.setActivityCoverage(getActivityCoverage(chromosomes));
+                return coverageDTO;
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
         }
+    }
+
+    /**
+     * Computes the activity coverage for the given chromosomes.
+     *
+     * @param chromosomes The chromosomes for which activity coverage should be evaluated.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the activity coverage for the given chromosomes.
+     */
+    private static <T> double getActivityCoverage(List<IChromosome<T>> chromosomes) {
+
+        Set<String> visitedActivitiesTotal = new HashSet<>();
+
+        for (IChromosome<T> chromosome : chromosomes) {
+
+            if (!visitedActivities.containsKey(chromosome)) {
+                throw new IllegalStateException("No visited activities for chromosome "
+                        + chromosome + "!");
+            }
+
+            visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
+        }
+
+        return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
     }
 
     /**
@@ -349,11 +385,9 @@ public final class CoverageUtils {
                  * We store the activity coverage per test suite, hence we can't request that
                  * information from the visited activities coverage map.
                  */
-                double activityCoverage = (double) testCase.getVisitedActivities().size()
-                        / getActivities().size() * 100;
-                CoverageDTO coverageDTO = new CoverageDTO();
-                coverageDTO.setActivityCoverage(activityCoverage);
-                return coverageDTO;
+                CoverageDTO activityCoverageDTO = new CoverageDTO();
+                activityCoverageDTO.setActivityCoverage(getActivityCoverage(testCase));
+                return activityCoverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
@@ -361,9 +395,24 @@ public final class CoverageUtils {
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager()
                         .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
+            case ALL_COVERAGE:
+                CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                        .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
+                coverageDTO.setActivityCoverage(getActivityCoverage(testCase));
+                return coverageDTO;
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
         }
+    }
+
+    /**
+     * Computes the activity coverage for the given test case.
+     *
+     * @param testCase The test case for which the activity coverage should be evaluated.
+     * @return Returns the activity coverage of the given test case.
+     */
+    private static double getActivityCoverage(TestCase testCase) {
+        return (double) testCase.getVisitedActivities().size() / getActivities().size() * 100;
     }
 
     /**
@@ -378,24 +427,20 @@ public final class CoverageUtils {
 
         switch (coverage) {
             case ACTIVITY_COVERAGE:
-
-                if (!visitedActivities.containsKey(chromosome)) {
-                    throw new IllegalStateException("No visited activities for chromosome "
-                            + chromosome + "!");
-                }
-
-                double activityCoverage = (double) visitedActivities.get(chromosome).size()
-                        / getActivities().size() * 100;
-
-                CoverageDTO coverageDTO = new CoverageDTO();
-                coverageDTO.setActivityCoverage(activityCoverage);
-                return coverageDTO;
+                CoverageDTO activityCoverageDTO = new CoverageDTO();
+                activityCoverageDTO.setActivityCoverage(getActivityCoverage(chromosome));
+                return activityCoverageDTO;
             case BRANCH_COVERAGE:
             case LINE_COVERAGE:
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager().getCoverage(coverage, chromosome);
+            case ALL_COVERAGE:
+                CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                        .getCoverage(coverage, chromosome);
+                coverageDTO.setActivityCoverage(getActivityCoverage(chromosome));
+                return coverageDTO;
             default:
                 throw new UnsupportedOperationException("Coverage type not yet supported!");
         }
