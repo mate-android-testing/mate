@@ -293,7 +293,8 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
         uiActions.addAll(getUIActions());
-        return Collections.unmodifiableList(uiActions);
+        actions = Collections.unmodifiableList(uiActions);
+        return actions;
     }
 
     @SuppressWarnings("debug")
@@ -370,8 +371,8 @@ public class ActionsScreenState extends AbstractScreenState {
         uiActions.add(new UIAction(ActionType.SEARCH, activityName));
         // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
         // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
-        uiActions.add(new UIAction(ActionType.SLEEP, activityName));
-        uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
+        // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
+        // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
         uiActions.add(new UIAction(ActionType.DELETE, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));

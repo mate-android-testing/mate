@@ -94,7 +94,7 @@ public class UIAbstractionLayer {
                 return executeActionUnsafe(action);
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
-                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
                         && retryCount < UiAutomatorDisconnectedRetries) {
                     retry = true;
                     retryCount += 1;

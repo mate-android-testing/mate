@@ -7,12 +7,12 @@ import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
+import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
-import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -32,12 +32,13 @@ import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessF
 import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
-import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
-import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.fitness.TestCaseLengthFitnessFunction;
+import org.mate.exploration.genetic.fitness.TestSuiteLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
@@ -170,7 +171,8 @@ public class GeneticAlgorithmProvider {
                 getPCrossOver(),
                 getPMutate(),
                 getPSampleRandom(),
-                getFocusedSearchStart());
+                getFocusedSearchStart(),
+                getMutationRate());
     }
 
     private <T> OnePlusOne<T> initializeOnePlusOne() {
@@ -342,10 +344,12 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
-            case TEST_LENGTH:
+            case TEST_SUITE_LENGTH:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IFitnessFunction<T>) new TestLengthFitnessFunction();
+                return (IFitnessFunction<T>) new TestSuiteLengthFitnessFunction();
+            case TEST_CASE_LENGTH:
+                return (IFitnessFunction<T>) new TestCaseLengthFitnessFunction();
             case METHOD_COVERAGE:
                 return (IFitnessFunction<T>) new MethodCoverageFitnessFunction<>();
             case BRANCH_COVERAGE:
@@ -544,6 +548,21 @@ public class GeneticAlgorithmProvider {
             }
         } else {
             return Double.valueOf(focusedSearchStart);
+        }
+    }
+
+    private int getMutationRate() {
+        String mutationRate
+                = properties.getProperty(GeneticAlgorithmBuilder.MUTATION_RATE_KEY);
+        if (mutationRate == null) {
+            if (useDefaults) {
+                return org.mate.Properties.MUTATION_RATE();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: mutation rate not specified");
+            }
+        } else {
+            return Integer.valueOf(mutationRate);
         }
     }
 }

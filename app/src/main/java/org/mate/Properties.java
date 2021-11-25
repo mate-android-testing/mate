@@ -1,6 +1,5 @@
 package org.mate;
 
-import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -8,6 +7,7 @@ import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
@@ -55,7 +55,7 @@ public class Properties {
     /*
     * Intent fuzzing related properties.
      */
-    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
+    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(0.0f); }
 
     /**
      * The optimisation strategy that should be applied.
@@ -154,6 +154,8 @@ public class Properties {
         return propertyOr(10);
     }
 
+    public static int MUTATION_RATE() { return propertyOr(1); }
+
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
@@ -171,6 +173,28 @@ public class Properties {
     public static ChromosomeFactory CHROMOSOME_FACTORY() { return propertyOr(null); }
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
+
+    /*
+     * Begin Greybox Fuzzing properties
+     */
+
+    /**
+     * The initial size of the seed corpus S.
+     *
+     * @return Returns the initial size of the seed corpus.
+     */
+    public static int SEED_CORPUS_SIZE() { return propertyOr(10); }
+
+    /**
+     * The maximal assignable energy p.
+     *
+     * @return Returns the maximal assignable energy.
+     */
+    public static int MAX_ENERGY() { return propertyOr(10); }
+
+    /*
+     * End Greybox Fuzzing properties
+     */
 
     /**
      * Indicates which objective should be used for the multi-/many-objective

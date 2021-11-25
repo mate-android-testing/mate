@@ -36,6 +36,7 @@ public class GeneticAlgorithmBuilder {
     public static final String BIG_POPULATION_SIZE_KEY = "big_population_size";
     public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
     public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
+    public static final String MUTATION_RATE_KEY ="mutation_rate";
 
     private Properties properties;
 
@@ -193,6 +194,11 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withFocusedSearchStart(double focusedSearchStart) {
         properties.setProperty(FOCUSED_SEARCH_START_KEY, String.valueOf(focusedSearchStart));
+        return this;
+    }
+
+    public GeneticAlgorithmBuilder withMutationRate(int mutationRate) {
+        properties.setProperty(MUTATION_RATE_KEY, String.valueOf(mutationRate));
         return this;
     }
 
