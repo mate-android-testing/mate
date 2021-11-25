@@ -657,9 +657,9 @@ public class DeviceMgr {
                 String randomStaticString = staticStrings.getRandomStringFor(type, className);
                 if (randomStaticString == null) {
                     randomStaticString = staticStrings.getRandomStringFor(type);
-                    if(r.nextDouble()<0.5){
-                        randomStaticString = Mutation.mutateInput(type,randomStaticString);
-                    }
+                }
+                if (r.nextDouble() < 0.25) {
+                    randomStaticString = Mutation.mutateInput(type, randomStaticString);
                 }
                 return randomStaticString;
             }

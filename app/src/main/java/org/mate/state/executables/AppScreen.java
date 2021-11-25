@@ -176,9 +176,10 @@ public class AppScreen {
                     } else{
                         hint = (String) node.getHintText();
                     }
-
-                    if (!widget.getResourceID().isEmpty()) {
-                        editTextHints.put(widget.getResourceID(), hint);
+                    if(hint != null) {
+                        if (!widget.getResourceID().isEmpty()) {
+                            editTextHints.put(widget.getResourceID(), hint);
+                        }
                     }
                 }
             }
