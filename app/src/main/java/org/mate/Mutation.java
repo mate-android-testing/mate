@@ -51,7 +51,6 @@ public class Mutation {
             case DATETIME_VARIATION_DATE:
                 return mutateDate(hint);
             default:
-                //    Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
                 return mutateString(hint + "", 2);
         }
     }
