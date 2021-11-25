@@ -15,12 +15,9 @@ public final class StaticStrings {
     private final Map<InputFieldType, Map<String, Set<String>>> inputFieldTypeMap = new HashMap<>();
 
     private StaticStrings() {
-        for (InputFieldType inputField : InputFieldType.values()) {
-            if (inputField != InputFieldType.NOTHING) {
-                inputFieldTypeMap.put(inputField, null);
-            }
-        }
+        createInitialMap();
     }
+
 
     public static StaticStrings getInstance() {
         if (staticStrings == null) {
@@ -29,6 +26,12 @@ public final class StaticStrings {
         return staticStrings;
     }
 
+    /**
+     * Adds static string value to the set with the corresponding class name.
+     *
+     * @param className The class name, where the values should be inorder.
+     * @param values    The new values.
+     */
     public void add(String className, Set<String> values) {
         Set<String> copy = new HashSet<>(values);
         doInMap(allStrings, className, copy);
@@ -47,6 +50,53 @@ public final class StaticStrings {
         }
     }
 
+    /**
+     * Gets a random string independent of the field type.
+     *
+     * @param className The class name you want to have a string of it.
+     * @return A random string of the set.
+     */
+    public String getRandomStringFor(String className) {
+        return getRandomStringFor(allStrings, className);
+    }
+
+    /**
+     * Gets a random string dependent of the field type.
+     *
+     * @param inputType The fieldType you need a string.
+     * @param className The class name you want to have a string of it.
+     * @return A random string of the set for field type.
+     */
+    public String getRandomStringFor(InputFieldType inputType, String className) {
+        return getRandomStringFor(inputFieldTypeMap.get(inputType), className);
+    }
+
+    /**
+     * Gets a random string for explicit inputType without any class name.
+     *
+     * @param inputType The class name.
+     * @return A random string for a certain input type.
+     */
+    public String getRandomStringFor(InputFieldType inputType) {
+        Map<String, Set<String>> map = inputFieldTypeMap.get(inputType);
+        if (map == null) {
+            return null;
+        }
+        Set<String> concatenated = new HashSet<>();
+        for (Map.Entry<String, Set<String>> entrySet : map.entrySet()) {
+            concatenated.addAll(entrySet.getValue());
+        }
+        return getRandomStringFromSet(concatenated);
+    }
+
+    private void createInitialMap() {
+        for (InputFieldType inputField : InputFieldType.values()) {
+            if (inputField != InputFieldType.NOTHING) {
+                inputFieldTypeMap.put(inputField, null);
+            }
+        }
+    }
+
     private void doInMap(Map<String, Set<String>> map, String className, Set<String> copy) {
         if (map.containsKey(className) && map.get(className) != null) {
             Set<String> prevSet = map.get(className);
@@ -55,10 +105,6 @@ public final class StaticStrings {
             }
         }
         map.put(className, copy);
-    }
-
-    public String getRandomStringFor(String className) {
-        return getRandomStringFor(allStrings, className);
     }
 
 
@@ -84,21 +130,5 @@ public final class StaticStrings {
         className = className.replaceAll("\\.", "/");
         className = className.replace("//", "/");
         return className;
-    }
-
-    public String getRandomStringFor(InputFieldType inputType, String className) {
-        return getRandomStringFor(inputFieldTypeMap.get(inputType), className);
-    }
-
-    public String getRandomStringFor(InputFieldType inputType) {
-        Map<String, Set<String>> map = inputFieldTypeMap.get(inputType);
-        if(map == null){
-            return null;
-        }
-        Set<String> concatenated = new HashSet<>();
-        for (Map.Entry<String, Set<String>> entrySet : map.entrySet()){
-            concatenated.addAll(entrySet.getValue());
-        }
-        return getRandomStringFromSet(concatenated);
     }
 }
