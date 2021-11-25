@@ -12,14 +12,17 @@ import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
 import android.util.Log;
 
+import org.mate.InputFieldType;
 import org.mate.MATE;
 import org.mate.Mutation;
 import org.mate.Registry;
+import org.mate.StaticStrings;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.StaticStringsParser;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.PrimitiveAction;
@@ -28,6 +31,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.List;
@@ -404,9 +408,9 @@ public class DeviceMgr {
             throw new IllegalStateException(e);
         } finally {
             /*
-            * After the rotation it takes some time that the device gets back in a stable state.
-            * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
-            * minimal waiting time to avoid this problem.
+             * After the rotation it takes some time that the device gets back in a stable state.
+             * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
+             * minimal waiting time to avoid this problem.
              */
             Utils.sleep(100);
         }
@@ -636,73 +640,32 @@ public class DeviceMgr {
      */
     private String generateTextData(WidgetAction action) {
         Widget widget = action.getWidget();
-        Random r = new Random();
-        double randomNumber = r.nextDouble();
-        //TOO
-        if (randomNumber < 0) {
-            return action.getWidget().getHint();
-        }
-        int inputType = widget.getInputType();
-
-        //TODO: make maxNumberMutation editable --> maybe a range from 0 - 5?
-        String hint = widget.getHint();
-       // Log.d("inputType", hint + ":" + inputType);
-
-        String mutation = Mutation.mutateInput(inputType, hint);
-        Log.d("inputType",hint +"-->"+mutation);
-        return mutation;
-
-
-        /*
-        Widget widget = action.getWidget();
-
-        String widgetText = widget.getText();
-        if (widgetText.isEmpty())
-            widgetText = widget.getHint();
-
-        // -1 if no limit has been set
-        int maxLengthInt = widget.getMaxTextLength();
-
-        // allow a max length of 15 characters
-        if (maxLengthInt < 0)
-            maxLengthInt = 15;
-        if (maxLengthInt > 15)
-            maxLengthInt = 15;
-
-        // consider https://developer.android.com/reference/android/text/InputType
-        int inputType = widget.getInputType();
-
-        // check whether the input consists solely of digits (ignoring dots and comas)
-        widgetText = widgetText.replace(".", "");
-        widgetText = widgetText.replace(",", "");
-
-        if (inputType == InputType.TYPE_NULL && !widgetText.isEmpty()
-                && android.text.TextUtils.isDigitsOnly(widgetText)) {
-            inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER;
-        }
-
-        // check whether we can derive the input via the content description
-        if (inputType == InputType.TYPE_NULL) {
-            String desc = widget.getContentDesc();
-            if (desc != null) {
-                if (desc.contains("email") || desc.contains("e-mail")
-                        || desc.contains("E-mail") || desc.contains("Email")) {
-                    inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+        String className = widget.getActivity();
+        InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
+        StaticStrings staticStrings = StaticStrings.getInstance();
+        Random r = Registry.getRandom();
+        if (widget.getHint() != null && !widget.getHint().isEmpty()) {
+            if (r.nextDouble() < 0.5) {
+                if (type == InputFieldType.NOTHING && r.nextDouble() < 0.5) {
+                    return action.getWidget().getHint();
                 }
+                return Mutation.mutateInput(type, widget.getHint());
             }
         }
-
-        // assume text input if input type not derivable
-        if (inputType == InputType.TYPE_NULL) {
-            inputType = InputType.TYPE_CLASS_TEXT;
+        if (type != InputFieldType.NOTHING) {
+            if (r.nextDouble() < 0.5) {
+                String randomStaticString = staticStrings.getRandomStringFor(type, className);
+                if (randomStaticString == null) {
+                    randomStaticString = staticStrings.getRandomStringFor(type);
+                }
+                return randomStaticString;
+            }
+        } else {
+            //TODO: Return strings of example file.
+            return "DummyString";
         }
-
-        return getRandomData(inputType, maxLengthInt);
-        */
-
+        return staticStrings.getRandomStringFor(className);
     }
-
-
 
 
     /**

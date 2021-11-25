@@ -1,6 +1,5 @@
 package org.mate;
 
-import android.text.InputType;
 
 import java.util.Random;
 
@@ -21,37 +20,36 @@ public class Mutation {
         ADDITION, CHANGE, DELETE;
 
         private static MutationType getRandomMutationType() {
-            Random r = new Random();
+            Random r = Registry.getRandom();
             return MutationType.values()[r.nextInt(MutationType.values().length)];
         }
     }
 
-    public static String mutateInput(int inputType, String hint) {
-        switch (inputType) {
-            case InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT:
-            case InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT:
-            case InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_CLASS_TEXT:
-            case InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | InputType.TYPE_CLASS_TEXT:
+    public static String mutateInput(InputFieldType type, String hint) {
+        switch (type){
+            case TEXT_VARIATION_PERSON_NAME:
+            case TEXT_FLAG_MULTI_LINE:
+            case TEXT_VARIATION_PASSWORD:
+            case TEXT_VARIATION_POSTAL_ADDRESS:
                 return mutateString(hint, 2);
 
-            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT:
+            case TEXT_VARIATION_EMAIL:
                 return mutateEmailAddress(hint, 2);
 
-            case InputType.TYPE_CLASS_PHONE:
+            case CLASS_PHONE:
                 return mutatePhone(hint, 2);
 
-            case InputType.TYPE_NUMBER_VARIATION_PASSWORD | InputType.TYPE_CLASS_NUMBER:
-            case InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_CLASS_NUMBER:
-            case InputType.TYPE_CLASS_NUMBER:
+            case NUMBER_VARIATION_PASSWORD:
+            case NUMBER_FLAG_SIGNED:
+            case CLASS_NUMBER:
                 return mutateNumber(hint, 2);
-            case InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER:
+            case NUMBER_FLAG_DECIMAL:
                 return mutateDecNumber(hint, 2);
 
-            case InputType.TYPE_DATETIME_VARIATION_TIME | InputType.TYPE_CLASS_DATETIME:
+            case DATETIME_VARIATION_TIME:
                 return mutateTime(hint);
-            case InputType.TYPE_DATETIME_VARIATION_DATE | InputType.TYPE_CLASS_DATETIME:
+            case DATETIME_VARIATION_DATE:
                 return mutateDate(hint);
-
             default:
                 //    Log.d("inputType", hint + ":" + inputType + " (nonSucc)");
                 return mutateString(hint + "", 2);
@@ -68,7 +66,7 @@ public class Mutation {
 
     private static String mutateString(String hint, int maxNumberMutation, String charSet, MutationType mutationType) {
         StringBuilder stb = new StringBuilder(hint);
-        Random r = new Random();
+        Random r = Registry.getRandom();
         for (int i = 0; i < maxNumberMutation; i++) {
             if (mutationType == null) {
                 mutationType = MutationType.getRandomMutationType();
@@ -99,7 +97,7 @@ public class Mutation {
     private static String mutateEmailAddress(String hint, int maxNumberMutation) {
         String[] emailParts = hint.split("@");
         String mutatedMail;
-        Random r = new Random();
+        Random r = Registry.getRandom();
         if (r.nextDouble() < 0.5) {
             mutatedMail = hint;
         } else {
@@ -115,7 +113,7 @@ public class Mutation {
     private static String mutatePhone(String hint, int maxNumberMutation) {
         hint = hint.replace("/", "");
         hint = mutateNumber(hint, maxNumberMutation);
-        Random r = new Random();
+        Random r = Registry.getRandom();
         if (r.nextDouble() < 0.5) {
             return hint;
         } else {
@@ -129,7 +127,7 @@ public class Mutation {
     private static String mutateNumber(String hint, int maxNumberMutation) {
         try {
             int number = Integer.parseInt(hint);
-            Random r = new Random();
+            Random r = Registry.getRandom();
             int randomGenNumber = r.nextInt(hint.length() * 2) - hint.length();
             number += randomGenNumber;
             return String.valueOf(number);
@@ -159,7 +157,7 @@ public class Mutation {
     private static String mutateDateOrTime(String dateTime, String regex, char replacedChar) {
         String[] dateTimes = dateTime.split(regex);
         StringBuilder stb = new StringBuilder();
-        Random r = new Random();
+        Random r = Registry.getRandom();
         for (int i = 0; i < dateTimes.length; i++) {
             dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(), SET_OF_NUMBERS,MutationType.CHANGE);
             stb.append(dateTimes[i]);
