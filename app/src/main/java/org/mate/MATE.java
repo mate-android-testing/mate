@@ -9,6 +9,7 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.interaction.action.intent.StaticStringsParser;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
@@ -65,12 +66,14 @@ public class MATE {
         Registry.registerTimeout(Properties.TIMEOUT() * 60 * 1000);
 
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
+        // Registry.registerPackageName("com.zola.bmi");
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
         UiDevice device = UiDevice.getInstance(getInstrumentation());
         DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
+        StaticStringsParser.parseAllStringsForActivity();
 
         // check whether the AUT could be successfully started
         if (!Registry.getPackageName().equals(device.getCurrentPackageName())) {
