@@ -48,7 +48,9 @@ public class UIAbstractionLayer {
         this.packageName = packageName;
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
-        lastScreenState.setId("S" + lastScreenStateNumber);
+        if(lastScreenState!=null) {
+            lastScreenState.setId("S" + lastScreenStateNumber);
+        }
         lastScreenStateNumber++;
         guiModel = new FSMModel(lastScreenState);
     }
