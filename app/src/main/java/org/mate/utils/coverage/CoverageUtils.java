@@ -81,7 +81,7 @@ public final class CoverageUtils {
      */
     private static Set<String> getActivities() {
         if (activities == null) {
-            activities = new HashSet<>(Registry.getEnvironmentManager().getActivityNames());
+            activities = new HashSet<>(Registry.getActivityNames());
         }
 
         if (activities.size() == 0) {

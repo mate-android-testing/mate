@@ -1,6 +1,8 @@
 package org.mate;
 
 import android.app.Instrumentation;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -10,7 +12,10 @@ import org.mate.interaction.UIAbstractionLayer;
 import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -253,6 +258,30 @@ public class Registry {
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
+        }
+    }
+
+    /**
+     * Returns the activity names of the AUT.
+     *
+     * @return Returns the activity names of the AUT.
+     */
+    public static List<String> getActivityNames() {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        try {
+            PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
+                    packageName, PackageManager.GET_ACTIVITIES);
+
+            return Arrays.stream(pi.activities).map(activity -> activity.name)
+                    .collect(Collectors.toList());
+        } catch (PackageManager.NameNotFoundException e) {
+            MATE.log_warn("Couldn't retrieve activity names!");
+            MATE.log_warn(e.getMessage());
+
+            // fallback mechanism
+            return Registry.getEnvironmentManager().getActivityNames();
         }
     }
 }

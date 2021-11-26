@@ -101,8 +101,8 @@ public class MATE {
     public void testApp(final Algorithm algorithm) {
 
         MATE.log_acc("Activities:");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
+        for (String activity : Registry.getActivityNames()) {
+            MATE.log_acc("\t" + activity);
         }
 
         try {
