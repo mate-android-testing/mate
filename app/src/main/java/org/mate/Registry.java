@@ -271,6 +271,7 @@ public class Registry {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
 
         try {
+            // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
             PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
                     packageName, PackageManager.GET_ACTIVITIES);
 
