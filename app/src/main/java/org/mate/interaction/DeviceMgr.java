@@ -728,11 +728,11 @@ public class DeviceMgr {
     }
 
     /**
-     * Doesn't actually re-install the app, solely deletes the app cache.
+     * Doesn't actually re-install the app, solely deletes the app's internal storage.
      */
     public void reinstallApp() {
         MATE.log("Reinstall app");
-        Registry.getEnvironmentManager().clearAppData();
+        Registry.clearApp();
     }
 
     /**
