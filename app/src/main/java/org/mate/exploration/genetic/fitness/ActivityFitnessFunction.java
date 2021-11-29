@@ -20,7 +20,7 @@ public class ActivityFitnessFunction implements IFitnessFunction<TestCase> {
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        List<String> activityNames = Registry.getActivityNames();
+        List<String> activityNames = Registry.getUiAbstractionLayer().getActivityNames();
         return getFitness(chromosome) / activityNames.size();
     }
 }

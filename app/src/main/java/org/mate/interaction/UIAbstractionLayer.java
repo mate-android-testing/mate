@@ -63,15 +63,6 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the name of the current activity.
-     *
-     * @return Returns the name of the current activity.
-     */
-    public String getCurrentActivity() {
-        return getLastScreenState().getActivityName();
-    }
-
-    /**
      * Executes the given action. Retries execution the action when the
      * UIAutomator is disconnected for a pre-defined number of times.
      *
@@ -495,6 +486,25 @@ public class UIAbstractionLayer {
      */
     public boolean reachedNewState() {
         return guiModel.reachedNewState();
+    }
+
+    /**
+     * Retrieves the name of the currently visible activity.
+     *
+     * @return Returns the name of the currently visible activity.
+     */
+    public String getCurrentActivity() {
+        // TODO: check whether we can use the cached activity -> getLastScreenState().getActivityName();
+        return deviceMgr.getCurrentActivity();
+    }
+
+    /**
+     * Returns the activity names of the AUT.
+     *
+     * @return Returns the activity names of the AUT.
+     */
+    public List<String> getActivityNames() {
+        return deviceMgr.getActivityNames();
     }
 
     /**

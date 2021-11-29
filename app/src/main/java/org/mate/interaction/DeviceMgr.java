@@ -1,7 +1,11 @@
 package org.mate.interaction;
 
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -12,6 +16,7 @@ import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
@@ -26,6 +31,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -764,7 +770,7 @@ public class DeviceMgr {
      */
     public void reinstallApp() {
         MATE.log("Reinstall app");
-        Registry.clearApp();
+        clearApp();
     }
 
     /**
@@ -798,6 +804,152 @@ public class DeviceMgr {
      */
     public void pressBack() {
         device.pressBack();
+    }
+
+    /**
+     * Retrieves the name of the currently visible activity.
+     *
+     * @return Returns the name of the currently visible activity.
+     */
+    public String getCurrentActivity() {
+
+        try {
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
+                return getCurrentActivityAPI25();
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+                return getCurrentActivityAPI28();
+            } else {
+                // fall back mechanism (slow)
+                return Registry.getEnvironmentManager().getCurrentActivityName();
+            }
+        } catch (Exception e) {
+            MATE.log_warn("Couldn't retrieve current activity name via local shell!");
+            MATE.log_warn(e.getMessage());
+
+            // fall back mechanism (slow)
+            return Registry.getEnvironmentManager().getCurrentActivityName();
+        }
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 25.
+     *
+     * @return Returns the current activity name.
+     */
+    private String getCurrentActivityAPI25() throws IOException {
+        String output = device.executeShellCommand("dumpsys activity top");
+        return output.split("\n")[1].split(" ")[3];
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 28.
+     *
+     * @return Returns the current activity name.
+     */
+    private String getCurrentActivityAPI28() throws IOException {
+        String output = device.executeShellCommand("dumpsys activity activities");
+        return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
+    }
+
+    /**
+     * Grants the AUT the read and write runtime permissions for the external storage.
+     * <p>
+     * Depending on the API level, we can either use the very fast method grantRuntimePermissions()
+     * (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
+     * MATE-Server granting those permissions directly before executing a privileged command in
+     * order to avoid unnecessary requests.
+     * <p>
+     * In order to verify that the runtime permissions got granted, check the output of the
+     * following command:
+     * device.executeShellCommand("dumpsys package " + packageName);
+     *
+     * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
+     */
+    @SuppressWarnings("unused")
+    public boolean grantRuntimePermissions() {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
+        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
+            return true;
+        }
+
+        try {
+            /*
+             * The operation executeShellCommand() is costly, but unfortunately it is not possible
+             * to concatenate two commands yet.
+             */
+            final String grantedReadPermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + readPermission);
+            final String grantedWritePermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + writePermission);
+
+            // an empty response indicates success of the operation
+            return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
+        } catch (IOException e) {
+            MATE.log_error("Couldn't grant runtime permissions!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns the activity names of the AUT.
+     *
+     * @return Returns the activity names of the AUT.
+     */
+    public List<String> getActivityNames() {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        try {
+            // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
+            PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
+                    packageName, PackageManager.GET_ACTIVITIES);
+
+            return Arrays.stream(pi.activities).map(activity -> activity.name)
+                    .collect(Collectors.toList());
+        } catch (PackageManager.NameNotFoundException e) {
+            MATE.log_warn("Couldn't retrieve activity names!");
+            MATE.log_warn(e.getMessage());
+
+            // fallback mechanism
+            return Registry.getEnvironmentManager().getActivityNames();
+        }
+    }
+
+    /**
+     * Clears the files contained in the app-internal storage, i.e. the app is reset to its
+     * original state.
+     */
+    public void clearApp() {
+
+        try {
+
+            device.executeShellCommand("pm clear " + packageName);
+
+            /*
+             * We need to re-generate an empty 'coverage.exec' file for those apps that have been
+             * manually instrumented with Jacoco, otherwise the apps keep crashing.
+             * TODO: Is the final call to 'exit' really necessary?
+             */
+            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                device.executeShellCommand("run-as " + packageName + " mkdir -p files");
+                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
+                // device.executeShellCommand("run-as " + packageName + " exit");
+            }
+
+        } catch (IOException e) {
+            MATE.log_warn("Couldn't clear app data!");
+            MATE.log_warn(e.getMessage());
+
+            // fallback mechanism
+            Registry.getEnvironmentManager().clearAppData();
+        }
     }
 
     /**
