@@ -29,6 +29,7 @@ import org.mate.utils.Utils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
@@ -121,11 +122,40 @@ public class DeviceMgr {
     /**
      * Simulates the occurrence of a system event.
      *
-     * @param event The system event.
+     * @param action The system event.
      */
-    private void executeAction(SystemAction event) throws AUTCrashException {
-        Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(), event.getReceiver(),
-                event.getAction(), event.isDynamicReceiver());
+    private void executeAction(SystemAction action) throws AUTCrashException {
+
+        // the inner class separator '$' needs to be escaped
+        String receiver = action.getReceiver().replaceAll("\\$", Matcher.quoteReplacement("\\$"));
+
+        String tag;
+        String component;
+
+        if (action.isDynamicReceiver()) {
+            /*
+            * In the case we deal with a dynamic receiver, we can't specify the full component name,
+            * since dynamic receivers can't be triggered by explicit intents! Instead, we can only
+            * specify the package name in order to limit the receivers of the broadcast.
+             */
+            tag = "-p";
+            component = packageName;
+        } else {
+            tag = "-n";
+            component = packageName + "/" + receiver;
+        }
+
+        try {
+            device.executeShellCommand("su root am broadcast -a " + action.getAction()
+                    + " " + tag + " " + component);
+        } catch (IOException e) {
+            MATE.log_warn("Executing system action failed!");
+            MATE.log_warn(e.getMessage());
+
+            // fall back mechanism
+            Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
+                    action.getReceiver(), action.getAction(), action.isDynamicReceiver());
+        }
         checkForCrash();
     }
 
