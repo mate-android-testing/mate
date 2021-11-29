@@ -28,8 +28,10 @@ import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
@@ -796,6 +798,36 @@ public class DeviceMgr {
      */
     public void pressBack() {
         device.pressBack();
+    }
+
+    /**
+     * Retrieves the stack trace of the last discovered crash.
+     *
+     * @return Returns the stack trace of the last crash.
+     */
+    public String getLastCrashStackTrace() {
+
+        try {
+            String response = device.executeShellCommand("run-as " + packageName
+                    + " logcat -b crash -t 2000 AndroidRuntime:E *:S");
+
+            List<String> lines = Arrays.asList(response.split("\n"));
+
+            // traverse the stack trace from bottom up until we reach the beginning
+            for (int i = lines.size() - 1; i >= 0; i--) {
+                if (lines.get(i).contains("E AndroidRuntime: FATAL EXCEPTION: ")) {
+                    return lines.subList(i, lines.size()).stream()
+                            .collect(Collectors.joining("\n"));
+                }
+            }
+
+        } catch(IOException e) {
+            MATE.log_warn("Couldn't retrieve stack trace of last crash!");
+            MATE.log_warn(e.getMessage());
+        }
+
+        // fallback mechanism
+        return Registry.getEnvironmentManager().getLastCrashStackTrace();
     }
 
     @Deprecated

@@ -498,6 +498,15 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Retrieves the stack trace of the last discovered crash.
+     *
+     * @return Returns the stack trace of the last crash.
+     */
+    public String getLastCrashStackTrace() {
+        return deviceMgr.getLastCrashStackTrace();
+    }
+
+    /**
      * The possible outcomes of applying an action.
      */
     public enum ActionResult {
