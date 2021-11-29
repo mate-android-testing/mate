@@ -67,8 +67,10 @@ public class MATE {
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
-        UiDevice device = UiDevice.getInstance(getInstrumentation());
-        DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        final UiDevice device = UiDevice.getInstance(getInstrumentation());
+        final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        Registry.registerDeviceMgr(deviceMgr);
+
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
@@ -101,8 +103,8 @@ public class MATE {
     public void testApp(final Algorithm algorithm) {
 
         MATE.log_acc("Activities:");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
+        for (String activity : Registry.getUiAbstractionLayer().getActivityNames()) {
+            MATE.log_acc("\t" + activity);
         }
 
         try {
@@ -130,6 +132,7 @@ public class MATE {
             try {
                 Registry.unregisterEnvironmentManager();
                 Registry.unregisterUiAbstractionLayer();
+                Registry.unregisterDeviceMgr();
                 Registry.unregisterProperties();
                 Registry.unregisterRandom();
                 Registry.unregisterPackageName();
