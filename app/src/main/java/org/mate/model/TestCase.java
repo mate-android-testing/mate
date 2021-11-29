@@ -540,7 +540,7 @@ public class TestCase {
             case FAILURE_APP_CRASH:
                 setCrashDetected();
                 if (Properties.RECORD_STACK_TRACE()) {
-                    crashStackTrace = Registry.getEnvironmentManager().getLastCrashStackTrace();
+                    crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
                 }
             case SUCCESS_OUTBOUND:
                 return false;

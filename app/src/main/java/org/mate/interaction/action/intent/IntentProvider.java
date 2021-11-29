@@ -292,7 +292,7 @@ public class IntentProvider {
      */
     public boolean isCurrentActivityHandlingOnNewIntent() {
 
-        String name = Registry.getCurrentActivity();
+        String name = Registry.getUiAbstractionLayer().getCurrentActivity();
 
         String[] tokens = name.split("/");
 
@@ -321,7 +321,7 @@ public class IntentProvider {
      */
     public IntentBasedAction generateIntentBasedActionForCurrentActivity() {
 
-        String name = Registry.getCurrentActivity();
+        String name = Registry.getUiAbstractionLayer().getCurrentActivity();
 
         String[] tokens = name.split("/");
 

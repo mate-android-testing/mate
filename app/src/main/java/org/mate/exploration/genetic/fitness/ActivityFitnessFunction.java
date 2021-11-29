@@ -56,7 +56,7 @@ public class ActivityFitnessFunction<T> implements IFitnessFunction<T> {
      */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        List<String> activities = Registry.getEnvironmentManager().getActivityNames();
+        List<String> activities = Registry.getUiAbstractionLayer().getActivityNames();
         return getFitness(chromosome) / activities.size();
     }
 }
