@@ -10,6 +10,7 @@ import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,14 +26,14 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
      * data are copied from the parents to the offspring.
      *
      * @param parents The two test suites on which crossover should be performed.
-     * @return Returns the offspring.
+     * @return Returns the offsprings.
      */
     @Override
-    public IChromosome<TestSuite> cross(List<IChromosome<TestSuite>> parents) {
+    public List<IChromosome<TestSuite>> cross(List<IChromosome<TestSuite>> parents) {
 
         if (parents.size() == 1) {
             MATE.log_warn("UniformSuiteCrossoverFunction not applicable on single chromosome!");
-            return parents.get(0);
+            return Collections.singletonList(parents.get(0));
         }
 
         TestSuite t1 = parents.get(0).getValue();
@@ -81,6 +82,6 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
             FitnessUtils.copyFitnessData(parents.get(1), offspring, copyTestCasesFromParent2);
         }
 
-        return offspring;
+        return Collections.singletonList(offspring);
     }
 }

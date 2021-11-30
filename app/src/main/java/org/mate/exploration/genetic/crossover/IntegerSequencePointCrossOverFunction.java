@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,14 +19,14 @@ public class IntegerSequencePointCrossOverFunction implements ICrossOverFunction
      * Performs a one point crossover on the given parents.
      *
      * @param parents The parents that undergo crossover.
-     * @return Returns the generated offspring.
+     * @return Returns the generated offsprings.
      */
     @Override
-    public IChromosome<List<Integer>> cross(List<IChromosome<List<Integer>>> parents) {
+    public List<IChromosome<List<Integer>>> cross(List<IChromosome<List<Integer>>> parents) {
 
         if (parents.size() == 1) {
             MATE.log_warn("IntegerSequencePointCrossOverFunction not applicable on single chromosome!");
-            return parents.get(0);
+            return Collections.singletonList(parents.get(0));
         }
 
         List<Integer> sequence1 = parents.get(0).getValue();
@@ -36,6 +37,6 @@ public class IntegerSequencePointCrossOverFunction implements ICrossOverFunction
         int point2 = (int) (point * (sequence2.size() + 1));
         List<Integer> resultSequence = new ArrayList<>(sequence1.subList(0, point1));
         resultSequence.addAll(sequence2.subList(point2, sequence2.size()));
-        return new Chromosome<>(resultSequence);
+        return Collections.singletonList(new Chromosome<>(resultSequence));
     }
 }

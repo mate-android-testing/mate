@@ -13,6 +13,7 @@ import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -50,14 +51,14 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
      * Performs a crossover on the given parents.
      *
      * @param parents The parents that undergo crossover.
-     * @return Returns the generated offspring.
+     * @return Returns the generated offsprings.
      */
     @Override
-    public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
+    public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
 
         if (parents.size() == 1) {
             MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on single chromosome!");
-            return parents.get(0);
+            return Collections.singletonList(parents.get(0));
         }
 
         List<Action> l1 = parents.get(0).getValue().getEventSequence();
@@ -92,7 +93,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
                         Optional<Integer> match = findMatch(l1.get(idx), l2, cc);
                         if (match.hasValue()) {
                             MATE.log_acc("Found match: " + idx + ", " + match.getValue());
-                            return merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize);
+                            return Collections.singletonList(
+                                    merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize));
                         }
                     }
 
@@ -118,7 +120,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             }
         }
         MATE.log_warn("No match found.");
-        return parents.get(0);
+        return Collections.singletonList(parents.get(0));
     }
 
     private Optional<Integer> findMatch(Action from, List<Action> l, int start) {

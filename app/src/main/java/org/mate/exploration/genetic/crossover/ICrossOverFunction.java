@@ -13,7 +13,7 @@ public interface ICrossOverFunction<T> {
      * Performs a crossover on the given parents.
      *
      * @param parents The parents that undergo crossover.
-     * @return Returns the generated offspring.
+     * @return Returns the generated offsprings.
      */
-    IChromosome<T> cross(List<IChromosome<T>> parents);
+    List<IChromosome<T>> cross(List<IChromosome<T>> parents);
 }

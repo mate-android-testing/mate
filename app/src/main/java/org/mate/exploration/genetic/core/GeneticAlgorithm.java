@@ -178,25 +178,30 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
         while (newGeneration.size() < bigPopulationSize) {
+
             List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
 
-            IChromosome<T> parent;
+            List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                parent = crossOverFunction.cross(parents);
+                offsprings = crossOverFunction.cross(parents);
             } else {
-                parent = parents.get(0);
+                offsprings = parents;
             }
 
-            IChromosome<T> offspring;
+            for (IChromosome<T> offspring : offsprings) {
 
-            if (Randomness.getRnd().nextDouble() < pMutate) {
-                offspring = mutationFunction.mutate(parent);
-            } else {
-                offspring = parent;
+                if (Randomness.getRnd().nextDouble() < pMutate) {
+                    offspring = mutationFunction.mutate(offspring);
+                }
+
+                if (newGeneration.size() < bigPopulationSize) {
+                    newGeneration.add(offspring);
+                } else {
+                    // big population size reached -> early abort
+                    break;
+                }
             }
-
-            newGeneration.add(offspring);
         }
 
         // TODO: beautify later when more time

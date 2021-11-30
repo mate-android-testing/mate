@@ -8,6 +8,7 @@ import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,14 +43,14 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
      * Performs a crossover on the given parents.
      *
      * @param parents The parents that undergo crossover.
-     * @return Returns the generated offspring.
+     * @return Returns the generated offsprings.
      */
     @Override
-    public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
+    public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
 
         if (parents.size() == 1) {
             MATE.log_warn("PrimitiveTestCaseMergeCrossOverFunction not applicable on single chromosome!");
-            return parents.get(0);
+            return Collections.singletonList(parents.get(0));
         }
         
         TestCase parent0 = parents.get(0).getValue();
@@ -70,8 +71,8 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
             CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
             CoverageUtils.logChromosomeCoverage(chromosome);
 
-            return chromosome;
+            return Collections.singletonList(chromosome);
         }
-        return new Chromosome<>(offspring);
+        return Collections.singletonList(new Chromosome<>(offspring));
     }
 }
