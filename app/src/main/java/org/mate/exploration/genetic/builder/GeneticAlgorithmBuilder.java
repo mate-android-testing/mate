@@ -323,16 +323,34 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
+    /**
+     * Specifies the novelty threshold for {@link org.mate.exploration.genetic.algorithm.NoveltySearch}.
+     *
+     * @param noveltyThreshold The novelty threshold.
+     * @return Returns the current builder state.
+     */
     public GeneticAlgorithmBuilder withNoveltyThreshold(double noveltyThreshold) {
         properties.setProperty(NOVELTY_THRESHOLD_KEY, String.valueOf(noveltyThreshold));
         return this;
     }
 
+    /**
+     * Specifies the archive size limit used in {@link org.mate.exploration.genetic.algorithm.NoveltySearch}.
+     *
+     * @param archiveLimit The archive size limit.
+     * @return Returns the current builder state.
+     */
     public GeneticAlgorithmBuilder withArchiveLimit(int archiveLimit) {
         properties.setProperty(ARCHIVE_LIMIT_KEY, String.valueOf(archiveLimit));
         return this;
     }
 
+    /**
+     * Specifies the number of nearest neighbours used in {@link org.mate.exploration.genetic.algorithm.NoveltySearch}.
+     *
+     * @param nearestNeighbours The number of nearest neighbours k.
+     * @return Returns the current builder state.
+     */
     public GeneticAlgorithmBuilder withNearestNeighbours(int nearestNeighbours) {
         properties.setProperty(NEAREST_NEIGHBOURS_KEY, String.valueOf(nearestNeighbours));
         return this;

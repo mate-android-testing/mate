@@ -404,18 +404,11 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Initialises the Sapienz algorithm. Ensures that the mandatory properties are defined.
-     *
-     * @param <T> The type of the chromosomes.
-     * @return Returns an instance of the Sapienz algorithm.
-     */
-    /**
      * Initialises the NoveltySearch algorithm. Ensures that the mandatory properties are defined.
      *
      * @param <T> The type o the chromosomes.
      * @return Returns an instance o the NoveltySearch algorithm.
      */
-
     private <T> NoveltySearch<T> initializeNoveltySearch() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
@@ -454,6 +447,11 @@ public class GeneticAlgorithmProvider {
                 getNoveltyThreshold());
     }
 
+    /**
+     * Retrieves the novelty threshold used for novelty search.
+     *
+     * @return Returns the novelty threshold.
+     */
     private double getNoveltyThreshold() {
         String noveltyThreshold
                 = properties.getProperty(GeneticAlgorithmBuilder.NOVELTY_THRESHOLD_KEY);
@@ -469,6 +467,11 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Retrieves the archive size limit used for novelty search.
+     *
+     * @return Returns the archive limit.
+     */
     private int getArchiveLimit() {
         String archiveLimit
                 = properties.getProperty(GeneticAlgorithmBuilder.ARCHIVE_LIMIT_KEY);
@@ -484,6 +487,11 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Retrieves the nearest neighbours k used for novelty search.
+     *
+     * @return Returns the nearest neighbours k.
+     */
     private int getNearestNeighbours() {
         String nearestNeighbours
                 = properties.getProperty(GeneticAlgorithmBuilder.NEAREST_NEIGHBOURS_KEY);
@@ -499,6 +507,12 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initialises the Sapienz algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the Sapienz algorithm.
+     */
     private <T> Sapienz<T> initializeSapienz() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {

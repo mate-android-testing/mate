@@ -37,6 +37,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     /**
      * The archive contains the most novel chromosomes over the entire run.
      */
+    // TODO: the chromosomes in the archive shouldn't be associated with any novelty
     private final List<Pair<IChromosome<T>, Double>> archive = new LinkedList<>();
 
     /**
@@ -158,7 +159,8 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> parent;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                parent = crossOverFunction.cross(parents);
+                // TODO: conform with the new crossover function design
+                parent = crossOverFunction.cross(parents).get(0);
             } else {
                 parent = parents.get(0);
             }
