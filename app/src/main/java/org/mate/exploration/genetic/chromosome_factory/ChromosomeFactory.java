@@ -1,5 +1,8 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+/**
+ * The currently supported chromosome factories in combination with genetic algorithms.
+ */
 public enum ChromosomeFactory {
 
     ANDROID_RANDOM_CHROMOSOME_FACTORY,

@@ -86,23 +86,27 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
             // performs a binary tournament selection that considers both rank and crowding distance
             List<IChromosome<T>> parents = selectionFunction.select(population, rankMap, crowdingDistanceMap);
 
-            IChromosome<T> parent;
+            List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                parent = crossOverFunction.cross(parents);
+                offsprings = crossOverFunction.cross(parents);
             } else {
-                parent = parents.get(0);
+                offsprings = parents;
             }
 
-            IChromosome<T> offspring;
+            for (IChromosome<T> offspring : offsprings) {
 
-            if (Randomness.getRnd().nextDouble() < pMutate) {
-                offspring = mutationFunction.mutate(parent);
-            } else {
-                offspring = parent;
+                if (Randomness.getRnd().nextDouble() < pMutate) {
+                    offspring = mutationFunction.mutate(offspring);
+                }
+
+                if (newGeneration.size() < bigPopulationSize) {
+                    newGeneration.add(offspring);
+                } else {
+                    // big population size reached -> early abort
+                    break;
+                }
             }
-
-            newGeneration.add(offspring);
         }
 
         // TODO: beautify later when more time

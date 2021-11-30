@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.selection;
 
 /**
- * The set of available selection functions.
+ * The list of available selection functions for genetic algorithms.
  */
 public enum SelectionFunction {
 

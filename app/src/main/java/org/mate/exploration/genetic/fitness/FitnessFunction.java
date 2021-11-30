@@ -1,9 +1,11 @@
 package org.mate.exploration.genetic.fitness;
 
+/**
+ * The list of supported fitness functions in genetic algorithms.
+ */
 public enum FitnessFunction {
 
     NUMBER_OF_ACTIVITIES,
-    NUMBER_OF_ACTIVITIES_TEST_SUITES,
     BRANCH_COVERAGE,
     BRANCH_MULTI_OBJECTIVE,
     BRANCH_DISTANCE,

@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATEMio {
+public class ExecuteMATEMIO {
 
 
     @Test
@@ -44,3 +44,4 @@ public class ExecuteMATEMio {
         mate.testApp(mio);
     }
 }
+

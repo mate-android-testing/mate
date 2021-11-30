@@ -1,7 +1,11 @@
 package org.mate.interaction;
 
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -32,13 +36,16 @@ import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
+import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -135,11 +142,40 @@ public class DeviceMgr {
     /**
      * Simulates the occurrence of a system event.
      *
-     * @param event The system event.
+     * @param action The system event.
      */
-    private void executeAction(SystemAction event) throws AUTCrashException {
-        Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(), event.getReceiver(),
-                event.getAction(), event.isDynamicReceiver());
+    private void executeAction(SystemAction action) throws AUTCrashException {
+
+        // the inner class separator '$' needs to be escaped
+        String receiver = action.getReceiver().replaceAll("\\$", Matcher.quoteReplacement("\\$"));
+
+        String tag;
+        String component;
+
+        if (action.isDynamicReceiver()) {
+            /*
+            * In the case we deal with a dynamic receiver, we can't specify the full component name,
+            * since dynamic receivers can't be triggered by explicit intents! Instead, we can only
+            * specify the package name in order to limit the receivers of the broadcast.
+             */
+            tag = "-p";
+            component = packageName;
+        } else {
+            tag = "-n";
+            component = packageName + "/" + receiver;
+        }
+
+        try {
+            device.executeShellCommand("su root am broadcast -a " + action.getAction()
+                    + " " + tag + " " + component);
+        } catch (IOException e) {
+            MATE.log_warn("Executing system action failed!");
+            MATE.log_warn(e.getMessage());
+
+            // fall back mechanism
+            Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
+                    action.getReceiver(), action.getAction(), action.isDynamicReceiver());
+        }
         checkForCrash();
     }
 
@@ -1094,11 +1130,11 @@ public class DeviceMgr {
     }
 
     /**
-     * Doesn't actually re-install the app, solely deletes the app cache.
+     * Doesn't actually re-install the app, solely deletes the app's internal storage.
      */
     public void reinstallApp() {
         MATE.log("Reinstall app");
-        Registry.getEnvironmentManager().clearAppData();
+        clearApp();
     }
 
     /**
@@ -1132,6 +1168,181 @@ public class DeviceMgr {
      */
     public void pressBack() {
         device.pressBack();
+    }
+
+    /**
+     * Retrieves the name of the currently visible activity.
+     *
+     * @return Returns the name of the currently visible activity.
+     */
+    public String getCurrentActivity() {
+
+        try {
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
+                return getCurrentActivityAPI25();
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+                return getCurrentActivityAPI28();
+            } else {
+                // fall back mechanism (slow)
+                return Registry.getEnvironmentManager().getCurrentActivityName();
+            }
+        } catch (Exception e) {
+            MATE.log_warn("Couldn't retrieve current activity name via local shell!");
+            MATE.log_warn(e.getMessage());
+
+            // fall back mechanism (slow)
+            return Registry.getEnvironmentManager().getCurrentActivityName();
+        }
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 25.
+     *
+     * @return Returns the current activity name.
+     */
+    private String getCurrentActivityAPI25() throws IOException {
+        String output = device.executeShellCommand("dumpsys activity top");
+        return output.split("\n")[1].split(" ")[3];
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 28.
+     *
+     * @return Returns the current activity name.
+     */
+    private String getCurrentActivityAPI28() throws IOException {
+        String output = device.executeShellCommand("dumpsys activity activities");
+        return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
+    }
+
+    /**
+     * Grants the AUT the read and write runtime permissions for the external storage.
+     * <p>
+     * Depending on the API level, we can either use the very fast method grantRuntimePermissions()
+     * (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
+     * MATE-Server granting those permissions directly before executing a privileged command in
+     * order to avoid unnecessary requests.
+     * <p>
+     * In order to verify that the runtime permissions got granted, check the output of the
+     * following command:
+     * device.executeShellCommand("dumpsys package " + packageName);
+     *
+     * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
+     */
+    @SuppressWarnings("unused")
+    public boolean grantRuntimePermissions() {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
+        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
+            return true;
+        }
+
+        try {
+            /*
+             * The operation executeShellCommand() is costly, but unfortunately it is not possible
+             * to concatenate two commands yet.
+             */
+            final String grantedReadPermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + readPermission);
+            final String grantedWritePermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + writePermission);
+
+            // an empty response indicates success of the operation
+            return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
+        } catch (IOException e) {
+            MATE.log_error("Couldn't grant runtime permissions!");
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns the activity names of the AUT.
+     *
+     * @return Returns the activity names of the AUT.
+     */
+    public List<String> getActivityNames() {
+
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        try {
+            // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
+            PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
+                    packageName, PackageManager.GET_ACTIVITIES);
+
+            return Arrays.stream(pi.activities).map(activity -> activity.name)
+                    .collect(Collectors.toList());
+        } catch (PackageManager.NameNotFoundException e) {
+            MATE.log_warn("Couldn't retrieve activity names!");
+            MATE.log_warn(e.getMessage());
+
+            // fallback mechanism
+            return Registry.getEnvironmentManager().getActivityNames();
+        }
+    }
+
+    /**
+     * Clears the files contained in the app-internal storage, i.e. the app is reset to its
+     * original state.
+     */
+    public void clearApp() {
+
+        try {
+            device.executeShellCommand("pm clear " + packageName);
+
+            /*
+             * We need to re-generate an empty 'coverage.exec' file for those apps that have been
+             * manually instrumented with Jacoco, otherwise the apps keep crashing.
+             * TODO: Is the final call to 'exit' really necessary?
+             */
+            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
+                device.executeShellCommand("run-as " + packageName + " mkdir -p files");
+                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
+                // device.executeShellCommand("run-as " + packageName + " exit");
+            }
+
+        } catch (IOException e) {
+            MATE.log_warn("Couldn't clear app data!");
+            MATE.log_warn(e.getMessage());
+
+            // fallback mechanism
+            Registry.getEnvironmentManager().clearAppData();
+        }
+    }
+
+    /**
+     * Retrieves the stack trace of the last discovered crash.
+     *
+     * @return Returns the stack trace of the last crash.
+     */
+    public String getLastCrashStackTrace() {
+
+        try {
+            String response = device.executeShellCommand("run-as " + packageName
+                    + " logcat -b crash -t 2000 AndroidRuntime:E *:S");
+
+            List<String> lines = Arrays.asList(response.split("\n"));
+
+            // traverse the stack trace from bottom up until we reach the beginning
+            for (int i = lines.size() - 1; i >= 0; i--) {
+                if (lines.get(i).contains("E AndroidRuntime: FATAL EXCEPTION: ")) {
+                    return lines.subList(i, lines.size()).stream()
+                            .collect(Collectors.joining("\n"));
+                }
+            }
+
+        } catch(IOException e) {
+            MATE.log_warn("Couldn't retrieve stack trace of last crash!");
+            MATE.log_warn(e.getMessage());
+        }
+
+        // fallback mechanism
+        return Registry.getEnvironmentManager().getLastCrashStackTrace();
     }
 
     @Deprecated

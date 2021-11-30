@@ -75,7 +75,7 @@ public class MotifAction extends UIAction {
      * @return Returns a randomly generated motif action.
      */
     public static MotifAction randomAction() {
-        String activity = Registry.getCurrentActivity();
+        String activity = Registry.getUiAbstractionLayer().getCurrentActivity();
         return new MotifAction(Randomness.randomElement(Arrays.asList(ActionType.motifActionTypes)), activity);
     }
 

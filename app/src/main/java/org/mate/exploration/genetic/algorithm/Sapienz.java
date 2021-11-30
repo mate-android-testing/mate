@@ -80,7 +80,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 * function directly executes the offspring x1' if necessary.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
-                IChromosome<T> offspring = crossOverFunction.cross(parents);
+                IChromosome<T> offspring = crossOverFunction.cross(parents).get(0);
                 newGeneration.add(offspring);
             } else if (rnd < pCrossover + pMutate) { // if r < p + q (apply mutation)
 

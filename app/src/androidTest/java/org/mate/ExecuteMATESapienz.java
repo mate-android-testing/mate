@@ -12,8 +12,6 @@ import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.TerminationCondition;
-import org.mate.model.TestSuite;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATESapienz {
@@ -25,7 +23,7 @@ public class ExecuteMATESapienz {
 
         MATE mate = new MATE();
 
-        final IGeneticAlgorithm<TestSuite> sapienz =
+        final IGeneticAlgorithm sapienz =
                 new GeneticAlgorithmBuilder()
                         .withAlgorithm(Algorithm.SAPIENZ)
                         .withChromosomeFactory(ChromosomeFactory.SAPIENZ_SUITE_RANDOM_CHROMOSOME_FACTORY)
@@ -35,10 +33,9 @@ public class ExecuteMATESapienz {
                         .withFitnessFunction(FitnessFunction.BRANCH_COVERAGE)
                         .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
                         .withFitnessFunction(FitnessFunction.TEST_LENGTH)
-                        .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
+                        .withTerminationCondition(Properties.TERMINATION_CONDITION())
                         .withPopulationSize(Properties.POPULATION_SIZE())
                         .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
-                        .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                         .withPMutate(Properties.P_MUTATE())
                         .withPCrossover(Properties.P_CROSSOVER())
                         .withNumTestCases(Properties.NUMBER_TESTCASES())

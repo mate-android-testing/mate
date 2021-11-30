@@ -1,6 +1,5 @@
 package org.mate.state.executables;
 
-import android.app.Instrumentation;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
@@ -10,7 +9,7 @@ import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
-import org.mate.Registry;
+import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.utils.Utils;
@@ -21,8 +20,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Models an app screen with all (discoverable) widgets on it.
@@ -59,13 +56,12 @@ public class AppScreen {
     /**
      * Creates a new app screen containing the widgets on it.
      */
-    public AppScreen() {
+    public AppScreen(DeviceMgr deviceMgr) {
 
-        Instrumentation instrumentation = getInstrumentation();
-        this.device = UiDevice.getInstance(instrumentation);
+        this.device = deviceMgr.getDevice();
 
         this.widgets = new ArrayList<>();
-        this.activityName = Registry.getCurrentActivity();
+        this.activityName = deviceMgr.getCurrentActivity();
 
         if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
             this.packageName = device.getCurrentPackageName();

@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
  * Interface for performing a mutation on a {@link IChromosome} used by {@link IGeneticAlgorithm}
  * and {@link GeneticAlgorithm} respectively.
  *
- * @param <T> The type of the chromosome.
+ * @param <T> The type wrapped by the chromosomes.
  */
 public interface IMutationFunction<T> {
 

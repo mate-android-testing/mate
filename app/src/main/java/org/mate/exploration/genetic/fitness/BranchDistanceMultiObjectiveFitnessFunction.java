@@ -61,11 +61,22 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
         return cache.get(branch).get(chromosome);
     }
 
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code false} since this fitness functions aims to minimise the branch distance.
+     */
     @Override
     public boolean isMaximizing() {
         return false;
     }
 
+    /**
+     * Returns the normalised fitness value, i.e. the branch distance between 0 and 1.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome);

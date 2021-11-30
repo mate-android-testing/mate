@@ -15,7 +15,6 @@ import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunctio
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
-import org.mate.model.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +33,12 @@ public class ExecuteMATEStandardGE {
         List<IFitnessFunction<List<Integer>>> fitnessFunctions = new ArrayList<>();
         fitnessFunctions.add(new GenotypePhenotypeMappedFitnessFunction<>(
                 new AndroidListBasedBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND()),
-                new LineCoverageFitnessFunction<TestCase>()
+                new LineCoverageFitnessFunction<>()
         ));
 
         final IGeneticAlgorithm<List<Integer>> standardGE = new StandardGeneticAlgorithm<>(
                 new IntegerSequenceChromosomeFactory(Properties.GE_SEQUENCE_LENGTH()),
-                new FitnessProportionateSelectionFunction<List<Integer>>(),
+                new FitnessProportionateSelectionFunction<>(),
                 new IntegerSequencePointCrossOverFunction(),
                 new IntegerSequencePointMutationFunction(),
                 fitnessFunctions,

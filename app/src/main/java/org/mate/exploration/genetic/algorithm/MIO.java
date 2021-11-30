@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * @param <T> Refers to the type of chromosome. Traditionally, MIO uses {@link TestCase}s as chromosomes.
  */
-public class Mio<T> extends GeneticAlgorithm<T> {
+public class MIO<T> extends GeneticAlgorithm<T> {
 
     /**
      * The sampling probability P_r during focused search.
@@ -111,7 +111,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
      * @param focusedSearchStart The percentage F.
      * @param pSampleRandom The sampling probability P_r.
      */
-    public Mio(IChromosomeFactory<T> chromosomeFactory,
+    public MIO(IChromosomeFactory<T> chromosomeFactory,
                IMutationFunction<T> mutationFunction,
                List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
@@ -155,7 +155,7 @@ public class Mio<T> extends GeneticAlgorithm<T> {
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
 
             // for each testing target k we keep a population T_k of up to size n
-            archive.put(fitnessFunction, new LinkedList<ChromosomeFitnessTuple>());
+            archive.put(fitnessFunction, new LinkedList<>());
 
             // initially the sampling counter c_k for each testing target k is zero
             samplingCounters.put(fitnessFunction, 0);
@@ -491,12 +491,9 @@ public class Mio<T> extends GeneticAlgorithm<T> {
                 // we need to discard the worst chromosomes
                 int discardAmount = population.size() - populationSize;
 
-                Collections.sort(population, new Comparator<ChromosomeFitnessTuple>() {
-                    @Override
-                    public int compare(ChromosomeFitnessTuple o1, ChromosomeFitnessTuple o2) {
-                        int cmp = compareFitness(target, o1, o2);
-                        return cmp != 0 ? cmp : compareSize(o1, o2);
-                    }
+                Collections.sort(population, (o1, o2) -> {
+                    int cmp = compareFitness(target, o1, o2);
+                    return cmp != 0 ? cmp : compareSize(o1, o2);
                 });
 
                 population.subList(0, discardAmount).clear();

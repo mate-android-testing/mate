@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.builder;
 
 import org.mate.exploration.genetic.algorithm.Algorithm;
+import org.mate.exploration.genetic.algorithm.MIO;
 import org.mate.exploration.genetic.algorithm.MOSA;
-import org.mate.exploration.genetic.algorithm.Mio;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.NoveltySearch;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
@@ -41,7 +41,6 @@ import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction
 import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
-import org.mate.exploration.genetic.fitness.SuiteActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
@@ -70,30 +69,65 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Provides a {@link GeneticAlgorithm} by consuming the properties specified via the
+ * {@link GeneticAlgorithmBuilder} class.
+ */
 public class GeneticAlgorithmProvider {
-    private boolean useDefaults;
-    private Properties properties;
 
+    /**
+     * Whether to allow default values if a property was not specified or not.
+     */
+    private boolean useDefaults;
+
+    /**
+     * The list of properties obtained from the {@link GeneticAlgorithmBuilder}.
+     */
+    private final Properties properties;
+
+    /**
+     * Constructs the genetic algorithm by consuming the given properties.
+     *
+     * @param properties The list of properties.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the constructed genetic algorithm.
+     */
     public static <T> GeneticAlgorithm<T> getGeneticAlgorithm(Properties properties) {
         GeneticAlgorithmProvider gaProvider = new GeneticAlgorithmProvider(properties);
         return gaProvider.getGeneticAlgorithm();
     }
 
+    /**
+     * Initialises the genetic algorithm provider with the given properties.
+     *
+     * @param properties The list of properties.
+     */
     private GeneticAlgorithmProvider(Properties properties) {
         this.properties = properties;
         setUseDefaults();
     }
 
+    /**
+     * Determines whether default values are allowed or not.
+     */
     private void setUseDefaults() {
         useDefaults = properties.getProperty(GeneticAlgorithmBuilder.USE_DEFAULTS_KEY)
                 .equals(GeneticAlgorithmBuilder.TRUE_STRING);
     }
 
+    /**
+     * Constructs the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the constructed genetic algorithm.
+     */
     private <T> GeneticAlgorithm<T> getGeneticAlgorithm() {
+
         String algorithmName = properties.getProperty(GeneticAlgorithmBuilder.ALGORITHM_KEY);
         if (algorithmName == null) {
             throw new IllegalArgumentException("No algorithm specified");
         }
+
         switch (Algorithm.valueOf(algorithmName)) {
             case STANDARD_GA:
                 return initializeGenericGeneticAlgorithm();
@@ -104,7 +138,7 @@ public class GeneticAlgorithmProvider {
             case MOSA:
                 return initializeMOSA();
             case MIO:
-                return initializeMio();
+                return initializeMIO();
             case RANDOM_WALK:
                 return initializeRandomWalk();
             case RANDOM_SEARCH:
@@ -116,10 +150,36 @@ public class GeneticAlgorithmProvider {
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
-
     }
 
+    /**
+     * Initialises the standard genetic algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the standard genetic algorithm.
+     */
     private <T> StandardGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("StandardGA requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a crossover function. You have to" +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("StandardGA requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("StandardGA requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
         return new StandardGeneticAlgorithm<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
@@ -136,8 +196,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the random search algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the random search algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the random search algorithm.
      */
     private <T> RandomSearch<T> initializeRandomSearch() {
 
@@ -158,7 +218,37 @@ public class GeneticAlgorithmProvider {
                 this.<T>initializeTerminationCondition());
     }
 
+    /**
+     * Initialises the NSGA-II algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the NSGA-II algorithm.
+     */
     private <T> NSGAII<T> initializeNSGAII() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("NSGA-II requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("NSGA-II requires a crossover function. You have to" +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("NSGA-II requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("NSGA-II requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("NSGA-II requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("NSGA-II requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.OBJECTIVE() == null) {
+            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to" +
+                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
+        }
+
         return new NSGAII<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
@@ -172,7 +262,37 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
+    /**
+     * Initialises the MOSA algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the MOSA algorithm.
+     */
     private <T> MOSA<T> initializeMOSA() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("MOSA requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("MOSA requires a crossover function. You have to" +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("MOSA requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("MOSA requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("MOSA requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("MOSA requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.OBJECTIVE() == null) {
+            throw new IllegalStateException("MOSA requires the type of objectives. You have to" +
+                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
+        }
+
         return new MOSA<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
@@ -189,10 +309,10 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the MIO algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the MIO algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the MIO algorithm.
      */
-    private <T> Mio<T> initializeMio() {
+    private <T> MIO<T> initializeMIO() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("MIO requires a chromosome factory. You have to" +
@@ -211,7 +331,7 @@ public class GeneticAlgorithmProvider {
                     "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
-        return new Mio<>(
+        return new MIO<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeMutationFunction(),
                 this.<T>initializeFitnessFunctions(),
@@ -228,8 +348,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the OnePlusOne algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the OnePlusOne algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the OnePlusOne algorithm.
      */
     private <T> OnePlusOne<T> initializeOnePlusOne() {
 
@@ -257,8 +377,8 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the random walk algorithm. Ensures that the mandatory properties are defined.
      *
-     * @param <T> The type o the chromosomes.
-     * @return Returns an instance o the random walk algorithm.
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the random walk algorithm.
      */
     private <T> RandomWalk<T> initializeRandomWalk() {
 
@@ -283,6 +403,12 @@ public class GeneticAlgorithmProvider {
                 this.initializeTerminationCondition());
     }
 
+    /**
+     * Initialises the Sapienz algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the Sapienz algorithm.
+     */
     /**
      * Initialises the NoveltySearch algorithm. Ensures that the mandatory properties are defined.
      *
@@ -375,7 +501,25 @@ public class GeneticAlgorithmProvider {
 
     private <T> Sapienz<T> initializeSapienz() {
 
-        if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("Sapienz requires a chromosome factory. You have to" +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a crossover function. You have to" +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a selection function. You have to" +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a mutation function. You have to" +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("Sapienz requires a fitness function. You have to" +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("Sapienz requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
             throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn" +
                     "the property Properties.WIDGET_BASED_ACTIONS() off.");
         }
@@ -393,12 +537,20 @@ public class GeneticAlgorithmProvider {
                 getPMutate());
     }
 
+    /**
+     * Initialises the chromosome factory of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the chromosome factory used by the genetic algorithm.
+     */
     private <T> IChromosomeFactory<T> initializeChromosomeFactory() {
+
         String chromosomeFactoryId
                 = properties.getProperty(GeneticAlgorithmBuilder.CHROMOSOME_FACTORY_KEY);
         if (chromosomeFactoryId == null) {
             return null;
         }
+
         switch (ChromosomeFactory.valueOf(chromosomeFactoryId)) {
             case ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
@@ -432,7 +584,14 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initialises the selection function of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the selection function used by the genetic algorithm.
+     */
     private <T> ISelectionFunction<T> initializeSelectionFunction() {
+
         String selectionFunctionId
                 = properties.getProperty(GeneticAlgorithmBuilder.SELECTION_FUNCTION_KEY);
         if (selectionFunctionId == null) {
@@ -460,7 +619,14 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initialises the crossover function of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the crossover function used by the genetic algorithm.
+     */
     private <T> ICrossOverFunction<T> initializeCrossOverFunction() {
+
         String crossOverFunctionId
                 = properties.getProperty(GeneticAlgorithmBuilder.CROSSOVER_FUNCTION_KEY);
         if (crossOverFunctionId == null) {
@@ -482,7 +648,14 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initialises the mutation function of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the mutation function used by the genetic algorithm.
+     */
     private <T> IMutationFunction<T> initializeMutationFunction() {
+
         String mutationFunctionId
                 = properties.getProperty(GeneticAlgorithmBuilder.MUTATION_FUNCTION_KEY);
         if (mutationFunctionId == null) {
@@ -516,8 +689,14 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initialises the fitness functions of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the fitness functions used by the genetic algorithm.
+     */
     private <T> List<IFitnessFunction<T>> initializeFitnessFunctions() {
-        int amountFitnessFunctions = Integer.valueOf(properties.getProperty
+        int amountFitnessFunctions = Integer.parseInt(properties.getProperty
                 (GeneticAlgorithmBuilder.AMOUNT_FITNESS_FUNCTIONS_KEY));
         if (amountFitnessFunctions == 0) {
             return null;
@@ -530,6 +709,12 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initialises the i-th fitness function of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the i-th fitness function used by the genetic algorithm.
+     */
     private <T> IFitnessFunction<T> initializeFitnessFunction(int index) {
 
         String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
@@ -541,10 +726,6 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IFitnessFunction<T>) new ActivityFitnessFunction();
-            case NUMBER_OF_ACTIVITIES_TEST_SUITES:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new SuiteActivityFitnessFunction();
             case NUMBER_OF_CRASHES:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
@@ -590,18 +771,31 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Gets the fitness function argument of the i-th fitness function.
+     *
+     * @param index The fitness function index.
+     * @return Returns the fitness function argument of the i-th fitness function.
+     */
     private String getFitnessFunctionArgument(int index) {
         String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
                 .FITNESS_FUNCTION_ARG_KEY_FORMAT, index);
         return properties.getProperty(key);
     }
 
+    /**
+     * Initialises the termination condition of the genetic algorithm.
+     *
+     * @return Returns the termination condition used by the genetic algorithm.
+     */
     private ITerminationCondition initializeTerminationCondition() {
+
         String terminationConditionId
                 = properties.getProperty(GeneticAlgorithmBuilder.TERMINATION_CONDITION_KEY);
         if (terminationConditionId == null) {
             return null;
         }
+
         switch (TerminationCondition.valueOf(terminationConditionId)) {
             case ITERATION_TERMINATION:
                 return new IterTerminationCondition(getNumberIterations());
@@ -615,151 +809,193 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Retrieves the number of test cases per test suite.
+     *
+     * @return Returns the number of test cases per test suite.
+     */
     private int getNumTestCases() {
+
         String numTestCases = properties.getProperty(GeneticAlgorithmBuilder.NUM_TESTCASES_KEY);
         if (numTestCases == null) {
             if (useDefaults) {
                 return org.mate.Properties.NUMBER_TESTCASES();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: number of test cases not specified");
+                throw new IllegalStateException("Without using defaults: number of test cases not specified");
             }
         } else {
-            return Integer.valueOf(numTestCases);
+            return Integer.parseInt(numTestCases);
         }
     }
 
+    /**
+     * Retrieves the number of actions per test case.
+     *
+     * @return Returns the number of actions per test case.
+     */
     private int getNumEvents() {
+
         String numEvents = properties.getProperty(GeneticAlgorithmBuilder.MAX_NUM_EVENTS_KEY);
         if (numEvents == null) {
             if (useDefaults) {
                 return org.mate.Properties.MAX_NUMBER_EVENTS();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: maximum number of events not specified");
+                throw new IllegalStateException("Without using defaults: maximum number of events not specified");
             }
         } else {
-            return Integer.valueOf(numEvents);
+            return Integer.parseInt(numEvents);
         }
     }
 
+    /**
+     * Retrieves the number of iterations for the {@link IterTerminationCondition}.
+     *
+     * @return Returns the number of iterations.
+     */
     private int getNumberIterations() {
-        String numberIterations
-                = properties.getProperty(GeneticAlgorithmBuilder.NUMBER_ITERATIONS_KEY);
+
+        String numberIterations = properties.getProperty(GeneticAlgorithmBuilder.NUMBER_ITERATIONS_KEY);
         if (numberIterations == null) {
             if (useDefaults) {
                 return org.mate.Properties.EVO_ITERATIONS_NUMBER();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: number of iterations not specified");
+                throw new IllegalStateException("Without using defaults: number of iterations not specified");
             }
         } else {
-            return Integer.valueOf(numberIterations);
+            return Integer.parseInt(numberIterations);
         }
     }
 
+    /**
+     * Retrieves the population size.
+     *
+     * @return Returns the population size.
+     */
     private int getPopulationSize() {
-        String populationSize
-                = properties.getProperty(GeneticAlgorithmBuilder.POPULATION_SIZE_KEY);
+
+        String populationSize = properties.getProperty(GeneticAlgorithmBuilder.POPULATION_SIZE_KEY);
         if (populationSize == null) {
             if (useDefaults) {
                 return org.mate.Properties.POPULATION_SIZE();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: population size not specified");
+                throw new IllegalStateException("Without using defaults: population size not specified");
             }
         } else {
-            return Integer.valueOf(populationSize);
+            return Integer.parseInt(populationSize);
         }
     }
 
+    /**
+     * Retrieves the big population size.
+     *
+     * @return Returns the big population size.
+     */
     private int getBigPopulationSize() {
-        String bigPopulationSize
-                = properties.getProperty(GeneticAlgorithmBuilder.BIG_POPULATION_SIZE_KEY);
+
+        String bigPopulationSize = properties.getProperty(GeneticAlgorithmBuilder.BIG_POPULATION_SIZE_KEY);
         if (bigPopulationSize == null) {
             if (useDefaults) {
                 return 2 * getPopulationSize();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: big population size not specified");
+                throw new IllegalStateException("Without using defaults: big population size not specified");
             }
         } else {
-            return Integer.valueOf(bigPopulationSize);
+            return Integer.parseInt(bigPopulationSize);
         }
     }
 
+    /**
+     * Retrieves the probability for crossover.
+     *
+     * @return Returns the probability for crossover.
+     */
     private double getPCrossOver() {
-        String pCrossover
-                = properties.getProperty(GeneticAlgorithmBuilder.P_CROSSOVER_KEY);
+
+        String pCrossover = properties.getProperty(GeneticAlgorithmBuilder.P_CROSSOVER_KEY);
         if (pCrossover == null) {
             if (useDefaults) {
                 return org.mate.Properties.P_CROSSOVER();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: p cross over not specified");
+                throw new IllegalStateException("Without using defaults: p cross over not specified");
             }
         } else {
-            return Double.valueOf(pCrossover);
+            return Double.parseDouble(pCrossover);
         }
     }
 
+    /**
+     * Retrieves the probability for mutation.
+     *
+     * @return Returns the probability for mutation.
+     */
     private double getPMutate() {
-        String pMutate
-                = properties.getProperty(GeneticAlgorithmBuilder.P_MUTATE_KEY);
+
+        String pMutate = properties.getProperty(GeneticAlgorithmBuilder.P_MUTATE_KEY);
         if (pMutate == null) {
             if (useDefaults) {
                 return org.mate.Properties.P_MUTATE();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: p mutate not specified");
+                throw new IllegalStateException("Without using defaults: p mutate not specified");
             }
         } else {
-            return Double.valueOf(pMutate);
+            return Double.parseDouble(pMutate);
         }
     }
 
+    /**
+     * Retrieves the probability for sampling a random chromosome which is used by {@link MIO}.
+     *
+     * @return Returns the probability for random sampling.
+     */
     private double getPSampleRandom() {
-        String pSampleRandom
-                = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
+
+        String pSampleRandom = properties.getProperty(GeneticAlgorithmBuilder.P_SAMPLE_RANDOM_KEY);
         if (pSampleRandom == null) {
             if (useDefaults) {
                 return org.mate.Properties.P_SAMPLE_RANDOM();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: p sample random not specified");
+                throw new IllegalStateException("Without using defaults: p sample random not specified");
             }
         } else {
-            return Double.valueOf(pSampleRandom);
+            return Double.parseDouble(pSampleRandom);
         }
     }
 
+    /**
+     * Retrieves the percentage when focused search should start which is used by {@link MIO}.
+     *
+     * @return Returns the percentage when focused search should start.
+     */
     private double getFocusedSearchStart() {
-        String focusedSearchStart
-                = properties.getProperty(GeneticAlgorithmBuilder.FOCUSED_SEARCH_START_KEY);
+
+        String focusedSearchStart = properties.getProperty(GeneticAlgorithmBuilder.FOCUSED_SEARCH_START_KEY);
         if (focusedSearchStart == null) {
             if (useDefaults) {
                 return org.mate.Properties.P_FOCUSED_SEARCH_START();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: focused search start not specified");
+                throw new IllegalStateException("Without using defaults: focused search start not specified");
             }
         } else {
-            return Double.valueOf(focusedSearchStart);
+            return Double.parseDouble(focusedSearchStart);
         }
     }
 
+    /**
+     * Retrieves the mutation rate which is used by {@link MIO}.
+     *
+     * @return Returns the mutation rate.
+     */
     private int getMutationRate() {
-        String mutationRate
-                = properties.getProperty(GeneticAlgorithmBuilder.MUTATION_RATE_KEY);
+
+        String mutationRate = properties.getProperty(GeneticAlgorithmBuilder.MUTATION_RATE_KEY);
         if (mutationRate == null) {
             if (useDefaults) {
                 return org.mate.Properties.MUTATION_RATE();
             } else {
-                throw new IllegalStateException(
-                        "Without using defaults: mutation rate not specified");
+                throw new IllegalStateException("Without using defaults: mutation rate not specified");
             }
         } else {
-            return Integer.valueOf(mutationRate);
+            return Integer.parseInt(mutationRate);
         }
     }
 
@@ -772,8 +1008,7 @@ public class GeneticAlgorithmProvider {
         if (useDefaults) {
             return org.mate.Properties.TOURNAMENT_SIZE();
         } else {
-            throw new IllegalStateException(
-                    "Without using defaults: tournament size not specified");
+            throw new IllegalStateException("Without using defaults: tournament size not specified");
         }
     }
 }
