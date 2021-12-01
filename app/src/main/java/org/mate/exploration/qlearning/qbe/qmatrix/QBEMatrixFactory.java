@@ -31,10 +31,21 @@ public final class QBEMatrixFactory {
             0.33, 0.26, 0.13, 0.00, 0.23, 0.04, 0.00,
     };
 
+    private static final double[] customNewCoverageMatrix = {
+            0.03, 0.03, 0.29, 0.00, 0.08, 0.19, 0.38,
+            0.07, 0.13, 0.33, 0.00, 0.19, 0.14, 0.14,
+            0.10, 0.09, 0.29, 0.00, 0.15, 0.18, 0.19,
+            0.14, 0.13, 0.20, 0.00, 0.15, 0.20, 0.19,
+            0.13, 0.15, 0.19, 0.07, 0.11, 0.14, 0.22,
+    };
+
     public QMatrix<QBEState, QBEAction> getMaximizeActivityCoverageQMatrix() {
         return new QMatrix<>(new QBEAbstractState(), new QBEAbstractAction(), activityCoverage);
     }
 
+    public QMatrix<QBEState, QBEAction> getCustomNewCoverageMatrix() {
+        return new QMatrix<>(new QBEAbstractState(), new QBEAbstractAction(), customNewCoverageMatrix);
+    }
 
     public QMatrix<QBEState, QBEAction> getMaximizesNumberOfCrashesQMatrix() {
         return new QMatrix<>(new QBEAbstractState(), new QBEAbstractAction(), numberOfCrashes);
