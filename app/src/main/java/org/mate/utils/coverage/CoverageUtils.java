@@ -22,7 +22,7 @@ public class CoverageUtils {
     private static Set<String> activities = null;
 
     // tracks for each chromosome which activities have been visited
-    private static Map<IChromosome, Set<String>> visitedActivities = new HashMap<>();
+    private static final Map<IChromosome, Set<String>> visitedActivities = new HashMap<>();
 
     /**
      * Copies the coverage data for the given test cases from a source chromosome to a
@@ -215,6 +215,11 @@ public class CoverageUtils {
 
         // get combined coverage
         MATE.log_acc("Total coverage: " + getCombinedCoverage(Properties.COVERAGE()));
+
+        if (Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
+            MATE.log_acc("Total activity coverage: "
+                    + getCombinedCoverage(Coverage.ACTIVITY_COVERAGE));
+        }
 
         if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
 
