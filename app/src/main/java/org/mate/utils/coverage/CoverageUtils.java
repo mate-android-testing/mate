@@ -244,7 +244,7 @@ public class CoverageUtils {
      */
     public static double getCombinedCoverage(Coverage coverage) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
                 Set<String> visitedActivitiesTotal = new HashSet<>();
 
