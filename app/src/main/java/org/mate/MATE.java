@@ -66,7 +66,6 @@ public class MATE {
         Registry.registerTimeout(Properties.TIMEOUT() * 60 * 1000);
 
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
-        // Registry.registerPackageName("com.zola.bmi");
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
         final UiDevice device = UiDevice.getInstance(getInstrumentation());
