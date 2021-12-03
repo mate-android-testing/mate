@@ -53,7 +53,7 @@ public class IntentProvider {
             MATE.log("Derived the following system event receivers: " + systemEventReceivers);
             MATE.log("Derived the following dynamic receivers: " + dynamicReceivers);
         } catch (XmlPullParserException | IOException e) {
-            MATE.log("Couldn't parse the AndroidManifest/staticInfoIntent file!");
+            MATE.log_error("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
         }
     }

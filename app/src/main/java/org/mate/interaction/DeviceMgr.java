@@ -35,6 +35,7 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.InputFieldType;
 import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
+import org.mate.utils.input_generation.StaticStringsParser;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -91,11 +92,17 @@ public class DeviceMgr {
      */
     private boolean disabledAutoRotate;
 
+    /**
+     * Contains the static strings extracted from the byte code.
+     */
+    private final StaticStrings staticStrings;
+
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
+        this.staticStrings = StaticStringsParser.parseStaticStrings();
     }
 
     /**
@@ -704,8 +711,6 @@ public class DeviceMgr {
         String className = convertClassName(widget.getActivity());
 
         InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
-        // TODO: init at constructor
-        StaticStrings staticStrings = StaticStrings.getInstance();
         Random r = Registry.getRandom();
 
         // TODO: add inline documentation

@@ -13,7 +13,6 @@ import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
-import org.mate.utils.input_generation.StaticStringsParser;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -74,8 +73,6 @@ public class MATE {
 
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
-        // TODO: initialise within DeviceMgr
-        StaticStringsParser.parseAllStringsForActivity();
 
         // check whether the AUT could be successfully started
         if (!Registry.getPackageName().equals(device.getCurrentPackageName())) {
