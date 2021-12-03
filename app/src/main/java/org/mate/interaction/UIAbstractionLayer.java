@@ -36,21 +36,19 @@ public class UIAbstractionLayer {
 
     private static final int UiAutomatorDisconnectedRetries = 3;
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
-    private String packageName;
-    private DeviceMgr deviceMgr;
+    private final String packageName;
+    private final DeviceMgr deviceMgr;
     private IScreenState lastScreenState;
     private int lastScreenStateNumber = 0;
 
-    private IGUIModel guiModel;
+    private final IGUIModel guiModel;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
-        if(lastScreenState!=null) {
-            lastScreenState.setId("S" + lastScreenStateNumber);
-        }
+        lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
         guiModel = new FSMModel(lastScreenState);
     }
