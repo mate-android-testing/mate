@@ -110,15 +110,12 @@ public final class StaticStrings {
         map.put(className, copy);
     }
 
-
     private String getRandomStringFor(Map<String, Set<String>> map, String className) {
-        className = prepareClassName(className);
         if (map != null && map.containsKey(className)) {
             return getRandomStringFromSet(map.get(className));
         }
         return null;
     }
-
 
     private String getRandomStringFromSet(Set<String> set) {
         if (set == null || set.size() == 0) {
@@ -127,11 +124,5 @@ public final class StaticStrings {
         Random random = Registry.getRandom();
         int randomNumber = random.nextInt(set.size());
         return (String) set.toArray()[randomNumber];
-    }
-
-    private String prepareClassName(String className) {
-        className = className.replaceAll("\\.", "/");
-        className = className.replace("//", "/");
-        return className;
     }
 }

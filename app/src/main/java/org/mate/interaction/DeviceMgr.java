@@ -668,6 +668,27 @@ public class DeviceMgr {
     }
 
     /**
+     * Converts a fully-qualified class name to solely it's class name, i.e. the possibly redundant
+     * package name is stripped off.
+     *
+     * @param className The fully-qualified class name consisting of <package-name>/<class-name>.
+     * @return Returns the simple class name.
+     */
+    private String convertClassName(String className) {
+
+        String[] tokens = className.split("/");
+        String packageName = tokens[0];
+        String componentName = tokens[1];
+
+        // if the component resides in the application package, a dot is used instead of the package name
+        if (componentName.startsWith(".")) {
+            componentName = packageName + componentName;
+        }
+
+        return componentName;
+    }
+
+    /**
      * Generates a text input for the given editable widget.
      *
      * @param action The widget action containing the editable widget.
@@ -676,9 +697,12 @@ public class DeviceMgr {
     private String generateTextData(WidgetAction action) {
 
         // TODO: ensure that generateTextData returns a string != null!
-
         Widget widget = action.getWidget();
-        String className = widget.getActivity();
+
+        // TODO: we always look at the activity name, but a fragment might be actually displayed on top
+        //  -> in this case we should the collected string constants from the fragment probably
+        String className = convertClassName(widget.getActivity());
+
         InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         // TODO: init at constructor
         StaticStrings staticStrings = StaticStrings.getInstance();
