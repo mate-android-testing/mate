@@ -114,7 +114,7 @@ public class ExecuteMATEReplayRun {
 
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
 
-            MATE.log("Current Activity: " + Registry.getCurrentActivity());
+            MATE.log("Current Activity: " + Registry.getUiAbstractionLayer().getCurrentActivity());
             MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
             Action nextAction = actions.get(i);
