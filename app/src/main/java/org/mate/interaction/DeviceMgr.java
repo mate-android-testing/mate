@@ -14,7 +14,6 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
-import android.util.Log;
 
 import org.mate.InputFieldType;
 import org.mate.MATE;
@@ -27,7 +26,6 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
-import org.mate.interaction.action.intent.StaticStringsParser;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.PrimitiveAction;
@@ -36,7 +34,6 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
-import org.xmlpull.v1.XmlPullParserException;
 import org.mate.utils.coverage.Coverage;
 
 import java.io.IOException;
