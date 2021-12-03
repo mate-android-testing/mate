@@ -1,5 +1,7 @@
-package org.mate;
+package org.mate.utils.input_generation;
 
+
+import org.mate.Registry;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+// TODO: add documentation
 public final class StaticStrings {
 
     private static StaticStrings staticStrings;

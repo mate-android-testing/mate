@@ -1,8 +1,11 @@
-package org.mate;
+package org.mate.utils.input_generation;
 
+
+import org.mate.Registry;
 
 import java.util.Random;
 
+// TODO: add documentation
 public class Mutation {
 
     private static final String SET_OF_LOW_LETTERS = "abcdefghijklmnopqrstuvwxyz";

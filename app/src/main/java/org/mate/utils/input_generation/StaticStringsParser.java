@@ -1,29 +1,18 @@
-package org.mate.interaction.action.intent;
+package org.mate.utils.input_generation;
 
-import android.content.Context;
-import android.util.Log;
 import android.util.Xml;
 
-import org.mate.MATE;
-import org.mate.StaticStrings;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
-/**
- * Parses additional information about intents, e.g. the key and its type of a bundle entry.
- */
+// TODO: add documentation
 public final class StaticStringsParser {
 
     private static final String ALL_STRINGS_XML_FILE =  "/data/data/org.mate/allStrings.xml";

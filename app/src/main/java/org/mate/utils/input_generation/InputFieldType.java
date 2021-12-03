@@ -1,10 +1,11 @@
-package org.mate;
+package org.mate.utils.input_generation;
 
 import android.text.InputType;
 
 import java.util.HashSet;
 import java.util.Set;
 
+// TODO: add documentation
 public enum InputFieldType {
 
     TEXT_VARIATION_PERSON_NAME("^[a-zA-Z\\s]+", InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_CLASS_TEXT),

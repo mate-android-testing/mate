@@ -15,12 +15,9 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.text.InputType;
 
-import org.mate.InputFieldType;
 import org.mate.MATE;
-import org.mate.Mutation;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.StaticStrings;
 import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
@@ -35,6 +32,9 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
+import org.mate.utils.input_generation.InputFieldType;
+import org.mate.utils.input_generation.Mutation;
+import org.mate.utils.input_generation.StaticStrings;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -674,19 +674,28 @@ public class DeviceMgr {
      * @return Returns a text input for the editable widget.
      */
     private String generateTextData(WidgetAction action) {
+
+        // TODO: ensure that generateTextData returns a string != null!
+
         Widget widget = action.getWidget();
         String className = widget.getActivity();
         InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
+        // TODO: init at constructor
         StaticStrings staticStrings = StaticStrings.getInstance();
         Random r = Registry.getRandom();
+
+        // TODO: add inline documentation
         if (widget.getHint() != null && !widget.getHint().isEmpty()) {
             if (r.nextDouble() < 0.5) {
-                if (type == InputFieldType.NOTHING && r.nextDouble() < 0.5) {
+                if (type == InputFieldType.NOTHING || r.nextDouble() < 0.5) {
                     return action.getWidget().getHint();
+                } else {
+                    return Mutation.mutateInput(type, widget.getHint());
                 }
-                return Mutation.mutateInput(type, widget.getHint());
             }
         }
+
+        // TODO: review regarding possible null pointer exceptions
         if (type != InputFieldType.NOTHING) {
             if (r.nextDouble() < 0.5) {
                 String randomStaticString = staticStrings.getRandomStringFor(type, className);
@@ -697,10 +706,10 @@ public class DeviceMgr {
                     randomStaticString = Mutation.mutateInput(type, randomStaticString);
                 }
                 return randomStaticString;
+            } else {
+                //TODO: Return strings of example file.
+                return "DummyString";
             }
-        } else {
-            //TODO: Return strings of example file.
-            return "DummyString";
         }
         return staticStrings.getRandomStringFor(className);
     }
