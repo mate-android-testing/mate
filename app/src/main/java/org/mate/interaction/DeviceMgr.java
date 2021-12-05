@@ -54,6 +54,10 @@ import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
  */
 public class DeviceMgr {
 
+    public static final double PROB_HINT = 0.5;
+    public static final double PROB_HINT_MUTATION = 0.5;
+    public static final double PROB_STATIC_STRING = 0.5;
+    public static final double PROB_STATIC_STRING_MUTATION = 0.25;
     /**
      * The ADB command to to disable auto rotation.
      */
@@ -153,9 +157,9 @@ public class DeviceMgr {
 
         if (action.isDynamicReceiver()) {
             /*
-            * In the case we deal with a dynamic receiver, we can't specify the full component name,
-            * since dynamic receivers can't be triggered by explicit intents! Instead, we can only
-            * specify the package name in order to limit the receivers of the broadcast.
+             * In the case we deal with a dynamic receiver, we can't specify the full component name,
+             * since dynamic receivers can't be triggered by explicit intents! Instead, we can only
+             * specify the package name in order to limit the receivers of the broadcast.
              */
             tag = "-p";
             component = packageName;
@@ -404,7 +408,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     *          is returned.
+     * is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -421,7 +425,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -450,9 +454,9 @@ public class DeviceMgr {
             throw new IllegalStateException(e);
         } finally {
             /*
-            * After the rotation it takes some time that the device gets back in a stable state.
-            * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
-            * minimal waiting time to avoid this problem.
+             * After the rotation it takes some time that the device gets back in a stable state.
+             * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
+             * minimal waiting time to avoid this problem.
              */
             Utils.sleep(100);
         }
@@ -499,7 +503,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     *          is returned.
+     * is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -599,7 +603,7 @@ public class DeviceMgr {
      *
      * @param widget The widget whose ui object should be looked up.
      * @return Returns the corresponding ui object or {@code null} if no
-     *          such ui object could be found.
+     * such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -651,8 +655,13 @@ public class DeviceMgr {
 
         Widget widget = action.getWidget();
         String textData = generateTextData(action);
-        MATE.log_debug("Input text: " + textData);
-        MATE.log_debug("Previous text: " + widget.getText());
+        if (textData == null) {
+            MATE.log_warn("No text data were produced! Should never happen!");
+            textData = "";
+        } else {
+            MATE.log_debug("Input text: " + textData);
+            MATE.log_debug("Previous text: " + widget.getText());
+        }
 
         UiObject2 uiObject = findObject(widget);
 
@@ -703,7 +712,6 @@ public class DeviceMgr {
      */
     private String generateTextData(WidgetAction action) {
 
-        // TODO: ensure that generateTextData returns a string != null!
         Widget widget = action.getWidget();
 
         // TODO: we always look at the activity name, but a fragment might be actually displayed on top
@@ -713,10 +721,15 @@ public class DeviceMgr {
         InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         Random r = Registry.getRandom();
 
-        // TODO: add inline documentation
+        // A hint should be present for the given widget. If it is, we check if the hint is a valid
+        // input param and use the probability PROB_HINT to select the hint as the input string.
         if (widget.getHint() != null && !widget.getHint().isEmpty()) {
-            if (r.nextDouble() < 0.5) {
-                if (type == InputFieldType.NOTHING || r.nextDouble() < 0.5) {
+            if (type.isValid(widget.getHint()) && r.nextDouble() < PROB_HINT) {
+
+                // We first consider the nature of the input field at hand. If we cannot assign this
+                // unambiguously, we enter the hint without changing it. If it is assignable, we
+                // will mutate it with the probability PROB_HINT_MUTATION.
+                if (type == InputFieldType.NOTHING || r.nextDouble() < PROB_HINT_MUTATION) {
                     return action.getWidget().getHint();
                 } else {
                     return Mutation.mutateInput(type, widget.getHint());
@@ -724,23 +737,44 @@ public class DeviceMgr {
             }
         }
 
-        // TODO: review regarding possible null pointer exceptions
-        if (type != InputFieldType.NOTHING) {
-            if (r.nextDouble() < 0.5) {
-                String randomStaticString = staticStrings.getRandomStringFor(type, className);
-                if (randomStaticString == null) {
-                    randomStaticString = staticStrings.getRandomStringFor(type);
+        // If the static strings were successfully parsed before, then we use the probability
+        // PROB_STATIC_STRING to fetch a random static string that matches for the input field type
+        // and the current class name.
+        if (staticStrings.isPresent()) {
+            if (r.nextDouble() < PROB_STATIC_STRING) {
+                String randomStaticString;
+                if (type != InputFieldType.NOTHING) {
+                    randomStaticString = staticStrings.getRandomStringFor(type, className);
+
+                    // If there is no matching string for these properties, we reduce the
+                    // requirements and search all classes for a matching string for this input
+                    // field type.
+                    if (randomStaticString == null) {
+                        randomStaticString = staticStrings.getRandomStringFor(type);
+                    }
+
+                    // If a string was found in the previous stations, we can still mutate it with
+                    // the probability PROB_STATIC_STRING_MUTATION.
+                    if (randomStaticString != null) {
+                        if (r.nextDouble() < PROB_STATIC_STRING_MUTATION) {
+                            randomStaticString = Mutation.mutateInput(type, randomStaticString);
+                        }
+                        return randomStaticString;
+                    }
                 }
-                if (r.nextDouble() < 0.25) {
-                    randomStaticString = Mutation.mutateInput(type, randomStaticString);
+
+                // If we have an input field type that is not further defined, or if the attempts
+                // before were unsuccessful, we try a random string for the current class name. If
+                // this does not work, we cannot include the static strings in the input generation.
+                randomStaticString = staticStrings.getRandomStringFor(className);
+                if (randomStaticString != null) {
+                    return randomStaticString;
                 }
-                return randomStaticString;
-            } else {
-                //TODO: Return strings of example file.
-                return "DummyString";
             }
         }
-        return staticStrings.getRandomStringFor(className);
+        //TODO: Return strings of example file as fall back mechanism. Or another approach?!
+        // Nevertheless a fall back mechanism is needed.
+        return "DummyString";
     }
 
     /**
@@ -999,7 +1033,7 @@ public class DeviceMgr {
                 }
             }
 
-        } catch(IOException e) {
+        } catch (IOException e) {
             MATE.log_warn("Couldn't retrieve stack trace of last crash!");
             MATE.log_warn(e.getMessage());
         }
