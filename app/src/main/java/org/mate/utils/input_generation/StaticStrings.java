@@ -112,8 +112,9 @@ public final class StaticStrings {
     }
 
     private String getRandomStringFor(Map<String, Set<String>> map, String className) {
-        if (map != null && map.containsKey(className)) {
-            return getRandomStringFromSet(map.get(className));
+        String convertedClassName = className.replaceAll("\\.","/");
+        if (map != null && map.containsKey(convertedClassName)) {
+            return getRandomStringFromSet(map.get(convertedClassName));
         }
         return null;
     }
