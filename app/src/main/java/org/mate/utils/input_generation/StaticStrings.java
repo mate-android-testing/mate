@@ -16,6 +16,7 @@ public final class StaticStrings {
     private static StaticStrings staticStrings;
     private final Map<String, Set<String>> allStrings = new HashMap<>();
     private final Map<InputFieldType, Map<String, Set<String>>> inputFieldTypeMap = new HashMap<>();
+    private boolean present;
 
     private StaticStrings() {
         createInitialMap();
@@ -124,5 +125,23 @@ public final class StaticStrings {
         Random random = Registry.getRandom();
         int randomNumber = random.nextInt(set.size());
         return (String) set.toArray()[randomNumber];
+    }
+
+    /**
+     * Getter for the state present. Present is a static string, if the parsing in {@code StaticStringsParser} was successful.
+     *
+     * @return True if parsing was successful, otherwise false;
+     */
+    public boolean isPresent() {
+        return present;
+    }
+
+    /**
+     * Sets the present state.
+     *
+     * @param present True if successful, false if not.
+     */
+    public void setPresent(boolean present) {
+        this.present = present;
     }
 }
