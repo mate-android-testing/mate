@@ -30,7 +30,7 @@ public class AmountCrashesFitnessFunction<T> implements IFitnessFunction<T> {
             return testCase.getCrashDetected() ? 1 : 0;
         } else {
             throw new UnsupportedOperationException("Chromosome type "
-                    + chromosome.getValue().getClass() + "not yet supported!");
+                    + chromosome.getValue().getClass() + " not yet supported!");
         }
     }
 

@@ -32,7 +32,7 @@ public class TestLengthFitnessFunction<T> implements IFitnessFunction<T> {
             return length;
         } else {
             throw new UnsupportedOperationException("Chromosome type "
-                    + chromosome.getValue().getClass() + "not yet supported!");
+                    + chromosome.getValue().getClass() + " not yet supported!");
         }
     }
 
