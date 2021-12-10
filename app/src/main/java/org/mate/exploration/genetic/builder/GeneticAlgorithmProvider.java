@@ -239,9 +239,6 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to" +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
-        } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to" +
-                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
         return new NSGAII<>(
