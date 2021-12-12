@@ -726,7 +726,7 @@ public class DeviceMgr {
         // A hint should be present for the given widget. If it is, we check if the hint is a valid
         // input param and use the probability PROB_HINT to select the hint as the input string.
         if (widget.getHint() != null && !widget.getHint().isEmpty()) {
-            if (type.isValid(widget.getHint()) && r.nextDouble() < 0) {
+            if (type.isValid(widget.getHint()) && r.nextDouble() < PROB_HINT) {
 
                 // We first consider the nature of the input field at hand. If we cannot assign this
                 // unambiguously, we enter the hint without changing it. If it is assignable, we
@@ -743,7 +743,7 @@ public class DeviceMgr {
         // PROB_STATIC_STRING to fetch a random static string that matches for the input field type
         // and the current class name.
         if (staticStrings.isPresent()) {
-            if (r.nextDouble() < 1) {
+            if (r.nextDouble() < PROB_STATIC_STRING) {
                 List<String> fragments = getCurrentFragmentsAPI28();
                 if(fragments==null) {
                     fragments = new ArrayList<>();
@@ -940,7 +940,7 @@ public class DeviceMgr {
                 extracted.add(s.split("\\{")[0]);
             }
             return extracted;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }

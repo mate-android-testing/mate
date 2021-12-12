@@ -138,7 +138,7 @@ public final class StaticStrings {
 
     private String getExactKey(Map<String, Set<String>> map, String keyPart) {
         for (String key : map.keySet()) {
-            if (key.endsWith(keyPart)) {
+            if (key.endsWith("."+keyPart)) {
                 return key;
             }
         }
