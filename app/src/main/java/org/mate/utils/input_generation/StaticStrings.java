@@ -6,6 +6,7 @@ import org.mate.Registry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -34,7 +35,7 @@ public final class StaticStrings {
      * Adds static string value to the set with the corresponding class name.
      *
      * @param className The class name, where the values should be inorder.
-     * @param values    The new values.
+     * @param values The new values.
      */
     public void add(String className, Set<String> values) {
         Set<String> copy = new HashSet<>(values);
@@ -55,23 +56,32 @@ public final class StaticStrings {
     }
 
     /**
-     * Gets a random string independent of the field type.
+     * Gets a random string independent of the field type. Only of a list of possible classes.
      *
-     * @param className The class name you want to have a string of it.
+     * @param classNames The class name you want to have a string of it.
      * @return A random string of the set.
      */
-    public String getRandomStringFor(String className) {
+    public String getRandomStringFor(List<String> classNames) {
+        String className = getRandomClassName(classNames);
         return getRandomStringFor(allStrings, className);
     }
 
+    private String getRandomClassName(List<String> classNames) {
+        Random r = Registry.getRandom();
+        int index = r.nextInt(classNames.size());
+        return classNames.get(index);
+    }
+
+
     /**
-     * Gets a random string dependent of the field type.
+     * Gets a random string dependent of the field type for a random class in a list of possible class names.
      *
      * @param inputType The fieldType you need a string.
-     * @param className The class name you want to have a string of it.
+     * @param classNames A list of class names with activities or fragments.
      * @return A random string of the set for field type.
      */
-    public String getRandomStringFor(InputFieldType inputType, String className) {
+    public String getRandomStringFor(InputFieldType inputType, List<String> classNames) {
+        String className = getRandomClassName(classNames);
         return getRandomStringFor(inputFieldTypeMap.get(inputType), className);
     }
 
@@ -112,9 +122,25 @@ public final class StaticStrings {
     }
 
     private String getRandomStringFor(Map<String, Set<String>> map, String className) {
-        String convertedClassName = className.replaceAll("\\.","/");
-        if (map != null && map.containsKey(convertedClassName)) {
-            return getRandomStringFromSet(map.get(convertedClassName));
+        String convertedClassName = className.replaceAll("\\.", "/");
+        if (map != null) {
+            String exactKey = getExactKey(map, convertedClassName);
+            if (exactKey != null) {
+                convertedClassName = exactKey;
+            }
+
+            if (map.containsKey(convertedClassName)) {
+                return getRandomStringFromSet(map.get(convertedClassName));
+            }
+        }
+        return null;
+    }
+
+    private String getExactKey(Map<String, Set<String>> map, String keyPart) {
+        for (String key : map.keySet()) {
+            if (key.endsWith(keyPart)) {
+                return key;
+            }
         }
         return null;
     }

@@ -38,6 +38,7 @@ import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -408,7 +409,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     * is returned.
+     *         is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -425,7 +426,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     * otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -503,7 +504,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     * is returned.
+     *         is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -535,7 +536,7 @@ public class DeviceMgr {
     /**
      * Executes a swipe (upon a widget) in a given direction.
      *
-     * @param widget    The widget at which position the swipe should be performed.
+     * @param widget The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
     private void handleSwipe(Widget widget, ActionType direction) {
@@ -603,7 +604,7 @@ public class DeviceMgr {
      *
      * @param widget The widget whose ui object should be looked up.
      * @return Returns the corresponding ui object or {@code null} if no
-     * such ui object could be found.
+     *         such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -718,13 +719,14 @@ public class DeviceMgr {
         //  -> in this case we should the collected string constants from the fragment probably
         String className = convertClassName(widget.getActivity());
 
+
         InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         Random r = Registry.getRandom();
 
         // A hint should be present for the given widget. If it is, we check if the hint is a valid
         // input param and use the probability PROB_HINT to select the hint as the input string.
         if (widget.getHint() != null && !widget.getHint().isEmpty()) {
-            if (type.isValid(widget.getHint()) && r.nextDouble() < PROB_HINT) {
+            if (type.isValid(widget.getHint()) && r.nextDouble() < 0) {
 
                 // We first consider the nature of the input field at hand. If we cannot assign this
                 // unambiguously, we enter the hint without changing it. If it is assignable, we
@@ -741,10 +743,15 @@ public class DeviceMgr {
         // PROB_STATIC_STRING to fetch a random static string that matches for the input field type
         // and the current class name.
         if (staticStrings.isPresent()) {
-            if (r.nextDouble() < PROB_STATIC_STRING) {
+            if (r.nextDouble() < 1) {
+                List<String> fragments = getCurrentFragmentsAPI28();
+                if(fragments==null) {
+                    fragments = new ArrayList<>();
+                }
+                fragments.add(className);
                 String randomStaticString;
                 if (type != InputFieldType.NOTHING) {
-                    randomStaticString = staticStrings.getRandomStringFor(type, className);
+                    randomStaticString = staticStrings.getRandomStringFor(type, fragments);
 
                     // If there is no matching string for these properties, we reduce the
                     // requirements and search all classes for a matching string for this input
@@ -766,7 +773,7 @@ public class DeviceMgr {
                 // If we have an input field type that is not further defined, or if the attempts
                 // before were unsuccessful, we try a random string for the current class name. If
                 // this does not work, we cannot include the static strings in the input generation.
-                randomStaticString = staticStrings.getRandomStringFor(className);
+                randomStaticString = staticStrings.getRandomStringFor(fragments);
                 if (randomStaticString != null) {
                     return randomStaticString;
                 }
@@ -780,7 +787,7 @@ public class DeviceMgr {
     /**
      * Generates a random input for the given input type on a best effort basis.
      *
-     * @param inputType    The input type, e.g. phone number.
+     * @param inputType The input type, e.g. phone number.
      * @param maxLengthInt The maximal length for the input.
      * @return Returns a random input matching the input type.
      */
@@ -910,6 +917,34 @@ public class DeviceMgr {
         String output = device.executeShellCommand("dumpsys activity activities");
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 28.
+     *
+     * @return Returns the current activity name.
+     */
+    private List<String> getCurrentFragmentsAPI28() {
+        try {
+            String output = device.executeShellCommand("dumpsys activity " + Registry.getPackageName());
+
+            output = output.split("Local FragmentActivity")[1];
+            output = output.split("Added Fragments:")[1];
+            output = output.split("Back Stack Index:")[0];
+            List<String> fragments = Arrays.stream(output.split("\n|\\s")).collect(Collectors.toList());
+            fragments.removeIf(s -> s.equals(""));
+            fragments.removeIf(s -> s.startsWith("#"));
+            fragments.removeIf(s -> s.startsWith("id"));
+            fragments.removeIf(s -> s.startsWith("("));
+            List<String> extracted = new ArrayList<>();
+            for (String s : fragments) {
+                extracted.add(s.split("\\{")[0]);
+            }
+            return extracted;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
 
     /**
      * Grants the AUT the read and write runtime permissions for the external storage.
