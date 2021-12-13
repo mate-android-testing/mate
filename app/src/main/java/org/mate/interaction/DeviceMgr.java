@@ -672,6 +672,7 @@ public class DeviceMgr {
     private void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
+        // TODO: replace with Objects.toString(generateTextData(action), ""); after testing
         String textData = generateTextData(action);
 
         if (textData == null) {
