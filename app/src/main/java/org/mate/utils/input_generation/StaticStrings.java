@@ -72,9 +72,9 @@ public final class StaticStrings {
         return classNames.get(index);
     }
 
-
     /**
-     * Gets a random string dependent of the field type for a random class in a list of possible class names.
+     * Gets a random string dependent of the field type for a random class in a list of possible
+     * class names.
      *
      * @param inputType The fieldType you need a string.
      * @param classNames A list of class names with activities or fragments.

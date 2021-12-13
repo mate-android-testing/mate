@@ -40,6 +40,7 @@ import org.mate.utils.input_generation.StaticStringsParser;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -55,10 +56,26 @@ import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
  */
 public class DeviceMgr {
 
-    public static final double PROB_HINT = 0.5;
-    public static final double PROB_HINT_MUTATION = 0.5;
-    public static final double PROB_STATIC_STRING = 0.5;
-    public static final double PROB_STATIC_STRING_MUTATION = 0.25;
+    /**
+     * The probability for considering the hint for the input generation.
+     */
+    private static final double PROB_HINT = 0.5;
+
+    /**
+     * The probability for mutating a given hint.
+     */
+    private static final double PROB_HINT_MUTATION = 0.5;
+
+    /**
+     * The probability for using a static string or the input generation.
+     */
+    private static final double PROB_STATIC_STRING = 0.5;
+
+    /**
+     * The probability for mutating a static string.
+     */
+    private static final double PROB_STATIC_STRING_MUTATION = 0.25;
+
     /**
      * The ADB command to to disable auto rotation.
      */
@@ -656,13 +673,13 @@ public class DeviceMgr {
 
         Widget widget = action.getWidget();
         String textData = generateTextData(action);
+
         if (textData == null) {
-            MATE.log_warn("No text data were produced! Should never happen!");
-            textData = "";
-        } else {
-            MATE.log_debug("Input text: " + textData);
-            MATE.log_debug("Previous text: " + widget.getText());
+            throw new IllegalStateException("Couldn't generate any input for the given widget!");
         }
+
+        MATE.log_debug("Input text: " + textData);
+        MATE.log_debug("Previous text: " + widget.getText());
 
         UiObject2 uiObject = findObject(widget);
 
@@ -713,74 +730,86 @@ public class DeviceMgr {
      */
     private String generateTextData(WidgetAction action) {
 
-        Widget widget = action.getWidget();
+        // TODO: re-use recorded input when executing in replay mode!
 
-        // TODO: we always look at the activity name, but a fragment might be actually displayed on top
-        //  -> in this case we should the collected string constants from the fragment probably
-        String className = convertClassName(widget.getActivity());
+        final Widget widget = action.getWidget();
+        final String activityName = convertClassName(widget.getActivity());
 
+        final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
+        final Random random = Registry.getRandom();
 
-        InputFieldType type = InputFieldType.getFieldTypeByNumber(widget.getInputType());
-        Random r = Registry.getRandom();
-
-        // A hint should be present for the given widget. If it is, we check if the hint is a valid
-        // input param and use the probability PROB_HINT to select the hint as the input string.
-        if (widget.getHint() != null && !widget.getHint().isEmpty()) {
-            if (type.isValid(widget.getHint()) && r.nextDouble() < PROB_HINT) {
-
-                // We first consider the nature of the input field at hand. If we cannot assign this
-                // unambiguously, we enter the hint without changing it. If it is assignable, we
-                // will mutate it with the probability PROB_HINT_MUTATION.
-                if (type == InputFieldType.NOTHING || r.nextDouble() < PROB_HINT_MUTATION) {
-                    return action.getWidget().getHint();
+        /*
+         * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
+         * with probability PROB_HINT_MUTATION we mutate the given hint.
+         */
+        if (widget.isHintPresent()) {
+            if (inputFieldType.isValid(widget.getHint()) && random.nextDouble() < PROB_HINT) {
+                if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
+                    return Mutation.mutateInput(inputFieldType, widget.getHint());
                 } else {
-                    return Mutation.mutateInput(type, widget.getHint());
+                    return action.getWidget().getHint();
                 }
             }
-        }
+        } else if (staticStrings.isPresent()) {
+            /*
+             * If the static strings from the bytecode were supplied and with probability
+             * PROB_STATIC_STRING we try to find a static string matching the input field type.
+             */
+            if (random.nextDouble() < PROB_STATIC_STRING) {
 
-        // If the static strings were successfully parsed before, then we use the probability
-        // PROB_STATIC_STRING to fetch a random static string that matches for the input field type
-        // and the current class name.
-        if (staticStrings.isPresent()) {
-            if (r.nextDouble() < PROB_STATIC_STRING) {
-                List<String> fragments = getCurrentFragmentsAPI28();
-                if(fragments==null) {
-                    fragments = new ArrayList<>();
-                }
-                fragments.add(className);
+                // consider both the string constants from the current activity and visible fragments
+                List<String> uiComponents = new ArrayList<>();
+                uiComponents.add(activityName);
+                uiComponents.addAll(getCurrentFragments());
+
                 String randomStaticString;
-                if (type != InputFieldType.NOTHING) {
-                    randomStaticString = staticStrings.getRandomStringFor(type, fragments);
 
-                    // If there is no matching string for these properties, we reduce the
-                    // requirements and search all classes for a matching string for this input
-                    // field type.
+                if (inputFieldType != InputFieldType.NOTHING) {
+
+                    // get a random string matching the input field type from one of the ui classes
+                    randomStaticString = staticStrings.getRandomStringFor(inputFieldType, uiComponents);
+
+                    /*
+                     * If there was no match, we consider a random string from any class matching
+                     * the given input field type.
+                     */
                     if (randomStaticString == null) {
-                        randomStaticString = staticStrings.getRandomStringFor(type);
+                        randomStaticString = staticStrings.getRandomStringFor(inputFieldType);
                     }
 
-                    // If a string was found in the previous stations, we can still mutate it with
-                    // the probability PROB_STATIC_STRING_MUTATION.
+                    // mutate the string with probability PROB_STATIC_STRING_MUTATION
                     if (randomStaticString != null) {
-                        if (r.nextDouble() < PROB_STATIC_STRING_MUTATION) {
-                            randomStaticString = Mutation.mutateInput(type, randomStaticString);
+                        if (random.nextDouble() < PROB_STATIC_STRING_MUTATION) {
+                            randomStaticString = Mutation.mutateInput(inputFieldType, randomStaticString);
                         }
                         return randomStaticString;
                     }
                 }
 
-                // If we have an input field type that is not further defined, or if the attempts
-                // before were unsuccessful, we try a random string for the current class name. If
-                // this does not work, we cannot include the static strings in the input generation.
-                randomStaticString = staticStrings.getRandomStringFor(fragments);
+                /*
+                 * If the input field type couldn't be determined or no static string could be
+                 * derived so far, we try to use a random string from either the current activity
+                 * or any of the visible fragments.
+                 */
+                randomStaticString = staticStrings.getRandomStringFor(uiComponents);
                 if (randomStaticString != null) {
                     return randomStaticString;
                 }
             }
         }
-        //TODO: Return strings of example file as fall back mechanism. Or another approach?!
-        // Nevertheless a fall back mechanism is needed.
+
+        // fallback mechanism
+        return getDummyString();
+    }
+
+    /**
+     * Returns a dummy string as input for some input field. This is the fallback mechanism for
+     * the input generation procedure.
+     *
+     * @return Returns a dummy string.
+     */
+    private String getDummyString() {
+        // TODO: Return strings of example file as fall back mechanism. Or another approach?!
         return "DummyString";
     }
 
@@ -919,11 +948,29 @@ public class DeviceMgr {
     }
 
     /**
-     * Returns the name of the current activity on an emulator running API 28.
+     * Returns the currently visible fragments.
      *
-     * @return Returns the current activity name.
+     * @return Returns the currently visible fragments or an empty list if the fragments could
+     *         not be derived.
+     */
+    private List<String> getCurrentFragments() {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+            return getCurrentFragmentsAPI28();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Returns the currently visible fragments for an emulator running API 28.
+     *
+     * @return Returns the currently visible fragments.
      */
     private List<String> getCurrentFragmentsAPI28() {
+
+        // TODO: It seems that the extraction can be simplified by supplying the current activity:
+        // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
+
         try {
             String output = device.executeShellCommand("dumpsys activity " + Registry.getPackageName());
 
@@ -941,7 +988,8 @@ public class DeviceMgr {
             }
             return extracted;
         } catch (Exception e) {
-            return null;
+            MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            return Collections.emptyList();
         }
     }
 

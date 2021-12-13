@@ -27,7 +27,7 @@ public class Widget {
     /**
      * A list of direct descendants.
      */
-    private List<Widget> children;
+    private final List<Widget> children;
 
     /**
      * A unique identifier for this widget, which is based on the activity name, the global
@@ -698,6 +698,15 @@ public class Widget {
 
     public void setHint(String hint) {
         this.hint = hint;
+    }
+
+    /**
+     * Checks whether a hint is present.
+     *
+     * @return Returns {@code true} if a hint is present, otherwise {@code false}.
+     */
+    public boolean isHintPresent() {
+        return hint != null && !hint.isEmpty();
     }
 
     public String getHint() {
