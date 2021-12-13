@@ -26,7 +26,8 @@ public final class StaticStrings {
     private final Map<String, Set<String>> allStrings = new HashMap<>();
 
     /**
-     * 
+     * This map stores for each {@link InputFieldType} a map with the string variables per class
+     * name.
      */
     private final Map<InputFieldType, Map<String, Set<String>>> inputFieldTypeMap = new HashMap<>();
 
@@ -61,7 +62,7 @@ public final class StaticStrings {
     public void add(String className, Set<String> values) {
 
         Set<String> copy = new HashSet<>(values);
-        doInMap(allStrings, className, copy);
+        extendMapByClassName(allStrings, className, copy);
 
         for (String value : values) {
             Set<InputFieldType> inputFields = InputFieldType.getInputFieldsMatchingRegex(value);
@@ -70,7 +71,7 @@ public final class StaticStrings {
                 if (cache == null) {
                     cache = new HashMap<>();
                 }
-                doInMap(cache, className, new HashSet<>(Collections.singleton(value)));
+                extendMapByClassName(cache, className, new HashSet<>(Collections.singleton(value)));
                 inputFieldTypeMap.put(input, cache);
             }
         }
@@ -131,14 +132,23 @@ public final class StaticStrings {
         }
     }
 
-    private void doInMap(Map<String, Set<String>> map, String className, Set<String> copy) {
+    /**
+     * Extends the given map for a given class name and the corresponding set with string values. If
+     * the class name as key already exists, the previous set will be merged with the new values.
+     * Otherwise a new one is created.
+     *
+     * @param map The map where a new set with values should be added.
+     * @param className The class name as key.
+     * @param strings The string that should be merged.
+     */
+    private void extendMapByClassName(Map<String, Set<String>> map, String className, Set<String> strings) {
         if (map.containsKey(className) && map.get(className) != null) {
             Set<String> prevSet = map.get(className);
             if (prevSet != null) {
-                copy.addAll(prevSet);
+                strings.addAll(prevSet);
             }
         }
-        map.put(className, copy);
+        map.put(className, strings);
     }
 
     private String getRandomStringFor(Map<String, Set<String>> map, String className) {
