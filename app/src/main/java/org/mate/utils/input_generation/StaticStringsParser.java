@@ -63,10 +63,10 @@ public final class StaticStringsParser {
                     }
                 }
             }
-            staticStrings.setPresent(true);
+
+            staticStrings.setInitialised(true);
         } catch (XmlPullParserException | IOException e) {
             MATE.log_warn("Couldn't parse the static string constants!");
-            staticStrings.setPresent(false);
             e.printStackTrace();
         }
 

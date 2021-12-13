@@ -751,7 +751,7 @@ public class DeviceMgr {
                     return action.getWidget().getHint();
                 }
             }
-        } else if (staticStrings.isPresent()) {
+        } else if (staticStrings.isInitialised()) {
             /*
              * If the static strings from the bytecode were supplied and with probability
              * PROB_STATIC_STRING we try to find a static string matching the input field type.

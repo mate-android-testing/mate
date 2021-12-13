@@ -10,18 +10,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// TODO: add documentation
+/**
+ * Provides access to the static strings extracted from the bytecode.
+ */
 public final class StaticStrings {
 
+    /**
+     * The singleton instance.
+     */
     private static StaticStrings staticStrings;
+
+    /**
+     * Contains the static strings per class.
+     */
     private final Map<String, Set<String>> allStrings = new HashMap<>();
+
+    /**
+     * 
+     */
     private final Map<InputFieldType, Map<String, Set<String>>> inputFieldTypeMap = new HashMap<>();
-    private boolean present;
+
+    /**
+     * Whether the static strings could be loaded, i.e. {@link StaticStringsParser#parseStaticStrings()}
+     * succeeded.
+     */
+    private boolean initialised = false;
 
     private StaticStrings() {
         createInitialMap();
     }
 
+    /**
+     * Retrieves the singleton instance.
+     *
+     * @return Returns the static string instance.
+     */
     public static StaticStrings getInstance() {
         if (staticStrings == null) {
             staticStrings = new StaticStrings();
@@ -36,6 +59,7 @@ public final class StaticStrings {
      * @param values The new values.
      */
     public void add(String className, Set<String> values) {
+
         Set<String> copy = new HashSet<>(values);
         doInMap(allStrings, className, copy);
 
@@ -49,7 +73,6 @@ public final class StaticStrings {
                 doInMap(cache, className, new HashSet<>(Collections.singleton(value)));
                 inputFieldTypeMap.put(input, cache);
             }
-
         }
     }
 
@@ -145,21 +168,20 @@ public final class StaticStrings {
     }
 
     /**
-     * Getter for the state present. Present is a static string, if the parsing in
-     * {@code StaticStringsParser} was successful.
+     * Whether the static strings could be successfully initialised.
      *
-     * @return True if parsing was successful, otherwise false;
+     * @return Returns {@code true} if the parsing was successful, otherwise {@code false}.
      */
-    public boolean isPresent() {
-        return present;
+    public boolean isInitialised() {
+        return initialised;
     }
 
     /**
-     * Sets the present state.
+     * Sets whether the static strings could be initialised.
      *
-     * @param present True if successful, false if not.
+     * @param initialised Whether the static strings could be initialised.
      */
-    public void setPresent(boolean present) {
-        this.present = present;
+    public void setInitialised(boolean initialised) {
+        this.initialised = initialised;
     }
 }
