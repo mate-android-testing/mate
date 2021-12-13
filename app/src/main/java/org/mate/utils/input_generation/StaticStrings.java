@@ -1,14 +1,13 @@
 package org.mate.utils.input_generation;
 
 
-import org.mate.Registry;
+import org.mate.utils.Randomness;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 // TODO: add documentation
@@ -22,7 +21,6 @@ public final class StaticStrings {
     private StaticStrings() {
         createInitialMap();
     }
-
 
     public static StaticStrings getInstance() {
         if (staticStrings == null) {
@@ -62,14 +60,8 @@ public final class StaticStrings {
      * @return A random string of the set.
      */
     public String getRandomStringFor(List<String> classNames) {
-        String className = getRandomClassName(classNames);
+        String className = Randomness.randomElement(classNames);
         return getRandomStringFor(allStrings, className);
-    }
-
-    private String getRandomClassName(List<String> classNames) {
-        Random r = Registry.getRandom();
-        int index = r.nextInt(classNames.size());
-        return classNames.get(index);
     }
 
     /**
@@ -81,7 +73,7 @@ public final class StaticStrings {
      * @return A random string of the set for field type.
      */
     public String getRandomStringFor(InputFieldType inputType, List<String> classNames) {
-        String className = getRandomClassName(classNames);
+        String className = Randomness.randomElement(classNames);
         return getRandomStringFor(inputFieldTypeMap.get(inputType), className);
     }
 
@@ -100,7 +92,12 @@ public final class StaticStrings {
         for (Map.Entry<String, Set<String>> entrySet : map.entrySet()) {
             concatenated.addAll(entrySet.getValue());
         }
-        return getRandomStringFromSet(concatenated);
+
+        if (!concatenated.isEmpty()) {
+            return Randomness.randomElement(concatenated);
+        } else {
+            return null;
+        }
     }
 
     private void createInitialMap() {
@@ -130,7 +127,9 @@ public final class StaticStrings {
             }
 
             if (map.containsKey(convertedClassName)) {
-                return getRandomStringFromSet(map.get(convertedClassName));
+                if (map.get(convertedClassName) != null) {
+                    return Randomness.randomElement(map.get(convertedClassName));
+                }
             }
         }
         return null;
@@ -138,24 +137,16 @@ public final class StaticStrings {
 
     private String getExactKey(Map<String, Set<String>> map, String keyPart) {
         for (String key : map.keySet()) {
-            if (key.endsWith("."+keyPart)) {
+            if (key.endsWith("." + keyPart)) {
                 return key;
             }
         }
         return null;
     }
 
-    private String getRandomStringFromSet(Set<String> set) {
-        if (set == null || set.size() == 0) {
-            return null;
-        }
-        Random random = Registry.getRandom();
-        int randomNumber = random.nextInt(set.size());
-        return (String) set.toArray()[randomNumber];
-    }
-
     /**
-     * Getter for the state present. Present is a static string, if the parsing in {@code StaticStringsParser} was successful.
+     * Getter for the state present. Present is a static string, if the parsing in
+     * {@code StaticStringsParser} was successful.
      *
      * @return True if parsing was successful, otherwise false;
      */
