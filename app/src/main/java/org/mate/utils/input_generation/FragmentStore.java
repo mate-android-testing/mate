@@ -62,7 +62,7 @@ public class FragmentStore {
     }
 
     /**
-     * Returns the currently visible fragments for an emulator running API 28.
+     * Returns the currently visible fragments for an emulator..
      *
      * @return Returns the currently visible fragments.
      */
