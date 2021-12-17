@@ -32,6 +32,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
+import org.mate.utils.input_generation.FragmentStore;
 import org.mate.utils.input_generation.InputFieldType;
 import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
@@ -119,12 +120,15 @@ public class DeviceMgr {
      */
     private final StaticStrings staticStrings;
 
+    private final FragmentStore fragmentStore;
+
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
         this.staticStrings = StaticStringsParser.parseStaticStrings();
+        this.fragmentStore = FragmentStore.getInstance();
     }
 
     /**
@@ -751,7 +755,8 @@ public class DeviceMgr {
                     return action.getWidget().getHint();
                 }
             }
-        } else if (staticStrings.isInitialised()) {
+        }
+        if (staticStrings.isInitialised()) {
             /*
              * If the static strings from the bytecode were supplied and with probability
              * PROB_STATIC_STRING we try to find a static string matching the input field type.
@@ -955,43 +960,7 @@ public class DeviceMgr {
      *         not be derived.
      */
     private List<String> getCurrentFragments() {
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-            return getCurrentFragmentsAPI28();
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Returns the currently visible fragments for an emulator running API 28.
-     *
-     * @return Returns the currently visible fragments.
-     */
-    private List<String> getCurrentFragmentsAPI28() {
-
-        // TODO: It seems that the extraction can be simplified by supplying the current activity:
-        // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
-
-        try {
-            String output = device.executeShellCommand("dumpsys activity " + Registry.getPackageName());
-
-            output = output.split("Local FragmentActivity")[1];
-            output = output.split("Added Fragments:")[1];
-            output = output.split("Back Stack Index:")[0];
-            List<String> fragments = Arrays.stream(output.split("\n|\\s")).collect(Collectors.toList());
-            fragments.removeIf(s -> s.equals(""));
-            fragments.removeIf(s -> s.startsWith("#"));
-            fragments.removeIf(s -> s.startsWith("id"));
-            fragments.removeIf(s -> s.startsWith("("));
-            List<String> extracted = new ArrayList<>();
-            for (String s : fragments) {
-                extracted.add(s.split("\\{")[0]);
-            }
-            return extracted;
-        } catch (Exception e) {
-            MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
-            return Collections.emptyList();
-        }
+        return fragmentStore.getFragmentsFor(device, getCurrentActivity());
     }
 
 
