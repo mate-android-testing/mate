@@ -32,7 +32,6 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
-import org.mate.utils.input_generation.FragmentStore;
 import org.mate.utils.input_generation.InputFieldType;
 import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
@@ -120,7 +119,6 @@ public class DeviceMgr {
      */
     private final StaticStrings staticStrings;
 
-    private final FragmentStore fragmentStore;
 
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
@@ -128,7 +126,6 @@ public class DeviceMgr {
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
         this.staticStrings = StaticStringsParser.parseStaticStrings();
-        this.fragmentStore = FragmentStore.getInstance();
     }
 
     /**
@@ -953,14 +950,38 @@ public class DeviceMgr {
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
 
+
     /**
-     * Returns the currently visible fragments.
+     * Returns the currently visible fragments for an emulator..
      *
-     * @return Returns the currently visible fragments or an empty list if the fragments could
-     *         not be derived.
+     * @return Returns the currently visible fragments.
      */
     private List<String> getCurrentFragments() {
-        return fragmentStore.getFragmentsFor(device, getCurrentActivity());
+
+        // TODO: It seems that the extraction can be simplified by supplying the current activity:
+        //  (Comment Severin: Same output as Registry.getPackageName)
+        // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
+
+        try {
+            String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
+
+            output = output.split("Local FragmentActivity")[1];
+            output = output.split("Added Fragments:")[1];
+            output = output.split("Back Stack Index:")[0];
+            List<String> fragments = Arrays.stream(output.split("\n|\\s")).collect(Collectors.toList());
+            fragments.removeIf(s -> s.equals(""));
+            fragments.removeIf(s -> s.startsWith("#"));
+            fragments.removeIf(s -> s.startsWith("id"));
+            fragments.removeIf(s -> s.startsWith("("));
+            List<String> extracted = new ArrayList<>();
+            for (String s : fragments) {
+                extracted.add(s.split("\\{")[0]);
+            }
+            return extracted;
+        } catch (Exception e) {
+            MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
 
