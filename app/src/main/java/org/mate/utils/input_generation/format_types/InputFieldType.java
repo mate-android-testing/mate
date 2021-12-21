@@ -1,4 +1,4 @@
-package org.mate.utils.input_generation;
+package org.mate.utils.input_generation.format_types;
 
 
 import android.text.InputType;
@@ -8,7 +8,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 
 /**

@@ -6,10 +6,12 @@ package org.mate.utils.input_generation;
 
 import org.mate.MATE;
 import org.mate.utils.Randomness;
+import org.mate.utils.input_generation.format_types.DateFormat;
+import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.input_generation.format_types.TimeFormat;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

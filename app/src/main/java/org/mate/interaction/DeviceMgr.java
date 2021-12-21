@@ -13,7 +13,6 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
-import android.text.InputType;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -32,7 +31,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
-import org.mate.utils.input_generation.InputFieldType;
+import org.mate.utils.input_generation.format_types.InputFieldType;
 import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;

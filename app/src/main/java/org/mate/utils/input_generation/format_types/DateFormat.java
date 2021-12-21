@@ -1,4 +1,4 @@
-package org.mate.utils.input_generation;
+package org.mate.utils.input_generation.format_types;
 
 /**
  * The supported date formats.

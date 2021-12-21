@@ -2,6 +2,7 @@ package org.mate.utils.input_generation;
 
 
 import org.mate.utils.Randomness;
+import org.mate.utils.input_generation.format_types.InputFieldType;
 
 import java.util.Collections;
 import java.util.HashMap;

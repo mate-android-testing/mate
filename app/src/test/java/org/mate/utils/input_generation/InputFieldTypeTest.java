@@ -3,6 +3,7 @@ package org.mate.utils.input_generation;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mate.utils.input_generation.format_types.InputFieldType;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
