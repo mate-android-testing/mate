@@ -3,21 +3,19 @@ package org.mate.utils.input_generation;
 
 import org.mate.Registry;
 
+
 import java.util.Random;
+
+import static org.mate.utils.input_generation.Letters.SET_OF_BIG_LETTERS;
+import static org.mate.utils.input_generation.Letters.SET_OF_LOW_LETTERS;
+import static org.mate.utils.input_generation.Letters.SET_OF_NUMBERS;
+import static org.mate.utils.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
+import static org.mate.utils.input_generation.Letters.generatePossibleLetters;
 
 // TODO: add documentation
 public class Mutation {
 
-    private static final String SET_OF_LOW_LETTERS = "abcdefghijklmnopqrstuvwxyz";
-
-    private static final String SET_OF_BIG_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    private static final String SET_OF_NUMBERS = "0123456789";
-
-    private static final String SET_OF_SPECIAL_SIGNS = "+-*/!\"§$%&/()=?´`_.,@€<>|{[]}\\:;^°";
-
     private static final double PROBABILITY_POINT_IN_DATE_TIME = 0.8;
-
 
     private enum MutationType {
         ADDITION, CHANGE, DELETE;
@@ -29,7 +27,7 @@ public class Mutation {
     }
 
     public static String mutateInput(InputFieldType type, String hint) {
-        switch (type){
+        switch (type) {
             case TEXT_VARIATION_PERSON_NAME:
             case TEXT_FLAG_MULTI_LINE:
             case TEXT_VARIATION_PASSWORD:
@@ -59,7 +57,8 @@ public class Mutation {
     }
 
     private static String mutateString(String hint, int maxNumberMutation) {
-        return mutateString(hint, maxNumberMutation, SET_OF_LOW_LETTERS + SET_OF_BIG_LETTERS);
+        return mutateString(hint, maxNumberMutation,
+                generatePossibleLetters(SET_OF_BIG_LETTERS, SET_OF_LOW_LETTERS));
     }
 
     private static String mutateString(String hint, int maxNumberMutation, String charSet) {
@@ -109,7 +108,8 @@ public class Mutation {
             }
         }
 
-        return mutateString(mutatedMail, maxNumberMutation, SET_OF_LOW_LETTERS + SET_OF_NUMBERS + SET_OF_SPECIAL_SIGNS);
+        return mutateString(mutatedMail, maxNumberMutation,
+                generatePossibleLetters(SET_OF_LOW_LETTERS, SET_OF_NUMBERS, SET_OF_SPECIAL_SIGNS));
     }
 
     private static String mutatePhone(String hint, int maxNumberMutation) {
@@ -161,7 +161,8 @@ public class Mutation {
         StringBuilder stb = new StringBuilder();
         Random r = Registry.getRandom();
         for (int i = 0; i < dateTimes.length; i++) {
-            dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(), SET_OF_NUMBERS,MutationType.CHANGE);
+            dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(),
+                    SET_OF_NUMBERS.getLetters(), MutationType.CHANGE);
             stb.append(dateTimes[i]);
             if (i + 1 != dateTimes.length && r.nextDouble() < PROBABILITY_POINT_IN_DATE_TIME) {
                 stb.append(replacedChar);

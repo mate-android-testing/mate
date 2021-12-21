@@ -155,7 +155,9 @@ public class AppScreen {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (node.isShowingHintText()) {
-                    hint = (String) node.getHintText();
+                    if(node.getHintText() instanceof String){
+                        hint = (String) node.getHintText();
+                    }
                 }
             } else {
                 // fallback mechanism for older devices

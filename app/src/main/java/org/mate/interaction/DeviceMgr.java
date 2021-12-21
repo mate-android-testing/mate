@@ -18,7 +18,7 @@ import android.text.InputType;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.datagen.DataGenerator;
+import org.mate.utils.input_generation.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
@@ -126,6 +126,7 @@ public class DeviceMgr {
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
         this.staticStrings = StaticStringsParser.parseStaticStrings();
+        DataGenerator.load();
     }
 
     /**
@@ -802,7 +803,7 @@ public class DeviceMgr {
         }
 
         // fallback mechanism
-        return getDummyString();
+        return getDummyString(inputFieldType);
     }
 
     /**
@@ -811,39 +812,9 @@ public class DeviceMgr {
      *
      * @return Returns a dummy string.
      */
-    private String getDummyString() {
+    private String getDummyString(InputFieldType inputFieldType) {
         // TODO: Return strings of example file as fall back mechanism. Or another approach?!
-        return "DummyString";
-    }
-
-    /**
-     * Generates a random input for the given input type on a best effort basis.
-     *
-     * @param inputType The input type, e.g. phone number.
-     * @param maxLengthInt The maximal length for the input.
-     * @return Returns a random input matching the input type.
-     */
-    private String getRandomData(int inputType, int maxLengthInt) {
-
-        // TODO: consider the generation of invalid strings, numbers, emails, uris, ...
-        DataGenerator dataGen = new DataGenerator();
-
-        switch (inputType) {
-            case InputType.TYPE_NUMBER_FLAG_DECIMAL:
-            case InputType.TYPE_CLASS_NUMBER:
-            case InputType.TYPE_CLASS_PHONE:
-            case InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL:
-                return dataGen.getRandomValidNumber(maxLengthInt);
-            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
-                return dataGen.getRandomValidEmail(maxLengthInt);
-            case InputType.TYPE_TEXT_VARIATION_URI:
-                return dataGen.getRandomUri(maxLengthInt);
-            case InputType.TYPE_CLASS_TEXT:
-                return dataGen.getRandomValidString(maxLengthInt);
-            default:
-                MATE.log_debug("Input type: " + inputType + " not explicitly supported yet!");
-                return dataGen.getRandomValidString(maxLengthInt);
-        }
+        return DataGenerator.generateRandomData(inputFieldType);
     }
 
     /**
