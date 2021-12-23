@@ -70,8 +70,6 @@ public class NoveltyFitnessFunction<T> implements IFitnessFunction<T> {
      * @param nearestNeighbours The number of nearest neighbours k.
      * @return Returns the novelty vector.
      */
-    // TODO: We may can re-use this for the novelty vector.
-    @SuppressWarnings("unused")
     public List<Double> getFitness(List<IChromosome<T>> chromosomes, int nearestNeighbours) {
 
         if (chromosomes.size() == 1) {
