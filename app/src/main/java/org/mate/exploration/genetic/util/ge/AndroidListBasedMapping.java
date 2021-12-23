@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A genotype to phenotype mapping where the genotype is list based and the genotype is an android
+ * A genotype to phenotype mapping where the genotype is list based and the phenotype is an android
  * {@link TestCase}. The mapping caches generated test cases and returns the cached one if the
  * phenotype for the same genotype is requested multiple times.
  *
