@@ -125,7 +125,6 @@ public class DeviceMgr {
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
         this.staticStrings = StaticStringsParser.parseStaticStrings();
-        DataGenerator.load();
     }
 
     /**
@@ -674,7 +673,7 @@ public class DeviceMgr {
 
         Widget widget = action.getWidget();
         // TODO: replace with Objects.toString(generateTextData(action), ""); after testing
-        String textData = generateTextData(action);
+        String textData = generateTextData(action, widget.getMaxTextLength());
 
         if (textData == null) {
             throw new IllegalStateException("Couldn't generate any input for the given widget!");
@@ -730,7 +729,7 @@ public class DeviceMgr {
      * @param action The widget action containing the editable widget.
      * @return Returns a text input for the editable widget.
      */
-    private String generateTextData(WidgetAction action) {
+    private String generateTextData(WidgetAction action, int maxLength) {
 
         // TODO: re-use recorded input when executing in replay mode!
 
@@ -802,18 +801,24 @@ public class DeviceMgr {
         }
 
         // fallback mechanism
-        return getDummyString(inputFieldType);
+        return generateRandomInput(inputFieldType, maxLength);
     }
 
     /**
-     * Returns a dummy string as input for some input field. This is the fallback mechanism for
-     * the input generation procedure.
+     * Generates a random input as a fallback mechanism. A random string is generated and shortened
+     * to the maximum length if it is too long.
      *
-     * @return Returns a dummy string.
+     * @param inputFieldType The field for which the string is to be generated.
+     * @param maxLength The maximum length of the result string.
+     * @return A random string matching the given {@link InputFieldType} with at most maxLength
+     *         length.
      */
-    private String getDummyString(InputFieldType inputFieldType) {
-        // TODO: Return strings of example file as fall back mechanism. Or another approach?!
-        return DataGenerator.generateRandomData(inputFieldType);
+    private String generateRandomInput(InputFieldType inputFieldType, int maxLength) {
+        String randomData = DataGenerator.generateRandomData(inputFieldType);
+        if (randomData.length() > maxLength) {
+            randomData = randomData.substring(0, maxLength);
+        }
+        return randomData;
     }
 
     /**

@@ -1,9 +1,5 @@
 package org.mate.utils.input_generation;
 
-/**
- * Created by marceloe on 14/10/16.
- */
-
 import org.mate.MATE;
 import org.mate.utils.Randomness;
 import org.mate.utils.input_generation.format_types.DateFormat;
@@ -23,16 +19,42 @@ import static org.mate.utils.input_generation.Letters.SET_OF_LOW_LETTERS;
 import static org.mate.utils.input_generation.Letters.SET_OF_NUMBERS;
 import static org.mate.utils.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
 
-
+/**
+ * Generates random input strings.
+ */
 public final class DataGenerator {
 
+    /**
+     * The probability for a line break.
+     */
     public static final double PROB_LINEBREAK = 0.2;
-    public static final int BOUND_NUMBERS = 8;
-    public static final int BOUND_STRING = 10;
-    private static final List<String> words = Dictionary.getWords();
 
+    /**
+     * The maximal length of number string.
+     */
+    public static final int BOUND_NUMBERS = 8;
+
+    /**
+     * The maximal length of a string.
+     */
+    public static final int BOUND_STRING = 10;
+
+    /**
+     * The maximal length of a string with multi lines.
+     */
     public static final int MAX_STRING_LENGTH_MULTILINE = 50;
 
+    /**
+     * The loaded words of dictionary.
+     */
+    private static final List<String> words = Dictionary.getWords();
+
+    /**
+     * Generates some random date for a given {@link InputFieldType}.
+     *
+     * @param type The type for generation of random data.
+     * @return The generated data.
+     */
     public static String generateRandomData(InputFieldType type) {
         MATE.log_debug("Input text: " + type);
 
@@ -71,10 +93,14 @@ public final class DataGenerator {
         }
     }
 
-    public static void load() {
-        Dictionary.loadWords();
-    }
-
+    /**
+     * Generates a multi line string with some words of the {@link Dictionary} or randomly generated
+     * strings.
+     *
+     * @param maxLength The maximal length of the multiline string.
+     * @param letters The possible letters.
+     * @return A multi line string.
+     */
     private static String generateMultiLine(final int maxLength, Letters... letters) {
 
         Random random = Randomness.getRnd();
@@ -114,6 +140,14 @@ public final class DataGenerator {
         return stb.toString();
     }
 
+    /**
+     * Generates a random one line String. If no letters are given a random word of the
+     * {@link Dictionary} is taken, otherwise a random letter string is gernerated.
+     *
+     * @param maxLength The maximal length of the one line string.
+     * @param letters The given letters.
+     * @return A generated string.
+     */
     private static String generateRandomString(int maxLength, Letters... letters) {
         StringBuilder stb = new StringBuilder();
 
@@ -134,6 +168,13 @@ public final class DataGenerator {
         return generateLetterString(maxLength, letters);
     }
 
+    /**
+     * Generates a letter string consisting of letters with a maxLength.
+     *
+     * @param maxLength The maximal length of the letter string.
+     * @param letters The letters where a string should build.
+     * @return The generated random letter string.
+     */
     private static String generateLetterString(int maxLength, Letters... letters) {
         if (maxLength <= 0) {
             return "";
@@ -147,6 +188,11 @@ public final class DataGenerator {
         return stb.toString();
     }
 
+    /**
+     * Generates a random email address with full stops and the @ sign in the middle.
+     *
+     * @return A random and valid email address is returned.
+     */
     private static String generateRandomEmail() {
         StringBuilder stb = new StringBuilder();
         Random random = Randomness.getRnd();
@@ -160,6 +206,12 @@ public final class DataGenerator {
         return stb.toString();
     }
 
+    /**
+     * Generates a random phone number. The country code is sometimes added at front of the number.
+     * Prefix and identifier number are separated by / sign.
+     *
+     * @return A valid random phone number.
+     */
     private static String generateRandomPhone() {
         Random random = Randomness.getRnd();
         StringBuilder stb = new StringBuilder();
@@ -176,6 +228,13 @@ public final class DataGenerator {
 
     }
 
+    /**
+     * Generates a signed random number string.
+     *
+     * @param signed Indicates, if the number should be signed or not.
+     * @param bound The maximal length of the number string.
+     * @return Returns a random number.
+     */
     private static String generateRandomNumber(boolean signed, int bound) {
         bound--;
         if (bound <= 1) {
@@ -188,6 +247,12 @@ public final class DataGenerator {
         return number;
     }
 
+    /**
+     * Generates a random decimal number with a given maximal length.
+     *
+     * @param bound The maximal length.
+     * @return A random decimal number.
+     */
     private static String generateRandomDecNumber(int bound) {
         int countFirstNumbers = bound - Randomness.getRnd().nextInt(bound) - 1;
         StringBuilder stb = new StringBuilder(generateRandomNumber(true, countFirstNumbers));
@@ -198,6 +263,11 @@ public final class DataGenerator {
         return stb.toString();
     }
 
+    /**
+     * Generates a random date for a random regex given in {@link DateFormat}.
+     *
+     * @return A valid date string.
+     */
     private static String generateRandomDate() {
         Date d = Date.from(timestamp());
         DateFormat df = Randomness.randomElement(Arrays.asList(DateFormat.values().clone()));
@@ -205,6 +275,11 @@ public final class DataGenerator {
         return sf.format(d);
     }
 
+    /**
+     * Generates a random time for a random regex given in {@link TimeFormat}.
+     *
+     * @return A valid time string.
+     */
     private static String generateRandomTime() {
         Date d = Date.from(timestamp());
         TimeFormat tf = Randomness.randomElement(Arrays.asList(TimeFormat.values().clone()));
@@ -212,6 +287,11 @@ public final class DataGenerator {
         return sf.format(d);
     }
 
+    /**
+     * Calculates  a random timestamp.
+     *
+     * @return A random timestamp.
+     */
     private static Instant timestamp() {
         return Instant.ofEpochSecond(Randomness.getRnd().nextInt());
     }

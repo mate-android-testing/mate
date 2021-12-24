@@ -12,11 +12,18 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Dictionary that loads and caches all words from a file. The words must be separated by line
+ * breaks.
+ */
 public class Dictionary {
     //https://github.com/dwyl/english-words
     private static List<String> words = null;
 
-    public static void loadWords() {
+    /**
+     * Loads the words from the words.txt file into a list and stores them temporarily.
+     */
+    private static void loadWords() {
         words = new ArrayList<>();
         try (InputStream file = InstrumentationRegistry.getTargetContext().getResources().getAssets().open("words.txt")) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(file));
@@ -29,6 +36,12 @@ public class Dictionary {
         }
     }
 
+    /**
+     * If the words have not yet been loaded, it loads those and then returns them. If this has
+     * already happened, the words are returned immediately.
+     *
+     * @return The loaded words.
+     */
     public static List<String> getWords() {
         if (words == null)
             loadWords();

@@ -26,6 +26,10 @@ public enum DateFormat {
         this.pattern = pattern;
     }
 
+    /**
+     * Getter for the pattern of a date format.
+     * @return The pattern.
+     */
     public String getPattern() {
         return pattern;
     }

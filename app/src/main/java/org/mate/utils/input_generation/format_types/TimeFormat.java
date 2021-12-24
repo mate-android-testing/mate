@@ -32,10 +32,20 @@ public enum TimeFormat {
         this.locale = locale;
     }
 
+    /**
+     * Getter for the pattern.
+     *
+     * @return The pattern for a {@link TimeFormat} is returned.
+     */
     public String getPattern() {
         return pattern;
     }
 
+    /**
+     * Getter for the locale of a time format.
+     *
+     * @return The locale for a {@link TimeFormat} is returned.
+     */
     public Locale getLocale() {
         return locale;
     }
