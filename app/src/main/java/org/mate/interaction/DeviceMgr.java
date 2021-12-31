@@ -426,7 +426,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     *         is returned.
+     * is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -443,7 +443,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     *         otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -521,7 +521,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     *         is returned.
+     * is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -553,7 +553,7 @@ public class DeviceMgr {
     /**
      * Executes a swipe (upon a widget) in a given direction.
      *
-     * @param widget The widget at which position the swipe should be performed.
+     * @param widget    The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
     private void handleSwipe(Widget widget, ActionType direction) {
@@ -621,7 +621,7 @@ public class DeviceMgr {
      *
      * @param widget The widget whose ui object should be looked up.
      * @return Returns the corresponding ui object or {@code null} if no
-     *         such ui object could be found.
+     * such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -809,13 +809,13 @@ public class DeviceMgr {
      * to the maximum length if it is too long.
      *
      * @param inputFieldType The field for which the string is to be generated.
-     * @param maxLength The maximum length of the result string.
+     * @param maxLength      The maximum length of the result string.
      * @return A random string matching the given {@link InputFieldType} with at most maxLength
-     *         length.
+     * length.
      */
     private String generateRandomInput(InputFieldType inputFieldType, int maxLength) {
         String randomData = DataGenerator.generateRandomData(inputFieldType);
-        if (randomData.length() > maxLength) {
+        if (maxLength > 0 && randomData.length() > maxLength) {
             randomData = randomData.substring(0, maxLength);
         }
         return randomData;
