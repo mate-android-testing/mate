@@ -37,6 +37,7 @@ import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -685,6 +686,9 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
+            case GENO_TO_PHENO_TYPE:
+                return (IFitnessFunction<T>)
+                        new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), getPhenoTypeFitnessFunction());
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
