@@ -5,6 +5,7 @@ import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
@@ -242,14 +243,21 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 }
             }
             if (fitnessFunctions.size() > 5) {
-                MATE.log_acc("Omitted other fitness function because there are to many (" + fitnessFunctions.size() + ")");
+                MATE.log_acc("Omitted other fitness function because there are to many ("
+                        + fitnessFunctions.size() + ")");
             }
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
             MATE.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
-            if (population.size() <= 10) {
+
+            if (population.size() <= 10
+                    /*
+                    * TODO: We need a way to access the phenotype here, otherwise it tries to
+                    *  use the genotype, which results in a crash.
+                     */
+                    && Properties.FITNESS_FUNCTION() != FitnessFunction.GENO_TO_PHENO_TYPE) {
                 MATE.log_acc("Combined coverage of current population: "
                         + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }
