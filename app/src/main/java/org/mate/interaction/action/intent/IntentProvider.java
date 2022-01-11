@@ -70,9 +70,7 @@ public class IntentProvider {
 
         List<ComponentDescription> toBeRemoved = new ArrayList<>();
 
-        final String BRANCH_COVERAGE_TRACER = "de.uni_passau.fim.auermich.branchcoverage.tracer.Tracer";
-        final String BRANCH_DISTANCE_TRACER = "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer";
-        final String TRACER = "de.uni_passau.fim.auermich.tracer.Tracer";
+        final String TRACER_PACKAGE = "de.uni_passau.fim.auermich";
 
         /*
         * These components are often not available because the Google Analytics SDK is
@@ -91,9 +89,7 @@ public class IntentProvider {
         }};
 
         for (ComponentDescription component : components) {
-            if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
-                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)
-                    || component.getFullyQualifiedName().equals(TRACER)
+            if (component.getFullyQualifiedName().startsWith(TRACER_PACKAGE)
                     || GOOGLE_ANALYTICS_COMPONENTS.contains(component.getFullyQualifiedName())) {
                 toBeRemoved.add(component);
             }

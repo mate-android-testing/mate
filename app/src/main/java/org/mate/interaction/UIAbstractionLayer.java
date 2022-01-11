@@ -313,7 +313,15 @@ public class UIAbstractionLayer {
                     }
                 }
             }
-            throw new IllegalStateException("Couldn't find any applicable action on permission dialog!");
+
+            /*
+            * In rare circumstances it can happen that the 'ALLOW' button is not discovered for yet
+            * unknown reasons. The discovered widgets on the current screen point to the permission
+            * dialog, but none of the buttons have the desired resource id. The only reasonable
+            * option seems to re-fetch the screen state and hope that the problem is gone.
+             */
+            MATE.log_warn("Couldn't find any applicable action on permission dialog!");
+            return true;
         } else {
             return false;
         }
