@@ -11,9 +11,11 @@ import org.mate.exploration.genetic.algorithm.Sapienz;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.BitSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
@@ -480,6 +482,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new SapienzSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
+            case BIT_SEQUENCE_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new BitSequenceChromosomeFactory(getSequenceLength());
+            case INTEGER_SEQUENCE_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new IntegerSequenceChromosomeFactory(getSequenceLength());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
