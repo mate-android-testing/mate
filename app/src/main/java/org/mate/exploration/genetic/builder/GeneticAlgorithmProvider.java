@@ -22,6 +22,7 @@ import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromos
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
@@ -44,6 +45,8 @@ import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFuncti
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.mutation.IntegerSequenceLengthMutationFunction;
+import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
@@ -62,11 +65,18 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.ge.AndroidListAnalogousMapping;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisionBiasedMapping;
+import org.mate.exploration.genetic.util.ge.GEMappingFunction;
+import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
 
 /**
  * Provides a {@link GeneticAlgorithm} by consuming the properties specified via the
@@ -547,6 +557,8 @@ public class GeneticAlgorithmProvider {
                     return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
                 case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
                     return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
+                case INTEGER_SEQUENCE_POINT_CROSS_OVER:
+                    return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
@@ -588,6 +600,10 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
+                case INTEGER_SEQUENCE_POINT_MUTATION:
+                    return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
+                case INTEGER_SEQUENCE_LENGTH_MUTATION:
+                    return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -913,6 +929,95 @@ public class GeneticAlgorithmProvider {
             return org.mate.Properties.TOURNAMENT_SIZE();
         } else {
             throw new IllegalStateException("Without using defaults: tournament size not specified");
+        }
+    }
+
+    /**
+     * Retrieves the sequence length for the {@link BitSequenceChromosomeFactory} and the
+     * {@link IntegerSequenceChromosomeFactory}, respectively.
+     *
+     * @return Returns the sequence length.
+     */
+    private int getSequenceLength() {
+        if (useDefaults) {
+            return org.mate.Properties.GE_SEQUENCE_LENGTH();
+        } else {
+            throw new IllegalStateException("Without using defaults: sequence length not specified");
+        }
+    }
+
+    /**
+     * Retrieves the mutation count for the {@link IntegerSequenceLengthMutationFunction}.
+     *
+     * @return Returns the mutation count.
+     */
+    private int getMutationCount() {
+        if (useDefaults) {
+            return org.mate.Properties.GE_MUTATION_COUNT();
+        } else {
+            throw new IllegalStateException("Without using defaults: sequence length not specified");
+        }
+    }
+
+    /**
+     * Retrieves the geno to phenotype mapping function used in GE.
+     *
+     * @param <S> The genotype.
+     * @param <T> The phenotype.
+     * @return Returns the specified geno to phenotype mapping function.
+     */
+    private <S, T> IGenotypePhenotypeMapping<S, T> getGenoToPhenoTypeMapping() {
+
+        String geMappingFunction = properties.getProperty(GeneticAlgorithmBuilder.GE_MAPPING_FUNCTION_KEY);
+
+        if (geMappingFunction == null) {
+            throw new IllegalStateException("GE mapping function not specified!");
+        }
+
+        switch (GEMappingFunction.valueOf(geMappingFunction)) {
+            case LIST_ANALOGOUS_MAPPING:
+                return (IGenotypePhenotypeMapping<S, T>) new AndroidListAnalogousMapping();
+            case LIST_BASED_BIASED_MAPPING:
+                return (IGenotypePhenotypeMapping<S, T>)
+                        new AndroidListBasedBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND());
+            case LIST_BASED_EQUAL_WEIGHTED_MAPPING:
+                return (IGenotypePhenotypeMapping<S, T>)
+                        new AndroidListBasedEqualWeightedDecisionBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND());
+            default:
+                throw new UnsupportedOperationException("GE mapping function "
+                        + geMappingFunction + " not yet supported!");
+        }
+    }
+
+    /**
+     * Retrieves the 'core' fitness function that is actually applied on pheno type.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the 'core' fitness function used in GE.
+     */
+    private <T> IFitnessFunction<T> getPhenoTypeFitnessFunction() {
+
+        FitnessFunction fitnessFunction = org.mate.Properties.GE_FITNESS_FUNCTION();
+
+        if (fitnessFunction == null) {
+            throw new IllegalStateException("Property GE_FITNESS_FUNCTION() not specified!");
+        }
+
+        if (fitnessFunction == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
+            return new BasicBlockBranchCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
+            return new BasicBlockLineCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.BRANCH_COVERAGE) {
+            return new BranchCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.BRANCH_DISTANCE) {
+            return new BranchDistanceFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.LINE_COVERAGE) {
+            return new LineCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.METHOD_COVERAGE) {
+            return new MethodCoverageFitnessFunction<>();
+        } else {
+            throw new UnsupportedOperationException("GE fitness function "
+                    + fitnessFunction + " not yet supported!");
         }
     }
 }
