@@ -3,9 +3,7 @@ package org.mate.utils.input_generation;
 
 import android.support.test.InstrumentationRegistry;
 
-
 import java.io.BufferedReader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,6 +15,7 @@ import java.util.List;
  * breaks.
  */
 public class Dictionary {
+
     //https://github.com/dwyl/english-words
     private static List<String> words = null;
 
@@ -25,7 +24,8 @@ public class Dictionary {
      */
     private static void loadWords() {
         words = new ArrayList<>();
-        try (InputStream file = InstrumentationRegistry.getTargetContext().getResources().getAssets().open("words.txt")) {
+        try (InputStream file = InstrumentationRegistry.getTargetContext().getResources()
+                .getAssets().open("words.txt")) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(file));
             String line;
             while ((line = reader.readLine()) != null) {

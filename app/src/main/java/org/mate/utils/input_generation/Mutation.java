@@ -5,7 +5,6 @@ import org.mate.Registry;
 import org.mate.utils.Randomness;
 import org.mate.utils.input_generation.format_types.InputFieldType;
 
-
 import java.util.Random;
 
 import static org.mate.utils.input_generation.Letters.SET_OF_BIG_LETTERS;
@@ -23,23 +22,27 @@ public class Mutation {
      * The probability that a full stop should be placed in a datum or tense.
      */
     private static final double PROBABILITY_POINT_IN_DATE_TIME = 0.8;
+
     /**
      * The maximum number of changes in a mutation process.
      */
-    public static final int MUTATION_DEGREE = 2;
+    private static final int MUTATION_DEGREE = 2;
 
     /**
      * Enum for different mutation types.
      */
     private enum MutationType {
+
         /**
          * Stands for adding a character.
          */
         ADDITION,
+
         /**
          * Stands for substituting a character.
          */
         CHANGE,
+
         /**
          * Stands for deleting a character.
          */
@@ -183,7 +186,6 @@ public class Mutation {
                 generatePossibleLetters(SET_OF_LOW_LETTERS, SET_OF_NUMBERS, SET_OF_SPECIAL_SIGNS));
     }
 
-
     /**
      * Mutates phone number. Sometimes invalid phone numbers can occur.
      *
@@ -287,7 +289,6 @@ public class Mutation {
         }
         return stb.toString();
     }
-
 
     /**
      * Returns a random char of a given char set.

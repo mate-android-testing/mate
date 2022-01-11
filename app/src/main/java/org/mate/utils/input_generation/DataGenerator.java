@@ -1,6 +1,5 @@
 package org.mate.utils.input_generation;
 
-import org.mate.MATE;
 import org.mate.utils.Randomness;
 import org.mate.utils.input_generation.format_types.DateFormat;
 import org.mate.utils.input_generation.format_types.InputFieldType;
@@ -56,7 +55,6 @@ public final class DataGenerator {
      * @return The generated data.
      */
     public static String generateRandomData(InputFieldType type) {
-        MATE.log_debug("Input text: " + type);
 
         switch (type) {
             case TEXT_FLAG_MULTI_LINE:
@@ -142,7 +140,7 @@ public final class DataGenerator {
 
     /**
      * Generates a random one line String. If no letters are given a random word of the
-     * {@link Dictionary} is taken, otherwise a random letter string is gernerated.
+     * {@link Dictionary} is taken, otherwise a random letter string is generated.
      *
      * @param maxLength The maximal length of the one line string.
      * @param letters The given letters.
@@ -159,12 +157,12 @@ public final class DataGenerator {
                 return stb.toString();
             } else {
 
-                //If no matching word is found, we generate a random word with all possible letters.
+                // If no matching word is found, we generate a random word with all possible letters.
                 return generateLetterString(maxLength, Letters.values());
             }
         }
 
-        //  Otherwise, we create a random word with our letters.
+        // Otherwise, we create a random word with our letters.
         return generateLetterString(maxLength, letters);
     }
 

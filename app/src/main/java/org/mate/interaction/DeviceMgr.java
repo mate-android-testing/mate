@@ -17,7 +17,6 @@ import android.support.test.uiautomator.UiSelector;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.utils.input_generation.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
@@ -31,16 +30,18 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
-import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.input_generation.DataGenerator;
 import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
+import org.mate.utils.input_generation.format_types.InputFieldType;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -426,7 +427,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     * is returned.
+     *         is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -443,7 +444,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     * otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -521,7 +522,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     * is returned.
+     *         is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -553,7 +554,7 @@ public class DeviceMgr {
     /**
      * Executes a swipe (upon a widget) in a given direction.
      *
-     * @param widget    The widget at which position the swipe should be performed.
+     * @param widget The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
     private void handleSwipe(Widget widget, ActionType direction) {
@@ -621,7 +622,7 @@ public class DeviceMgr {
      *
      * @param widget The widget whose ui object should be looked up.
      * @return Returns the corresponding ui object or {@code null} if no
-     * such ui object could be found.
+     *         such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -672,12 +673,7 @@ public class DeviceMgr {
     private void handleEdit(WidgetAction action) {
 
         Widget widget = action.getWidget();
-        // TODO: replace with Objects.toString(generateTextData(action), ""); after testing
-        String textData = generateTextData(action, widget.getMaxTextLength());
-
-        if (textData == null) {
-            throw new IllegalStateException("Couldn't generate any input for the given widget!");
-        }
+        String textData = Objects.toString(generateTextData(action, widget.getMaxTextLength()), "");
 
         MATE.log_debug("Input text: " + textData);
         MATE.log_debug("Previous text: " + widget.getText());
@@ -809,9 +805,9 @@ public class DeviceMgr {
      * to the maximum length if it is too long.
      *
      * @param inputFieldType The field for which the string is to be generated.
-     * @param maxLength      The maximum length of the result string.
+     * @param maxLength The maximum length of the result string.
      * @return A random string matching the given {@link InputFieldType} with at most maxLength
-     * length.
+     *         length.
      */
     private String generateRandomInput(InputFieldType inputFieldType, int maxLength) {
         String randomData = DataGenerator.generateRandomData(inputFieldType);

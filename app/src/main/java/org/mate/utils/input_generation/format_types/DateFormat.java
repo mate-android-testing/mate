@@ -27,8 +27,9 @@ public enum DateFormat {
     }
 
     /**
-     * Getter for the pattern of a date format.
-     * @return The pattern.
+     * Returns the date format pattern.
+     *
+     * @return Returns the date format pattern.
      */
     public String getPattern() {
         return pattern;
