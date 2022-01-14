@@ -2,6 +2,7 @@ package org.mate.state.executables;
 
 import org.mate.MATE;
 import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Models a screen state and maintains the list of applicable widget actions.
@@ -59,6 +61,28 @@ public class ActionsScreenState extends AbstractScreenState {
             }
         }
         return Collections.unmodifiableList(widgetActions);
+    }
+
+    /**
+     * Returns the list of motif actions (genes).
+     *
+     * @return Returns the list of motif actions.
+     */
+    @Override
+    public List<MotifAction> getMotifActions() {
+
+        // actions get init lazily
+        if (actions == null) {
+            actions = getActions();
+        }
+
+        List<MotifAction> motifActions = new ArrayList<>();
+        for (UIAction uiAction : actions) {
+            if (uiAction instanceof MotifAction) {
+                motifActions.add((MotifAction) uiAction);
+            }
+        }
+        return Collections.unmodifiableList(motifActions);
     }
 
     /**
@@ -293,8 +317,93 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
         uiActions.addAll(getUIActions());
+        uiActions.addAll(getMotifActions(widgetActions));
         actions = Collections.unmodifiableList(uiActions);
         return actions;
+    }
+
+    /**
+     * Retrieves the applicable motif actions (genes) for the current screen based on the extracted
+     * widget actions.
+     *
+     * @param widgetActions The extracted widget actions of the current screen.
+     * @return Returns a list of applicable motif genes.
+     */
+    private List<MotifAction> getMotifActions(Set<WidgetAction> widgetActions) {
+
+        List<MotifAction> motifActions = new ArrayList<>();
+        motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
+        motifActions.addAll(extractSpinnerScrollActions(widgetActions));
+
+        // TODO: add further motif genes, e.g. scrolling on list views
+
+        return motifActions;
+    }
+
+    /**
+     * Extracts the possible spinner scroll motif actions. A scroll motif action combines the
+     * clicking and scrolling on a spinner. Without this motif action, one has to click first on a
+     * spinner, which in turn opens the drop-down menu, and click or scroll to select a different
+     * entry.
+     *
+     * @param widgetActions The set of extracted widget actions.
+     * @return Returns the possible spinner motif actions if any.
+     */
+    private List<MotifAction> extractSpinnerScrollActions(Set<WidgetAction> widgetActions) {
+
+        List<MotifAction> spinnerScrollActions = new ArrayList<>();
+
+        List<WidgetAction> spinnerClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isClickable()
+                        && widgetAction.getWidget().isSpinnerType())
+                .collect(Collectors.toList());
+
+        spinnerClickActions.stream().forEach(spinnerClickAction -> {
+            MotifAction spinnerScrollAction
+                    = new MotifAction(ActionType.SPINNER_SCROLLING, activityName,
+                    Collections.singletonList(spinnerClickAction));
+            spinnerScrollActions.add(spinnerScrollAction);
+        });
+
+        return spinnerScrollActions;
+    }
+
+    /**
+     * Extracts the possible 'fill form and click submit button' motif actions.
+     *
+     * @param widgetActions The set of extracted widget actions.
+     * @return Returns the possible 'fill form and click submit button' actions if any.
+     */
+    private List<MotifAction> extractFillFormAndSubmitActions(Set<WidgetAction> widgetActions) {
+
+        List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
+
+        /*
+         * TODO: Extract only those editable widgets and buttons that belong to the same form.
+         *  We should exploit the characteristics of the ui tree for that purpose.
+         */
+
+        List<WidgetAction> textInsertActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
+                .collect(Collectors.toList());
+
+        List<WidgetAction> clickableButtonActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isButtonType()
+                        && widgetAction.getWidget().isClickable())
+                .collect(Collectors.toList());
+
+        if (!textInsertActions.isEmpty() && !clickableButtonActions.isEmpty()) {
+
+            clickableButtonActions.stream().forEach(clickableButtonAction -> {
+                List<UIAction> actions = new ArrayList<>(textInsertActions);
+                actions.add(clickableButtonAction);
+                MotifAction fillFormAndSubmitAction
+                        = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);
+                fillFormAndSubmitActions.add(fillFormAndSubmitAction);
+            });
+        }
+
+        return fillFormAndSubmitActions;
     }
 
     @SuppressWarnings("debug")

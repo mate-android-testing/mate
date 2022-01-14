@@ -6,34 +6,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.fitness.FitnessFunction;
-import org.mate.exploration.genetic.mutation.MutationFunction;
-import org.mate.exploration.genetic.termination.TerminationCondition;
-import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATERandomWalk {
 
         @Test
         public void useAppContext() {
+
             MATE.log_acc("Starting Random Walk ....");
-
             MATE mate = new MATE();
-
-            MATE.log("Starting random walk now ...");
 
             final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                     .withAlgorithm(Algorithm.RANDOM_WALK)
-                    .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
-                    .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
-                    .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
-                    .withFitnessFunction(FitnessFunction.LINE_COVERAGE)
-                    .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS());
+                    .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
+                    .withMutationFunction(Properties.MUTATION_FUNCTION())
+                    .withFitnessFunction(Properties.FITNESS_FUNCTION())
+                    .withTerminationCondition(Properties.TERMINATION_CONDITION());
 
-            final IGeneticAlgorithm<TestCase> randomWalk = builder.build();
-
+            final IGeneticAlgorithm randomWalk = builder.build();
             mate.testApp(randomWalk);
         }
 }

@@ -13,6 +13,7 @@ import java.util.List;
  * only a single actions remains. Which half should be halved again is determined by a codon.
  */
 public class AndroidListBasedEqualWeightedDecisionBiasedMapping extends AndroidListBasedBiasedMapping {
+
     /**
      * A equal weighted integer sequence to android {@link org.mate.model.TestCase} mapping with
      * a 50% test case ending bias.
@@ -23,24 +24,31 @@ public class AndroidListBasedEqualWeightedDecisionBiasedMapping extends AndroidL
 
     /**
      * A equal weighted integer sequence to android {@link org.mate.model.TestCase} mapping with
-     * the given stopping bias per 10000, e.g. 1000 resulting in a 10% stopping bias
-     * @param stoppingBiasPerTenthousand stopping bias per 10000
+     * the given stopping bias per 10000, e.g. 1000 resulting in a 10% stopping bias.
+     *
+     * @param stoppingBiasPerTenThousand The stopping bias per 10000.
      */
-    public AndroidListBasedEqualWeightedDecisionBiasedMapping(int stoppingBiasPerTenthousand) {
-        super(stoppingBiasPerTenthousand);
+    public AndroidListBasedEqualWeightedDecisionBiasedMapping(int stoppingBiasPerTenThousand) {
+        super(stoppingBiasPerTenThousand);
     }
 
     /**
      * A equal weighted integer sequence to android {@link org.mate.model.TestCase} mapping with
      * the given stopping bias per 10000, e.g. 1000 resulting in a 10% stopping bias and an
-     * indicator whether the app should be reset before starting the {@link org.mate.model.TestCase}
-     * @param resetApp whether to reset the app before starting a test case
-     * @param stoppingBiasPerTenthousand stopping bias per 10000
+     * indicator whether the app should be reset before starting the {@link org.mate.model.TestCase}.
+     *
+     * @param resetApp Whether to reset the app before starting a test case.
+     * @param stoppingBiasPerTenThousand The stopping bias per 10000.
      */
-    public AndroidListBasedEqualWeightedDecisionBiasedMapping(boolean resetApp, int stoppingBiasPerTenthousand) {
-        super(resetApp, stoppingBiasPerTenthousand);
+    public AndroidListBasedEqualWeightedDecisionBiasedMapping(boolean resetApp, int stoppingBiasPerTenThousand) {
+        super(resetApp, stoppingBiasPerTenThousand);
     }
 
+    /**
+     * The action that should be executed next.
+     *
+     * @return Returns the selected action.
+     */
     @Override
     protected Action selectAction() {
         List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
