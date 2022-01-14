@@ -9,6 +9,7 @@ import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 
 import java.util.Locale;
 import java.util.Properties;
@@ -43,6 +44,7 @@ public class GeneticAlgorithmBuilder {
     public static final String NOVELTY_THRESHOLD_KEY = "novelty_threshold";
     public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
     public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
+    public static final String GE_MAPPING_FUNCTION_KEY = "ge_mapping_function";
 
     /**
      * The list of properties..
@@ -364,6 +366,17 @@ public class GeneticAlgorithmBuilder {
      */
     public GeneticAlgorithmBuilder withMutationRate(int mutationRate) {
         properties.setProperty(MUTATION_RATE_KEY, String.valueOf(mutationRate));
+        return this;
+    }
+
+    /**
+     * Specifies the mapping function used in GE.
+     *
+     * @param mappingFunction The GE mapping function.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withGEMappingFunction(GEMappingFunction mappingFunction) {
+        properties.setProperty(GE_MAPPING_FUNCTION_KEY, mappingFunction.name());
         return this;
     }
 

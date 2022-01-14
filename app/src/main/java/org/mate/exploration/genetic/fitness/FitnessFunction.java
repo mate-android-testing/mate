@@ -21,4 +21,5 @@ public enum FitnessFunction {
     BASIC_BLOCK_BRANCH_COVERAGE,
     BASIC_BLOCK_MULTI_OBJECTIVE,
     NOVELTY;
+    GENO_TO_PHENO_TYPE;
 }

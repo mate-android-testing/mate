@@ -31,7 +31,7 @@ public class ExecuteMATENSGAII {
                 .withMutationFunction(Properties.MUTATION_FUNCTION())
                 .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
                 .withFitnessFunction(FitnessFunction.TEST_LENGTH)
-                .withFitnessFunction(FitnessFunction.NUMBER_OF_STATES)
+                .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withPMutate(Properties.P_MUTATE())

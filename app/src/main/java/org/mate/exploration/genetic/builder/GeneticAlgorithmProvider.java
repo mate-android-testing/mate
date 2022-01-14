@@ -12,15 +12,18 @@ import org.mate.exploration.genetic.algorithm.Sapienz;
 import org.mate.exploration.genetic.algorithm.StandardGeneticAlgorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.BitSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
@@ -35,6 +38,7 @@ import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -44,6 +48,8 @@ import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFuncti
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.mutation.IntegerSequenceLengthMutationFunction;
+import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
@@ -63,11 +69,18 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.ge.AndroidListAnalogousMapping;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisionBiasedMapping;
+import org.mate.exploration.genetic.util.ge.GEMappingFunction;
+import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 import org.mate.exploration.intent.IntentChromosomeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
 
 /**
  * Provides a {@link GeneticAlgorithm} by consuming the properties specified via the
@@ -161,22 +174,22 @@ public class GeneticAlgorithmProvider {
     private <T> StandardGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("StandardGA requires a chromosome factory. You have to" +
+            throw new IllegalStateException("StandardGA requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
-            throw new IllegalStateException("StandardGA requires a crossover function. You have to" +
+            throw new IllegalStateException("StandardGA requires a crossover function. You have to " +
                     "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
-            throw new IllegalStateException("StandardGA requires a selection function. You have to" +
+            throw new IllegalStateException("StandardGA requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("StandardGA requires a mutation function. You have to" +
+            throw new IllegalStateException("StandardGA requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("StandardGA requires a fitness function. You have to" +
+            throw new IllegalStateException("StandardGA requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("StandardGA requires a termination condition. You have to" +
+            throw new IllegalStateException("StandardGA requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         }
 
@@ -202,13 +215,13 @@ public class GeneticAlgorithmProvider {
     private <T> RandomSearch<T> initializeRandomSearch() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("RandomSearch requires a chromosome factory. You have to" +
+            throw new IllegalStateException("RandomSearch requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("RandomSearch requires a fitness function. You have to" +
+            throw new IllegalStateException("RandomSearch requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("RandomSearch requires a termination condition. You have to" +
+            throw new IllegalStateException("RandomSearch requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         }
 
@@ -227,25 +240,25 @@ public class GeneticAlgorithmProvider {
     private <T> NSGAII<T> initializeNSGAII() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("NSGA-II requires a chromosome factory. You have to" +
+            throw new IllegalStateException("NSGA-II requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
-            throw new IllegalStateException("NSGA-II requires a crossover function. You have to" +
+            throw new IllegalStateException("NSGA-II requires a crossover function. You have to " +
                     "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
-            throw new IllegalStateException("NSGA-II requires a selection function. You have to" +
+            throw new IllegalStateException("NSGA-II requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("NSGA-II requires a mutation function. You have to" +
+            throw new IllegalStateException("NSGA-II requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("NSGA-II requires a fitness function. You have to" +
+            throw new IllegalStateException("NSGA-II requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("NSGA-II requires a termination condition. You have to" +
+            throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to" +
+            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to " +
                     "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
@@ -271,25 +284,25 @@ public class GeneticAlgorithmProvider {
     private <T> MOSA<T> initializeMOSA() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("MOSA requires a chromosome factory. You have to" +
+            throw new IllegalStateException("MOSA requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
-            throw new IllegalStateException("MOSA requires a crossover function. You have to" +
+            throw new IllegalStateException("MOSA requires a crossover function. You have to " +
                     "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
-            throw new IllegalStateException("MOSA requires a selection function. You have to" +
+            throw new IllegalStateException("MOSA requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("MOSA requires a mutation function. You have to" +
+            throw new IllegalStateException("MOSA requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("MOSA requires a fitness function. You have to" +
+            throw new IllegalStateException("MOSA requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("MOSA requires a termination condition. You have to" +
+            throw new IllegalStateException("MOSA requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("MOSA requires the type of objectives. You have to" +
+            throw new IllegalStateException("MOSA requires the type of objectives. You have to " +
                     "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
@@ -315,19 +328,19 @@ public class GeneticAlgorithmProvider {
     private <T> MIO<T> initializeMIO() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("MIO requires a chromosome factory. You have to" +
+            throw new IllegalStateException("MIO requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("MIO requires a mutation function. You have to" +
+            throw new IllegalStateException("MIO requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("MIO requires a fitness function. You have to" +
+            throw new IllegalStateException("MIO requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("MIO requires a termination condition. You have to" +
+            throw new IllegalStateException("MIO requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("MIO requires the type of objectives. You have to" +
+            throw new IllegalStateException("MIO requires the type of objectives. You have to " +
                     "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
@@ -354,16 +367,16 @@ public class GeneticAlgorithmProvider {
     private <T> OnePlusOne<T> initializeOnePlusOne() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("OnePlusOne requires a chromosome factory. You have to" +
+            throw new IllegalStateException("OnePlusOne requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("OnePlusOne requires a mutation function. You have to" +
+            throw new IllegalStateException("OnePlusOne requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("OnePlusOne requires a fitness function. You have to" +
+            throw new IllegalStateException("OnePlusOne requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("OnePlusOne requires a termination condition. You have to" +
+            throw new IllegalStateException("OnePlusOne requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         }
 
@@ -383,16 +396,16 @@ public class GeneticAlgorithmProvider {
     private <T> RandomWalk<T> initializeRandomWalk() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("RandomWalk requires a chromosome factory. You have to" +
+            throw new IllegalStateException("RandomWalk requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("RandomWalk requires a mutation function. You have to" +
+            throw new IllegalStateException("RandomWalk requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("RandomWalk requires a fitness function. You have to" +
+            throw new IllegalStateException("RandomWalk requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("RandomWalk requires a termination condition. You have to" +
+            throw new IllegalStateException("RandomWalk requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         }
 
@@ -516,25 +529,25 @@ public class GeneticAlgorithmProvider {
     private <T> Sapienz<T> initializeSapienz() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
-            throw new IllegalStateException("Sapienz requires a chromosome factory. You have to" +
+            throw new IllegalStateException("Sapienz requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
         } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
-            throw new IllegalStateException("Sapienz requires a crossover function. You have to" +
+            throw new IllegalStateException("Sapienz requires a crossover function. You have to " +
                     "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
-            throw new IllegalStateException("Sapienz requires a selection function. You have to" +
+            throw new IllegalStateException("Sapienz requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            throw new IllegalStateException("Sapienz requires a mutation function. You have to" +
+            throw new IllegalStateException("Sapienz requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("Sapienz requires a fitness function. You have to" +
+            throw new IllegalStateException("Sapienz requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("Sapienz requires a termination condition. You have to" +
+            throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         } else if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
-            throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn" +
+            throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn " +
                     "the property Properties.WIDGET_BASED_ACTIONS() off.");
         }
 
@@ -592,6 +605,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new SapienzSuiteRandomChromosomeFactory(getNumTestCases(), getNumEvents());
+            case BIT_SEQUENCE_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new BitSequenceChromosomeFactory(getSequenceLength());
+            case INTEGER_SEQUENCE_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new IntegerSequenceChromosomeFactory(getSequenceLength());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -655,6 +672,8 @@ public class GeneticAlgorithmProvider {
                     return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
                 case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
                     return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
+                case INTEGER_SEQUENCE_POINT_CROSS_OVER:
+                    return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
                 default:
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
@@ -696,6 +715,10 @@ public class GeneticAlgorithmProvider {
                     // Force cast. Only works if T is TestCase. This fails if other properties expect a
                     // different T for their chromosomes
                     return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
+                case INTEGER_SEQUENCE_POINT_MUTATION:
+                    return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
+                case INTEGER_SEQUENCE_LENGTH_MUTATION:
+                    return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
                 default:
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
@@ -777,6 +800,9 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
+            case GENO_TO_PHENO_TYPE:
+                return (IFitnessFunction<T>)
+                        new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), getPhenoTypeFitnessFunction());
             case NOVELTY:
                 return (IFitnessFunction<T>) new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
             default:
@@ -1023,6 +1049,95 @@ public class GeneticAlgorithmProvider {
             return org.mate.Properties.TOURNAMENT_SIZE();
         } else {
             throw new IllegalStateException("Without using defaults: tournament size not specified");
+        }
+    }
+
+    /**
+     * Retrieves the sequence length for the {@link BitSequenceChromosomeFactory} and the
+     * {@link IntegerSequenceChromosomeFactory}, respectively.
+     *
+     * @return Returns the sequence length.
+     */
+    private int getSequenceLength() {
+        if (useDefaults) {
+            return org.mate.Properties.GE_SEQUENCE_LENGTH();
+        } else {
+            throw new IllegalStateException("Without using defaults: sequence length not specified");
+        }
+    }
+
+    /**
+     * Retrieves the mutation count for the {@link IntegerSequenceLengthMutationFunction}.
+     *
+     * @return Returns the mutation count.
+     */
+    private int getMutationCount() {
+        if (useDefaults) {
+            return org.mate.Properties.GE_MUTATION_COUNT();
+        } else {
+            throw new IllegalStateException("Without using defaults: sequence length not specified");
+        }
+    }
+
+    /**
+     * Retrieves the geno to phenotype mapping function used in GE.
+     *
+     * @param <S> The genotype.
+     * @param <T> The phenotype.
+     * @return Returns the specified geno to phenotype mapping function.
+     */
+    private <S, T> IGenotypePhenotypeMapping<S, T> getGenoToPhenoTypeMapping() {
+
+        String geMappingFunction = properties.getProperty(GeneticAlgorithmBuilder.GE_MAPPING_FUNCTION_KEY);
+
+        if (geMappingFunction == null) {
+            throw new IllegalStateException("GE mapping function not specified!");
+        }
+
+        switch (GEMappingFunction.valueOf(geMappingFunction)) {
+            case LIST_ANALOGOUS_MAPPING:
+                return (IGenotypePhenotypeMapping<S, T>) new AndroidListAnalogousMapping();
+            case LIST_BASED_BIASED_MAPPING:
+                return (IGenotypePhenotypeMapping<S, T>)
+                        new AndroidListBasedBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND());
+            case LIST_BASED_EQUAL_WEIGHTED_MAPPING:
+                return (IGenotypePhenotypeMapping<S, T>)
+                        new AndroidListBasedEqualWeightedDecisionBiasedMapping(GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND());
+            default:
+                throw new UnsupportedOperationException("GE mapping function "
+                        + geMappingFunction + " not yet supported!");
+        }
+    }
+
+    /**
+     * Retrieves the 'core' fitness function that is actually applied on pheno type.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the 'core' fitness function used in GE.
+     */
+    private <T> IFitnessFunction<T> getPhenoTypeFitnessFunction() {
+
+        FitnessFunction fitnessFunction = org.mate.Properties.GE_FITNESS_FUNCTION();
+
+        if (fitnessFunction == null) {
+            throw new IllegalStateException("Property GE_FITNESS_FUNCTION() not specified!");
+        }
+
+        if (fitnessFunction == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
+            return new BasicBlockBranchCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
+            return new BasicBlockLineCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.BRANCH_COVERAGE) {
+            return new BranchCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.BRANCH_DISTANCE) {
+            return new BranchDistanceFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.LINE_COVERAGE) {
+            return new LineCoverageFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.METHOD_COVERAGE) {
+            return new MethodCoverageFitnessFunction<>();
+        } else {
+            throw new UnsupportedOperationException("GE fitness function "
+                    + fitnessFunction + " not yet supported!");
         }
     }
 }

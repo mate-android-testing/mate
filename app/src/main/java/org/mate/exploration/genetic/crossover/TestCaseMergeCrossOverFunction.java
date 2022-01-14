@@ -82,7 +82,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         for (int i = 0; i < l1.size(); i++) {
             int idx = choice + d;
 
-            if (idx < l1.size()) {
+            if (idx >= 0 && idx < l1.size()) {
                 for (Edge e1 : Registry.getUiAbstractionLayer().getEdges(l1.get(idx))) {
 
                     // don't consider actions that result in leaving the app

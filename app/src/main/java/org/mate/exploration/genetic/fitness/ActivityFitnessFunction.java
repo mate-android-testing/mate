@@ -24,7 +24,7 @@ public class ActivityFitnessFunction<T> implements IFitnessFunction<T> {
     public double getFitness(IChromosome<T> chromosome) {
         if (chromosome.getValue() instanceof TestCase) {
             return ((TestCase) chromosome.getValue()).getVisitedActivities().size();
-        } else if (chromosome instanceof TestSuite) {
+        } else if (chromosome.getValue() instanceof TestSuite) {
             Set<String> coveredActivities = new HashSet<>();
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
                 coveredActivities.addAll(testCase.getVisitedActivities());
@@ -32,7 +32,7 @@ public class ActivityFitnessFunction<T> implements IFitnessFunction<T> {
             return coveredActivities.size();
         } else {
             throw new UnsupportedOperationException("Chromosome type "
-                    + chromosome.getValue().getClass() + "not yet supported!");
+                    + chromosome.getValue().getClass() + " not yet supported!");
         }
     }
 
