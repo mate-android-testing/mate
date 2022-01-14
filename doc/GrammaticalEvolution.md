@@ -37,8 +37,3 @@ the resulting Android test case.
 Creating the initial population is very simple as we only need to produce lists
 with random integers. This is done by the IntegerSequenceChromosomeFactory.
 
-## Note
-Its currently not possible to create grammatical evolution algorithms using the
-GeneticAlgorithmBuilder as the GenotypePhenotypeMappedFitnessFunction takes two
-arguments that are not primitive data types and therefore cannot be passed
-using the withFitnessFunction(...) method of the GeneticAlgorithmBuilder.
