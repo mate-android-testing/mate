@@ -15,7 +15,6 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
-import android.text.InputType;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -48,9 +47,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -703,8 +701,8 @@ public class DeviceMgr {
                 * that is randomly created. Otherwise, we may end up in a different state and
                 * subsequent actions might not show the same behaviour as in the recorded run.
                  */
-                String textData = Registry.isReplayMode() ? action.getText() : generateTextData(widget);
-                textData = textData == null ? "" : textData;
+                String textData = Registry.isReplayMode() ? action.getText() :
+                        Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
                 MATE.log_debug("Inserting text: " + textData);
                 uiElement.setText(textData);
@@ -1031,13 +1029,10 @@ public class DeviceMgr {
          * break execution, since a different (valid) input may lead to a different state, e.g. we
          * end on a different activity and all subsequent widget actions are not applicable anymore.
          */
-        String textData = Registry.isReplayMode() ? widget.getText() : generateTextData(widget);
-
-        Widget widget = action.getWidget();
-        String textData = Objects.toString(generateTextData(action, widget.getMaxTextLength()), "");
+        String textData = Registry.isReplayMode() ? widget.getText() :
+                Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
         MATE.log_debug("Input text: " + textData);
-        MATE.log_debug("New text: " + textData);
         MATE.log_debug("Previous text: " + widget.getText());
 
         UiObject2 uiObject = findObject(widget);
@@ -1092,17 +1087,11 @@ public class DeviceMgr {
      * Generates a text input for the given editable widget.
      *
      * @param widget The editable widget.
+     * @param maxLength The maximal input length.
      * @return Returns a text input for the editable widget.
      */
-    private String generateTextData(Widget widget) {
-    private String generateTextData(WidgetAction action, int maxLength) {
+    private String generateTextData(final Widget widget, final int maxLength) {
 
-        // TODO: re-use recorded input when executing in replay mode!
-
-        String widgetText = widget.getText();
-        if (widgetText == null || widgetText.isEmpty())
-            widgetText = widget.getHint();
-        final Widget widget = action.getWidget();
         final String activityName = convertClassName(widget.getActivity());
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
@@ -1117,7 +1106,7 @@ public class DeviceMgr {
                 if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
                     return Mutation.mutateInput(inputFieldType, widget.getHint());
                 } else {
-                    return action.getWidget().getHint();
+                    return widget.getHint();
                 }
             }
         }
@@ -1294,18 +1283,15 @@ public class DeviceMgr {
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
 
-
     /**
-     * Returns the currently visible fragments for an emulator..
+     * Returns the currently visible fragments.
      *
      * @return Returns the currently visible fragments.
      */
     private List<String> getCurrentFragments() {
 
         // TODO: It seems that the extraction can be simplified by supplying the current activity:
-        //  (Comment Severin: Same output as Registry.getPackageName)
         // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
-
         try {
             String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
 
@@ -1321,6 +1307,7 @@ public class DeviceMgr {
             for (String s : fragments) {
                 extracted.add(s.split("\\{")[0]);
             }
+            MATE.log_debug("Currently active fragments: " + extracted);
             return extracted;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
