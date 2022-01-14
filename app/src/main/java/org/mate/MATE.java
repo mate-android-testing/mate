@@ -19,7 +19,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -108,12 +107,9 @@ public class MATE {
         }
 
         try {
-            TimeoutRun.timeoutRun(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    algorithm.run();
-                    return null;
-                }
+            TimeoutRun.timeoutRun(() -> {
+                algorithm.run();
+                return null;
             }, Registry.getTimeout());
         } catch (Exception e) {
             e.printStackTrace();

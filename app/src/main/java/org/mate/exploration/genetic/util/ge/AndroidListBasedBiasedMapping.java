@@ -11,13 +11,14 @@ import java.util.List;
  * that controls the probability of ending a test case.
  */
 public class AndroidListBasedBiasedMapping extends AndroidListBasedMapping<Integer> {
+
     public static final int BIAS_100_PERCENT = 10000;
     public static final int BIAS_50_PERCENT = BIAS_100_PERCENT / 2;
 
-    private final int stoppingBias; //bias towards stopping a testcase in 1 / 10000
+    private final int stoppingBias; // bias towards stopping a testcase in 1 / 10000
 
     /**
-     * Create a mapping with the default stopping bias (50%)
+     * Create a mapping with the default stopping bias (50%).
      */
     public AndroidListBasedBiasedMapping() {
         this(BIAS_50_PERCENT);
@@ -25,25 +26,33 @@ public class AndroidListBasedBiasedMapping extends AndroidListBasedMapping<Integ
 
     /**
      * Create a mapping with the given per 10000 stopping bias, e.g. 1000 resulting in a 10%
-     * stopping bias
-     * @param stoppingBiasPerTenthousand stopping bias per 10000
+     * stopping bias.
+     *
+     * @param stoppingBiasPerTenThousand The stopping bias per 10000.
      */
-    public AndroidListBasedBiasedMapping(int stoppingBiasPerTenthousand) {
-        this(true, stoppingBiasPerTenthousand);
+    public AndroidListBasedBiasedMapping(int stoppingBiasPerTenThousand) {
+        this(true, stoppingBiasPerTenThousand);
     }
 
     /**
      * Create a mapping with the given per 10000 stopping bias, e.g. 1000 resulting in a 10%
      * stopping bias and an indicator whether the app should be reset before starting the
-     * {@link org.mate.model.TestCase}
-     * @param resetApp whether to reset the app before starting a test case
-     * @param stoppingBiasPerTenthousand stopping bias per 10000
+     * {@link org.mate.model.TestCase}.
+     *
+     * @param resetApp Whether to reset the app before starting a test case.
+     * @param stoppingBiasPerTenThousand The stopping bias per 10000.
      */
-    public AndroidListBasedBiasedMapping(boolean resetApp, int stoppingBiasPerTenthousand) {
+    public AndroidListBasedBiasedMapping(boolean resetApp, int stoppingBiasPerTenThousand) {
         super(resetApp, -1);
-        this.stoppingBias = stoppingBiasPerTenthousand;
+        this.stoppingBias = stoppingBiasPerTenThousand;
     }
 
+    /**
+     * Whether the current test case should be stopped.
+     *
+     * @return Returns {@code true} if the test case should be stopped, otherwise {@code false}
+     *          is returned.
+     */
     @Override
     protected boolean finishTestCase() {
         int value = ListUtils.wrappedGet(
@@ -57,6 +66,11 @@ public class AndroidListBasedBiasedMapping extends AndroidListBasedMapping<Integ
         return value % BIAS_100_PERCENT < stoppingBias;
     }
 
+    /**
+     * The action that should be executed next.
+     *
+     * @return Returns the selected action.
+     */
     @Override
     protected Action selectAction() {
         List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();

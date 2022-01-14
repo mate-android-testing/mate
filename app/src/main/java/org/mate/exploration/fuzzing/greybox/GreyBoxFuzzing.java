@@ -150,7 +150,7 @@ public abstract class GreyBoxFuzzing<T> implements Algorithm {
             int p = assignEnergy(s);
 
             for (int i = 0; i < p; i++) {
-                IChromosome<T> sPrime = mutationFunction.mutate(s).get(0);
+                IChromosome<T> sPrime = mutationFunction.mutate(s);
                 if (isCrashing(sPrime)) {
                     MATE.log_acc("Found crashing chromosome: " + sPrime);
                     crashingInputs.add(sPrime);
