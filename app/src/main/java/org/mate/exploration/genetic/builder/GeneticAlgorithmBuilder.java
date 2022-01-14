@@ -41,6 +41,9 @@ public class GeneticAlgorithmBuilder {
     public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
     public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
     public static final String MUTATION_RATE_KEY = "mutation_rate";
+    public static final String NOVELTY_THRESHOLD_KEY = "novelty_threshold";
+    public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
+    public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
     public static final String GE_MAPPING_FUNCTION_KEY = "ge_mapping_function";
 
     /**
@@ -319,6 +322,39 @@ public class GeneticAlgorithmBuilder {
      */
     public GeneticAlgorithmBuilder withFocusedSearchStart(double focusedSearchStart) {
         properties.setProperty(FOCUSED_SEARCH_START_KEY, String.valueOf(focusedSearchStart));
+        return this;
+    }
+
+    /**
+     * Specifies the novelty threshold for {@link org.mate.exploration.genetic.algorithm.NoveltySearch}.
+     *
+     * @param noveltyThreshold The novelty threshold.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withNoveltyThreshold(double noveltyThreshold) {
+        properties.setProperty(NOVELTY_THRESHOLD_KEY, String.valueOf(noveltyThreshold));
+        return this;
+    }
+
+    /**
+     * Specifies the archive size limit used in {@link org.mate.exploration.genetic.algorithm.NoveltySearch}.
+     *
+     * @param archiveLimit The archive size limit.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withArchiveLimit(int archiveLimit) {
+        properties.setProperty(ARCHIVE_LIMIT_KEY, String.valueOf(archiveLimit));
+        return this;
+    }
+
+    /**
+     * Specifies the number of nearest neighbours used in {@link org.mate.exploration.genetic.algorithm.NoveltySearch}.
+     *
+     * @param nearestNeighbours The number of nearest neighbours k.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withNearestNeighbours(int nearestNeighbours) {
+        properties.setProperty(NEAREST_NEIGHBOURS_KEY, String.valueOf(nearestNeighbours));
         return this;
     }
 

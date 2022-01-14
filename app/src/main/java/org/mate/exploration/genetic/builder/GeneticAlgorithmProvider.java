@@ -4,6 +4,7 @@ import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.MIO;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.NSGAII;
+import org.mate.exploration.genetic.algorithm.NoveltySearch;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
@@ -42,6 +43,7 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
+import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
@@ -57,6 +59,7 @@ import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
+import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.selection.RankSelectionFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
@@ -155,6 +158,8 @@ public class GeneticAlgorithmProvider {
                 return initializeRandomSearch();
             case SAPIENZ:
                 return initializeSapienz();
+            case NOVELTY_SEARCH:
+                return initializeNoveltySearch();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -252,6 +257,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.OBJECTIVE() == null) {
+            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to " +
+                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
         return new NSGAII<>(
@@ -409,6 +417,110 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
+     * Initialises the NoveltySearch algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type o the chromosomes.
+     * @return Returns an instance o the NoveltySearch algorithm.
+     */
+    private <T> NoveltySearch<T> initializeNoveltySearch() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("NoveltySearch requires a chromosome factory. You have to " +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+            throw new IllegalStateException("NoveltySearch requires a crossover function. You have to " +
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+            throw new IllegalStateException("NoveltySearch requires a mutation function. You have to " +
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
+            throw new IllegalStateException("NoveltySearch requires a selection function. You have to " +
+                    "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+            throw new IllegalStateException("NoveltySearch requires a fitness function. You have to " +
+                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("NoveltySearch requires a termination condition. You have to" +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
+        return new NoveltySearch<>(
+                this.<T>initializeChromosomeFactory(),
+                this.<T>initializeSelectionFunction(),
+                this.<T>initializeCrossOverFunction(),
+                this.<T>initializeMutationFunction(),
+                this.<T>initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getBigPopulationSize(),
+                getPCrossOver(),
+                getPMutate(),
+                getNearestNeighbours(),
+                getArchiveLimit(),
+                getNoveltyThreshold());
+    }
+
+    /**
+     * Retrieves the novelty threshold used for novelty search.
+     *
+     * @return Returns the novelty threshold.
+     */
+    private double getNoveltyThreshold() {
+        String noveltyThreshold
+                = properties.getProperty(GeneticAlgorithmBuilder.NOVELTY_THRESHOLD_KEY);
+        if (noveltyThreshold == null) {
+            if (useDefaults) {
+                return org.mate.Properties.NOVELTY_THRESHOLD();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: novelty threshold not specified");
+            }
+        } else {
+            return Double.valueOf(noveltyThreshold);
+        }
+    }
+
+    /**
+     * Retrieves the archive size limit used for novelty search.
+     *
+     * @return Returns the archive limit.
+     */
+    private int getArchiveLimit() {
+        String archiveLimit
+                = properties.getProperty(GeneticAlgorithmBuilder.ARCHIVE_LIMIT_KEY);
+        if (archiveLimit == null) {
+            if (useDefaults) {
+                return org.mate.Properties.ARCHIVE_LIMIT();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: archive limit not specified");
+            }
+        } else {
+            return Integer.valueOf(archiveLimit);
+        }
+    }
+
+    /**
+     * Retrieves the nearest neighbours k used for novelty search.
+     *
+     * @return Returns the nearest neighbours k.
+     */
+    private int getNearestNeighbours() {
+        String nearestNeighbours
+                = properties.getProperty(GeneticAlgorithmBuilder.NEAREST_NEIGHBOURS_KEY);
+        if (nearestNeighbours == null) {
+            if (useDefaults) {
+                return org.mate.Properties.NEAREST_NEIGHBOURS();
+            } else {
+                throw new IllegalStateException(
+                        "Without using defaults: nearest neighbours not specified");
+            }
+        } else {
+            return Integer.valueOf(nearestNeighbours);
+        }
+    }
+
+    /**
      * Initialises the Sapienz algorithm. Ensures that the mandatory properties are defined.
      *
      * @param <T> The type of the chromosomes.
@@ -529,6 +641,8 @@ public class GeneticAlgorithmProvider {
                     return new RankSelectionFunction<>();
                 case CROWDED_TOURNAMENT_SELECTION:
                     return new CrowdedTournamentSelectionFunction<>();
+                case NOVELTY_RANK_SELECTION:
+                    return new NoveltyRankSelectionFunction<>();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
@@ -689,6 +803,8 @@ public class GeneticAlgorithmProvider {
             case GENO_TO_PHENO_TYPE:
                 return (IFitnessFunction<T>)
                         new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), getPhenoTypeFitnessFunction());
+            case NOVELTY:
+                return (IFitnessFunction<T>) new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);

@@ -97,3 +97,6 @@ chromosome_factory=ANDROID_RANDOM_CHROMOSOME_FACTORY
 ```
 The available properties can be looked up in the class
 `org.mate.Properties`.
+
+## Algorithm Documentation
+For more information on grammatical evolution refer to the [documentation](doc/GrammaticalEvolution.md).
