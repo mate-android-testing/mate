@@ -27,7 +27,7 @@ public class IntegerSequenceLengthMutationFunction implements IMutationFunction<
     }
 
     /**
-     * Performs a mutation that addes and/or removes genes from the given chromosome.
+     * Performs a mutation that adds and/or removes genes from the given chromosome.
      *
      * @param chromosome The chromosome to be mutated.
      * @return Returns the mutated chromosome.

@@ -243,7 +243,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                 }
             }
             if (fitnessFunctions.size() > 5) {
-                MATE.log_acc("Omitted other fitness function because there are to many ("
+                MATE.log_acc("Omitted other fitness function because there are too many ("
                         + fitnessFunctions.size() + ")");
             }
         }
