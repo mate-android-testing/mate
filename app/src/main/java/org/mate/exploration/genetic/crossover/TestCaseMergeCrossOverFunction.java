@@ -13,27 +13,52 @@ import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * Provides a crossover function for {@link TestCase}s produced by the
+ * {@link org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory}.
+ */
 public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
 
     private static final double MAX_LENGTH_DEVIATION = 0.25;
+
+    /**
+     * Whether to execute the actions directly or not.
+     */
     private boolean executeActions;
 
+    /**
+     * Initialises a crossover function that is used for test cases consisting of
+     * {@link org.mate.interaction.action.ui.UIAction}, or more precisely
+     * {@link org.mate.interaction.action.ui.WidgetAction}.
+     */
     public TestCaseMergeCrossOverFunction() {
         executeActions = true;
     }
 
+    /**
+     * Sets whether the actions should be directly or not.
+     *
+     * @param executeActions Whether the actions should be directly executed.
+     */
     public void setExecuteActions(boolean executeActions) {
         this.executeActions = executeActions;
     }
 
+    /**
+     * Performs a crossover on the given parents.
+     *
+     * @param parents The parents that undergo crossover.
+     * @return Returns the generated offsprings.
+     */
     @Override
-    public IChromosome<TestCase> cross(List<IChromosome<TestCase>> parents) {
+    public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
 
         if (parents.size() == 1) {
             MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on single chromosome!");
-            return parents.get(0);
+            return Collections.singletonList(parents.get(0));
         }
 
         List<Action> l1 = parents.get(0).getValue().getEventSequence();
@@ -57,7 +82,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         for (int i = 0; i < l1.size(); i++) {
             int idx = choice + d;
 
-            if (idx < l1.size()) {
+            if (idx >= 0 && idx < l1.size()) {
                 for (Edge e1 : Registry.getUiAbstractionLayer().getEdges(l1.get(idx))) {
 
                     // don't consider actions that result in leaving the app
@@ -68,7 +93,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
                         Optional<Integer> match = findMatch(l1.get(idx), l2, cc);
                         if (match.hasValue()) {
                             MATE.log_acc("Found match: " + idx + ", " + match.getValue());
-                            return merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize);
+                            return Collections.singletonList(
+                                    merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize));
                         }
                     }
 
@@ -94,7 +120,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             }
         }
         MATE.log_warn("No match found.");
-        return parents.get(0);
+        return Collections.singletonList(parents.get(0));
     }
 
     private Optional<Integer> findMatch(Action from, List<Action> l, int start) {

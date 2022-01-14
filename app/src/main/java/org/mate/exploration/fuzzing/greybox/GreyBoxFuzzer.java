@@ -59,8 +59,8 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
         IChromosome<T> best = seedCorpus.get(0);
 
         for (IChromosome<T> s : seedCorpus) {
-            double coverage = CoverageUtils.getCoverage(Properties.COVERAGE(), s);
-            if (coverage > CoverageUtils.getCoverage(Properties.COVERAGE(), best)) {
+            double coverage = CoverageUtils.getCoverage(Properties.COVERAGE(), s).getCoverage();
+            if (coverage > CoverageUtils.getCoverage(Properties.COVERAGE(), best).getCoverage()) {
                 best = s;
             }
         }
@@ -82,7 +82,7 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
         * We need to make a snapshot of the total coverage here in order to tell whether a
         * mutated chromosome s' is going to increase the total coverage or not.
          */
-        totalCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE());
+        totalCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE()).getCoverage();
 
         if (s.getValue() instanceof TestCase) {
             int size = ((TestCase) s.getValue()).getEventSequence().size();
@@ -134,7 +134,7 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
         * subsequent isInteresting() check. Thus, we need to make that decision here and update
         * the total coverage accordingly.
          */
-        double combinedCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE());
+        double combinedCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE()).getCoverage();
         if (combinedCoverage > totalCoverage) {
             isInteresting = true;
             totalCoverage = combinedCoverage;

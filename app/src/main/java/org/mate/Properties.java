@@ -137,10 +137,6 @@ public class Properties {
     public static double P_MUTATE() {
         return propertyOr(0.3);
     }
-    // for mutation functions that apply multiple mutations based on the given probability
-    public static double P_INNER_MUTATE() {
-        return propertyOr(0.3);
-    }
 
     public static double P_SAMPLE_RANDOM() {
         return propertyOr(0.5);
@@ -156,9 +152,21 @@ public class Properties {
 
     public static int MUTATION_RATE() { return propertyOr(1); }
 
+    public static int TOURNAMENT_SIZE() { return propertyOr(2); }
+
+    public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
+
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
+
+    /**
+     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTION()}
+     * provides the mapping from geno to phenotype, this property specifies the core fitness function.
+     *
+     * @return Returns the core fitness function used in the context of GE.
+     */
+    public static FitnessFunction GE_FITNESS_FUNCTION() { return propertyOr(null); }
 
     public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
 
@@ -272,7 +280,7 @@ public class Properties {
      */
     public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
 
-    //Grammatical Evolution Properties
+    // grammatical evolution properties
     public static int GE_SEQUENCE_LENGTH() {
         return propertyOr(100);
     }

@@ -6,13 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
-import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-import org.mate.exploration.genetic.crossover.CrossOverFunction;
-import org.mate.exploration.genetic.fitness.FitnessFunction;
-import org.mate.exploration.genetic.mutation.MutationFunction;
-import org.mate.exploration.genetic.selection.SelectionFunction;
-import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.model.TestCase;
 
 @RunWith(AndroidJUnit4.class)
@@ -28,15 +22,14 @@ public class ExecuteMATEStandardGeneticAlgorithm {
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)
-                .withChromosomeFactory(ChromosomeFactory.ANDROID_RANDOM_CHROMOSOME_FACTORY)
-                .withSelectionFunction(SelectionFunction.FITNESS_PROPORTIONATE_SELECTION)
-                .withCrossoverFunction(CrossOverFunction.TEST_CASE_MERGE_CROSS_OVER)
-                .withMutationFunction(MutationFunction.TEST_CASE_CUT_POINT_MUTATION)
-                .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
-                .withTerminationCondition(TerminationCondition.NEVER_TERMINATION)
+                .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
+                .withSelectionFunction(Properties.SELECTION_FUNCTION())
+                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withFitnessFunction(Properties.FITNESS_FUNCTION())
+                .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
-                .withMaxNumEvents(Properties.MAX_NUMBER_EVENTS())
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER())
                 .build();

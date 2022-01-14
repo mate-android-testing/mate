@@ -18,6 +18,7 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageDTO;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -28,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Provides the interface to communicate with the MATE server.
@@ -37,7 +39,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.3";
+    private static final String MESSAGE_PROTOCOL_VERSION = "2.4";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -737,7 +739,8 @@ public class EnvironmentManager {
         if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
                 || coverage == Coverage.METHOD_COVERAGE
                 || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE
-                || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
+                || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE
+                || coverage == Coverage.ALL_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
             String testcase = entityId == null ? chromosomeId : entityId;
             if (coveredTestCases.contains(testcase)) {
@@ -785,7 +788,8 @@ public class EnvironmentManager {
         if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
                 || coverage == Coverage.METHOD_COVERAGE
                 || coverage == Coverage.BASIC_BLOCK_LINE_COVERAGE
-                || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE) {
+                || coverage == Coverage.BASIC_BLOCK_BRANCH_COVERAGE
+                || coverage == Coverage.ALL_COVERAGE) {
             // check whether the storing of the traces/coverage file has been already requested
             String testcase = entityId == null ? chromosomeId : entityId;
             if (coveredTestCases.contains(testcase)) {
@@ -815,33 +819,30 @@ public class EnvironmentManager {
      * @param <T>         Refers to a test case or a test suite.
      * @return Returns the combined coverage information for a set of chromosomes.
      */
-    public <T> double getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
+    public <T> CoverageDTO getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
 
         String chromosomesParam = null;
 
         if (chromosomes != null) {
 
-            // Java 8: String.join("+", chromosomeIds);
-            StringBuilder chromosomeIds = new StringBuilder();
+            chromosomesParam = chromosomes.stream()
+                    .filter(chromosome -> {
+                        if (chromosome.getValue() instanceof TestCase) {
+                            // there is no coverage data to store for dummy test cases
+                            if (((TestCase) chromosome.getValue()).isDummy()) {
+                                MATE.log_warn("Trying to retrieve combined coverage of dummy test case...");
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .map(this::getChromosomeId)
+                    .collect(Collectors.joining("+"));
 
-            for (IChromosome<T> chromosome : chromosomes) {
-                if (chromosome.getValue() instanceof TestCase) {
-                    // there is no coverage data to store for dummy test cases
-                    if (((TestCase) chromosome.getValue()).isDummy()) {
-                        MATE.log_warn("Trying to retrieve combined coverage of dummy test case...");
-                        continue;
-                    }
-                }
-                chromosomeIds.append(getChromosomeId(chromosome));
-                chromosomeIds.append("+");
+            if (chromosomesParam.isEmpty()) {
+                // only dummy test cases
+                return CoverageDTO.getDummyCoverageDTO(coverage);
             }
-
-            // remove '+' at the end
-            if (chromosomeIds.length() > 0) {
-                chromosomeIds.setLength(chromosomeIds.length() - 1);
-            }
-
-            chromosomesParam = chromosomeIds.toString();
         }
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
@@ -852,7 +853,35 @@ public class EnvironmentManager {
         }
 
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("coverage"));
+        return extractCoverage(response);
+    }
+
+    /**
+     * Fills the coverage dto with the obtained coverage information from the coverage response.
+     *
+     * @param response The response to a coverage request.
+     * @return Returns the filled coverage dto.
+     */
+    private CoverageDTO extractCoverage(Message response) {
+
+        CoverageDTO coverageDTO = new CoverageDTO();
+
+        String methodCoverage = response.getParameter("method_coverage");
+        if (methodCoverage != null) {
+            coverageDTO.setMethodCoverage(Double.parseDouble(methodCoverage));
+        }
+
+        String branchCoverage = response.getParameter("branch_coverage");
+        if (branchCoverage != null) {
+            coverageDTO.setBranchCoverage(Double.parseDouble(branchCoverage));
+        }
+
+        String lineCoverage = response.getParameter("line_coverage");
+        if (lineCoverage != null) {
+            coverageDTO.setLineCoverage(Double.parseDouble(lineCoverage));
+        }
+
+        return coverageDTO;
     }
 
     /**
@@ -864,7 +893,7 @@ public class EnvironmentManager {
      * @param testCaseId  Identifies the individual test case.
      * @return Returns the coverage of the given test case.
      */
-    public double getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
+    public CoverageDTO getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/get")
                 .withParameter("deviceId", emulator)
@@ -873,7 +902,7 @@ public class EnvironmentManager {
                 .withParameter("testSuiteId", testSuiteId)
                 .withParameter("testCaseId", testCaseId);
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("coverage"));
+        return extractCoverage(response);
     }
 
     /**
@@ -885,7 +914,7 @@ public class EnvironmentManager {
      * @param chromosomeId Identifies either a test case or a test suite.
      * @return Returns the coverage of the given test case.
      */
-    public double getCoverage(Coverage coverage, String chromosomeId) {
+    public CoverageDTO getCoverage(Coverage coverage, String chromosomeId) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/combined")
                 .withParameter("deviceId", emulator)
@@ -893,7 +922,7 @@ public class EnvironmentManager {
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("coverage"));
+        return extractCoverage(response);
     }
 
     /**
@@ -904,13 +933,13 @@ public class EnvironmentManager {
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the coverage of the given test case.
      */
-    public <T> double getCoverage(Coverage coverage, IChromosome<T> chromosome) {
+    public <T> CoverageDTO getCoverage(Coverage coverage, IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
             // a dummy test case has a coverage of 0%
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve coverage of dummy test case...");
-                return 0.0;
+                return CoverageDTO.getDummyCoverageDTO(coverage);
             }
         }
 
@@ -922,7 +951,7 @@ public class EnvironmentManager {
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("coverage"));
+        return extractCoverage(response);
     }
 
     /**
@@ -944,22 +973,11 @@ public class EnvironmentManager {
             }
         }
 
-        // concatenate lines
-        StringBuilder sb = new StringBuilder();
-
-        for (String line : lines) {
-            sb.append(line);
-            sb.append("*");
-        }
-        if (!lines.isEmpty()) {
-            sb.setLength(sb.length() - 1);
-        }
-
         String chromosomeId = getChromosomeId(chromosome);
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("lines", sb.toString())
+                .withParameter("lines", lines.stream().collect(Collectors.joining("*")))
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
 

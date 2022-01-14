@@ -12,6 +12,12 @@ import org.mate.utils.FitnessUtils;
  */
 public class MethodCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
+    /**
+     * Computes the method coverage for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the fitness should be evaluated.
+     * @return Returns the method coverage obtained by the method coverage module.
+     */
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
@@ -24,11 +30,22 @@ public class MethodCoverageFitnessFunction<T> implements IFitnessFunction<T> {
         return methodCoverage;
     }
 
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code true} since this fitness functions aims to maximise the method coverage.
+     */
     @Override
     public boolean isMaximizing() {
         return true;
     }
 
+    /**
+     * Returns the normalised fitness value, i.e. the method coverage divided by 100.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome) / 100;

@@ -1,5 +1,6 @@
 package org.mate.state;
 
+import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -18,6 +19,7 @@ public interface IScreenState {
     List<Widget> getWidgets();
     List<UIAction> getActions();
     List<WidgetAction> getWidgetActions();
+    List<MotifAction> getMotifActions();
     String getActivityName();
     String getPackageName();
     ScreenStateType getType();
