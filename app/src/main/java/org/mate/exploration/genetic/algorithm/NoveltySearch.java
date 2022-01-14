@@ -172,12 +172,6 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             }
 
             /*
-            * TODO: We should force here the execution of the new offspring and its novelty
-            *  computation. Right now, crossover and mutation may internally execute the chromosome
-            *  and generate a new chromosome every time instead of updating the chromosome in place.
-             */
-
-            /*
             * TODO: Should we exclude in the new generation the current population? At least this
             *  would be consistent with the invocation of getFitness() in createInitialPopulation().
              */
