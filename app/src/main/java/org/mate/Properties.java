@@ -80,14 +80,6 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /**
-     *  Added by vin on 24/05/2018
-     */
-    // if 0 any point will be added to the archive
-    public static float NOVELTY_THRESHOLD() {
-        return propertyOr(0);
-    }
-
     public static int K_VALUE() {
         return propertyOr(2);
     }
@@ -95,10 +87,6 @@ public class Properties {
     //10;
     public static double RANK_BIAS() {
         return propertyOr(1.7);
-    }
-
-    public static int ARCHIVE_SIZE() {
-        return propertyOr(10);
     }
 
     //10;
@@ -206,7 +194,7 @@ public class Properties {
 
     /**
      * Indicates which objective should be used for the multi-/many-objective
-     * search, i.e. branches or lines.
+     * search, e.g. branches or lines.
      *
      * @return Returns the objective or {@code null} if none was specified.
      */
@@ -292,6 +280,29 @@ public class Properties {
     public static int GE_MUTATION_COUNT() {
         return propertyOr(3);
     }
+
+    /**
+     * Novelty Search - Defines the novelty threshold. A value of 0 indicates that every
+     * chromosome will be added to the archive.
+     *
+     * @return Returns the novelty threshold T.
+     */
+    public static double NOVELTY_THRESHOLD() { return propertyOr(0.0); }
+
+    /**
+     * Novelty Search - Defines the maximal size of the archive.
+     *
+     * @return Returns the archive size L.
+     */
+    public static int ARCHIVE_LIMIT() { return propertyOr(10); }
+
+    /**
+     * Novelty Search - Defines the number of nearest neighbours that should be considered
+     * for the novelty metric.
+     *
+     * @return Returns the number of nearest neighbours k.
+     */
+    public static int NEAREST_NEIGHBOURS() { return propertyOr(3); }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
