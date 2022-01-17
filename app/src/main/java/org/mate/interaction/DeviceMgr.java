@@ -938,6 +938,7 @@ public class DeviceMgr {
 
             output = output.split("Local FragmentActivity")[1];
             output = output.split("Added Fragments:")[1];
+            output = output.split("FragmentManager")[0];
             output = output.split("Back Stack Index:")[0];
             List<String> fragments = Arrays.stream(output.split("\n|\\s")).collect(Collectors.toList());
             fragments.removeIf(s -> s.equals(""));
