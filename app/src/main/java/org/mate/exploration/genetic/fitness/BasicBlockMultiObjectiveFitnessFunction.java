@@ -34,13 +34,13 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
     public BasicBlockMultiObjectiveFitnessFunction(String block) {
         this.block = block;
         blocks.add(block);
-        cache.put(block, new HashMap<IChromosome, Double>());
+        cache.put(block, new HashMap<>());
     }
 
     /**
-     * Retrieves the basic block fitness value for the given chromosome.
-     * A cache is employed to make subsequent requests faster. A fitness value of '1' indicates
-     * that the basic block has been covered, '0' indicates non-covered.
+     * Computes the basic block fitness value for the given chromosome. A cache is employed to make
+     * subsequent requests faster. A fitness value of '1' indicates that the basic block has been
+     * covered, '0' indicates non-covered.
      *
      * @param chromosome The chromosome for which we want to retrieve its fitness value.
      * @return Returns the fitness value for the given chromosome.
@@ -67,11 +67,24 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
         return basicBlockFitnessValue;
     }
 
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code true} since this fitness functions aims to maximise coverage of
+     *          basic blocks.
+     */
     @Override
     public boolean isMaximizing() {
         return true;
     }
 
+    /**
+     * Returns the normalised fitness value, i.e. the value 0 if the basic block was not covered
+     * by the chromosome, otherwise the value 1 is returned.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome);

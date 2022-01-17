@@ -34,13 +34,13 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
     public BranchMultiObjectiveFitnessFunction(String branch) {
         this.branch = branch;
         branches.add(branch);
-        cache.put(branch, new HashMap<IChromosome, Double>());
+        cache.put(branch, new HashMap<>());
     }
 
     /**
-     * Retrieves the branch fitness value for the given chromosome.
-     * A cache is employed to make subsequent requests faster. A fitness value of '1' indicates
-     * that the branch has been covered, '0' indicates non-covered.
+     * Computes the branch fitness value for the given chromosome. A cache is employed to make
+     * subsequent requests faster. A fitness value of 1 indicates that the branch has been covered,
+     * 0 indicates non-covered.
      *
      * @param chromosome The chromosome for which we want to retrieve its fitness value.
      * @return Returns the fitness value for the given chromosome.
@@ -62,11 +62,23 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
         return cache.get(branch).get(chromosome);
     }
 
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code true} since this fitness functions aims to maximise the branch coverage.
+     */
     @Override
     public boolean isMaximizing() {
         return true;
     }
 
+    /**
+     * Returns the normalised fitness value, i.e. the value 0 if the branch was not covered by
+     * the chromosome, otherwise the value 1 is returned.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome);

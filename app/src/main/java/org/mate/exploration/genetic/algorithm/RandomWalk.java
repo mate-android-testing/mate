@@ -1,35 +1,64 @@
 package org.mate.exploration.genetic.algorithm;
 
+import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
-import org.mate.exploration.genetic.selection.IdSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 
-import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Provides an implementation of a random walk. In the random walk algorithm an initially created
+ * chromosome is iteratively mutated until the termination condition is met.
+ *
+ * @param <T> The type of the chromosome.
+ */
 public class RandomWalk<T> extends GeneticAlgorithm<T> {
 
     /**
-     * Initializing the genetic algorithm with all necessary attributes
+     * Initialises the random walk with all necessary attributes.
      *
-     * @param chromosomeFactory    see {@link IChromosomeFactory}
-     * @param mutationFunction     see {@link IMutationFunction}
-     * @param fitnessFunctions see {@link IFitnessFunction}
-     * @param terminationCondition see {@link ITerminationCondition}
+     * @param chromosomeFactory The used chromosome factory.
+     * @param mutationFunction The used mutation function.
+     * @param fitnessFunctions The list of fitness functions.
+     * @param terminationCondition The used termination condition.
      */
-    public RandomWalk(IChromosomeFactory<T> chromosomeFactory, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition) {
-        super(chromosomeFactory, new IdSelectionFunction<T>(), null, mutationFunction, fitnessFunctions, terminationCondition, 1, 2, 0, 1);
+    public RandomWalk(IChromosomeFactory<T> chromosomeFactory,
+                      IMutationFunction<T> mutationFunction,
+                      List<IFitnessFunction<T>> fitnessFunctions,
+                      ITerminationCondition terminationCondition) {
+        super(
+                chromosomeFactory,
+                null,
+                null,
+                mutationFunction,
+                fitnessFunctions,
+                terminationCondition,
+                1,
+                1,
+                0,
+                1);
     }
 
     /**
-     * Always return the new chromosome (offspring)
-     * @return new chromosome (offspring) only
+     * The single chromosome of the population is iteratively mutated.
      */
-    public List<IChromosome<T>> getGenerationSurvivors() {
-        return Arrays.asList(population.get(population.size() - 1));
+    @Override
+    public void evolve() {
+
+        MATE.log_acc("Creating generation #" + (currentGenerationNumber + 1));
+
+        IChromosome<T> chromosome = population.get(0);
+        IChromosome<T> mutant = mutationFunction.mutate(chromosome);
+
+        // keep solely the mutant (offspring)
+        population.clear();
+        population.add(mutant);
+
+        logCurrentFitness();
+        currentGenerationNumber++;
     }
 }

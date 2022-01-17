@@ -4,11 +4,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -54,7 +52,7 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the list of executable widget actions on the current screen.
+     * Returns the list of executable ui actions on the current screen.
      *
      * @return Returns the list of executable widget actions.
      */
@@ -110,12 +108,8 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
-            MATE.log_acc("CRASH MESSAGE" + e.getMessage());
+            MATE.log_acc("CRASH MESSAGE " + e.getMessage());
             deviceMgr.pressHome();
-
-            if (action instanceof PrimitiveAction) {
-                return FAILURE_APP_CRASH;
-            }
 
             // update screen state model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
@@ -123,10 +117,6 @@ public class UIAbstractionLayer {
             guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
             return FAILURE_APP_CRASH;
-        }
-
-        if (action instanceof PrimitiveAction) {
-            return SUCCESS;
         }
 
         state = clearScreen();
@@ -433,10 +423,7 @@ public class UIAbstractionLayer {
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        IScreenState state = clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = state;
-        }
+        lastScreenState = clearScreen();
     }
 
     /**
@@ -445,10 +432,7 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        IScreenState state = clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = state;
-        }
+        lastScreenState = clearScreen();
     }
 
     /**
@@ -528,6 +512,11 @@ public class UIAbstractionLayer {
      * The possible outcomes of applying an action.
      */
     public enum ActionResult {
-        FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
+        FAILURE_UNKNOWN,
+        FAILURE_EMULATOR_CRASH,
+        FAILURE_APP_CRASH,
+        SUCCESS_NEW_STATE,
+        SUCCESS,
+        SUCCESS_OUTBOUND;
     }
 }

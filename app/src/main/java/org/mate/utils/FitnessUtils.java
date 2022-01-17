@@ -38,7 +38,7 @@ public class FitnessUtils {
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
-                FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
+                FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
@@ -57,6 +57,7 @@ public class FitnessUtils {
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE,
                 FitnessFunction.METHOD_COVERAGE,
+                FitnessFunction.NOVELTY,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE, FitnessFunction.BRANCH_MULTI_OBJECTIVE);
@@ -84,7 +85,7 @@ public class FitnessUtils {
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
-                FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
+                FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome, testCase.getId());
@@ -133,6 +134,29 @@ public class FitnessUtils {
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
             return Registry.getEnvironmentManager()
                     .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
+        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
+            // GE specifies the 'core' fitness function in the GE_FITNESS_FUNCTION() property
+            if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
+            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome).getLineCoverage();
+            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
+            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
+                return Registry.getEnvironmentManager().getBranchDistance(chromosome);
+            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
+            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
+            } else {
+                throw new UnsupportedOperationException("GE fitness function "
+                        + Properties.GE_FITNESS_FUNCTION() + " not yet supported!");
+            }
         }
 
         throw new UnsupportedOperationException("Fitness function "
@@ -162,5 +186,38 @@ public class FitnessUtils {
 
         throw new UnsupportedOperationException("Fitness function "
                 + Properties.FITNESS_FUNCTION() + " not yet supported!");
+    }
+
+    /**
+     * Retrieves the novelty vector for the given chromosomes.
+     *
+     * @param chromosomes The list of chromosomes for which the novelty should be computed.
+     * @param nearestNeighbours The number of nearest neighbours k that should be considered.
+     * @param objectives The objectives type, e.g. branches.
+     * @param <T> Specifies the type of the chromosomes.
+     * @return Returns the novelty vector.
+     */
+    public static <T> List<Double> getNoveltyVector(List<IChromosome<T>> chromosomes,
+                                                    int nearestNeighbours, String objectives) {
+        return Registry.getEnvironmentManager()
+                .getNoveltyVector(chromosomes, nearestNeighbours, objectives);
+    }
+
+    /**
+     * Retrieves the novelty score for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the novelty should be evaluated.
+     * @param population The current population.
+     * @param archive The current archive.
+     * @param nearestNeighbours The number of nearest neighbours k.
+     * @param objectives The kind of objectives, e.g. branches.
+     * @param <T> The type of the chromosomes.
+     * @return Returns the novelty for the given chromosome.
+     */
+    public static <T> double getNovelty(IChromosome<T> chromosome, List<IChromosome<T>> population,
+                                        List<IChromosome<T>> archive, int nearestNeighbours,
+                                        String objectives) {
+        return Registry.getEnvironmentManager()
+                .getNovelty(chromosome, population, archive, nearestNeighbours, objectives);
     }
 }

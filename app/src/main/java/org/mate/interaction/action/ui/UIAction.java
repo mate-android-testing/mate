@@ -27,6 +27,7 @@ public class UIAction extends Action {
      * Constructs a new ui action with the given action type.
      *
      * @param actionType The type of action, e.g. CLICK.
+     * @param activityName The name of the activity on which the action should be applied.
      */
     public UIAction(ActionType actionType, String activityName) {
         this.actionType = actionType;

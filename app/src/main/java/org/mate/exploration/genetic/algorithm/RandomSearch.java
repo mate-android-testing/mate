@@ -12,12 +12,41 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 
+/**
+ * Provides an implementation of the random search algorithm. In random search, a random chromosome
+ * is initially sampled. Then, in the evolution process, another random chromosome is sampled
+ * and the one with the better fitness is kept while the other one is discarded.
+ *
+ * @param <T> The type of the chromosomes.
+ */
 public class RandomSearch<T> extends GeneticAlgorithm<T> {
 
-    public RandomSearch(IChromosomeFactory<T> chromosomeFactory, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition) {
-        super(chromosomeFactory, null, null,null, fitnessFunctions, terminationCondition, 1, 2, 0, 0);
+    /**
+     * Initialises the random search algorithm with the necessary attributes.
+     *
+     * @param chromosomeFactory The used chromosome factory.
+     * @param fitnessFunctions The used fitness functions. Only a single fitness function is used here.
+     * @param terminationCondition The used termination condition.
+     */
+    public RandomSearch(IChromosomeFactory<T> chromosomeFactory,
+                        List<IFitnessFunction<T>> fitnessFunctions,
+                        ITerminationCondition terminationCondition) {
+        super(chromosomeFactory,
+                null,
+                null,
+                null,
+                fitnessFunctions,
+                terminationCondition,
+                1,
+                2,
+                0,
+                0);
     }
 
+    /**
+     * In the evolve step of random search, a second random chromosome is created and the one
+     * with the better fitness value is kept in the population.
+     */
     @Override
     public void evolve() {
 
@@ -42,6 +71,9 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
         currentGenerationNumber++;
     }
 
+    /**
+     * Logs the fitness of the chromosomes in the current population.
+     */
     @Override
     protected void logCurrentFitness() {
 

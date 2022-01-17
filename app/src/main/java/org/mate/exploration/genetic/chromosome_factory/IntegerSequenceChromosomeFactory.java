@@ -9,19 +9,30 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Creates integer sequences as chromosomes. These can be used for grammatical evolution.
+ * Creates integer sequences as chromosomes. This factory is intended to be used in combination
+ * with a grammatical evolution strategy.
  */
 public class IntegerSequenceChromosomeFactory implements IChromosomeFactory<List<Integer>> {
+
+    /**
+     * The sequence length.
+     */
     private final int sequenceLength;
 
     /**
-     * Creates a factory that will generate integer sequences with the given sequence length
-     * @param sequenceLength the length of the generated integer sequences
+     * Creates a factory that will generate random integer sequences.
+     *
+     * @param sequenceLength The length of the generated integer sequences.
      */
     public IntegerSequenceChromosomeFactory(int sequenceLength) {
         this.sequenceLength = sequenceLength;
     }
 
+    /**
+     * Creates a chromosome consisting of a random integer sequence.
+     *
+     * @return Returns the generated chromosome.
+     */
     @Override
     public IChromosome<List<Integer>> createChromosome() {
         Random rnd = Randomness.getRnd();

@@ -59,6 +59,23 @@ public class Randomness {
     }
 
     /**
+     * Randomly retrieves {@param count} elements from a given list.
+     *
+     * @param list The input list.
+     * @param count The number of elements that should be retrieved.
+     * @param <T> The element type.
+     * @return Returns a list with {@param count} random elements from a given list.
+     */
+    public static <T> List<T> randomElements(List<T> list, int count) {
+
+        List<T> result = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            result.add(randomElement(list));
+        }
+        return result;
+    }
+
+    /**
      * Randomly retrieves {@param count} elements from a given set.
      *
      * @param set The input set.
