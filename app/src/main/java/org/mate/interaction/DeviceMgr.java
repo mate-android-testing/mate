@@ -1290,32 +1290,50 @@ public class DeviceMgr {
      */
     private List<String> getCurrentFragments() {
 
-        // TODO: It seems that the extraction can be simplified by supplying the current activity:
         // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
         try {
             String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
-
-            output = output.split("Local FragmentActivity")[1];
-            output = output.split("Added Fragments:")[1];
-            output = output.split("FragmentManager")[0];
-            output = output.split("Back Stack Index:")[0];
-            List<String> fragments = Arrays.stream(output.split("\n|\\s")).collect(Collectors.toList());
-            fragments.removeIf(s -> s.equals(""));
-            fragments.removeIf(s -> s.startsWith("#"));
-            fragments.removeIf(s -> s.startsWith("id"));
-            fragments.removeIf(s -> s.startsWith("("));
-            List<String> extracted = new ArrayList<>();
-            for (String s : fragments) {
-                extracted.add(s.split("\\{")[0]);
-            }
-            MATE.log_debug("Currently active fragments: " + extracted);
-            return extracted;
+            List<String> fragments = extractFragments(output);
+            MATE.log_debug("Currently active fragments: " + fragments);
+            return fragments;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
             return Collections.emptyList();
         }
     }
 
+    /**
+     * Extracts the visible fragments from the given output.
+     *
+     * @param output The output of the command 'dumpsys activity <activity-name>'.
+     * @return Returns the visible fragments.
+     */
+    private List<String> extractFragments(String output) {
+
+        /*
+        * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
+        *
+        *  Local FragmentActivity 30388ff State:
+        *     Added Fragments:
+        *       #0: MyFragment{b4f3bc} (642de726-ae2d-439c-a047-4a4a35a6f435 id=0x7f080071)
+        *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
+        *     Back Stack Index: 0 (this line seems to be optional!)
+        *     FragmentManager misc state:
+         */
+        final String[] fragmentLines = output
+                .split("Local FragmentActivity")[1]
+                .split("Added Fragments:")[1]
+                .split("FragmentManager")[0]
+                .split("Back Stack Index:")[0] // this line is not always present
+                .split(System.lineSeparator());
+
+        return Arrays.stream(fragmentLines)
+                .filter(line -> !line.replaceAll("\\s+","").isEmpty())
+                .map(line -> line.split(":")[1])
+                .map(line -> line.split("\\{")[0])
+                .map(String::trim)
+                .collect(Collectors.toList());
+    }
 
     /**
      * Grants the AUT the read and write runtime permissions for the external storage.
