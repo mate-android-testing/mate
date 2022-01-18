@@ -1319,9 +1319,16 @@ public class DeviceMgr {
         *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
         *     Back Stack Index: 0 (this line seems to be optional!)
         *     FragmentManager misc state:
-         */
-        final String[] fragmentLines = output
-                .split("Local FragmentActivity")[1]
+        */
+
+        final String fragmentActivityState = output.split("Local FragmentActivity")[1];
+        
+        // If no fragment is visible, the 'Added Fragments:' line is missing!
+        if (!fragmentActivityState.contains("Added Fragments:")) {
+            return Collections.emptyList();
+        }
+
+        final String[] fragmentLines = fragmentActivityState
                 .split("Added Fragments:")[1]
                 .split("FragmentManager")[0]
                 .split("Back Stack Index:")[0] // this line is not always present
