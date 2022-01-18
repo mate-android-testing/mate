@@ -15,12 +15,10 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
-import android.text.InputType;
 
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.datagen.DataGenerator;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
@@ -37,6 +35,11 @@ import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
+import org.mate.utils.input_generation.DataGenerator;
+import org.mate.utils.input_generation.Mutation;
+import org.mate.utils.input_generation.StaticStrings;
+import org.mate.utils.input_generation.StaticStringsParser;
+import org.mate.utils.input_generation.format_types.InputFieldType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -58,6 +62,26 @@ import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
  * Also provides functionality to check for crashes, restart or re-install the AUT, etc.
  */
 public class DeviceMgr {
+
+    /**
+     * The probability for considering the hint for the input generation.
+     */
+    private static final double PROB_HINT = 0.5;
+
+    /**
+     * The probability for mutating a given hint.
+     */
+    private static final double PROB_HINT_MUTATION = 0.5;
+
+    /**
+     * The probability for using a static string or the input generation.
+     */
+    private static final double PROB_STATIC_STRING = 0.5;
+
+    /**
+     * The probability for mutating a static string.
+     */
+    private static final double PROB_STATIC_STRING_MUTATION = 0.25;
 
     /**
      * The ADB command to to disable auto rotation.
@@ -97,11 +121,18 @@ public class DeviceMgr {
      */
     private boolean disabledAutoRotate;
 
+    /**
+     * Contains the static strings extracted from the byte code.
+     */
+    private final StaticStrings staticStrings;
+
+
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
+        this.staticStrings = StaticStringsParser.parseStaticStrings();
     }
 
     /**
@@ -154,9 +185,9 @@ public class DeviceMgr {
 
         if (action.isDynamicReceiver()) {
             /*
-            * In the case we deal with a dynamic receiver, we can't specify the full component name,
-            * since dynamic receivers can't be triggered by explicit intents! Instead, we can only
-            * specify the package name in order to limit the receivers of the broadcast.
+             * In the case we deal with a dynamic receiver, we can't specify the full component name,
+             * since dynamic receivers can't be triggered by explicit intents! Instead, we can only
+             * specify the package name in order to limit the receivers of the broadcast.
              */
             tag = "-p";
             component = packageName;
@@ -670,8 +701,8 @@ public class DeviceMgr {
                 * that is randomly created. Otherwise, we may end up in a different state and
                 * subsequent actions might not show the same behaviour as in the recorded run.
                  */
-                String textData = Registry.isReplayMode() ? action.getText() : generateTextData(widget);
-                textData = textData == null ? "" : textData;
+                String textData = Registry.isReplayMode() ? action.getText() :
+                        Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
                 MATE.log_debug("Inserting text: " + textData);
                 uiElement.setText(textData);
@@ -748,7 +779,7 @@ public class DeviceMgr {
      * Checks whether a crash dialog is visible on the current screen.
      *
      * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
-     * is returned.
+     *         is returned.
      */
     public boolean checkForCrashDialog() {
 
@@ -765,7 +796,7 @@ public class DeviceMgr {
      *
      * @param widget The given widget.
      * @return Returns {@code true} if the widget refers to a progress bar,
-     * otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean checkForProgressBar(Widget widget) {
         return widget.getClazz().contains("ProgressBar")
@@ -843,7 +874,7 @@ public class DeviceMgr {
      * Returns whether the emulator is in portrait mode or not.
      *
      * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     * is returned.
+     *         is returned.
      */
     public boolean isInPortraitMode() {
         return isInPortraitMode;
@@ -875,7 +906,7 @@ public class DeviceMgr {
     /**
      * Executes a swipe (upon a widget) in a given direction.
      *
-     * @param widget    The widget at which position the swipe should be performed.
+     * @param widget The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
      */
     private void handleSwipe(Widget widget, ActionType direction) {
@@ -942,7 +973,8 @@ public class DeviceMgr {
      * best effort approach.
      *
      * @param widget The widget whose ui object should be looked up.
-     * @return Returns the corresponding ui object or {@code null} if no such ui object could be found.
+     * @return Returns the corresponding ui object or {@code null} if no
+     *         such ui object could be found.
      */
     private UiObject2 findObject(Widget widget) {
 
@@ -997,9 +1029,10 @@ public class DeviceMgr {
          * break execution, since a different (valid) input may lead to a different state, e.g. we
          * end on a different activity and all subsequent widget actions are not applicable anymore.
          */
-        String textData = Registry.isReplayMode() ? widget.getText() : generateTextData(widget);
+        String textData = Registry.isReplayMode() ? widget.getText() :
+                Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
-        MATE.log_debug("New text: " + textData);
+        MATE.log_debug("Input text: " + textData);
         MATE.log_debug("Previous text: " + widget.getText());
 
         UiObject2 uiObject = findObject(widget);
@@ -1030,85 +1063,120 @@ public class DeviceMgr {
     }
 
     /**
+     * Converts a fully-qualified class name to solely it's class name, i.e. the possibly redundant
+     * package name is stripped off.
+     *
+     * @param className The fully-qualified class name consisting of <package-name>/<class-name>.
+     * @return Returns the simple class name.
+     */
+    private String convertClassName(String className) {
+
+        String[] tokens = className.split("/");
+        String packageName = tokens[0];
+        String componentName = tokens[1];
+
+        // if the component resides in the application package, a dot is used instead of the package name
+        if (componentName.startsWith(".")) {
+            componentName = packageName + componentName;
+        }
+
+        return componentName;
+    }
+
+    /**
      * Generates a text input for the given editable widget.
      *
      * @param widget The editable widget.
+     * @param maxLength The maximal input length.
      * @return Returns a text input for the editable widget.
      */
-    private String generateTextData(Widget widget) {
+    private String generateTextData(final Widget widget, final int maxLength) {
 
-        String widgetText = widget.getText();
-        if (widgetText == null || widgetText.isEmpty())
-            widgetText = widget.getHint();
+        final String activityName = convertClassName(widget.getActivity());
 
-        // -1 if no limit has been set
-        int maxLengthInt = widget.getMaxTextLength();
+        final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
+        final Random random = Registry.getRandom();
 
-        // allow a max length of 15 characters
-        if (maxLengthInt < 0)
-            maxLengthInt = 15;
-        if (maxLengthInt > 15)
-            maxLengthInt = 15;
-
-        // consider https://developer.android.com/reference/android/text/InputType
-        int inputType = widget.getInputType();
-
-        // check whether the input consists solely of digits (ignoring dots and comas)
-        widgetText = widgetText.replace(".", "");
-        widgetText = widgetText.replace(",", "");
-
-        if (inputType == InputType.TYPE_NULL && !widgetText.isEmpty()
-                && android.text.TextUtils.isDigitsOnly(widgetText)) {
-            inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER;
+        /*
+         * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
+         * with probability PROB_HINT_MUTATION we mutate the given hint.
+         */
+        if (widget.isHintPresent()) {
+            if (inputFieldType.isValid(widget.getHint()) && random.nextDouble() < PROB_HINT) {
+                if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
+                    return Mutation.mutateInput(inputFieldType, widget.getHint());
+                } else {
+                    return widget.getHint();
+                }
+            }
         }
+        if (staticStrings.isInitialised()) {
+            /*
+             * If the static strings from the bytecode were supplied and with probability
+             * PROB_STATIC_STRING we try to find a static string matching the input field type.
+             */
+            if (random.nextDouble() < PROB_STATIC_STRING) {
 
-        // check whether we can derive the input via the content description
-        if (inputType == InputType.TYPE_NULL) {
-            String desc = widget.getContentDesc();
-            if (desc != null) {
-                if (desc.contains("email") || desc.contains("e-mail")
-                        || desc.contains("E-mail") || desc.contains("Email")) {
-                    inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+                // consider both the string constants from the current activity and visible fragments
+                List<String> uiComponents = new ArrayList<>();
+                uiComponents.add(activityName);
+                uiComponents.addAll(getCurrentFragments());
+
+                String randomStaticString;
+
+                if (inputFieldType != InputFieldType.NOTHING) {
+
+                    // get a random string matching the input field type from one of the ui classes
+                    randomStaticString = staticStrings.getRandomStringFor(inputFieldType, uiComponents);
+
+                    /*
+                     * If there was no match, we consider a random string from any class matching
+                     * the given input field type.
+                     */
+                    if (randomStaticString == null) {
+                        randomStaticString = staticStrings.getRandomStringFor(inputFieldType);
+                    }
+
+                    // mutate the string with probability PROB_STATIC_STRING_MUTATION
+                    if (randomStaticString != null) {
+                        if (random.nextDouble() < PROB_STATIC_STRING_MUTATION) {
+                            randomStaticString = Mutation.mutateInput(inputFieldType, randomStaticString);
+                        }
+                        return randomStaticString;
+                    }
+                }
+
+                /*
+                 * If the input field type couldn't be determined or no static string could be
+                 * derived so far, we try to use a random string from either the current activity
+                 * or any of the visible fragments.
+                 */
+                randomStaticString = staticStrings.getRandomStringFor(uiComponents);
+                if (randomStaticString != null) {
+                    return randomStaticString;
                 }
             }
         }
 
-        // assume text input if input type not derivable
-        if (inputType == InputType.TYPE_NULL) {
-            inputType = InputType.TYPE_CLASS_TEXT;
-        }
-
-        return getRandomData(inputType, maxLengthInt);
+        // fallback mechanism
+        return generateRandomInput(inputFieldType, maxLength);
     }
 
     /**
-     * Generates a random input for the given input type on a best effort basis.
+     * Generates a random input as a fallback mechanism. A random string is generated and shortened
+     * to the maximum length if it is too long.
      *
-     * @param inputType    The input type, e.g. phone number.
-     * @param maxLengthInt The maximal length for the input.
-     * @return Returns a random input matching the input type.
+     * @param inputFieldType The field for which the string is to be generated.
+     * @param maxLength The maximum length of the result string.
+     * @return A random string matching the given {@link InputFieldType} with at most maxLength
+     *         length.
      */
-    private String getRandomData(int inputType, int maxLengthInt) {
-
-        // TODO: consider the generation of invalid strings, numbers, emails, uris, ...
-        DataGenerator dataGen = new DataGenerator();
-
-        switch (inputType) {
-            case InputType.TYPE_NUMBER_FLAG_DECIMAL:
-            case InputType.TYPE_CLASS_NUMBER:
-            case InputType.TYPE_CLASS_PHONE:
-            case InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL:
-                return dataGen.getRandomValidNumber(maxLengthInt);
-            case InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
-                return dataGen.getRandomValidEmail(maxLengthInt);
-            case InputType.TYPE_TEXT_VARIATION_URI:
-                return dataGen.getRandomUri(maxLengthInt);
-            case InputType.TYPE_CLASS_TEXT:
-                return dataGen.getRandomValidString(maxLengthInt);
-            default:
-                MATE.log_debug("Input type: " + inputType + " not explicitly supported yet!");
-                return dataGen.getRandomValidString(maxLengthInt);
+    private String generateRandomInput(InputFieldType inputFieldType, int maxLength) {
+        String randomData = DataGenerator.generateRandomData(inputFieldType);
+        if (maxLength > 0 && randomData.length() > maxLength) {
+            randomData = randomData.substring(0, maxLength);
         }
+        return randomData;
     }
 
     /**
@@ -1213,6 +1281,65 @@ public class DeviceMgr {
     private String getCurrentActivityAPI28() throws IOException {
         String output = device.executeShellCommand("dumpsys activity activities");
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
+    }
+
+    /**
+     * Returns the currently visible fragments.
+     *
+     * @return Returns the currently visible fragments.
+     */
+    private List<String> getCurrentFragments() {
+
+        // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
+        try {
+            String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
+            List<String> fragments = extractFragments(output);
+            MATE.log_debug("Currently active fragments: " + fragments);
+            return fragments;
+        } catch (Exception e) {
+            MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Extracts the visible fragments from the given output.
+     *
+     * @param output The output of the command 'dumpsys activity <activity-name>'.
+     * @return Returns the visible fragments.
+     */
+    private List<String> extractFragments(String output) {
+
+        /*
+        * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
+        *
+        *  Local FragmentActivity 30388ff State:
+        *     Added Fragments:
+        *       #0: MyFragment{b4f3bc} (642de726-ae2d-439c-a047-4a4a35a6f435 id=0x7f080071)
+        *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
+        *     Back Stack Index: 0 (this line seems to be optional!)
+        *     FragmentManager misc state:
+        */
+
+        final String fragmentActivityState = output.split("Local FragmentActivity")[1];
+        
+        // If no fragment is visible, the 'Added Fragments:' line is missing!
+        if (!fragmentActivityState.contains("Added Fragments:")) {
+            return Collections.emptyList();
+        }
+
+        final String[] fragmentLines = fragmentActivityState
+                .split("Added Fragments:")[1]
+                .split("FragmentManager")[0]
+                .split("Back Stack Index:")[0] // this line is not always present
+                .split(System.lineSeparator());
+
+        return Arrays.stream(fragmentLines)
+                .filter(line -> !line.replaceAll("\\s+","").isEmpty())
+                .map(line -> line.split(":")[1])
+                .map(line -> line.split("\\{")[0])
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 
     /**

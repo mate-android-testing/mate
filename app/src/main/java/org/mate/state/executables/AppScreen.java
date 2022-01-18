@@ -1,6 +1,7 @@
 package org.mate.state.executables;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -39,13 +40,13 @@ public class AppScreen {
     /**
      * A list of discovered widgets on the app screen.
      */
-    private List<Widget> widgets;
+    private final List<Widget> widgets;
 
     /**
      * Collects the text hints for editable fields over all app screens.
      * The key is defined through the resource id of the widget.
      */
-    private static Map<String, String> editTextHints = new Hashtable<String,String>();
+    private static final Map<String, String> editTextHints = new Hashtable<String, String>();
 
     /**
      * Stores relevant information about the device, e.g. the display height.
@@ -100,11 +101,11 @@ public class AppScreen {
     /**
      * Extracts the widgets from the ui hierarchy.
      *
-     * @param node Describes a node in the ui hierarchy. Initially, the root node.
-     * @param parent The parent widget, {@code null} for the root node.
-     * @param depth The depth of the node in the ui hierarchy (tree).
+     * @param node        Describes a node in the ui hierarchy. Initially, the root node.
+     * @param parent      The parent widget, {@code null} for the root node.
+     * @param depth       The depth of the node in the ui hierarchy (tree).
      * @param globalIndex A global index based on DFS order.
-     * @param localIndex A local index for each child widget, i.e. the child number.
+     * @param localIndex  A local index for each child widget, i.e. the child number.
      * @return Returns the current global index.
      */
     private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
@@ -115,8 +116,11 @@ public class AppScreen {
         MATE.log_debug("Node class: " + node.getClassName());
 
         Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
-        checkForHint(node, widget);
         widgets.add(widget);
+
+        if (widget.isEditable()) {
+            checkForHint(node, widget);
+        }
 
         if (parent != null) {
             parent.addChild(widget);
@@ -138,61 +142,78 @@ public class AppScreen {
     }
 
     /**
-     * Checks whether a widget displays some hint. Globally collects
-     * all hints.
+     * Checks whether an editable widget displays some hint.
      *
-     * @param node A node in the ui hierarchy.
+     * @param node   A node in the ui hierarchy.
      * @param widget The widget corresponding to the node.
      */
     private void checkForHint(AccessibilityNodeInfo node, Widget widget) {
 
-        /*
-         * TODO: We should replace the following code with node.isShowingHintText()
-         *  and node.getHintText() in the future, however this requires min API level 26.
-         */
-        // try to retrieve the hint of a widget
-        if (widget.isEditable()) {
+        String hint = editTextHints.get(widget.getResourceID());
 
-            String hint = editTextHints.get(widget.getResourceID());
+        if (hint == null) {
 
-            if (hint == null) {
-
-                UiObject2 uiObject = null;
-
-                if (widget.getResourceID().isEmpty()) {
-                    uiObject = device.findObject(By.text(widget.getText()));
-                } else {
-                    uiObject = device.findObject(By.res(widget.getResourceID()));
-                }
-
-                if (uiObject != null) {
-
-                    /*
-                     * In order to retrieve the hint of a widget, we have to clear the
-                     * input, and this in turn should display the hint if we are lucky.
-                     */
-
-                    // save original input
-                    String textBeforeClear = Objects.toString(uiObject.getText(), "");
-
-                    // reset input and hope that this causes a hint to be set
-                    uiObject.setText("");
-                    String textAfterClear = Objects.toString(uiObject.getText(), "");
-
-                    // restore original input
-                    uiObject.setText(textBeforeClear);
-
-                    hint = textAfterClear;
-
-                    if (!widget.getResourceID().isEmpty()) {
-                        editTextHints.put(widget.getResourceID(), hint);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (node.isShowingHintText()) {
+                    if(node.getHintText() instanceof String){
+                        hint = (String) node.getHintText();
                     }
                 }
+            } else {
+                // fallback mechanism for older devices
+                hint = getHintAPI25AndLower(widget);
             }
 
-            hint = Objects.toString(hint, "");
-            widget.setHint(hint);
+            // save hint for subsequent requests
+            if (hint != null) {
+                if (!widget.getResourceID().isEmpty()) {
+                    editTextHints.put(widget.getResourceID(), hint);
+                }
+            }
         }
+
+        hint = Objects.toString(hint, "");
+        widget.setHint(hint);
+    }
+
+    /**
+     * Retrieves the hint of an input field for an emulator running an API level <= 25.
+     *
+     * @param widget The widget representing the input field.
+     * @return Returns the hint contained in the input field.
+     */
+    private String getHintAPI25AndLower(Widget widget) {
+
+        String hint = null;
+        UiObject2 uiObject;
+
+        if (widget.getResourceID().isEmpty()) {
+            uiObject = device.findObject(By.text(widget.getText()));
+        } else {
+            uiObject = device.findObject(By.res(widget.getResourceID()));
+        }
+
+        if (uiObject != null) {
+
+            /*
+             * In order to retrieve the hint of a widget, we have to clear the
+             * input, and this in turn should display the hint if we are lucky.
+             */
+
+            // save original input
+            String textBeforeClear = Objects.toString(uiObject.getText(), "");
+
+            // reset input and hope that this causes a hint to be set
+            uiObject.setText("");
+            String textAfterClear = Objects.toString(uiObject.getText(), "");
+
+            // restore original input
+            uiObject.setText(textBeforeClear);
+
+            hint = textAfterClear;
+        }
+
+        return hint;
     }
 
     /**
@@ -209,7 +230,7 @@ public class AppScreen {
      *
      * @return Returns the widgets of the app screen.
      */
-    public List<Widget> getWidgets(){
+    public List<Widget> getWidgets() {
         return Collections.unmodifiableList(widgets);
     }
 
@@ -266,7 +287,7 @@ public class AppScreen {
      *
      * @param o The other app screen to compare against.
      * @return Returns {@code true} if the two app screens are identical,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     @Override
     public boolean equals(Object o) {

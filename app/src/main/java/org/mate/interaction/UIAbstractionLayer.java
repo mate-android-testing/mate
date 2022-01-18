@@ -34,12 +34,12 @@ public class UIAbstractionLayer {
 
     private static final int UiAutomatorDisconnectedRetries = 3;
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
-    private String packageName;
-    private DeviceMgr deviceMgr;
+    private final String packageName;
+    private final DeviceMgr deviceMgr;
     private IScreenState lastScreenState;
     private int lastScreenStateNumber = 0;
 
-    private IGUIModel guiModel;
+    private final IGUIModel guiModel;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
