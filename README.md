@@ -19,11 +19,18 @@ neither a *Google Play* nor a *Google API* image. This is due to recent changes 
 to permission issues.
 
 ## How to run MATE
+
+The simplest option is to make use of the supplied `mate-commander`:
+* [Windows](https://github.com/mate-android-testing/mate-commander/tree/mate-commander-windows) 
+* [Linux](https://github.com/mate-android-testing/mate-commander) 
+
+If you however want to debug MATE and MATE Server follow the instructions below:
+
 ### 1) Start the device
 Setup the emulator or attach your device via USB and enable USB-Debugging.
 Install and open(!) the app you want to test.
 
-### 2) Build and run MATE server
+### 2) Build and run MATE Server
 Refer to the [instructions](https://github.com/mate-android-testing/mate-server/blob/master/README.md)
 from the MATE server repository.
 
