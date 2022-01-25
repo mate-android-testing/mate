@@ -18,7 +18,7 @@ import org.mate.representation.util.MATERepLog;
  */
 public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
-    private MessageHandler messageHandler;
+    private final MessageHandler messageHandler;
 
     public CommandHandler() {
         // since the Handler is created here, it will use the thread we are currently running on

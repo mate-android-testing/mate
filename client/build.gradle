@@ -92,4 +92,5 @@ dependencies {
     implementation 'com.android.support.test:runner:1.0.2'
     implementation files('libs/xstream-1.4.11-java7.jar')
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    implementation 'androidx.core:core:1.6.0'
 }
