@@ -127,19 +127,18 @@ public class MATE implements AutoCloseable {
             Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
         }
 
-            Registry.getEnvironmentManager().releaseEmulator();
-            // EnvironmentManager.deleteAllScreenShots(packageName);
-            try {
-                Registry.unregisterEnvironmentManager();
-                Registry.unregisterUiAbstractionLayer();
-                Registry.unregisterDeviceMgr();
-                Registry.unregisterProperties();
-                Registry.unregisterRandom();
-                Registry.unregisterPackageName();
-                Registry.unregisterTimeout();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        Registry.getEnvironmentManager().releaseEmulator();
+        // EnvironmentManager.deleteAllScreenShots(packageName);
+        try {
+            Registry.unregisterEnvironmentManager();
+            Registry.unregisterUiAbstractionLayer();
+            Registry.unregisterDeviceMgr();
+            Registry.unregisterProperties();
+            Registry.unregisterRandom();
+            Registry.unregisterPackageName();
+            Registry.unregisterTimeout();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
