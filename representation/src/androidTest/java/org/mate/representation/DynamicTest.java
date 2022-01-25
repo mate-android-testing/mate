@@ -12,8 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.*;
+import org.mate.representation.mateservice.MATEServiceConnection;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -46,8 +45,15 @@ public class DynamicTest {
 
     @Test
     public void run() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("org.mate.representation", appContext.getPackageName());
+        MATEServiceConnection.establish();
+
+        // stay here forever
+        while (true) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
