@@ -1,9 +1,7 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.fuzzing.greybox.GreyBoxFuzzer;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
@@ -21,15 +19,13 @@ import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 
-@RunWith(AndroidJUnit4.class)
 public class ExecuteMATEGreyBoxFuzzing {
 
-    @Test
-    public void useAppContext() {
+    public static void run(String packageName) {
 
         MATE.log_acc("Starting GreyBox Fuzzing...");
 
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
         final GreyBoxFuzzer<?> greyBoxFuzzer = new GreyBoxFuzzer<>(
                 translateChromosomeFactory(Properties.CHROMOSOME_FACTORY()),

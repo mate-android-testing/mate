@@ -9,7 +9,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -30,6 +29,8 @@ import java.util.List;
  */
 public class MATEService extends Service implements IBinder.DeathRecipient {
 
+    public static final String PACKAGE_NAME_INTENT_EXTRA = "packageName";
+    public static final String ALGORITHM_INTENT_EXTRA = "algorithm";
     private IRepresentationLayerInterface representationLayer;
     private IBinder representationLayerBinder;
 
@@ -49,7 +50,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      *
      * In our case, we will make such request using the following ADB command:
      * adb shell am start-foreground-service -n org.mate/.service.MATEService -e packageName
-     * [aut-package-name] -e port [mate-server-port] -e algorithm [mate-algorithm]
+     * [aut-package-name] -e algorithm [mate-algorithm]
      *
      * Notice that the "-e" flag indicate extra parameters that will be received in this method.
      *
@@ -67,13 +68,13 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             return START_NOT_STICKY;
         }
 
-        if (!intent.hasExtra("packageName")) {
-            log("MATE Service starting but package name was not provided");
+        if (!intent.hasExtra(ALGORITHM_INTENT_EXTRA)) {
+            log("MATE Service starting but " + ALGORITHM_INTENT_EXTRA + " was not provided");
             return START_NOT_STICKY;
         }
 
-        if (!intent.hasExtra("algorithm")) {
-            log("MATE Service starting but algorithm was not provided");
+        if (!intent.hasExtra(PACKAGE_NAME_INTENT_EXTRA)) {
+            log("MATE Service starting but " + PACKAGE_NAME_INTENT_EXTRA + " was not provided");
             return START_NOT_STICKY;
         }
 
@@ -82,18 +83,12 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             return START_NOT_STICKY;
         }
 
-        String packageName = intent.getStringExtra("packageName");
-        log(String.format("MATE Service starting for package name: %s", packageName));
+        String algorithm = intent.getStringExtra(ALGORITHM_INTENT_EXTRA);
+        String packageName = intent.getStringExtra(PACKAGE_NAME_INTENT_EXTRA);
+        log(String.format("MATE Service starting for algorithm %s and package name %s",
+                algorithm, packageName));
 
-        // Replace with appropriate call to MATE Client
-        Handler handler = new Handler();
-        final Runnable r = new Runnable() {
-            public void run() {
-                log("I'M WORKING!");
-                handler.postDelayed(this, 1000);
-            }
-        };
-        handler.postDelayed(r, 1000);
+        MATERunner.run(packageName, algorithm);
 
         // If we get killed, after returning from here, restart
         return START_NOT_STICKY;

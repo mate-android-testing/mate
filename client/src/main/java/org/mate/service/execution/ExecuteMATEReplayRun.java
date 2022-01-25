@@ -1,9 +1,8 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
@@ -19,15 +18,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-@RunWith(AndroidJUnit4.class)
 public class ExecuteMATEReplayRun {
 
-    @Test
-    public void useAppContext() {
+    public static void run(String packageName) {
         MATE.log_acc("Starting ReplayRun...");
 
         // init uiAbstractionLayer, properties, etc.
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
         Registry.registerReplayMode();
 

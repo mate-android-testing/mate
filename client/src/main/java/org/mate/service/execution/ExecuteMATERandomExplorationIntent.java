@@ -1,19 +1,16 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.heuristical.RandomExploration;
 
-@RunWith(AndroidJUnit4.class)
 public class ExecuteMATERandomExplorationIntent {
 
 
-    @Test
-    public void useAppContext() {
+    public static void run(String packageName) {
         MATE.log_acc("Starting Random Intent Exploration...");
 
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
         MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 

@@ -1,9 +1,7 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
@@ -15,23 +13,20 @@ import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 
 import java.util.List;
 
-@RunWith(AndroidJUnit4.class)
-public class ExecuteMATEEqualWeightedGE {
+public class ExecuteMATEListAnalogousGE {
+    public static void run(String packageName) {
+        MATE.log_acc("Starting List Analogous GE Algorithm...");
 
-    @Test
-    public void useAppContext() {
-        MATE.log_acc("Starting Equal Weighted GE Algorithm...");
+        MATE mate = new MATE(packageName);
 
-        MATE mate = new MATE();
-
-        final IGeneticAlgorithm<List<Integer>> equalWeightedGE = new GeneticAlgorithmBuilder()
+        final IGeneticAlgorithm<List<Integer>> listAnalogousGE = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)
                 .withChromosomeFactory(ChromosomeFactory.INTEGER_SEQUENCE_CHROMOSOME_FACTORY)
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
-                .withGEMappingFunction(GEMappingFunction.LIST_BASED_EQUAL_WEIGHTED_MAPPING)
+                .withGEMappingFunction(GEMappingFunction.LIST_ANALOGOUS_MAPPING)
                 .withFitnessFunction(FitnessFunction.GENO_TO_PHENO_TYPE)
                 .withCrossoverFunction(CrossOverFunction.INTEGER_SEQUENCE_POINT_CROSS_OVER)
-                .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_POINT_MUTATION)
+                .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_LENGTH_MUTATION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
@@ -40,6 +35,6 @@ public class ExecuteMATEEqualWeightedGE {
                 .withPCrossover(Properties.P_CROSSOVER())
                 .build();
 
-        mate.testApp(equalWeightedGE);
+        mate.testApp(listAnalogousGE);
     }
 }

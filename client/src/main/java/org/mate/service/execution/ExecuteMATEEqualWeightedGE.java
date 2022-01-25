@@ -1,9 +1,7 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
@@ -15,20 +13,18 @@ import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 
 import java.util.List;
 
-@RunWith(AndroidJUnit4.class)
-public class ExecuteMATEStandardGE {
+public class ExecuteMATEEqualWeightedGE {
 
-    @Test
-    public void useAppContext() {
-        MATE.log_acc("Starting Standard GE Algorithm...");
+    public static void run(String packageName) {
+        MATE.log_acc("Starting Equal Weighted GE Algorithm...");
 
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
-        final IGeneticAlgorithm<List<Integer>> standardGE = new GeneticAlgorithmBuilder()
+        final IGeneticAlgorithm<List<Integer>> equalWeightedGE = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)
                 .withChromosomeFactory(ChromosomeFactory.INTEGER_SEQUENCE_CHROMOSOME_FACTORY)
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
-                .withGEMappingFunction(GEMappingFunction.LIST_BASED_BIASED_MAPPING)
+                .withGEMappingFunction(GEMappingFunction.LIST_BASED_EQUAL_WEIGHTED_MAPPING)
                 .withFitnessFunction(FitnessFunction.GENO_TO_PHENO_TYPE)
                 .withCrossoverFunction(CrossOverFunction.INTEGER_SEQUENCE_POINT_CROSS_OVER)
                 .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_POINT_MUTATION)
@@ -40,6 +36,6 @@ public class ExecuteMATEStandardGE {
                 .withPCrossover(Properties.P_CROSSOVER())
                 .build();
 
-        mate.testApp(standardGE);
+        mate.testApp(equalWeightedGE);
     }
 }

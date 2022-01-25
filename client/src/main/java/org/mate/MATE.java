@@ -25,7 +25,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 public class MATE {
 
     // TODO: make singleton
-    public MATE() {
+    public MATE(String packageName) {
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -63,7 +63,7 @@ public class MATE {
         MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
         Registry.registerTimeout(Properties.TIMEOUT() * 60 * 1000);
 
-        Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
+        Registry.registerPackageName(packageName);
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
         final UiDevice device = UiDevice.getInstance(getInstrumentation());

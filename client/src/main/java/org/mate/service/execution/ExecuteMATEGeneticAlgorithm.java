@@ -1,23 +1,20 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 import java.util.List;
 
-@RunWith(AndroidJUnit4.class)
 public class ExecuteMATEGeneticAlgorithm {
 
-    @Test
-    public void useAppContext() {
+    public static void run(String packageName) {
         MATE.log_acc("Starting Genetic Algorithm...");
 
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Properties.ALGORITHM())

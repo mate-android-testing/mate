@@ -1,21 +1,17 @@
-package org.mate;
+package org.mate.service.execution;
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
-@RunWith(AndroidJUnit4.class)
 public class ExecuteMATERandomSearch {
 
-    @Test
-    public void useAppContext() {
+    public static void run(String packageName) {
         MATE.log_acc("Starting Random Search GA ....");
 
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
         final IGeneticAlgorithm randomSearch = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.RANDOM_SEARCH)

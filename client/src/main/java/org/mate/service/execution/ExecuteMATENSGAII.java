@@ -1,27 +1,23 @@
-package org.mate;
+package org.mate.service.execution;
 
 
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 
-@RunWith(AndroidJUnit4.class)
 public class ExecuteMATENSGAII {
 
 
-    @Test
-    public void useAppContext() {
+    public static void run(String packageName) {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("NSGA-II algorithm");
 
-        MATE mate = new MATE();
+        MATE mate = new MATE(packageName);
 
         IGeneticAlgorithm nsga = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NSGAII)

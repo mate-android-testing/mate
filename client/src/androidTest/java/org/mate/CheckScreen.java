@@ -17,8 +17,7 @@ public class CheckScreen {
     private DeviceMgr deviceMgr;
 
 
-    @Test
-    public void useAppContext() throws Exception {
+    public void run(String packageName) throws Exception {
 
 
         MATE.log("start checkscreenstate");
