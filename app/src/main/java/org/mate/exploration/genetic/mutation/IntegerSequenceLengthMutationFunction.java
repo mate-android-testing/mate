@@ -8,34 +8,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mutation function that add and/or removes entries from an integer sequences
+ * Provides a mutation function that add and/or removes genes from the chromosome.
  */
 public class IntegerSequenceLengthMutationFunction implements IMutationFunction<List<Integer>> {
+
+    /**
+     * The number of genes that should be added and/or removed.
+     */
     private final int GE_MUTATION_COUNT;
 
     /**
-     * Creates a mutation function that will add and/or removes the given amount of entries from
-     * the integer sequences.
-     * @param geMutationCount how the amount of entries that should be added and/or removed
+     * Initialises the mutation function.
+     *
+     * @param geMutationCount The number of genes that should be added or removed.
      */
     public IntegerSequenceLengthMutationFunction(int geMutationCount) {
         GE_MUTATION_COUNT = geMutationCount;
     }
 
+    /**
+     * Performs a mutation that adds and/or removes genes from the given chromosome.
+     *
+     * @param chromosome The chromosome to be mutated.
+     * @return Returns the mutated chromosome.
+     */
     @Override
-    public List<IChromosome<List<Integer>>> mutate(IChromosome<List<Integer>> chromosome) {
+    public IChromosome<List<Integer>> mutate(IChromosome<List<Integer>> chromosome) {
+
         List<Integer> resultSequence = new ArrayList<>(chromosome.getValue());
 
         for (int i = 0; i < GE_MUTATION_COUNT; i++) {
+
+            // whether to add or remove genes
             boolean doDrop = Randomness.getRnd().nextBoolean();
 
+            // can't remove genes if none present
             if (resultSequence.size() == 0) {
                 doDrop = false;
             }
 
             if (doDrop) {
                 int index = Randomness.randomIndex(resultSequence);
-                //index must not be of Integer Object type to avoid calling wrong overloaded function
+                // index must not be of Integer Object type to avoid calling wrong overloaded function
                 resultSequence.remove(index);
             } else {
                 int index = Randomness.getRnd().nextInt(resultSequence.size() + 1);
@@ -43,8 +57,6 @@ public class IntegerSequenceLengthMutationFunction implements IMutationFunction<
             }
         }
 
-        List<IChromosome<List<Integer>>> chromosomeList = new ArrayList<>();
-        chromosomeList.add(new Chromosome<>(resultSequence));
-        return chromosomeList;
+        return new Chromosome<>(resultSequence);
     }
 }

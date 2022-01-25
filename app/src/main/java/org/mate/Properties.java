@@ -55,7 +55,7 @@ public class Properties {
     /*
     * Intent fuzzing related properties.
      */
-    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
+    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(0.0f); }
 
     /**
      * The optimisation strategy that should be applied.
@@ -74,7 +74,7 @@ public class Properties {
     }
 
     /*
-     * Whether to serialize a test case. Default: off.
+    * Whether to serialize a test case. Default: off.
      */
     public static boolean RECORD_TEST_CASE() {
         return propertyOr(false);
@@ -88,14 +88,6 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /**
-     * Added by vin on 24/05/2018
-     */
-    // if 0 any point will be added to the archive
-    public static float NOVELTY_THRESHOLD() {
-        return propertyOr(0);
-    }
-
     public static int K_VALUE() {
         return propertyOr(2);
     }
@@ -103,10 +95,6 @@ public class Properties {
     //10;
     public static double RANK_BIAS() {
         return propertyOr(1.7);
-    }
-
-    public static int ARCHIVE_SIZE() {
-        return propertyOr(10);
     }
 
     //10;
@@ -145,10 +133,6 @@ public class Properties {
     public static double P_MUTATE() {
         return propertyOr(0.3);
     }
-    // for mutation functions that apply multiple mutations based on the given probability
-    public static double P_INNER_MUTATE() {
-        return propertyOr(0.3);
-    }
 
     public static double P_SAMPLE_RANDOM() {
         return propertyOr(0.5);
@@ -162,9 +146,23 @@ public class Properties {
         return propertyOr(10);
     }
 
+    public static int MUTATION_RATE() { return propertyOr(1); }
+
+    public static int TOURNAMENT_SIZE() { return propertyOr(2); }
+
+    public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
+
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
+
+    /**
+     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTION()}
+     * provides the mapping from geno to phenotype, this property specifies the core fitness function.
+     *
+     * @return Returns the core fitness function used in the context of GE.
+     */
+    public static FitnessFunction GE_FITNESS_FUNCTION() { return propertyOr(null); }
 
     public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
 
@@ -180,9 +178,31 @@ public class Properties {
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
 
+    /*
+     * Begin Greybox Fuzzing properties
+     */
+
+    /**
+     * The initial size of the seed corpus S.
+     *
+     * @return Returns the initial size of the seed corpus.
+     */
+    public static int SEED_CORPUS_SIZE() { return propertyOr(10); }
+
+    /**
+     * The maximal assignable energy p.
+     *
+     * @return Returns the maximal assignable energy.
+     */
+    public static int MAX_ENERGY() { return propertyOr(10); }
+
+    /*
+     * End Greybox Fuzzing properties
+     */
+
     /**
      * Indicates which objective should be used for the multi-/many-objective
-     * search, i.e. branches or lines.
+     * search, e.g. branches or lines.
      *
      * @return Returns the objective or {@code null} if none was specified.
      */
@@ -256,7 +276,7 @@ public class Properties {
      */
     public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
 
-    //Grammatical Evolution Properties
+    // grammatical evolution properties
     public static int GE_SEQUENCE_LENGTH() {
         return propertyOr(100);
     }
@@ -268,6 +288,29 @@ public class Properties {
     public static int GE_MUTATION_COUNT() {
         return propertyOr(3);
     }
+
+    /**
+     * Novelty Search - Defines the novelty threshold. A value of 0 indicates that every
+     * chromosome will be added to the archive.
+     *
+     * @return Returns the novelty threshold T.
+     */
+    public static double NOVELTY_THRESHOLD() { return propertyOr(0.0); }
+
+    /**
+     * Novelty Search - Defines the maximal size of the archive.
+     *
+     * @return Returns the archive size L.
+     */
+    public static int ARCHIVE_LIMIT() { return propertyOr(10); }
+
+    /**
+     * Novelty Search - Defines the number of nearest neighbours that should be considered
+     * for the novelty metric.
+     *
+     * @return Returns the number of nearest neighbours k.
+     */
+    public static int NEAREST_NEIGHBOURS() { return propertyOr(3); }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the

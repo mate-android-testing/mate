@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
 public class MATE implements AutoCloseable {
 
@@ -67,8 +66,10 @@ public class MATE implements AutoCloseable {
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
-        UiDevice device = UiDevice.getInstance(getInstrumentation());
-        DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        final UiDevice device = UiDevice.getInstance(getInstrumentation());
+        final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        Registry.registerDeviceMgr(deviceMgr);
+
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
@@ -101,17 +102,14 @@ public class MATE implements AutoCloseable {
     public void testApp(final Algorithm algorithm) {
 
         MATE.log_acc("Activities:");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
+        for (String activity : Registry.getUiAbstractionLayer().getActivityNames()) {
+            MATE.log_acc("\t" + activity);
         }
 
         try {
-            TimeoutRun.timeoutRun(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    algorithm.run();
-                    return null;
-                }
+            TimeoutRun.timeoutRun(() -> {
+                algorithm.run();
+                return null;
             }, Registry.getTimeout());
         } catch (Exception e) {
             e.printStackTrace();
@@ -129,17 +127,19 @@ public class MATE implements AutoCloseable {
             Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
         }
 
-        Registry.getEnvironmentManager().releaseEmulator();
-        // EnvironmentManager.deleteAllScreenShots(packageName);
-        try {
-            Registry.unregisterEnvironmentManager();
-            Registry.unregisterUiAbstractionLayer();
-            Registry.unregisterProperties();
-            Registry.unregisterRandom();
-            Registry.unregisterPackageName();
-            Registry.unregisterTimeout();
-        } catch (IOException e) {
-            e.printStackTrace();
+            Registry.getEnvironmentManager().releaseEmulator();
+            // EnvironmentManager.deleteAllScreenShots(packageName);
+            try {
+                Registry.unregisterEnvironmentManager();
+                Registry.unregisterUiAbstractionLayer();
+                Registry.unregisterDeviceMgr();
+                Registry.unregisterProperties();
+                Registry.unregisterRandom();
+                Registry.unregisterPackageName();
+                Registry.unregisterTimeout();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

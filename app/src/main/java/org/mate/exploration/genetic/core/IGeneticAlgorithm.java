@@ -6,32 +6,38 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import java.util.List;
 
 /**
- * Interface for genetic algorithms
- * @param <T> Type wrapped by the chromosome implementation
+ * Defines the interface for any genetic algorithm.
+ *
+ * @param <T> The type of the chromosomes.
  */
 public interface IGeneticAlgorithm<T> extends Algorithm {
+
     /**
-     * Get the current population of the genetic algorithm
-     * @return current population
+     * Gets the current population.
+     *
+     * @return Returns the current population.
      */
     List<IChromosome<T>> getCurrentPopulation();
 
     /**
-     * Create the initial population for the genetic algorithm
+     * Creates the initial population.
      */
     void createInitialPopulation();
 
     /**
-     * Perform a single step of evolution
+     * Performs a single step of evolution.
      */
     void evolve();
 
     /**
-     * Creates initial population and repeatedly executes evolve until the termination condition is
-     * met. Do not manually execute {@link #createInitialPopulation()} before using run, as run will
-     * execute it as well.
+     * Defines the entry point of the genetic algorithm.
      */
     void run();
 
+    /**
+     * Determines the survivors of the current generation.
+     *
+     * @return Returns the survivors of the current generation.
+     */
     List<IChromosome<T>> getGenerationSurvivors();
 }

@@ -12,35 +12,68 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
 
+/**
+ * Provides an implementation of the random search algorithm. In random search, a random chromosome
+ * is initially sampled. Then, in the evolution process, another random chromosome is sampled
+ * and the one with the better fitness is kept while the other one is discarded.
+ *
+ * @param <T> The type of the chromosomes.
+ */
 public class RandomSearch<T> extends GeneticAlgorithm<T> {
 
-    public RandomSearch(IChromosomeFactory<T> chromosomeFactory, List<IFitnessFunction<T>> fitnessFunctions, ITerminationCondition terminationCondition) {
-        super(chromosomeFactory, null, null,null, fitnessFunctions, terminationCondition, 1, 2, 0, 0);
+    /**
+     * Initialises the random search algorithm with the necessary attributes.
+     *
+     * @param chromosomeFactory The used chromosome factory.
+     * @param fitnessFunctions The used fitness functions. Only a single fitness function is used here.
+     * @param terminationCondition The used termination condition.
+     */
+    public RandomSearch(IChromosomeFactory<T> chromosomeFactory,
+                        List<IFitnessFunction<T>> fitnessFunctions,
+                        ITerminationCondition terminationCondition) {
+        super(chromosomeFactory,
+                null,
+                null,
+                null,
+                fitnessFunctions,
+                terminationCondition,
+                1,
+                2,
+                0,
+                0);
     }
 
+    /**
+     * In the evolve step of random search, a second random chromosome is created and the one
+     * with the better fitness value is kept in the population.
+     */
     @Override
     public void evolve() {
 
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
-        // add temporary a second random chromosome
+        // Add temporary a second random chromosome.
         population.add(chromosomeFactory.createChromosome());
 
         // Discard old chromosome if not better than new one.
-        double compared = fitnessFunctions.get(0).getFitness(population.get(0))
-                - fitnessFunctions.get(0).getFitness(population.get(1));
+        IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
+        double compared = fitnessFunction.getNormalizedFitness(population.get(0))
+                - fitnessFunction.getNormalizedFitness(population.get(1));
 
         logCurrentFitness();
 
-        if (compared > 0) {
-            population.remove(1);
+        if (fitnessFunction.isMaximizing()) {
+            population.remove(compared > 0 ? 1 : 0);
         } else {
-            population.remove(0);
+            population.remove(compared < 0 ? 1 : 0);
         }
 
         currentGenerationNumber++;
     }
 
+    /**
+     * Logs the fitness of the chromosomes in the current population.
+     */
     @Override
     protected void logCurrentFitness() {
 
@@ -50,7 +83,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
             for (int j = 0; j < population.size(); j++) {
                 IChromosome<T> chromosome = population.get(j);
                 MATE.log_acc("Chromosome " + (j + 1) + " Fitness: "
-                        + fitnessFunction.getFitness(chromosome));
+                        + fitnessFunction.getNormalizedFitness(chromosome));
 
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE
                         && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {

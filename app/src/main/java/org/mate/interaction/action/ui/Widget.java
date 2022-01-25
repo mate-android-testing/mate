@@ -585,7 +585,10 @@ public class Widget {
     public boolean isEditTextType() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            return android.widget.EditText.class.isAssignableFrom(clazz);
+            return android.widget.EditText.class.isAssignableFrom(clazz)
+                    || android.widget.AutoCompleteTextView.class.isAssignableFrom(clazz)
+                    || android.widget.MultiAutoCompleteTextView.class.isAssignableFrom(clazz)
+                    || android.inputmethodservice.ExtractEditText.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
             MATE.log_warn("Class " + getClazz() + " not found!");
@@ -709,6 +712,15 @@ public class Widget {
         this.hint = hint;
     }
 
+    /**
+     * Checks whether a hint is present.
+     *
+     * @return Returns {@code true} if a hint is present, otherwise {@code false}.
+     */
+    public boolean isHintPresent() {
+        return hint != null && !hint.isEmpty();
+    }
+
     public String getHint() {
         return hint;
     }
@@ -750,7 +762,8 @@ public class Widget {
     public boolean isButtonType() {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
-            return android.widget.Button.class.isAssignableFrom(clazz);
+            return android.widget.Button.class.isAssignableFrom(clazz)
+                    || android.widget.CompoundButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
             MATE.log_warn("Class " + getClazz() + " not found!");

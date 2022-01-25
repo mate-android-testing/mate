@@ -10,23 +10,46 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 
 import java.util.List;
 
+/**
+ * Provides an implementation of a standard genetic algorithm.
+ *
+ * @param <T> The type of the chromosomes.
+ */
 public class StandardGeneticAlgorithm<T> extends GeneticAlgorithm<T> {
 
     /**
-     * Initializing the genetic algorithm with all necessary attributes
+     * Initialises the standard genetic algorithm with the necessary attributes.
      *
-     * @param chromosomeFactory       see {@link IChromosomeFactory}
-     * @param selectionFunction       see {@link ISelectionFunction}
-     * @param crossOverFunction       see {@link ICrossOverFunction}
-     * @param mutationFunction        see {@link IMutationFunction}
-     * @param iFitnessFunctions       see {@link IFitnessFunction}
-     * @param terminationCondition    see {@link ITerminationCondition}
-     * @param populationSize          size of population kept by the genetic algorithm
-     * @param generationSurvivorCount amount of survivors of each generation
-     * @param pCrossover              probability that crossover occurs (between 0 and 1)
-     * @param pMutate                 probability that mutation occurs (between 0 and 1)
+     * @param chromosomeFactory The used chromosome factory.
+     * @param selectionFunction The used selection function.
+     * @param crossOverFunction The used crossover function.
+     * @param mutationFunction The used mutation function.
+     * @param fitnessFunctions The list of fitness functions. Only a single fitness function is used here.
+     * @param terminationCondition The used termination condition.
+     * @param populationSize The population size.
+     * @param bigPopulationSize The big population size.
+     * @param pCrossover The probability rate for crossover.
+     * @param pMutate The probability rate for mutation.
      */
-    public StandardGeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory, ISelectionFunction<T> selectionFunction, ICrossOverFunction<T> crossOverFunction, IMutationFunction<T> mutationFunction, List<IFitnessFunction<T>> iFitnessFunctions, ITerminationCondition terminationCondition, int populationSize, int generationSurvivorCount, double pCrossover, double pMutate) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, iFitnessFunctions, terminationCondition, populationSize, generationSurvivorCount, pCrossover, pMutate);
+    public StandardGeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory,
+                                    ISelectionFunction<T> selectionFunction,
+                                    ICrossOverFunction<T> crossOverFunction,
+                                    IMutationFunction<T> mutationFunction,
+                                    List<IFitnessFunction<T>> fitnessFunctions,
+                                    ITerminationCondition terminationCondition,
+                                    int populationSize,
+                                    int bigPopulationSize,
+                                    double pCrossover,
+                                    double pMutate) {
+        super(chromosomeFactory,
+                selectionFunction,
+                crossOverFunction,
+                mutationFunction,
+                fitnessFunctions,
+                terminationCondition,
+                populationSize,
+                bigPopulationSize,
+                pCrossover,
+                pMutate);
     }
 }

@@ -1,29 +1,62 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
 
+/**
+ * Provides a chromosome factory that generates {@link TestCase}s consisting of random
+ * {@link org.mate.interaction.action.ui.UIAction}s.
+ */
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
 
-    protected UIAbstractionLayer uiAbstractionLayer;
-    protected int maxNumEvents;
-    protected boolean resetApp;
+    /**
+     * A reference to the ui abstraction layer.
+     */
+    protected final UIAbstractionLayer uiAbstractionLayer;
+
+    /**
+     * The maximal number of actions per test case.
+     */
+    protected final int maxNumEvents;
+
+    /**
+     * Whether to reset the AUT before creating a new chromosome (test case).
+     */
+    protected final boolean resetApp;
+
+    /**
+     * Whether this chromosome factory is used within a test suite chromosome factory.
+     */
     protected boolean isTestSuiteExecution;
+
+    /**
+     * The current action count.
+     */
     private int actionsCount;
 
+    /**
+     * Initialises a new chromosome factory that is capable of generating random {@link TestCase}s.
+     *
+     * @param maxNumEvents The maximal number of actions per test case.
+     */
     public AndroidRandomChromosomeFactory(int maxNumEvents) {
         this(true, maxNumEvents);
     }
 
-    public AndroidRandomChromosomeFactory( boolean resetApp, int maxNumEvents) {
+    /**
+     * Initialises a new chromosome factory that is capable of generating random {@link TestCase}s.
+     *
+     * @param resetApp Whether to reset the AUT before creating a new chromosome (test case).
+     * @param maxNumEvents The maximal number of actions per test case.
+     */
+    public AndroidRandomChromosomeFactory(boolean resetApp, int maxNumEvents) {
         this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
         this.resetApp = resetApp;
@@ -32,12 +65,24 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     }
 
     // TODO: might be replaceable with chromosome factory property in the future
+    /**
+     * Defines whether this chromosome factory is used within a test suite chromosome factory.
+     *
+     * @param testSuiteExecution Whether we deal with a test suite execution.
+     */
     public void setTestSuiteExecution(boolean testSuiteExecution) {
         this.isTestSuiteExecution = testSuiteExecution;
     }
 
+    /**
+     * Creates a new chromosome that wraps a test case consisting of random actions. Note that
+     * the chromosome is inherently executed.
+     *
+     * @return Returns the generated chromosome.
+     */
     @Override
     public IChromosome<TestCase> createChromosome() {
+
         if (resetApp) {
             uiAbstractionLayer.resetApp();
         }

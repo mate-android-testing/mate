@@ -53,7 +53,7 @@ public class IntentProvider {
             MATE.log("Derived the following system event receivers: " + systemEventReceivers);
             MATE.log("Derived the following dynamic receivers: " + dynamicReceivers);
         } catch (XmlPullParserException | IOException e) {
-            MATE.log("Couldn't parse the AndroidManifest/staticInfoIntent file!");
+            MATE.log_error("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
         }
     }
@@ -70,9 +70,7 @@ public class IntentProvider {
 
         List<ComponentDescription> toBeRemoved = new ArrayList<>();
 
-        final String BRANCH_COVERAGE_TRACER = "de.uni_passau.fim.auermich.branchcoverage.tracer.Tracer";
-        final String BRANCH_DISTANCE_TRACER = "de.uni_passau.fim.auermich.branchdistance.tracer.Tracer";
-        final String TRACER = "de.uni_passau.fim.auermich.tracer.Tracer";
+        final String TRACER_PACKAGE = "de.uni_passau.fim.auermich";
 
         /*
         * These components are often not available because the Google Analytics SDK is
@@ -91,9 +89,7 @@ public class IntentProvider {
         }};
 
         for (ComponentDescription component : components) {
-            if (component.getFullyQualifiedName().equals(BRANCH_COVERAGE_TRACER)
-                    || component.getFullyQualifiedName().equals(BRANCH_DISTANCE_TRACER)
-                    || component.getFullyQualifiedName().equals(TRACER)
+            if (component.getFullyQualifiedName().startsWith(TRACER_PACKAGE)
                     || GOOGLE_ANALYTICS_COMPONENTS.contains(component.getFullyQualifiedName())) {
                 toBeRemoved.add(component);
             }
@@ -292,7 +288,7 @@ public class IntentProvider {
      */
     public boolean isCurrentActivityHandlingOnNewIntent() {
 
-        String name = Registry.getCurrentActivity();
+        String name = Registry.getUiAbstractionLayer().getCurrentActivity();
 
         String[] tokens = name.split("/");
 
@@ -321,7 +317,7 @@ public class IntentProvider {
      */
     public IntentBasedAction generateIntentBasedActionForCurrentActivity() {
 
-        String name = Registry.getCurrentActivity();
+        String name = Registry.getUiAbstractionLayer().getCurrentActivity();
 
         String[] tokens = name.split("/");
 

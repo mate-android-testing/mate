@@ -4,11 +4,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -36,12 +34,12 @@ public class UIAbstractionLayer {
 
     private static final int UiAutomatorDisconnectedRetries = 3;
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
-    private String packageName;
-    private DeviceMgr deviceMgr;
+    private final String packageName;
+    private final DeviceMgr deviceMgr;
     private IScreenState lastScreenState;
     private int lastScreenStateNumber = 0;
 
-    private IGUIModel guiModel;
+    private final IGUIModel guiModel;
 
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
@@ -54,21 +52,12 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the list of executable widget actions on the current screen.
+     * Returns the list of executable ui actions on the current screen.
      *
      * @return Returns the list of executable widget actions.
      */
     public List<UIAction> getExecutableActions() {
         return getLastScreenState().getActions();
-    }
-
-    /**
-     * Returns the name of the current activity.
-     *
-     * @return Returns the name of the current activity.
-     */
-    public String getCurrentActivity() {
-        return getLastScreenState().getActivityName();
     }
 
     /**
@@ -94,7 +83,7 @@ public class UIAbstractionLayer {
                 return executeActionUnsafe(action);
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
-                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
                         && retryCount < UiAutomatorDisconnectedRetries) {
                     retry = true;
                     retryCount += 1;
@@ -119,12 +108,8 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
-            MATE.log_acc("CRASH MESSAGE" + e.getMessage());
+            MATE.log_acc("CRASH MESSAGE " + e.getMessage());
             deviceMgr.pressHome();
-
-            if (action instanceof PrimitiveAction) {
-                return FAILURE_APP_CRASH;
-            }
 
             // update screen state model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
@@ -132,10 +117,6 @@ public class UIAbstractionLayer {
             guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
             return FAILURE_APP_CRASH;
-        }
-
-        if (action instanceof PrimitiveAction) {
-            return SUCCESS;
         }
 
         state = clearScreen();
@@ -322,7 +303,15 @@ public class UIAbstractionLayer {
                     }
                 }
             }
-            throw new IllegalStateException("Couldn't find any applicable action on permission dialog!");
+
+            /*
+            * In rare circumstances it can happen that the 'ALLOW' button is not discovered for yet
+            * unknown reasons. The discovered widgets on the current screen point to the permission
+            * dialog, but none of the buttons have the desired resource id. The only reasonable
+            * option seems to re-fetch the screen state and hope that the problem is gone.
+             */
+            MATE.log_warn("Couldn't find any applicable action on permission dialog!");
+            return true;
         } else {
             return false;
         }
@@ -434,10 +423,7 @@ public class UIAbstractionLayer {
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        IScreenState state = clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = state;
-        }
+        lastScreenState = clearScreen();
     }
 
     /**
@@ -446,10 +432,7 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        IScreenState state = clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = state;
-        }
+        lastScreenState = clearScreen();
     }
 
     /**
@@ -498,9 +481,42 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Retrieves the name of the currently visible activity.
+     *
+     * @return Returns the name of the currently visible activity.
+     */
+    public String getCurrentActivity() {
+        // TODO: check whether we can use the cached activity -> getLastScreenState().getActivityName();
+        return deviceMgr.getCurrentActivity();
+    }
+
+    /**
+     * Returns the activity names of the AUT.
+     *
+     * @return Returns the activity names of the AUT.
+     */
+    public List<String> getActivityNames() {
+        return deviceMgr.getActivityNames();
+    }
+
+    /**
+     * Retrieves the stack trace of the last discovered crash.
+     *
+     * @return Returns the stack trace of the last crash.
+     */
+    public String getLastCrashStackTrace() {
+        return deviceMgr.getLastCrashStackTrace();
+    }
+
+    /**
      * The possible outcomes of applying an action.
      */
     public enum ActionResult {
-        FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
+        FAILURE_UNKNOWN,
+        FAILURE_EMULATOR_CRASH,
+        FAILURE_APP_CRASH,
+        SUCCESS_NEW_STATE,
+        SUCCESS,
+        SUCCESS_OUTBOUND;
     }
 }
