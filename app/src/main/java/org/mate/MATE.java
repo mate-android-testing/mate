@@ -1,7 +1,5 @@
 package org.mate;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -21,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
+
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 public class MATE implements AutoCloseable {
 
@@ -118,7 +118,13 @@ public class MATE implements AutoCloseable {
         }
     }
 
+    /**
+     * Called after the exploration has finished. Performs various tasks like logging the final
+     * coverage and releasing the emulator.
+     */
+    @Override
     public void close() {
+
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
             CoverageUtils.logFinalCoverage();
         }

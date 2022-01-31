@@ -42,35 +42,48 @@ public final class SimpleTester<S extends State<A>, A extends Action> implements
         }
     }
 
+    @Override
     public void run() {
+
         final long startTime = System.currentTimeMillis();
-        while (noTimeout(startTime)) {
+
+        while (!reachedTimeout(startTime)) {
+
             app.reset();
             S currentState = app.getCurrentState();
 
             boolean noTerminalState;
-            boolean noCrash = true; // Initialization not necessary, but the compiler cannot figure it out.
+            boolean noCrash = true;
             int testcaseLength = 0;
+
             do {
                 final Optional<A> chosenAction = explorationStrategy.chooseAction(currentState);
-                MATE.log_debug("Choose action:" + chosenAction.toString());
+                MATE.log_debug("Choose action:" + chosenAction);
                 noTerminalState = chosenAction.isPresent();
+
                 if (noTerminalState) {
-                    final Pair<Optional<S>, UIAbstractionLayer.ActionResult> result = app.executeAction(chosenAction.get());
+                    final Pair<Optional<S>, UIAbstractionLayer.ActionResult> result
+                            = app.executeAction(chosenAction.get());
                     final Optional<S> nextState = result.first;
                     noCrash = nextState.isPresent();
                     ++testcaseLength;
                     if (noCrash) {
                         currentState = nextState.get();
                     }
-
                 }
-            } while (noTerminalState && noCrash && testcaseLength < maximumNumberOfActionPerTestcase && noTimeout(startTime));
+            } while (noTerminalState && noCrash
+                    && testcaseLength < maximumNumberOfActionPerTestcase && !reachedTimeout(startTime));
         }
     }
 
-    private boolean noTimeout(final long startTime) {
+    /**
+     * Checks whether the specified timeout has been reached.
+     *
+     * @param startTime The starting time of the exploration.
+     * @return Returns {@code true} if the timeout has been reached, otherwise {@code false}.
+     */
+    private boolean reachedTimeout(final long startTime) {
         final long currentTime = System.currentTimeMillis();
-        return currentTime - startTime < timeoutInMilliseconds;
+        return currentTime - startTime > timeoutInMilliseconds;
     }
 }
