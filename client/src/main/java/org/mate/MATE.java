@@ -25,7 +25,7 @@ import static android.support.test.InstrumentationRegistry.getInstrumentation;
 public class MATE {
 
     // TODO: make singleton
-    public MATE(String packageName) {
+    public MATE(String packageName, IRepresentationLayerInterface representationLayer) {
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -52,6 +52,7 @@ public class MATE {
         }
         Registry.registerEnvironmentManager(environmentManager);
         Registry.registerProperties(new Properties(environmentManager.getProperties()));
+
         Random rnd;
         if (Properties.RANDOM_SEED() != null) {
             rnd = new MersenneTwister(Properties.RANDOM_SEED());
@@ -66,16 +67,16 @@ public class MATE {
         Registry.registerPackageName(packageName);
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
-        final UiDevice device = UiDevice.getInstance(getInstrumentation());
-        final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        final DeviceMgr deviceMgr = new DeviceMgr(representationLayer, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
 
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
         // check whether the AUT could be successfully started
-        if (!Registry.getPackageName().equals(device.getCurrentPackageName())) {
-            MATE.log_acc("Currently displayed app: " + device.getCurrentPackageName());
+        String currentPackageName = deviceMgr.getCurrentPackageName();
+        if (!Registry.getPackageName().equals(currentPackageName)) {
+            MATE.log_acc("Currently displayed app: " + currentPackageName);
             throw new IllegalStateException("Couldn't launch app under test!");
         }
 

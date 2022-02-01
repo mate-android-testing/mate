@@ -1,5 +1,6 @@
 package org.mate.service.execution;
 
+import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -12,12 +13,12 @@ import java.util.List;
 
 public class ExecuteMATEMOSA {
 
-    public static void run(String packageName) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("MOSA algorithm");
 
-        MATE mate = new MATE(packageName);
+        MATE mate = new MATE(packageName, representationLayer);
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)

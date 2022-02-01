@@ -1,5 +1,6 @@
 package org.mate.service.execution;
 
+import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.fuzzing.greybox.GreyBoxFuzzer;
@@ -21,11 +22,11 @@ import org.mate.exploration.genetic.termination.TerminationCondition;
 
 public class ExecuteMATEGreyBoxFuzzing {
 
-    public static void run(String packageName) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
 
         MATE.log_acc("Starting GreyBox Fuzzing...");
 
-        MATE mate = new MATE(packageName);
+        MATE mate = new MATE(packageName, representationLayer);
 
         final GreyBoxFuzzer<?> greyBoxFuzzer = new GreyBoxFuzzer<>(
                 translateChromosomeFactory(Properties.CHROMOSOME_FACTORY()),

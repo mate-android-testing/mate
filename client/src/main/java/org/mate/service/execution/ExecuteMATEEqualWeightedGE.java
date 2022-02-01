@@ -1,5 +1,6 @@
 package org.mate.service.execution;
 
+import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.algorithm.Algorithm;
@@ -15,10 +16,10 @@ import java.util.List;
 
 public class ExecuteMATEEqualWeightedGE {
 
-    public static void run(String packageName) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
         MATE.log_acc("Starting Equal Weighted GE Algorithm...");
 
-        MATE mate = new MATE(packageName);
+        MATE mate = new MATE(packageName, representationLayer);
 
         final IGeneticAlgorithm<List<Integer>> equalWeightedGE = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)

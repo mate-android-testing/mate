@@ -16,6 +16,7 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 
+import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -126,9 +127,12 @@ public class DeviceMgr {
      */
     private final StaticStrings staticStrings;
 
+    private IRepresentationLayerInterface representationLayer;
 
-    public DeviceMgr(UiDevice device, String packageName) {
-        this.device = device;
+
+    public DeviceMgr(IRepresentationLayerInterface representationLayer, String packageName) {
+        this.representationLayer = representationLayer;
+        this.device = null;
         this.packageName = packageName;
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;

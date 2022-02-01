@@ -1,5 +1,6 @@
 package org.mate.service.execution;
 
+import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -11,10 +12,10 @@ import java.util.List;
 
 public class ExecuteMATEGeneticAlgorithm {
 
-    public static void run(String packageName) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
         MATE.log_acc("Starting Genetic Algorithm...");
 
-        MATE mate = new MATE(packageName);
+        MATE mate = new MATE(packageName, representationLayer);
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Properties.ALGORITHM())

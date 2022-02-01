@@ -1,6 +1,7 @@
 package org.mate.service.execution;
 
 
+import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.algorithm.Algorithm;
@@ -10,12 +11,12 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 public class ExecuteMATEOnePlusOne {
 
-    public static void run(String packageName) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
 
         MATE.log_acc("Starting Evolutionary Search...");
         MATE.log_acc("One-plus-one algorithm");
 
-        MATE mate = new MATE(packageName);
+        MATE mate = new MATE(packageName, representationLayer);
 
         final IGeneticAlgorithm onePlusOne = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.ONE_PLUS_ONE)
