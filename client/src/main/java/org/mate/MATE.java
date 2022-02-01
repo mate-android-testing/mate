@@ -31,6 +31,10 @@ public class MATE {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
+        // should resolve android.os.NetworkOnMainThreadException
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         Integer serverPort = null;
         try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
