@@ -1,4 +1,4 @@
-package org.mate.interaction.action.ui;
+package org.mate.commons.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 

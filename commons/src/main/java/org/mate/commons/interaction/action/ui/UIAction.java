@@ -1,9 +1,9 @@
-package org.mate.interaction.action.ui;
+package org.mate.commons.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 
 import java.util.Objects;
 
@@ -65,7 +65,7 @@ public class UIAction extends Action {
     }
 
     /**
-     * Another simple text representation used for the {@link org.mate.model.IGUIModel}.
+     * Another simple text representation used for MATE's IGUIModel.
      *
      * @return Returns a simplified string representation.
      */

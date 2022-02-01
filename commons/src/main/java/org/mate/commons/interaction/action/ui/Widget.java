@@ -1,4 +1,4 @@
-package org.mate.interaction.action.ui;
+package org.mate.commons.interaction.action.ui;
 
 
 import android.graphics.Rect;
@@ -6,7 +6,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -582,7 +582,7 @@ public class Widget {
                     || android.inputmethodservice.ExtractEditText.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -757,7 +757,7 @@ public class Widget {
                     || android.widget.CompoundButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -774,7 +774,7 @@ public class Widget {
             return android.widget.ImageButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -791,7 +791,7 @@ public class Widget {
             return android.widget.ImageSwitcher.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -819,7 +819,7 @@ public class Widget {
             return android.widget.ImageView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -847,7 +847,7 @@ public class Widget {
             return android.widget.ScrollView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -868,7 +868,7 @@ public class Widget {
             //       || android.support.v4.view.ViewPager.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -886,7 +886,7 @@ public class Widget {
             return android.widget.AbsSpinner.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -937,7 +937,7 @@ public class Widget {
             return android.widget.AbsListView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -954,7 +954,7 @@ public class Widget {
             return android.widget.TextView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }
@@ -972,7 +972,7 @@ public class Widget {
             return android.widget.Checkable.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
+            MATELog.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
     }

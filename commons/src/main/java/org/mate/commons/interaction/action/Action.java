@@ -1,4 +1,4 @@
-package org.mate.interaction.action;
+package org.mate.commons.interaction.action;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
