@@ -6,6 +6,7 @@ import android.os.RemoteException;
 
 import org.mate.IMATEServiceInterface;
 import org.mate.IRepresentationLayerInterface;
+import org.mate.representation.DeviceInfo;
 import org.mate.representation.util.MATERepLog;
 
 /**
@@ -27,12 +28,24 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public String getCurrentPackageName() throws RemoteException {
+        return DeviceInfo.getInstance().getCurrentPackageName();
+    }
+
+    @Override
+    public String getCurrentActivityName() throws RemoteException {
+        return DeviceInfo.getInstance().getCurrentActivityName();
+    }
+
+    /*
+    @Override
     public void getAvailableActions() throws RemoteException {
         String threadName = Thread.currentThread().getName();
         MATERepLog.info("Command received: getAvailableActions() on thread " + threadName);
         messageHandler.handleMessage(messageHandler.obtainMessage(GET_AVAILABLE_ACTIONS, 0, 0));
         MATERepLog.info("Exiting Command: getAvailableActions()");
     }
+    */
 
     public void setMateService(IMATEServiceInterface mateService) {
         messageHandler.setMateService(mateService);

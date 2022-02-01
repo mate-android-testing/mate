@@ -2,5 +2,6 @@
 package org.mate;
 
 interface IRepresentationLayerInterface {
-    void getAvailableActions();
+    String getCurrentPackageName();
+    String getCurrentActivityName();
 }

@@ -1242,6 +1242,15 @@ public class DeviceMgr {
         device.pressBack();
     }
 
+    public String getCurrentPackageName() {
+        try {
+            return representationLayer.getCurrentPackageName();
+        } catch (RemoteException e) {
+            MATE.log_warn(e.getMessage());
+            return null;
+        }
+    }
+
     /**
      * Retrieves the name of the currently visible activity.
      *
