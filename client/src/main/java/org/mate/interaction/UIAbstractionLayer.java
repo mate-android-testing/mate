@@ -15,7 +15,7 @@ import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
-import org.mate.utils.Utils;
+import org.mate.commons.utils.Utils;
 
 import java.util.Date;
 import java.util.List;

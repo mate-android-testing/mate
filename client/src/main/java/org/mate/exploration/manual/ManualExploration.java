@@ -14,7 +14,7 @@ import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
-import org.mate.utils.Utils;
+import org.mate.commons.utils.Utils;
 
 /**
  * Enables the manual exploration of an app.

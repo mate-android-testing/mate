@@ -85,4 +85,8 @@ public class DeviceInfo {
         String output = device.executeShellCommand("dumpsys activity activities");
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
+
+    public UiDevice getUiDevice() {
+        return device;
+    }
 }

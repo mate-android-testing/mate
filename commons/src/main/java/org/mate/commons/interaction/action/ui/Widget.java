@@ -3,6 +3,8 @@ package org.mate.commons.interaction.action.ui;
 
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -16,8 +18,12 @@ import java.util.Objects;
 /**
  * Represents an element in the ui hierarchy, i.e. a wrapper around a {@link AccessibilityNodeInfo}
  * object. Defines a parent, child and sibling relation.
+ *
+ * Parcelable implementation was auto-generated using the Android Parcelable Code Generator
+ * plugin for Android Studio:
+ * https://plugins.jetbrains.com/plugin/16132-android-parcelable-code-generator
  */
-public class Widget {
+public class Widget implements Parcelable {
 
     /**
      * A reference to the parent widget or {@code null} if it is the root widget.
@@ -1057,4 +1063,171 @@ public class Widget {
         return "Widget{Activity: " + activity + ", resourceID: " + resourceID + ", clazz: " + clazz
                 + ", depth: " + depth + ", index: " + index + ", local index: " + localIndex + "}";
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(this.parent, flags);
+        dest.writeList(this.children);
+        dest.writeString(this.id);
+        dest.writeString(this.clazz);
+        dest.writeString(this.resourceID);
+        dest.writeInt(this.index);
+        dest.writeInt(this.localIndex);
+        dest.writeInt(this.depth);
+        dest.writeString(this.activity);
+        dest.writeString(this.packageName);
+        dest.writeParcelable(this.bounds, flags);
+        dest.writeInt(this.X);
+        dest.writeInt(this.Y);
+        dest.writeInt(this.x1);
+        dest.writeInt(this.x2);
+        dest.writeInt(this.y1);
+        dest.writeInt(this.y2);
+        dest.writeString(this.text);
+        dest.writeString(this.contentDesc);
+        dest.writeString(this.labeledBy);
+        dest.writeByte(this.showingHintText ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.focused ? (byte) 1 : (byte) 0);
+        dest.writeString(this.errorText);
+        dest.writeByte(this.contextClickable ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.importantForAccessibility ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.accessibilityFocused ? (byte) 1 : (byte) 0);
+        dest.writeString(this.labelFor);
+        dest.writeByte(this.checkable ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.checked ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.editable ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.enabled ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.focusable ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.scrollable ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.selected ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.visible ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.maxTextLength);
+        dest.writeByte(this.screenReaderFocusable ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.inputType);
+        dest.writeByte(this.hasChildren ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.heading ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.password ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.clickable ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.longClickable ? (byte) 1 : (byte) 0);
+        dest.writeString(this.hint);
+        dest.writeString(this.color);
+        dest.writeString(this.maxminLum);
+    }
+
+    /*public void readFromParcel(Parcel source) {
+        this.parent = source.readParcelable(Widget.class.getClassLoader());
+        this.children = new ArrayList<Widget>();
+        source.readList(this.children, Widget.class.getClassLoader());
+        this.id = source.readString();
+        this.clazz = source.readString();
+        this.resourceID = source.readString();
+        this.index = source.readInt();
+        this.localIndex = source.readInt();
+        this.depth = source.readInt();
+        this.activity = source.readString();
+        this.packageName = source.readString();
+        this.bounds = source.readParcelable(Rect.class.getClassLoader());
+        this.X = source.readInt();
+        this.Y = source.readInt();
+        this.x1 = source.readInt();
+        this.x2 = source.readInt();
+        this.y1 = source.readInt();
+        this.y2 = source.readInt();
+        this.text = source.readString();
+        this.contentDesc = source.readString();
+        this.labeledBy = source.readString();
+        this.showingHintText = source.readByte() != 0;
+        this.focused = source.readByte() != 0;
+        this.errorText = source.readString();
+        this.contextClickable = source.readByte() != 0;
+        this.importantForAccessibility = source.readByte() != 0;
+        this.accessibilityFocused = source.readByte() != 0;
+        this.labelFor = source.readString();
+        this.checkable = source.readByte() != 0;
+        this.checked = source.readByte() != 0;
+        this.editable = source.readByte() != 0;
+        this.enabled = source.readByte() != 0;
+        this.focusable = source.readByte() != 0;
+        this.scrollable = source.readByte() != 0;
+        this.selected = source.readByte() != 0;
+        this.visible = source.readByte() != 0;
+        this.maxTextLength = source.readInt();
+        this.screenReaderFocusable = source.readByte() != 0;
+        this.inputType = source.readInt();
+        this.hasChildren = source.readByte() != 0;
+        this.heading = source.readByte() != 0;
+        this.password = source.readByte() != 0;
+        this.clickable = source.readByte() != 0;
+        this.longClickable = source.readByte() != 0;
+        this.hint = source.readString();
+        this.color = source.readString();
+        this.maxminLum = source.readString();
+    }*/
+
+    protected Widget(Parcel in) {
+        this.parent = in.readParcelable(Widget.class.getClassLoader());
+        this.children = new ArrayList<Widget>();
+        in.readList(this.children, Widget.class.getClassLoader());
+        this.id = in.readString();
+        this.clazz = in.readString();
+        this.resourceID = in.readString();
+        this.index = in.readInt();
+        this.localIndex = in.readInt();
+        this.depth = in.readInt();
+        this.activity = in.readString();
+        this.packageName = in.readString();
+        this.bounds = in.readParcelable(Rect.class.getClassLoader());
+        this.X = in.readInt();
+        this.Y = in.readInt();
+        this.x1 = in.readInt();
+        this.x2 = in.readInt();
+        this.y1 = in.readInt();
+        this.y2 = in.readInt();
+        this.text = in.readString();
+        this.contentDesc = in.readString();
+        this.labeledBy = in.readString();
+        this.showingHintText = in.readByte() != 0;
+        this.focused = in.readByte() != 0;
+        this.errorText = in.readString();
+        this.contextClickable = in.readByte() != 0;
+        this.importantForAccessibility = in.readByte() != 0;
+        this.accessibilityFocused = in.readByte() != 0;
+        this.labelFor = in.readString();
+        this.checkable = in.readByte() != 0;
+        this.checked = in.readByte() != 0;
+        this.editable = in.readByte() != 0;
+        this.enabled = in.readByte() != 0;
+        this.focusable = in.readByte() != 0;
+        this.scrollable = in.readByte() != 0;
+        this.selected = in.readByte() != 0;
+        this.visible = in.readByte() != 0;
+        this.maxTextLength = in.readInt();
+        this.screenReaderFocusable = in.readByte() != 0;
+        this.inputType = in.readInt();
+        this.hasChildren = in.readByte() != 0;
+        this.heading = in.readByte() != 0;
+        this.password = in.readByte() != 0;
+        this.clickable = in.readByte() != 0;
+        this.longClickable = in.readByte() != 0;
+        this.hint = in.readString();
+        this.color = in.readString();
+        this.maxminLum = in.readString();
+    }
+
+    public static final Parcelable.Creator<Widget> CREATOR = new Parcelable.Creator<Widget>() {
+        @Override
+        public Widget createFromParcel(Parcel source) {
+            return new Widget(source);
+        }
+
+        @Override
+        public Widget[] newArray(int size) {
+            return new Widget[size];
+        }
+    };
 }

@@ -6,8 +6,13 @@ import android.os.RemoteException;
 
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.representation.DeviceInfo;
+import org.mate.representation.state.widget.WidgetScreenParser;
 import org.mate.representation.util.MATERepLog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles commands requested by the MATE Service (e.g., fetch current available actions).
@@ -35,6 +40,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     @Override
     public String getCurrentActivityName() throws RemoteException {
         return DeviceInfo.getInstance().getCurrentActivityName();
+    }
+
+    @Override
+    public List<Widget> getCurrentScreenWidgets() throws RemoteException {
+        return new WidgetScreenParser().getWidgets();
     }
 
     /*

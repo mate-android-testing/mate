@@ -5,7 +5,7 @@ import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
 import org.mate.state.executables.ActionsScreenState;
 import org.mate.state.executables.AppScreen;
-import org.mate.utils.Utils;
+import org.mate.commons.utils.Utils;
 
 /**
  * A simple factory to retrieve the current screen state.

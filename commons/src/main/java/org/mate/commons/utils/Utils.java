@@ -1,4 +1,4 @@
-package org.mate.utils;
+package org.mate.commons.utils;
 
 /**
  * A collection of utility functions.

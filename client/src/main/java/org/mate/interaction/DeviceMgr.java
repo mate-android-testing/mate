@@ -34,7 +34,7 @@ import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
-import org.mate.utils.Utils;
+import org.mate.commons.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
 import org.mate.utils.input_generation.Mutation;
