@@ -1,8 +1,8 @@
 package org.mate.accessibility.check.bbc.screenbased;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.IScreenAccessibilityCheck;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
 
 import java.util.ArrayList;
@@ -33,21 +33,21 @@ public class ScreenBasedAccessibilityViolationChecker {
 
         List<AccessibilityViolation> violations = new ArrayList<AccessibilityViolation>();
         screenBasedChecks = createScreenBasedAccessibilityList();
-        MATE.log(">>SCREEN BASED CHECKS");
+        MATELog.log(">>SCREEN BASED CHECKS");
 
         for (IScreenAccessibilityCheck screenCheck: screenBasedChecks){
             AccessibilityViolation violation = screenCheck.check(state);
             if (violation!=null) {
                 violations.add(violation);
                 violation.reportFlaw();
-                MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " " + violation.getInfo() );
+                MATELog.log("VIOLATION FOUND: " + violation.getType().getValue() + " " + violation.getInfo() );
                 if (!violation.getInfo().equals(""))
-                    MATE.log(" -- extra info: " + violation.getInfo());
+                    MATELog.log(" -- extra info: " + violation.getInfo());
             }
 
         }
 
-        MATE.log("<<SCREEN BASED CHECKS");
+        MATELog.log("<<SCREEN BASED CHECKS");
         return violations;
     }
 }

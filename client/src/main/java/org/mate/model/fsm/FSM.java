@@ -2,8 +2,8 @@ package org.mate.model.fsm;
 
 import android.support.annotation.NonNull;
 
-import org.mate.MATE;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
 
 import java.util.Collections;
@@ -51,7 +51,7 @@ public class FSM {
 
         Transition transition = new Transition(source, target, action);
         if (transitions.add(transition)) {
-            MATE.log_debug(String.valueOf(this));
+            MATELog.log_debug(String.valueOf(this));
         }
     }
 

@@ -3,6 +3,7 @@ package org.mate.service.execution;
 import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.fuzzing.greybox.GreyBoxFuzzer;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
@@ -24,7 +25,7 @@ public class ExecuteMATEGreyBoxFuzzing {
 
     public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
 
-        MATE.log_acc("Starting GreyBox Fuzzing...");
+        MATELog.log_acc("Starting GreyBox Fuzzing...");
 
         MATE mate = new MATE(packageName, representationLayer);
 
@@ -37,7 +38,7 @@ public class ExecuteMATEGreyBoxFuzzing {
         );
 
         mate.testApp(greyBoxFuzzer);
-        MATE.log_acc("Total number of crashes: " + greyBoxFuzzer.getCrashingInputs().size());
+        MATELog.log_acc("Total number of crashes: " + greyBoxFuzzer.getCrashingInputs().size());
     }
 
     private static IChromosomeFactory translateChromosomeFactory(ChromosomeFactory chromosomeFactory) {

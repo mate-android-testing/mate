@@ -3,6 +3,7 @@ package org.mate.service.execution;
 import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -13,7 +14,7 @@ public class ExecuteMATENoveltySearch {
 
     public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
 
-        MATE.log_acc("Starting Novelty Search...");
+        MATELog.log_acc("Starting Novelty Search...");
 
         MATE mate = new MATE(packageName, representationLayer);
 

@@ -4,10 +4,10 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.EnvironmentManager;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -49,11 +49,11 @@ public class IntentProvider {
             // filter out system event intent filters
             systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEventActions);
 
-            MATE.log("Derived the following components: " + components);
-            MATE.log("Derived the following system event receivers: " + systemEventReceivers);
-            MATE.log("Derived the following dynamic receivers: " + dynamicReceivers);
+            MATELog.log("Derived the following components: " + components);
+            MATELog.log("Derived the following system event receivers: " + systemEventReceivers);
+            MATELog.log("Derived the following dynamic receivers: " + dynamicReceivers);
         } catch (XmlPullParserException | IOException e) {
-            MATE.log_error("Couldn't parse the AndroidManifest/staticInfoIntent file!");
+            MATELog.log_error("Couldn't parse the AndroidManifest/staticInfoIntent file!");
             throw new IllegalStateException(e);
         }
     }
@@ -303,7 +303,7 @@ public class IntentProvider {
             activity = packageName + activity;
         }
 
-        MATE.log("Current visible Activity is: " + activity);
+        MATELog.log("Current visible Activity is: " + activity);
         ComponentDescription component = ComponentDescription.getComponentByName(components, activity);
 
         return component != null && component.isActivity() && component.isHandlingOnNewIntent();
@@ -362,7 +362,7 @@ public class IntentProvider {
                                                         boolean dynamicReceiver, boolean handleOnNewIntent) {
 
         if (!component.hasIntentFilter()) {
-            MATE.log("Component " + component + " doesn't declare any intent-filter!");
+            MATELog.log("Component " + component + " doesn't declare any intent-filter!");
             throw new IllegalStateException("Component without intent-filter!");
         }
 

@@ -1,18 +1,18 @@
 package org.mate.exploration.manual;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySummaryResults;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 import org.mate.utils.Utils;
 
@@ -42,14 +42,14 @@ public class ManualExploration implements Algorithm {
 
                 IScreenState state = uiAbstractionLayer.getLastScreenState();
 
-                MATE.log_debug("Widgets on screen: ");
+                MATELog.log_debug("Widgets on screen: ");
                 for (Widget w: state.getWidgets()) {
-                    MATE.log(w.getClazz() + "-" + w.getId() + "-" + w.getText()
+                    MATELog.log(w.getClazz() + "-" + w.getId() + "-" + w.getText()
                             + "-" + w.getBounds().toShortString());
                 }
 
-                MATE.log_acc("New state: " + state.getId());
-                MATE.log_acc("Activity: " + state.getActivityName());
+                MATELog.log_acc("New state: " + state.getId());
+                MATELog.log_acc("Activity: " + state.getActivityName());
 
 
                 if (enableAccessibilityChecks) {

@@ -2,8 +2,8 @@ package org.mate;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.manual.CheckCurrentScreen;
 import org.mate.interaction.DeviceMgr;
 
@@ -20,7 +20,7 @@ public class CheckScreen {
     public void run(String packageName) throws Exception {
 
 
-        MATE.log("start checkscreenstate");
+        MATELog.log("start checkscreenstate");
 
         /*
         Thread.sleep(5000);

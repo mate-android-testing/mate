@@ -11,7 +11,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.action.intent.ComponentDescription;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
@@ -202,7 +202,7 @@ public final class IntentBasedActionConverter implements Converter {
 
         if (intent.getComponent() == null && intent.getPackage() == null) {
             // should hopefully never happen, at least this should not be the typical use case
-            MATE.log("Intent without specified component nor package name!");
+            MATELog.log("Intent without specified component nor package name!");
         }
 
         return new IntentBasedAction(intent, component, intentFilter);

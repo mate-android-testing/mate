@@ -2,7 +2,7 @@ package org.mate.interaction.action.intent;
 
 import android.util.Xml;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -134,7 +134,7 @@ public final class IntentInfoParser {
 
                     // handle dynamically registered broadcast receivers (only those with intent-filters)
                     if (!foundComponent && dynamicReceiver && !intentFilters.isEmpty()) {
-                        MATE.log("Discovered Dynamic Broadcast Receiver: " + componentName
+                        MATELog.log("Discovered Dynamic Broadcast Receiver: " + componentName
                                 + " (" + parser.getName() + ")");
 
                         ComponentDescription receiver = new ComponentDescription(componentName,

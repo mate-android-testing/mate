@@ -1,12 +1,12 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 
 public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
     @Override
@@ -27,8 +27,8 @@ public class AcionableElementsCheck implements IWidgetAccessibilityCheck {
         matchesBackgroundColor = Registry.getEnvironmentManager().matchesSurroundingColor(state.getPackageName(),state.getId(),widget);
 
         if ((widget.isClickable() && widget.getClazz().contains("Button")&& !widget.getText().equals(""))|| checkClickableText) {
-            MATE.log("CHECKS BACKGROUND COLOR = " + widget.getClazz() + " " + widget.getText());
-            MATE.log("   matching: " + matchesBackgroundColor);
+            MATELog.log("CHECKS BACKGROUND COLOR = " + widget.getClazz() + " " + widget.getText());
+            MATELog.log("   matching: " + matchesBackgroundColor);
             if (matchesBackgroundColor>0.5) {
                 AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.ACTIONABLE_ELEMENTS, widget, state, "Button background color is the same as the screen, match: " + matchesBackgroundColor);
                 violation.setWarning(true);

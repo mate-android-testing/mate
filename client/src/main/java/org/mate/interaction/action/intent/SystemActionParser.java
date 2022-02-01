@@ -1,6 +1,6 @@
 package org.mate.interaction.action.intent;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -35,7 +35,7 @@ public final class SystemActionParser {
 
             return systemEvents;
         } catch (IOException e) {
-            MATE.log("Reading system events from file failed!");
+            MATELog.log("Reading system events from file failed!");
             throw new IllegalStateException(e);
         }
     }

@@ -3,8 +3,8 @@ package org.mate;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
-import android.util.Log;
 
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
@@ -65,11 +65,11 @@ public class MATE {
         }
         Registry.registerRandom(rnd);
 
-        MATE.log_acc("TIMEOUT: " + Properties.TIMEOUT());
+        MATELog.log_acc("TIMEOUT: " + Properties.TIMEOUT());
         Registry.registerTimeout(Properties.TIMEOUT() * 60 * 1000);
 
         Registry.registerPackageName(packageName);
-        MATE.log_acc("Package name: " + Registry.getPackageName());
+        MATELog.log_acc("Package name: " + Registry.getPackageName());
 
         final DeviceMgr deviceMgr = new DeviceMgr(representationLayer, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
@@ -80,13 +80,13 @@ public class MATE {
         // check whether the AUT could be successfully started
         String currentPackageName = deviceMgr.getCurrentPackageName();
         if (!Registry.getPackageName().equals(currentPackageName)) {
-            MATE.log_acc("Currently displayed app: " + currentPackageName);
+            MATELog.log_acc("Currently displayed app: " + currentPackageName);
             throw new IllegalStateException("Couldn't launch app under test!");
         }
 
         // try to allocate emulator
         String emulator = Registry.getEnvironmentManager().allocateEmulator(Registry.getPackageName());
-        MATE.log_acc("Emulator: " + emulator);
+        MATELog.log_acc("Emulator: " + emulator);
 
         if (emulator == null || emulator.isEmpty()) {
             throw new IllegalStateException("Emulator couldn't be properly allocated!");
@@ -94,7 +94,7 @@ public class MATE {
 
         if (Properties.GRAPH_TYPE() != null) {
             // initialise a graph
-            MATE.log_acc("Initialising graph!");
+            MATELog.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
         }
     }
@@ -106,9 +106,9 @@ public class MATE {
      */
     public void testApp(final Algorithm algorithm) {
 
-        MATE.log_acc("Activities:");
+        MATELog.log_acc("Activities:");
         for (String activity : Registry.getUiAbstractionLayer().getActivityNames()) {
-            MATE.log_acc("\t" + activity);
+            MATELog.log_acc("\t" + activity);
         }
 
         try {
@@ -144,23 +144,4 @@ public class MATE {
         }
     }
 
-    public static void log(String msg) {
-        Log.i("apptest", msg);
-    }
-
-    public static void log_acc(String msg) {
-        Log.e("acc", msg);
-    }
-
-    public static void log_debug(String msg) {
-        Log.d("debug", msg);
-    }
-
-    public static void log_warn(String msg) {
-        Log.w("warning", msg);
-    }
-
-    public static void log_error(String msg) {
-        Log.e("error", msg);
-    }
 }

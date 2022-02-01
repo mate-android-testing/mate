@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.crossover;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -49,7 +49,7 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
     public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
 
         if (parents.size() == 1) {
-            MATE.log_warn("PrimitiveTestCaseMergeCrossOverFunction not applicable on single chromosome!");
+            MATELog.log_warn("PrimitiveTestCaseMergeCrossOverFunction not applicable on single chromosome!");
             return Collections.singletonList(parents.get(0));
         }
         

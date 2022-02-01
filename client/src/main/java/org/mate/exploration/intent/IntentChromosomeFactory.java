@@ -1,11 +1,12 @@
 package org.mate.exploration.intent;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentDescription;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentProvider;
@@ -15,7 +16,7 @@ import org.mate.utils.coverage.CoverageUtils;
 
 /**
  * Provides a chromosome factory that produces {@link TestCase}s consisting of a combination of
- * {@link org.mate.interaction.action.ui.UIAction}, {@link org.mate.interaction.action.intent.IntentBasedAction}
+ * {@link UIAction}, {@link org.mate.interaction.action.intent.IntentBasedAction}
  * and {@link org.mate.interaction.action.intent.SystemAction} actions.
  */
 public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
@@ -113,13 +114,13 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         relativeActivityWithOnNewIntentAmount = ((float) numberOfActivitiesHandlingOnNewIntent)
                 / numberOfActivitiesHandlingOnNewIntent + numberOfActivities;
 
-        MATE.log("Total number of components: " + numberOfComponents);
-        MATE.log("Number of Activities: " + numberOfActivities);
-        MATE.log("Number of Services: " + numberOfServices);
-        MATE.log("Number of Receivers: " + numberOfReceivers);
-        MATE.log("Number of system Receivers: " + intentProvider.getSystemEventReceivers().size());
-        MATE.log("Number of dynamic Receivers: " + intentProvider.getDynamicReceivers().size());
-        MATE.log("Number of Activities handling OnNewIntent: " + numberOfActivitiesHandlingOnNewIntent);
+        MATELog.log("Total number of components: " + numberOfComponents);
+        MATELog.log("Number of Activities: " + numberOfActivities);
+        MATELog.log("Number of Services: " + numberOfServices);
+        MATELog.log("Number of Receivers: " + numberOfReceivers);
+        MATELog.log("Number of system Receivers: " + intentProvider.getSystemEventReceivers().size());
+        MATELog.log("Number of dynamic Receivers: " + intentProvider.getDynamicReceivers().size());
+        MATELog.log("Number of Activities handling OnNewIntent: " + numberOfActivitiesHandlingOnNewIntent);
     }
 
     /**
@@ -138,7 +139,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         // TODO: If we can ensure that sdcard files are not touched by the app, then pushing
         //  those files is redundant and we could do this once before creating the first chromosome
         // push dummy files onto sd card
-        MATE.log("Pushing custom media files: "
+        MATELog.log("Pushing custom media files: "
                 + Registry.getEnvironmentManager().pushDummyFiles());
 
         TestCase testCase = TestCase.newInitializedTestCase();

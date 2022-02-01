@@ -1,10 +1,10 @@
 package org.mate.exploration.manual;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 
 public class CheckCurrentScreen {
 
@@ -93,12 +93,12 @@ public class CheckCurrentScreen {
 
         Registry.getEnvironmentManager().takeScreenshot(screenState.getPackageName(), screenState.getId());
 
-        MATE.log("Current screen state: " + screenState.getId());
+        MATELog.log("Current screen state: " + screenState.getId());
 
         for (Widget w : screenState.getWidgets()) {
             if (w.isImportantForAccessibility()) {
-                MATE.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
-                MATE.log("---showing hint: " + w.isShowingHintText());
+                MATELog.log(w.getId() + " " + w.getClazz() + " text: " + w.getText() + " cd: " + w.getContentDesc() + " ht: " + w.getHint() + " error: " + w.getErrorText());
+                MATELog.log("---showing hint: " + w.isShowingHintText());
             }
 
             //actionable: " + w.isActionable() + " icc: " + w.isContextClickable() + " clickable: " + w.isClickable());
@@ -166,6 +166,6 @@ public class CheckCurrentScreen {
 
         }*/
 
-        MATE.log("END OF CURRENT SCREEN VALIDATION");
+        MATELog.log("END OF CURRENT SCREEN VALIDATION");
     }
 }

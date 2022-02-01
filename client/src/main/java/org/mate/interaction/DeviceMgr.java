@@ -17,20 +17,20 @@ import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 
 import org.mate.IRepresentationLayerInterface;
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.AUTCrashException;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
-import org.mate.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
@@ -55,8 +55,8 @@ import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.support.test.InstrumentationRegistry.getContext;
-import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
-import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
+import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_DOWN;
+import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
  * The device manager is responsible for the actual execution of the various actions.
@@ -139,13 +139,8 @@ public class DeviceMgr {
         this.staticStrings = StaticStringsParser.parseStaticStrings();
     }
 
-    /**
-     * Returns the ui device instance.
-     *
-     * @return Returns the ui device instance.
-     */
-    public UiDevice getDevice() {
-        return device;
+    public IRepresentationLayerInterface getRepresentationLayer() {
+        return representationLayer;
     }
 
     /**
@@ -204,8 +199,8 @@ public class DeviceMgr {
             device.executeShellCommand("su root am broadcast -a " + action.getAction()
                     + " " + tag + " " + component);
         } catch (IOException e) {
-            MATE.log_warn("Executing system action failed!");
-            MATE.log_warn(e.getMessage());
+            MATELog.log_warn("Executing system action failed!");
+            MATELog.log_warn(e.getMessage());
 
             // fall back mechanism
             Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
@@ -361,7 +356,7 @@ public class DeviceMgr {
 
         if (spinner == null) {
             // we fall back to single click mechanism
-            MATE.log_warn("Spinner element couldn't be found!");
+            MATELog.log_warn("Spinner element couldn't be found!");
             handleClick(spinnerWidget);
             return;
         }
@@ -374,7 +369,7 @@ public class DeviceMgr {
 
             if (selectedEntry == null) {
                 // we fall back to single click mechanism
-                MATE.log_warn("Selected entry of spinner couldn't be found!");
+                MATELog.log_warn("Selected entry of spinner couldn't be found!");
                 handleClick(spinnerWidget);
                 return;
             }
@@ -384,7 +379,7 @@ public class DeviceMgr {
 
             if (dropDownMenu.getChildren().isEmpty()) {
                 // we fall back to single click mechanism
-                MATE.log_warn("Spinner without drop-down menu!");
+                MATELog.log_warn("Spinner without drop-down menu!");
                 handleClick(spinnerWidget);
                 return;
             }
@@ -448,7 +443,7 @@ public class DeviceMgr {
                         Widget selectedWidget = spinnerWidget.getChildren().get(0);
                         handleSpinnerScrolling(spinnerWidget, selectedWidget);
                     } else {
-                        MATE.log_warn("Couldn't locate spinner at location ("
+                        MATELog.log_warn("Couldn't locate spinner at location ("
                                 + spinnerClickAction.getX() + "," + spinnerClickAction.getY() + ")!");
                     }
                 }
@@ -520,7 +515,7 @@ public class DeviceMgr {
                 try {
                     device.sleep();
                 } catch (RemoteException e) {
-                    MATE.log("Sleep couldn't be performed");
+                    MATELog.log("Sleep couldn't be performed");
                     e.printStackTrace();
                 }
                 break;
@@ -528,7 +523,7 @@ public class DeviceMgr {
                 try {
                     device.wakeUp();
                 } catch (RemoteException e) {
-                    MATE.log("Wake up couldn't be performed");
+                    MATELog.log("Wake up couldn't be performed");
                     e.printStackTrace();
                 }
                 break;
@@ -594,16 +589,16 @@ public class DeviceMgr {
             final String msg = "Calling startActivity() from outside of an Activity  context " +
                     "requires the FLAG_ACTIVITY_NEW_TASK flag.";
             if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
-                MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
+                MATELog.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
                 try {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     InstrumentationRegistry.getTargetContext().startActivity(intent);
                 } catch (Exception ex) {
-                    MATE.log("Executing Intent-based action failed: " + ex.getMessage());
+                    MATELog.log("Executing Intent-based action failed: " + ex.getMessage());
                     ex.printStackTrace();
                 }
             } else {
-                MATE.log("Executing Intent-based action failed: " + e.getMessage());
+                MATELog.log("Executing Intent-based action failed: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -685,7 +680,7 @@ public class DeviceMgr {
                 widget = findWidget(uiElement);
             } catch (StaleObjectException e) {
 
-                MATE.log_warn("Stale ui element!");
+                MATELog.log_warn("Stale ui element!");
                 e.printStackTrace();
 
                 /*
@@ -708,7 +703,7 @@ public class DeviceMgr {
                 String textData = Registry.isReplayMode() ? action.getText() :
                         Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
-                MATE.log_debug("Inserting text: " + textData);
+                MATELog.log_debug("Inserting text: " + textData);
                 uiElement.setText(textData);
 
                 // record for possible replaying + findObject() relies on it
@@ -774,7 +769,7 @@ public class DeviceMgr {
     private void checkForCrash() throws AUTCrashException {
 
         if (checkForCrashDialog()) {
-            MATE.log("CRASH");
+            MATELog.log("CRASH");
             throw new AUTCrashException("App crashed");
         }
     }
@@ -821,11 +816,11 @@ public class DeviceMgr {
         try {
             String output = device.executeShellCommand(isInPortraitMode ? LANDSCAPE_MODE_CMD : PORTRAIT_MODE_CMD);
             if (!output.isEmpty()) {
-                MATE.log_warn("Couldn't toggle rotation: " + output);
+                MATELog.log_warn("Couldn't toggle rotation: " + output);
             }
             isInPortraitMode = !isInPortraitMode;
         } catch (IOException e) {
-            MATE.log_error("Couldn't change rotation!");
+            MATELog.log_error("Couldn't change rotation!");
             throw new IllegalStateException(e);
         } finally {
             /*
@@ -844,11 +839,11 @@ public class DeviceMgr {
         try {
             String output = device.executeShellCommand(DISABLE_AUTO_ROTATION_CMD);
             if (!output.isEmpty()) {
-                MATE.log_warn("Couldn't disable auto rotation: " + output);
+                MATELog.log_warn("Couldn't disable auto rotation: " + output);
             }
             disabledAutoRotate = true;
         } catch (IOException e) {
-            MATE.log_error("Couldn't disable auto rotation!");
+            MATELog.log_error("Couldn't disable auto rotation!");
             throw new IllegalStateException(e);
         }
     }
@@ -865,11 +860,11 @@ public class DeviceMgr {
         try {
             String output = device.executeShellCommand(PORTRAIT_MODE_CMD);
             if (!output.isEmpty()) {
-                MATE.log_warn("Couldn't change to portrait mode: " + output);
+                MATELog.log_warn("Couldn't change to portrait mode: " + output);
             }
             isInPortraitMode = true;
         } catch (IOException e) {
-            MATE.log_error("Couldn't change to portrait mode!");
+            MATELog.log_error("Couldn't change to portrait mode!");
             throw new IllegalStateException(e);
         }
     }
@@ -1036,8 +1031,8 @@ public class DeviceMgr {
         String textData = Registry.isReplayMode() ? widget.getText() :
                 Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
-        MATE.log_debug("Input text: " + textData);
-        MATE.log_debug("Previous text: " + widget.getText());
+        MATELog.log_debug("Input text: " + textData);
+        MATELog.log_debug("Previous text: " + widget.getText());
 
         UiObject2 uiObject = findObject(widget);
 
@@ -1061,7 +1056,7 @@ public class DeviceMgr {
                 // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
                 device.pressBack();
             } else {
-                MATE.log("  ********* obj " + widget.getId() + "  not found");
+                MATELog.log("  ********* obj " + widget.getId() + "  not found");
             }
         }
     }
@@ -1205,7 +1200,7 @@ public class DeviceMgr {
      * Doesn't actually re-install the app, solely deletes the app's internal storage.
      */
     public void reinstallApp() {
-        MATE.log("Reinstall app");
+        MATELog.log("Reinstall app");
         clearApp();
     }
 
@@ -1213,7 +1208,7 @@ public class DeviceMgr {
      * Restarts the AUT.
      */
     public void restartApp() {
-        MATE.log("Restarting app");
+        MATELog.log("Restarting app");
         // Launch the app
         Context context = getContext();
         final Intent intent = context.getPackageManager()
@@ -1223,7 +1218,7 @@ public class DeviceMgr {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         } catch (Exception e) {
             e.printStackTrace();
-            MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
+            MATELog.log("EXCEPTION CLEARING ACTIVITY FLAG");
         }
         context.startActivity(intent);
     }
@@ -1246,7 +1241,7 @@ public class DeviceMgr {
         try {
             return representationLayer.getCurrentPackageName();
         } catch (RemoteException e) {
-            MATE.log_warn(e.getMessage());
+            MATELog.log_warn(e.getMessage());
             return null;
         }
     }
@@ -1268,8 +1263,8 @@ public class DeviceMgr {
                 return Registry.getEnvironmentManager().getCurrentActivityName();
             }
         } catch (Exception e) {
-            MATE.log_warn("Couldn't retrieve current activity name via local shell!");
-            MATE.log_warn(e.getMessage());
+            MATELog.log_warn("Couldn't retrieve current activity name via local shell!");
+            MATELog.log_warn(e.getMessage());
 
             // fall back mechanism (slow)
             return Registry.getEnvironmentManager().getCurrentActivityName();
@@ -1307,10 +1302,10 @@ public class DeviceMgr {
         try {
             String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
             List<String> fragments = extractFragments(output);
-            MATE.log_debug("Currently active fragments: " + fragments);
+            MATELog.log_debug("Currently active fragments: " + fragments);
             return fragments;
         } catch (Exception e) {
-            MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            MATELog.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -1396,7 +1391,7 @@ public class DeviceMgr {
             // an empty response indicates success of the operation
             return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
         } catch (IOException e) {
-            MATE.log_error("Couldn't grant runtime permissions!");
+            MATELog.log_error("Couldn't grant runtime permissions!");
             throw new IllegalStateException(e);
         }
     }
@@ -1418,8 +1413,8 @@ public class DeviceMgr {
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {
-            MATE.log_warn("Couldn't retrieve activity names!");
-            MATE.log_warn(e.getMessage());
+            MATELog.log_warn("Couldn't retrieve activity names!");
+            MATELog.log_warn(e.getMessage());
 
             // fallback mechanism
             return Registry.getEnvironmentManager().getActivityNames();
@@ -1447,8 +1442,8 @@ public class DeviceMgr {
             }
 
         } catch (IOException e) {
-            MATE.log_warn("Couldn't clear app data!");
-            MATE.log_warn(e.getMessage());
+            MATELog.log_warn("Couldn't clear app data!");
+            MATELog.log_warn(e.getMessage());
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
@@ -1477,8 +1472,8 @@ public class DeviceMgr {
             }
 
         } catch(IOException e) {
-            MATE.log_warn("Couldn't retrieve stack trace of last crash!");
-            MATE.log_warn(e.getMessage());
+            MATELog.log_warn("Couldn't retrieve stack trace of last crash!");
+            MATELog.log_warn(e.getMessage());
         }
 
         // fallback mechanism

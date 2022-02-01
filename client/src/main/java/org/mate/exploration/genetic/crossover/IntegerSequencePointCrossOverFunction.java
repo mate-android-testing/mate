@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.crossover;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.Randomness;
@@ -25,7 +25,7 @@ public class IntegerSequencePointCrossOverFunction implements ICrossOverFunction
     public List<IChromosome<List<Integer>>> cross(List<IChromosome<List<Integer>>> parents) {
 
         if (parents.size() == 1) {
-            MATE.log_warn("IntegerSequencePointCrossOverFunction not applicable on single chromosome!");
+            MATELog.log_warn("IntegerSequencePointCrossOverFunction not applicable on single chromosome!");
             return Collections.singletonList(parents.get(0));
         }
 

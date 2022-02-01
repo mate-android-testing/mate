@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.MATE;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -10,7 +11,7 @@ import org.mate.utils.coverage.CoverageUtils;
 
 /**
  * Provides a chromosome factory that generates {@link TestSuite}s consisting of {@link TestCase}s
- * that in turn consists of random {@link org.mate.interaction.action.ui.UIAction}s.
+ * that in turn consists of random {@link UIAction}s.
  */
 public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
 
@@ -46,10 +47,10 @@ public class AndroidSuiteRandomChromosomeFactory implements IChromosomeFactory<T
     public IChromosome<TestSuite> createChromosome() {
         TestSuite ts = new TestSuite();
         IChromosome<TestSuite> chromosome = new Chromosome<>(ts);
-        MATE.log_acc("Android Suite Random Chromosome Factory: creating chromosome: " + chromosome);
+        MATELog.log_acc("Android Suite Random Chromosome Factory: creating chromosome: " + chromosome);
         for (int i = 0; i < numTestCases; i++) {
             TestCase tc = androidRandomChromosomeFactory.createChromosome().getValue();
-            MATE.log_acc("With test case: " + tc);
+            MATELog.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
             FitnessUtils.storeTestSuiteChromosomeFitness(chromosome, tc);
             CoverageUtils.storeTestSuiteChromosomeCoverage(chromosome, tc);

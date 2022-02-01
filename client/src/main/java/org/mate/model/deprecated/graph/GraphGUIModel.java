@@ -1,12 +1,12 @@
 package org.mate.model.deprecated.graph;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.exploration.deprecated.aco.Ant;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,7 @@ public class GraphGUIModel implements IGUIModel {
 
     private String findScreenNodeByState(IScreenState screenState){
         if (screenState==null){
-            MATE.log_acc("screenstate is null");
+            MATELog.log_acc("screenstate is null");
             return ""; }
 
         for (ScreenNode scNode: stateGraph.getScreenNodes().values()){
@@ -100,11 +100,11 @@ public class GraphGUIModel implements IGUIModel {
             addRootNode(screenState);
             updated=true;
 
-            MATE.log_debug("New state name: "+stateId);
-            MATE.log_debug("Activity name: "+screenState.getActivityName());
-            MATE.log_debug("Widgets: " );
+            MATELog.log_debug("New state name: "+stateId);
+            MATELog.log_debug("Activity name: "+screenState.getActivityName());
+            MATELog.log_debug("Widgets: " );
             for (Widget w: screenState.getWidgets()) {
-                MATE.log_debug(w.getId() + " " + w.getClazz());
+                MATELog.log_debug(w.getId() + " " + w.getClazz());
             }
         }
         else {
@@ -116,11 +116,11 @@ public class GraphGUIModel implements IGUIModel {
                     //new state
                     stateId = "S" + String.valueOf(nodeCount++);
 
-                    MATE.log_debug("New state name: "+stateId);
-                    MATE.log_debug("Activity name: "+screenState.getActivityName());
-                    MATE.log_debug("Widgets: " );
+                    MATELog.log_debug("New state name: "+stateId);
+                    MATELog.log_debug("Activity name: "+screenState.getActivityName());
+                    MATELog.log_debug("Widgets: " );
                     for (Widget w: screenState.getWidgets()){
-                        MATE.log_debug(w.getId()+ " " + w.getClazz());
+                        MATELog.log_debug(w.getId()+ " " + w.getClazz());
                     }
 
                     screenState.setId(stateId);

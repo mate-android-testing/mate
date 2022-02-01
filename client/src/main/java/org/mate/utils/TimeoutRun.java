@@ -1,13 +1,12 @@
 package org.mate.utils;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -23,22 +22,22 @@ public class TimeoutRun {
         boolean finishedWithoutTimeout = false;
 
         try {
-            MATE.log_acc("Starting timeout run...");
+            MATELog.log_acc("Starting timeout run...");
             future.get(milliseconds, TimeUnit.MILLISECONDS);
-            MATE.log_acc("Finished run before timeout.");
+            MATELog.log_acc("Finished run before timeout.");
             finishedWithoutTimeout = true;
         } catch (TimeoutException e) {
-            MATE.log_acc("Timeout. Requesting shutdown...");
+            MATELog.log_acc("Timeout. Requesting shutdown...");
             executor.shutdownNow();
             try {
                 executor.awaitTermination(30, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
-                MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
+                MATELog.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
                 e.printStackTrace();
             }
-            MATE.log_acc("Finished run due to timeout.");
+            MATELog.log_acc("Finished run due to timeout.");
         } catch (InterruptedException | ExecutionException e) {
-            MATE.log_acc("Unexpected exception in timeout run: " + e.getMessage());
+            MATELog.log_acc("Unexpected exception in timeout run: " + e.getMessage());
             e.printStackTrace();
         }
 

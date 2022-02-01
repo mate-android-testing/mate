@@ -2,14 +2,14 @@ package org.mate.utils.testcase;
 
 import android.content.Intent;
 
-import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
-import org.mate.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 
 import java.util.EnumSet;
@@ -26,8 +26,8 @@ public final class TestCaseStatistics {
 
     public static void recordStats(TestCase testCase) {
 
-        MATE.log("Visited activities in order: " + testCase.getActivitySequence());
-        MATE.log("Visited activities: " + testCase.getVisitedActivities());
+        MATELog.log("Visited activities in order: " + testCase.getActivitySequence());
+        MATELog.log("Visited activities: " + testCase.getVisitedActivities());
 
         // intent related statistics
         if (Properties.RELATIVE_INTENT_AMOUNT() > 0.0f) {
@@ -82,12 +82,12 @@ public final class TestCaseStatistics {
 
         // print how often each widget has been triggered
         for (Map.Entry<String, Integer> widgetEntry : widgetActions.entrySet()) {
-            MATE.log("Widget " + widgetEntry.getKey()
+            MATELog.log("Widget " + widgetEntry.getKey()
                     + " has been triggered: " + widgetEntry.getValue() + " times!");
         }
 
         // print the number of unrelated widget actions
-        MATE.log("Number of unrelated widget actions: " + widgetUnrelatedActions);
+        MATELog.log("Number of unrelated widget actions: " + widgetUnrelatedActions);
     }
 
     /**
@@ -136,11 +136,11 @@ public final class TestCaseStatistics {
             }
         }
 
-        MATE.log("Number of targeted Activities: " + activities);
-        MATE.log("Number of targeted Services: " + services);
-        MATE.log("Number of targeted Receivers: " + receivers);
-        MATE.log("Number of targeted dynamic Receivers: " + dynamicReceivers);
-        MATE.log("Number of targeted system-event Receivers: " + systemEventReceivers);
+        MATELog.log("Number of targeted Activities: " + activities);
+        MATELog.log("Number of targeted Services: " + services);
+        MATELog.log("Number of targeted Receivers: " + receivers);
+        MATELog.log("Number of targeted dynamic Receivers: " + dynamicReceivers);
+        MATELog.log("Number of targeted system-event Receivers: " + systemEventReceivers);
     }
 
     private static void printURIs(TestCase testCase) {
@@ -154,7 +154,7 @@ public final class TestCaseStatistics {
                 Intent intent = ((IntentBasedAction) action).getIntent();
 
                 if (intent.getData() != null){
-                    MATE.log("Generated URI: " + intent.getData());
+                    MATELog.log("Generated URI: " + intent.getData());
                 }
             }
         }
@@ -182,8 +182,8 @@ public final class TestCaseStatistics {
             }
         }
 
-        MATE.log("Total Number of generated URIs: " + countTotalURIs);
-        MATE.log("Number of invalid (empty) URIs: " + countInvalidURIs);
+        MATELog.log("Total Number of generated URIs: " + countTotalURIs);
+        MATELog.log("Number of invalid (empty) URIs: " + countInvalidURIs);
     }
 
     /**
@@ -194,7 +194,7 @@ public final class TestCaseStatistics {
     private static void countActionsPerType(TestCase testCase) {
 
         List<Action> actions = testCase.getEventSequence();
-        MATE.log("Total number of actions: " + actions.size());
+        MATELog.log("Total number of actions: " + actions.size());
 
         int numberOfUIActions = 0;
         int numberOfSystemActions = 0;
@@ -212,9 +212,9 @@ public final class TestCaseStatistics {
             }
         }
 
-        MATE.log("Number of UI actions: " + numberOfUIActions);
-        MATE.log("Number of intent-based actions: " + numberOfIntentBasedActions);
-        MATE.log("Number of system actions: " + numberOfSystemActions);
+        MATELog.log("Number of UI actions: " + numberOfUIActions);
+        MATELog.log("Number of intent-based actions: " + numberOfIntentBasedActions);
+        MATELog.log("Number of system actions: " + numberOfSystemActions);
     }
 
     private static void countNullValues(TestCase testCase) {
@@ -256,7 +256,7 @@ public final class TestCaseStatistics {
             }
         }
 
-        MATE.log("TestCase included null values: " + nullCtr);
+        MATELog.log("TestCase included null values: " + nullCtr);
     }
 
 }

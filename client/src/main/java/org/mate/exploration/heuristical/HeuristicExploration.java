@@ -1,7 +1,8 @@
 package org.mate.exploration.heuristical;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 
@@ -12,7 +13,7 @@ public class HeuristicExploration implements Algorithm {
 
     /**
      * The chromosome factory that produces {@link org.mate.model.TestCase}s consisting of
-     * {@link org.mate.interaction.action.ui.UIAction}s, where the ui action selection process is
+     * {@link UIAction}s, where the ui action selection process is
      * based on a widget-based weighting approach as used in Stoat.
      */
     private final HeuristicalChromosomeFactory heuristicChromosomeFactory;
@@ -53,7 +54,7 @@ public class HeuristicExploration implements Algorithm {
         }
 
         for (int i = 0; true; i++) {
-            MATE.log_acc("Exploration #" + (i + 1));
+            MATELog.log_acc("Exploration #" + (i + 1));
             heuristicChromosomeFactory.createChromosome();
             if (!alwaysReset) {
                 Registry.getUiAbstractionLayer().restartApp();

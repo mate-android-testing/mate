@@ -1,6 +1,6 @@
 package org.mate.state.executables;
 
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 
 import java.util.Collections;

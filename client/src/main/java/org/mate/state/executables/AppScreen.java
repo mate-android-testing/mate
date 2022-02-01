@@ -9,10 +9,11 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.MATE;
+import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.utils.Utils;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class AppScreen {
              * connection may get lost. In this case, we should wait some time until we try to
              * re-connect.
              */
-            MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+            MATELog.log_acc("UIAutomator disconnected, try re-connecting!");
             Utils.sleep(1000);
 
             // try to reconnect
@@ -93,9 +94,9 @@ public class AppScreen {
         }
 
         // retrieve widgets from current screen
-        MATE.log_debug("AppScreen: " + activityName);
+        MATELog.log_debug("AppScreen: " + activityName);
         parseWidgets(rootNode, null, 0, 0, 0);
-        MATE.log_debug("Number of widgets: " + widgets.size());
+        MATELog.log_debug("Number of widgets: " + widgets.size());
     }
 
     /**
@@ -111,9 +112,9 @@ public class AppScreen {
     private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
                              int globalIndex, final int localIndex) {
 
-        MATE.log_debug("Node: " + node.getViewIdResourceName() + ", depth: " + depth
+        MATELog.log_debug("Node: " + node.getViewIdResourceName() + ", depth: " + depth
                 + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
-        MATE.log_debug("Node class: " + node.getClassName());
+        MATELog.log_debug("Node class: " + node.getClassName());
 
         Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
         widgets.add(widget);
@@ -133,7 +134,7 @@ public class AppScreen {
         for (int i = 0; i < node.getChildCount(); i++) {
             // the local index is simply the child number
             if (node.getChild(i) == null) {
-                MATE.log_warn("Child node " + i + " at depth " + depth + " not available!");
+                MATELog.log_warn("Child node " + i + " at depth " + depth + " not available!");
             } else {
                 globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
             }

@@ -2,8 +2,8 @@ package org.mate.interaction.action.intent;
 
 import android.util.Xml;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -237,7 +237,7 @@ public final class ComponentParser {
         }
 
         // remove empty components
-        MATE.log("Removing components: " + components.removeAll(receiversToBeRemoved));
+        MATELog.log("Removing components: " + components.removeAll(receiversToBeRemoved));
 
         return systemEventReceivers;
     }

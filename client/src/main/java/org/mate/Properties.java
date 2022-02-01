@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -362,14 +363,14 @@ public class Properties {
                             property.getValue());
                     store.put(key, parsedObj);
                 } catch (Exception e) {
-                    MATE.log(
+                    MATELog.log(
                             "Failure while trying to parse \""
                                     + property.getValue()
                                     + "\" as instance of class "
                                     + propertiesInfo.get(key).getCanonicalName());
                 }
             } else {
-                MATE.log("Unknown property with key: " + property.getKey());
+                MATELog.log("Unknown property with key: " + property.getKey());
             }
         }
     }

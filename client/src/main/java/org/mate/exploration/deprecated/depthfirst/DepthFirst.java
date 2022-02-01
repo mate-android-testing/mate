@@ -2,15 +2,15 @@ package org.mate.exploration.deprecated.depthfirst;
 
 import android.support.test.uiautomator.UiDevice;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.mate.MATE.log;
+import static org.mate.commons.utils.MATELog.log;
 
 /**
  * Created by geyan on 10/06/2017.
@@ -49,14 +49,14 @@ public class DepthFirst {
         //gets a list of all executable actions
         //TODO: how about selectState.getactions
         List<WidgetAction> executableActions = selectedState.getWidgetActions();
-        MATE.log(selectedStateId + " - activity: " + selectedState.getActivityName());
+        MATELog.log(selectedStateId + " - activity: " + selectedState.getActivityName());
         for (WidgetAction act: executableActions){
             Widget widget = act.getWidget();
             String widgetStr ="";
             if (widget!=null)
                 widgetStr = widget.getId() + " - " + widget.getText() +" - " + widget.getClazz() + " - " + widget.getContentDesc();
 
-            MATE.log("..act: " + act.getActionType()+ " on "+ widgetStr);
+            MATELog.log("..act: " + act.getActionType()+ " on "+ widgetStr);
         }
 
         List<Action> adjActions = new ArrayList<>();
@@ -77,7 +77,7 @@ public class DepthFirst {
 
             //if the app is in the screen node/state being explored
             if (stateFound) {
-                MATE.log("CURRENTLY IN STATE: " + selectedStateId);
+                MATELog.log("CURRENTLY IN STATE: " + selectedStateId);
                 try {
 
                     if (action.getActionType()==ActionType.TYPE_TEXT) {
@@ -86,10 +86,10 @@ public class DepthFirst {
                         boolean exit = false;
                         while (i<executableActions.size() && action.getActionType() == ActionType.TYPE_TEXT) {
                             contEditActions++;
-                            MATE.log((i + 1) + "/" + executableActions.size() + " txt: " + action.getWidget().getText());
+                            MATELog.log((i + 1) + "/" + executableActions.size() + " txt: " + action.getWidget().getText());
                             this.deviceMgr.executeAction(action);
                             if (contEditActions>1){
-                                MATE.log("ADD Adj: " + action.getActionType() + " " + action.getWidget().getId());
+                                MATELog.log("ADD Adj: " + action.getActionType() + " " + action.getWidget().getId());
                                 firstAction.addAdjAction(action);
                             }
                             i++;
@@ -99,7 +99,7 @@ public class DepthFirst {
                         action = firstAction;
                     }
                     else{
-                        MATE.log((i + 1) + "/" + executableActions.size() + " txt: " + action.getWidget().getText());
+                        MATELog.log((i + 1) + "/" + executableActions.size() + " txt: " + action.getWidget().getText());
                         this.deviceMgr.executeAction(action);
                     }
 
@@ -114,7 +114,7 @@ public class DepthFirst {
                     action.setTimeToWait(timeToWait);
                     state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
-                    MATE.log("\n\nnumber of actions (new state?): " + state.getActions().size()+"\n\n");
+                    MATELog.log("\n\nnumber of actions (new state?): " + state.getActions().size()+"\n\n");
 
                     //if the same app is running, i.e., no other app is running
                     if (state.getPackageName().equals(this.packageName)) {
@@ -147,18 +147,18 @@ public class DepthFirst {
                 }
             }
             else{
-                MATE.log("STATE NOT FOUND");
+                MATELog.log("STATE NOT FOUND");
             }
 
             t2 = new Date().getTime();
             deviceClosed = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName()==null;
             if (deviceClosed ||!stateFound || (t2-t1> Registry.getTimeout())) {
                 stopExecution = true;
-                MATE.log("STOP execution");
+                MATELog.log("STOP execution");
             }
         }
 
-        MATE.log("EXIT STATE: "+selectedStateId);
+        MATELog.log("EXIT STATE: "+selectedStateId);
     }
 
     private long waitForProgressBar(IScreenState state) {
@@ -169,7 +169,7 @@ public class DepthFirst {
             hasProgressBar=false;
             for (Widget widget : state.getWidgets()) {
                 if (widget.getClazz().contains("ProgressBar") && widget.isEnabled() && widget.getContentDesc().contains("Loading")) {
-                    MATE.log("WAITING PROGRESS BAR TO FINISH");
+                    MATELog.log("WAITING PROGRESS BAR TO FINISH");
                     hasProgressBar = true;
                     try {
                         Thread.sleep(3000);

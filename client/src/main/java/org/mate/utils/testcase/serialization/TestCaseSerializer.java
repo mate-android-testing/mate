@@ -5,8 +5,8 @@ import android.support.test.InstrumentationRegistry;
 
 import com.thoughtworks.xstream.XStream;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.model.TestCase;
 
 import java.io.File;
@@ -38,17 +38,17 @@ public final class TestCaseSerializer {
      * @param testCase The test case to be serialized and stored.
      */
     public static void serializeTestCase(TestCase testCase) {
-        MATE.log("Serializing TestCase " + recordCounter);
+        MATELog.log("Serializing TestCase " + recordCounter);
 
         // create the test-cases folder if not yet present
         File dir = new File(TEST_CASES_DIR);
         if (!dir.exists()) {
-            MATE.log("Creating test-cases folder succeeded: " + dir.mkdir());
+            MATELog.log("Creating test-cases folder succeeded: " + dir.mkdir());
         }
 
         // log whether execution of test case resulted in a crash
         if (testCase.getCrashDetected()) {
-            MATE.log("TestCase " + recordCounter + " caused a crash!");
+            MATELog.log("TestCase " + recordCounter + " caused a crash!");
         }
 
         // the output file
@@ -71,7 +71,7 @@ public final class TestCaseSerializer {
 
             // retry on failure
             if (!success) {
-                MATE.log("Retry serialization...!");
+                MATELog.log("Retry serialization...!");
                 fileWriter.write(testCaseXML);
                 fileWriter.flush();
                 success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
@@ -79,13 +79,13 @@ public final class TestCaseSerializer {
             }
 
             if (!success) {
-                MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                MATELog.log("Serializing TestCase " + recordCounter + " failed!");
                 throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
             }
         } catch (IOException e) {
             // TODO: we could try to write to external storage as a fallback if it is a memory issue
 
-            MATE.log("Retry serialization...!");
+            MATELog.log("Retry serialization...!");
 
             try (Writer fileWriter = new FileWriter(testCaseFile)) {
 
@@ -97,11 +97,11 @@ public final class TestCaseSerializer {
                         "TestCase" + recordCounter + ".xml");
 
                 if (!success) {
-                    MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                    MATELog.log("Serializing TestCase " + recordCounter + " failed!");
                     throw new IllegalStateException(e);
                 }
             } catch (IOException ioe) {
-                MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                MATELog.log("Serializing TestCase " + recordCounter + " failed!");
                 throw new IllegalStateException(e);
             }
         }
@@ -117,7 +117,7 @@ public final class TestCaseSerializer {
      */
     public static TestCase deserializeTestCase() {
 
-        MATE.log("Deserializing TestCase " + replayCounter);
+        MATELog.log("Deserializing TestCase " + replayCounter);
 
         try {
 
@@ -132,14 +132,14 @@ public final class TestCaseSerializer {
             xstream.registerConverter(new WidgetActionConverter());
 
             TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
-            MATE.log("Number of Actions: " + testCase.getEventSequence().size());
+            MATELog.log("Number of Actions: " + testCase.getEventSequence().size());
 
             // update counter
             replayCounter++;
 
             return testCase;
         } catch (FileNotFoundException e) {
-            MATE.log("TestCase file for deserialization not found!");
+            MATELog.log("TestCase file for deserialization not found!");
             return null;
         }
     }

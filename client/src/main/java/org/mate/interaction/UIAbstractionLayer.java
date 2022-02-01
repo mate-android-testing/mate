@@ -1,15 +1,14 @@
 package org.mate.interaction;
 
-import android.os.RemoteException;
 import android.util.Log;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.AUTCrashException;
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.fsm.FSMModel;
@@ -108,7 +107,7 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
-            MATE.log_acc("CRASH MESSAGE " + e.getMessage());
+            MATELog.log_acc("CRASH MESSAGE " + e.getMessage());
             deviceMgr.pressHome();
 
             // update screen state model
@@ -142,7 +141,7 @@ public class UIAbstractionLayer {
 
         // if current package is null, emulator has crashed/closed
         if (currentPackageName == null) {
-            MATE.log_acc("CURRENT PACKAGE: NULL");
+            MATELog.log_acc("CURRENT PACKAGE: NULL");
             return FAILURE_EMULATOR_CRASH;
             // TODO: what to do when the emulator crashes?
         }
@@ -155,7 +154,7 @@ public class UIAbstractionLayer {
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
         if (!currentPackageName.equals(this.packageName)) {
-            MATE.log("current package different from app package: " + currentPackageName);
+            MATELog.log("current package different from app package: " + currentPackageName);
             return SUCCESS_OUTBOUND;
         } else {
             return SUCCESS;
@@ -238,7 +237,7 @@ public class UIAbstractionLayer {
     private boolean handleGoogleSignInDialog(IScreenState screenState) {
 
         if (screenState.getPackageName().equals("com.google.android.gms")) {
-            MATE.log("Detected Google SignIn Dialog!");
+            MATELog.log("Detected Google SignIn Dialog!");
             deviceMgr.pressBack();
             return true;
         } else {
@@ -255,7 +254,7 @@ public class UIAbstractionLayer {
     private boolean handleCrashDialog() {
 
         if (deviceMgr.checkForCrashDialog()) {
-            MATE.log("Detected crash dialog!");
+            MATELog.log("Detected crash dialog!");
             // TODO: Should we really press 'HOME' or better click 'OK' on the dialog?
             deviceMgr.pressHome();
             return true;
@@ -280,7 +279,7 @@ public class UIAbstractionLayer {
         if (screenState.getPackageName().equals("com.google.android.packageinstaller")
                 || screenState.getPackageName().equals("com.android.packageinstaller")) {
 
-            MATE.log("Detected permission dialog!");
+            MATELog.log("Detected permission dialog!");
 
             for (WidgetAction action : screenState.getWidgetActions()) {
 
@@ -298,7 +297,7 @@ public class UIAbstractionLayer {
                         deviceMgr.executeAction(action);
                         return true;
                     } catch (AUTCrashException e) {
-                        MATE.log_warn("Couldn't click on permission dialog!");
+                        MATELog.log_warn("Couldn't click on permission dialog!");
                         throw new IllegalStateException(e);
                     }
                 }
@@ -310,7 +309,7 @@ public class UIAbstractionLayer {
             * dialog, but none of the buttons have the desired resource id. The only reasonable
             * option seems to re-fetch the screen state and hope that the problem is gone.
              */
-            MATE.log_warn("Couldn't find any applicable action on permission dialog!");
+            MATELog.log_warn("Couldn't find any applicable action on permission dialog!");
             return true;
         } else {
             return false;
@@ -330,7 +329,7 @@ public class UIAbstractionLayer {
             if (widget.getText().equals("This app was built for an older version of Android " +
                     "and may not work properly. Try checking for updates, or contact the developer.")) {
 
-                MATE.log("Detected build warnings dialog!");
+                MATELog.log("Detected build warnings dialog!");
 
                 for (WidgetAction action : screenState.getWidgetActions()) {
                     if (action.getActionType() == ActionType.CLICK
@@ -339,7 +338,7 @@ public class UIAbstractionLayer {
                             deviceMgr.executeAction(action);
                             return true;
                         } catch (AUTCrashException e) {
-                            MATE.log_warn("Couldn't click on build warnings dialog!");
+                            MATELog.log_warn("Couldn't click on build warnings dialog!");
                             throw new IllegalStateException(e);
                         }
                     }
@@ -371,7 +370,7 @@ public class UIAbstractionLayer {
 
             for (Widget widget : state.getWidgets()) {
                 if (deviceMgr.checkForProgressBar(widget)) {
-                    MATE.log("WAITING PROGRESS BAR TO FINISH");
+                    MATELog.log("WAITING PROGRESS BAR TO FINISH");
                     hasProgressBar = true;
                     hadProgressBar = true;
                     Utils.sleep(3000);
@@ -456,7 +455,7 @@ public class UIAbstractionLayer {
         Set<IScreenState> recordedScreenStates = guiModel.getStates();
         for (IScreenState recordedScreenState : recordedScreenStates) {
             if (recordedScreenState.equals(screenState)) {
-                MATE.log_debug("Using cached screen state!");
+                MATELog.log_debug("Using cached screen state!");
                 /*
                 * NOTE: We should only return the cached screen state if we can ensure
                 * that equals() actually compares the widgets. Otherwise, we can end up with

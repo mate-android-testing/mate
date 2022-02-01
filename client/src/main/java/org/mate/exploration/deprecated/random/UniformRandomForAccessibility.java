@@ -2,7 +2,6 @@ package org.mate.exploration.deprecated.random;
 
 import android.support.test.uiautomator.UiDevice;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySummaryResults;
@@ -10,10 +9,11 @@ import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
+import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -93,7 +93,7 @@ public class UniformRandomForAccessibility {
                     }
                     //if current package is null, emulator has crashed/closed
                     if (currentPackageName==null) {
-                        MATE.log_debug("CURRENT PACKAGE: NULL");
+                        MATELog.log_debug("CURRENT PACKAGE: NULL");
                         return;
                     }
 
@@ -101,7 +101,7 @@ public class UniformRandomForAccessibility {
                     //if it is not, restart app
                     //check also whether the limit number of actions before restart has been reached
                     if (!currentPackageName.equals(this.packageName)||numberOfActions>= Properties.MAX_NUMBER_EVENTS()) {
-                        MATE.log("package name: " + this.packageName);
+                        MATELog.log("package name: " + this.packageName);
                         deviceMgr.restartApp();
                         state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                         numberOfActions=0;
@@ -132,7 +132,7 @@ public class UniformRandomForAccessibility {
                 }
             }
             catch(Exception e){
-                MATE.log("UNKNOWN EXCEPTION");
+                MATELog.log("UNKNOWN EXCEPTION");
             }
 
             currentTime = new Date().getTime();
@@ -140,7 +140,7 @@ public class UniformRandomForAccessibility {
 
         Registry.getEnvironmentManager().tunnelLegacyCmd("FINISH"+ "_" + Registry.getEnvironmentManager().getEmulator()
                 + selectedScreenState.getPackageName());
-        MATE.log_acc("NUMBER_OF_ACTIONS: " + totalNumberOfActions);
+        MATELog.log_acc("NUMBER_OF_ACTIONS: " + totalNumberOfActions);
     }
 
     private void runAccessibilityChecks(IScreenState state, IScreenState selectedScreenState) {
@@ -150,8 +150,8 @@ public class UniformRandomForAccessibility {
 
         //updates the current activity name
         currentActivityName = state.getActivityName();
-        MATE.log("start ACCESSIBILITY CHECKS: " );
-        MATE.log_acc("ACTIVITY_VISITED: " + state.getActivityName());
+        MATELog.log("start ACCESSIBILITY CHECKS: " );
+        MATELog.log_acc("ACTIVITY_VISITED: " + state.getActivityName());
 
 
         //prepare for collecting results
@@ -182,7 +182,7 @@ public class UniformRandomForAccessibility {
 
             if (contrastRatioViolationFound!=null) {
                 //report accessibility flaw found
-                MATE.log("ADD CONTRAST FLAW");
+                MATELog.log("ADD CONTRAST FLAW");
                 AccessibilitySummaryResults.addAccessibilityFlaw("ACCESSIBILITY_CONTRAST_FLAW",
                         widget, contrastRatioViolationFound.getInfo());
 
@@ -204,7 +204,7 @@ public class UniformRandomForAccessibility {
                     //    "");
             }
         }
-        MATE.log("finish ACCESSIBILITY CHECKS: " );
+        MATELog.log("finish ACCESSIBILITY CHECKS: " );
     }
 
     public int selectRandomAction(int executionActionSize){
@@ -221,7 +221,7 @@ public class UniformRandomForAccessibility {
             hasProgressBar=false;
             for (Widget widget : state.getWidgets()) {
                 if (widget.getClazz().contains("ProgressBar") && widget.isEnabled() && widget.getContentDesc().contains("Loading")) {
-                    MATE.log("WAITING PROGRESS BAR TO FINISH");
+                    MATELog.log("WAITING PROGRESS BAR TO FINISH");
                     hasProgressBar = true;
                     hadProgressBar=true;
                     try {
@@ -262,7 +262,7 @@ public class UniformRandomForAccessibility {
                 }
 
                 currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
-                MATE.log("new package name: " + currentPackage);
+                MATELog.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)
                     goOn = false;

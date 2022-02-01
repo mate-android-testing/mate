@@ -1,8 +1,8 @@
 package org.mate.utils.coverage;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
@@ -55,7 +55,7 @@ public final class CoverageUtils {
         }
 
         if (visitedActivities.containsKey(targetChromosome)) {
-            MATE.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
+            MATELog.log_warn("Overwriting coverage data for chromosome " + targetChromosome + "!");
         }
 
         visitedActivities.put(targetChromosome, visitedActivitiesOfTestCases);
@@ -190,12 +190,12 @@ public final class CoverageUtils {
         switch (Properties.COVERAGE()) {
             case ACTIVITY_COVERAGE:
 
-                MATE.log("Coverage of chromosome "
+                MATELog.log("Coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
 
                 if (chromosome.getValue() instanceof TestSuite) {
                     for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                        MATE.log("Coverage of individual chromosome " + testCase + ": "
+                        MATELog.log("Coverage of individual chromosome " + testCase + ": "
                                 + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
                     }
                 }
@@ -207,16 +207,16 @@ public final class CoverageUtils {
             case BASIC_BLOCK_BRANCH_COVERAGE:
 
                 // log activity coverage in any case
-                MATE.log("Activity coverage of chromosome "
+                MATELog.log("Activity coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
 
-                MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
+                MATELog.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
                         + Registry.getEnvironmentManager().getCoverage(
                         Properties.COVERAGE(), chromosome));
 
                 if (chromosome.getValue() instanceof TestSuite) {
                     for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                        MATE.log("Coverage of individual chromosome " + testCase + ": "
+                        MATELog.log("Coverage of individual chromosome " + testCase + ": "
                                 + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
                     }
                 }
@@ -228,12 +228,12 @@ public final class CoverageUtils {
                 double activityCoverage = getActivityCoverage(chromosome);
                 coverageDTO.setActivityCoverage(activityCoverage);
 
-                MATE.log("Coverage of chromosome "
+                MATELog.log("Coverage of chromosome "
                         + chromosome.getValue().toString() + ": " + coverageDTO);
 
                 if (chromosome.getValue() instanceof TestSuite) {
                     for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                        MATE.log("Coverage of individual chromosome " + testCase + ": "
+                        MATELog.log("Coverage of individual chromosome " + testCase + ": "
                                 + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
                     }
                 }
@@ -255,16 +255,16 @@ public final class CoverageUtils {
             Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
                     "lastIncompleteTestCase", null);
 
-            MATE.log("Coverage of last test case: " +
+            MATELog.log("Coverage of last test case: " +
                     Registry.getEnvironmentManager().getCoverage(Properties.COVERAGE()
                             , "lastIncompleteTestCase"));
         }
 
         // get combined coverage
-        MATE.log_acc("Total coverage: " + getCombinedCoverage(Properties.COVERAGE()));
+        MATELog.log_acc("Total coverage: " + getCombinedCoverage(Properties.COVERAGE()));
 
         if (Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-            MATE.log_acc("Total activity coverage: "
+            MATELog.log_acc("Total activity coverage: "
                     + getCombinedCoverage(Coverage.ACTIVITY_COVERAGE).getActivityCoverage());
         }
 
@@ -276,9 +276,9 @@ public final class CoverageUtils {
                 visitedActivitiesTotal.addAll(activities);
             }
 
-            MATE.log_acc("Total visited activities: ");
+            MATELog.log_acc("Total visited activities: ");
             for (String activity : visitedActivitiesTotal) {
-                MATE.log_acc(activity);
+                MATELog.log_acc(activity);
             }
         }
     }

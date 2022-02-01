@@ -5,12 +5,12 @@ import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.graph.GraphType;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
@@ -114,7 +114,7 @@ public class EnvironmentManager {
             server.getOutputStream().write(Serializer.serialize(message));
             server.getOutputStream().flush();
         } catch (IOException e) {
-            MATE.log("socket error sending");
+            MATELog.log("socket error sending");
             throw new IllegalStateException(e);
         }
 
@@ -122,7 +122,7 @@ public class EnvironmentManager {
 
         verifyMetadata(response);
         if (response.getSubject().equals("/error")) {
-            MATE.log("Received error message from mate-server: "
+            MATELog.log("Received error message from mate-server: "
                     + response.getParameter("info"));
             return null;
         }
@@ -179,7 +179,7 @@ public class EnvironmentManager {
         String protocolVersion = message.getParameter(
                 METADATA_PREFIX + MESSAGE_PROTOCOL_VERSION_KEY);
         if (!protocolVersion.equals(MESSAGE_PROTOCOL_VERSION)) {
-            MATE.log(
+            MATELog.log(
                     "WARNING: Message protocol version used by MATE ("
                             + MESSAGE_PROTOCOL_VERSION
                             + ") does not match with the version used by MATE-Server ("
@@ -255,7 +255,7 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         if (response.getSubject().equals("/error")) {
-            MATE.log_acc("Copying fitness data failed!");
+            MATELog.log_acc("Copying fitness data failed!");
             throw new IllegalStateException(response.getParameter("info"));
         }
     }
@@ -294,7 +294,7 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         if (response.getSubject().equals("/error")) {
-            MATE.log_acc("Copying coverage data failed!");
+            MATELog.log_acc("Copying coverage data failed!");
             throw new IllegalStateException(response.getParameter("info"));
         }
     }
@@ -342,7 +342,7 @@ public class EnvironmentManager {
             throw new IllegalStateException("Objective property not defined!");
         }
 
-        MATE.log_acc("Getting objectives...!");
+        MATELog.log_acc("Getting objectives...!");
 
         List<String> objectives;
 
@@ -356,7 +356,7 @@ public class EnvironmentManager {
             throw new UnsupportedOperationException("Objective " + objective + " not yet supported!");
         }
 
-        MATE.log_acc("Number of objectives: " + objectives.size());
+        MATELog.log_acc("Number of objectives: " + objectives.size());
         return objectives;
     }
 
@@ -392,7 +392,7 @@ public class EnvironmentManager {
                 .withParameter("testcase", testCase);
         Message response = sendMessage(messageBuilder.build());
         boolean success = Boolean.parseBoolean(response.getParameter("response"));
-        MATE.log("Fetching TestCase from emulator succeeded: " + success);
+        MATELog.log("Fetching TestCase from emulator succeeded: " + success);
         return success;
     }
 
@@ -498,7 +498,7 @@ public class EnvironmentManager {
      */
     public void drawGraph(boolean raw) {
 
-        MATE.log_acc("Drawing graph!");
+        MATELog.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(raw));
@@ -530,12 +530,12 @@ public class EnvironmentManager {
     public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId) {
 
         if (entityId != null && entityId.equals("dummy")) {
-            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            MATELog.log_warn("Trying to store fitness data of dummy test case...");
             return;
         } else if (chromosome.getValue() instanceof TestCase) {
             // there is no fitness data to store for dummy test cases
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to store fitness data of dummy test case...");
+                MATELog.log_warn("Trying to store fitness data of dummy test case...");
                 return;
             }
         }
@@ -561,7 +561,7 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
 
         if (response.getSubject().equals("/error")) {
-            MATE.log_acc("Storing fitness data failed!");
+            MATELog.log_acc("Storing fitness data failed!");
             throw new IllegalStateException(response.getParameter("info"));
         }
     }
@@ -577,7 +577,7 @@ public class EnvironmentManager {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve branch distance of dummy test case...");
+                MATELog.log_warn("Trying to retrieve branch distance of dummy test case...");
                 // a dummy test case has a branch distance of 1.0 (worst value)
                 return 1.0;
             }
@@ -607,7 +607,7 @@ public class EnvironmentManager {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve branch fitness vector of dummy test case...");
+                MATELog.log_warn("Trying to retrieve branch fitness vector of dummy test case...");
                 // a dummy test case has a branch fitness of 0.0 for each objective (0.0 == worst)
                 return Collections.nCopies(objectives.size(), 0.0);
             }
@@ -645,7 +645,7 @@ public class EnvironmentManager {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve basic block fitness vector of dummy test case...");
+                MATELog.log_warn("Trying to retrieve basic block fitness vector of dummy test case...");
                 // a dummy test case has a basic block fitness of 0.0 for each objective (0.0 == worst)
                 return Collections.nCopies(objectives.size(), 0.0);
             }
@@ -683,7 +683,7 @@ public class EnvironmentManager {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
+                MATELog.log_warn("Trying to retrieve branch distance vector of dummy test case...");
                 // a dummy test case has a branch distance of 1.0 (worst value) for each objective
                 return Collections.nCopies(objectives.size(), 1.0);
             }
@@ -718,7 +718,7 @@ public class EnvironmentManager {
                 .withParameter("packageName", Registry.getPackageName())
                 .build());
         if (!"/coverage/getSourceLines".equals(response.getSubject())) {
-            MATE.log_acc("ERROR: unable to retrieve source lines");
+            MATELog.log_acc("ERROR: unable to retrieve source lines");
             return null;
         }
         return Arrays.asList(response.getParameter("lines").split("\n"));
@@ -773,12 +773,12 @@ public class EnvironmentManager {
     public <T> void storeCoverageData(Coverage coverage, IChromosome<T> chromosome, String entityId) {
 
         if (entityId != null && entityId.equals("dummy")) {
-            MATE.log_warn("Trying to store coverage data of dummy test case...");
+            MATELog.log_warn("Trying to store coverage data of dummy test case...");
             return;
         } else if (chromosome.getValue() instanceof TestCase) {
             // there is no coverage data to store for dummy test cases
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to store coverage data of dummy test case...");
+                MATELog.log_warn("Trying to store coverage data of dummy test case...");
                 return;
             }
         }
@@ -830,7 +830,7 @@ public class EnvironmentManager {
                         if (chromosome.getValue() instanceof TestCase) {
                             // there is no coverage data to store for dummy test cases
                             if (((TestCase) chromosome.getValue()).isDummy()) {
-                                MATE.log_warn("Trying to retrieve combined coverage of dummy test case...");
+                                MATELog.log_warn("Trying to retrieve combined coverage of dummy test case...");
                                 return false;
                             }
                         }
@@ -938,7 +938,7 @@ public class EnvironmentManager {
         if (chromosome.getValue() instanceof TestCase) {
             // a dummy test case has a coverage of 0%
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve coverage of dummy test case...");
+                MATELog.log_warn("Trying to retrieve coverage of dummy test case...");
                 return CoverageDTO.getDummyCoverageDTO(coverage);
             }
         }
@@ -967,7 +967,7 @@ public class EnvironmentManager {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve line percentage vector of dummy test case...");
+                MATELog.log_warn("Trying to retrieve line percentage vector of dummy test case...");
                 // a dummy test case has a line percentage of 0.0 for each objective (0.0 == worst)
                 return Collections.nCopies(lines.size(), 0.0);
             }
@@ -982,7 +982,7 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
 
         if (response.getSubject().equals("/error")) {
-            MATE.log_acc("Retrieving line covered percentages failed!");
+            MATELog.log_acc("Retrieving line covered percentages failed!");
             throw new IllegalStateException(response.getParameter("info"));
         } else {
             // convert result
@@ -1060,7 +1060,7 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator)
                 .build());
         if (!"/android/clearApp".equals(response.getSubject())) {
-            MATE.log_acc("ERROR: unable clear app data");
+            MATELog.log_acc("ERROR: unable clear app data");
         }
     }
 
@@ -1191,7 +1191,7 @@ public class EnvironmentManager {
                 .build());
         if (!"/emulator/interaction".equals(response.getSubject()) ||
                 !"portrait".equals(response.getParameter("rotation"))) {
-            MATE.log_acc("ERROR: unable to set rotation to portrait mode");
+            MATELog.log_acc("ERROR: unable to set rotation to portrait mode");
         }
     }
 
@@ -1207,7 +1207,7 @@ public class EnvironmentManager {
                 .withParameter("rotation", "toggle")
                 .build());
         if (!"/emulator/interaction".equals(response.getSubject())) {
-            MATE.log_acc("ERROR: unable to toggle rotation of emulator");
+            MATELog.log_acc("ERROR: unable to toggle rotation of emulator");
         }
     }
 

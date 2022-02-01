@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.crossover;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -32,7 +32,7 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
     public List<IChromosome<TestSuite>> cross(List<IChromosome<TestSuite>> parents) {
 
         if (parents.size() == 1) {
-            MATE.log_warn("UniformSuiteCrossoverFunction not applicable on single chromosome!");
+            MATELog.log_warn("UniformSuiteCrossoverFunction not applicable on single chromosome!");
             return Collections.singletonList(parents.get(0));
         }
 
@@ -48,9 +48,9 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
 
         TestSuite offspringSuite = new TestSuite();
         IChromosome<TestSuite> offspring = new Chromosome<>(offspringSuite);
-        MATE.log_acc("Uniform Suite Cross Over: crossing over chromosome: "
+        MATELog.log_acc("Uniform Suite Cross Over: crossing over chromosome: "
                 + parents.get(0) + " and chromosome: " + parents.get(1));
-        MATE.log_acc("Cross over result chromosome: " + offspring);
+        MATELog.log_acc("Cross over result chromosome: " + offspring);
 
         List<TestCase> copyTestCasesFromParent1 = new ArrayList<>();
         List<TestCase> copyTestCasesFromParent2 = new ArrayList<>();
@@ -70,14 +70,14 @@ public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSui
 
         // copy coverage and fitness data from first parent to offspring
         if (!copyTestCasesFromParent1.isEmpty()) {
-            MATE.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
+            MATELog.log_acc("With " + copyTestCasesFromParent1.size() + " test cases from first parent");
             CoverageUtils.copyCoverageData(parents.get(0), offspring, copyTestCasesFromParent1);
             FitnessUtils.copyFitnessData(parents.get(0), offspring, copyTestCasesFromParent1);
         }
 
         // copy coverage and fitness data from second parent to offspring
         if (!copyTestCasesFromParent2.isEmpty()) {
-            MATE.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
+            MATELog.log_acc("and " + copyTestCasesFromParent2.size() + " test cases from second parent");
             CoverageUtils.copyCoverageData(parents.get(1), offspring, copyTestCasesFromParent2);
             FitnessUtils.copyFitnessData(parents.get(1), offspring, copyTestCasesFromParent2);
         }

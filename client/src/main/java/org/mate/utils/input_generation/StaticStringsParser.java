@@ -2,7 +2,7 @@ package org.mate.utils.input_generation;
 
 import android.util.Xml;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -66,7 +66,7 @@ public final class StaticStringsParser {
 
             staticStrings.setInitialised(true);
         } catch (XmlPullParserException | IOException e) {
-            MATE.log_warn("Couldn't parse the static string constants!");
+            MATELog.log_warn("Couldn't parse the static string constants!");
             e.printStackTrace();
         }
 

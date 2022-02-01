@@ -1,11 +1,11 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
@@ -108,7 +108,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
      */
     private int chooseCutPoint(TestCase testCase) {
         if (testCase.getEventSequence().isEmpty()) {
-            MATE.log_warn("Choosing cut point from empty test case " + testCase + "!");
+            MATELog.log_warn("Choosing cut point from empty test case " + testCase + "!");
             return 0;
         } else {
             return Randomness.getRnd().nextInt(testCase.getEventSequence().size());

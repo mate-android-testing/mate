@@ -1,9 +1,9 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
@@ -38,7 +38,7 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
         CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-        MATE.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
+        MATELog.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
 
         return mutatedChromosome;
     }

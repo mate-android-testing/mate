@@ -1,10 +1,12 @@
 package org.mate.exploration.genetic.crossover;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
@@ -31,8 +33,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
 
     /**
      * Initialises a crossover function that is used for test cases consisting of
-     * {@link org.mate.interaction.action.ui.UIAction}, or more precisely
-     * {@link org.mate.interaction.action.ui.WidgetAction}.
+     * {@link UIAction}, or more precisely
+     * {@link WidgetAction}.
      */
     public TestCaseMergeCrossOverFunction() {
         executeActions = true;
@@ -57,7 +59,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
     public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
 
         if (parents.size() == 1) {
-            MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on single chromosome!");
+            MATELog.log_warn("TestCaseMergeCrossoverFunction not applicable on single chromosome!");
             return Collections.singletonList(parents.get(0));
         }
 
@@ -92,7 +94,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
                         cc = Math.min(Math.max(0, cc), l1.size() - 1);
                         Optional<Integer> match = findMatch(l1.get(idx), l2, cc);
                         if (match.hasValue()) {
-                            MATE.log_acc("Found match: " + idx + ", " + match.getValue());
+                            MATELog.log_acc("Found match: " + idx + ", " + match.getValue());
                             return Collections.singletonList(
                                     merge(l1.subList(0, idx + 1), l2.subList(match.getValue(), l2.size()), finalSize));
                         }
@@ -119,7 +121,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
                 }
             }
         }
-        MATE.log_warn("No match found.");
+        MATELog.log_warn("No match found.");
         return Collections.singletonList(parents.get(0));
     }
 

@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.util.ge;
 
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.utils.ListUtils;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.FitnessUtils;
 
@@ -95,7 +95,7 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
             }
         }
 
-        MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
+        MATELog.log_acc("retrieving fitness values for chromosome " + chromosome);
         List<Double> coveredPercentage = FitnessUtils.getFitness(chromosome, lines);
         for (int i = 0; i < coveredPercentage.size(); i++) {
             cache.get(lines.get(i)).put(chromosome, coveredPercentage.get(i));
@@ -125,6 +125,6 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
                 }
             }
         }
-        MATE.log_acc("Cleaning cache: " + count + " inactive chromosome removed.");
+        MATELog.log_acc("Cleaning cache: " + count + " inactive chromosome removed.");
     }
 }

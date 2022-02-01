@@ -4,10 +4,11 @@ import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.action.ui.MotifAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.utils.testcase.TestCaseOptimizer;
 import org.mate.utils.testcase.TestCaseStatistics;
@@ -22,14 +23,14 @@ import java.util.TreeSet;
 public class ExecuteMATEReplayRun {
 
     public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
-        MATE.log_acc("Starting ReplayRun...");
+        MATELog.log_acc("Starting ReplayRun...");
 
         // init uiAbstractionLayer, properties, etc.
         MATE mate = new MATE(packageName, representationLayer);
 
         Registry.registerReplayMode();
 
-        MATE.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
+        MATELog.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 
         // track which test cases couldn't be successfully replayed
         Map<Integer, TestCase> failures = new TreeMap<>();
@@ -44,13 +45,13 @@ public class ExecuteMATEReplayRun {
         // as long as we find a test case for replaying
         while (testCase != null) {
 
-            MATE.log("Replaying TestCase " + testCaseID);
+            MATELog.log("Replaying TestCase " + testCaseID);
 
             // apply optimisation strategy before replaying (optional)
             testCase = TestCaseOptimizer.optimise(testCase);
 
             if (replayTestCase(testCase)) {
-                MATE.log("Replayed TestCase " + testCaseID);
+                MATELog.log("Replayed TestCase " + testCaseID);
                 // record stats only if test case could be successfully replayed
                 TestCaseStatistics.recordStats(testCase);
             } else {
@@ -66,8 +67,8 @@ public class ExecuteMATEReplayRun {
             Registry.getUiAbstractionLayer().resetApp();
         }
 
-        MATE.log("Retry replaying " + failures.size() + " test cases!");
-        MATE.log("Retry replaying test cases: " + failures.keySet());
+        MATELog.log("Retry replaying " + failures.size() + " test cases!");
+        MATELog.log("Retry replaying test cases: " + failures.keySet());
 
         // track which test cases couldn't be replayed though retry
         Set<Integer> nonRecoverableTestCases = new TreeSet<>(failures.keySet());
@@ -79,7 +80,7 @@ public class ExecuteMATEReplayRun {
 
             for (int i = 0; i < 5 && !success; i++) {
 
-                MATE.log("Replaying TestCase " + entry.getKey());
+                MATELog.log("Replaying TestCase " + entry.getKey());
 
                 // TODO: we could try to insert some artificial delay between the actions
                 //  since the AUT might be too slow on loading on the current activity
@@ -87,7 +88,7 @@ public class ExecuteMATEReplayRun {
                 success = replayTestCase(entry.getValue());
 
                 if (success) {
-                    MATE.log("Replayed TestCase " + entry.getKey());
+                    MATELog.log("Replayed TestCase " + entry.getKey());
                     nonRecoverableTestCases.remove(entry.getKey());
                     // record stats about successful test cases
                     TestCaseStatistics.recordStats(entry.getValue());
@@ -98,8 +99,8 @@ public class ExecuteMATEReplayRun {
             }
         }
 
-        MATE.log("Number of non recoverable test cases: " + nonRecoverableTestCases.size());
-        MATE.log("Non recoverable test cases: " + nonRecoverableTestCases);
+        MATELog.log("Number of non recoverable test cases: " + nonRecoverableTestCases.size());
+        MATELog.log("Non recoverable test cases: " + nonRecoverableTestCases);
     }
 
     /**
@@ -117,8 +118,8 @@ public class ExecuteMATEReplayRun {
         for (int i = 0; i < testCase.getEventSequence().size(); i++) {
 
             // TODO: track for how many actions current and expected activity diverge
-            MATE.log("Current Activity: " + Registry.getUiAbstractionLayer().getCurrentActivity());
-            MATE.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
+            MATELog.log("Current Activity: " + Registry.getUiAbstractionLayer().getCurrentActivity());
+            MATELog.log("Expected Activity: " + testCase.getActivityBeforeAction(i));
 
             // TODO: one should abort if a (primitive) action leaves the app, because there must be some divergence
             Action nextAction = actions.get(i);
@@ -132,17 +133,17 @@ public class ExecuteMATEReplayRun {
                 Action repairedAction = repairUIAction(nextAction);
 
                 if (repairedAction != null) {
-                    MATE.log("replaying action " + i + ": " + repairedAction);
+                    MATELog.log("replaying action " + i + ": " + repairedAction);
                     Registry.getUiAbstractionLayer().executeAction(repairedAction);
-                    MATE.log("replayed action " + i + ": " + repairedAction);
+                    MATELog.log("replayed action " + i + ": " + repairedAction);
                 } else {
-                    MATE.log("Action not applicable!");
+                    MATELog.log("Action not applicable!");
                     return false;
                 }
             } else {
-                MATE.log("replaying action " + i + ": " + nextAction);
+                MATELog.log("replaying action " + i + ": " + nextAction);
                 Registry.getUiAbstractionLayer().executeAction(nextAction);
-                MATE.log("replayed action " + i + ": " + nextAction);
+                MATELog.log("replayed action " + i + ": " + nextAction);
             }
         }
         return true;
@@ -165,7 +166,7 @@ public class ExecuteMATEReplayRun {
 
             WidgetAction selectedAction = (WidgetAction) a;
 
-            MATE.log(selectedAction.getActionType() + " on " + selectedAction.getWidget().getId()
+            MATELog.log(selectedAction.getActionType() + " on " + selectedAction.getWidget().getId()
                     + " Text : " + selectedAction.getWidget().getText()
                     + " hint : " + selectedAction.getWidget().getHint()
                     + " Class : " + selectedAction.getWidget().getClazz()
@@ -173,15 +174,15 @@ public class ExecuteMATEReplayRun {
                     + " X : " + selectedAction.getWidget().getX()
                     + " Y : " + selectedAction.getWidget().getY());
 
-            MATE.log("------------------------------------------");
-            MATE.log("Applicable widget actions with same action type: ");
+            MATELog.log("------------------------------------------");
+            MATELog.log("Applicable widget actions with same action type: ");
 
             for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
 
                 if (action instanceof WidgetAction) {
                     if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {
                         WidgetAction widgetAction = (WidgetAction) action;
-                        MATE.log(widgetAction.getActionType() + " on " + widgetAction.getWidget().getId()
+                        MATELog.log(widgetAction.getActionType() + " on " + widgetAction.getWidget().getId()
                                 + " Text : " + widgetAction.getWidget().getText()
                                 + " hint : " + widgetAction.getWidget().getHint()
                                 + " Class : " + widgetAction.getWidget().getClazz()
@@ -196,14 +197,14 @@ public class ExecuteMATEReplayRun {
 
             MotifAction selectedAction = (MotifAction) a;
 
-            MATE.log(selectedAction.getActionType() + "on " + selectedAction.getActivityName());
+            MATELog.log(selectedAction.getActionType() + "on " + selectedAction.getActivityName());
 
             for (UIAction widgetAction : selectedAction.getUIActions()) {
-                MATE.log(widgetAction.toString());
+                MATELog.log(widgetAction.toString());
             }
 
-            MATE.log("------------------------------------------");
-            MATE.log("Applicable motif actions with same action type: ");
+            MATELog.log("------------------------------------------");
+            MATELog.log("Applicable motif actions with same action type: ");
 
             for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
 
@@ -211,10 +212,10 @@ public class ExecuteMATEReplayRun {
                     MotifAction motifAction = (MotifAction) action;
                     if (motifAction.getActionType() == selectedAction.getActionType()) {
 
-                        MATE.log(motifAction.getActionType() + "on " + motifAction.getActivityName());
+                        MATELog.log(motifAction.getActionType() + "on " + motifAction.getActivityName());
 
                         for (UIAction widgetAction : motifAction.getUIActions()) {
-                            MATE.log(widgetAction.toString());
+                            MATELog.log(widgetAction.toString());
                         }
                     }
                 }

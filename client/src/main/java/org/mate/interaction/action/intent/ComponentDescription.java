@@ -5,8 +5,8 @@ import android.os.Parcelable;
 import android.util.Size;
 import android.util.SizeF;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.utils.DataPool;
 import org.mate.utils.Randomness;
 
@@ -318,7 +318,7 @@ public class ComponentDescription {
                     bundle.putBundle(extra.getKey(), new Bundle());
                     break;
                 default:
-                    MATE.log("Data type not yet supported: " + extra.getValue());
+                    MATELog.log("Data type not yet supported: " + extra.getValue());
                     // omit bundle entry
                     break;
             }

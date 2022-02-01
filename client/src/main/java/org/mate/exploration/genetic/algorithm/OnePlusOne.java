@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.algorithm;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -52,7 +52,7 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
     @Override
     public void evolve() {
 
-        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
+        MATELog.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
         // sample a single offspring by mutation
         IChromosome<T> offspring = mutationFunction.mutate(population.get(0));

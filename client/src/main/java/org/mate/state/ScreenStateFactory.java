@@ -1,7 +1,7 @@
 package org.mate.state;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
 import org.mate.state.executables.ActionsScreenState;
 import org.mate.state.executables.AppScreen;
@@ -26,7 +26,7 @@ public class ScreenStateFactory {
      */
     public static IScreenState getScreenState(ScreenStateType stateType) {
 
-        MATE.log_debug("Try retrieving screen state ...");
+        MATELog.log_debug("Try retrieving screen state ...");
 
         // TODO: get rid of this static reference
         final DeviceMgr deviceMgr = Registry.getDeviceMgr();
@@ -43,14 +43,14 @@ public class ScreenStateFactory {
                  *    and a screen state with zero actions?
                  */
                 while (retries < MAX_NUMBER_OF_RETRIES && state.getActions().size() == 0) {
-                    MATE.log_debug("Retry fetching screen state!");
+                    MATELog.log_debug("Retry fetching screen state!");
                     Utils.sleep(5000);
                     state = new ActionsScreenState(new AppScreen(deviceMgr));
                     retries++;
                 }
 
                 if (state.getActions().size() == 0) {
-                    MATE.log_warn("Fetching screen state failed!");
+                    MATELog.log_warn("Fetching screen state failed!");
                 }
 
                 return state;

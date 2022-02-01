@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -147,10 +147,10 @@ public class MIO<T> extends GeneticAlgorithm<T> {
         this.populationSizeStart = populationSize;
         this.mutationRateStart = mutationRate;
 
-        MATE.log_acc("Initial Parameters: ");
-        MATE.log_acc("Random sampling probability P_r: " + pSampleRandomStart);
-        MATE.log_acc("Population size n: " + populationSizeStart);
-        MATE.log_acc("Mutation rate m: " + mutationRateStart);
+        MATELog.log_acc("Initial Parameters: ");
+        MATELog.log_acc("Random sampling probability P_r: " + pSampleRandomStart);
+        MATELog.log_acc("Population size n: " + populationSizeStart);
+        MATELog.log_acc("Mutation rate m: " + mutationRateStart);
 
         for (IFitnessFunction<T> fitnessFunction : this.fitnessFunctions) {
 
@@ -171,7 +171,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
 
         this.startTime = System.currentTimeMillis();
 
-        MATE.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
+        MATELog.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
         IChromosome<T> chromosome = chromosomeFactory.createChromosome();
         population.add(chromosome);
 
@@ -241,14 +241,14 @@ public class MIO<T> extends GeneticAlgorithm<T> {
     @Override
     public void evolve() {
 
-        MATE.log_acc("Generating population #" + (currentGenerationNumber + 1));
+        MATELog.log_acc("Generating population #" + (currentGenerationNumber + 1));
         population.clear();
 
         if (Randomness.getRnd().nextDouble() < pSampleRandom) {
             // sample random chromosome with probability P_r
             IChromosome<T> chromosome = chromosomeFactory.createChromosome();
             population.add(chromosome);
-            MATE.log_acc("Sampled random chromosome " + chromosome + "!");
+            MATELog.log_acc("Sampled random chromosome " + chromosome + "!");
         } else {
             /*
             * Sample a chromosome from the archive with probability (1 - P_r). Pick a target k with
@@ -258,7 +258,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IFitnessFunction<T> target = getBestTarget();
             ChromosomeFitnessTuple tuple = Randomness.randomElement(archive.get(target));
             IChromosome<T> chromosome = tuple.chromosome;
-            MATE.log_acc("Sampled chromosome " + chromosome + " from archive!");
+            MATELog.log_acc("Sampled chromosome " + chromosome + " from archive!");
 
             // increase sampling counter c_k, see section 3.3
             Integer value = samplingCounters.get(target);
@@ -268,11 +268,11 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             for (int i = 0; i < mutationRate; i++) {
                 IChromosome<T> mutant = mutationFunction.mutate(chromosome);
                 population.add(mutant);
-                MATE.log_acc("Sampled mutant " + mutant + "!");
+                MATELog.log_acc("Sampled mutant " + mutant + "!");
             }
         }
 
-        MATE.log_acc("Updating Archive...");
+        MATELog.log_acc("Updating Archive...");
 
         // evaluate fitness and update archive
         for (IChromosome<T> chromosome : population) {
@@ -482,7 +482,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
      */
     private void shrinkArchive() {
 
-        MATE.log_acc("Shrinking Archive...");
+        MATELog.log_acc("Shrinking Archive...");
 
         for (final IFitnessFunction<T> target : fitnessFunctions) {
             List<ChromosomeFitnessTuple> population = archive.get(target);
@@ -507,14 +507,14 @@ public class MIO<T> extends GeneticAlgorithm<T> {
      */
     private void updateParameters() {
 
-        MATE.log_acc("Updating Parameters...");
+        MATELog.log_acc("Updating Parameters...");
 
         long currentTime = System.currentTimeMillis();
         long expiredTime = currentTime - startTime;
         long focusedSearchStartTime = (long) (Registry.getTimeout() * focusedSearchStart);
 
         if (expiredTime >= focusedSearchStartTime) {
-            MATE.log_acc("Starting focused search...");
+            MATELog.log_acc("Starting focused search...");
             startedFocusedSearch = true;
             pSampleRandom = pSampleRandomFocusedSearch;
             populationSize = populationSizeFocusedSearch;
@@ -532,9 +532,9 @@ public class MIO<T> extends GeneticAlgorithm<T> {
                     + Math.round((mutationRateFocusedSearch - mutationRateStart) * focusedSearchStartProgress);
         }
 
-        MATE.log_acc("New population size n: " + populationSize);
-        MATE.log_acc("New random sampling rate P_r: " + pSampleRandom);
-        MATE.log_acc("New mutation rate m: " + mutationRate);
+        MATELog.log_acc("New population size n: " + populationSize);
+        MATELog.log_acc("New random sampling rate P_r: " + pSampleRandom);
+        MATELog.log_acc("New mutation rate m: " + mutationRate);
 
         // the population size is decreasing with time, thus we need to discard the worst chromosomes
         shrinkArchive();
@@ -565,7 +565,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
         }
 
         if (bestEntry == null) {
-            MATE.log_acc("All testing targets covered, picking random target k.");
+            MATELog.log_acc("All testing targets covered, picking random target k.");
             // all non empty testing targets are covered, thus pick one randomly among them
             List<IFitnessFunction<T>> coveredTargets = new ArrayList<>();
 
@@ -733,13 +733,13 @@ public class MIO<T> extends GeneticAlgorithm<T> {
     @SuppressWarnings("debug")
     private void debugArchive() {
 
-        MATE.log_debug("Archive: ");
+        MATELog.log_debug("Archive: ");
         int i = 0;
         for (List<ChromosomeFitnessTuple> population: archive.values()) {
             if (!population.isEmpty()) {
-                MATE.log_debug("Population: " + i);
+                MATELog.log_debug("Population: " + i);
                 for (ChromosomeFitnessTuple tuple : population) {
-                    MATE.log_debug(tuple.toString());
+                    MATELog.log_debug(tuple.toString());
                 }
             }
             i++;
@@ -749,9 +749,9 @@ public class MIO<T> extends GeneticAlgorithm<T> {
     @SuppressWarnings("debug")
     private void debugPopulation(List<ChromosomeFitnessTuple> population) {
 
-        MATE.log_debug("Population: ");
+        MATELog.log_debug("Population: ");
         for (ChromosomeFitnessTuple tuple : population) {
-            MATE.log_debug(tuple.toString());
+            MATELog.log_debug(tuple.toString());
         }
     }
 }

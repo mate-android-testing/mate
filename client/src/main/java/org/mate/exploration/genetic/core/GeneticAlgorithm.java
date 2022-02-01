@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.core;
 
-import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -154,7 +154,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     @Override
     public void createInitialPopulation() {
 
-        MATE.log_acc("Creating initial population (1st generation)");
+        MATELog.log_acc("Creating initial population (1st generation)");
 
         for (int i = 0; i < populationSize; i++) {
             population.add(chromosomeFactory.createChromosome());
@@ -175,7 +175,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     @Override
     public void evolve() {
 
-        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
+        MATELog.log_acc("Creating population #" + (currentGenerationNumber + 1));
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
         while (newGeneration.size() < bigPopulationSize) {
@@ -232,24 +232,24 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected void logCurrentFitness() {
 
         if (population.size() <= 10) {
-            MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
+            MATELog.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
-                MATE.log_acc("Fitness function " + (i + 1) + ":");
+                MATELog.log_acc("Fitness function " + (i + 1) + ":");
                 IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
-                    MATE.log_acc("Chromosome " + (j + 1) + ": "
+                    MATELog.log_acc("Chromosome " + (j + 1) + ": "
                             + fitnessFunction.getFitness(chromosome));
                 }
             }
             if (fitnessFunctions.size() > 5) {
-                MATE.log_acc("Omitted other fitness function because there are too many ("
+                MATELog.log_acc("Omitted other fitness function because there are too many ("
                         + fitnessFunctions.size() + ")");
             }
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            MATE.log_acc("Combined coverage until now: "
+            MATELog.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
 
             if (population.size() <= 10
@@ -258,7 +258,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
                     *  use the genotype, which results in a crash.
                      */
                     && Properties.FITNESS_FUNCTION() != FitnessFunction.GENO_TO_PHENO_TYPE) {
-                MATE.log_acc("Combined coverage of current population: "
+                MATELog.log_acc("Combined coverage of current population: "
                         + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }
         }

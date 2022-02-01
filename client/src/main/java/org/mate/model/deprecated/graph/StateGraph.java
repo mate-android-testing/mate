@@ -1,9 +1,9 @@
 package org.mate.model.deprecated.graph;
 
-import org.mate.MATE;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -180,9 +180,9 @@ public class StateGraph {
         }
 
         if (multPaths.size()>1){
-            MATE.log("paths: "+multPaths.size());
+            MATELog.log("paths: "+multPaths.size());
             for (List<Action> actions : multPaths)
-                MATE.log("... "+actions.size() + " actions");
+                MATELog.log("... "+actions.size() + " actions");
         }
 
 

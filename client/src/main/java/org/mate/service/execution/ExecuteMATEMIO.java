@@ -4,6 +4,7 @@ import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -14,8 +15,8 @@ public class ExecuteMATEMIO {
 
 
     public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
-        MATE.log_acc("Starting Evolutionary Search...");
-        MATE.log_acc("MIO algorithm");
+        MATELog.log_acc("Starting Evolutionary Search...");
+        MATELog.log_acc("MIO algorithm");
 
         MATE mate = new MATE(packageName, representationLayer);
 

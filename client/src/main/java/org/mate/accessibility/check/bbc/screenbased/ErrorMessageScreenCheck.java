@@ -1,11 +1,11 @@
 package org.mate.accessibility.check.bbc.screenbased;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IScreenAccessibilityCheck;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck {
         IScreenState visitedState = stateHasBeenVisited(state);
 
         if (visitedState!=null){
-            MATE.log("same state");
+            MATELog.log("same state");
             if (differentContext(state,visitedState)){
                 AccessibilityViolation violation = new AccessibilityViolation(AccessibilityViolationType.ERROR_MESSAGE,state,"Content descriptions/hints do not changed after showing error message");
                 violation.setWarning(true);
@@ -33,7 +33,7 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck {
             }
         }
         else{
-            MATE.log("different state");
+            MATELog.log("different state");
             visitedStates.add(state);
         }
 
@@ -50,8 +50,8 @@ public class ErrorMessageScreenCheck implements IScreenAccessibilityCheck {
             //search by id
             for (Widget wOther: otherWidgets){
                 if (wThis.getId().contains("imageview_search)")){
-                    MATE.log("this: "+wThis.getText()+ " " + wThis.getContentDesc() + " " + wThis.getHint()+" " + wThis.getErrorText());
-                    MATE.log("other: "+wOther.getText()+ " " + wOther.getContentDesc() + " " + wOther.getHint()+" " + wOther.getErrorText());
+                    MATELog.log("this: "+wThis.getText()+ " " + wThis.getContentDesc() + " " + wThis.getHint()+" " + wThis.getErrorText());
+                    MATELog.log("other: "+wOther.getText()+ " " + wOther.getContentDesc() + " " + wOther.getHint()+" " + wOther.getErrorText());
                 }
                 if (wThis.getId().equals(wOther.getId())&&
                         wOther.getContentDesc().equals(wThis.getContentDesc()) &&

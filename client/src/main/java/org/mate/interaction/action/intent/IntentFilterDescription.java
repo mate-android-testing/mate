@@ -3,8 +3,8 @@ package org.mate.interaction.action.intent;
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 
-import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.utils.Randomness;
 
 import java.io.File;
@@ -440,7 +440,7 @@ public class IntentFilterDescription {
                     return "mateTestXml.xml";
             }
 
-            MATE.log_acc("No file found for mimeType: " + mimeType);
+            MATELog.log_acc("No file found for mimeType: " + mimeType);
             return null;
         }
 

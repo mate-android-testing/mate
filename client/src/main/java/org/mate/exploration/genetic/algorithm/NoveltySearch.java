@@ -2,8 +2,8 @@ package org.mate.exploration.genetic.algorithm;
 
 import android.util.Pair;
 
-import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -115,7 +115,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     @Override
     public void createInitialPopulation() {
 
-        MATE.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
+        MATELog.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
 
         for (int i = 0; i < populationSize; i++) {
             IChromosome<T> chromosome = chromosomeFactory.createChromosome();
@@ -140,7 +140,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     @Override
     public void evolve() {
 
-        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
+        MATELog.log_acc("Creating population #" + (currentGenerationNumber + 1));
         List<IChromosome<T>> newGeneration = new ArrayList<>(population);
 
         /*
@@ -205,24 +205,24 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     @Override
     protected void logCurrentFitness() {
 
-        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
+        MATELog.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
 
-        MATE.log_acc("Novelty of chromosomes in population: ");
+        MATELog.log_acc("Novelty of chromosomes in population: ");
         for (Pair<IChromosome<T>, Double> chromosome : noveltyPairs) {
-            MATE.log_acc("Chromosome " + chromosome.first + ": " + chromosome.second);
+            MATELog.log_acc("Chromosome " + chromosome.first + ": " + chromosome.second);
         }
 
-        MATE.log_acc("Novelty of chromosomes in archive: ");
+        MATELog.log_acc("Novelty of chromosomes in archive: ");
         List<Double> noveltyScores = noveltyFitnessFunction.getFitness(archive, nearestNeighbours);
         for (int i = 0; i < archive.size(); i++) {
-            MATE.log_acc("Chromosome " + archive.get(i) + ": " + noveltyScores.get(0));
+            MATELog.log_acc("Chromosome " + archive.get(i) + ": " + noveltyScores.get(0));
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            MATE.log_acc("Combined coverage until now: "
+            MATELog.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
             if (population.size() <= 10) {
-                MATE.log_acc("Combined coverage of current population: "
+                MATELog.log_acc("Combined coverage of current population: "
                         + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }
         }
@@ -263,7 +263,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
 
                     if (novelty > worstNovelty) {
                         // only replace if better than worst chromosome in the archive
-                        MATE.log_acc("Replacing chromosome " + worst + " with chromosome "
+                        MATELog.log_acc("Replacing chromosome " + worst + " with chromosome "
                                 + chromosome + " in archive!");
                         archive.remove(worst);
                         archive.add(chromosome);

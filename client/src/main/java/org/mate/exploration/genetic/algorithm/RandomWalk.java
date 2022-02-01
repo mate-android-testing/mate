@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.algorithm;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -49,7 +49,7 @@ public class RandomWalk<T> extends GeneticAlgorithm<T> {
     @Override
     public void evolve() {
 
-        MATE.log_acc("Creating generation #" + (currentGenerationNumber + 1));
+        MATELog.log_acc("Creating generation #" + (currentGenerationNumber + 1));
 
         IChromosome<T> chromosome = population.get(0);
         IChromosome<T> mutant = mutationFunction.mutate(chromosome);

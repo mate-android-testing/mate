@@ -1,11 +1,11 @@
 package org.mate.state.executables;
 
-import org.mate.MATE;
-import org.mate.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.action.ui.MotifAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
@@ -99,13 +99,13 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         if (activityName.contains("GoogleOAuthActivity")) {
-            MATE.log_acc("Reached GoogleOAuthActivity!");
+            MATELog.log_acc("Reached GoogleOAuthActivity!");
             // we can't authenticate here, so only allow to press 'BACK'
             return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
         }
         
-        MATE.log_debug("Retrieving widget actions for screen state...");
-        MATE.log_debug("Number of all widgets: " + this.widgets.size());
+        MATELog.log_debug("Retrieving widget actions for screen state...");
+        MATELog.log_debug("Number of all widgets: " + this.widgets.size());
 
         List<Widget> widgets = new ArrayList<>();
 
@@ -131,7 +131,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
         }
 
-        MATE.log_debug("Number of relevant widgets: " + widgets.size());
+        MATELog.log_debug("Number of relevant widgets: " + widgets.size());
 
         /*
          * We use here a LinkedHashSet to maintain the insertion order, since we later
@@ -142,7 +142,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         for (Widget widget : widgets) {
 
-            MATE.log_debug("Widget: " + widget);
+            MATELog.log_debug("Widget: " + widget);
             logWidgetProperties(widget);
 
             /*
@@ -159,7 +159,7 @@ public class ActionsScreenState extends AbstractScreenState {
              * resolution of 1080x1920 this represents the area [0,0][1080,72].
              */
             if (appScreen.getStatusBarBoundingBox().contains(widget.getBounds())) {
-                MATE.log_debug("Widget within status bar: " + widget.getBounds());
+                MATELog.log_debug("Widget within status bar: " + widget.getBounds());
                 continue;
             }
 
@@ -168,13 +168,13 @@ public class ActionsScreenState extends AbstractScreenState {
             *  We should define only for a single widget an action.
              */
             if (hasOverlappingSiblingWidgetAction(widget, widgetActions)) {
-                MATE.log_debug("Overlapping sibling action!");
+                MATELog.log_debug("Overlapping sibling action!");
                 continue;
             }
 
             if (widget.isSonOfSpinner()) {
 
-                MATE.log_debug("Spinner widget defines scrolling action itself!");
+                MATELog.log_debug("Spinner widget defines scrolling action itself!");
 
                 /*
                 * A spinner typically hosts text views as entries, but it could happen
@@ -199,24 +199,24 @@ public class ActionsScreenState extends AbstractScreenState {
              * a linear layout in order to fill or introduce a gap.
              */
             if (widget.isContainer()) {
-                MATE.log_debug("Container as a leaf widget!");
+                MATELog.log_debug("Container as a leaf widget!");
                 continue;
             }
 
             if ((widget.isSonOfLongClickable() || widget.isSonOfClickable()
                     || widget.isSonOfCheckable()) && !widget.isSonOfActionableContainer()) {
-                MATE.log_debug("Parent widget defines the action!");
+                MATELog.log_debug("Parent widget defines the action!");
                 // we define the action directly on the parent widget
                 continue;
             }
 
             if (widget.isCheckableType()) {
-                MATE.log_debug("Widget implements checkable interface!");
+                MATELog.log_debug("Widget implements checkable interface!");
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
             if (widget.isEditTextType()) {
-                MATE.log_debug("Widget is an edit text instance!");
+                MATELog.log_debug("Widget is an edit text instance!");
                 widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
 
                /*
@@ -231,7 +231,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             if (widget.isButtonType()) {
-                MATE.log_debug("Widget is a button instance!");
+                MATELog.log_debug("Widget is a button instance!");
 
                 // TODO: Use static analysis to detect whether click/long click refer to the same
                 //  event handler.
@@ -245,7 +245,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             if (widget.isSpinnerType()) {
-                MATE.log_debug("Widget is a spinner instance!");
+                MATELog.log_debug("Widget is a spinner instance!");
 
                 /*
                 * TODO: Add a proper scrolling action. Right now we simply
@@ -270,7 +270,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
             if (widget.isScrollable() && !widget.isSpinnerType() && !widget.isSonOfScrollable()) {
 
-                MATE.log_debug("Widget is a scrollview!");
+                MATELog.log_debug("Widget is a scrollview!");
 
                 /*
                 * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
@@ -312,8 +312,8 @@ public class ActionsScreenState extends AbstractScreenState {
             widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
         }
 
-        MATE.log_debug("Number of widget actions: " + widgetActions.size());
-        MATE.log_debug("Derived the following widget actions: " + widgetActions);
+        MATELog.log_debug("Number of widget actions: " + widgetActions.size());
+        MATELog.log_debug("Derived the following widget actions: " + widgetActions);
 
         List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
         uiActions.addAll(getUIActions());
@@ -410,23 +410,23 @@ public class ActionsScreenState extends AbstractScreenState {
     private void logWidgetProperties(Widget widget) {
 
         if (widget.isClickable()) {
-            MATE.log_debug("Widget is clickable!");
+            MATELog.log_debug("Widget is clickable!");
         }
 
         if (widget.isLongClickable()) {
-            MATE.log_debug("Widget is long clickable!");
+            MATELog.log_debug("Widget is long clickable!");
         }
 
         if (widget.isScrollable()) {
-            MATE.log_debug("Widget is scrollable!");
+            MATELog.log_debug("Widget is scrollable!");
         }
 
         if (widget.isEditable()) {
-            MATE.log_debug("Widget is editable!");
+            MATELog.log_debug("Widget is editable!");
         }
 
         if (widget.isCheckable()) {
-            MATE.log_debug("Widget is checkable!");
+            MATELog.log_debug("Widget is checkable!");
         }
     }
 
@@ -455,7 +455,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 // check whether any sibling overlaps with the current widget
                 for (Widget sibling : siblings) {
                     if (sibling.getBounds().equals(widget.getBounds())) {
-                        MATE.log_debug("Widget " + widget + " overlaps with " + sibling + "!");
+                        MATELog.log_debug("Widget " + widget + " overlaps with " + sibling + "!");
                         return true;
                     }
                 }

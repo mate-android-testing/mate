@@ -1,9 +1,9 @@
 package org.mate.accessibility.check.bbc;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.screenbased.ScreenBasedAccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.WidgetBasedAccessibilityViolationChecker;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public class AccessibilityViolationChecker {
     public static List<AccessibilityViolation> runAccessibilityChecks(IScreenState state){
 
         List<AccessibilityViolation> violations = new ArrayList<>();
-        MATE.log("RUN ALL ACC CHECKS");
+        MATELog.log("RUN ALL ACC CHECKS");
 
         //checks that came from Google Testing Framework
         /*
@@ -30,9 +30,9 @@ public class AccessibilityViolationChecker {
         //new checks
 
         //widget based
-        MATE.log("Widget based checks");
+        MATELog.log("Widget based checks");
         List<AccessibilityViolation> widgetViolations = WidgetBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
-        MATE.log("Screen based checks");
+        MATELog.log("Screen based checks");
         List<AccessibilityViolation> screenViolations = ScreenBasedAccessibilityViolationChecker.runAccessibilityChecks(state);
 
         violations.addAll(widgetViolations);

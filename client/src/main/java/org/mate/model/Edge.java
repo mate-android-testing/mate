@@ -1,6 +1,6 @@
 package org.mate.model;
 
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.state.IScreenState;
 
 /**

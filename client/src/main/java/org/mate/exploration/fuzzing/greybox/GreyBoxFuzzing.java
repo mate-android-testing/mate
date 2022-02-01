@@ -1,6 +1,6 @@
 package org.mate.exploration.fuzzing.greybox;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
@@ -136,31 +136,31 @@ public abstract class GreyBoxFuzzing<T> implements Algorithm {
     @Override
     public void run() {
 
-        MATE.log_acc("Seed corpus size: " + corpusSize);
-        MATE.log_acc("Max assignable energy: " + maxEnergy);
+        MATELog.log_acc("Seed corpus size: " + corpusSize);
+        MATELog.log_acc("Max assignable energy: " + maxEnergy);
 
-        MATE.log_acc("Generating seed corpus S...");
+        MATELog.log_acc("Generating seed corpus S...");
         List<IChromosome<T>> seedCorpus = generateSeedCorpus();
 
-        MATE.log_acc("Starting greybox fuzzing...");
+        MATELog.log_acc("Starting greybox fuzzing...");
         while (!terminationCondition.isMet()) {
 
-            MATE.log_acc("Choosing next chromosome from seed corpus S...");
+            MATELog.log_acc("Choosing next chromosome from seed corpus S...");
             IChromosome<T> s = chooseNext(seedCorpus);
             int p = assignEnergy(s);
 
             for (int i = 0; i < p; i++) {
                 IChromosome<T> sPrime = mutationFunction.mutate(s);
                 if (isCrashing(sPrime)) {
-                    MATE.log_acc("Found crashing chromosome: " + sPrime);
+                    MATELog.log_acc("Found crashing chromosome: " + sPrime);
                     crashingInputs.add(sPrime);
                 } else if (isInteresting(sPrime)) {
-                    MATE.log_acc("Found interesting chromosome: " + sPrime);
+                    MATELog.log_acc("Found interesting chromosome: " + sPrime);
                     seedCorpus.add(sPrime);
                 }
             }
 
-            MATE.log_acc("Total number of crashes so far: " + crashingInputs.size());
+            MATELog.log_acc("Total number of crashes so far: " + crashingInputs.size());
         }
     }
 }

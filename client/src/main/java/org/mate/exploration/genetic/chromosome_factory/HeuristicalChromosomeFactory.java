@@ -1,9 +1,9 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 

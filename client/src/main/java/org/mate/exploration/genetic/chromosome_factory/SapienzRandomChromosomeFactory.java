@@ -5,7 +5,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.model.TestCase;

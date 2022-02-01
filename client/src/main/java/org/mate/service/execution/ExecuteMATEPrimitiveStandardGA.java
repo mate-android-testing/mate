@@ -3,6 +3,7 @@ package org.mate.service.execution;
 import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
@@ -14,8 +15,8 @@ import org.mate.model.TestCase;
 public class ExecuteMATEPrimitiveStandardGA {
 
     public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
-        MATE.log_acc("Starting Evolutionary Search...");
-        MATE.log_acc("Primitive StandardGeneticAlgorithm implementation");
+        MATELog.log_acc("Starting Evolutionary Search...");
+        MATELog.log_acc("Primitive StandardGeneticAlgorithm implementation");
 
         MATE mate = new MATE(packageName, representationLayer);
 

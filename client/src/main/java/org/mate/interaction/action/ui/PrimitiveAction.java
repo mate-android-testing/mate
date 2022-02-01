@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;

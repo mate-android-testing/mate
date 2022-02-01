@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.builder;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -387,13 +387,13 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the constructed genetic algorithm.
      */
     public <T> IGeneticAlgorithm<T> build() {
-        MATE.log_acc("Building genetic algorithm with properties:");
+        MATELog.log_acc("Building genetic algorithm with properties:");
         for (String key : properties.stringPropertyNames()) {
             if (key.startsWith("fitness_function")
                     && Integer.parseInt(properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY)) > 5) {
                 continue;
             }
-            MATE.log_acc("Key: " + key + ", Value: " + properties.getProperty(key));
+            MATELog.log_acc("Key: " + key + ", Value: " + properties.getProperty(key));
         }
         return GeneticAlgorithmProvider.getGeneticAlgorithm(properties);
     }

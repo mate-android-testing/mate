@@ -1,9 +1,9 @@
 package org.mate.state;
 
 import org.mate.interaction.action.ui.MotifAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 
 import java.util.List;
 

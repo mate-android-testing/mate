@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -51,10 +51,10 @@ public class SapienzSuiteRandomChromosomeFactory implements IChromosomeFactory<T
     public IChromosome<TestSuite> createChromosome() {
         TestSuite ts = new TestSuite();
         IChromosome<TestSuite> chromosome = new Chromosome<>(ts);
-        MATE.log_acc("Sapienz Suite Random Chromosome Factory: creating chromosome: " + chromosome);
+        MATELog.log_acc("Sapienz Suite Random Chromosome Factory: creating chromosome: " + chromosome);
         for (int i = 0; i < numTestCases; i++) {
             TestCase tc = sapienzRandomChromosomeFactory.createChromosome().getValue();
-            MATE.log_acc("With test case: " + tc);
+            MATELog.log_acc("With test case: " + tc);
             ts.getTestCases().add(tc);
             FitnessUtils.storeTestSuiteChromosomeFitness(chromosome, tc);
             CoverageUtils.storeTestSuiteChromosomeCoverage(chromosome, tc);

@@ -1,7 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
-import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -50,7 +50,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
     @Override
     public void evolve() {
 
-        MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
+        MATELog.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
         // Add temporary a second random chromosome.
         population.add(chromosomeFactory.createChromosome());
@@ -78,16 +78,16 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
     protected void logCurrentFitness() {
 
         for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
-            MATE.log_acc("Fitness function " + (i + 1) + ":");
+            MATELog.log_acc("Fitness function " + (i + 1) + ":");
             IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
             for (int j = 0; j < population.size(); j++) {
                 IChromosome<T> chromosome = population.get(j);
-                MATE.log_acc("Chromosome " + (j + 1) + " Fitness: "
+                MATELog.log_acc("Chromosome " + (j + 1) + " Fitness: "
                         + fitnessFunction.getNormalizedFitness(chromosome));
 
                 if (Properties.COVERAGE() != Coverage.NO_COVERAGE
                         && Properties.COVERAGE() != Coverage.ACTIVITY_COVERAGE) {
-                    MATE.log_acc("Chromosome " + (j + 1) + " Coverage: "
+                    MATELog.log_acc("Chromosome " + (j + 1) + " Coverage: "
                             + CoverageUtils.getCoverage(Properties.COVERAGE(),
                             chromosome));
                 }
@@ -95,7 +95,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            MATE.log_acc("Accumulated Coverage: "
+            MATELog.log_acc("Accumulated Coverage: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
         }
     }

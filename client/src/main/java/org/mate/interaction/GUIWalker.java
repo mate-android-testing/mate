@@ -2,14 +2,14 @@ package org.mate.interaction;
 
 import android.app.Instrumentation;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exceptions.InvalidScreenStateException;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class GUIWalker {
             return true;
         }
 
-        MATE.log("Going from " + guiModelMgr.getCurrentStateId() +" to " + targetScreenStateId);
+        MATELog.log("Going from " + guiModelMgr.getCurrentStateId() +" to " + targetScreenStateId);
 //        MATE.log("         >>> 1st attempt");
         List<List<Action>> paths = guiModelMgr.pathFromTo(guiModelMgr.getCurrentStateId(),targetScreenStateId);
         if (paths.size()>0){

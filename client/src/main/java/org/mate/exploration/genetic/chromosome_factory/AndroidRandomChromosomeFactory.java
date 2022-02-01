@@ -1,10 +1,11 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
@@ -12,7 +13,7 @@ import org.mate.utils.coverage.CoverageUtils;
 
 /**
  * Provides a chromosome factory that generates {@link TestCase}s consisting of random
- * {@link org.mate.interaction.action.ui.UIAction}s.
+ * {@link UIAction}s.
  */
 public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
 

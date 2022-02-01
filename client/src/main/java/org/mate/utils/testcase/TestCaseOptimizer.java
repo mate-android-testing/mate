@@ -1,12 +1,12 @@
 package org.mate.utils.testcase;
 
-import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;
@@ -206,7 +206,7 @@ public final class TestCaseOptimizer {
      */
     private static TestCase removeLastActions(TestCase testCase, int n, Class actionType) {
 
-        MATE.log("Optimising TestCase!");
+        MATELog.log("Optimising TestCase!");
 
         List<Action> actions = new ArrayList<>(testCase.getEventSequence());
         Collections.reverse(actions);
@@ -227,7 +227,7 @@ public final class TestCaseOptimizer {
             }
         }
 
-        MATE.log("Removed from TestCase " + ctr + " " + actionType.getName() + "!");
+        MATELog.log("Removed from TestCase " + ctr + " " + actionType.getName() + "!");
 
         // remove the actions from the test case
         testCase.getEventSequence().removeAll(toBeRemoved);

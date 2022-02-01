@@ -1,10 +1,10 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
-import org.mate.MATE;
 import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class WidgetBasedAccessibilityViolationChecker {
         List<AccessibilityViolation> violations = new ArrayList<AccessibilityViolation>();
 
         widgetBasedChecks = createWidgetBasedAccessibilityList();
-        MATE.log(">>WIDGET BASED CHECKS");
+        MATELog.log(">>WIDGET BASED CHECKS");
         for (Widget widget: state.getWidgets()){
 
             for (IWidgetAccessibilityCheck widgetCheck: widgetBasedChecks){
@@ -52,13 +52,13 @@ public class WidgetBasedAccessibilityViolationChecker {
                 if (violation!=null) {
                     violations.add(violation);
                     violation.reportFlaw();
-                    MATE.log("VIOLATION FOUND: " + violation.getType().getValue() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
+                    MATELog.log("VIOLATION FOUND: " + violation.getType().getValue() + " - " + widget.getClazz() + "  " + widget.getId() + " - " + widget.getText() + "  VISIBLE TO TB: " + widget.isScreenReaderFocusable() + "  ACCF: " + widget.isAccessibilityFocused() + "  IFA: " + widget.isImportantForAccessibility());
                     if (!violation.getInfo().equals(""))
-                        MATE.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds().toShortString());
+                        MATELog.log(" -- extra info: " + violation.getInfo() + " " + widget.getBounds().toShortString());
                 }
             }
         }
-        MATE.log("<<WIDGET BASED CHECKS");
+        MATELog.log("<<WIDGET BASED CHECKS");
         return violations;
     }
 }

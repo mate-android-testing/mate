@@ -3,12 +3,12 @@ package org.mate.accessibility;
 import android.graphics.Rect;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.utils.AccessibilityUtils;
+import org.mate.commons.utils.MATELog;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
-import org.mate.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.Widget;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,7 +116,7 @@ public class AccessibilitySummaryResults {
 
         all_flaws.add("ACC_FLAW:"+activityName.replace(packageName,"") + ","+nodeId.replace(packageName,"")+","+clazz+","+text.replace(",","-")+","+checkType+","+extraInfo);
 
-        MATE.log(checkType+" - " + nodeId + " - " + text);
+        MATELog.log(checkType+" - " + nodeId + " - " + text);
 
 
         activityName = activityName.replace(packageName+"/","");
@@ -154,7 +154,7 @@ public class AccessibilitySummaryResults {
         //INCLUDE COORDINATES
         String flawMsg = packageName+":"+activityName+":"+stateId+":"+checkType+":" + clazz + ":" + widgetid + ":"+ widgetText+":"+extraInfo;
         flawMsg+=":"+x1+":"+y1+":"+x2+":"+y2;
-        MATE.log("SEND FLAW TO SERVER");
+        MATELog.log("SEND FLAW TO SERVER");
         Registry.getEnvironmentManager().sendFlawToServer(flawMsg);
 
     }
@@ -168,7 +168,7 @@ public class AccessibilitySummaryResults {
 
         all_flaws.add("ACC_FLAW:"+activityName.replace(packageName,"") + ","+widget.getId().replace(packageName,"")+","+widget.getClazz()+","+text.replace(",","-")+","+checkType+","+extraInfo);
 
-        MATE.log(checkType+" - " + widget.getClazz() + " - " + widget.getId() + " - "+ widget.getText());
+        MATELog.log(checkType+" - " + widget.getClazz() + " - " + widget.getId() + " - "+ widget.getText());
 
         activityName = activityName.replace(packageName+"/","");
         String widgetid = widget.getId().replace(packageName+":id/","");
@@ -195,15 +195,15 @@ public class AccessibilitySummaryResults {
     public static void printSummary(IGUIModel guiModel){
 
         for (String accflaw: size_flaws){
-            MATE.log_acc(accflaw);
+            MATELog.log_acc(accflaw);
         }
 
         for (String accflaw: contrast_flaws){
-            MATE.log_acc(accflaw);
+            MATELog.log_acc(accflaw);
         }
 
         for (String accflaw: all_flaws){
-            MATE.log_acc(accflaw);
+            MATELog.log_acc(accflaw);
         }
 
         int flawscount[] = new int[8];
@@ -219,7 +219,7 @@ public class AccessibilitySummaryResults {
                     cont+=flawsByActivity.size();
                 }
             }
-            MATE.log_debug(etype.replace("_"," ") + ": " + cont);
+            MATELog.log_debug(etype.replace("_"," ") + ": " + cont);
             summaryStr+=String.valueOf(cont)+",";
             flawscount[i]=cont;
             total+=cont;
@@ -227,18 +227,18 @@ public class AccessibilitySummaryResults {
         if (summaryStr.length()>0)
             summaryStr = summaryStr.substring(0,summaryStr.length()-1);
 
-        MATE.log_debug("ACC_SUMMARY:"+currentPackageName+","+total+","+summaryStr);
+        MATELog.log_debug("ACC_SUMMARY:"+currentPackageName+","+total+","+summaryStr);
 
-        MATE.log_debug("STATES_VISITED_BY_MATE:"+guiModel.getStates().size());
+        MATELog.log_debug("STATES_VISITED_BY_MATE:"+guiModel.getStates().size());
         Set<String> uniqueActivities = new HashSet<String>();
         for (IScreenState state: guiModel.getStates()){
             if (state.getActivityName().contains(currentPackageName))
                 uniqueActivities.add(state.getActivityName());
         }
 
-        MATE.log_debug("ACTIVITIES_VISITED_BY_MATE:"+uniqueActivities.size());
+        MATELog.log_debug("ACTIVITIES_VISITED_BY_MATE:"+uniqueActivities.size());
         for (String st: uniqueActivities){
-             MATE.log_debug("activity: " + st);
+             MATELog.log_debug("activity: " + st);
         }
     }
 

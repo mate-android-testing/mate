@@ -2,13 +2,13 @@ package org.mate.model;
 
 import android.support.annotation.NonNull;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
-import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
@@ -86,7 +86,7 @@ public class TestCase {
      * @param id The (unique) test case id.
      */
     public TestCase(String id) {
-        MATE.log("Initialising new test case!");
+        MATELog.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
         visitedActivities = new HashSet<>();
@@ -113,9 +113,9 @@ public class TestCase {
      * and so on.
      */
     public void finish() {
-        MATE.log("Finishing test case!");
+        MATELog.log("Finishing test case!");
 
-        MATE.log("Found crash: " + getCrashDetected());
+        MATELog.log("Found crash: " + getCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
@@ -388,7 +388,7 @@ public class TestCase {
         }
 
         String activityBeforeAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
-        MATE.log("executing action " + actionID + ": " + action);
+        MATELog.log("executing action " + actionID + ": " + action);
 
         addEvent(action);
         UIAbstractionLayer.ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
@@ -403,8 +403,8 @@ public class TestCase {
             activitySequence.add(activityAfterAction);
         }
 
-        MATE.log("executed action " + actionID + ": " + action);
-        MATE.log("Activity Transition for action " +  actionID
+        MATELog.log("executed action " + actionID + ": " + action);
+        MATELog.log("Activity Transition for action " +  actionID
                 + ":" + activityBeforeAction  + "->" + activityAfterAction);
 
         switch (actionResult) {

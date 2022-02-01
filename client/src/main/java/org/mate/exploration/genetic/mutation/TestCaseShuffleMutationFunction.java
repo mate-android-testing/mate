@@ -2,7 +2,7 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 

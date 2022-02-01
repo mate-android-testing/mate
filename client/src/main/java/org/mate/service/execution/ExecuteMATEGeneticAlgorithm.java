@@ -4,6 +4,7 @@ import org.mate.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
@@ -13,7 +14,7 @@ import java.util.List;
 public class ExecuteMATEGeneticAlgorithm {
 
     public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
-        MATE.log_acc("Starting Genetic Algorithm...");
+        MATELog.log_acc("Starting Genetic Algorithm...");
 
         MATE mate = new MATE(packageName, representationLayer);
 

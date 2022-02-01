@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.interaction.action.Action;
+import org.mate.commons.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
 
 /**

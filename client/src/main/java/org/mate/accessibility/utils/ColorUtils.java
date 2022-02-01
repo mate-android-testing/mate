@@ -3,7 +3,7 @@ package org.mate.accessibility.utils;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import org.mate.MATE;
+import org.mate.commons.utils.MATELog;
 
 import java.util.Hashtable;
 
@@ -125,8 +125,8 @@ public class ColorUtils {
             }
         }
 
-        MATE.log("MAX HIGH: " + maxHigh);
-        MATE.log("color HIGH: " + colorHigh);
+        MATELog.log("MAX HIGH: " + maxHigh);
+        MATELog.log("color HIGH: " + colorHigh);
 
         int maxLow = 0;
         int colorLow=0;
@@ -138,14 +138,14 @@ public class ColorUtils {
             }
         }
 
-        MATE.log("MAX HIGH: " + maxLow);
-        MATE.log("color HIGH: " + colorLow);
+        MATELog.log("MAX HIGH: " + maxLow);
+        MATELog.log("color HIGH: " + colorLow);
 
         double lowLum = ColorUtils.getRelativeLuminance(colorLow);
         double highLum = ColorUtils.getRelativeLuminance(colorHigh);
 
-        MATE.log("low lum: " + lowLum);
-        MATE.log("high lum: " + highLum);
+        MATELog.log("low lum: " + lowLum);
+        MATELog.log("high lum: " + highLum);
 
         return ColorUtils.getContrastRatio(highLum, lowLum);
     }
