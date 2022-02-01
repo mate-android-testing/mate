@@ -26,7 +26,7 @@ import org.mate.representation.util.MATERepLog;
  */
 public class MATEServiceConnection implements ServiceConnection {
     public static final String MATE_SERVICE_PACKAGE_NAME = "org.mate";
-    public static final String MATE_SERVICE_CLASS_NAME = "org.mate.MATEService";
+    public static final String MATE_SERVICE_CLASS_NAME = "org.mate.service.MATEService";
 
     private final CommandHandler commandHandler;
     private IMATEServiceInterface mateService;
@@ -38,7 +38,7 @@ public class MATEServiceConnection implements ServiceConnection {
     /**
      * Init process of connection with the MATE Service.
      */
-    public static void establish() {
+    public static void establish() throws Exception {
         // this is needed to create handlers in this thread
         Looper.prepare();
 
@@ -54,7 +54,13 @@ public class MATEServiceConnection implements ServiceConnection {
         intent.setClassName(MATE_SERVICE_PACKAGE_NAME, MATE_SERVICE_CLASS_NAME);
 
         final Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        boolean result = context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+        if (!result) {
+            String message = "Unable to bind to MATE Service";
+            MATERepLog.info(message);
+            throw new Exception(message);
+        }
     }
 
     @Override

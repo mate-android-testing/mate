@@ -44,7 +44,7 @@ public class DynamicTest {
     }
 
     @Test
-    public void run() {
+    public void run() throws Exception {
         MATEServiceConnection.establish();
 
         // stay here forever
