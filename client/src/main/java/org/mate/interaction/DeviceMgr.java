@@ -16,7 +16,7 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 
-import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;

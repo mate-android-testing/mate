@@ -4,6 +4,7 @@ import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;

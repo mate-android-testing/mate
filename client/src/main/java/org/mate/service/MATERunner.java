@@ -1,6 +1,6 @@
 package org.mate.service;
 
-import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.service.execution.ExecuteMATEAccManualExploration;
 import org.mate.service.execution.ExecuteMATEEqualWeightedGE;
 import org.mate.service.execution.ExecuteMATEGeneticAlgorithm;

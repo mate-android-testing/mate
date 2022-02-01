@@ -11,7 +11,7 @@ import android.os.RemoteException;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.mate.IMATEServiceInterface;
+import org.mate.commons.IMATEServiceInterface;
 import org.mate.representation.commands.CommandHandler;
 import org.mate.representation.util.MATERepLog;
 

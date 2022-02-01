@@ -9,7 +9,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;

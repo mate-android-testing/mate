@@ -16,8 +16,8 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import org.mate.IMATEServiceInterface;
-import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.IMATEServiceInterface;
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.R;
 

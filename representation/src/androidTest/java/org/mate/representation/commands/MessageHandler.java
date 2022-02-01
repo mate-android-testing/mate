@@ -6,7 +6,7 @@ import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 
-import org.mate.IMATEServiceInterface;
+import org.mate.commons.IMATEServiceInterface;
 import org.mate.representation.util.MATERepLog;
 
 import java.util.ArrayList;

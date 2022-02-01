@@ -1,6 +1,6 @@
 package org.mate.service.execution;
 
-import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;

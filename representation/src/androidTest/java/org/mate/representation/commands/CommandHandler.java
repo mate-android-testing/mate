@@ -4,8 +4,8 @@ import static org.mate.representation.commands.MessageHandler.GET_AVAILABLE_ACTI
 
 import android.os.RemoteException;
 
-import org.mate.IMATEServiceInterface;
-import org.mate.IRepresentationLayerInterface;
+import org.mate.commons.IMATEServiceInterface;
+import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.representation.DeviceInfo;
 import org.mate.representation.util.MATERepLog;
 
