@@ -108,7 +108,7 @@ public class ExecuteMATEReplayRun {
      * @return Returns {@code true} if the test case could be successfully replayed,
      * otherwise {@code false} is returned.
      */
-    private boolean replayTestCase(TestCase testCase) {
+    private static boolean replayTestCase(TestCase testCase) {
 
         // get the actions for replaying
         List<Action> actions = testCase.getEventSequence();
@@ -155,7 +155,7 @@ public class ExecuteMATEReplayRun {
      * @return Returns an alternative action that is applicable, or {@code null} if no appropriate
      * action could be derived.
      */
-    private Action repairUIAction(Action a) {
+    private static Action repairUIAction(Action a) {
 
         // TODO: provide appropriate repair mechanism!
 

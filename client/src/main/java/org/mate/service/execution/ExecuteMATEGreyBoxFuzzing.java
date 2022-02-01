@@ -39,7 +39,7 @@ public class ExecuteMATEGreyBoxFuzzing {
         MATE.log_acc("Total number of crashes: " + greyBoxFuzzer.getCrashingInputs().size());
     }
 
-    private IChromosomeFactory translateChromosomeFactory(ChromosomeFactory chromosomeFactory) {
+    private static IChromosomeFactory translateChromosomeFactory(ChromosomeFactory chromosomeFactory) {
         switch (chromosomeFactory) {
             case ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 return new AndroidRandomChromosomeFactory(true, Properties.MAX_NUMBER_EVENTS());
@@ -54,7 +54,7 @@ public class ExecuteMATEGreyBoxFuzzing {
         }
     }
 
-    private IMutationFunction translateMutationFunction(MutationFunction mutationFunction) {
+    private static IMutationFunction translateMutationFunction(MutationFunction mutationFunction) {
         switch (mutationFunction) {
             case TEST_CASE_CUT_POINT_MUTATION:
                 return new CutPointMutationFunction(Properties.MAX_NUMBER_EVENTS());
@@ -68,7 +68,7 @@ public class ExecuteMATEGreyBoxFuzzing {
         }
     }
 
-    private ITerminationCondition translateTerminationCondition(TerminationCondition terminationCondition) {
+    private static ITerminationCondition translateTerminationCondition(TerminationCondition terminationCondition) {
         switch (terminationCondition) {
             case NEVER_TERMINATION:
                 return new NeverTerminationCondition();
