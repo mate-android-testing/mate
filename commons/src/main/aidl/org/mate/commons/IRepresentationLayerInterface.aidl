@@ -4,7 +4,7 @@ package org.mate.commons;
 import org.mate.commons.interaction.action.ui.Widget;
 
 interface IRepresentationLayerInterface {
-    // Representation Layer Configuration
+    // Representation Layer config
     void setTargetPackageName(String packageName);
 
     // General device info
@@ -16,6 +16,12 @@ interface IRepresentationLayerInterface {
     String getCurrentPackageName();
     String getCurrentActivityName();
     List<String> getTargetPackageActivityNames();
+
+    // AUT config
+    boolean clearTargetPackageData();
+
+    // General actions
+    String executeShellCommand(String command);
 
     // Widget actions
     List<Widget> getCurrentScreenWidgets();

@@ -1430,7 +1430,7 @@ public class DeviceMgr {
     public void clearApp() {
 
         try {
-            device.executeShellCommand("pm clear " + packageName);
+            representationLayer.clearTargetPackageData();
 
             /*
              * We need to re-generate an empty 'coverage.exec' file for those apps that have been
@@ -1438,12 +1438,12 @@ public class DeviceMgr {
              * TODO: Is the final call to 'exit' really necessary?
              */
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                device.executeShellCommand("run-as " + packageName + " mkdir -p files");
-                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
+                representationLayer.executeShellCommand("run-as " + packageName + " mkdir -p files");
+                representationLayer.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
                 // device.executeShellCommand("run-as " + packageName + " exit");
             }
 
-        } catch (IOException e) {
+        } catch (RemoteException e) {
             MATELog.log_warn("Couldn't clear app data!");
             MATELog.log_warn(e.getMessage());
 

@@ -136,4 +136,21 @@ public class DeviceInfo {
     public void setTargetPackageName(String packageName) {
         targetPackageName = packageName;
     }
+
+    public boolean clearTargetPackageData() {
+        if (targetPackageName != null) {
+            String output = this.executeShellCommand("pm clear " + targetPackageName);
+            return output != null;
+        }
+        return false;
+    }
+
+    public String executeShellCommand(String command) {
+        try {
+            return device.executeShellCommand("pm clear " + targetPackageName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
