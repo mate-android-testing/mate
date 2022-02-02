@@ -200,7 +200,9 @@ public class DeviceMgr {
                     + " " + tag + " " + component);
         } catch (IOException e) {
             MATELog.log_warn("Executing system action failed!");
-            MATELog.log_warn(e.getMessage());
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
 
             // fall back mechanism
             Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
@@ -1245,7 +1247,9 @@ public class DeviceMgr {
         try {
             return representationLayer.getCurrentPackageName();
         } catch (RemoteException e) {
-            MATELog.log_warn(e.getMessage());
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
             return null;
         }
     }
@@ -1268,7 +1272,9 @@ public class DeviceMgr {
             }
         } catch (Exception e) {
             MATELog.log_warn("Couldn't retrieve current activity name via local shell!");
-            MATELog.log_warn(e.getMessage());
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
 
             // fall back mechanism (slow)
             return Registry.getEnvironmentManager().getCurrentActivityName();
@@ -1410,7 +1416,9 @@ public class DeviceMgr {
             return representationLayer.getTargetPackageActivityNames();
         } catch (RemoteException e) {
             MATELog.log_warn("Couldn't retrieve activity names!");
-            MATELog.log_warn(e.getMessage());
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
 
             // fallback mechanism
             return Registry.getEnvironmentManager().getActivityNames();
@@ -1439,7 +1447,9 @@ public class DeviceMgr {
 
         } catch (RemoteException e) {
             MATELog.log_warn("Couldn't clear app data!");
-            MATELog.log_warn(e.getMessage());
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
@@ -1469,7 +1479,9 @@ public class DeviceMgr {
 
         } catch(IOException e) {
             MATELog.log_warn("Couldn't retrieve stack trace of last crash!");
-            MATELog.log_warn(e.getMessage());
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
         }
 
         // fallback mechanism
