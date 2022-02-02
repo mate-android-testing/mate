@@ -53,6 +53,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public boolean isCrashDialogDisplayed() throws RemoteException {
+        return DeviceInfo.getInstance().isCrashDialogDisplayed();
+    }
+
+    @Override
     public List<Widget> getCurrentScreenWidgets() throws RemoteException {
         return new WidgetScreenParser().getWidgets();
     }

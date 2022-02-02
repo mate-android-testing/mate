@@ -5,6 +5,8 @@ import android.os.Build;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiSelector;
 
 import org.mate.representation.util.MATERepLog;
 
@@ -96,5 +98,14 @@ public class DeviceInfo {
 
     public int getDisplayHeight() {
         return device.getDisplayHeight();
+    }
+
+    public boolean isCrashDialogDisplayed() {
+        UiObject crashDialog1 = device.findObject(
+                new UiSelector().packageName("android").textContains("keeps stopping"));
+        UiObject crashDialog2 = device.findObject(
+                new UiSelector().packageName("android").textContains("has stopped"));
+
+        return crashDialog1.exists() || crashDialog2.exists();
     }
 }

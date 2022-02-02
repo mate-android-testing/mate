@@ -781,13 +781,13 @@ public class DeviceMgr {
      *         is returned.
      */
     public boolean checkForCrashDialog() {
-
-        UiObject crashDialog1 = device.findObject(
-                new UiSelector().packageName("android").textContains("keeps stopping"));
-        UiObject crashDialog2 = device.findObject(
-                new UiSelector().packageName("android").textContains("has stopped"));
-
-        return crashDialog1.exists() || crashDialog2.exists();
+        try {
+            return representationLayer.isCrashDialogDisplayed();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            // an exception here likely means a crash has happened.
+            return true;
+        }
     }
 
     /**

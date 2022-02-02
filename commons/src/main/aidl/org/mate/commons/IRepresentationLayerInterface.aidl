@@ -9,6 +9,7 @@ interface IRepresentationLayerInterface {
     int getDisplayHeight();
     String getCurrentPackageName();
     String getCurrentActivityName();
+    boolean isCrashDialogDisplayed();
 
     // Widget actions
     List<Widget> getCurrentScreenWidgets();
