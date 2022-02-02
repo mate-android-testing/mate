@@ -28,7 +28,7 @@ public class Widget implements Parcelable {
     /**
      * A reference to the parent widget or {@code null} if it is the root widget.
      */
-    private final Widget parent;
+    private Widget parent;
 
     /**
      * A list of direct descendants.
@@ -1071,7 +1071,6 @@ public class Widget implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(this.parent, flags);
         dest.writeList(this.children);
         dest.writeString(this.id);
         dest.writeString(this.clazz);
@@ -1170,9 +1169,13 @@ public class Widget implements Parcelable {
     }*/
 
     protected Widget(Parcel in) {
-        this.parent = in.readParcelable(Widget.class.getClassLoader());
         this.children = new ArrayList<Widget>();
         in.readList(this.children, Widget.class.getClassLoader());
+
+        for (Widget child: children) {
+            child.parent = this;
+        }
+
         this.id = in.readString();
         this.clazz = in.readString();
         this.resourceID = in.readString();
