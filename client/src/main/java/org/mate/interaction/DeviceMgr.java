@@ -1412,17 +1412,9 @@ public class DeviceMgr {
      * @return Returns the activity names of the AUT.
      */
     public List<String> getActivityNames() {
-
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-
         try {
-            // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
-            PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
-                    packageName, PackageManager.GET_ACTIVITIES);
-
-            return Arrays.stream(pi.activities).map(activity -> activity.name)
-                    .collect(Collectors.toList());
-        } catch (PackageManager.NameNotFoundException e) {
+            return representationLayer.getTargetPackageActivityNames();
+        } catch (RemoteException e) {
             MATELog.log_warn("Couldn't retrieve activity names!");
             MATELog.log_warn(e.getMessage());
 

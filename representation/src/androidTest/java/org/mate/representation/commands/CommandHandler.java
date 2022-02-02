@@ -33,6 +33,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public void setTargetPackageName(String packageName) throws RemoteException {
+        DeviceInfo.getInstance().setTargetPackageName(packageName);
+    }
+
+    @Override
     public int getDisplayWidth() throws RemoteException {
         return DeviceInfo.getInstance().getDisplayWidth();
     }
@@ -50,6 +55,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     @Override
     public String getCurrentActivityName() throws RemoteException {
         return DeviceInfo.getInstance().getCurrentActivityName();
+    }
+
+    @Override
+    public List<String> getTargetPackageActivityNames() throws RemoteException {
+        return DeviceInfo.getInstance().getTargetPackageActivityNames();
     }
 
     @Override

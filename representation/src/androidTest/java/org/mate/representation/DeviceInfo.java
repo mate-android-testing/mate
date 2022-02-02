@@ -1,6 +1,8 @@
 package org.mate.representation;
 
 import android.app.Instrumentation;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -8,9 +10,13 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiSelector;
 
+import org.mate.commons.utils.MATELog;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for providing basic information about the Device and the application
@@ -24,6 +30,7 @@ public class DeviceInfo {
      */
     private final UiDevice device;
     private final Instrumentation instrumentation;
+    private String targetPackageName;
 
     private DeviceInfo() {
         instrumentation = InstrumentationRegistry.getInstrumentation();
@@ -107,5 +114,26 @@ public class DeviceInfo {
                 new UiSelector().packageName("android").textContains("has stopped"));
 
         return crashDialog1.exists() || crashDialog2.exists();
+    }
+
+    public List<String> getTargetPackageActivityNames() {
+        if (targetPackageName == null) {
+            return null;
+        }
+
+        try {
+            // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
+            PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
+                    targetPackageName, PackageManager.GET_ACTIVITIES);
+
+            return Arrays.stream(pi.activities).map(activity -> activity.name)
+                    .collect(Collectors.toList());
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    public void setTargetPackageName(String packageName) {
+        targetPackageName = packageName;
     }
 }

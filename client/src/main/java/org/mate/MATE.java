@@ -1,5 +1,6 @@
 package org.mate;
 
+import android.os.RemoteException;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -72,6 +73,8 @@ public class MATE {
         Registry.registerPackageName(packageName);
         MATELog.log_acc("Package name: " + Registry.getPackageName());
 
+        configRepresentationLayer(representationLayer);
+
         final DeviceMgr deviceMgr = new DeviceMgr(representationLayer, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
 
@@ -97,6 +100,14 @@ public class MATE {
             // initialise a graph
             MATELog.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
+        }
+    }
+
+    private void configRepresentationLayer(IRepresentationLayerInterface representationLayer) {
+        try {
+            representationLayer.setTargetPackageName(Registry.getPackageName());
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Couldn't configure Representation Layer");
         }
     }
 
