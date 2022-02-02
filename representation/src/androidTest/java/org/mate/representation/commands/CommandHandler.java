@@ -33,6 +33,16 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public int getDisplayWidth() throws RemoteException {
+        return DeviceInfo.getInstance().getDisplayWidth();
+    }
+
+    @Override
+    public int getDisplayHeight() throws RemoteException {
+        return DeviceInfo.getInstance().getDisplayHeight();
+    }
+
+    @Override
     public String getCurrentPackageName() throws RemoteException {
         return DeviceInfo.getInstance().getCurrentPackageName();
     }

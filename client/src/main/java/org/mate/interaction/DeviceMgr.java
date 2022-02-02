@@ -1184,7 +1184,12 @@ public class DeviceMgr {
      * @return Returns the screen width in pixels.
      */
     public int getScreenWidth() {
-        return device.getDisplayWidth();
+        try {
+            return representationLayer.getDisplayWidth();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     /**
@@ -1193,7 +1198,12 @@ public class DeviceMgr {
      * @return Returns the screen height in pixels.
      */
     public int getScreenHeight() {
-        return device.getDisplayHeight();
+        try {
+            return representationLayer.getDisplayHeight();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     /**

@@ -89,4 +89,12 @@ public class DeviceInfo {
     public UiDevice getUiDevice() {
         return device;
     }
+
+    public int getDisplayWidth() {
+        return device.getDisplayWidth();
+    }
+
+    public int getDisplayHeight() {
+        return device.getDisplayHeight();
+    }
 }
