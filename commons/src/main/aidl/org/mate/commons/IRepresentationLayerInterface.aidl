@@ -19,6 +19,7 @@ interface IRepresentationLayerInterface {
 
     // AUT config
     boolean clearTargetPackageData();
+    boolean restartTargetPackage();
 
     // General actions
     String executeShellCommand(String command);

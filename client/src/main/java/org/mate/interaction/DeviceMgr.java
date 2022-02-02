@@ -1219,18 +1219,12 @@ public class DeviceMgr {
      */
     public void restartApp() {
         MATELog.log("Restarting app");
-        // Launch the app
-        Context context = getContext();
-        final Intent intent = context.getPackageManager()
-                .getLaunchIntentForPackage(packageName);
-        // Clear out any previous instances
         try {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        } catch (Exception e) {
+            representationLayer.restartTargetPackage();
+        } catch (RemoteException e) {
             e.printStackTrace();
-            MATELog.log("EXCEPTION CLEARING ACTIVITY FLAG");
+            throw new IllegalStateException("Unable to restart app");
         }
-        context.startActivity(intent);
     }
 
     /**

@@ -1,6 +1,8 @@
 package org.mate.representation;
 
 import android.app.Instrumentation;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -152,5 +154,25 @@ public class DeviceInfo {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public boolean restartTargetPackage() {
+        if (targetPackageName == null) {
+            return false;
+        }
+
+        Context context = instrumentation.getContext();
+        final Intent intent = context.getPackageManager().getLaunchIntentForPackage(targetPackageName);
+        // Clear out any previous instances
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MATELog.log("EXCEPTION CLEARING ACTIVITY FLAG");
+            return false;
+        }
+
+        context.startActivity(intent);
+        return true;
     }
 }
