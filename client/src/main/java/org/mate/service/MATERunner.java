@@ -1,5 +1,7 @@
 package org.mate.service;
 
+import android.content.Context;
+
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.service.execution.ExecuteMATEAccManualExploration;
 import org.mate.service.execution.ExecuteMATEEqualWeightedGE;
@@ -23,67 +25,71 @@ import org.mate.service.execution.ExecuteMATEStandardGE;
 import org.mate.service.execution.ExecuteMATEStandardGeneticAlgorithm;
 
 public class MATERunner {
-    public static void run(String packageName, String algorithm, IRepresentationLayerInterface representationLayer) {
+    public static void run(String packageName,
+                           String algorithm,
+                           IRepresentationLayerInterface representationLayer,
+                           Context context) {
         switch (algorithm) {
             case "AccManualExploration": {
-                ExecuteMATEAccManualExploration.run(packageName, representationLayer);
+                ExecuteMATEAccManualExploration.run(packageName, representationLayer, context);
             }
             case "EqualWeightedGE": {
-                ExecuteMATEEqualWeightedGE.run(packageName, representationLayer);
+                ExecuteMATEEqualWeightedGE.run(packageName, representationLayer, context);
             }
             case "GeneticAlgorithm": {
-                ExecuteMATEGeneticAlgorithm.run(packageName, representationLayer);
+                ExecuteMATEGeneticAlgorithm.run(packageName, representationLayer, context);
             }
             case "GreyBoxFuzzing": {
-                ExecuteMATEGreyBoxFuzzing.run(packageName, representationLayer);
+                ExecuteMATEGreyBoxFuzzing.run(packageName, representationLayer, context);
             }
             case "HeuristicRandomExploration": {
-                ExecuteMATEHeuristicRandomExploration.run(packageName, representationLayer);
+                ExecuteMATEHeuristicRandomExploration.run(packageName, representationLayer,
+                        context);
             }
             case "ListAnalogousGE": {
-                ExecuteMATEListAnalogousGE.run(packageName, representationLayer);
+                ExecuteMATEListAnalogousGE.run(packageName, representationLayer, context);
             }
             case "MIO": {
-                ExecuteMATEMIO.run(packageName, representationLayer);
+                ExecuteMATEMIO.run(packageName, representationLayer, context);
             }
             case "MOSA": {
-                ExecuteMATEMOSA.run(packageName, representationLayer);
+                ExecuteMATEMOSA.run(packageName, representationLayer, context);
             }
             case "NoveltySearch": {
-                ExecuteMATENoveltySearch.run(packageName, representationLayer);
+                ExecuteMATENoveltySearch.run(packageName, representationLayer, context);
             }
             case "NSGAII": {
-                ExecuteMATENSGAII.run(packageName, representationLayer);
+                ExecuteMATENSGAII.run(packageName, representationLayer, context);
             }
             case "OnePlusOne": {
-                ExecuteMATEOnePlusOne.run(packageName, representationLayer);
+                ExecuteMATEOnePlusOne.run(packageName, representationLayer, context);
             }
             case "PrimitiveStandardGA": {
-                ExecuteMATEPrimitiveStandardGA.run(packageName, representationLayer);
+                ExecuteMATEPrimitiveStandardGA.run(packageName, representationLayer, context);
             }
             case "RandomExploration": {
-                ExecuteMATERandomExploration.run(packageName, representationLayer);
+                ExecuteMATERandomExploration.run(packageName, representationLayer, context);
             }
             case "RandomExplorationIntent": {
-                ExecuteMATERandomExplorationIntent.run(packageName, representationLayer);
+                ExecuteMATERandomExplorationIntent.run(packageName, representationLayer, context);
             }
             case "RandomSearch": {
-                ExecuteMATERandomSearch.run(packageName, representationLayer);
+                ExecuteMATERandomSearch.run(packageName, representationLayer, context);
             }
             case "RandomWalk": {
-                ExecuteMATERandomWalk.run(packageName, representationLayer);
+                ExecuteMATERandomWalk.run(packageName, representationLayer, context);
             }
             case "ReplayRun": {
-                ExecuteMATEReplayRun.run(packageName, representationLayer);
+                ExecuteMATEReplayRun.run(packageName, representationLayer, context);
             }
             case "Sapienz": {
-                ExecuteMATESapienz.run(packageName, representationLayer);
+                ExecuteMATESapienz.run(packageName, representationLayer, context);
             }
             case "StandardGE": {
-                ExecuteMATEStandardGE.run(packageName, representationLayer);
+                ExecuteMATEStandardGE.run(packageName, representationLayer, context);
             }
             case "StandardGeneticAlgorithm": {
-                ExecuteMATEStandardGeneticAlgorithm.run(packageName, representationLayer);
+                ExecuteMATEStandardGeneticAlgorithm.run(packageName, representationLayer, context);
             }
         }
     }

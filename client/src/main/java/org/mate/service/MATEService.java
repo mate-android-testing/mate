@@ -88,7 +88,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         log(String.format("MATE Service starting for algorithm %s and package name %s",
                 algorithm, packageName));
 
-        MATERunner.run(packageName, algorithm, representationLayer);
+        MATERunner.run(packageName, algorithm, representationLayer, getApplicationContext());
 
         // If we get killed, after returning from here, restart
         return START_NOT_STICKY;

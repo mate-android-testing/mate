@@ -1,5 +1,7 @@
 package org.mate.service.execution;
 
+import android.content.Context;
+
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
@@ -10,10 +12,10 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 public class ExecuteMATERandomWalk {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
 
         MATELog.log_acc("Starting Random Walk ....");
-        MATE mate = new MATE(packageName, representationLayer);
+        MATE mate = new MATE(packageName, representationLayer, context);
 
         final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.RANDOM_WALK)

@@ -1,5 +1,7 @@
 package org.mate.service.execution;
 
+import android.content.Context;
+
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
@@ -12,11 +14,11 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 
 public class ExecuteMATENoveltySearch {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
 
         MATELog.log_acc("Starting Novelty Search...");
 
-        MATE mate = new MATE(packageName, representationLayer);
+        MATE mate = new MATE(packageName, representationLayer, context);
 
         final IGeneticAlgorithm noveltySearch = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NOVELTY_SEARCH)

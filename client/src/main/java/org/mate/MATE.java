@@ -1,9 +1,8 @@
 package org.mate;
 
+import android.content.Context;
 import android.os.RemoteException;
 import android.os.StrictMode;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.UiDevice;
 
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.utils.MATELog;
@@ -22,12 +21,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-
 public class MATE {
 
     // TODO: make singleton
-    public MATE(String packageName, IRepresentationLayerInterface representationLayer) {
+    public MATE(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -38,12 +35,12 @@ public class MATE {
         StrictMode.setThreadPolicy(policy);
 
         Integer serverPort = null;
-        try (FileInputStream fis = InstrumentationRegistry.getTargetContext().openFileInput("port");
+        try (FileInputStream fis = context.openFileInput("port");
              BufferedReader reader = new BufferedReader(new InputStreamReader(fis))) {
             serverPort = Integer.valueOf(reader.readLine());
-            MATE.log_acc("Using server port: " + serverPort);
+            MATELog.log_acc("Using server port: " + serverPort);
         } catch (IOException e) {
-            MATE.log_acc("Couldn't read server port, fall back to default port!");
+            MATELog.log_acc("Couldn't read server port, fall back to default port!");
         }
 
         EnvironmentManager environmentManager;

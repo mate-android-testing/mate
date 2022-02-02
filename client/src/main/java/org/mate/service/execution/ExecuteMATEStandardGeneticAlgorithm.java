@@ -1,5 +1,7 @@
 package org.mate.service.execution;
 
+import android.content.Context;
+
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
@@ -12,11 +14,11 @@ import org.mate.model.TestCase;
 public class ExecuteMATEStandardGeneticAlgorithm {
 
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer) {
+    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
         MATELog.log_acc("Starting Evolutionary Search...");
         MATELog.log_acc("StandardGeneticAlgorithm implementation");
 
-        MATE mate = new MATE(packageName, representationLayer);
+        MATE mate = new MATE(packageName, representationLayer, context);
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)
