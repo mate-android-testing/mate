@@ -149,7 +149,7 @@ public class DeviceInfo {
 
     public String executeShellCommand(String command) {
         try {
-            return device.executeShellCommand("pm clear " + targetPackageName);
+            return device.executeShellCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
