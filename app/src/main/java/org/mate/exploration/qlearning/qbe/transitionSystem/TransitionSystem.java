@@ -1,10 +1,5 @@
 package org.mate.exploration.qlearning.qbe.transitionSystem;
 
-import static java.util.stream.Collectors.toSet;
-
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.State;
 
@@ -13,7 +8,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
+import static java.util.stream.Collectors.toSet;
+
 public final class TransitionSystem<S extends State<A>, A extends Action> {
 
   private final S initialState;

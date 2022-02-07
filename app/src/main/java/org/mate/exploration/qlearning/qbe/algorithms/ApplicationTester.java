@@ -1,10 +1,6 @@
 package org.mate.exploration.qlearning.qbe.algorithms;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import org.mate.MATE;
-import org.mate.exploration.Algorithm;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.exploration.qlearning.qbe.interfaces.Application;
@@ -23,13 +19,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
-public final class ApplicationTester<S extends State<A>, A extends Action> implements Algorithm {
-
-    private final Application<S, A> app;
-    private final ExplorationStrategy<S, A> explorationStrategy;
-    private final long timeoutInMilliseconds;
-    private final int maximumNumberOfActionPerTestcase;
+public final class ApplicationTester<S extends State<A>, A extends Action> extends AbstractTester<S, A> {
 
     private List<List<TransitionRelation<S, A>>> testsuite = new ArrayList<>();
     private final TransitionSystem<S, A> transitionSystem;
@@ -37,24 +27,11 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
     public ApplicationTester(final Application<S, A> app,
                              final ExplorationStrategy<S, A> explorationStrategy,
                              final long timeoutInMilliseconds,
-                             final int maximumNumberOfActionPerTestcase) {
-        this.app = Objects.requireNonNull(app);
-        this.explorationStrategy = Objects.requireNonNull(explorationStrategy);
-        this.timeoutInMilliseconds = timeoutInMilliseconds;
-        this.maximumNumberOfActionPerTestcase = maximumNumberOfActionPerTestcase;
+                             final int maximumNumberOfActionPerTestCase) {
+        super(app, explorationStrategy, timeoutInMilliseconds, maximumNumberOfActionPerTestCase);
 
         app.reset(); // Ensure that app.getCurrentState() is the initial state of the app.
         this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
-
-        if (timeoutInMilliseconds <= 0) {
-            throw new IllegalArgumentException("The timeout must be a positive value");
-        }
-
-        if (maximumNumberOfActionPerTestcase <= 0) {
-            throw new IllegalArgumentException(
-                    "The maximum number of actions per test case need to be at least 1.");
-        }
-
     }
 
     public Set<List<TransitionRelation<S, A>>> getTestsuite() {
@@ -111,7 +88,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
 
                 }
             } while (noTerminalState && noCrash && !nonDeterministic
-                    && testcase.size() < maximumNumberOfActionPerTestcase && !reachedTimeout(startTime));
+                    && testcase.size() < maximumNumberOfActionPerTestCase && !reachedTimeout(startTime));
             if (!nonDeterministic) testsuite.add(testcase);
         }
     }
@@ -178,17 +155,6 @@ public final class ApplicationTester<S extends State<A>, A extends Action> imple
             }
         }
         return testsuite;
-    }
-
-    /**
-     * Checks whether the specified timeout has been reached.
-     *
-     * @param startTime The starting time of the exploration.
-     * @return Returns {@code true} if the timeout has been reached, otherwise {@code false}.
-     */
-    private boolean reachedTimeout(final long startTime) {
-        final long currentTime = System.currentTimeMillis();
-        return currentTime - startTime > timeoutInMilliseconds;
     }
 }
 
