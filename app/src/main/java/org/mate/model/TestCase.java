@@ -1,7 +1,5 @@
 package org.mate.model;
 
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
-
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
@@ -10,7 +8,6 @@ import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
@@ -23,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mate.interaction.UIAbstractionLayer.ActionResult;
+
 public class TestCase {
 
     /**
@@ -34,22 +33,22 @@ public class TestCase {
     /**
      * The set of visited activities.
      */
-    private Set<String> visitedActivities;
+    private final Set<String> visitedActivities;
 
     /**
      * The set of visited screen states (ids).
      */
-    private Set<String> visitedStates;
+    private final Set<String> visitedStates;
 
     /**
      * The actions that has been executed by this test case.
      */
-    private List<Action> eventSequence;
+    private final List<Action> eventSequence;
 
     /**
      * The visited activities in the order they appeared.
      */
-    private List<String> activitySequence;
+    private final List<String> activitySequence;
 
     /**
      * Whether a crash has been triggered by an action of the test case.
