@@ -1,12 +1,5 @@
 package org.mate.exploration.qlearning.qbe.interfaces.implementations;
 
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
-
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.qlearning.qbe.interfaces.Application;
 import org.mate.interaction.UIAbstractionLayer;
@@ -17,7 +10,10 @@ import org.mate.utils.coverage.CoverageUtils;
 import java.util.Objects;
 import java.util.Optional;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
+import static org.mate.interaction.UIAbstractionLayer.ActionResult;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
+import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
+
 public final class QBEApplication implements Application<QBEState, QBEAction> {
 
     private final UIAbstractionLayer uiAbstractionLayer;
@@ -33,7 +29,6 @@ public final class QBEApplication implements Application<QBEState, QBEAction> {
         return new QBEState(uiAbstractionLayer.getLastScreenState());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Pair<Optional<QBEState>, ActionResult> executeAction(final QBEAction action) {
         ActionResult result = currentTestcase.updateTestCaseGetResult(action.getUiAction(), testcaseLength++);

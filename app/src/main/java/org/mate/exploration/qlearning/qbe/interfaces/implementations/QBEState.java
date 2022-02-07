@@ -1,13 +1,5 @@
 package org.mate.exploration.qlearning.qbe.interfaces.implementations;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import org.mate.exploration.qlearning.qbe.interfaces.State;
 import org.mate.exploration.qlearning.qbe.interfaces.StateSkeleton;
 import org.mate.interaction.action.ui.Widget;
@@ -21,7 +13,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+
 public final class QBEState extends StateSkeleton<QBEAction> implements State<QBEAction> {
 
     private final Set<QBEAction> actions;

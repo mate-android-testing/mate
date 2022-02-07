@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 public final class QMatrix<S extends State<A>, A extends Action> {
 
   private final AbstractStates<S, A> abstractStates;
@@ -80,6 +79,7 @@ public final class QMatrix<S extends State<A>, A extends Action> {
     return matrix[index];
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.N)
   public void setValue(final S state, final A action, final double value) {
     final int index = getIndex(state, action);
     if (!Double.isFinite(value) || value < 0) {

@@ -1,8 +1,5 @@
 package org.mate.exploration.qlearning.qbe.transitionSystem;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import org.mate.MATE;
 import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEAction;
 import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEState;
@@ -17,7 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 public final class TransitionSystemSerializer {
 
     private final File directory;

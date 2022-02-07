@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 public abstract class StateSkeleton<A extends Action> implements State<A> {
 
     private static final double COSINE_SIMILARITY_THRESHOLD = 0.95;
@@ -23,6 +22,7 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
      * implemented as hash maps. If any map is implemented as a tree map the algorithms runs in
      *  O(n*log(n)).
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private static Pair<List<Double>, List<Double>> featureMapToContentVectors(
             final Map<String, Integer> features1, final Map<String, Integer> features2) {
         final Set<String> keys = new HashSet<>(features1.size() + features2.size());
@@ -42,6 +42,7 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
 
     protected abstract Map<String, Integer> getFeatureMap();
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public final boolean equals(final Object other) {
         if (this == other) {
@@ -62,6 +63,7 @@ public abstract class StateSkeleton<A extends Action> implements State<A> {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public final int hashCode() {
         // This hash function is correct, because equal states imply equal actions and equal number

@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import static org.mate.utils.Randomness.getDistributedRandomNumber;
 import static org.mate.utils.StreamUtils.distinctByKey;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 public final class QBE<S extends State<A>, A extends Action> implements ExplorationStrategy<S, A> {
 
   private final QMatrix<S, A> qmatrix;
@@ -31,6 +30,7 @@ public final class QBE<S extends State<A>, A extends Action> implements Explorat
     this.abstractActions = qmatrix.getActionLabelingFunction();
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.N)
   @Override
   public Optional<A> chooseAction(final S currentState) {
     final Set<A> currentActions = currentState.getActions();
