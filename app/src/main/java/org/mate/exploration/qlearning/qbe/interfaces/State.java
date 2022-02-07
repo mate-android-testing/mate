@@ -4,5 +4,5 @@ import java.util.Set;
 
 public interface State<A extends Action> {
 
-  Set<A> getActions();
+    Set<A> getActions();
 }

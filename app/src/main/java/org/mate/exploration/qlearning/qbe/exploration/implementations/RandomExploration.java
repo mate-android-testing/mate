@@ -10,9 +10,9 @@ import java.util.Set;
 
 public final class RandomExploration<S extends State<A>, A extends Action> implements ExplorationStrategy<S, A> {
 
-  @Override
-  public Optional<A> chooseAction(final S currentState) {
-    final Set<A> possibleActions = currentState.getActions();
-    return possibleActions.isEmpty() ? Optional.empty() : Optional.of(Randomness.randomElement(possibleActions));
-  }
+    @Override
+    public Optional<A> chooseAction(final S currentState) {
+        final Set<A> possibleActions = currentState.getActions();
+        return possibleActions.isEmpty() ? Optional.empty() : Optional.of(Randomness.randomElement(possibleActions));
+    }
 }

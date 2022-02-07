@@ -8,5 +8,5 @@ import java.util.Optional;
 @FunctionalInterface
 public interface ExplorationStrategy<S extends State<A>, A extends Action> {
 
-  Optional<A> chooseAction(S currentState);
+    Optional<A> chooseAction(S currentState);
 }

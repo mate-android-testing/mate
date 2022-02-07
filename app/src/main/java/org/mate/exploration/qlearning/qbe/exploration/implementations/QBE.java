@@ -21,32 +21,32 @@ import static org.mate.utils.StreamUtils.distinctByKey;
 
 public final class QBE<S extends State<A>, A extends Action> implements ExplorationStrategy<S, A> {
 
-  private final QMatrix<S, A> qmatrix;
-  private final QMatrix.AbstractActions<A> abstractActions;
+    private final QMatrix<S, A> qmatrix;
+    private final QMatrix.AbstractActions<A> abstractActions;
 
 
-  public QBE(final QMatrix<S, A> qmatrix) {
-    this.qmatrix = Objects.requireNonNull(qmatrix);
-    this.abstractActions = qmatrix.getActionLabelingFunction();
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.N)
-  @Override
-  public Optional<A> chooseAction(final S currentState) {
-    final Set<A> currentActions = currentState.getActions();
-    if (currentActions.isEmpty()) {
-      return Optional.empty();
-    } else {
-      final Map<Integer, Double> qMap = currentActions.stream()
-              .filter(distinctByKey(abstractActions::getAbstractActionIndex))
-              .collect(
-                      Collectors.toMap(abstractActions::getAbstractActionIndex,
-                              action -> qmatrix.getValue(currentState, action)));
-      final int chosenAbstractActionIndex = getDistributedRandomNumber(qMap);
-      final Set<A> possibleActions = currentState.getActions().stream()
-              .filter(a -> abstractActions.getAbstractActionIndex(a) == chosenAbstractActionIndex)
-              .collect(Collectors.toSet());
-      return Optional.of(Randomness.randomElement(possibleActions));
+    public QBE(final QMatrix<S, A> qmatrix) {
+        this.qmatrix = Objects.requireNonNull(qmatrix);
+        this.abstractActions = qmatrix.getActionLabelingFunction();
     }
-  }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public Optional<A> chooseAction(final S currentState) {
+        final Set<A> currentActions = currentState.getActions();
+        if (currentActions.isEmpty()) {
+            return Optional.empty();
+        } else {
+            final Map<Integer, Double> qMap = currentActions.stream()
+                    .filter(distinctByKey(abstractActions::getAbstractActionIndex))
+                    .collect(
+                            Collectors.toMap(abstractActions::getAbstractActionIndex,
+                                    action -> qmatrix.getValue(currentState, action)));
+            final int chosenAbstractActionIndex = getDistributedRandomNumber(qMap);
+            final Set<A> possibleActions = currentState.getActions().stream()
+                    .filter(a -> abstractActions.getAbstractActionIndex(a) == chosenAbstractActionIndex)
+                    .collect(Collectors.toSet());
+            return Optional.of(Randomness.randomElement(possibleActions));
+        }
+    }
 }

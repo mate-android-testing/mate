@@ -8,11 +8,11 @@ import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 public interface Application<S extends State<A>, A extends Action> {
 
-  S getCurrentState();
+    S getCurrentState();
 
-  Pair<Optional<S>, ActionResult> executeAction(A action);
+    Pair<Optional<S>, ActionResult> executeAction(A action);
 
-  void reset();
+    void reset();
 
-  S copyWithDummyComponent(S conflictingState);
+    S copyWithDummyComponent(S conflictingState);
 }
