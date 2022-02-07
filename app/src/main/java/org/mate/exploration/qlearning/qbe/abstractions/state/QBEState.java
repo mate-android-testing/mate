@@ -1,7 +1,6 @@
-package org.mate.exploration.qlearning.qbe.interfaces.implementations;
+package org.mate.exploration.qlearning.qbe.abstractions.state;
 
-import org.mate.exploration.qlearning.qbe.interfaces.State;
-import org.mate.exploration.qlearning.qbe.interfaces.StateSkeleton;
+import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 

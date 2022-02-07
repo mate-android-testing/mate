@@ -1,6 +1,6 @@
 package org.mate.exploration.qlearning.qbe.qmatrix;
 
-import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEAction;
+import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
 
 /**
  * Implementation according to

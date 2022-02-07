@@ -1,8 +1,9 @@
-package org.mate.exploration.qlearning.qbe.interfaces;
+package org.mate.exploration.qlearning.qbe.abstractions.state;
 
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.utils.MathUtils;
 import org.mate.utils.Pair;
 

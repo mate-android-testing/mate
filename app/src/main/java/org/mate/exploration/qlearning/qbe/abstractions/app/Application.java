@@ -1,5 +1,7 @@
-package org.mate.exploration.qlearning.qbe.interfaces;
+package org.mate.exploration.qlearning.qbe.abstractions.app;
 
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
+import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.utils.Pair;
 
 import java.util.Optional;

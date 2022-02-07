@@ -1,7 +1,7 @@
 package org.mate.exploration.qlearning.qbe.qmatrix;
 
-import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEAction;
-import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEState;
+import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
+import org.mate.exploration.qlearning.qbe.abstractions.state.QBEState;
 
 /**
  * Values of the QMatrixes taken from

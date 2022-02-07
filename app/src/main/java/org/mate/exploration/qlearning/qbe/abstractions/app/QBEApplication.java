@@ -1,7 +1,8 @@
-package org.mate.exploration.qlearning.qbe.interfaces.implementations;
+package org.mate.exploration.qlearning.qbe.abstractions.app;
 
 import org.mate.exploration.genetic.chromosome.Chromosome;
-import org.mate.exploration.qlearning.qbe.interfaces.Application;
+import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
+import org.mate.exploration.qlearning.qbe.abstractions.state.QBEState;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 import org.mate.utils.Pair;

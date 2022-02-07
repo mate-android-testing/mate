@@ -1,7 +1,7 @@
-package org.mate.exploration.qlearning.qbe.transitionSystem;
+package org.mate.exploration.qlearning.qbe.transition_system;
 
-import org.mate.exploration.qlearning.qbe.interfaces.Action;
-import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
+import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 
 import java.util.Collection;
 import java.util.HashSet;

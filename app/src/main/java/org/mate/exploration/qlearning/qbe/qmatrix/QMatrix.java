@@ -3,8 +3,8 @@ package org.mate.exploration.qlearning.qbe.qmatrix;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import org.mate.exploration.qlearning.qbe.interfaces.Action;
-import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
+import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 
 import java.util.Arrays;
 import java.util.Objects;

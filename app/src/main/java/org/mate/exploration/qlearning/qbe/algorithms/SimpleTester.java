@@ -1,10 +1,10 @@
 package org.mate.exploration.qlearning.qbe.algorithms;
 
 import org.mate.MATE;
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
+import org.mate.exploration.qlearning.qbe.abstractions.app.Application;
+import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
-import org.mate.exploration.qlearning.qbe.interfaces.Action;
-import org.mate.exploration.qlearning.qbe.interfaces.Application;
-import org.mate.exploration.qlearning.qbe.interfaces.State;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.utils.Pair;
 

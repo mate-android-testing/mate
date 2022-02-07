@@ -1,8 +1,7 @@
-package org.mate.exploration.qlearning.qbe.exploration.implementations;
+package org.mate.exploration.qlearning.qbe.exploration;
 
-import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
-import org.mate.exploration.qlearning.qbe.interfaces.Action;
-import org.mate.exploration.qlearning.qbe.interfaces.State;
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
+import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.utils.Randomness;
 
 import java.util.Optional;

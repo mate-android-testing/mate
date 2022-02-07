@@ -1,6 +1,5 @@
-package org.mate.exploration.qlearning.qbe.interfaces.implementations;
+package org.mate.exploration.qlearning.qbe.abstractions.action;
 
-import org.mate.exploration.qlearning.qbe.interfaces.Action;
 import org.mate.interaction.action.ui.UIAction;
 
 import java.util.Objects;

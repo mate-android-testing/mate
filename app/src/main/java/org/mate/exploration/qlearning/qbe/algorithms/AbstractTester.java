@@ -1,10 +1,10 @@
 package org.mate.exploration.qlearning.qbe.algorithms;
 
 import org.mate.exploration.Algorithm;
+import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
+import org.mate.exploration.qlearning.qbe.abstractions.app.Application;
+import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
-import org.mate.exploration.qlearning.qbe.interfaces.Action;
-import org.mate.exploration.qlearning.qbe.interfaces.Application;
-import org.mate.exploration.qlearning.qbe.interfaces.State;
 
 import java.util.Objects;
 

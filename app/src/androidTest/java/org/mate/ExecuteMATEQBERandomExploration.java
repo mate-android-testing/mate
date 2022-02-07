@@ -1,14 +1,14 @@
 package org.mate;
 
 import org.junit.Test;
+import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
+import org.mate.exploration.qlearning.qbe.abstractions.app.QBEApplication;
+import org.mate.exploration.qlearning.qbe.abstractions.state.QBEState;
 import org.mate.exploration.qlearning.qbe.algorithms.ApplicationTester;
 import org.mate.exploration.qlearning.qbe.algorithms.SimpleTester;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
-import org.mate.exploration.qlearning.qbe.exploration.implementations.RandomExploration;
-import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEAction;
-import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEApplication;
-import org.mate.exploration.qlearning.qbe.interfaces.implementations.QBEState;
-import org.mate.exploration.qlearning.qbe.transitionSystem.TransitionSystemSerializer;
+import org.mate.exploration.qlearning.qbe.exploration.RandomExploration;
+import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystemSerializer;
 
 public class ExecuteMATEQBERandomExploration {
     private static final String TRANSITION_SYSTEM_DIR = "/data/data/org.mate/transition_systems";
