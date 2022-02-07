@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 /**
  * Defines a state in the context of QBE.
  */
-public final class QBEState extends StateSkeleton<QBEAction> implements State<QBEAction> {
+public final class QBEState extends AbstractQBEState<QBEAction> implements State<QBEAction> {
 
     /**
      * The applicable actions in the current state.
