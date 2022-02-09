@@ -80,10 +80,6 @@ android {
         htmlReport true
         htmlOutput file("$project.buildDir/reports/lint/lint.html")
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
