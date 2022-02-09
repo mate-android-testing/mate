@@ -53,10 +53,11 @@ public abstract class AbstractQBEState<A extends Action> implements State<A> {
     }
 
     /**
+     * Retrieves the number of GUI components on the underlying screen.
      *
-     * @return
+     * @return Returns the number of GUI components.
      */
-    protected abstract int getNumberOfComponent();
+    protected abstract int getNumberOfComponents();
 
     /**
      * Retrieves the feature map.
@@ -66,12 +67,16 @@ public abstract class AbstractQBEState<A extends Action> implements State<A> {
     protected abstract Map<String, Integer> getFeatureMap();
 
     /**
-     * Compares two {@link AbstractQBEState}s for equality.
+     * Compares two {@link AbstractQBEState}s for equality. See section IV.A) for more details.
+     * Two states v and v' are considered equal iff they:
+     *
+     *      (1) share the same set of enabled actions
+     *      (2) have the same number of components
+     *      (3) have a cosine similarity (content vectors) above 0.95
      *
      * @param o The other {@link AbstractQBEState}.
-     * @return Returns {@code true} if both states are equal, i.e. when both states are identical
-     *          or the cosine similarity of the content vectors is above the specified threshold.
-     *          In any other case, {@code false} is returned.
+     * @return Returns {@code true} if all of above three criterion are satisfied, otherwise
+     *          {@code false} is returned.
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -83,7 +88,7 @@ public abstract class AbstractQBEState<A extends Action> implements State<A> {
         } else {
             final AbstractQBEState<?> other = (AbstractQBEState<?>) o;
             if (!this.getActions().equals(other.getActions())
-                    || this.getNumberOfComponent() != other.getNumberOfComponent()) {
+                    || this.getNumberOfComponents() != other.getNumberOfComponents()) {
                 return false;
             } else {
                 final Pair<List<Double>, List<Double>> contentVectors = featureMapToContentVectors(
@@ -108,7 +113,7 @@ public abstract class AbstractQBEState<A extends Action> implements State<A> {
         // The hash function does not use the feature map, because different features maps could
         // still imply equality if the two maps are similar enough (according to cosine similarity).
         int hash = Integer.hashCode(getActions().stream().mapToInt(Object::hashCode).sum());
-        hash = 31 * hash + Integer.hashCode(getNumberOfComponent());
+        hash = 31 * hash + Integer.hashCode(getNumberOfComponents());
         return hash;
     }
 

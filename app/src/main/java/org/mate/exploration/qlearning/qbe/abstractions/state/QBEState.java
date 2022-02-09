@@ -33,7 +33,7 @@ public final class QBEState extends AbstractQBEState<QBEAction> implements State
     private final Map<String, Integer> featureMap;
 
     /**
-     *
+     * The number of GUI components on the underlying screen.
      */
     private int numberOfComponents;
 
@@ -90,11 +90,12 @@ public final class QBEState extends AbstractQBEState<QBEAction> implements State
     }
 
     /**
-     * 
-     * @return
+     * Retrieves the number of GUI components on the underlying screen.
+     *
+     * @return Returns the number of GUI components.
      */
     @Override
-    protected int getNumberOfComponent() {
+    protected int getNumberOfComponents() {
         return numberOfComponents;
     }
 
