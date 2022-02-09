@@ -397,14 +397,16 @@ public class EnvironmentManager {
     }
 
     /**
-     * Fetches a serialized transition system from the internal storage of the emulator.
-     * Also removes the serialized transition system afterwards.
-     *
-     * @param transitionSystemDir The transition system directory.
-     * @param fileName            The name of the transition system file.
+     * Fetches a serialized transition system from the internal storage of the emulator. Also
+     * removes the serialized transition system afterwards.
      */
-    public boolean fetchTransitionSystem(String transitionSystemDir, String fileName) {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_transition_system")
+    public boolean fetchTransitionSystem() {
+
+        final String transitionSystemDir = "/data/data/org.mate/transition_systems";
+        final String fileName = "transition_system.gz";
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/utility/fetch_transition_system")
                 .withParameter("deviceId", emulator)
                 .withParameter("transitionSystemDir", transitionSystemDir)
                 .withParameter("transitionSystemFile", fileName);

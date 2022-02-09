@@ -14,17 +14,40 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * Provides a serialization mechanism for the ELTS.
+ */
 public final class TransitionSystemSerializer {
 
+    /**
+     * The directory where the ELTS should be serialized to.
+     */
+    private static final String TRANSITION_SYSTEM_DIR = "/data/data/org.mate/transition_systems";
+
+    /**
+     * The file name of the serialized ELTS.
+     */
+    private static final String FILE_NAME = "transition_system.gz";
+
+    /**
+     * The directory where the ELTS should be serialized to.
+     */
     private final File directory;
 
-
-    public TransitionSystemSerializer(final String directory) {
-        this.directory = new File(Objects.requireNonNull(directory));
+    /**
+     * Initialises the transition system serializer.
+     */
+    public TransitionSystemSerializer() {
+        this.directory = new File(TRANSITION_SYSTEM_DIR);
     }
 
+    /**
+     * Serializes the given ELTS.
+     *
+     * @param ts The transition system that should be serialized.
+     */
+    public void serialize(final TransitionSystem<QBEState, QBEAction> ts) {
 
-    public void serialize(final TransitionSystem<QBEState, QBEAction> ts, final String fileName) {
         Objects.requireNonNull(ts);
 
         if (ts.getActions().stream().map(QBEAction::hashCode).distinct().count() != ts.getActions().size()) {
@@ -33,17 +56,19 @@ public final class TransitionSystemSerializer {
             return;
         }
 
-        final File file = new File(directory, Objects.requireNonNull(fileName));
         if (!directory.exists()) {
             MATE.log("Creating transition system folder succeeded: " + directory.mkdirs());
         }
+
+        final File file = new File(directory, FILE_NAME);
 
         if (file.isDirectory()) {
             MATE.log_error("File " + file + " exists, but is a directory");
             return;
         }
 
-        try (final PrintWriter writer = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)), false)) {
+        try (final PrintWriter writer
+                     = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)), false)) {
             serializeTransitionSystem(ts, writer);
         } catch (IOException e) {
             MATE.log_error(e.getMessage());
@@ -51,10 +76,13 @@ public final class TransitionSystemSerializer {
         }
     }
 
-    private Map<QBEAction, Integer> serializeQBEActions(final Set<QBEAction> actions, final PrintWriter writer) {
+    private Map<QBEAction, Integer> serializeQBEActions(final Set<QBEAction> actions,
+                                                        final PrintWriter writer) {
+
         final Map<QBEAction, Integer> map = new HashMap<>(actions.size());
         int index = 0;
         writer.write("{");
+
         for (final QBEAction action : actions) {
             if (index > 0) {
                 writer.write(",");
@@ -63,20 +91,28 @@ public final class TransitionSystemSerializer {
             map.put(action, index);
             ++index;
         }
+
         writer.write("}");
         return map;
     }
 
-    private Map<QBEState, Integer> serializeQBEStates(final Set<QBEState> states, final Map<QBEAction, Integer> actionIndexes, final PrintWriter writer) {
+    private Map<QBEState, Integer> serializeQBEStates(final Set<QBEState> states,
+                                                      final Map<QBEAction, Integer> actionIndexes,
+                                                      final PrintWriter writer) {
+
         final Map<QBEState, Integer> map = new HashMap<>(states.size());
         int index = 0;
         writer.write("{");
+
         for (final QBEState state : states) {
+
             if (index > 0) {
                 writer.write(",");
             }
+
             writer.printf("\"%d\":{\"actions\":[", index);
             boolean firstEntry = true;
+
             for (final QBEAction action : state.getActions()) {
                 if (!firstEntry) {
                     writer.write(",");
@@ -85,8 +121,10 @@ public final class TransitionSystemSerializer {
                 }
                 writer.write(actionIndexes.get(action).toString());
             }
+
             writer.write("],\"featureMap\":{");
             firstEntry = true;
+
             for (final Map.Entry<String, Integer> entry : state.getFeatureMap().entrySet()) {
                 if (!firstEntry) {
                     writer.write(",");
@@ -95,27 +133,38 @@ public final class TransitionSystemSerializer {
                 }
                 writer.printf("\"%s\":\"%d\"", entry.getKey(), entry.getValue());
             }
+
             writer.write("}}");
             map.put(state, index);
             ++index;
         }
+
         writer.write("}");
         return map;
     }
 
-    private void serializeTransitionRelation(final TransitionRelation<QBEState, QBEAction> tr, final Map<QBEState, Integer> stateIndexes, final Map<QBEAction, Integer> actionIndexes, final PrintWriter writer) {
-        writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d,\"actionResult\":\"%s\"}", stateIndexes.get(tr.from), actionIndexes.get(tr.trigger), stateIndexes.get(tr.to), tr.actionResult);
+    private void serializeTransitionRelation(final TransitionRelation<QBEState, QBEAction> tr,
+                                             final Map<QBEState, Integer> stateIndexes,
+                                             final Map<QBEAction, Integer> actionIndexes,
+                                             final PrintWriter writer) {
+        writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d,\"actionResult\":\"%s\"}",
+                stateIndexes.get(tr.from), actionIndexes.get(tr.trigger), stateIndexes.get(tr.to),
+                tr.actionResult);
     }
 
+    private void serializeTransitionSystem(final TransitionSystem<QBEState, QBEAction> ts,
+                                           final PrintWriter writer) {
 
-    private void serializeTransitionSystem(final TransitionSystem<QBEState, QBEAction> ts, final PrintWriter writer) {
         ts.removeUnreachableStates();
+
         writer.write("{\"actions\":");
         final Map<QBEAction, Integer> actionIndexes = serializeQBEActions(ts.getActions(), writer);
         writer.write(",\"states\":");
         final Map<QBEState, Integer> stateIndexes = serializeQBEStates(ts.getStates(), actionIndexes, writer);
         writer.printf(",\"initialState\":%d,\"transitionRelations\":[", stateIndexes.get(ts.getInitialState()));
+
         boolean firstEntry = true;
+
         for (TransitionRelation<QBEState, QBEAction> tr : ts.getTransitions()) {
             if (!firstEntry) {
                 writer.write(",");
