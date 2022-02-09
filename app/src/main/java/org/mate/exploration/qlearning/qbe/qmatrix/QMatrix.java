@@ -9,7 +9,12 @@ import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import java.util.Arrays;
 import java.util.Objects;
 
-
+/**
+ * Defines a transition prioritization matrix shortly denoted q-matrix.
+ *
+ * @param <S> The generic state type.
+ * @param <A> The generic action type.
+ */
 public final class QMatrix<S extends State<A>, A extends Action> {
 
     private final AbstractStates<S, A> abstractStates;
@@ -34,7 +39,8 @@ public final class QMatrix<S extends State<A>, A extends Action> {
         matrix = new double[numberOfAbstractStates * numberOfAbstractActions];
     }
 
-    public QMatrix(final AbstractStates<S, A> abstractStates, final AbstractActions<A> abstractActions, final double[] values) {
+    public QMatrix(final AbstractStates<S, A> abstractStates, final AbstractActions<A> abstractActions,
+                   final double[] values) {
         this.abstractStates = Objects.requireNonNull(abstractStates);
         this.abstractActions = Objects.requireNonNull(abstractActions);
         numberOfAbstractStates = abstractStates.getNumberOfAbstractStates();
@@ -45,8 +51,10 @@ public final class QMatrix<S extends State<A>, A extends Action> {
                     "Number of abstract state and number of abstract actions need to be at least 1");
         }
 
-        if (abstractStates.getNumberOfAbstractStates() * abstractActions.getNumberOfAbstractActions() != values.length) {
-            throw new IllegalArgumentException("The number of values does not match the number of abstract states and abstract actions");
+        if (abstractStates.getNumberOfAbstractStates() * abstractActions.getNumberOfAbstractActions()
+                != values.length) {
+            throw new IllegalArgumentException("The number of values does not match the number " +
+                    "of abstract states and abstract actions");
         }
 
         matrix = values.clone();
@@ -106,8 +114,8 @@ public final class QMatrix<S extends State<A>, A extends Action> {
 
     @Override
     public int hashCode() {
-        return 31 * 31 * numberOfAbstractStates + 31 * numberOfAbstractActions + Arrays.hashCode(
-                matrix);
+        return 31 * 31 * numberOfAbstractStates + 31 * numberOfAbstractActions
+                + Arrays.hashCode(matrix);
     }
 
     @Override
