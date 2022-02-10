@@ -4,6 +4,7 @@ import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -38,6 +39,11 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
      */
     private final Set<TransitionRelation<S, A>> transitions = new HashSet<>();
 
+    /**
+     * Initialises a new transition system with the given initial state.
+     *
+     * @param initialState The initial state v0.
+     */
     public TransitionSystem(final S initialState) {
         this.initialState = Objects.requireNonNull(initialState);
         states.add(initialState);
@@ -59,7 +65,7 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
      * @return Returns the states.
      */
     public Set<S> getStates() {
-        return states;
+        return Collections.unmodifiableSet(states);
     }
 
     /**
@@ -68,7 +74,7 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
      * @return Returns the actions.
      */
     public Set<A> getActions() {
-        return actions;
+        return Collections.unmodifiableSet(actions);
     }
 
     /**
@@ -77,7 +83,7 @@ public final class TransitionSystem<S extends State<A>, A extends Action> {
      * @return Returns the transitions.
      */
     public Set<TransitionRelation<S, A>> getTransitions() {
-        return transitions;
+        return Collections.unmodifiableSet(transitions);
     }
 
     /**
