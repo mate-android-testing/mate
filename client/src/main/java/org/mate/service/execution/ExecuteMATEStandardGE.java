@@ -19,10 +19,10 @@ import java.util.List;
 
 public class ExecuteMATEStandardGE {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting Standard GE Algorithm...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final IGeneticAlgorithm<List<Integer>> standardGE = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)

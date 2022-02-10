@@ -1,40 +1,39 @@
 package org.mate.interaction;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_DOWN;
+import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_UP;
+
 import android.app.Instrumentation;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.StaleObjectException;
 import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 
-import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.commons.utils.MATELog;
-import org.mate.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentType;
-import org.mate.interaction.action.intent.IntentBasedAction;
-import org.mate.interaction.action.intent.SystemAction;
 import org.mate.commons.interaction.action.ui.ActionType;
-import org.mate.interaction.action.ui.MotifAction;
-import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Utils;
+import org.mate.exceptions.AUTCrashException;
+import org.mate.interaction.action.intent.ComponentType;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.service.MATEService;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
-import org.mate.commons.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
 import org.mate.utils.input_generation.Mutation;
@@ -52,11 +51,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.support.test.InstrumentationRegistry.getContext;
-import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_DOWN;
-import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
  * The device manager is responsible for the actual execution of the various actions.
@@ -127,20 +121,13 @@ public class DeviceMgr {
      */
     private final StaticStrings staticStrings;
 
-    private IRepresentationLayerInterface representationLayer;
 
-
-    public DeviceMgr(IRepresentationLayerInterface representationLayer, String packageName) {
-        this.representationLayer = representationLayer;
+    public DeviceMgr(String packageName) {
         this.device = null;
         this.packageName = packageName;
         this.isInPortraitMode = true;
         this.disabledAutoRotate = false;
         this.staticStrings = StaticStringsParser.parseStaticStrings();
-    }
-
-    public IRepresentationLayerInterface getRepresentationLayer() {
-        return representationLayer;
     }
 
     /**
@@ -784,7 +771,7 @@ public class DeviceMgr {
      */
     public boolean checkForCrashDialog() {
         try {
-            return representationLayer.isCrashDialogDisplayed();
+            return MATEService.getRepresentationLayer().isCrashDialogDisplayed();
         } catch (RemoteException e) {
             e.printStackTrace();
             // an exception here likely means a crash has happened.
@@ -1187,7 +1174,7 @@ public class DeviceMgr {
      */
     public int getScreenWidth() {
         try {
-            return representationLayer.getDisplayWidth();
+            return MATEService.getRepresentationLayer().getDisplayWidth();
         } catch (RemoteException e) {
             e.printStackTrace();
             return -1;
@@ -1201,7 +1188,7 @@ public class DeviceMgr {
      */
     public int getScreenHeight() {
         try {
-            return representationLayer.getDisplayHeight();
+            return MATEService.getRepresentationLayer().getDisplayHeight();
         } catch (RemoteException e) {
             e.printStackTrace();
             return -1;
@@ -1221,12 +1208,9 @@ public class DeviceMgr {
      */
     public void restartApp() {
         MATELog.log("Restarting app");
-        try {
-            representationLayer.restartTargetPackage();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Unable to restart app");
-        }
+        MATEService.disconnectRepresentationLayer();
+        Utils.sleep(200);
+        MATEService.ensureRepresentationLayerIsConnected();
     }
 
     /**
@@ -1245,7 +1229,7 @@ public class DeviceMgr {
 
     public String getCurrentPackageName() {
         try {
-            return representationLayer.getCurrentPackageName();
+            return MATEService.getRepresentationLayer().getCurrentPackageName();
         } catch (RemoteException e) {
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());
@@ -1413,7 +1397,7 @@ public class DeviceMgr {
      */
     public List<String> getActivityNames() {
         try {
-            return representationLayer.getTargetPackageActivityNames();
+            return MATEService.getRepresentationLayer().getTargetPackageActivityNames();
         } catch (RemoteException e) {
             MATELog.log_warn("Couldn't retrieve activity names!");
             if (e.getMessage() != null) {
@@ -1432,7 +1416,7 @@ public class DeviceMgr {
     public void clearApp() {
 
         try {
-            representationLayer.clearTargetPackageData();
+            MATEService.getRepresentationLayer().clearTargetPackageData();
 
             /*
              * We need to re-generate an empty 'coverage.exec' file for those apps that have been
@@ -1440,8 +1424,8 @@ public class DeviceMgr {
              * TODO: Is the final call to 'exit' really necessary?
              */
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                representationLayer.executeShellCommand("run-as " + packageName + " mkdir -p files");
-                representationLayer.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
+                MATEService.getRepresentationLayer().executeShellCommand("run-as " + packageName + " mkdir -p files");
+                MATEService.getRepresentationLayer().executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
                 // device.executeShellCommand("run-as " + packageName + " exit");
             }
 

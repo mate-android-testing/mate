@@ -11,10 +11,10 @@ import org.mate.exploration.heuristical.RandomExploration;
 public class ExecuteMATERandomExplorationIntent {
 
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting Random Intent Exploration...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         MATELog.log_acc("Relative Intent Amount: " + Properties.RELATIVE_INTENT_AMOUNT());
 

@@ -18,10 +18,10 @@ import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import java.util.List;
 
 public class ExecuteMATEListAnalogousGE {
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting List Analogous GE Algorithm...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final IGeneticAlgorithm<List<Integer>> listAnalogousGE = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)

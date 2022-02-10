@@ -14,11 +14,11 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 
 public class ExecuteMATENoveltySearch {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting Novelty Search...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final IGeneticAlgorithm noveltySearch = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NOVELTY_SEARCH)

@@ -25,11 +25,11 @@ import org.mate.exploration.genetic.termination.TerminationCondition;
 
 public class ExecuteMATEGreyBoxFuzzing {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting GreyBox Fuzzing...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final GreyBoxFuzzer<?> greyBoxFuzzer = new GreyBoxFuzzer<>(
                 translateChromosomeFactory(Properties.CHROMOSOME_FACTORY()),

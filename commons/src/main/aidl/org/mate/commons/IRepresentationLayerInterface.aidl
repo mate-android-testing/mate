@@ -4,7 +4,9 @@ package org.mate.commons;
 import org.mate.commons.interaction.action.ui.Widget;
 
 interface IRepresentationLayerInterface {
-    // Representation Layer config
+    // Representation Layer status & config
+    void ping();
+    void exit();
     void setTargetPackageName(String packageName);
 
     // General device info

@@ -15,10 +15,10 @@ import java.util.List;
 
 public class ExecuteMATEGeneticAlgorithm {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting Genetic Algorithm...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Properties.ALGORITHM())

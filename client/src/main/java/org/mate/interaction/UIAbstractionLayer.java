@@ -2,6 +2,7 @@ package org.mate.interaction;
 
 import android.util.Log;
 
+import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
@@ -407,7 +408,7 @@ public class UIAbstractionLayer {
      */
     public void resetApp() {
 
-        try {
+        /*try {
             deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
             MATE.log("Wake up couldn't be performed");
@@ -416,7 +417,7 @@ public class UIAbstractionLayer {
 
         if (!deviceMgr.isInPortraitMode()) {
             deviceMgr.setPortraitMode();
-        }
+        }*/
 
         deviceMgr.reinstallApp();
         Utils.sleep(5000);

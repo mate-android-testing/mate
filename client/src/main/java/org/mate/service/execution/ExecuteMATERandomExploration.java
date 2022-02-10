@@ -11,11 +11,11 @@ import org.mate.exploration.heuristical.RandomExploration;
 public class ExecuteMATERandomExploration {
 
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting Random Exploration...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final RandomExploration randomExploration
                 = new RandomExploration(true, Properties.MAX_NUMBER_EVENTS());

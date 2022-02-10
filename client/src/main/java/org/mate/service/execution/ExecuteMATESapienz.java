@@ -17,11 +17,11 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 
 public class ExecuteMATESapienz {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting Evolutionary Search...");
         MATELog.log_acc("Sapienz implementation");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final IGeneticAlgorithm sapienz =
                 new GeneticAlgorithmBuilder()

@@ -14,11 +14,11 @@ import org.mate.model.TestCase;
 public class ExecuteMATEStandardGeneticAlgorithm {
 
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting Evolutionary Search...");
         MATELog.log_acc("StandardGeneticAlgorithm implementation");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final IGeneticAlgorithm<TestCase> genericGA = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)

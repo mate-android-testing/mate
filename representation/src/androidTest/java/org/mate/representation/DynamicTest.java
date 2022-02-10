@@ -18,6 +18,8 @@ import org.mate.representation.mateservice.MATEServiceConnection;
 @RunWith(AndroidJUnit4.class)
 public class DynamicTest {
 
+    public static volatile boolean keepRunning = true;
+
     /**
      * Launches Main activity of target package.
      * @throws Exception if no Main activity is found for target package
@@ -48,9 +50,9 @@ public class DynamicTest {
         MATEServiceConnection.establish();
 
         // stay here forever
-        while (true) {
+        while (keepRunning) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

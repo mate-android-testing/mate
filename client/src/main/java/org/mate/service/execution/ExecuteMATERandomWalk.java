@@ -12,10 +12,10 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 public class ExecuteMATERandomWalk {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting Random Walk ....");
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.RANDOM_WALK)

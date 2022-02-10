@@ -10,6 +10,7 @@ import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.service.MATEService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,14 +45,11 @@ public class AppScreen {
      */
     private final DeviceMgr deviceMgr;
 
-    private final IRepresentationLayerInterface representationLayer;
-
     /**
      * Creates a new app screen containing the widgets on it.
      */
     public AppScreen(DeviceMgr deviceMgr) {
         this.deviceMgr = deviceMgr;
-        this.representationLayer = deviceMgr.getRepresentationLayer();
 
         this.activityName = this.deviceMgr.getCurrentActivity();
 
@@ -61,12 +59,10 @@ public class AppScreen {
             this.packageName = activityName.split("/")[0];
         }
 
-
-
         // retrieve widgets from current screen
         try {
             MATELog.log_debug("AppScreen: " + activityName);
-            this.widgets = this.representationLayer.getCurrentScreenWidgets();
+            this.widgets = MATEService.getRepresentationLayer().getCurrentScreenWidgets();
             MATELog.log_debug("Number of widgets: " + widgets.size());
         } catch (RemoteException e) {
             e.printStackTrace();

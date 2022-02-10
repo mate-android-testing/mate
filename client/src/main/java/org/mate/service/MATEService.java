@@ -16,10 +16,12 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import org.mate.Registry;
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.R;
+import org.mate.commons.utils.Utils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,8 +33,71 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
     public static final String PACKAGE_NAME_INTENT_EXTRA = "packageName";
     public static final String ALGORITHM_INTENT_EXTRA = "algorithm";
-    private IRepresentationLayerInterface representationLayer;
-    private IBinder representationLayerBinder;
+
+    /**
+     * Representation Layer associated to the MATE Service.
+     * To ensure that updates to this variable propagate predictable to other threads, we apply
+     * the volatile modifier.
+     */
+    private volatile static IRepresentationLayerInterface representationLayer;
+    private volatile static IBinder representationLayerBinder;
+
+    public static void ensureRepresentationLayerIsConnected() {
+        if (isRepresentationLayerAlive()) {
+            // nothing to do
+            return;
+        }
+
+        Registry.getEnvironmentManager().launchRepresentationLayer();
+
+        int waited = 0;
+        int waitTime = 500; // half a second
+        int maxWaitTime = waitTime * 10; // 5 seconds
+        while (representationLayer == null && waited < maxWaitTime) {
+            Utils.sleep(waitTime);
+            waited += waitTime;
+        }
+
+        if (representationLayer == null) {
+            throw new IllegalStateException("Unable to ensure that representation layer is connected");
+        }
+
+        // Config representation layer just connected
+        try {
+            representationLayer.setTargetPackageName(Registry.getPackageName());
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Couldn't configure Representation Layer");
+        }
+    }
+
+    public static void disconnectRepresentationLayer() {
+        if (isRepresentationLayerAlive()) {
+            try {
+                representationLayer.exit();
+            } catch (RemoteException e) {
+                // do nothing
+            }
+        }
+
+        representationLayer = null;
+    }
+
+    public static boolean isRepresentationLayerAlive() {
+        if (representationLayer == null) {
+            return false;
+        }
+
+        try {
+            representationLayer.ping();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    public static IRepresentationLayerInterface getRepresentationLayer() {
+        return representationLayer;
+    }
 
     /**
      * Called when our service first comes to existence.
@@ -78,17 +143,12 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             return START_NOT_STICKY;
         }
 
-        if (representationLayer == null) {
-            log("Unable to start MATE Service yet. Representation Layer has not been registered");
-            return START_NOT_STICKY;
-        }
-
         String algorithm = intent.getStringExtra(ALGORITHM_INTENT_EXTRA);
         String packageName = intent.getStringExtra(PACKAGE_NAME_INTENT_EXTRA);
         log(String.format("MATE Service starting for algorithm %s and package name %s",
                 algorithm, packageName));
 
-        MATERunner.run(packageName, algorithm, representationLayer, getApplicationContext());
+        MATERunner.run(packageName, algorithm, getApplicationContext());
 
         // If we get killed, after returning from here, restart
         return START_NOT_STICKY;
@@ -162,8 +222,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     @Override
     public void binderDied() {
         log("Client just died");
-        this.representationLayer = null;
-        this.representationLayerBinder.unlinkToDeath(this,0);
+        representationLayer = null;
+        representationLayerBinder.unlinkToDeath(this,0);
 
         // TODO: process this information somehow
     }
@@ -175,8 +235,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      * @param binder
      */
     public void setRepresentationLayer(IRepresentationLayerInterface representationLayer, IBinder binder) {
-        this.representationLayer = representationLayer;
-        this.representationLayerBinder = binder;
+        MATEService.representationLayer = representationLayer;
+        representationLayerBinder = binder;
 
         try {
             binder.linkToDeath(this, 0);

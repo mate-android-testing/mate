@@ -13,10 +13,10 @@ import org.mate.exploration.manual.ManualExploration;
  */
 public class ExecuteMATEAccManualExploration {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting manual exploration...");
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         ManualExploration manualExploration = new ManualExploration(false);
         mate.testApp(manualExploration);

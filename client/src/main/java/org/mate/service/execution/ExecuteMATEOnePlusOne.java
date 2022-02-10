@@ -14,12 +14,12 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 public class ExecuteMATEOnePlusOne {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting Evolutionary Search...");
         MATELog.log_acc("One-plus-one algorithm");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final IGeneticAlgorithm onePlusOne = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.ONE_PLUS_ONE)

@@ -8,6 +8,7 @@ import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.representation.DeviceInfo;
+import org.mate.representation.DynamicTest;
 import org.mate.representation.state.widget.WidgetScreenParser;
 import org.mate.representation.util.MATERepLog;
 
@@ -30,6 +31,17 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
         // since the Handler is created here, it will use the thread we are currently running on
         // (hopefully the Main thread).
         messageHandler = new MessageHandler();
+    }
+
+    @Override
+    public void ping() throws RemoteException {
+        // Do nothing. This method is used to test the connection between the MATE Service and
+        // the Representation Layer.
+    }
+
+    @Override
+    public void exit() throws RemoteException {
+        DynamicTest.keepRunning = false;
     }
 
     @Override

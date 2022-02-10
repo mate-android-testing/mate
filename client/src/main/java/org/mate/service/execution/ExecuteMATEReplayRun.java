@@ -24,11 +24,11 @@ import java.util.TreeSet;
 
 public class ExecuteMATEReplayRun {
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
         MATELog.log_acc("Starting ReplayRun...");
 
         // init uiAbstractionLayer, properties, etc.
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         Registry.registerReplayMode();
 

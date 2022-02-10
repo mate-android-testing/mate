@@ -1,15 +1,14 @@
 package org.mate;
 
 import android.content.Context;
-import android.os.RemoteException;
 import android.os.StrictMode;
 
-import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.service.MATEService;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
@@ -24,7 +23,7 @@ import java.util.Random;
 public class MATE {
 
     // TODO: make singleton
-    public MATE(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public MATE(String packageName, Context context) {
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -70,9 +69,17 @@ public class MATE {
         Registry.registerPackageName(packageName);
         MATELog.log_acc("Package name: " + Registry.getPackageName());
 
-        configRepresentationLayer(representationLayer);
+        // try to allocate emulator
+        String emulator = Registry.getEnvironmentManager().allocateEmulator(Registry.getPackageName());
+        MATELog.log_acc("Emulator: " + emulator);
 
-        final DeviceMgr deviceMgr = new DeviceMgr(representationLayer, Registry.getPackageName());
+        if (emulator == null || emulator.isEmpty()) {
+            throw new IllegalStateException("Emulator couldn't be properly allocated!");
+        }
+
+        MATEService.ensureRepresentationLayerIsConnected();
+
+        final DeviceMgr deviceMgr = new DeviceMgr(Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
 
         // internally checks for permission dialogs and grants permissions if required
@@ -85,26 +92,10 @@ public class MATE {
             throw new IllegalStateException("Couldn't launch app under test!");
         }
 
-        // try to allocate emulator
-        String emulator = Registry.getEnvironmentManager().allocateEmulator(Registry.getPackageName());
-        MATELog.log_acc("Emulator: " + emulator);
-
-        if (emulator == null || emulator.isEmpty()) {
-            throw new IllegalStateException("Emulator couldn't be properly allocated!");
-        }
-
         if (Properties.GRAPH_TYPE() != null) {
             // initialise a graph
             MATELog.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
-        }
-    }
-
-    private void configRepresentationLayer(IRepresentationLayerInterface representationLayer) {
-        try {
-            representationLayer.setTargetPackageName(Registry.getPackageName());
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Couldn't configure Representation Layer");
         }
     }
 

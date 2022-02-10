@@ -11,11 +11,11 @@ import org.mate.exploration.heuristical.HeuristicExploration;
 public class ExecuteMATEHeuristicRandomExploration {
 
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting Heuristic Random Exploration...");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         final HeuristicExploration heuristicExploration =
                 new HeuristicExploration(Properties.MAX_NUMBER_EVENTS());

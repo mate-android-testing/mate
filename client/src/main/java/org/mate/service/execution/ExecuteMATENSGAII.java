@@ -16,12 +16,12 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 public class ExecuteMATENSGAII {
 
 
-    public static void run(String packageName, IRepresentationLayerInterface representationLayer, Context context) {
+    public static void run(String packageName, Context context) {
 
         MATELog.log_acc("Starting Evolutionary Search...");
         MATELog.log_acc("NSGA-II algorithm");
 
-        MATE mate = new MATE(packageName, representationLayer, context);
+        MATE mate = new MATE(packageName, context);
 
         IGeneticAlgorithm nsga = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NSGAII)
