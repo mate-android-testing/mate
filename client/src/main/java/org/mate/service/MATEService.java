@@ -134,16 +134,19 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         if (intent == null) {
             log("MATE Service starting but intent was not provided");
+            stopSelf();
             return START_NOT_STICKY;
         }
 
         if (!intent.hasExtra(ALGORITHM_INTENT_EXTRA)) {
             log("MATE Service starting but " + ALGORITHM_INTENT_EXTRA + " was not provided");
+            stopSelf();
             return START_NOT_STICKY;
         }
 
         if (!intent.hasExtra(PACKAGE_NAME_INTENT_EXTRA)) {
             log("MATE Service starting but " + PACKAGE_NAME_INTENT_EXTRA + " was not provided");
+            stopSelf();
             return START_NOT_STICKY;
         }
 
@@ -152,14 +155,19 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         log(String.format("MATE Service starting for algorithm %s and package name %s",
                 algorithm, packageName));
 
-        if (!launchPackageName(packageName)) {
-            log(String.format("MATE Service unable to start package name %s", packageName));
-            return START_NOT_STICKY;
+        try {
+            if (!launchPackageName(packageName)) {
+                log(String.format("MATE Service unable to start package name %s", packageName));
+                return START_NOT_STICKY;
+            }
+
+            MATERunner.run(packageName, algorithm, getApplicationContext());
+        } catch (Exception e) {
+            log("An exception occurred: " + e.getMessage());
+            stopSelf();
         }
 
-        MATERunner.run(packageName, algorithm, getApplicationContext());
-
-        // If we get killed, after returning from here, restart
+        // Do not restart this service if it is explicitly stopped, so return not sticky.
         return START_NOT_STICKY;
     }
 
