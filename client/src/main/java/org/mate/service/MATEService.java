@@ -21,6 +21,7 @@ import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.R;
+import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 
 import java.util.Arrays;
@@ -148,10 +149,32 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         log(String.format("MATE Service starting for algorithm %s and package name %s",
                 algorithm, packageName));
 
+        if (!launchPackageName(packageName)) {
+            log(String.format("MATE Service unable to start package name %s", packageName));
+            return START_NOT_STICKY;
+        }
+
         MATERunner.run(packageName, algorithm, getApplicationContext());
 
         // If we get killed, after returning from here, restart
         return START_NOT_STICKY;
+    }
+
+    private boolean launchPackageName(String packageName) {
+        Context context = getApplicationContext();
+        final Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+
+        // Clear out any previous instances
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MATELog.log("EXCEPTION CLEARING ACTIVITY FLAG");
+            return false;
+        }
+
+        context.startActivity(intent);
+        return true;
     }
 
     /**
