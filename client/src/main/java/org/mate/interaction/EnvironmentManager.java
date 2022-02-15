@@ -1316,10 +1316,11 @@ public class EnvironmentManager {
         return chromosomeIds.toString();
     }
 
-    public void launchRepresentationLayer() {
+    public boolean launchRepresentationLayer() {
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/android/launch_representation_layer")
                 .withParameter("deviceId", emulator);
-        sendMessage(messageBuilder.build());
+        Message response = sendMessage(messageBuilder.build());
+        return Boolean.parseBoolean(response.getParameter("response"));
     }
 }

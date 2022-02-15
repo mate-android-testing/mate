@@ -49,7 +49,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             return;
         }
 
-        Registry.getEnvironmentManager().launchRepresentationLayer();
+        boolean success = Registry.getEnvironmentManager().launchRepresentationLayer();
+        if (!success) {
+            throw new IllegalStateException("MATE Server was unable to launch representation layer");
+        }
 
         int waited = 0;
         int waitTime = 500; // half a second
