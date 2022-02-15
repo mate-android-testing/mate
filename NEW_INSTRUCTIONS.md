@@ -29,11 +29,6 @@ Build and install MATE's Representation Layer
 Build and run MATE Server. 
 Refer to the [instructions](https://github.com/mate-android-testing/mate-server/blob/master/README.md) from the MATE Server repository.
 
-Start the Representation Layer on the device.
-```
-adb shell am instrument -w -e class 'org.mate.representation.DynamicTest' org.mate.representation.test/androidx.test.runner.AndroidJUnitRunner
-```
-
 On another shell terminal, start the MATE Client with the desired algorithm.
 The available algorithm names can be found in the [MATE Runner class](client/src/main/java/org/mate/service/MATERunner.java).
 ```
