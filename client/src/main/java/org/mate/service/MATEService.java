@@ -56,7 +56,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         int waited = 0;
         int waitTime = 500; // half a second
-        int maxWaitTime = waitTime * 10; // 5 seconds
+        int maxWaitTime = waitTime * 20; // 10 seconds
         while (representationLayer == null && waited < maxWaitTime) {
             Utils.sleep(waitTime);
             waited += waitTime;
