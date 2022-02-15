@@ -89,6 +89,10 @@ public class MATERunner {
             case "StandardGeneticAlgorithm": {
                 ExecuteMATEStandardGeneticAlgorithm.run(packageName, context);
             }
+            default: {
+                throw new IllegalStateException(String.format("Algorithm \"%s\" is not valid",
+                        algorithm));
+            }
         }
     }
 }
