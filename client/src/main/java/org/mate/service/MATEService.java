@@ -16,16 +16,18 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import org.mate.MATE;
+import org.mate.R;
 import org.mate.Registry;
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
-import org.mate.MATE;
-import org.mate.R;
 import org.mate.commons.utils.MATELog;
-import org.mate.commons.utils.Utils;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class in charge of firing up the MATE Client with the appropriate parameters.
@@ -43,23 +45,32 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     private volatile static IRepresentationLayerInterface representationLayer;
     private volatile static IBinder representationLayerBinder;
 
+    /**
+     * This CountDownLatch is used to wait in a non-main thread for the representation layer to be
+     * connected, which happens on the main thread.
+     */
+    private static CountDownLatch representationLayerConnectionCountDown;
+
     public static void ensureRepresentationLayerIsConnected() {
+        log(String.format("ensureRepresentationLayerIsConnected called on thread %s",
+                Thread.currentThread().getName()));
+
         if (isRepresentationLayerAlive()) {
             // nothing to do
             return;
         }
+
+        representationLayerConnectionCountDown = new CountDownLatch(1);
 
         boolean success = Registry.getEnvironmentManager().launchRepresentationLayer();
         if (!success) {
             throw new IllegalStateException("MATE Server was unable to launch representation layer");
         }
 
-        int waited = 0;
-        int waitTime = 500; // half a second
-        int maxWaitTime = waitTime * 20; // 10 seconds
-        while (representationLayer == null && waited < maxWaitTime) {
-            Utils.sleep(waitTime);
-            waited += waitTime;
+        try {
+            representationLayerConnectionCountDown.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            // do nothing
         }
 
         if (representationLayer == null) {
@@ -160,12 +171,32 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 log(String.format("MATE Service unable to start package name %s", packageName));
                 return START_NOT_STICKY;
             }
-
-            MATERunner.run(packageName, algorithm, getApplicationContext());
         } catch (Exception e) {
             log("An exception occurred: " + e.getMessage());
             stopSelf();
         }
+
+        // Run MATE in a new thread.
+        //
+        // Since the MATE Service is the entry point of our program, it is run on the main thread
+        // of this process.
+        // If we try to run MATE Client directly on this process, we will later face a problem of
+        // wanting to wait and execute at the same time on the same thread.
+        // This happens because MATE.java will call MATEService.ensureRepresentationLayerIsConnected();
+        // before spawning a new process, and so this code would be run on the main thread.
+        // Once the Registry.getEnvironmentManager().launchRepresentationLayer(); method is
+        // called, we would need to wait in the main thread for a onBind call. Nevertheless, the
+        // onBind events are processed on the main thread. Therefore, by blocking the main thread
+        // we are preventing the onBind event from happening.
+        // Thus, we run MATE in a new thread.
+        new Thread(() -> {
+            try {
+                MATERunner.run(packageName, algorithm, getApplicationContext());
+            } catch (Exception e) {
+                log("An exception occurred: " + e.getMessage());
+                stopSelf();
+            }
+        }).start();
 
         // Do not restart this service if it is explicitly stopped, so return not sticky.
         return START_NOT_STICKY;
@@ -199,6 +230,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     @Override
     public IBinder onBind(Intent intent) {
         log("onBind called");
+        log(String.format("onBind called on thread %s",
+                Thread.currentThread().getName()));
         return binder;
     }
 
@@ -246,8 +279,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         return builder.build();
     }
 
-    public void log(String message) {
-        Log.i("MATE_SERVICE", message);
+    public static void log(String message) {
+        Log.i("MATE_SERVICE", String.format("[%d] %s", new Date().getTime(), message));
     }
 
     /**
@@ -269,6 +302,9 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      * @param binder
      */
     public void setRepresentationLayer(IRepresentationLayerInterface representationLayer, IBinder binder) {
+        log(String.format("setRepresentationLayer called on thread %s",
+                Thread.currentThread().getName()));
+
         MATEService.representationLayer = representationLayer;
         representationLayerBinder = binder;
 
@@ -278,6 +314,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         } catch (RemoteException e) {
             log("An error ocurred registering death listener " + e.getMessage());
         }
+
+        representationLayerConnectionCountDown.countDown();
     }
 
     private final IMATEServiceInterface.Stub binder = new IMATEServiceInterface.Stub() {
