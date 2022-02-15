@@ -1200,7 +1200,14 @@ public class DeviceMgr {
      */
     public void reinstallApp() {
         MATELog.log("Reinstall app");
-        clearApp();
+
+        // Clears the files contained in the app-internal storage, i.e. the app is reset to its
+        // original state.
+        // This will also take care of re-generating an empty 'coverage.exec' file for those apps
+        // that have been manually instrumented with Jacoco, otherwise the apps keep crashing.
+        // I.e., it will execute "run-as <packageName> mkdir -p files" and "run-as <packageName>
+        // touch files/coverage.exe"
+        Registry.getEnvironmentManager().clearAppData();
     }
 
     /**
@@ -1406,37 +1413,6 @@ public class DeviceMgr {
 
             // fallback mechanism
             return Registry.getEnvironmentManager().getActivityNames();
-        }
-    }
-
-    /**
-     * Clears the files contained in the app-internal storage, i.e. the app is reset to its
-     * original state.
-     */
-    public void clearApp() {
-
-        try {
-            MATEService.getRepresentationLayer().clearTargetPackageData();
-
-            /*
-             * We need to re-generate an empty 'coverage.exec' file for those apps that have been
-             * manually instrumented with Jacoco, otherwise the apps keep crashing.
-             * TODO: Is the final call to 'exit' really necessary?
-             */
-            if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
-                MATEService.getRepresentationLayer().executeShellCommand("run-as " + packageName + " mkdir -p files");
-                MATEService.getRepresentationLayer().executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
-                // device.executeShellCommand("run-as " + packageName + " exit");
-            }
-
-        } catch (RemoteException e) {
-            MATELog.log_warn("Couldn't clear app data!");
-            if (e.getMessage() != null) {
-                MATELog.log_warn(e.getMessage());
-            }
-
-            // fallback mechanism
-            Registry.getEnvironmentManager().clearAppData();
         }
     }
 

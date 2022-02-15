@@ -75,16 +75,6 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
-    public boolean clearTargetPackageData() throws RemoteException {
-        return DeviceInfo.getInstance().clearTargetPackageData();
-    }
-
-    @Override
-    public boolean restartTargetPackage() throws RemoteException {
-        return DeviceInfo.getInstance().restartTargetPackage();
-    }
-
-    @Override
     public String executeShellCommand(String command) throws RemoteException {
         return DeviceInfo.getInstance().executeShellCommand(command);
     }

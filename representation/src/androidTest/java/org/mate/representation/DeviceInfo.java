@@ -139,14 +139,6 @@ public class DeviceInfo {
         targetPackageName = packageName;
     }
 
-    public boolean clearTargetPackageData() {
-        if (targetPackageName != null) {
-            String output = this.executeShellCommand("pm clear " + targetPackageName);
-            return output != null;
-        }
-        return false;
-    }
-
     public String executeShellCommand(String command) {
         try {
             return device.executeShellCommand(command);
@@ -154,25 +146,5 @@ public class DeviceInfo {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public boolean restartTargetPackage() {
-        if (targetPackageName == null) {
-            return false;
-        }
-
-        Context context = instrumentation.getContext();
-        final Intent intent = context.getPackageManager().getLaunchIntentForPackage(targetPackageName);
-        // Clear out any previous instances
-        try {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            MATELog.log("EXCEPTION CLEARING ACTIVITY FLAG");
-            return false;
-        }
-
-        context.startActivity(intent);
-        return true;
     }
 }
