@@ -103,6 +103,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
         return new WidgetScreenParser().getWidgets();
     }
 
+    @Override
+    public void registerReplayMode() throws RemoteException {
+        ExplorationInfo.getInstance().registerReplayMode();
+    }
+
     /*
     @Override
     public void getAvailableActions() throws RemoteException {

@@ -215,7 +215,7 @@ public class WidgetActionExecutor extends ActionExecutor {
          * break execution, since a different (valid) input may lead to a different state, e.g. we
          * end on a different activity and all subsequent widget actions are not applicable anymore.
          */
-        String textData = Registry.isReplayMode() ? widget.getText() :
+        String textData = ExplorationInfo.getInstance().isReplayMode() ? widget.getText() :
                 Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
 
         MATELog.log_debug("Input text: " + textData);
@@ -244,8 +244,11 @@ public class WidgetActionExecutor extends ActionExecutor {
                 device.pressBack();
             } else {
                 MATELog.log("  ********* obj " + widget.getId() + "  not found");
+                return false;
             }
         }
+
+        return true;
     }
 
     /**

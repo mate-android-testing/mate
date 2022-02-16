@@ -85,10 +85,15 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     private static void configureRepresentationLayer() {
         try {
             representationLayer.setTargetPackageName(Registry.getPackageName());
+
             // TODO (Ivan): This random seed should take into account how many actions we have
             //  executed so far. Otherwise, each time we reset exploration we start executing the
             //  same actions.
             representationLayer.setRandomSeed(Properties.RANDOM_SEED());
+
+            if (Registry.isReplayMode()) {
+                representationLayer.registerReplayMode();
+            }
         } catch (RemoteException e) {
             throw new IllegalStateException("Couldn't configure Representation Layer");
         }

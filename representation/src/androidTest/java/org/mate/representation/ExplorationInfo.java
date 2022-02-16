@@ -36,7 +36,15 @@ public class ExplorationInfo {
      */
     private String targetPackageName;
 
+    /**
+     * The Random object to use during exploration
+     */
     private Random rnd;
+
+    /**
+     * Whether we are in replay mode. Default: Off
+     */
+    private boolean replayMode = false;
 
     private ExplorationInfo() {
     }
@@ -65,6 +73,15 @@ public class ExplorationInfo {
     public Random getRandom() {
         return rnd;
     }
+
+    public void registerReplayMode() {
+        replayMode = true;
+    }
+
+    public boolean isReplayMode() {
+        return replayMode;
+    }
+
     /**
      *
      * @return the name of the currently visible package.
