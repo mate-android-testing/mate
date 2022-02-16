@@ -13,6 +13,7 @@ import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 import org.mate.representation.DeviceInfo;
+import org.mate.representation.ExplorationInfo;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -42,7 +43,7 @@ public class WidgetScreenParser {
 
     public WidgetScreenParser() {
         this.widgets = new ArrayList<>();
-        this.activityName = DeviceInfo.getInstance().getCurrentActivityName();
+        this.activityName = ExplorationInfo.getInstance().getCurrentActivityName();
         this.device = DeviceInfo.getInstance().getUiDevice();
         parseWidgets();
     }

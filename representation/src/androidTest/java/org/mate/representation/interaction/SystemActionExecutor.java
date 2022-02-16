@@ -4,7 +4,7 @@ import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.intent.SystemAction;
 import org.mate.commons.utils.MATELog;
-import org.mate.representation.DeviceInfo;
+import org.mate.representation.ExplorationInfo;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -41,10 +41,10 @@ public class SystemActionExecutor extends ActionExecutor {
              * specify the package name in order to limit the receivers of the broadcast.
              */
             tag = "-p";
-            component = DeviceInfo.getInstance().getTargetPackageName();
+            component = ExplorationInfo.getInstance().getTargetPackageName();
         } else {
             tag = "-n";
-            component = DeviceInfo.getInstance().getTargetPackageName() + "/" + receiver;
+            component = ExplorationInfo.getInstance().getTargetPackageName() + "/" + receiver;
         }
 
         try {

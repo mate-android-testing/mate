@@ -18,7 +18,7 @@ import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
-import org.mate.representation.DeviceInfo;
+import org.mate.representation.ExplorationInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class WidgetActionExecutor extends ActionExecutor {
     public WidgetActionExecutor() {
         super();
 
-        Mutation.setRandom(DeviceInfo.getInstance().getRandom());
+        Mutation.setRandom(ExplorationInfo.getInstance().getRandom());
         this.staticStrings = StaticStringsParser.parseStaticStrings();
     }
 
@@ -309,7 +309,7 @@ public class WidgetActionExecutor extends ActionExecutor {
         final String activityName = convertClassName(widget.getActivity());
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
-        final Random random = DeviceInfo.getInstance().getRandom();
+        final Random random = ExplorationInfo.getInstance().getRandom();
 
         /*
          * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
@@ -334,7 +334,7 @@ public class WidgetActionExecutor extends ActionExecutor {
                 // consider both the string constants from the current activity and visible fragments
                 List<String> uiComponents = new ArrayList<>();
                 uiComponents.add(activityName);
-                uiComponents.addAll(DeviceInfo.getInstance().getCurrentFragments());
+                uiComponents.addAll(ExplorationInfo.getInstance().getCurrentFragments());
 
                 String randomStaticString;
 

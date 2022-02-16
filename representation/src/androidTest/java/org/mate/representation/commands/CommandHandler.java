@@ -9,9 +9,9 @@ import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.representation.DeviceInfo;
 import org.mate.representation.DynamicTest;
+import org.mate.representation.ExplorationInfo;
 import org.mate.representation.interaction.ActionExecutor;
 import org.mate.representation.interaction.ActionExecutorFactory;
-import org.mate.representation.interaction.UiActionExecutor;
 import org.mate.representation.state.widget.WidgetScreenParser;
 
 import java.util.List;
@@ -47,12 +47,12 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
     @Override
     public void setTargetPackageName(String packageName) throws RemoteException {
-        DeviceInfo.getInstance().setTargetPackageName(packageName);
+        ExplorationInfo.getInstance().setTargetPackageName(packageName);
     }
 
     @Override
     public void setRandomSeed(long seed) throws RemoteException {
-        DeviceInfo.getInstance().setRandomSeed(seed);
+        ExplorationInfo.getInstance().setRandomSeed(seed);
     }
 
     @Override
@@ -67,17 +67,17 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
     @Override
     public String getCurrentPackageName() throws RemoteException {
-        return DeviceInfo.getInstance().getCurrentPackageName();
+        return ExplorationInfo.getInstance().getCurrentPackageName();
     }
 
     @Override
     public String getCurrentActivityName() throws RemoteException {
-        return DeviceInfo.getInstance().getCurrentActivityName();
+        return ExplorationInfo.getInstance().getCurrentActivityName();
     }
 
     @Override
     public List<String> getTargetPackageActivityNames() throws RemoteException {
-        return DeviceInfo.getInstance().getTargetPackageActivityNames();
+        return ExplorationInfo.getInstance().getTargetPackageActivityNames();
     }
 
     @Override
