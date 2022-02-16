@@ -6,7 +6,7 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.UIAction;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.Arrays;
 import java.util.Collections;

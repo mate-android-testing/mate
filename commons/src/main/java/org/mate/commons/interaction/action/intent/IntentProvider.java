@@ -6,9 +6,9 @@ import android.net.Uri;
 
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.commons.interaction.action.Action;
-import org.mate.utils.Randomness;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

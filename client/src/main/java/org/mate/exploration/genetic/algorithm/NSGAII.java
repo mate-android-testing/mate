@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

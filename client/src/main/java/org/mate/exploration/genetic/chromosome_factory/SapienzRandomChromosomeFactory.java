@@ -10,7 +10,7 @@ import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 /**

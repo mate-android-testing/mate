@@ -11,7 +11,7 @@ import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 

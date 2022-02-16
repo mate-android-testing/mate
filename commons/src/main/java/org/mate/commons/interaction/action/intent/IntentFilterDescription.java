@@ -5,7 +5,7 @@ import android.support.test.InstrumentationRegistry;
 
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.io.File;
 import java.util.Collections;

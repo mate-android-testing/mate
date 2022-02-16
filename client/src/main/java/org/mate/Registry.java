@@ -3,6 +3,7 @@ package org.mate;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.commons.utils.Randomness;
 
 import java.io.IOException;
 import java.util.Random;
@@ -131,6 +132,7 @@ public class Registry {
 
     public static void registerRandom(Random random) {
         Registry.random = random;
+        Randomness.setRnd(random);
     }
 
     public static void unregisterRandom() {

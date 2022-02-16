@@ -14,7 +14,7 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 

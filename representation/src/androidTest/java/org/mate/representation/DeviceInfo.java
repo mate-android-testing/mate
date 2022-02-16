@@ -13,6 +13,7 @@ import androidx.test.uiautomator.UiSelector;
 
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
+import org.mate.commons.utils.Randomness;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
@@ -258,6 +259,7 @@ public class DeviceInfo {
 
     public void setRandomSeed(long seed) {
         rnd = new MersenneTwister(seed);
+        Randomness.setRnd(rnd);
     }
 
     public Random getRandom() {

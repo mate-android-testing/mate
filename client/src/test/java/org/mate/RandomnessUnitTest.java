@@ -1,11 +1,10 @@
 package org.mate;
 
 import org.junit.Test;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RandomnessUnitTest {

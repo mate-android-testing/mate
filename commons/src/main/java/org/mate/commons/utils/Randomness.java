@@ -1,6 +1,4 @@
-package org.mate.utils;
-
-import org.mate.Registry;
+package org.mate.commons.utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,8 +8,15 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Randomness {
+
+    private static Random rnd = new Random();
+
+    public static void setRnd(Random rnd) {
+        Randomness.rnd = rnd;
+    }
+
     public static Random getRnd() {
-        return Registry.getRandom();
+        return rnd;
     }
 
     public static <T> T randomElement(List<T> list) {

@@ -3,7 +3,7 @@ package org.mate.exploration.genetic.crossover;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;

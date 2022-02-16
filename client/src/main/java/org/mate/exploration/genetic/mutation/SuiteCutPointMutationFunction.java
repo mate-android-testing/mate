@@ -5,7 +5,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;

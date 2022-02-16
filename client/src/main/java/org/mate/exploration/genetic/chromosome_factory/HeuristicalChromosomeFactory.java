@@ -5,7 +5,7 @@ import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;

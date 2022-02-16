@@ -2,7 +2,7 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.List;

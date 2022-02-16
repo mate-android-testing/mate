@@ -8,7 +8,7 @@ import android.util.SizeF;
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.mate.utils.DataPool;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;

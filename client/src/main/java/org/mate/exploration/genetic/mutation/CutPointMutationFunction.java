@@ -8,7 +8,7 @@ import org.mate.interaction.UIAbstractionLayer;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 /**

@@ -1,6 +1,6 @@
 package org.mate.commons.input_generation;
 
-import org.mate.utils.Randomness;
+import org.mate.commons.utils.Randomness;
 import org.mate.commons.input_generation.format_types.DateFormat;
 import org.mate.commons.input_generation.format_types.InputFieldType;
 import org.mate.commons.input_generation.format_types.TimeFormat;
