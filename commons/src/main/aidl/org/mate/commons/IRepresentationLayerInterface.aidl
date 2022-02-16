@@ -13,7 +13,6 @@ interface IRepresentationLayerInterface {
     // General device info
     int getDisplayWidth();
     int getDisplayHeight();
-    boolean isCrashDialogDisplayed();
 
     // Activities info
     String getCurrentPackageName();

@@ -156,15 +156,6 @@ public class DeviceInfo {
         return device.getDisplayHeight();
     }
 
-    public boolean isCrashDialogDisplayed() {
-        UiObject crashDialog1 = device.findObject(
-                new UiSelector().packageName("android").textContains("keeps stopping"));
-        UiObject crashDialog2 = device.findObject(
-                new UiSelector().packageName("android").textContains("has stopped"));
-
-        return crashDialog1.exists() || crashDialog2.exists();
-    }
-
     public List<String> getTargetPackageActivityNames() {
         if (targetPackageName == null) {
             return null;
