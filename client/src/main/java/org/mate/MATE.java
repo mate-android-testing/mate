@@ -57,7 +57,7 @@ public class MATE {
         Registry.registerProperties(new Properties(environmentManager.getProperties()));
 
         if (Properties.RANDOM_SEED() == null) {
-            Properties.setProperty("RANDOM_SEED", System.currentTimeMillis());
+            Properties.setProperty("random_seed", System.currentTimeMillis());
         }
 
         Random rnd = new MersenneTwister(Properties.RANDOM_SEED());

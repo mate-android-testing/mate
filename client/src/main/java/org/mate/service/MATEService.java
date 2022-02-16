@@ -24,6 +24,9 @@ import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.utils.MATELog;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -208,6 +211,12 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 MATERunner.run(packageName, algorithm, getApplicationContext());
             } catch (Exception e) {
                 log("An exception occurred: " + e.getMessage());
+
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                log(sw.toString());
+
                 stopSelf();
             }
         }).start();
