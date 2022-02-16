@@ -3,8 +3,8 @@ package org.mate.interaction;
 import android.app.Instrumentation;
 
 import org.mate.commons.utils.MATELog;
-import org.mate.exceptions.AUTCrashException;
-import org.mate.exceptions.InvalidScreenStateException;
+import org.mate.commons.exceptions.AUTCrashException;
+import org.mate.commons.exceptions.InvalidScreenStateException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;

@@ -1,5 +1,6 @@
 package org.mate.commons.interaction.action.ui;
 
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -104,4 +105,33 @@ public class UIAction extends Action {
                     Objects.equals(activityName, other.activityName);
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.actionType == null ? -1 : this.actionType.ordinal());
+        dest.writeString(this.activityName);
+    }
+
+    protected UIAction(Parcel in) {
+        int tmpActionType = in.readInt();
+        this.actionType = tmpActionType == -1 ? null : ActionType.values()[tmpActionType];
+        this.activityName = in.readString();
+    }
+
+    public static final Creator<UIAction> CREATOR = new Creator<UIAction>() {
+        @Override
+        public UIAction createFromParcel(Parcel source) {
+            return new UIAction(source);
+        }
+
+        @Override
+        public UIAction[] newArray(int size) {
+            return new UIAction[size];
+        }
+    };
 }

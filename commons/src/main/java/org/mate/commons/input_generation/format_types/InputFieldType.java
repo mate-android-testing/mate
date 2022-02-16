@@ -1,4 +1,4 @@
-package org.mate.utils.input_generation.format_types;
+package org.mate.commons.input_generation.format_types;
 
 
 import android.text.InputType;

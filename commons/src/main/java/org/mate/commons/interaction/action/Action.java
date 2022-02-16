@@ -1,9 +1,10 @@
 package org.mate.commons.interaction.action;
 
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-public abstract class Action {
+public abstract class Action implements Parcelable {
 
     /**
      * A detailed description of the action. Primarily used

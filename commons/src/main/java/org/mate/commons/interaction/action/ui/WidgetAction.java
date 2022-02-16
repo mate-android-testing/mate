@@ -1,5 +1,6 @@
 package org.mate.commons.interaction.action.ui;
 
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -209,4 +210,42 @@ public class WidgetAction extends UIAction {
             return actionType + "(" + widget.getClazz() + ")";
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeParcelable(this.widget, flags);
+        dest.writeTypedList(this.adjActions);
+        dest.writeString(this.extraInfo);
+        dest.writeLong(this.timeToWait);
+        dest.writeFloat(this.pheromone);
+        dest.writeFloat(this.proportionalPheromone);
+    }
+
+    protected WidgetAction(Parcel in) {
+        super(in);
+        this.widget = in.readParcelable(Widget.class.getClassLoader());
+        this.adjActions = in.createTypedArrayList(WidgetAction.CREATOR);
+        this.extraInfo = in.readString();
+        this.timeToWait = in.readLong();
+        this.pheromone = in.readFloat();
+        this.proportionalPheromone = in.readFloat();
+    }
+
+    public static final Creator<WidgetAction> CREATOR = new Creator<WidgetAction>() {
+        @Override
+        public WidgetAction createFromParcel(Parcel source) {
+            return new WidgetAction(source);
+        }
+
+        @Override
+        public WidgetAction[] newArray(int size) {
+            return new WidgetAction[size];
+        }
+    };
 }

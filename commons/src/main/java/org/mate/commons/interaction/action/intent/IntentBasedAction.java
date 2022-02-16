@@ -1,4 +1,4 @@
-package org.mate.interaction.action.intent;
+package org.mate.commons.interaction.action.intent;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;

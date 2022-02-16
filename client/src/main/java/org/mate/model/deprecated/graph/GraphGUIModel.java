@@ -1,7 +1,7 @@
 package org.mate.model.deprecated.graph;
 
 import org.mate.commons.utils.MATELog;
-import org.mate.exceptions.InvalidScreenStateException;
+import org.mate.commons.exceptions.InvalidScreenStateException;
 import org.mate.exploration.deprecated.aco.Ant;
 import org.mate.state.IScreenState;
 import org.mate.commons.interaction.action.Action;

@@ -2,9 +2,8 @@ package org.mate.interaction;
 
 import android.util.Log;
 
-import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
-import org.mate.exceptions.AUTCrashException;
+import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.UIAction;

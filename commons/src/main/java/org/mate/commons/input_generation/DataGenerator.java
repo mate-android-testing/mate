@@ -1,9 +1,9 @@
-package org.mate.utils.input_generation;
+package org.mate.commons.input_generation;
 
 import org.mate.utils.Randomness;
-import org.mate.utils.input_generation.format_types.DateFormat;
-import org.mate.utils.input_generation.format_types.InputFieldType;
-import org.mate.utils.input_generation.format_types.TimeFormat;
+import org.mate.commons.input_generation.format_types.DateFormat;
+import org.mate.commons.input_generation.format_types.InputFieldType;
+import org.mate.commons.input_generation.format_types.TimeFormat;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static org.mate.utils.input_generation.Letters.SET_OF_LOW_BIG_NUMBER_LETTERS;
-import static org.mate.utils.input_generation.Letters.SET_OF_LOW_LETTERS;
-import static org.mate.utils.input_generation.Letters.SET_OF_NUMBERS;
-import static org.mate.utils.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
+import static org.mate.commons.input_generation.Letters.SET_OF_LOW_BIG_NUMBER_LETTERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_LOW_LETTERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_NUMBERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
 
 /**
  * Generates random input strings.

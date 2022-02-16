@@ -1,18 +1,19 @@
 package org.mate.representation.commands;
 
-import static org.mate.representation.commands.MessageHandler.GET_AVAILABLE_ACTIONS;
-
 import android.os.RemoteException;
 
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
+import org.mate.commons.exceptions.AUTCrashException;
+import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.representation.DeviceInfo;
 import org.mate.representation.DynamicTest;
+import org.mate.representation.interaction.ActionExecutor;
+import org.mate.representation.interaction.ActionExecutorFactory;
+import org.mate.representation.interaction.UiActionExecutor;
 import org.mate.representation.state.widget.WidgetScreenParser;
-import org.mate.representation.util.MATERepLog;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,6 +78,19 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     @Override
     public String executeShellCommand(String command) throws RemoteException {
         return DeviceInfo.getInstance().executeShellCommand(command);
+    }
+
+    @Override
+    public boolean executeAction(Action action) throws RemoteException {
+        ActionExecutor executor = ActionExecutorFactory.getExecutor(action);
+
+        try {
+            executor.perform(action);
+            return true;
+        } catch (AUTCrashException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override

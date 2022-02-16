@@ -1,6 +1,6 @@
 package org.mate.model.deprecated.graph;
 
-import org.mate.exceptions.InvalidScreenStateException;
+import org.mate.commons.exceptions.InvalidScreenStateException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.state.IScreenState;
 import org.mate.commons.interaction.action.ui.WidgetAction;

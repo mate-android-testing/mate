@@ -1,17 +1,17 @@
-package org.mate.utils.input_generation;
+package org.mate.commons.input_generation;
 
 
 import org.mate.Registry;
 import org.mate.utils.Randomness;
-import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.commons.input_generation.format_types.InputFieldType;
 
 import java.util.Random;
 
-import static org.mate.utils.input_generation.Letters.SET_OF_BIG_LETTERS;
-import static org.mate.utils.input_generation.Letters.SET_OF_LOW_LETTERS;
-import static org.mate.utils.input_generation.Letters.SET_OF_NUMBERS;
-import static org.mate.utils.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
-import static org.mate.utils.input_generation.Letters.generatePossibleLetters;
+import static org.mate.commons.input_generation.Letters.SET_OF_BIG_LETTERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_LOW_LETTERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_NUMBERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
+import static org.mate.commons.input_generation.Letters.generatePossibleLetters;
 
 /**
  * Class that mutates a given input.

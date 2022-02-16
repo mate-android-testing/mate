@@ -10,7 +10,7 @@ import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
 import org.mate.commons.utils.MATELog;
-import org.mate.exceptions.AUTCrashException;
+import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.interaction.DeviceMgr;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;

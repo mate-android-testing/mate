@@ -1,8 +1,8 @@
-package org.mate.utils.input_generation;
+package org.mate.commons.input_generation;
 
 
 import org.mate.utils.Randomness;
-import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.commons.input_generation.format_types.InputFieldType;
 
 import java.util.Collections;
 import java.util.HashMap;

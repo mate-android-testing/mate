@@ -1,7 +1,7 @@
 package org.mate.exploration.deprecated.aco;
 
 import org.mate.Properties;
-import org.mate.exceptions.AUTCrashException;
+import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.exploration.deprecated.Fitness.ActivityCoverage;
 import org.mate.interaction.DeviceMgr;
 import org.mate.commons.interaction.action.Action;

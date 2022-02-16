@@ -1,4 +1,4 @@
-package org.mate.exceptions;
+package org.mate.commons.exceptions;
 
 /**
  * Created by marceloeler on 09/03/17.

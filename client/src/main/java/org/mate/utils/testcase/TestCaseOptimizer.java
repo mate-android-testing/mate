@@ -3,9 +3,9 @@ package org.mate.utils.testcase;
 import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.MATELog;
-import org.mate.interaction.action.intent.ComponentType;
-import org.mate.interaction.action.intent.IntentBasedAction;
-import org.mate.interaction.action.intent.SystemAction;
+import org.mate.commons.interaction.action.intent.ComponentType;
+import org.mate.commons.interaction.action.intent.IntentBasedAction;
+import org.mate.commons.interaction.action.intent.SystemAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 
@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Provides different optimisation strategies for a {@link org.mate.model.TestCase}.
  * This can be essentially anything from removing all actions of kind
- * {@link org.mate.interaction.action.intent.IntentBasedAction} to dropping solely individual
+ * {@link org.mate.commons.interaction.action.intent.IntentBasedAction} to dropping solely individual
  * actions.
  */
 public final class TestCaseOptimizer {
@@ -82,7 +82,7 @@ public final class TestCaseOptimizer {
      * The second optimisation strategy.
      *
      * Removes all actions of a test case except the last one. The idea is that
-     * a {@link org.mate.interaction.action.intent.IntentBasedAction} may lead to a crash
+     * a {@link org.mate.commons.interaction.action.intent.IntentBasedAction} may lead to a crash
      * directly without preceding UI or Intent-based actions. If no crash occurs anymore,
      * the last action didn't cause the crash, at least not independently.
      *
@@ -263,7 +263,7 @@ public final class TestCaseOptimizer {
      * Checks whether the last action of the given test case is of type {@param type}.
      *
      * @param testCase The given test case.
-     * @param type     The action type, e.g. {@link org.mate.interaction.action.intent.IntentBasedAction}.
+     * @param type     The action type, e.g. {@link org.mate.commons.interaction.action.intent.IntentBasedAction}.
      * @return Returns {@code true} if the last action matches the given action type,
      * otherwise {@code false} is returned.
      */

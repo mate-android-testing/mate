@@ -35,8 +35,8 @@ public class RandomExploration implements Algorithm {
 
     /**
      * Initialises the random exploration strategy including the use of
-     * {@link org.mate.interaction.action.intent.IntentBasedAction} and
-     * {@link org.mate.interaction.action.intent.SystemAction} actions.
+     * {@link org.mate.commons.interaction.action.intent.IntentBasedAction} and
+     * {@link org.mate.commons.interaction.action.intent.SystemAction} actions.
      *
      * @param alwaysReset Whether to reset the app after each creation and execution of a chromosome.
      * @param maxNumEvents The maximal number of actions per test case.

@@ -12,10 +12,10 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 import org.mate.commons.utils.MATELog;
-import org.mate.interaction.action.intent.ComponentDescription;
-import org.mate.interaction.action.intent.ComponentType;
-import org.mate.interaction.action.intent.IntentBasedAction;
-import org.mate.interaction.action.intent.IntentFilterDescription;
+import org.mate.commons.interaction.action.intent.ComponentDescription;
+import org.mate.commons.interaction.action.intent.ComponentType;
+import org.mate.commons.interaction.action.intent.IntentBasedAction;
+import org.mate.commons.interaction.action.intent.IntentFilterDescription;
 
 /**
  * Represents a custom converter from an {@link IntentBasedAction} to XML and vice versa.

@@ -1,4 +1,4 @@
-package org.mate.utils.input_generation;
+package org.mate.commons.input_generation;
 
 
 import android.support.test.InstrumentationRegistry;
