@@ -55,6 +55,7 @@ public class WidgetActionExecutor extends ActionExecutor {
     public WidgetActionExecutor() {
         super();
 
+        Mutation.setRandom(DeviceInfo.getInstance().getRandom());
         this.staticStrings = StaticStringsParser.parseStaticStrings();
     }
 

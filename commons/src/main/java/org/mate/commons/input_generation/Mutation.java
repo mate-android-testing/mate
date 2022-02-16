@@ -16,6 +16,8 @@ import static org.mate.commons.input_generation.Letters.generatePossibleLetters;
  */
 public class Mutation {
 
+    private static Random rnd = new Random();
+
     /**
      * The probability that a full stop should be placed in a datum or tense.
      */
@@ -52,9 +54,12 @@ public class Mutation {
          * @return A random mutation type.
          */
         private static MutationType getRandomMutationType() {
-            Random r = Registry.getRandom();
-            return MutationType.values()[r.nextInt(MutationType.values().length)];
+            return MutationType.values()[rnd.nextInt(MutationType.values().length)];
         }
+    }
+
+    public static void setRandom(Random rnd) {
+        Mutation.rnd = rnd;
     }
 
     /**
@@ -134,18 +139,18 @@ public class Mutation {
      */
     private static String mutateString(String string, int maxNumberMutation, String charSet, MutationType mutationType) {
         StringBuilder stb = new StringBuilder(string);
-        Random r = Registry.getRandom();
         for (int i = 0; i < maxNumberMutation; i++) {
             if (mutationType == null) {
                 mutationType = MutationType.getRandomMutationType();
             }
-            int randomNumber = r.nextInt(string.length());
+            int randomNumber = rnd.nextInt(string.length());
             switch (mutationType) {
                 case CHANGE:
-                    stb.replace(randomNumber, randomNumber + 1, generateRandomCharString(r, charSet));
+                    stb.replace(randomNumber, randomNumber + 1, generateRandomCharString(rnd,
+                            charSet));
                     break;
                 case ADDITION:
-                    stb.replace(randomNumber, randomNumber, generateRandomCharString(r, charSet));
+                    stb.replace(randomNumber, randomNumber, generateRandomCharString(rnd, charSet));
                     break;
                 case DELETE:
                     if (stb.length() != 0) {
@@ -170,8 +175,7 @@ public class Mutation {
     private static String mutateEmailAddress(String email, int maxNumberMutation) {
         String[] emailParts = email.split("@");
         String mutatedMail;
-        Random r = Registry.getRandom();
-        if (r.nextDouble() < 0.5) {
+        if (rnd.nextDouble() < 0.5) {
             mutatedMail = email;
         } else {
             mutatedMail = emailParts[0];
@@ -194,11 +198,10 @@ public class Mutation {
     private static String mutatePhone(String phone, int maxNumberMutation) {
         phone = phone.replace("/", "");
         phone = mutateNumber(phone, maxNumberMutation);
-        Random r = Registry.getRandom();
-        if (r.nextDouble() < 0.5) {
+        if (rnd.nextDouble() < 0.5) {
             return phone;
         } else {
-            int randomGenNumber = r.nextInt(phone.length());
+            int randomGenNumber = rnd.nextInt(phone.length());
             StringBuilder stb = new StringBuilder(phone);
             stb.replace(randomGenNumber, randomGenNumber, "\\");
             return stb.toString();
@@ -215,8 +218,7 @@ public class Mutation {
     private static String mutateNumber(String num, int maxNumberMutation) {
         try {
             int number = Integer.parseInt(num);
-            Random r = Registry.getRandom();
-            int randomGenNumber = r.nextInt(num.length() * 2) - num.length();
+            int randomGenNumber = rnd.nextInt(num.length() * 2) - num.length();
             number += randomGenNumber;
             return String.valueOf(number);
         } catch (NumberFormatException e) {
@@ -276,12 +278,11 @@ public class Mutation {
     private static String mutateDateOrTime(String dateTime, String regex, char replacedChar) {
         String[] dateTimes = dateTime.split(regex);
         StringBuilder stb = new StringBuilder();
-        Random r = Registry.getRandom();
         for (int i = 0; i < dateTimes.length; i++) {
             dateTimes[i] = mutateString(dateTimes[i], dateTimes[i].length(),
                     SET_OF_NUMBERS.getLetters(), MutationType.CHANGE);
             stb.append(dateTimes[i]);
-            if (i + 1 != dateTimes.length && r.nextDouble() < PROBABILITY_POINT_IN_DATE_TIME) {
+            if (i + 1 != dateTimes.length && rnd.nextDouble() < PROBABILITY_POINT_IN_DATE_TIME) {
                 stb.append(replacedChar);
             }
         }
@@ -296,6 +297,6 @@ public class Mutation {
      * @return A random char of the set.
      */
     private static String generateRandomCharString(Random r, String charSet) {
-        return String.valueOf(charSet.charAt(r.nextInt(charSet.length())));
+        return String.valueOf(charSet.charAt(rnd.nextInt(charSet.length())));
     }
 }

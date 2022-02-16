@@ -49,32 +49,6 @@ public class DeviceInfo {
     private Random rnd;
 
     /**
-     * Returns whether the emulator is in portrait mode or not.
-     *
-     * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
-     *         is returned.
-     */
-    public boolean isInPortraitMode() {
-        return isInPortraitMode;
-    }
-
-    public void setInPortraitMode(boolean inPortraitMode) {
-        isInPortraitMode = inPortraitMode;
-    }
-
-    public void toggleInPortraitMode() {
-        isInPortraitMode = !isInPortraitMode;
-    }
-
-    public boolean isDisabledAutoRotate() {
-        return disabledAutoRotate;
-    }
-
-    public void setDisabledAutoRotate(boolean disabledAutoRotate) {
-        this.disabledAutoRotate = disabledAutoRotate;
-    }
-
-    /**
      * Keeps track whether the emulator is in portrait or landscape mode.
      */
     private boolean isInPortraitMode;
@@ -98,6 +72,32 @@ public class DeviceInfo {
         }
 
         return instance;
+    }
+
+    /**
+     * Returns whether the emulator is in portrait mode or not.
+     *
+     * @return Returns {@code true} if the emulator is in portrait mode, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isInPortraitMode() {
+        return isInPortraitMode;
+    }
+
+    public void setInPortraitMode(boolean inPortraitMode) {
+        isInPortraitMode = inPortraitMode;
+    }
+
+    public void toggleInPortraitMode() {
+        isInPortraitMode = !isInPortraitMode;
+    }
+
+    public boolean isDisabledAutoRotate() {
+        return disabledAutoRotate;
+    }
+
+    public void setDisabledAutoRotate(boolean disabledAutoRotate) {
+        this.disabledAutoRotate = disabledAutoRotate;
     }
 
     /**
