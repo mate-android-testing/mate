@@ -17,6 +17,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.R;
 import org.mate.Registry;
 import org.mate.commons.IMATEServiceInterface;
@@ -78,8 +79,13 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         }
 
         // Config representation layer just connected
+        configureRepresentationLayer();
+    }
+
+    private static void configureRepresentationLayer() {
         try {
             representationLayer.setTargetPackageName(Registry.getPackageName());
+            representationLayer.setRandomSeed(Properties.RANDOM_SEED());
         } catch (RemoteException e) {
             throw new IllegalStateException("Couldn't configure Representation Layer");
         }

@@ -51,6 +51,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public void setRandomSeed(long seed) throws RemoteException {
+        DeviceInfo.getInstance().setRandomSeed(seed);
+    }
+
+    @Override
     public int getDisplayWidth() throws RemoteException {
         return DeviceInfo.getInstance().getDisplayWidth();
     }

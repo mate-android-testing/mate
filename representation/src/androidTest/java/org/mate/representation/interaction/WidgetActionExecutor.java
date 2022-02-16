@@ -308,7 +308,7 @@ public class WidgetActionExecutor extends ActionExecutor {
         final String activityName = convertClassName(widget.getActivity());
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
-        final Random random = Registry.getRandom();
+        final Random random = DeviceInfo.getInstance().getRandom();
 
         /*
          * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,

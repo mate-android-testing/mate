@@ -1,4 +1,4 @@
-package org.mate.utils;
+package org.mate.commons.utils;
 
 /**
  * Copyright (C) 2010-2018 Gordon Fraser, Andrea Arcuri and EvoSuite

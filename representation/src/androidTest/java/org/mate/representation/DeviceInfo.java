@@ -12,6 +12,7 @@ import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiSelector;
 
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.MersenneTwister;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +44,8 @@ public class DeviceInfo {
      * The package name of the AUT.
      */
     private String targetPackageName;
+
+    private Random rnd;
 
     /**
      * Returns whether the emulator is in portrait mode or not.
@@ -250,5 +254,13 @@ public class DeviceInfo {
 
     public String getTargetPackageName() {
         return targetPackageName;
+    }
+
+    public void setRandomSeed(long seed) {
+        rnd = new MersenneTwister(seed);
+    }
+
+    public Random getRandom() {
+        return rnd;
     }
 }

@@ -9,7 +9,7 @@ import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.service.MATEService;
-import org.mate.utils.MersenneTwister;
+import org.mate.commons.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
@@ -55,12 +55,11 @@ public class MATE {
         Registry.registerEnvironmentManager(environmentManager);
         Registry.registerProperties(new Properties(environmentManager.getProperties()));
 
-        Random rnd;
-        if (Properties.RANDOM_SEED() != null) {
-            rnd = new MersenneTwister(Properties.RANDOM_SEED());
-        } else {
-            rnd = new MersenneTwister();
+        if (Properties.RANDOM_SEED() == null) {
+            Properties.setProperty("RANDOM_SEED", System.currentTimeMillis());
         }
+
+        Random rnd = new MersenneTwister(Properties.RANDOM_SEED());
         Registry.registerRandom(rnd);
 
         MATELog.log_acc("TIMEOUT: " + Properties.TIMEOUT());

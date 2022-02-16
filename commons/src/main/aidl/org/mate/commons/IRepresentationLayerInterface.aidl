@@ -9,6 +9,7 @@ interface IRepresentationLayerInterface {
     void ping();
     void exit();
     void setTargetPackageName(String packageName);
+    void setRandomSeed(long seed);
 
     // General device info
     int getDisplayWidth();
