@@ -1118,56 +1118,6 @@ public class Widget implements Parcelable {
         dest.writeString(this.maxminLum);
     }
 
-    /*public void readFromParcel(Parcel source) {
-        this.parent = source.readParcelable(Widget.class.getClassLoader());
-        this.children = new ArrayList<Widget>();
-        source.readList(this.children, Widget.class.getClassLoader());
-        this.id = source.readString();
-        this.clazz = source.readString();
-        this.resourceID = source.readString();
-        this.index = source.readInt();
-        this.localIndex = source.readInt();
-        this.depth = source.readInt();
-        this.activity = source.readString();
-        this.packageName = source.readString();
-        this.bounds = source.readParcelable(Rect.class.getClassLoader());
-        this.X = source.readInt();
-        this.Y = source.readInt();
-        this.x1 = source.readInt();
-        this.x2 = source.readInt();
-        this.y1 = source.readInt();
-        this.y2 = source.readInt();
-        this.text = source.readString();
-        this.contentDesc = source.readString();
-        this.labeledBy = source.readString();
-        this.showingHintText = source.readByte() != 0;
-        this.focused = source.readByte() != 0;
-        this.errorText = source.readString();
-        this.contextClickable = source.readByte() != 0;
-        this.importantForAccessibility = source.readByte() != 0;
-        this.accessibilityFocused = source.readByte() != 0;
-        this.labelFor = source.readString();
-        this.checkable = source.readByte() != 0;
-        this.checked = source.readByte() != 0;
-        this.editable = source.readByte() != 0;
-        this.enabled = source.readByte() != 0;
-        this.focusable = source.readByte() != 0;
-        this.scrollable = source.readByte() != 0;
-        this.selected = source.readByte() != 0;
-        this.visible = source.readByte() != 0;
-        this.maxTextLength = source.readInt();
-        this.screenReaderFocusable = source.readByte() != 0;
-        this.inputType = source.readInt();
-        this.hasChildren = source.readByte() != 0;
-        this.heading = source.readByte() != 0;
-        this.password = source.readByte() != 0;
-        this.clickable = source.readByte() != 0;
-        this.longClickable = source.readByte() != 0;
-        this.hint = source.readString();
-        this.color = source.readString();
-        this.maxminLum = source.readString();
-    }*/
-
     protected Widget(Parcel in) {
         this.children = new ArrayList<Widget>();
         in.readList(this.children, Widget.class.getClassLoader());

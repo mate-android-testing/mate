@@ -1,4 +1,4 @@
-package org.mate.utils;
+package org.mate.commons.utils;
 
 import java.util.Arrays;
 import java.util.List;

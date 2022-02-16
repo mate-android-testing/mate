@@ -1,13 +1,15 @@
 package org.mate.commons.interaction.action.intent;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.test.InstrumentationRegistry;
 
-import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Randomness;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -20,7 +22,7 @@ import java.util.Set;
  * intent-filter is typically represent by an arbitrary combination
  * of action, category and data tags.
  */
-public class IntentFilterDescription {
+public class IntentFilterDescription implements Parcelable {
 
     private Set<String> actions = new HashSet<>();
     private Set<String> categories = new HashSet<>();
@@ -92,7 +94,7 @@ public class IntentFilterDescription {
      * A representation for the data tag potentially contained
      * in an intent-filter tag.
      */
-    public static class Data {
+    public static class Data implements Parcelable {
 
         private Set<String> schemes;
         private Set<String> hosts;
@@ -216,8 +218,9 @@ public class IntentFilterDescription {
          * inside the intent filter.
          *
          * @return Returns the generated URI or {@code null} if no URI could be derived.
+         * @param packageName
          */
-        Uri generateRandomUri() {
+        Uri generateRandomUri(String packageName) {
 
             Random rand = new Random();
             StringBuilder uriBuilder = new StringBuilder();
@@ -298,7 +301,7 @@ public class IntentFilterDescription {
                         String[] pathParts = Uri.fromFile(
                                 new File(InstrumentationRegistry.getTargetContext().getFilesDir(), fileName)).toString().split("/");
 
-                        pathParts[pathParts.length - 3] = Registry.getPackageName();
+                        pathParts[pathParts.length - 3] = packageName;
 
                         for (int i = 0; i < pathParts.length - 1; i++) {
                             uriBuilder.append(pathParts[i]).append("/");
@@ -503,5 +506,76 @@ public class IntentFilterDescription {
             }
             return path.toString();
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeStringList(new ArrayList<>(this.schemes));
+            dest.writeStringList(new ArrayList<>(this.hosts));
+            dest.writeStringList(new ArrayList<>(this.ports));
+            dest.writeStringList(new ArrayList<>(this.paths));
+            dest.writeStringList(new ArrayList<>(this.pathPatterns));
+            dest.writeStringList(new ArrayList<>(this.pathPrefixes));
+            dest.writeStringList(new ArrayList<>(this.mimeTypes));
+        }
+
+        protected Data(Parcel in) {
+            this.schemes =new HashSet<>(in.createStringArrayList());
+            this.hosts =new HashSet<>(in.createStringArrayList());
+            this.ports =new HashSet<>(in.createStringArrayList());
+            this.paths =new HashSet<>(in.createStringArrayList());
+            this.pathPatterns =new HashSet<>(in.createStringArrayList());
+            this.pathPrefixes =new HashSet<>(in.createStringArrayList());
+            this.mimeTypes =new HashSet<>(in.createStringArrayList());
+        }
+
+        public static final Creator<Data> CREATOR = new Creator<Data>() {
+            @Override
+            public Data createFromParcel(Parcel source) {
+                return new Data(source);
+            }
+
+            @Override
+            public Data[] newArray(int size) {
+                return new Data[size];
+            }
+        };
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringList(new ArrayList<>(this.actions));
+        dest.writeStringList(new ArrayList<>(this.categories));
+        dest.writeParcelable(this.data, flags);
+    }
+
+    public IntentFilterDescription() {
+    }
+
+    protected IntentFilterDescription(Parcel in) {
+        this.actions = new HashSet<>(in.createStringArrayList());
+        this.categories = new HashSet<>(in.createStringArrayList());
+        this.data = in.readParcelable(Data.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<IntentFilterDescription> CREATOR = new Parcelable.Creator<IntentFilterDescription>() {
+        @Override
+        public IntentFilterDescription createFromParcel(Parcel source) {
+            return new IntentFilterDescription(source);
+        }
+
+        @Override
+        public IntentFilterDescription[] newArray(int size) {
+            return new IntentFilterDescription[size];
+        }
+    };
 }

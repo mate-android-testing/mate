@@ -219,6 +219,8 @@ public class WidgetAction extends UIAction {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
+        dest.writeInt(ACTION_TYPE_WIDGET);
+
         dest.writeParcelable(this.widget, flags);
         dest.writeTypedList(this.adjActions);
         dest.writeString(this.extraInfo);
@@ -227,7 +229,7 @@ public class WidgetAction extends UIAction {
         dest.writeFloat(this.proportionalPheromone);
     }
 
-    protected WidgetAction(Parcel in) {
+    public WidgetAction(Parcel in) {
         super(in);
         this.widget = in.readParcelable(Widget.class.getClassLoader());
         this.adjActions = in.createTypedArrayList(WidgetAction.CREATOR);

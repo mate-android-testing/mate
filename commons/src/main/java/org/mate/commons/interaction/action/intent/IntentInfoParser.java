@@ -38,11 +38,13 @@ public final class IntentInfoParser {
      * specified by the constant {@code STATIC_INFO_FILE} has been pushed to the app internal
      * storage of MATE.
      *
+     *
+     * @param packageName
      * @param components The list of components retrieved from the AndroidManifest.xml.
      * @throws XmlPullParserException Should never happen.
      * @throws IOException            Should never happen.
      */
-    public static void parseIntentInfoFile(List<ComponentDescription> components,
+    public static void parseIntentInfoFile(String packageName, List<ComponentDescription> components,
                                            List<ComponentDescription> dynamicReceivers)
             throws XmlPullParserException, IOException {
 
@@ -137,7 +139,8 @@ public final class IntentInfoParser {
                         MATELog.log("Discovered Dynamic Broadcast Receiver: " + componentName
                                 + " (" + parser.getName() + ")");
 
-                        ComponentDescription receiver = new ComponentDescription(componentName,
+                        ComponentDescription receiver = new ComponentDescription(packageName, 
+                                componentName,
                                 ComponentType.BROADCAST_RECEIVER);
                         receiver.addStringConstants(stringConstants);
                         receiver.addExtras(extras);

@@ -1,5 +1,6 @@
 package org.mate.commons.interaction.action.intent;
 
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import org.mate.commons.interaction.action.Action;
@@ -143,4 +144,41 @@ public class SystemAction extends Action {
     public String toShortString() {
         return action;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(ACTION_TYPE_SYSTEM);
+
+        dest.writeParcelable(this.component, flags);
+        dest.writeParcelable(this.intentFilter, flags);
+        dest.writeString(this.receiver);
+        dest.writeByte(this.dynamic ? (byte) 1 : (byte) 0);
+        dest.writeString(this.action);
+    }
+
+    public SystemAction(Parcel in) {
+        this.component = in.readParcelable(ComponentDescription.class.getClassLoader());
+        this.intentFilter = in.readParcelable(IntentFilterDescription.class.getClassLoader());
+        this.receiver = in.readString();
+        this.dynamic = in.readByte() != 0;
+        this.action = in.readString();
+    }
+
+    public static final Creator<SystemAction> CREATOR = new Creator<SystemAction>() {
+        @Override
+        public SystemAction createFromParcel(Parcel source) {
+            return new SystemAction(source);
+        }
+
+        @Override
+        public SystemAction[] newArray(int size) {
+            return new SystemAction[size];
+        }
+    };
 }

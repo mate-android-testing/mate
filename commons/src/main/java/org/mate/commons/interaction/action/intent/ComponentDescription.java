@@ -1,13 +1,13 @@
 package org.mate.commons.interaction.action.intent;
 
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Size;
 import android.util.SizeF;
 
-import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
-import org.mate.utils.DataPool;
+import org.mate.commons.utils.DataPool;
 import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ComponentDescription {
+public class ComponentDescription implements Parcelable {
 
+    private String packageName;
     private final String name;
     private final ComponentType type;
 
@@ -34,12 +35,14 @@ public class ComponentDescription {
     private Set<String> stringConstants = new HashSet<>();
     private Map<String, String> extras = new HashMap<>();
 
-    public ComponentDescription(String name, String type) {
+    public ComponentDescription(String packageName, String name, String type) {
+        this.packageName = packageName;
         this.name = name;
         this.type = ComponentType.mapStringToComponent(type);
     }
 
-    public ComponentDescription(String name, ComponentType type) {
+    public ComponentDescription(String packageName, String name, ComponentType type) {
+        this.packageName = packageName;
         this.name = name;
         this.type = type;
     }
@@ -108,7 +111,7 @@ public class ComponentDescription {
     public String getFullyQualifiedName() {
 
         if (name.startsWith(".")) {
-            return Registry.getPackageName() + name;
+            return packageName + name;
         } else {
             return name;
         }
@@ -326,4 +329,51 @@ public class ComponentDescription {
         return bundle;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeInt(this.type == null ? -1 : this.type.ordinal());
+        dest.writeByte(this.handleOnNewIntent ? (byte) 1 : (byte) 0);
+        dest.writeTypedList(new ArrayList<>(this.intentFilters));
+        dest.writeStringList(new ArrayList<>(this.stringConstants));
+        dest.writeInt(this.extras.size());
+        for (Map.Entry<String, String> entry : this.extras.entrySet()) {
+            dest.writeString(entry.getKey());
+            dest.writeString(entry.getValue());
+        }
+    }
+
+    protected ComponentDescription(Parcel in) {
+        this.name = in.readString();
+        int tmpType = in.readInt();
+        this.type = tmpType == -1 ? null : ComponentType.values()[tmpType];
+        this.handleOnNewIntent = in.readByte() != 0;
+        this.intentFilters =
+                new HashSet<>(in.createTypedArrayList(IntentFilterDescription.CREATOR));
+        this.stringConstants = new HashSet<>(in.createStringArrayList());
+        int extrasSize = in.readInt();
+        this.extras = new HashMap<String, String>(extrasSize);
+        for (int i = 0; i < extrasSize; i++) {
+            String key = in.readString();
+            String value = in.readString();
+            this.extras.put(key, value);
+        }
+    }
+
+    public static final Parcelable.Creator<ComponentDescription> CREATOR = new Parcelable.Creator<ComponentDescription>() {
+        @Override
+        public ComponentDescription createFromParcel(Parcel source) {
+            return new ComponentDescription(source);
+        }
+
+        @Override
+        public ComponentDescription[] newArray(int size) {
+            return new ComponentDescription[size];
+        }
+    };
 }

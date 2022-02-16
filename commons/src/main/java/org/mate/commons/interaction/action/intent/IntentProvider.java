@@ -4,11 +4,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 
-import org.mate.Registry;
+import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Randomness;
-import org.mate.interaction.EnvironmentManager;
-import org.mate.commons.interaction.action.Action;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -20,13 +18,17 @@ import java.util.Random;
 import java.util.Set;
 
 public class IntentProvider {
+    public static final String ACTIVITY_UNKNOWN = "unknown";
+
+    private String packageName;
 
     private List<ComponentDescription> components;
     private static final List<String> systemEventActions = SystemActionParser.loadSystemEventActions();
     private List<ComponentDescription> systemEventReceivers = new ArrayList<>();
     private List<ComponentDescription> dynamicReceivers = new ArrayList<>();
 
-    public IntentProvider() {
+    public IntentProvider(String packageName) {
+        this.packageName = packageName;
         parseXMLFiles();
     }
 
@@ -38,16 +40,18 @@ public class IntentProvider {
 
         try {
             // extract all exported and enabled components declared in the manifest
-            components = ComponentParser.parseManifest();
+            components = ComponentParser.parseManifest(packageName);
 
             // remove certain components, e.g. our custom tracer or google analytics receivers
             filterComponents(components);
 
             // add information about bundle entries and extracted string constants + collect dynamic receivers
-            IntentInfoParser.parseIntentInfoFile(components, dynamicReceivers);
+            IntentInfoParser.parseIntentInfoFile(packageName, components, dynamicReceivers);
 
             // filter out system event intent filters
-            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(components, systemEventActions);
+            systemEventReceivers = ComponentParser.filterSystemEventIntentFilters(packageName,
+                    components,
+                    systemEventActions);
 
             MATELog.log("Derived the following components: " + components);
             MATELog.log("Derived the following system event receivers: " + systemEventReceivers);
@@ -286,13 +290,11 @@ public class IntentProvider {
      * @return Returns {@code true} if the current activity implements onNewIntent(),
      *          otherwise {@code false} is returned.
      */
-    public boolean isCurrentActivityHandlingOnNewIntent() {
+    public boolean isCurrentActivityHandlingOnNewIntent(String currentActivityName) {
 
-        String name = Registry.getUiAbstractionLayer().getCurrentActivity();
+        String[] tokens = currentActivityName.split("/");
 
-        String[] tokens = name.split("/");
-
-        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN) || tokens.length < 2) {
+        if (currentActivityName.equals(ACTIVITY_UNKNOWN) || tokens.length < 2) {
             return false;
         }
 
@@ -311,17 +313,15 @@ public class IntentProvider {
 
     /**
      * Creates an IntentBasedAction that triggers the currently visible activity's onNewIntent method.
-     * Should only be called when {@link #isCurrentActivityHandlingOnNewIntent()} yields {@code true}.
+     * Should only be called when {@link #isCurrentActivityHandlingOnNewIntent(String)}} yields {@code
+     * true}.
      *
      * @return Returns an IntentBasedAction that triggers the currently visible activity's onNewIntent method.
      */
-    public IntentBasedAction generateIntentBasedActionForCurrentActivity() {
+    public IntentBasedAction generateIntentBasedActionForCurrentActivity(String currentActivityName) {
+        String[] tokens = currentActivityName.split("/");
 
-        String name = Registry.getUiAbstractionLayer().getCurrentActivity();
-
-        String[] tokens = name.split("/");
-
-        if (name.equals(EnvironmentManager.ACTIVITY_UNKNOWN) || tokens.length < 2) {
+        if (currentActivityName.equals(ACTIVITY_UNKNOWN) || tokens.length < 2) {
             throw new IllegalStateException("Couldn't retrieve name of current activity!");
         }
 
@@ -405,7 +405,7 @@ public class IntentProvider {
         if (intentFilter.hasData()) {
             // TODO: consider integration of mimeType -> should be derived automatically otherwise
             //  the mimeType needs to be set in one pass together with the URI, see intent.setType()!
-            Uri uri = intentFilter.getData().generateRandomUri();
+            Uri uri = intentFilter.getData().generateRandomUri(packageName);
             if (uri != null) {
                 intent.setData(uri);
             }
@@ -418,10 +418,10 @@ public class IntentProvider {
          */
         if (dynamicReceiver) {
             // will result in implicit resolution restricted to application package
-            intent.setPackage(Registry.getPackageName());
+            intent.setPackage(packageName);
         } else {
             // make every other intent explicit
-            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
+            intent.setComponent(new ComponentName(packageName, component.getFullyQualifiedName()));
         }
 
         // construct suitable key-value pairs

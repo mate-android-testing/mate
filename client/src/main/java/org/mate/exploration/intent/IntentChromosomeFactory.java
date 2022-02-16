@@ -10,6 +10,7 @@ import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.intent.ComponentDescription;
 import org.mate.commons.interaction.action.intent.ComponentType;
 import org.mate.commons.interaction.action.intent.IntentProvider;
+import org.mate.interaction.DeviceMgr;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
@@ -39,7 +40,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     /**
      * Generates the requested intent-based and system actions.
      */
-    private final IntentProvider intentProvider = new IntentProvider();
+    private IntentProvider intentProvider;
 
     /**
      * Initialises the chromosome factory with the maximal number of actions and the probability
@@ -52,6 +53,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     public IntentChromosomeFactory(int maxNumEvents, float relativeIntentAmount) {
 
         super(maxNumEvents);
+
+        this.intentProvider = new IntentProvider(Registry.getPackageName());
 
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
@@ -176,7 +179,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     @Override
     protected Action selectAction() {
-
+        // TODO (Ivan): Should this be Registry.getRandom() ?
         double random = Math.random();
 
         if (random < relativeIntentAmount) {
@@ -205,9 +208,10 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 double rnd = Math.random();
 
                 // select with p = 1/2 either onNewIntent or OnCreate
-                if (rnd < 0.5 && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
+                String currentActivityName = Registry.getDeviceMgr().getCurrentActivity();
+                if (rnd < 0.5 && intentProvider.isCurrentActivityHandlingOnNewIntent(currentActivityName)) {
                     // we trigger the onNewIntent method of the current activity
-                    return intentProvider.generateIntentBasedActionForCurrentActivity();
+                    return intentProvider.generateIntentBasedActionForCurrentActivity(currentActivityName);
                 } else {
                     // we trigger the onCreate method of any activity
                     return intentProvider.getAction(ComponentType.ACTIVITY);

@@ -2,7 +2,6 @@ package org.mate.commons.interaction.action.intent;
 
 import android.util.Xml;
 
-import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -30,8 +29,9 @@ public final class ComponentParser {
      * @return Returns a list of exported and enabled components.
      * @throws XmlPullParserException Should never happen.
      * @throws IOException            Should never happen.
+     * @param packageName
      */
-    public static List<ComponentDescription> parseManifest() throws XmlPullParserException, IOException {
+    public static List<ComponentDescription> parseManifest(String packageName) throws XmlPullParserException, IOException {
 
         // TODO: parse only components that do not define any required permissions
 
@@ -47,9 +47,9 @@ public final class ComponentParser {
         // move on to the first tag and verify that the package attribute matches the package name of the AUT
         parser.nextTag();
         parser.require(XmlPullParser.START_TAG, null, "manifest");
-        if (!parser.getAttributeValue(null, "package").equals(Registry.getPackageName())) {
+        if (!parser.getAttributeValue(null, "package").equals(packageName)) {
             throw new IllegalArgumentException("Wrong manifest file! Found package was "
-                    + parser.getAttributeValue(null, "package") + ", but should be " + Registry.getPackageName());
+                    + parser.getAttributeValue(null, "package") + ", but should be " + packageName);
         }
 
         List<ComponentDescription> components = new ArrayList<>();
@@ -92,7 +92,8 @@ public final class ComponentParser {
                             // parse the type, e.g. activity or service
                             String componentType = parser.getName();
 
-                            currentComponent = new ComponentDescription(componentName, componentType);
+                            currentComponent = new ComponentDescription(packageName, componentName,
+                                    componentType);
                         }
                         break;
 
@@ -195,11 +196,13 @@ public final class ComponentParser {
     /**
      * Filters out broadcast receivers' intent filters (actually removes them) that describe a system event.
      *
+     *
+     * @param packageName
      * @param components The list of components attached with its intent filters.
      * @param systemEvents A list of system events.
      * @return Returns the removed receivers.
      */
-    public static List<ComponentDescription> filterSystemEventIntentFilters(List<ComponentDescription> components, List<String> systemEvents) {
+    public static List<ComponentDescription> filterSystemEventIntentFilters(String packageName, List<ComponentDescription> components, List<String> systemEvents) {
 
         List<ComponentDescription> systemEventReceivers = new ArrayList<>();
         List<ComponentDescription> receiversToBeRemoved = new ArrayList<>();
@@ -217,7 +220,9 @@ public final class ComponentParser {
                     if (describesSystemEvent(systemEvents, intentFilter)) {
 
                         ComponentDescription systemEventReceiver =
-                                new ComponentDescription(component.getFullyQualifiedName(), ComponentType.BROADCAST_RECEIVER);
+                                new ComponentDescription(packageName,
+                                        component.getFullyQualifiedName(),
+                                        ComponentType.BROADCAST_RECEIVER);
                         systemEventReceiver.addIntentFilter(intentFilter);
                         systemEventReceivers.add(systemEventReceiver);
 

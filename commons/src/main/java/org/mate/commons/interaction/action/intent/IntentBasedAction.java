@@ -1,6 +1,7 @@
 package org.mate.commons.interaction.action.intent;
 
 import android.content.Intent;
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import org.mate.commons.interaction.action.Action;
@@ -112,4 +113,38 @@ public class IntentBasedAction extends Action {
             return "INTENT_WITHOUT_ACTION";
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(ACTION_TYPE_INTENT_BASED);
+
+        dest.writeParcelable(this.intent, flags);
+        dest.writeParcelable(this.component, flags);
+        dest.writeParcelable(this.intentFilter, flags);
+    }
+
+    public IntentBasedAction(Parcel in) {
+        super(in);
+        this.intent = in.readParcelable(Intent.class.getClassLoader());
+        this.component = in.readParcelable(ComponentDescription.class.getClassLoader());
+        this.intentFilter = in.readParcelable(IntentFilterDescription.class.getClassLoader());
+    }
+
+    public static final Creator<IntentBasedAction> CREATOR = new Creator<IntentBasedAction>() {
+        @Override
+        public IntentBasedAction createFromParcel(Parcel source) {
+            return new IntentBasedAction(source);
+        }
+
+        @Override
+        public IntentBasedAction[] newArray(int size) {
+            return new IntentBasedAction[size];
+        }
+    };
 }
