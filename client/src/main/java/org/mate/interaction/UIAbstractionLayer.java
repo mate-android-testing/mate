@@ -252,15 +252,17 @@ public class UIAbstractionLayer {
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
     private boolean handleCrashDialog() {
-
-        if (deviceMgr.checkForCrashDialog()) {
+        // TODO (Ivan): Do we need to handle crash dialog? How do we do it if Representation
+        //  Layer is off?
+        /*if (deviceMgr.checkForCrashDialog()) {
             MATELog.log("Detected crash dialog!");
             // TODO: Should we really press 'HOME' or better click 'OK' on the dialog?
             deviceMgr.pressHome();
             return true;
         } else {
             return false;
-        }
+        }*/
+        return false;
     }
 
     /**

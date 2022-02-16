@@ -424,29 +424,14 @@ public class EnvironmentManager {
      * packageName permission. However, the intermediate reset/restart of the app causes the
      * loss of those runtime permissions.
      *
-     * @param packageName The app that requires the permissions.
      * @return Returns {@code true} if the granting permissions succeeded, otherwise {@code false}.
      */
     @SuppressWarnings("unused")
-    public boolean grantRuntimePermissions(String packageName) {
-
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        UiDevice device = UiDevice.getInstance(instrumentation);
-
-        final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
-        final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
-
-        // this method is far faster than the request via the server
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
-            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
-            return true;
-        }
-
+    public boolean grantRuntimePermissions() {
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
-                .withParameter("packageName", packageName);
+                .withParameter("packageName", Registry.getPackageName());
         Message response = sendMessage(messageBuilder.build());
         return Boolean.parseBoolean(response.getParameter("response"));
     }

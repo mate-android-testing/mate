@@ -12,9 +12,10 @@ interface IRepresentationLayerInterface {
     void setRandomSeed(long seed);
     void registerReplayMode();
 
-    // General device info
+    // General device info & config
     int getDisplayWidth();
     int getDisplayHeight();
+    boolean grantRuntimePermission(String permission);
 
     // Activities info
     String getCurrentPackageName();

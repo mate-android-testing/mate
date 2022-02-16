@@ -1,22 +1,20 @@
 package org.mate.interaction;
 
-import android.app.Instrumentation;
 import android.os.Build;
 import android.os.RemoteException;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.UiDevice;
 
 import org.mate.Registry;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.intent.SystemAction;
+import org.mate.commons.interaction.action.ui.ActionType;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.service.MATEService;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,17 +25,9 @@ import java.util.stream.Collectors;
  */
 public class DeviceMgr {
 
-    /**
-     * The device instance provided by the instrumentation class to perform various actions.
-     */
-    private final UiDevice device;
-
-
     private final String packageName;
 
-
     public DeviceMgr(String packageName) {
-        this.device = null;
         this.packageName = packageName;
 
     }
@@ -150,14 +140,28 @@ public class DeviceMgr {
      * Emulates pressing the 'HOME' button.
      */
     public void pressHome() {
-        device.pressHome();
+        try {
+            MATEService.getRepresentationLayer().executeAction(new UIAction(ActionType.HOME,
+                    ""));
+        } catch (RemoteException e) {
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
+        }
     }
 
     /**
      * Emulates pressing the 'BACK' button.
      */
     public void pressBack() {
-        device.pressBack();
+        try {
+            MATEService.getRepresentationLayer().executeAction(new UIAction(ActionType.BACK,
+                    ""));
+        } catch (RemoteException e) {
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
+        }
     }
 
     public String getCurrentPackageName() {
@@ -209,32 +213,20 @@ public class DeviceMgr {
     @SuppressWarnings("unused")
     public boolean grantRuntimePermissions() {
 
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-
         final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
         final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            instrumentation.getUiAutomation().grantRuntimePermission(packageName, readPermission);
-            instrumentation.getUiAutomation().grantRuntimePermission(packageName, writePermission);
-            return true;
-        }
-
         try {
-            /*
-             * The operation executeShellCommand() is costly, but unfortunately it is not possible
-             * to concatenate two commands yet.
-             */
-            final String grantedReadPermission
-                    = device.executeShellCommand("pm grant " + packageName + " " + readPermission);
-            final String grantedWritePermission
-                    = device.executeShellCommand("pm grant " + packageName + " " + writePermission);
+            MATEService.getRepresentationLayer().grantRuntimePermission(readPermission);
+            MATEService.getRepresentationLayer().grantRuntimePermission(writePermission);
+            return true;
+        } catch (RemoteException e) {
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
 
-            // an empty response indicates success of the operation
-            return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
-        } catch (IOException e) {
-            MATELog.log_error("Couldn't grant runtime permissions!");
-            throw new IllegalStateException(e);
+            // fallback mechanism
+            return Registry.getEnvironmentManager().grantRuntimePermissions();
         }
     }
 
@@ -263,9 +255,10 @@ public class DeviceMgr {
      * @return Returns the stack trace of the last crash.
      */
     public String getLastCrashStackTrace() {
+        // TODO (Ivan): Check if this actually works when the application crashes
 
         try {
-            String response = device.executeShellCommand("run-as " + packageName
+            String response = MATEService.getRepresentationLayer().executeShellCommand("run-as " + packageName
                     + " logcat -b crash -t 2000 AndroidRuntime:E *:S");
 
             List<String> lines = Arrays.asList(response.split("\n"));
@@ -278,7 +271,7 @@ public class DeviceMgr {
                 }
             }
 
-        } catch(IOException e) {
+        } catch(Exception e) {
             MATELog.log_warn("Couldn't retrieve stack trace of last crash!");
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());

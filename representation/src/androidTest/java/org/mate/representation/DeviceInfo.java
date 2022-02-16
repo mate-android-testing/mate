@@ -117,4 +117,24 @@ public class DeviceInfo {
     public void setDisabledAutoRotate(boolean disabledAutoRotate) {
         this.disabledAutoRotate = disabledAutoRotate;
     }
+
+    public boolean grantRuntimePermission(String permission) {
+        String packageName = ExplorationInfo.getInstance().getTargetPackageName();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            instrumentation.getUiAutomation().grantRuntimePermission(packageName, permission);
+            return true;
+        }
+
+        try {
+            final String grantedPermission
+                    = device.executeShellCommand("pm grant " + packageName + " " + permission);
+
+            // an empty response indicates success of the operation
+            return grantedPermission.isEmpty();
+        } catch (IOException e) {
+            MATELog.log_error("Couldn't grant runtime permissions!");
+            return false;
+        }
+    }
 }

@@ -66,6 +66,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public boolean grantRuntimePermission(String permission) throws RemoteException {
+        return DeviceInfo.getInstance().grantRuntimePermission(permission);
+    }
+
+    @Override
     public String getCurrentPackageName() throws RemoteException {
         return ExplorationInfo.getInstance().getCurrentPackageName();
     }
