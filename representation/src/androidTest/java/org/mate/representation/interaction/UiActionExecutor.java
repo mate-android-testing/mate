@@ -138,6 +138,8 @@ public class UiActionExecutor extends ActionExecutor {
             disableAutoRotation();
         }
 
+        boolean success = false;
+
         try {
             String output = device.executeShellCommand(DeviceInfo.getInstance().isInPortraitMode() ?
                     LANDSCAPE_MODE_CMD :
@@ -147,6 +149,8 @@ public class UiActionExecutor extends ActionExecutor {
             }
 
             DeviceInfo.getInstance().toggleInPortraitMode();
+
+            success = true;
         } catch (IOException e) {
             MATELog.log_error("Couldn't change rotation!");
             throw new IllegalStateException(e);
@@ -158,6 +162,8 @@ public class UiActionExecutor extends ActionExecutor {
              */
             Utils.sleep(100);
         }
+
+        return success;
     }
 
     /**
