@@ -1,16 +1,11 @@
 package org.mate.interaction;
 
-import android.app.Instrumentation;
-import android.os.Build;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.UiDevice;
-
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.graph.GraphType;
-import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;

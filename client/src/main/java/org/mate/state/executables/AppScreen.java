@@ -3,20 +3,16 @@ package org.mate.state.executables;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
-import android.support.test.uiautomator.UiDevice;
 
-import org.mate.commons.IRepresentationLayerInterface;
+import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
-import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.service.MATEService;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**

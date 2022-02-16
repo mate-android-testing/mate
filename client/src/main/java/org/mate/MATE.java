@@ -24,6 +24,7 @@ public class MATE {
 
     // TODO: make singleton
     public MATE(String packageName, Context context) {
+        Registry.registerContext(context);
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();

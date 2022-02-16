@@ -1,11 +1,14 @@
 package org.mate;
 
+import android.content.Context;
+
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.commons.utils.Randomness;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Random;
 
 public class Registry {
@@ -38,6 +41,11 @@ public class Registry {
      * Whether we are in replay mode. Default: Off
      */
     private static boolean replayMode;
+
+    /**
+     * Context provided by the MATE Service.
+     */
+    private static WeakReference<Context> context;
 
     public static void registerReplayMode() {
         replayMode = true;
@@ -149,5 +157,13 @@ public class Registry {
 
     public static void unregisterDeviceMgr() {
         deviceMgr = null;
+    }
+
+    public static void registerContext(Context context) {
+        Registry.context = new WeakReference<>(context);
+    }
+
+    public static Context getContext() {
+        return Registry.context.get();
     }
 }

@@ -1,17 +1,14 @@
 package org.mate.accessibility.check.bbc.widgetbased;
 
-import android.content.Context;
 import android.graphics.Rect;
 
-
-import org.mate.accessibility.check.bbc.AccessibilitySettings;
+import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
-import org.mate.state.IScreenState;
+import org.mate.accessibility.check.bbc.AccessibilitySettings;
+import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.commons.interaction.action.ui.Widget;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import org.mate.state.IScreenState;
 
 /**
  * Created by marceloeler on 26/06/17.
@@ -25,8 +22,7 @@ public class TargetSizeAccessibilityCheck implements IWidgetAccessibilityCheck {
         if (!widget.isActionable())
             return null;
 
-        Context generalContext = getInstrumentation().getContext();
-        float density = generalContext.getResources().getDisplayMetrics().density;
+        float density = Registry.getContext().getResources().getDisplayMetrics().density;
         Rect bounds = new Rect();
         float height = Math.abs(widget.getY2() - widget.getY1());
         float width = Math.abs(widget.getX2() - widget.getX1());

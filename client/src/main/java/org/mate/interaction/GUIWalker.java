@@ -1,21 +1,17 @@
 package org.mate.interaction;
 
-import android.app.Instrumentation;
-
-import org.mate.commons.utils.MATELog;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.exceptions.InvalidScreenStateException;
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Created by marceloeler on 21/06/17.
@@ -30,7 +26,6 @@ public class GUIWalker {
     public GUIWalker(IGUIModel guiModel, String packageName, DeviceMgr deviceMgr){
         this.guiModelMgr = guiModel;
         this.packageName = packageName;
-        Instrumentation instrumentation =  getInstrumentation();
         this.deviceMgr = deviceMgr;
     }
 

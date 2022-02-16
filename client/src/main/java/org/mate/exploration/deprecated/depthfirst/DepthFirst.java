@@ -1,16 +1,16 @@
 package org.mate.exploration.deprecated.depthfirst;
 
-import android.support.test.uiautomator.UiDevice;
+import static org.mate.commons.utils.MATELog.log;
 
 import org.mate.Registry;
-import org.mate.commons.utils.MATELog;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.exceptions.InvalidScreenStateException;
-import org.mate.interaction.DeviceMgr;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
+import org.mate.interaction.DeviceMgr;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -19,9 +19,6 @@ import org.mate.state.ScreenStateType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.mate.commons.utils.MATELog.log;
 
 /**
  * Created by geyan on 10/06/2017.
@@ -151,7 +148,7 @@ public class DepthFirst {
             }
 
             t2 = new Date().getTime();
-            deviceClosed = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName()==null;
+            deviceClosed = Registry.getDeviceMgr().getCurrentPackageName() == null;
             if (deviceClosed ||!stateFound || (t2-t1> Registry.getTimeout())) {
                 stopExecution = true;
                 MATELog.log("STOP execution");

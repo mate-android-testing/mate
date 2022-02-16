@@ -1,8 +1,6 @@
 package org.mate.utils.testcase.serialization;
 
 
-import android.support.test.InstrumentationRegistry;
-
 import com.thoughtworks.xstream.XStream;
 
 import org.mate.Registry;
@@ -124,7 +122,7 @@ public final class TestCaseSerializer {
             String testCaseName = "TestCase" + replayCounter + ".xml";
 
             // retrieves the file from /data/data/org.mate/files/
-            FileInputStream testCaseFile = InstrumentationRegistry.getTargetContext().openFileInput(testCaseName);
+            FileInputStream testCaseFile = Registry.getContext().openFileInput(testCaseName);
 
             XStream xstream = new XStream();
             xstream.ignoreUnknownElements();

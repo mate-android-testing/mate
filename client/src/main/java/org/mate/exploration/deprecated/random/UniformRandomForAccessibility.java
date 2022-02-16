@@ -1,7 +1,5 @@
 package org.mate.exploration.deprecated.random;
 
-import android.support.test.uiautomator.UiDevice;
-
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilitySummaryResults;
@@ -9,11 +7,11 @@ import org.mate.accessibility.AccessibilityViolation;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
 import org.mate.accessibility.check.bbc.widgetbased.MultipleContentDescCheck;
 import org.mate.accessibility.check.bbc.widgetbased.TextContrastRatioAccessibilityCheck;
-import org.mate.commons.utils.MATELog;
 import org.mate.commons.exceptions.AUTCrashException;
-import org.mate.interaction.DeviceMgr;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
+import org.mate.interaction.DeviceMgr;
 import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -22,8 +20,6 @@ import org.mate.state.ScreenStateType;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 @Deprecated
 public class UniformRandomForAccessibility {
@@ -261,7 +257,7 @@ public class UniformRandomForAccessibility {
                     }
                 }
 
-                currentPackage = UiDevice.getInstance(getInstrumentation()).getCurrentPackageName();
+                currentPackage = Registry.getDeviceMgr().getCurrentPackageName();
                 MATELog.log("new package name: " + currentPackage);
                 long timeB = new Date().getTime();
                 if (timeB - timeA > 30000)
