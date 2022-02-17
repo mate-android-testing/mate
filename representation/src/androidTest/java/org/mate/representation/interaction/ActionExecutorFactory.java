@@ -9,7 +9,7 @@ import org.mate.commons.interaction.action.ui.WidgetAction;
 public class ActionExecutorFactory {
     public static ActionExecutor getExecutor(Action action) {
         if (action instanceof WidgetAction) {
-            return new UiActionExecutor();
+            return new WidgetActionExecutor();
         }/* else if (action instanceof PrimitiveAction) {
             return new PrimitiveActionExecutor();
         }*/ else if (action instanceof IntentBasedAction) {
