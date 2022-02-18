@@ -1,5 +1,6 @@
 package org.mate.commons.interaction.action.ui;
 
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -18,7 +19,7 @@ public class PrimitiveAction extends UIAction {
     /**
      * The x and y coordinates at which the action should be applied.
      */
-    private final int x, y;
+    private int x, y;
 
     /**
      * The text that was inserted to a possible input field at position x and y.
@@ -138,4 +139,42 @@ public class PrimitiveAction extends UIAction {
     public String toShortString() {
         return actionType + " at (" + x + "," + y + ")";
     }
+
+    @Override
+    public int getIntForActionSubClass() {
+        return ACTION_SUBCLASS_PRIMITIVE;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        dest.writeInt(this.x);
+        dest.writeInt(this.y);
+        dest.writeString(this.text);
+    }
+
+    protected PrimitiveAction(Parcel in) {
+        super(in);
+        this.x = in.readInt();
+        this.y = in.readInt();
+        this.text = in.readString();
+    }
+
+    public static final Creator<PrimitiveAction> CREATOR = new Creator<PrimitiveAction>() {
+        @Override
+        public PrimitiveAction createFromParcel(Parcel source) {
+            return new PrimitiveAction(source);
+        }
+
+        @Override
+        public PrimitiveAction[] newArray(int size) {
+            return new PrimitiveAction[size];
+        }
+    };
 }

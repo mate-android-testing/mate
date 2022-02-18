@@ -1,5 +1,6 @@
 package org.mate.commons.interaction.action.ui;
 
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import org.mate.commons.utils.Randomness;
@@ -126,4 +127,38 @@ public class MotifAction extends UIAction {
     public String toShortString() {
         return String.valueOf(actionType);
     }
+
+    @Override
+    public int getIntForActionSubClass() {
+        return ACTION_SUBCLASS_MOTIF;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        
+        dest.writeTypedList(this.uiActions);
+    }
+
+    protected MotifAction(Parcel in) {
+        super(in);
+        this.uiActions = in.createTypedArrayList(UIAction.CREATOR);
+    }
+
+    public static final Creator<MotifAction> CREATOR = new Creator<MotifAction>() {
+        @Override
+        public MotifAction createFromParcel(Parcel source) {
+            return new MotifAction(source);
+        }
+
+        @Override
+        public MotifAction[] newArray(int size) {
+            return new MotifAction[size];
+        }
+    };
 }

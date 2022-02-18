@@ -119,12 +119,12 @@ public class UIAction extends Action {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-
         dest.writeInt(this.actionType == null ? -1 : this.actionType.ordinal());
         dest.writeString(this.activityName);
     }
 
     public UIAction(Parcel in) {
+        super(in);
         int tmpActionType = in.readInt();
         this.actionType = tmpActionType == -1 ? null : ActionType.values()[tmpActionType];
         this.activityName = in.readString();
