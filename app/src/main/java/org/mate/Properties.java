@@ -362,14 +362,14 @@ public class Properties {
                             property.getValue());
                     store.put(key, parsedObj);
                 } catch (Exception e) {
-                    MATE.log(
+                    MATE.log_acc(
                             "Failure while trying to parse \""
                                     + property.getValue()
                                     + "\" as instance of class "
                                     + propertiesInfo.get(key).getCanonicalName());
                 }
             } else {
-                MATE.log("Unknown property with key: " + property.getKey());
+                MATE.log_acc("Unknown property with key: " + property.getKey());
             }
         }
     }
