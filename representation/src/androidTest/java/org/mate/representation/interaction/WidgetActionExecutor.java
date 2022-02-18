@@ -7,11 +7,7 @@ import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiObject2;
 
 import org.mate.commons.exceptions.AUTCrashException;
-import org.mate.commons.input_generation.DataGenerator;
 import org.mate.commons.input_generation.Mutation;
-import org.mate.commons.input_generation.StaticStrings;
-import org.mate.commons.input_generation.StaticStringsParser;
-import org.mate.commons.input_generation.format_types.InputFieldType;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.Widget;
@@ -19,44 +15,17 @@ import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 import org.mate.representation.ExplorationInfo;
+import org.mate.representation.util.TextDataGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class WidgetActionExecutor extends ActionExecutor {
-
-    /**
-     * The probability for considering the hint for the input generation.
-     */
-    private static final double PROB_HINT = 0.5;
-
-    /**
-     * The probability for mutating a given hint.
-     */
-    private static final double PROB_HINT_MUTATION = 0.5;
-
-    /**
-     * The probability for using a static string or the input generation.
-     */
-    private static final double PROB_STATIC_STRING = 0.5;
-
-    /**
-     * The probability for mutating a static string.
-     */
-    private static final double PROB_STATIC_STRING_MUTATION = 0.25;
-
-    /**
-     * Contains the static strings extracted from the byte code.
-     */
-    private final StaticStrings staticStrings;
 
     public WidgetActionExecutor() {
         super();
 
         Mutation.setRandom(ExplorationInfo.getInstance().getRandom());
-        this.staticStrings = StaticStringsParser.parseStaticStrings();
     }
 
     /**
@@ -115,12 +84,13 @@ public class WidgetActionExecutor extends ActionExecutor {
 
         return success;
     }
+
     /**
      * Executes a click on the given widget.
      *
      * @param widget The widget on which a click should be performed.
      */
-    private boolean handleClick(Widget widget) {
+    public boolean handleClick(Widget widget) {
         return device.click(widget.getX(), widget.getY());
     }
 
@@ -203,12 +173,13 @@ public class WidgetActionExecutor extends ActionExecutor {
         }
         return device.swipe(X, Y, X, Y, 120);
     }
+
     /**
      * Handles the insertion of a text in the given editable widget.
      *
      * @param widget The editable widget.
      */
-    private boolean handleEdit(Widget widget) {
+    public boolean handleEdit(Widget widget) {
 
         /*
          * If we run in replay mode, we should insert the text that we recorded, otherwise we may
@@ -216,7 +187,9 @@ public class WidgetActionExecutor extends ActionExecutor {
          * end on a different activity and all subsequent widget actions are not applicable anymore.
          */
         String textData = ExplorationInfo.getInstance().isReplayMode() ? widget.getText() :
-                Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
+                Objects.toString(TextDataGenerator.getInstance().generateTextData(
+                        widget,
+                        widget.getMaxTextLength()), "");
 
         MATELog.log_debug("Input text: " + textData);
         MATELog.log_debug("Previous text: " + widget.getText());
@@ -259,7 +232,7 @@ public class WidgetActionExecutor extends ActionExecutor {
      * @return Returns the corresponding ui object or {@code null} if no
      *         such ui object could be found.
      */
-    private UiObject2 findObject(Widget widget) {
+    public UiObject2 findObject(Widget widget) {
 
         // retrieve all ui objects that match the given widget resource id
         List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
@@ -298,122 +271,5 @@ public class WidgetActionExecutor extends ActionExecutor {
             }
         }
         return null;
-    }
-
-    /**
-     * Generates a text input for the given editable widget.
-     *
-     * @param widget The editable widget.
-     * @param maxLength The maximal input length.
-     * @return Returns a text input for the editable widget.
-     */
-    private String generateTextData(final Widget widget, final int maxLength) {
-
-        final String activityName = convertClassName(widget.getActivity());
-
-        final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
-        final Random random = ExplorationInfo.getInstance().getRandom();
-
-        /*
-         * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
-         * with probability PROB_HINT_MUTATION we mutate the given hint.
-         */
-        if (widget.isHintPresent()) {
-            if (inputFieldType.isValid(widget.getHint()) && random.nextDouble() < PROB_HINT) {
-                if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
-                    return Mutation.mutateInput(inputFieldType, widget.getHint());
-                } else {
-                    return widget.getHint();
-                }
-            }
-        }
-        if (staticStrings.isInitialised()) {
-            /*
-             * If the static strings from the bytecode were supplied and with probability
-             * PROB_STATIC_STRING we try to find a static string matching the input field type.
-             */
-            if (random.nextDouble() < PROB_STATIC_STRING) {
-
-                // consider both the string constants from the current activity and visible fragments
-                List<String> uiComponents = new ArrayList<>();
-                uiComponents.add(activityName);
-                uiComponents.addAll(ExplorationInfo.getInstance().getCurrentFragments());
-
-                String randomStaticString;
-
-                if (inputFieldType != InputFieldType.NOTHING) {
-
-                    // get a random string matching the input field type from one of the ui classes
-                    randomStaticString = staticStrings.getRandomStringFor(inputFieldType, uiComponents);
-
-                    /*
-                     * If there was no match, we consider a random string from any class matching
-                     * the given input field type.
-                     */
-                    if (randomStaticString == null) {
-                        randomStaticString = staticStrings.getRandomStringFor(inputFieldType);
-                    }
-
-                    // mutate the string with probability PROB_STATIC_STRING_MUTATION
-                    if (randomStaticString != null) {
-                        if (random.nextDouble() < PROB_STATIC_STRING_MUTATION) {
-                            randomStaticString = Mutation.mutateInput(inputFieldType, randomStaticString);
-                        }
-                        return randomStaticString;
-                    }
-                }
-
-                /*
-                 * If the input field type couldn't be determined or no static string could be
-                 * derived so far, we try to use a random string from either the current activity
-                 * or any of the visible fragments.
-                 */
-                randomStaticString = staticStrings.getRandomStringFor(uiComponents);
-                if (randomStaticString != null) {
-                    return randomStaticString;
-                }
-            }
-        }
-
-        // fallback mechanism
-        return generateRandomInput(inputFieldType, maxLength);
-    }
-
-    /**
-     * Converts a fully-qualified class name to solely it's class name, i.e. the possibly redundant
-     * package name is stripped off.
-     *
-     * @param className The fully-qualified class name consisting of <package-name>/<class-name>.
-     * @return Returns the simple class name.
-     */
-    private String convertClassName(String className) {
-
-        String[] tokens = className.split("/");
-        String packageName = tokens[0];
-        String componentName = tokens[1];
-
-        // if the component resides in the application package, a dot is used instead of the package name
-        if (componentName.startsWith(".")) {
-            componentName = packageName + componentName;
-        }
-
-        return componentName;
-    }
-
-    /**
-     * Generates a random input as a fallback mechanism. A random string is generated and shortened
-     * to the maximum length if it is too long.
-     *
-     * @param inputFieldType The field for which the string is to be generated.
-     * @param maxLength The maximum length of the result string.
-     * @return A random string matching the given {@link InputFieldType} with at most maxLength
-     *         length.
-     */
-    private String generateRandomInput(InputFieldType inputFieldType, int maxLength) {
-        String randomData = DataGenerator.generateRandomData(inputFieldType);
-        if (maxLength > 0 && randomData.length() > maxLength) {
-            randomData = randomData.substring(0, maxLength);
-        }
-        return randomData;
     }
 }

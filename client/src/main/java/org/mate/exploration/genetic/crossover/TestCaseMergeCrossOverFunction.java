@@ -10,7 +10,7 @@ import org.mate.commons.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
-import org.mate.utils.Optional;
+import org.mate.commons.utils.Optional;
 import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 

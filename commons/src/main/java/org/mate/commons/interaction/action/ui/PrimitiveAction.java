@@ -1,11 +1,8 @@
-package org.mate.interaction.action.ui;
+package org.mate.commons.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.mate.Registry;
-import org.mate.commons.interaction.action.ui.ActionType;
-import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.utils.Randomness;
 
 import java.util.Arrays;
@@ -84,10 +81,9 @@ public class PrimitiveAction extends UIAction {
      *
      * @return Returns a randomly generated primitive action.
      */
-    public static PrimitiveAction randomAction() {
-        int x = Randomness.getRnd().nextInt(Registry.getUiAbstractionLayer().getScreenWidth());
-        int y = Randomness.getRnd().nextInt(Registry.getUiAbstractionLayer().getScreenHeight());
-        String activity = Registry.getUiAbstractionLayer().getCurrentActivity();
+    public static PrimitiveAction randomAction(String activity, int screenWidth, int screenHeight) {
+        int x = Randomness.getRnd().nextInt(screenWidth);
+        int y = Randomness.getRnd().nextInt(screenHeight);
         return new PrimitiveAction(x, y,
                 Randomness.randomElement(Arrays.asList(ActionType.primitiveActionTypes)), activity);
     }

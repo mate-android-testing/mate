@@ -1,13 +1,8 @@
 package org.mate.representation;
 
-import android.app.Instrumentation;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.uiautomator.UiDevice;
 
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
@@ -46,6 +41,11 @@ public class ExplorationInfo {
      */
     private boolean replayMode = false;
 
+    /**
+     * Whether we should use widget based actions instead of primitive actions.
+     */
+    private boolean widgetBasedActions = false;
+
     private ExplorationInfo() {
     }
 
@@ -74,12 +74,20 @@ public class ExplorationInfo {
         return rnd;
     }
 
-    public void registerReplayMode() {
+    public void setReplayMode() {
         replayMode = true;
     }
 
     public boolean isReplayMode() {
         return replayMode;
+    }
+
+    public void setWidgetBasedActions() {
+        widgetBasedActions = true;
+    }
+
+    public boolean useWidgetBasedActions() {
+        return widgetBasedActions;
     }
 
     /**

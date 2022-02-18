@@ -1,7 +1,8 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.Registry;
 import org.mate.commons.interaction.action.Action;
-import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.commons.interaction.action.ui.PrimitiveAction;
 
 /**
  * Provides a chromosome factory that generates {@link org.mate.model.TestCase}s consisting of
@@ -37,6 +38,10 @@ public class PrimitiveAndroidRandomChromosomeFactory extends AndroidRandomChromo
      */
     @Override
     protected Action selectAction() {
-        return PrimitiveAction.randomAction();
+        return PrimitiveAction.randomAction(
+                Registry.getUiAbstractionLayer().getCurrentActivity(),
+                Registry.getUiAbstractionLayer().getScreenWidth(),
+                Registry.getUiAbstractionLayer().getScreenHeight()
+        );
     }
 }

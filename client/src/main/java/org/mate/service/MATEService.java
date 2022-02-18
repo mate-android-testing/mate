@@ -95,8 +95,13 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             representationLayer.setRandomSeed(Properties.RANDOM_SEED());
 
             if (Registry.isReplayMode()) {
-                representationLayer.registerReplayMode();
+                representationLayer.setReplayMode();
             }
+
+            if (Properties.WIDGET_BASED_ACTIONS()) {
+                representationLayer.setWidgetBasedActions();
+            }
+
         } catch (RemoteException e) {
             throw new IllegalStateException("Couldn't configure Representation Layer");
         }

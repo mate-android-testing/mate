@@ -6,8 +6,8 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.commons.interaction.action.Action;
-import org.mate.interaction.action.ui.MotifAction;
-import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.commons.interaction.action.ui.MotifAction;
+import org.mate.commons.interaction.action.ui.PrimitiveAction;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.commons.utils.Randomness;
@@ -131,9 +131,12 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
     private Action selectAction() {
         final double random = Randomness.getRnd().nextDouble();
         if (random < 0.5) {
-            return PrimitiveAction.randomAction();
+            return PrimitiveAction.randomAction(
+                    Registry.getUiAbstractionLayer().getCurrentActivity(),
+                    Registry.getUiAbstractionLayer().getScreenWidth(),
+                    Registry.getUiAbstractionLayer().getScreenHeight());
         } else {
-            return MotifAction.randomAction();
+            return MotifAction.randomAction(Registry.getUiAbstractionLayer().getCurrentActivity());
         }
     }
 }

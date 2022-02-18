@@ -1,6 +1,4 @@
-package org.mate.utils;
-
-import android.app.VoiceInteractor;
+package org.mate.commons.utils;
 
 public class Optional<T> {
     private final T value;

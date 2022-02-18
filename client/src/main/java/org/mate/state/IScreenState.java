@@ -1,6 +1,6 @@
 package org.mate.state;
 
-import org.mate.interaction.action.ui.MotifAction;
+import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;

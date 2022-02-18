@@ -109,8 +109,13 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
-    public void registerReplayMode() throws RemoteException {
-        ExplorationInfo.getInstance().registerReplayMode();
+    public void setReplayMode() throws RemoteException {
+        ExplorationInfo.getInstance().setReplayMode();
+    }
+
+    @Override
+    public void setWidgetBasedActions() throws RemoteException {
+        ExplorationInfo.getInstance().setWidgetBasedActions();
     }
 
     /*

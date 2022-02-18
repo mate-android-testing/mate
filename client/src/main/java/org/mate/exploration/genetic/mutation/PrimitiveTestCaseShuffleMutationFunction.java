@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
+import org.mate.commons.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -14,7 +15,7 @@ import java.util.List;
 
 /**
  * Provides a shuffle mutation function for {@link TestCase}s that is only applicable in combination
- * with {@link org.mate.interaction.action.ui.PrimitiveAction}.
+ * with {@link PrimitiveAction}.
  */
 public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFunction<TestCase> {
 

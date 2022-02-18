@@ -2,13 +2,12 @@ package org.mate.service.execution;
 
 import android.content.Context;
 
-import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.MATELog;
-import org.mate.interaction.action.ui.MotifAction;
+import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;

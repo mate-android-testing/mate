@@ -10,7 +10,8 @@ interface IRepresentationLayerInterface {
     void exit();
     void setTargetPackageName(String packageName);
     void setRandomSeed(long seed);
-    void registerReplayMode();
+    void setReplayMode();
+    void setWidgetBasedActions();
 
     // General device info & config
     int getDisplayWidth();

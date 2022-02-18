@@ -7,10 +7,10 @@ import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.commons.interaction.action.Action;
-import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.commons.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
-import org.mate.utils.Optional;
+import org.mate.commons.utils.Optional;
 import org.mate.commons.utils.Randomness;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
@@ -335,7 +335,12 @@ public class TestCase {
                 if (Properties.WIDGET_BASED_ACTIONS()) {
                     action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
                 } else {
-                    action = PrimitiveAction.randomAction();
+                    action =
+                            PrimitiveAction.randomAction(
+                                    Registry.getUiAbstractionLayer().getCurrentActivity(),
+                                    Registry.getUiAbstractionLayer().getScreenWidth(),
+                                    Registry.getUiAbstractionLayer().getScreenHeight()
+                            );
                 }
                 if (!resultingTc.updateTestCase(action, count)) {
                     return resultingTc;
