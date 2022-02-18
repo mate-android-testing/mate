@@ -212,6 +212,11 @@ public class WidgetAction extends UIAction {
     }
 
     @Override
+    public int getIntForActionSubClass() {
+        return ACTION_SUBCLASS_WIDGET;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -219,7 +224,6 @@ public class WidgetAction extends UIAction {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(ACTION_TYPE_WIDGET);
 
         dest.writeParcelable(this.widget, flags);
         dest.writeTypedList(this.adjActions);

@@ -115,6 +115,11 @@ public class IntentBasedAction extends Action {
     }
 
     @Override
+    public int getIntForActionSubClass() {
+        return ACTION_SUBCLASS_INTENT_BASED;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -122,7 +127,6 @@ public class IntentBasedAction extends Action {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(ACTION_TYPE_INTENT_BASED);
 
         dest.writeParcelable(this.intent, flags);
         dest.writeParcelable(this.component, flags);
