@@ -60,6 +60,11 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      */
     private static int representationLayerLaunches = 0;
 
+    /**
+     * A boolean flag so that the MATE Service knows whether the MATE Client is running or not.
+     */
+    private volatile static boolean mateClientRunning = false;
+
     public static void ensureRepresentationLayerIsConnected() {
         log(String.format("ensureRepresentationLayerIsConnected called on thread %s",
                 Thread.currentThread().getName()));
@@ -172,6 +177,11 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     public int onStartCommand(Intent intent, int flags, int startId) {
         log("onStartCommand called");
 
+        if (mateClientRunning) {
+            log("MATE Service started, but MATE Client is already running. We'll do nothing");
+            return START_NOT_STICKY;
+        }
+
         if (intent == null) {
             log("MATE Service starting but intent was not provided");
             stopSelf();
@@ -218,6 +228,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         // onBind events are processed on the main thread. Therefore, by blocking the main thread
         // we are preventing the onBind event from happening.
         // Thus, we run MATE in a new thread.
+        mateClientRunning = true;
         new Thread(() -> {
             try {
                 MATERunner.run(packageName, algorithm, getApplicationContext());
@@ -230,6 +241,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 log(sw.toString());
 
                 stopSelf();
+            } finally {
+                mateClientRunning = false;
             }
         }).start();
 
