@@ -55,6 +55,11 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      */
     private static CountDownLatch representationLayerConnectionCountDown;
 
+    /**
+     * The number of times we have launched the representation layer.
+     */
+    private static int representationLayerLaunches = 0;
+
     public static void ensureRepresentationLayerIsConnected() {
         log(String.format("ensureRepresentationLayerIsConnected called on thread %s",
                 Thread.currentThread().getName()));
@@ -66,6 +71,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         representationLayerConnectionCountDown = new CountDownLatch(1);
 
+        representationLayerLaunches++;
+        
         boolean success = Registry.getEnvironmentManager().launchRepresentationLayer();
         if (!success) {
             throw new IllegalStateException("MATE Server was unable to launch representation layer");
@@ -89,10 +96,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         try {
             representationLayer.setTargetPackageName(Registry.getPackageName());
 
-            // TODO (Ivan): This random seed should take into account how many actions we have
-            //  executed so far. Otherwise, each time we reset exploration we start executing the
-            //  same actions.
-            representationLayer.setRandomSeed(Properties.RANDOM_SEED());
+            // Use the random seed, but also add an integer representing the number of times we
+            // have launched the representation layer. This is to avoid using the same seed each
+            // time we reset exploration, causing it to execute always the same actions.
+            representationLayer.setRandomSeed(Properties.RANDOM_SEED() + representationLayerLaunches);
 
             if (Registry.isReplayMode()) {
                 representationLayer.setReplayMode();
