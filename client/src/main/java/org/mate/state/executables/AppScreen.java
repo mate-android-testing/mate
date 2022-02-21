@@ -4,6 +4,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 
+import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
@@ -60,7 +61,7 @@ public class AppScreen {
             MATELog.log_debug("AppScreen: " + activityName);
             this.widgets = MATEService.getRepresentationLayer().getCurrentScreenWidgets();
             MATELog.log_debug("Number of widgets: " + widgets.size());
-        } catch (RemoteException e) {
+        } catch (RemoteException | AUTCrashException e) {
             e.printStackTrace();
             this.widgets = new ArrayList<>();
         }

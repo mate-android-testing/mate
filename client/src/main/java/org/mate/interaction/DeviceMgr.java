@@ -91,8 +91,9 @@ public class DeviceMgr {
     public int getScreenWidth() {
         try {
             return MATEService.getRepresentationLayer().getDisplayWidth();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (RemoteException | AUTCrashException e) {
+            MATELog.log_error("Unable to retrieve display width from representation " +
+                    "layer");
             return -1;
         }
     }
@@ -105,8 +106,9 @@ public class DeviceMgr {
     public int getScreenHeight() {
         try {
             return MATEService.getRepresentationLayer().getDisplayHeight();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (RemoteException | AUTCrashException e) {
+            MATELog.log_error("Unable to retrieve display height from representation " +
+                    "layer");
             return -1;
         }
     }
@@ -143,10 +145,12 @@ public class DeviceMgr {
         try {
             MATEService.getRepresentationLayer().executeAction(new UIAction(ActionType.HOME,
                     ""));
-        } catch (RemoteException e) {
+        } catch (RemoteException | AUTCrashException e) {
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());
             }
+
+            // do nothing
         }
     }
 
@@ -157,20 +161,23 @@ public class DeviceMgr {
         try {
             MATEService.getRepresentationLayer().executeAction(new UIAction(ActionType.BACK,
                     ""));
-        } catch (RemoteException e) {
+        } catch (RemoteException | AUTCrashException e) {
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());
             }
+
+            // do nothing
         }
     }
 
     public String getCurrentPackageName() {
         try {
             return MATEService.getRepresentationLayer().getCurrentPackageName();
-        } catch (RemoteException e) {
+        } catch (RemoteException | AUTCrashException e) {
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());
             }
+
             return null;
         }
     }
@@ -186,7 +193,7 @@ public class DeviceMgr {
             if (currentActivityName != null) {
                 return currentActivityName;
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException | AUTCrashException e) {
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());
             }
@@ -211,7 +218,7 @@ public class DeviceMgr {
      * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
      */
     @SuppressWarnings("unused")
-    public boolean grantRuntimePermissions() {
+    public boolean grantRuntimePermissions() throws AUTCrashException {
 
         final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
         final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
@@ -238,7 +245,7 @@ public class DeviceMgr {
     public List<String> getActivityNames() {
         try {
             return MATEService.getRepresentationLayer().getTargetPackageActivityNames();
-        } catch (RemoteException e) {
+        } catch (RemoteException | AUTCrashException e) {
             MATELog.log_warn("Couldn't retrieve activity names!");
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());

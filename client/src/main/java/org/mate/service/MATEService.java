@@ -22,6 +22,7 @@ import org.mate.R;
 import org.mate.Registry;
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
+import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.utils.MATELog;
 
 import java.io.PrintStream;
@@ -144,7 +145,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         }
     }
 
-    public static IRepresentationLayerInterface getRepresentationLayer() {
+    public static IRepresentationLayerInterface getRepresentationLayer() throws AUTCrashException {
+        if (representationLayer == null) {
+            throw new AUTCrashException("Trying to use a disconnected representation layer");
+        }
         return representationLayer;
     }
 

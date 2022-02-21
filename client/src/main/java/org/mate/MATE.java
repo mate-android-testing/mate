@@ -3,6 +3,7 @@ package org.mate;
 import android.content.Context;
 import android.os.StrictMode;
 
+import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;

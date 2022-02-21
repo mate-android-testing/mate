@@ -101,12 +101,14 @@ public class UIAbstractionLayer {
      * @param action The action to be executed.
      * @return Returns the outcome of the execution, e.g. success.
      */
-    private ActionResult executeActionUnsafe(Action action) {
+    private ActionResult executeActionUnsafe(Action action) throws AUTCrashException {
         IScreenState state;
         try {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
+            // TODO (Ivan): We won't be able to press home or do anything if AUT has crashed.
+            //  Maybe we should call DeviceMgr.restartApp?
             MATELog.log_acc("CRASH MESSAGE " + e.getMessage());
             deviceMgr.pressHome();
 
@@ -234,7 +236,7 @@ public class UIAbstractionLayer {
      *
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
-    private boolean handleGoogleSignInDialog(IScreenState screenState) {
+    private boolean handleGoogleSignInDialog(IScreenState screenState) throws AUTCrashException {
 
         if (screenState.getPackageName().equals("com.google.android.gms")) {
             MATELog.log("Detected Google SignIn Dialog!");
@@ -357,7 +359,7 @@ public class UIAbstractionLayer {
      * @param state The recording of the current screen.
      * @return Returns the amount of time it has waited for completion.
      */
-    private long waitForProgressBar(IScreenState state) {
+    private long waitForProgressBar(IScreenState state) throws AUTCrashException {
 
         long ini = new Date().getTime();
         long end = new Date().getTime();
