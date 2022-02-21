@@ -72,7 +72,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         representationLayerConnectionCountDown = new CountDownLatch(1);
 
         representationLayerLaunches++;
-        
+
         boolean success = Registry.getEnvironmentManager().launchRepresentationLayer();
         if (!success) {
             throw new IllegalStateException("MATE Server was unable to launch representation layer");
@@ -240,6 +240,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     private boolean launchPackageName(String packageName) {
         Context context = getApplicationContext();
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+
+        if (intent == null) {
+            return false;
+        }
 
         // Clear out any previous instances
         try {
