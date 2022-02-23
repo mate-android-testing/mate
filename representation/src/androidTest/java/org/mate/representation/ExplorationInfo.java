@@ -7,6 +7,7 @@ import android.os.Build;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;
+import org.mate.representation.test.BuildConfig;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class ExplorationInfo {
     /**
      * The package name of the AUT.
      */
-    private String targetPackageName;
+    private final String targetPackageName = BuildConfig.TARGET_PACKAGE_NAME;
 
     /**
      * The Random object to use during exploration
@@ -55,10 +56,6 @@ public class ExplorationInfo {
         }
 
         return instance;
-    }
-
-    public void setTargetPackageName(String packageName) {
-        targetPackageName = packageName;
     }
 
     public String getTargetPackageName() {
