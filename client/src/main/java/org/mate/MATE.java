@@ -86,6 +86,18 @@ public class MATE {
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
+        // check whether the representation layer was built for the same package name as the one
+        // we are being asked to test
+        String representationLayerPackageName = deviceMgr.getRepresentationLayerTargetPackageName();
+        if (!Registry.getPackageName().equals(representationLayerPackageName)) {
+            MATELog.log_acc("Representation layer has package name " +
+                    representationLayerPackageName +
+                    ", but MATE Client was launched for package name " +
+                    Registry.getPackageName());
+            throw new IllegalStateException("Representation layer was built for another package " +
+                    "name!");
+        }
+
         // check whether the AUT could be successfully started
         String currentPackageName = deviceMgr.getCurrentPackageName();
         if (!Registry.getPackageName().equals(currentPackageName)) {

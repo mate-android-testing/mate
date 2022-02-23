@@ -170,6 +170,18 @@ public class DeviceMgr {
         }
     }
 
+    public String getRepresentationLayerTargetPackageName() {
+        try {
+            return MATEService.getRepresentationLayer().getTargetPackageName();
+        } catch (RemoteException | AUTCrashException e) {
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
+
+            return null;
+        }
+    }
+
     public String getCurrentPackageName() {
         try {
             return MATEService.getRepresentationLayer().getCurrentPackageName();
@@ -293,5 +305,4 @@ public class DeviceMgr {
     public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
         return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
     }
-
 }

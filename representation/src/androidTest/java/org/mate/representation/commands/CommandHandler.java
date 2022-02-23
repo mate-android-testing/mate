@@ -13,6 +13,7 @@ import org.mate.representation.ExplorationInfo;
 import org.mate.representation.interaction.ActionExecutor;
 import org.mate.representation.interaction.ActionExecutorFactory;
 import org.mate.representation.state.widget.WidgetScreenParser;
+import org.mate.representation.test.BuildConfig;
 
 import java.util.List;
 
@@ -46,8 +47,8 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
-    public void setTargetPackageName(String packageName) throws RemoteException {
-        ExplorationInfo.getInstance().setTargetPackageName(packageName);
+    public String getTargetPackageName() throws RemoteException {
+        return BuildConfig.TARGET_PACKAGE_NAME;
     }
 
     @Override

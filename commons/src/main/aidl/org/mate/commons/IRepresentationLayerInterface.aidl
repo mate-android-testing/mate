@@ -8,7 +8,7 @@ interface IRepresentationLayerInterface {
     // Representation Layer status & config
     void ping();
     void exit();
-    void setTargetPackageName(String packageName);
+    String getTargetPackageName();
     void setRandomSeed(long seed);
     void setReplayMode();
     void setWidgetBasedActions();

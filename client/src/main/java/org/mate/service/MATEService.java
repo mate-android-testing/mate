@@ -100,8 +100,6 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
     private static void configureRepresentationLayer() {
         try {
-            representationLayer.setTargetPackageName(Registry.getPackageName());
-
             // Use the random seed, but also add an integer representing the number of times we
             // have launched the representation layer. This is to avoid using the same seed each
             // time we reset exploration, causing it to execute always the same actions.
