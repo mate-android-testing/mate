@@ -43,7 +43,7 @@ public class DeviceMgr {
         try {
             success = MATEService.getRepresentationLayer().executeAction(action);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            MATELog.log_warn("A Remote Exception occurred while executing action");
         }
 
         if (!success && action instanceof SystemAction) {

@@ -107,10 +107,7 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
-            // TODO (Ivan): We won't be able to press home or do anything if AUT has crashed.
-            //  Maybe we should call DeviceMgr.restartApp?
             MATELog.log_acc("CRASH MESSAGE " + e.getMessage());
-            deviceMgr.pressHome();
 
             // update screen state model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);

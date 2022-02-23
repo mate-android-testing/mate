@@ -24,6 +24,7 @@ import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Utils;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -212,6 +213,12 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 log(String.format("MATE Service unable to start package name %s", packageName));
                 return START_NOT_STICKY;
             }
+
+            // Wait some time for AUT to start.
+            // If we don't wait enough, we will fail allocation of emulator on the MATE Server
+            // when it asks for the pid of the AUT and it doesn't find it.
+            Utils.sleep(2000);
+
         } catch (Exception e) {
             log("An exception occurred: " + e.getMessage());
             stopSelf();

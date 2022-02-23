@@ -62,7 +62,7 @@ public class AppScreen {
             this.widgets = MATEService.getRepresentationLayer().getCurrentScreenWidgets();
             MATELog.log_debug("Number of widgets: " + widgets.size());
         } catch (RemoteException | AUTCrashException e) {
-            e.printStackTrace();
+            MATELog.log_warn("Using AppScreen after AUT has crashed");
             this.widgets = new ArrayList<>();
         }
     }
