@@ -1429,7 +1429,7 @@ public class DeviceMgr {
              */
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                 device.executeShellCommand("run-as " + packageName + " mkdir -p files");
-                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
+                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exec");
                 // device.executeShellCommand("run-as " + packageName + " exit");
             }
 
