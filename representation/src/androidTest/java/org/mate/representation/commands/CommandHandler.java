@@ -17,6 +17,8 @@ import org.mate.representation.interaction.ActionExecutorFactory;
 import org.mate.representation.state.widget.WidgetScreenParser;
 import org.mate.representation.test.BuildConfig;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 /**
@@ -107,8 +109,16 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
         try {
             executor.perform(action);
             return true;
-        } catch (AUTCrashException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            MATELog.log_error(
+                    "An exception occurred executing action on representation layer: " +
+                    e.getMessage());
+
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            MATELog.log_error(sw.toString());
+
             return false;
         }
     }

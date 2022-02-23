@@ -1,9 +1,15 @@
-package org.mate.commons.input_generation;
+package org.mate.representation.input_generation;
 
-import org.mate.commons.utils.Randomness;
+import static org.mate.commons.input_generation.Letters.SET_OF_LOW_BIG_NUMBER_LETTERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_LOW_LETTERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_NUMBERS;
+import static org.mate.commons.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
+
+import org.mate.commons.input_generation.Letters;
 import org.mate.commons.input_generation.format_types.DateFormat;
 import org.mate.commons.input_generation.format_types.InputFieldType;
 import org.mate.commons.input_generation.format_types.TimeFormat;
+import org.mate.commons.utils.Randomness;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -12,11 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import static org.mate.commons.input_generation.Letters.SET_OF_LOW_BIG_NUMBER_LETTERS;
-import static org.mate.commons.input_generation.Letters.SET_OF_LOW_LETTERS;
-import static org.mate.commons.input_generation.Letters.SET_OF_NUMBERS;
-import static org.mate.commons.input_generation.Letters.SET_OF_SPECIAL_SIGNS;
 
 /**
  * Generates random input strings.
@@ -55,7 +56,6 @@ public final class DataGenerator {
      * @return The generated data.
      */
     public static String generateRandomData(InputFieldType type) {
-
         switch (type) {
             case TEXT_FLAG_MULTI_LINE:
                 return generateMultiLine(Randomness.getRnd().nextInt(MAX_STRING_LENGTH_MULTILINE));

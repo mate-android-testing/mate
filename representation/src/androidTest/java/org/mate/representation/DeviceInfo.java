@@ -71,6 +71,10 @@ public class DeviceInfo {
         return device;
     }
 
+    public Context getRepresentationLayerContext() {
+        return instrumentation.getContext();
+    }
+
     public Context getAUTContext() {
         return instrumentation.getTargetContext();
     }

@@ -11,7 +11,7 @@ import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.representation.ExplorationInfo;
 import org.mate.representation.state.widget.WidgetScreenParser;
-import org.mate.representation.util.TextDataGenerator;
+import org.mate.representation.input_generation.TextDataGenerator;
 
 import java.util.List;
 import java.util.Objects;

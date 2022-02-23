@@ -1,6 +1,5 @@
-package org.mate.representation.util;
+package org.mate.representation.input_generation;
 
-import org.mate.commons.input_generation.DataGenerator;
 import org.mate.commons.input_generation.Mutation;
 import org.mate.commons.input_generation.StaticStrings;
 import org.mate.commons.input_generation.StaticStringsParser;
