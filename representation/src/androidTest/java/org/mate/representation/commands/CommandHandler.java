@@ -1,5 +1,6 @@
 package org.mate.representation.commands;
 
+import android.os.Debug;
 import android.os.RemoteException;
 
 import org.mate.commons.IMATEServiceInterface;
@@ -7,6 +8,7 @@ import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.utils.MATELog;
 import org.mate.representation.DeviceInfo;
 import org.mate.representation.DynamicTest;
 import org.mate.representation.ExplorationInfo;
@@ -44,6 +46,13 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     @Override
     public void exit() throws RemoteException {
         DynamicTest.keepRunning = false;
+    }
+
+    @Override
+    public void waitForDebugger() throws RemoteException {
+        MATELog.log("MATE Representation Layer waiting for Debugger to be attached to Android " +
+                "Process");
+        Debug.waitForDebugger();
     }
 
     @Override

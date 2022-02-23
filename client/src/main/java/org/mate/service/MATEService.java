@@ -9,6 +9,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -26,7 +28,6 @@ import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
     public static final String PACKAGE_NAME_INTENT_EXTRA = "packageName";
     public static final String ALGORITHM_INTENT_EXTRA = "algorithm";
+    public static final String WAIT_FOR_DEBUGGER = "waitForDebugger";
 
     /**
      * Representation Layer associated to the MATE Service.
@@ -66,6 +68,12 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      * A boolean flag so that the MATE Service knows whether the MATE Client is running or not.
      */
     private volatile static boolean mateClientRunning = false;
+
+    /**
+     * A boolean flag that indicates that MATE Client/Service and Representation Layer should
+     * wait for debugger to be attached to the Android Process.
+     */
+    private static boolean waitForDebugger = false;
 
     public static void ensureRepresentationLayerIsConnected() {
         log(String.format("ensureRepresentationLayerIsConnected called on thread %s",
@@ -101,6 +109,14 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
     private static void configureRepresentationLayer() {
         try {
+            if (waitForDebugger) {
+                // TODO (Ivan): the following does not seem to be useful.
+                //  Android Studio does not show the process of the representation layer to
+                //  attach to it. Maybe this is because the representation layer's process has
+                //  the name of the AUT's package name.
+                // representationLayer.waitForDebugger();
+            }
+
             // Use the random seed, but also add an integer representing the number of times we
             // have launched the representation layer. This is to avoid using the same seed each
             // time we reset exploration, causing it to execute always the same actions.
@@ -189,6 +205,21 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             log("MATE Service starting but intent was not provided");
             stopSelf();
             return START_NOT_STICKY;
+        }
+
+        log("MATE Service received the following intent extras:");
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                log(key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
+            }
+        }
+
+        // Did user add "--ez waitForDebugger true" to the startservice command?
+        if (intent.hasExtra(WAIT_FOR_DEBUGGER) && intent.getBooleanExtra(WAIT_FOR_DEBUGGER, false)) {
+            log("MATE Service waiting for Debugger to be attached to Android Process");
+            waitForDebugger = true;
+            Debug.waitForDebugger();
         }
 
         if (!intent.hasExtra(ALGORITHM_INTENT_EXTRA)) {

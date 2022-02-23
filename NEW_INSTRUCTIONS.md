@@ -34,3 +34,5 @@ The available algorithm names can be found in the [MATE Runner class](client/src
 ```
 adb shell am start-foreground-service -n org.mate/.service.MATEService -e packageName <package-name-of-aut> -e algorithm <mate-algorithm>
 ```
+
+To debug the execution of the MATE Client and Representation Layer, add the following flag to the previous command: `--ez waitForDebugger true`
