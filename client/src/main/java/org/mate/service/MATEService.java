@@ -279,10 +279,9 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 PrintWriter pw = new PrintWriter(sw);
                 e.printStackTrace(pw);
                 log(sw.toString());
-
-                stopSelf();
             } finally {
                 mateClientRunning = false;
+                stopSelf();
             }
         }).start();
 
