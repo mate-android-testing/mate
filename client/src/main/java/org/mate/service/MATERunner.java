@@ -2,7 +2,6 @@ package org.mate.service;
 
 import android.content.Context;
 
-import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.service.execution.ExecuteMATEAccManualExploration;
 import org.mate.service.execution.ExecuteMATEEqualWeightedGE;
 import org.mate.service.execution.ExecuteMATEGeneticAlgorithm;
@@ -31,63 +30,83 @@ public class MATERunner {
         switch (algorithm) {
             case "AccManualExploration": {
                 ExecuteMATEAccManualExploration.run(packageName, context);
+                break;
             }
             case "EqualWeightedGE": {
                 ExecuteMATEEqualWeightedGE.run(packageName, context);
+                break;
             }
             case "GeneticAlgorithm": {
                 ExecuteMATEGeneticAlgorithm.run(packageName, context);
+                break;
             }
             case "GreyBoxFuzzing": {
                 ExecuteMATEGreyBoxFuzzing.run(packageName, context);
+                break;
             }
             case "HeuristicRandomExploration": {
                 ExecuteMATEHeuristicRandomExploration.run(packageName, context);
+                break;
             }
             case "ListAnalogousGE": {
                 ExecuteMATEListAnalogousGE.run(packageName, context);
+                break;
             }
             case "MIO": {
                 ExecuteMATEMIO.run(packageName, context);
+                break;
             }
             case "MOSA": {
                 ExecuteMATEMOSA.run(packageName, context);
+                break;
             }
             case "NoveltySearch": {
                 ExecuteMATENoveltySearch.run(packageName, context);
+                break;
             }
             case "NSGAII": {
                 ExecuteMATENSGAII.run(packageName, context);
+                break;
             }
             case "OnePlusOne": {
                 ExecuteMATEOnePlusOne.run(packageName, context);
+                break;
             }
             case "PrimitiveStandardGA": {
                 ExecuteMATEPrimitiveStandardGA.run(packageName, context);
+                break;
             }
             case "RandomExploration": {
                 ExecuteMATERandomExploration.run(packageName, context);
+                break;
             }
             case "RandomExplorationIntent": {
                 ExecuteMATERandomExplorationIntent.run(packageName, context);
+                break;
             }
             case "RandomSearch": {
                 ExecuteMATERandomSearch.run(packageName, context);
+                break;
             }
             case "RandomWalk": {
                 ExecuteMATERandomWalk.run(packageName, context);
+                break;
             }
             case "ReplayRun": {
                 ExecuteMATEReplayRun.run(packageName, context);
+                break;
             }
             case "Sapienz": {
                 ExecuteMATESapienz.run(packageName, context);
+                break;
             }
             case "StandardGE": {
                 ExecuteMATEStandardGE.run(packageName, context);
+                break;
             }
             case "StandardGeneticAlgorithm": {
                 ExecuteMATEStandardGeneticAlgorithm.run(packageName, context);
+                break;
             }
             default: {
                 throw new IllegalStateException(String.format("Algorithm \"%s\" is not valid",
