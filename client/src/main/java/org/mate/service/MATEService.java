@@ -281,6 +281,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 log(sw.toString());
             } finally {
                 mateClientRunning = false;
+                stopForeground(true);
                 stopSelf();
             }
         }).start();
@@ -332,6 +333,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     @Override
     public void onDestroy() {
         log("onDestroy called");
+        super.onDestroy();
     }
 
     /**
