@@ -203,6 +203,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         if (intent == null) {
             log("MATE Service starting but intent was not provided");
+            stopForeground(true);
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -224,12 +225,14 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         if (!intent.hasExtra(ALGORITHM_INTENT_EXTRA)) {
             log("MATE Service starting but " + ALGORITHM_INTENT_EXTRA + " was not provided");
+            stopForeground(true);
             stopSelf();
             return START_NOT_STICKY;
         }
 
         if (!intent.hasExtra(PACKAGE_NAME_INTENT_EXTRA)) {
             log("MATE Service starting but " + PACKAGE_NAME_INTENT_EXTRA + " was not provided");
+            stopForeground(true);
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -252,6 +255,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         } catch (Exception e) {
             log("An exception occurred: " + e.getMessage());
+            stopForeground(true);
             stopSelf();
         }
 
