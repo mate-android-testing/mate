@@ -58,6 +58,15 @@ public interface IGUIModel {
     Optional<List<Edge>> shortestPath(IScreenState from, IScreenState to);
 
     /**
+     * Returns the screen state matching the given id.
+     *
+     * @param screenStateId The screen state id.
+     * @return Returns the screen state matching the given id or {@code null} if no such screen state
+     *          exists.
+     */
+    IScreenState getScreenStateById(String screenStateId);
+
+    /**
      * Returns a textual representation of the GUI model.
      *
      * @return Returns a textual representation of the GUI model.

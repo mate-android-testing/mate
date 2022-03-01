@@ -98,6 +98,17 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
+    public IScreenState getScreenStateById(String screenStateId) {
+        return getStates().stream()
+                .filter(screenState -> screenState.getId().equals(screenStateId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return fsm.toString();
     }
