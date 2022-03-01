@@ -6,6 +6,7 @@ import android.util.Log;
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -23,11 +24,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
+import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
+import static org.mate.interaction.action.ActionResult.SUCCESS;
+import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
 // TODO: make singleton
 public class UIAbstractionLayer {
