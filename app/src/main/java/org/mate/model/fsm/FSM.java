@@ -221,6 +221,15 @@ public class FSM {
     }
 
     /**
+     * Returns the root state of the FSM.
+     *
+     * @return Returns the root state.
+     */
+    public State getRootState() {
+        return root;
+    }
+
+    /**
      *  Returns a simple text representation of the FSM.
      *
      * @return Returns a simple string representation of the FSM.

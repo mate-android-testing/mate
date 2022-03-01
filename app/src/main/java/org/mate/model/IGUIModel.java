@@ -67,6 +67,13 @@ public interface IGUIModel {
     IScreenState getScreenStateById(String screenStateId);
 
     /**
+     * Returns the root state, i.e. the start screen of the AUT.
+     *
+     * @return Returns the start screen state.
+     */
+    IScreenState getRootState();
+
+    /**
      * Returns a textual representation of the GUI model.
      *
      * @return Returns a textual representation of the GUI model.

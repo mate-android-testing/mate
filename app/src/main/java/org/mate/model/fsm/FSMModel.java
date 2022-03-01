@@ -109,6 +109,14 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
+    public IScreenState getRootState() {
+        return fsm.getRootState().getScreenState();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return fsm.toString();
     }
