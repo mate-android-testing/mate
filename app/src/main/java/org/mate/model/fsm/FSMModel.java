@@ -1,12 +1,16 @@
 package org.mate.model.fsm;
 
+import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FSMModel implements IGUIModel {
 
@@ -72,6 +76,22 @@ public class FSMModel implements IGUIModel {
     @Override
     public int getNumberOfStates() {
         return fsm.getNumberOfStates();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<List<Edge>> shortestPath(IScreenState from, IScreenState to) {
+        State fromState = fsm.getState(from);
+        State toState = fsm.getState(to);
+        MATE.log_acc("Trying to find the shortest path from " + fromState + " to " + toState);
+        return fsm.shortestPath(fromState, toState)
+                .map(transitions -> transitions.stream()
+                        .map(transition -> new Edge(transition.getAction(),
+                                transition.getSource().getScreenState(),
+                                transition.getTarget().getScreenState()))
+                        .collect(Collectors.toList()));
     }
 
     /**

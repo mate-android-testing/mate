@@ -3,6 +3,8 @@ package org.mate.model;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface IGUIModel {
@@ -45,6 +47,15 @@ public interface IGUIModel {
      * @return Returns the edges that are labeled by the given action.
      */
     Set<Edge> getEdges(Action action);
+
+    /**
+     * Tries to find the shortest path between two given states.
+     *
+     * @param from The source state.
+     * @param to The target state.
+     * @return Returns the shortest path between the source and target state if such path exists.
+     */
+    Optional<List<Edge>> shortestPath(IScreenState from, IScreenState to);
 
     /**
      * Returns a textual representation of the GUI model.
