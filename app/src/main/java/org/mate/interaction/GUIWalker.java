@@ -1,160 +1,135 @@
 package org.mate.interaction;
 
-import android.app.Instrumentation;
-
 import org.mate.MATE;
-import org.mate.exceptions.AUTCrashException;
-import org.mate.exceptions.InvalidScreenStateException;
 import org.mate.interaction.action.Action;
-import org.mate.model.deprecated.graph.IGUIModel;
+import org.mate.interaction.action.ActionResult;
+import org.mate.model.Edge;
+import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
-import org.mate.interaction.action.ui.WidgetAction;
-import org.mate.state.ScreenStateType;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * Created by marceloeler on 21/06/17.
+ * Enables to move directly or indirectly to a given {@link IScreenState} or activity.
  */
-@Deprecated
 public class GUIWalker {
 
-    private IGUIModel guiModelMgr;
-    private String packageName;
-    DeviceMgr deviceMgr;
+    /**
+     * The current gui model.
+     */
+    private final IGUIModel guiModel;
 
-    public GUIWalker(IGUIModel guiModel, String packageName, DeviceMgr deviceMgr){
-        this.guiModelMgr = guiModel;
-        this.packageName = packageName;
-        Instrumentation instrumentation =  getInstrumentation();
-        this.deviceMgr = deviceMgr;
+    /**
+     * Enables the interaction with the AUT.
+     */
+    private final UIAbstractionLayer uiAbstractionLayer;
+
+    /**
+     * Initialises the gui walker.
+     *
+     * @param uiAbstractionLayer The ui abstraction layer.
+     */
+    public GUIWalker(UIAbstractionLayer uiAbstractionLayer){
+        this.guiModel = uiAbstractionLayer.getGuiModel();
+        this.uiAbstractionLayer = uiAbstractionLayer;
     }
 
-    private Action lastActionExecuted=null;
-
-
-
-    private boolean checkStateReached(String targetScreenStateId) {
-        IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-        try {
-            guiModelMgr.moveToState(state);
-        } catch (InvalidScreenStateException e) {
-            e.printStackTrace();
-            return false;
-        }
-        if (guiModelMgr.getCurrentStateId().equals(targetScreenStateId))
-            return true;
-        else
-            return false;
+    /**
+     * Moves the AUT into the given (screen) state.
+     *
+     * @param screenStateId The screen state id.
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean goToState(String screenStateId) {
+        IScreenState screenState = guiModel.getScreenStateById(screenStateId);
+        return screenState != null && goToState(screenState);
     }
 
-    public boolean goToState(String targetScreenStateId) {
-        boolean stateFound=false;
+    /**
+     * Moves the AUT into the given (screen) state.
+     *
+     * @param screenState The screen state.
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean goToState(final IScreenState screenState) {
 
-        if (guiModelMgr.getCurrentStateId().equals(targetScreenStateId)) {
-            return true;
-        }
+        Objects.requireNonNull(screenState, "Screen state is null!");
 
-        MATE.log("Going from " + guiModelMgr.getCurrentStateId() +" to " + targetScreenStateId);
-//        MATE.log("         >>> 1st attempt");
-        List<List<Action>> paths = guiModelMgr.pathFromTo(guiModelMgr.getCurrentStateId(),targetScreenStateId);
-        if (paths.size()>0){
-            executePaths(paths, targetScreenStateId);
-            stateFound = this.checkStateReached(targetScreenStateId);
-            if (stateFound) {
-                return true;
-            }
-        }
-
-//        MATE.log("         >>> 2nd attempt - restart");
-        deviceMgr.restartApp();
-        //MATE.log("State detected after restart: " + guiModelMgr.detectCurrentState(packageName,ScreenStateFactory.getScreenState("ActionsScreenState")));
-        stateFound = this.checkStateReached(targetScreenStateId);
-        if (stateFound) {
+        if (uiAbstractionLayer.getLastScreenState().equals(screenState)) {
+            // we are already at the desired screen state
             return true;
         }
-        paths = guiModelMgr.pathFromTo(guiModelMgr.getCurrentStateId(),targetScreenStateId);
-        if (paths.size()>0){
-            executePaths(paths,targetScreenStateId);
-            stateFound = this.checkStateReached(targetScreenStateId);
-            if (stateFound) {
-                return true;
+
+        return goFromTo(uiAbstractionLayer.getLastScreenState(), screenState);
+    }
+
+    /**
+     * Replays the given actions on the current screen state.
+     *
+     * @param actions The list of actions that should be executed.
+     * @return Returns {@code true} if all actions could be applied successfully, otherwise
+     *          {@code false} is returned.
+     */
+    private boolean replayActions(List<Action> actions) {
+        for (Action action : actions) {
+            ActionResult result = uiAbstractionLayer.executeAction(action);
+            if (result != ActionResult.SUCCESS && result != ActionResult.SUCCESS_NEW_STATE) {
+                return false;
             }
         }
+        return true;
+    }
 
-//        MATE.log("         >>> 3rd attempt - reinstall");
-        deviceMgr.reinstallApp();
-        deviceMgr.restartApp();
-        //MATE.log("State detected after restart: " + guiModelMgr.detectCurrentState(packageName,ScreenStateFactory.getScreenState("ActionsScreenState")));
-        stateFound = this.checkStateReached(targetScreenStateId);
-        if (stateFound) {
+    /**
+     * Moves the AUT from the given source to the given target state.
+     *
+     * @param source The source state.
+     * @param target The target state.
+     * @return Returns {@code true} if the transition to the target state was possible, otherwise
+     *          {@code false} is returned.
+     */
+    private boolean goFromTo(IScreenState source, IScreenState target) {
+
+        Optional<List<Action>> shortestPath = guiModel.shortestPath(source, target)
+                .map(path -> path.stream().map(Edge::getAction).collect(Collectors.toList()));
+
+        if (shortestPath.isPresent()) {
+            return replayActions(shortestPath.get())
+                    // check that we actually reached the target state
+                    && uiAbstractionLayer.getLastScreenState().equals(target);
+        } else {
+            MATE.log_acc("No path from " + source.getId() + " to " + target.getId() + "!");
+
+            // If there is not direct path from the source state, re-try it from the initial state
+            uiAbstractionLayer.restartApp();
+            shortestPath = guiModel.shortestPath(uiAbstractionLayer.getLastScreenState(), target)
+                    .map(path -> path.stream().map(Edge::getAction).collect(Collectors.toList()));
+
+            if (shortestPath.isPresent()) {
+                return replayActions(shortestPath.get())
+                        // check that we actually reached the target state
+                        && uiAbstractionLayer.getLastScreenState().equals(target);
+            }
+        }
+        return false;
+    }
+    
+    public boolean goToActivity(String activity) {
+
+        if (uiAbstractionLayer.getCurrentActivity().equals(activity)) {
+            // we are already on the wanted activity
             return true;
         }
-        paths = guiModelMgr.pathFromTo(guiModelMgr.getCurrentStateId(),targetScreenStateId);
-        if (paths.size()>0){
-            executePaths(paths,targetScreenStateId);
-            stateFound = this.checkStateReached(targetScreenStateId);
-            if (stateFound) {
-                return true;
-            }
-            deviceMgr.restartApp();
-            stateFound = this.checkStateReached(targetScreenStateId);
-            if (stateFound) {
-                return true;
-            }
-        }
-        return stateFound;
+
+        throw new UnsupportedOperationException();
     }
 
-
-    private void executePaths(List<List<Action>> paths, String targetScreenStateId) {
-        boolean desiredStateReached = false;
-        for (int ev = 0; ev < paths.size() && !desiredStateReached; ev++) {
-            List<Action> path = paths.get(ev);
-            goToState(guiModelMgr.getCurrentStateId());
-            executePath(path, targetScreenStateId);
-            desiredStateReached = checkStateReached(targetScreenStateId);
-        }
+    public boolean goToMainActivity() {
+        throw new UnsupportedOperationException();
     }
-
-    private void executePath(List<Action> path, String targetScreenStateId){
-
-        boolean desiredStateReached=false;
-        List<Action> actions = new ArrayList<>();
-        if (!path.isEmpty()){
-            boolean targetReached = false;
-            for (int i=0; i< path.size() && !targetReached; i++){
-
-                Action action = path.get(i);
-
-                actions.add(action);
-
-                try {
-                    deviceMgr.executeAction(action);
-                    targetReached = this.checkStateReached(targetScreenStateId);
-                    lastActionExecuted=action;
-
-                    if (action instanceof WidgetAction) {
-                        WidgetAction wa = (WidgetAction) action;
-                        if (wa.getWidget().isEditable()) {
-                            for (WidgetAction act : wa.getAdjActions())
-                                deviceMgr.executeAction(act);
-                        }
-                    }
-
-                } catch (AUTCrashException e) {
-                    deviceMgr.pressHome();
-                    i = path.size()+1; //exit loop
-                }
-            }
-        }
-    }
-
-    // boolean moveToState(IScreenState screenState);
-    // boolean moveToActivity(String activity);
-    // boolean moveToMainActivity();
 }
