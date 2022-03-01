@@ -1,6 +1,10 @@
 package org.mate.interaction;
 
+import android.content.Context;
+import android.content.Intent;
+
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.model.Edge;
@@ -11,6 +15,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static android.support.test.InstrumentationRegistry.getContext;
 
 /**
  * Enables to move directly or indirectly to a given {@link IScreenState} or activity.
@@ -118,7 +124,7 @@ public class GUIWalker {
         }
         return false;
     }
-    
+
     public boolean goToActivity(String activity) {
 
         if (uiAbstractionLayer.getCurrentActivity().equals(activity)) {
@@ -129,7 +135,24 @@ public class GUIWalker {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Moves the AUT to the main activity, i.e. the start screen.
+     *
+     * @return Returns {@code true} if the main activity could be launched, otherwise {@code false}
+     *          is returned.
+     */
     public boolean goToMainActivity() {
-        throw new UnsupportedOperationException();
+        Context context = getContext();
+        final Intent intent = context.getPackageManager()
+                .getLaunchIntentForPackage(Registry.getPackageName());
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
+        }
+        context.startActivity(intent);
+        // TODO: compare vs hardcoded main activity extracted from manifest
+        return guiModel.getRootState().getActivityName().equals(uiAbstractionLayer.getCurrentActivity());
     }
 }
