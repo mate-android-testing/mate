@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 public class FSM {
 
     private final State root;
-    private Set<State> states;
-    private Set<Transition> transitions;
+    private final Set<State> states;
+    private final Set<Transition> transitions;
     private int nextStateId;
     private boolean reachedNewState;
 
