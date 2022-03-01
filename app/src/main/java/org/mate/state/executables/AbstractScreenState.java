@@ -126,4 +126,14 @@ public abstract class AbstractScreenState implements IScreenState {
     public int hashCode() {
         return Objects.hash(activityName, packageName, widgets);
     }
+
+    /**
+     * Provides a simple textual representation of a screen state of the form: id [activity].
+     *
+     * @return Returns the string representation of the screen state.
+     */
+    @Override
+    public String toString() {
+        return id + " [" + activityName + "]";
+    }
 }
