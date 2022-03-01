@@ -30,7 +30,6 @@ import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
@@ -1470,11 +1469,6 @@ public class DeviceMgr {
 
         // fallback mechanism
         return Registry.getEnvironmentManager().getLastCrashStackTrace();
-    }
-
-    @Deprecated
-    public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
-        return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
     }
 
 }
