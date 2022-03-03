@@ -74,6 +74,13 @@ public interface IGUIModel {
     IScreenState getRootState();
 
     /**
+     * Returns the screen states describing the given activity.
+     *
+     * @return Returns the screen states describing the given activity.
+     */
+    Set<IScreenState> getActivityStates(String activity);
+
+    /**
      * Returns a textual representation of the GUI model.
      *
      * @return Returns a textual representation of the GUI model.

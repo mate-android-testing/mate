@@ -14,6 +14,7 @@ import org.mate.state.IScreenState;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static android.support.test.InstrumentationRegistry.getContext;
@@ -125,14 +126,40 @@ public class GUIWalker {
         return false;
     }
 
+    /**
+     * Moves the AUT to the given activity.
+     *
+     * @param activity The activity that should be launched.
+     * @return Returns {@code true} if the activity could be reached, otherwise {@code false} is
+     *          returned.
+     */
     public boolean goToActivity(String activity) {
 
         if (uiAbstractionLayer.getCurrentActivity().equals(activity)) {
-            // we are already on the wanted activity
+            // we are already on the target activity
             return true;
         }
 
-        throw new UnsupportedOperationException();
+        /*
+        * In general, an activity consists of multiple screen states and in theory we should reach
+        * any state, i.e. we could pick a single state on the target activity. But during replaying
+        * the actions, we may encounter some inconsistency, i.e. we end up in a completely different
+        * state. Thus, we try out all possible target states in the worst case.
+         */
+        Set<IScreenState> targetActivityStates = guiModel.getActivityStates(activity);
+
+        for (IScreenState targetActivityState : targetActivityStates) {
+            if (uiAbstractionLayer.getCurrentActivity().equals(activity)) {
+                // we reached the target activity
+                return true;
+            } else {
+                // internally re-starts the app if there is no path from the current state
+                goFromTo(uiAbstractionLayer.getLastScreenState(), targetActivityState);
+            }
+        }
+
+        MATE.log_acc("We couldn't reach the target activity: " + activity);
+        return false;
     }
 
     /**

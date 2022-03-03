@@ -117,6 +117,16 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
+    public Set<IScreenState> getActivityStates(String activity) {
+        return getStates().stream()
+                .filter(screenState -> screenState.getActivityName().equals(activity))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return fsm.toString();
     }
