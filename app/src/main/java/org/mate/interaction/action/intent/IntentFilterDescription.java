@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ import java.util.Set;
  */
 public class IntentFilterDescription {
 
-    private Set<String> actions = new HashSet<>();
-    private Set<String> categories = new HashSet<>();
+    private final Set<String> actions = new HashSet<>();
+    private final Set<String> categories = new HashSet<>();
     private Data data;
 
     void addAction(String action) {
@@ -51,15 +52,15 @@ public class IntentFilterDescription {
         data.addMimeType(mimeType);
     }
 
-    boolean hasAction() {
+    public boolean hasAction() {
         return !actions.isEmpty();
     }
 
-    boolean hasCategory() {
+    public boolean hasCategory() {
         return !categories.isEmpty();
     }
 
-    boolean hasData() {
+    public boolean hasData() {
         // this only makes sense with lazy initialization
         return data != null;
     }
@@ -74,6 +75,25 @@ public class IntentFilterDescription {
 
     public Data getData() {
         return data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            IntentFilterDescription other = (IntentFilterDescription) o;
+            return Objects.equals(actions, other.actions) &&
+                    Objects.equals(categories, other.categories) &&
+                    Objects.equals(data, other.data);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(actions, categories, data);
     }
 
     @Override

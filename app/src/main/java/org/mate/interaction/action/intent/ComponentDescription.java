@@ -28,11 +28,11 @@ public class ComponentDescription {
     private boolean handleOnNewIntent = false;
 
     // a component may define optionally intent filter tags
-    private Set<IntentFilterDescription> intentFilters = new HashSet<>();
+    private final Set<IntentFilterDescription> intentFilters = new HashSet<>();
 
     // additional information used in combination with intents
-    private Set<String> stringConstants = new HashSet<>();
-    private Map<String, String> extras = new HashMap<>();
+    private final Set<String> stringConstants = new HashSet<>();
+    private final Map<String, String> extras = new HashMap<>();
 
     public ComponentDescription(String name, String type) {
         this.name = name;
@@ -92,7 +92,7 @@ public class ComponentDescription {
         this.intentFilters.removeAll(intentFilters);
     }
 
-    ComponentType getType() {
+    public ComponentType getType() {
         return type;
     }
 
@@ -122,7 +122,8 @@ public class ComponentDescription {
      * @return Returns the component matching the given name in the list of components
      *          or {@code null} if the component couldn't be found.
      */
-    public static ComponentDescription getComponentByName(final List<ComponentDescription> components, final String name) {
+    public static ComponentDescription getComponentByName(
+            final List<ComponentDescription> components, final String name) {
 
         for (ComponentDescription component : components) {
             if (component.getFullyQualifiedName().equals(name)) {
