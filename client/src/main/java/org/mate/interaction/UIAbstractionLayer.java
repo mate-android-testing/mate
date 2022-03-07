@@ -88,7 +88,7 @@ public class UIAbstractionLayer {
                     retryCount += 1;
                     continue;
                 }
-                Log.e("acc", "", e);
+                Log.e("acc", "Exception occurred when calling executeActionUnsafe method:" + e.getMessage(), e);
             }
         }
         return FAILURE_UNKNOWN;

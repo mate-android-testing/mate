@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.interaction.action.intent.SystemAction;
+import org.mate.commons.interaction.action.ui.MotifAction;
+import org.mate.commons.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 
@@ -77,14 +79,14 @@ public abstract class Action implements Parcelable {
         switch (source.readInt()) {
             case ACTION_SUBCLASS_WIDGET:
                 return new WidgetAction(source);
-            // case ACTION_TYPE_PRIMITIVE:
-            //     return new PrimitiveAction(source);
+            case ACTION_SUBCLASS_PRIMITIVE:
+                return new PrimitiveAction(source);
             case ACTION_SUBCLASS_INTENT_BASED:
                 return new IntentBasedAction(source);
             case ACTION_SUBCLASS_SYSTEM:
                 return new SystemAction(source);
-            // case ACTION_TYPE_MOTIF:
-            //     return new MotifAction(source);
+            case ACTION_SUBCLASS_MOTIF:
+                return new MotifAction(source);
             case ACTION_SUBCLASS_UI:
                 return new UIAction(source);
             default:

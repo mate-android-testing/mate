@@ -159,7 +159,7 @@ public class PrimitiveAction extends UIAction {
         dest.writeString(this.text);
     }
 
-    protected PrimitiveAction(Parcel in) {
+    public PrimitiveAction(Parcel in) {
         super(in);
         this.x = in.readInt();
         this.y = in.readInt();

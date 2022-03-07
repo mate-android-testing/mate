@@ -104,6 +104,12 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
     @Override
     public boolean executeAction(Action action) throws RemoteException {
+        if (action == null) {
+            MATELog.log_error("Trying to execute null action");
+            throw new IllegalStateException("executeAction method on representation layer was " +
+                    "called for a null action");
+        }
+
         ActionExecutor executor = ActionExecutorFactory.getExecutor(action);
 
         try {

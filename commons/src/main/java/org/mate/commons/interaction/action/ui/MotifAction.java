@@ -145,7 +145,7 @@ public class MotifAction extends UIAction {
         dest.writeTypedList(this.uiActions);
     }
 
-    protected MotifAction(Parcel in) {
+    public MotifAction(Parcel in) {
         super(in);
         this.uiActions = in.createTypedArrayList(UIAction.CREATOR);
     }

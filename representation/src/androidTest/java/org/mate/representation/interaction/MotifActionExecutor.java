@@ -58,7 +58,7 @@ public class MotifActionExecutor extends ActionExecutor {
                 success = handleSpinnerScrolling(action);
                 break;
             default:
-                throw new UnsupportedOperationException("UI action "
+                throw new UnsupportedOperationException("Motif action "
                         + action.getActionType() + " not yet supported!");
         }
 
