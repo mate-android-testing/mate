@@ -54,7 +54,8 @@ public abstract class Action implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         // Action class does not have protected variables, but we need to write an integer to
         // identify which of the many Action subclasses we are converting to Parcel
-        dest.writeInt(getIntForActionSubClass());
+        int intForActionSubClass = getIntForActionSubClass();
+        dest.writeInt(intForActionSubClass);
     }
 
     public Action() {}
@@ -75,8 +76,21 @@ public abstract class Action implements Parcelable {
         }
     };
 
+    /**
+     * Auxiliary method to build an action from a Parcel, using the correct subclass.
+     * In order to do so, this method looks at the first integer in the Parcel.
+     * Depending on the value, it will use the appropriate constructor from a subclass.
+     *
+     * DO NOT use here the CREATOR classes inside each of the Action subclasses.
+     * Doing so will cause an infinite recursion, since they call this method in turn indirectly.
+     *
+     * @param source
+     * @return
+     */
     private static Action getConcreteClass(Parcel source) {
-        switch (source.readInt()) {
+        int intForActionSubClass = source.readInt();
+
+        switch (intForActionSubClass) {
             case ACTION_SUBCLASS_WIDGET:
                 return new WidgetAction(source);
             case ACTION_SUBCLASS_PRIMITIVE:
@@ -90,7 +104,8 @@ public abstract class Action implements Parcelable {
             case ACTION_SUBCLASS_UI:
                 return new UIAction(source);
             default:
-                return null;
+                throw new IllegalStateException("Invalid int for Action subclass found: " +
+                        intForActionSubClass);
         }
     }
 }

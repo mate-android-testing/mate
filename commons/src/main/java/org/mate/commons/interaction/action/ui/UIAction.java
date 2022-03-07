@@ -133,7 +133,11 @@ public class UIAction extends Action {
     public static final Creator<UIAction> CREATOR = new Creator<UIAction>() {
         @Override
         public UIAction createFromParcel(Parcel source) {
-            return new UIAction(source);
+            // We need to use the Action.CREATOR here, because we want to make sure to remove the
+            // ActionSubClass integer from the beginning of Parcel and call the appropriate
+            // constructor for this action.
+            // Otherwise, the first integer will be read as data for an instance variable.
+            return (UIAction) Action.CREATOR.createFromParcel(source);
         }
 
         @Override

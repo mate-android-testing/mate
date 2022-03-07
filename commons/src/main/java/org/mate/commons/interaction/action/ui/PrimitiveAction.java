@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.Randomness;
 
 import java.util.Arrays;
@@ -153,7 +154,6 @@ public class PrimitiveAction extends UIAction {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-
         dest.writeInt(this.x);
         dest.writeInt(this.y);
         dest.writeString(this.text);
@@ -169,7 +169,11 @@ public class PrimitiveAction extends UIAction {
     public static final Creator<PrimitiveAction> CREATOR = new Creator<PrimitiveAction>() {
         @Override
         public PrimitiveAction createFromParcel(Parcel source) {
-            return new PrimitiveAction(source);
+            // We need to use the Action.CREATOR here, because we want to make sure to remove the
+            // ActionSubClass integer from the beginning of Parcel and call the appropriate
+            // constructor for this action.
+            // Otherwise, the first integer will be read as data for an instance variable.
+            return (PrimitiveAction) Action.CREATOR.createFromParcel(source);
         }
 
         @Override

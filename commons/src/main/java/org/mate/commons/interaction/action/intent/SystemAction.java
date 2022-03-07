@@ -158,7 +158,6 @@ public class SystemAction extends Action {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-
         dest.writeParcelable(this.component, flags);
         dest.writeParcelable(this.intentFilter, flags);
         dest.writeString(this.receiver);
@@ -177,7 +176,11 @@ public class SystemAction extends Action {
     public static final Creator<SystemAction> CREATOR = new Creator<SystemAction>() {
         @Override
         public SystemAction createFromParcel(Parcel source) {
-            return new SystemAction(source);
+            // We need to use the Action.CREATOR here, because we want to make sure to remove the
+            // ActionSubClass integer from the beginning of Parcel and call the appropriate
+            // constructor for this action.
+            // Otherwise, the first integer will be read as data for an instance variable.
+            return (SystemAction) Action.CREATOR.createFromParcel(source);
         }
 
         @Override

@@ -1,11 +1,11 @@
 package org.mate.state.executables;
 
 import org.mate.commons.interaction.action.ui.ActionType;
-import org.mate.commons.utils.MATELog;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;

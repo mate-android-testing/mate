@@ -3,6 +3,8 @@ package org.mate.commons.interaction.action.ui;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 
+import org.mate.commons.interaction.action.Action;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -224,7 +226,6 @@ public class WidgetAction extends UIAction {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-
         dest.writeParcelable(this.widget, flags);
         dest.writeTypedList(this.adjActions);
         dest.writeString(this.extraInfo);
@@ -246,7 +247,11 @@ public class WidgetAction extends UIAction {
     public static final Creator<WidgetAction> CREATOR = new Creator<WidgetAction>() {
         @Override
         public WidgetAction createFromParcel(Parcel source) {
-            return new WidgetAction(source);
+            // We need to use the Action.CREATOR here, because we want to make sure to remove the
+            // ActionSubClass integer from the beginning of Parcel and call the appropriate
+            // constructor for this action.
+            // Otherwise, the first integer will be read as data for an instance variable.
+            return (WidgetAction) Action.CREATOR.createFromParcel(source);
         }
 
         @Override

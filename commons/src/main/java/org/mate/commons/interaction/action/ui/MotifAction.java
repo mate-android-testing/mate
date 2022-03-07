@@ -3,6 +3,7 @@ package org.mate.commons.interaction.action.ui;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 
+import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.Randomness;
 
 import java.util.Arrays;
@@ -141,7 +142,6 @@ public class MotifAction extends UIAction {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        
         dest.writeTypedList(this.uiActions);
     }
 
@@ -153,7 +153,11 @@ public class MotifAction extends UIAction {
     public static final Creator<MotifAction> CREATOR = new Creator<MotifAction>() {
         @Override
         public MotifAction createFromParcel(Parcel source) {
-            return new MotifAction(source);
+            // We need to use the Action.CREATOR here, because we want to make sure to remove the
+            // ActionSubClass integer from the beginning of Parcel and call the appropriate
+            // constructor for this action.
+            // Otherwise, the first integer will be read as data for an instance variable.
+            return (MotifAction) Action.CREATOR.createFromParcel(source);
         }
 
         @Override
