@@ -3,6 +3,9 @@ package org.mate.interaction.action.intent;
 import android.util.Xml;
 
 import org.mate.MATE;
+import org.mate.utils.manifest.element.ComponentDescription;
+import org.mate.utils.manifest.element.ComponentType;
+import org.mate.utils.manifest.element.IntentFilterDescription;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -148,6 +151,4 @@ public final class IntentInfoParser {
             }
         }
     }
-
-
 }

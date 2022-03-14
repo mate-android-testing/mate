@@ -21,7 +21,6 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
@@ -39,6 +38,7 @@ import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.manifest.element.ComponentType;
 
 import java.io.IOException;
 import java.util.ArrayList;

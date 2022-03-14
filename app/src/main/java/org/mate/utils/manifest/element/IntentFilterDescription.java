@@ -1,4 +1,4 @@
-package org.mate.interaction.action.intent;
+package org.mate.utils.manifest.element;
 
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
@@ -16,27 +16,60 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Represents a single intent-filter tag and the information it contains,
- * i.e. the declared actions, categories and data attributes. Each
- * intent-filter is typically represent by an arbitrary combination
- * of action, category and data tags.
+ * Represents an intent filter hosted within a {@link ComponentDescription}.
  */
 public class IntentFilterDescription {
 
+    /**
+     * The set of actions.
+     */
     private final Set<String> actions = new HashSet<>();
+
+    /**
+     * The set of categories.
+     */
     private final Set<String> categories = new HashSet<>();
+
+    /**
+     * The data specification, mostly optional.
+     */
     private Data data;
 
-    void addAction(String action) {
+    /**
+     * Adds the given action to the intent filter.
+     *
+     * @param action The action to be added.
+     */
+    public void addAction(String action) {
         actions.add(action);
     }
 
-    void addCategory(String category) {
+    /**
+     * Adds an category to the intent filter.
+     *
+     * @param category The category to be added.
+     */
+    public void addCategory(String category) {
         categories.add(category);
     }
 
-    void addData(String scheme, String host, String port, String path, String pathPattern,
-                 String pathPrefix, String mimeType) {
+    /**
+     * Adds an data specification to the intent filter. See
+     * https://developer.android.com/guide/topics/manifest/data-element for more information.
+     *
+     * @param scheme The scheme part of a URI. This is the minimal essential attribute for specifying
+     *          a URI; at least one scheme attribute must be set for the filter, or none of the other
+     *          URI attributes are meaningful.
+     * @param host The host part of a URI authority.
+     * @param port The port part of a URI authority. This attribute is meaningful only if the scheme
+     *              and host attributes are also specified for the filter.
+     * @param path The path part of a URI which must begin with a /.
+     * @param pathPattern The path part of a URI which must begin with a /.
+     * @param pathPrefix The path part of a URI which must begin with a /.
+     * @param mimeType A MIME media type, such as image/jpeg or audio/mpeg4-generic.
+     */
+    public void addData(String scheme, String host, String port, String path, String pathPattern,
+                        String pathPrefix, String mimeType) {
 
         if (data == null) {
             // lazy initialisation
@@ -52,31 +85,72 @@ public class IntentFilterDescription {
         data.addMimeType(mimeType);
     }
 
+    /**
+     * Whether the intent filter declares any action.
+     *
+     * @return Returns {@code true} if the intent filter declares any action, otherwise {@code false}
+     *          is returned.
+     */
     public boolean hasAction() {
         return !actions.isEmpty();
     }
 
+    /**
+     * Whether the intent filter declares any category.
+     *
+     * @return Returns {@code true} if the intent filter declares any category, otherwise {@code false}
+     *          is returned.
+     */
     public boolean hasCategory() {
         return !categories.isEmpty();
     }
 
+    /**
+     * Whether the intent filter declares a data specification.
+     *
+     * @return Returns {@code true} if the intent filter declares a data specification, otherwise
+     *          {@code false} is returned.
+     */
     public boolean hasData() {
         // this only makes sense with lazy initialization
         return data != null;
     }
 
+    /**
+     * Returns the set of actions declared by the intent filter.
+     *
+     * @return Returns the set of actions.
+     */
     public Set<String> getActions() {
         return Collections.unmodifiableSet(actions);
     }
 
+    /**
+     * Returns the set of categories declared by the intent filter.
+     *
+     * @return Returns the set of categories.
+     */
     public Set<String> getCategories() {
         return Collections.unmodifiableSet(categories);
     }
 
+    /**
+     * Returns the data specification. Might be {@code null}.
+     *
+     * @return Returns the data specification.
+     */
     public Data getData() {
         return data;
     }
 
+    /**
+     * Checks for equality between two intent filters. Two intent filters are considered equal, iff
+     * they share the same set of actions and categories as well as the same data specification.
+     *
+     * @param o The other intent filter.
+     * @return Returns {@code true} if the two intent filters are equal, otherwise {@code false} is
+     *          returned.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -91,14 +165,23 @@ public class IntentFilterDescription {
         }
     }
 
+    /**
+     * Computes a hashcode for the intent filter.
+     *
+     * @return Returns the computed hashcode.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(actions, categories, data);
     }
 
+    /**
+     * Provides a simple textual representation of the intent filter.
+     *
+     * @return Returns the string representation of the intent filter.
+     */
     @Override
     public String toString() {
-
         StringBuilder builder = new StringBuilder();
         builder.append("Actions: " + actions + System.lineSeparator());
         builder.append("Categories: " + categories + System.lineSeparator());
@@ -109,8 +192,7 @@ public class IntentFilterDescription {
 
 
     /**
-     * A representation for the data tag potentially contained
-     * in an intent-filter tag.
+     * A representation of the data specification, mostly optional.
      */
     public static class Data {
 
@@ -237,7 +319,7 @@ public class IntentFilterDescription {
          *
          * @return Returns the generated URI or {@code null} if no URI could be derived.
          */
-        Uri generateRandomUri() {
+        public Uri generateRandomUri() {
 
             Random rand = new Random();
             StringBuilder uriBuilder = new StringBuilder();

@@ -6,12 +6,12 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentDescription;
-import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentProvider;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
+import org.mate.utils.manifest.element.ComponentDescription;
+import org.mate.utils.manifest.element.ComponentType;
 
 /**
  * Provides a chromosome factory that produces {@link TestCase}s consisting of a combination of

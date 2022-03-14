@@ -13,6 +13,9 @@ import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
+import org.mate.utils.manifest.Manifest;
+import org.mate.utils.manifest.ManifestParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -65,6 +68,16 @@ public class MATE {
 
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
         MATE.log_acc("Package name: " + Registry.getPackageName());
+
+        try {
+            Manifest manifest = ManifestParser.parseManifest(Registry.getPackageName());
+            Registry.registerManifest(manifest);
+            Registry.registerMainActivity(manifest.getMainActivity());
+        } catch (XmlPullParserException | IOException e) {
+            throw new IllegalStateException("Couldn't parse AndroidManifest.xml!", e);
+        }
+
+        MATE.log_acc("Main activity: " + Registry.getMainActivity());
 
         final UiDevice device = UiDevice.getInstance(getInstrumentation());
         final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());

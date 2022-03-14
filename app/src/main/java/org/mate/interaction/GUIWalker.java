@@ -9,14 +9,14 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
-import org.mate.interaction.action.intent.ComponentDescription;
 import org.mate.interaction.action.intent.ComponentParser;
 import org.mate.interaction.action.intent.IntentBasedAction;
-import org.mate.interaction.action.intent.IntentFilterDescription;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
+import org.mate.utils.manifest.element.ComponentDescription;
+import org.mate.utils.manifest.element.IntentFilterDescription;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

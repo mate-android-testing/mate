@@ -1,4 +1,4 @@
-package org.mate.interaction.action.intent;
+package org.mate.utils.manifest.element;
 
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -19,29 +19,103 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Describes an app component declared in the AndroidManifest.xml.
+ */
 public class ComponentDescription {
 
+    /**
+     * The name of the component.
+     */
     private final String name;
+
+    /**
+     * The type of the component, e.g. activity.
+     */
     private final ComponentType type;
 
-    // whether the component handles onNewIntent (solely activities do so)
+    /**
+     * Whether the component has been exported or not.
+     */
+    private boolean exported;
+
+    /**
+     * Whether the component has been enabled or not.
+     */
+    private boolean enabled;
+
+    /**
+     * Whether the component handles 'onNewIntent'. Solely relevant for activities.
+     */
     private boolean handleOnNewIntent = false;
 
-    // a component may define optionally intent filter tags
+    /**
+     * The set of intent filters associated with the component.
+     */
     private final Set<IntentFilterDescription> intentFilters = new HashSet<>();
 
     // additional information used in combination with intents
     private final Set<String> stringConstants = new HashSet<>();
     private final Map<String, String> extras = new HashMap<>();
 
+    /**
+     * Initialises a new component with the given name and type.
+     *
+     * @param name The component name.
+     * @param type The component type, e.g. activity.
+     */
     public ComponentDescription(String name, String type) {
         this.name = name;
         this.type = ComponentType.mapStringToComponent(type);
     }
 
+    /**
+     * Initialises a new component with the given name and type.
+     *
+     * @param name The component name.
+     * @param type The component type, e.g. activity.
+     */
     public ComponentDescription(String name, ComponentType type) {
         this.name = name;
         this.type = type;
+    }
+
+    /**
+     * Whether the component has been exported or not.
+     *
+     * @return Returns {@code true} if the component has been exported, otherwise {@code false} is
+     *          returned.
+     */
+    public boolean isExported() {
+        return exported;
+    }
+
+    /**
+     * Sets the 'exported' flag of the component.
+     *
+     * @param exported The new exported value.
+     */
+    public void setExported(boolean exported) {
+        this.exported = exported;
+    }
+
+    /**
+     * Whether the component has been enabled or not.
+     *
+     * @return Returns {@code true} if the component has been enabled, otherwise {@code false} is
+     *          returned.
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Sets the 'enabled' flag of the component.
+     *
+     * @param enabled The new enabled value.
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean isHandlingOnNewIntent() {
@@ -52,7 +126,7 @@ public class ComponentDescription {
         this.handleOnNewIntent = handleOnNewIntent;
     }
 
-    void addStringConstants(Set<String> stringConstants) {
+    public void addStringConstants(Set<String> stringConstants) {
         this.stringConstants.addAll(stringConstants);
     }
 
@@ -179,7 +253,7 @@ public class ComponentDescription {
      *
      * @return Returns the randomly generated bundle.
      */
-    Bundle generateRandomBundle() {
+    public Bundle generateRandomBundle() {
 
         Bundle bundle = new Bundle();
 
