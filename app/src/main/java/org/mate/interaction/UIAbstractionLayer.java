@@ -320,7 +320,8 @@ public class UIAbstractionLayer {
          * We currently support API level 25 and 28.
          */
         if (screenState.getPackageName().equals("com.google.android.packageinstaller")
-                || screenState.getPackageName().equals("com.android.packageinstaller")) {
+                || screenState.getPackageName().equals("com.android.packageinstaller")
+                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")) {
 
             MATE.log("Detected permission dialog!");
 
