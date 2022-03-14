@@ -9,7 +9,6 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
-import org.mate.interaction.action.intent.ComponentParser;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
@@ -17,9 +16,7 @@ import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.IntentFilterDescription;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -65,15 +62,9 @@ public class GUIWalker {
         this.guiModel = uiAbstractionLayer.getGuiModel();
         this.uiAbstractionLayer = uiAbstractionLayer;
         if (quickLaunch) {
-            // parse the manifest in order to extract the activities with their intent filters
-            try {
-                activities = ComponentParser.parseManifest().stream()
-                        .filter(ComponentDescription::isActivity)
-                        .collect(Collectors.toList());
-            } catch (XmlPullParserException | IOException e) {
-                MATE.log_error("Couldn't parse the AndroidManifest.xml file!");
-                throw new IllegalStateException(e);
-            }
+            activities = Registry.getManifest().getActivities().stream()
+                    .filter(activity -> activity.isExported() && activity.isEnabled())
+                    .collect(Collectors.toList());
         }
     }
 
@@ -386,7 +377,6 @@ public class GUIWalker {
             MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
         }
         context.startActivity(intent);
-        // TODO: compare vs hardcoded main activity extracted from manifest
-        return guiModel.getRootState().getActivityName().equals(uiAbstractionLayer.getCurrentActivity());
+        return uiAbstractionLayer.getCurrentActivity().equals(Registry.getMainActivity());
     }
 }
