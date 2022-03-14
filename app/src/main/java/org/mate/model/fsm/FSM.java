@@ -18,21 +18,49 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A simple finite state machine for the representing the {@link org.mate.model.IGUIModel}.
+ */
 public class FSM {
 
+    /**
+     * The root state.
+     */
     private final State root;
+
+    /**
+     * The states of the FSM.
+     */
     private final Set<State> states;
+
+    /**
+     * The transitions of the FSM.
+     */
     private final Set<Transition> transitions;
+
+    /**
+     * The id of the next new state.
+     */
     private int nextStateId;
+
+    /**
+     * Whether we reached a new state with the last transition.
+     */
     private boolean reachedNewState;
+
+    /**
+     * The package name of the AUT.
+     */
+    private final String packageName;
 
     /**
      * Creates a new finite state machine with an initial start state.
      *
      * @param root The start or root state.
      */
-    public FSM(State root) {
+    public FSM(State root, String packageName) {
         this.root = root;
+        this.packageName = packageName;
         nextStateId = 1;
         states = new HashSet<>();
         transitions = new HashSet<>();
@@ -227,6 +255,31 @@ public class FSM {
      */
     public State getRootState() {
         return root;
+    }
+
+    /**
+     * Returns the activity predecessors of the given activity.
+     *
+     * @param activity The given activity.
+     * @return Returns the activities that have a direct transition to the given activity.
+     */
+    public Set<String> getActivityPredecessors(String activity) {
+
+        Set<String> activityPredecessors = new HashSet<>();
+
+        // find all transitions that lead to the given activity and represent an activity of the AUT
+        for (Transition transition : transitions) {
+            if (transition.getTarget().getScreenState().getActivityName().equals(activity)) {
+                // check that the source state represents a different activity of the AUT
+                IScreenState sourceState = transition.getSource().getScreenState();
+                if (sourceState.getPackageName().equals(packageName)
+                        && !sourceState.getActivityName().equals(activity)) {
+                    activityPredecessors.add(sourceState.getActivityName());
+                }
+            }
+        }
+
+        return activityPredecessors;
     }
 
     /**

@@ -69,7 +69,6 @@ public class GUIWalker {
             try {
                 activities = ComponentParser.parseManifest().stream()
                         .filter(ComponentDescription::isActivity)
-                        .peek(component -> MATE.log_acc("Extracted Activity: " + component.getFullyQualifiedName()))
                         .collect(Collectors.toList());
             } catch (XmlPullParserException | IOException e) {
                 MATE.log_error("Couldn't parse the AndroidManifest.xml file!");
@@ -108,6 +107,8 @@ public class GUIWalker {
 
         if (quickLaunch) {
             return quickLaunch(screenState)
+                    // try to quick launch close activity and then step to final state
+                    || quickLaunchCloseActivity(screenState.getActivityName())
                     // fall back mechanism
                     || goFromTo(uiAbstractionLayer.getLastScreenState(), screenState);
         } else {
@@ -179,6 +180,42 @@ public class GUIWalker {
         }
 
         // we couldn't quick launch the activity through an intent
+        return false;
+    }
+
+    /**
+     * Tries to quick launch a close (neighbouring) activity and then steps to the final activity.
+     *
+     * @param activity The target activity.
+     * @return Returns {@code true} if the activity could be successfully launched, otherwise
+     *          {@code false} is returned.
+     */
+    private boolean quickLaunchCloseActivity(String activity) {
+
+        MATE.log_acc("QuickLaunchCloseActivity for: " + activity);
+
+        Set<String> activityPredecessors = guiModel.getActivityPredecessors(activity);
+
+        if (!activityPredecessors.isEmpty()) {
+            // this can only happen if the given activity is the main activity
+            return false;
+        }
+
+        Set<IScreenState> targetActivityStates = guiModel.getActivityStates(activity);
+
+        for (String activityPredecessor : activityPredecessors) {
+            // try to quick launch a neighbouring activity
+            if (quickLaunch(activityPredecessor)) {
+                // try to move to any state of the target activity
+                for (IScreenState targetActivityState : targetActivityStates) {
+                    if (goFromTo(uiAbstractionLayer.getLastScreenState(), targetActivityState)) {
+                        MATE.log_acc("QuickLaunchCloseActivity succeeded!");
+                        return true;
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
@@ -292,6 +329,8 @@ public class GUIWalker {
 
         if (quickLaunch) {
             return quickLaunch(activity)
+                    // try to quick launch close activity and then step to final state
+                    || quickLaunchCloseActivity(activity)
                     // fall back mechanism
                     || goToActivityByState(activity);
         } else {

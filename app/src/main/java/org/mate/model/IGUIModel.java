@@ -81,6 +81,21 @@ public interface IGUIModel {
     Set<IScreenState> getActivityStates(String activity);
 
     /**
+     * Returns the screen states belonging to the AUT.
+     *
+     * @return Returns the screen states of the AUT.
+     */
+    Set<IScreenState> getAppStates();
+
+    /**
+     * Returns the activity predecessors of the given activity.
+     *
+     * @param activity The given activity.
+     * @return Returns the activities that have a direct transition to the given activity.
+     */
+    Set<String> getActivityPredecessors(String activity);
+
+    /**
      * Returns a textual representation of the GUI model.
      *
      * @return Returns a textual representation of the GUI model.

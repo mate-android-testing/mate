@@ -89,7 +89,7 @@ public class UIAbstractionLayer {
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
-        guiModel = new FSMModel(lastScreenState);
+        guiModel = new FSMModel(lastScreenState, packageName);
         guiWalker = new GUIWalker(this);
     }
 

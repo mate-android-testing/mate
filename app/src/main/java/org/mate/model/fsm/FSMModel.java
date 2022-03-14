@@ -12,17 +12,30 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Represents the gui model through a finite state machine.
+ */
 public class FSMModel implements IGUIModel {
 
+    /**
+     * The finite state machine.
+     */
     private final FSM fsm;
+
+    /**
+     * The package name of the AUT.
+     */
+    private final String packageName;
 
     /**
      * Creates a new FSM based model with a given initial state.
      *
      * @param rootState The root or start state of the FSM model.
+     * @param packageName The package name of the AUT.
      */
-    public FSMModel(IScreenState rootState) {
-        fsm = new FSM(new State(0, rootState));
+    public FSMModel(IScreenState rootState, String packageName) {
+        this.packageName = packageName;
+        fsm = new FSM(new State(0, rootState), packageName);
     }
 
     /**
@@ -121,6 +134,24 @@ public class FSMModel implements IGUIModel {
         return getStates().stream()
                 .filter(screenState -> screenState.getActivityName().equals(activity))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<IScreenState> getAppStates() {
+        return getStates().stream()
+                .filter(screenState -> screenState.getPackageName().equals(packageName))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> getActivityPredecessors(String activity) {
+        return fsm.getActivityPredecessors(activity);
     }
 
     /**
