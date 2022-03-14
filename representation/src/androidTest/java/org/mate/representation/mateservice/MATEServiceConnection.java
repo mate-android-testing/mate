@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.mate.commons.IMATEServiceInterface;
+import org.mate.commons.utils.MATELog;
 import org.mate.representation.commands.CommandHandler;
 import org.mate.representation.util.MATERepLog;
 
@@ -27,6 +28,9 @@ import org.mate.representation.util.MATERepLog;
 public class MATEServiceConnection implements ServiceConnection {
     public static final String MATE_SERVICE_PACKAGE_NAME = "org.mate";
     public static final String MATE_SERVICE_CLASS_NAME = "org.mate.service.MATEService";
+
+    // Current connection to the MATE Service.
+    public static MATEServiceConnection connection = null;
 
     private final CommandHandler commandHandler;
     private IMATEServiceInterface mateService;
@@ -47,7 +51,7 @@ public class MATEServiceConnection implements ServiceConnection {
 
         // create an instance of MATEServiceConnection, which will take care of listening for MATE
         // Service connection events.
-        MATEServiceConnection connection = new MATEServiceConnection();
+        connection = new MATEServiceConnection();
 
         // bind to MATE Service using the connection object we just created.
         Intent intent = new Intent();
@@ -61,6 +65,17 @@ public class MATEServiceConnection implements ServiceConnection {
             MATERepLog.info(message);
             throw new Exception(message);
         }
+    }
+
+    public static void tearDownIfConnected() {
+        if (connection == null) {
+            return;
+        }
+
+        MATELog.log("MATE Representation Layer is tearing down connection with MATE Service.");
+
+        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        context.unbindService(connection);
     }
 
     @Override

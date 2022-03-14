@@ -57,5 +57,7 @@ public class DynamicTest {
                 e.printStackTrace();
             }
         }
+
+        MATEServiceConnection.tearDownIfConnected();
     }
 }

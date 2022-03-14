@@ -203,8 +203,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         if (intent == null) {
             log("MATE Service starting but intent was not provided");
-            stopForeground(true);
-            stopSelf();
+            stopService();
             return START_NOT_STICKY;
         }
 
@@ -225,15 +224,13 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         if (!intent.hasExtra(ALGORITHM_INTENT_EXTRA)) {
             log("MATE Service starting but " + ALGORITHM_INTENT_EXTRA + " was not provided");
-            stopForeground(true);
-            stopSelf();
+            stopService();
             return START_NOT_STICKY;
         }
 
         if (!intent.hasExtra(PACKAGE_NAME_INTENT_EXTRA)) {
             log("MATE Service starting but " + PACKAGE_NAME_INTENT_EXTRA + " was not provided");
-            stopForeground(true);
-            stopSelf();
+            stopService();
             return START_NOT_STICKY;
         }
 
@@ -255,8 +252,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
 
         } catch (Exception e) {
             log("An exception occurred: " + e.getMessage());
-            stopForeground(true);
-            stopSelf();
+            stopService();
         }
 
         // Run MATE in a new thread.
@@ -285,13 +281,40 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 log(sw.toString());
             } finally {
                 mateClientRunning = false;
-                stopForeground(true);
-                stopSelf();
+
+                if (representationLayer != null) {
+                    // ask the representation layer to disconnect itself from us, so we can stop
+                    // the MATE Service gracefully.
+                    log("MATE Service is asking representation layer to exit");
+                    try {
+                        representationLayer.exit();
+                    } catch (RemoteException e) {
+                        // do nothing
+                    }
+                }
+
+                Utils.sleep(2000);
+
+                MATEService.this.stopService();
             }
         }).start();
 
         // Do not restart this service if it is explicitly stopped, so return not sticky.
         return START_NOT_STICKY;
+    }
+
+    /**
+     * Stop the MATE Service by any means necessary.
+     */
+    private void stopService() {
+        if (representationLayer == null) {
+            log("MATE Service finishing gracefully");
+            stopForeground(true);
+            stopSelf();
+        } else {
+            log("MATE Service finishing forcefully: representation layer won't disconnect");
+            throw new IllegalStateException("MATE Service says bye bye");
+        }
     }
 
     private boolean launchPackageName(String packageName) {

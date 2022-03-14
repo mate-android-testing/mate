@@ -47,6 +47,7 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
     @Override
     public void exit() throws RemoteException {
+        MATELog.log("MATE Representation Layer was asked to exit.");
         DynamicTest.keepRunning = false;
     }
 
