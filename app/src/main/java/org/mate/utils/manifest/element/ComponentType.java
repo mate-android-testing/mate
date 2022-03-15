@@ -31,6 +31,11 @@ public enum ComponentType {
         throw new IllegalArgumentException("Component " + component + " cannot be mapped to a type!");
     }
 
+    /**
+     * Returns a textual representation of the component type.
+     *
+     * @return Returns the string representation of the component type.
+     */
     @Override
     public String toString() {
         switch (this) {

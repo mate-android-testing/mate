@@ -371,5 +371,4 @@ public class ComponentDescription {
 
         return builder.toString();
     }
-
 }
