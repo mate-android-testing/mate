@@ -54,8 +54,21 @@ public class ComponentDescription {
      */
     private final Set<IntentFilterDescription> intentFilters = new HashSet<>();
 
-    // additional information used in combination with intents
+    /**
+     * Whether the component is a dynamic broadcast receiver. Solely relevant for receivers.
+     */
+    private boolean isDynamicReceiver = false;
+
+    /**
+     * String constants discovered through a static analysis of the bytecode, see
+     * {@link org.mate.exploration.intent.parsers.IntentInfoParser}.
+     */
     private final Set<String> stringConstants = new HashSet<>();
+
+    /**
+     * Extras (key-value pairs) discovered through a static analysis of the bytecode, see
+     * {@link org.mate.exploration.intent.parsers.IntentInfoParser}.
+     */
     private final Map<String, String> extras = new HashMap<>();
 
     /**
@@ -84,7 +97,7 @@ public class ComponentDescription {
      * Whether the component has been exported or not.
      *
      * @return Returns {@code true} if the component has been exported, otherwise {@code false} is
-     *          returned.
+     *         returned.
      */
     public boolean isExported() {
         return exported;
@@ -103,7 +116,7 @@ public class ComponentDescription {
      * Whether the component has been enabled or not.
      *
      * @return Returns {@code true} if the component has been enabled, otherwise {@code false} is
-     *          returned.
+     *         returned.
      */
     public boolean isEnabled() {
         return enabled;
@@ -118,58 +131,154 @@ public class ComponentDescription {
         this.enabled = enabled;
     }
 
+    /**
+     * Whether the component is a dynamic broadcast receiver.
+     *
+     * @return Returns {@code true} if the component is a dynamic receiver, otherwise {@code false} is
+     *         returned.
+     */
+    public boolean isDynamicReceiver() {
+        return isBroadcastReceiver() && isDynamicReceiver;
+    }
+
+    /**
+     * Controls whether the component is a dynamic broadcast receiver.
+     *
+     * @param dynamicReceiver {@code true} if the receiver is dynamic, otherwise {@code false}.
+     */
+    public void setDynamicReceiver(boolean dynamicReceiver) {
+        isDynamicReceiver = dynamicReceiver;
+    }
+
+    /**
+     * Whether the activity reacts to the onNewIntent() method.
+     *
+     * @return Returns {@code true} if the activity reacts to the onNewIntent() method, otherwise
+     *         {@code false} is returned.
+     */
     public boolean isHandlingOnNewIntent() {
         return handleOnNewIntent;
     }
 
+    /**
+     * Sets whether the component (activity) reacts to the onNewIntent() method.
+     *
+     * @param handleOnNewIntent Whether the components reacts to onNewIntent().
+     */
     public void setHandlingOnNewIntent(boolean handleOnNewIntent) {
         this.handleOnNewIntent = handleOnNewIntent;
     }
 
+    /**
+     * Adds a set of string constants to the component.
+     *
+     * @param stringConstants The string constants to be added.
+     */
     public void addStringConstants(Set<String> stringConstants) {
         this.stringConstants.addAll(stringConstants);
     }
 
+    /**
+     * Adds a set of intent filters to the component.
+     *
+     * @param intentFilters The set of intent filters to be added.
+     */
     public void addIntentFilters(Set<IntentFilterDescription> intentFilters) {
         this.intentFilters.addAll(intentFilters);
     }
 
+    /**
+     * Adds extras (key-value pairs) to the component.
+     *
+     * @param extras The extras to be added.
+     */
     public void addExtras(Map<String, String> extras) {
         this.extras.putAll(extras);
     }
 
+    /**
+     * Whether this component represents an activity.
+     *
+     * @return Returns {@code true} if this component represents an activity, otherwise {@code false}
+     *         is returned.
+     */
     public boolean isActivity() {
         return type == ComponentType.ACTIVITY;
     }
 
+    /**
+     * Whether this component represents a service.
+     *
+     * @return Returns {@code true} if this component represents a service, otherwise {@code false}
+     *         is returned.
+     */
     public boolean isService() {
         return type == ComponentType.SERVICE;
     }
 
+    /**
+     * Whether this component represents a broadcast receiver.
+     *
+     * @return Returns {@code true} if this component represents a receiver, otherwise {@code false}
+     *         is returned.
+     */
     public boolean isBroadcastReceiver() {
         return type == ComponentType.BROADCAST_RECEIVER;
     }
 
+    /**
+     * Whether this component represents a content provider.
+     *
+     * @return Returns {@code true} if this component represents a provider, otherwise {@code false}
+     *         is returned.
+     */
     public boolean isContentProvider() {
         return type == ComponentType.CONTENT_PROVIDER;
     }
 
+    /**
+     * Whether this component defines any intent filters.
+     *
+     * @return Returns {@code true} if this component defines any intent filters, otherwise
+     *         {@code false} is returned.
+     */
     public boolean hasIntentFilter() {
         return !intentFilters.isEmpty();
     }
 
+    /**
+     * Whether this component defines any extras.
+     *
+     * @return Returns {@code true} if this component defines any extras, otherwise {@code false}
+     *         is returned.
+     */
     public boolean hasExtra() {
         return !extras.isEmpty();
     }
 
+    /**
+     * Removes the given set of intent filters from this component.
+     *
+     * @param intentFilters The set of intent filters that should be removed.
+     */
     public void removeIntentFilters(Collection<IntentFilterDescription> intentFilters) {
         this.intentFilters.removeAll(intentFilters);
     }
 
+    /**
+     * Returns the type of the component. Note that activity-aliases are considered as activities.
+     *
+     * @return Returns the component's type.
+     */
     public ComponentType getType() {
         return type;
     }
 
+    /**
+     * Adds the given intent filter to this component.
+     *
+     * @param intentFilter The intent filter to be added.
+     */
     public void addIntentFilter(IntentFilterDescription intentFilter) {
         intentFilters.add(intentFilter);
     }
@@ -194,7 +303,7 @@ public class ComponentDescription {
      * @param components The list of components.
      * @param name The name of the component to be looked up.
      * @return Returns the component matching the given name in the list of components
-     *          or {@code null} if the component couldn't be found.
+     *         or {@code null} if the component couldn't be found.
      */
     public static ComponentDescription getComponentByName(
             final List<ComponentDescription> components, final String name) {
@@ -225,6 +334,11 @@ public class ComponentDescription {
         return Collections.unmodifiableMap(extras);
     }
 
+    /**
+     * Provides a textual representation of the component.
+     *
+     * @return Returns the string representation of the component.
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

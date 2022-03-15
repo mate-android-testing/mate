@@ -190,19 +190,20 @@ public class IntentFilterDescription {
         return builder.toString();
     }
 
-
     /**
-     * A representation of the data specification, mostly optional.
+     * A representation of the data specification, mostly optional. See
+     * https://developer.android.com/guide/topics/manifest/data-element for more details.
      */
     public static class Data {
 
-        private Set<String> schemes;
-        private Set<String> hosts;
-        private Set<String> ports;
-        private Set<String> paths;
-        private Set<String> pathPatterns;
-        private Set<String> pathPrefixes;
-        private Set<String> mimeTypes;
+        // the attributes that describe a data uri
+        private final Set<String> schemes;
+        private final Set<String> hosts;
+        private final Set<String> ports;
+        private final Set<String> paths;
+        private final Set<String> pathPatterns;
+        private final Set<String> pathPrefixes;
+        private final Set<String> mimeTypes;
 
         private static final String[] imageFiles = {"Bmp.bmp", "Gif.gif", "Jpg.jpg", "Png.png", "Tiff.tiff"};
         private static final String[] audioFiles = {"Wav.wav", "Mid.mid", "Ogg.ogg", "Mp3.mp3"};
@@ -262,7 +263,6 @@ public class IntentFilterDescription {
                 mimeTypes.add(mimeType);
             }
         }
-
 
         @Override
         public String toString() {
@@ -542,7 +542,7 @@ public class IntentFilterDescription {
                     return "mateTestXml.xml";
             }
 
-            MATE.log_acc("No file found for mimeType: " + mimeType);
+            MATE.log_warn("No file found for mimeType: " + mimeType);
             return null;
         }
 
