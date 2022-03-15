@@ -483,8 +483,8 @@ public class IntentProvider {
         }
 
         // construct suitable key-value pairs
-        if (component.hasExtra()) {
-            intent.putExtras(component.generateRandomBundle());
+        if (component.hasExtras()) {
+            intent.putExtras(BundleGenerator.generateRandomBundle(component));
         }
 
         // trigger onNewIntent() instead of onCreate() (solely for activities)
