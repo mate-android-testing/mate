@@ -364,6 +364,16 @@ public class IntentProvider {
     private IntentBasedAction generateIntentBasedAction(ComponentDescription component,
                                                         boolean dynamicReceiver, boolean handleOnNewIntent) {
 
+        /*
+        * Services without an intent filter can be targeted as long as we know its full name. In this
+        * case we simply construct an explicit intent without any further attributes.
+         */
+        if (component.isService() && !component.hasIntentFilter()) {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
+            return new IntentBasedAction(intent, component, new IntentFilterDescription());
+        }
+
         if (!component.hasIntentFilter()) {
             MATE.log("Component " + component + " doesn't declare any intent-filter!");
             throw new IllegalStateException("Component without intent-filter!");

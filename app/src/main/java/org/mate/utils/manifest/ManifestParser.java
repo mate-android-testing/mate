@@ -113,13 +113,23 @@ public final class ManifestParser {
                     case "receiver":
                         if (currentComponent != null && currentComponent.hasIntentFilter()) {
                             /*
-                            * According to the official docs, a component that defines an intent
-                            * filter should be exported. However, it is unclear whether an explicit
-                            * 'false' value overrides this behaviour.
+                             * According to the official docs, a component that defines an intent
+                             * filter should be exported. However, it is unclear whether an explicit
+                             * 'false' value overrides this behaviour.
                              */
                             currentComponent.setExported(true);
                         }
 
+                        if (currentComponent != null && currentComponent.isService()) {
+                            /*
+                             * According to https://developer.android.com/guide/topics/manifest/service-element
+                             * a service can be targeted once we know its name. Since we are aware of
+                             * this information, we consider any service as exported.
+                             */
+                            currentComponent.setExported(true);
+                        }
+
+                        components.add(currentComponent);
                         currentComponent = null;
                         break;
                     case "intent-filter":
@@ -144,7 +154,7 @@ public final class ManifestParser {
      *
      * @param intentFilter The given intent filter.
      * @return Returns {@code true} if the intent filter describes the main activity, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     private static boolean describesMainActivity(final IntentFilterDescription intentFilter) {
         return intentFilter.getActions().contains("android.intent.action.MAIN")
