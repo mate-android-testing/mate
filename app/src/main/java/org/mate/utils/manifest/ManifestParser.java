@@ -120,15 +120,6 @@ public final class ManifestParser {
                             currentComponent.setExported(true);
                         }
 
-                        if (currentComponent != null && currentComponent.isService()) {
-                            /*
-                             * According to https://developer.android.com/guide/topics/manifest/service-element
-                             * a service can be targeted once we know its name. Since we are aware of
-                             * this information, we consider any service as exported.
-                             */
-                            currentComponent.setExported(true);
-                        }
-
                         components.add(currentComponent);
                         currentComponent = null;
                         break;

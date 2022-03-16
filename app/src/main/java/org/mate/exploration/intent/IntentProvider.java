@@ -413,9 +413,8 @@ public class IntentProvider {
 
         /*
         * There are components that were explicitly exported although they don't offer any intent
-        * filter, e.g. activity-aliases. Likewise, a service without an intent filter is also
-        * implicitly exported. In this case we simply construct an explicit intent without any
-        * further attributes.
+        * filter, e.g. activity-aliases. In this case we simply construct an explicit intent without
+        * any further attributes.
          */
         if (!component.hasIntentFilter()) {
             MATE.log_debug("Targeting component without intent filter: " + component.getFullyQualifiedName());
