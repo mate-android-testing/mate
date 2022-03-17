@@ -4,7 +4,6 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.model.TestCase;
 
@@ -23,7 +22,7 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
     /**
      * The used factory to produce new chromosomes (test cases).
      */
-    private final IChromosomeFactory<TestCase> aimDroidChromosomeFactory;
+    private final AimDroidChromosomeFactory aimDroidChromosomeFactory;
 
     /**
      * Enables the interaction with the AUT.
@@ -74,6 +73,7 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             }
 
             // explore activity in cage
+            aimDroidChromosomeFactory.setTargetActivity(targetActivity);
             IChromosome<TestCase> chromosome = aimDroidChromosomeFactory.createChromosome();
             TestCase testCase = chromosome.getValue();
 

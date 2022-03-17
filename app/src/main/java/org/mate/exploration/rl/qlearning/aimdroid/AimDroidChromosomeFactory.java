@@ -14,11 +14,18 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     /**
      * The activity that should be explored intensively.
      */
-    private final String targetActivity;
+    private String targetActivity;
 
     public AimDroidChromosomeFactory(boolean resetApp, int maxNumEvents) {
         super(resetApp, maxNumEvents);
-        targetActivity = uiAbstractionLayer.getCurrentActivity();
+    }
+
+    public String getTargetActivity() {
+        return targetActivity;
+    }
+
+    public void setTargetActivity(String targetActivity) {
+        this.targetActivity = targetActivity;
     }
 
     /**
