@@ -5,7 +5,6 @@ import android.os.RemoteException;
 
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
-import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
@@ -23,21 +22,10 @@ import java.util.List;
 
 /**
  * Handles commands requested by the MATE Service (e.g., fetch current available actions).
- *
- * Note that Inter Process Communication (IPC) calls are dispatched through a thread pool running
- * in each process, so the code executing here will NOT be running in our main thread like most
- * other things -- so, to update the UI (and use the Espresso API), we need to use a Handler to
- * hop over there.
  */
 public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
-    private final MessageHandler messageHandler;
-
-    public CommandHandler() {
-        // since the Handler is created here, it will use the thread we are currently running on
-        // (hopefully the Main thread).
-        messageHandler = new MessageHandler();
-    }
+    public CommandHandler() {}
 
     @Override
     public void ping() throws RemoteException {
@@ -145,17 +133,7 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
         ExplorationInfo.getInstance().setWidgetBasedActions();
     }
 
-    /*
-    @Override
-    public void getAvailableActions() throws RemoteException {
-        String threadName = Thread.currentThread().getName();
-        MATERepLog.info("Command received: getAvailableActions() on thread " + threadName);
-        messageHandler.handleMessage(messageHandler.obtainMessage(GET_AVAILABLE_ACTIONS, 0, 0));
-        MATERepLog.info("Exiting Command: getAvailableActions()");
-    }
-    */
-
     public void setMateService(IMATEServiceInterface mateService) {
-        messageHandler.setMateService(mateService);
+        // do nothing, for now
     }
 }

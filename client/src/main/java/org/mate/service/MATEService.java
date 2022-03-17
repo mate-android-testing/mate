@@ -504,10 +504,5 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             log("registerRepresentationLayer called");
             setRepresentationLayer(representationLayer, binder);
         }
-
-        @Override
-        public void reportAvailableActions(List<String> actions) throws RemoteException {
-            log("reportAvailableActions called. Received actions: " + Arrays.toString(actions.toArray()));
-        }
     };
 }
