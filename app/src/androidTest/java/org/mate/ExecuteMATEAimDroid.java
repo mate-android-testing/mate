@@ -16,7 +16,7 @@ public class ExecuteMATEAimDroid {
         MATE mate = new MATE();
 
         ActivityInsulatedMultiLevelExploration activityInsulatedMultiLevelExploration
-                = new ActivityInsulatedMultiLevelExploration(false, Properties.MAX_NUMBER_EVENTS());
+                = new ActivityInsulatedMultiLevelExploration(false, Properties.MAX_NUMBER_EVENTS(), 0.05d);
         mate.testApp(activityInsulatedMultiLevelExploration);
     }
 
