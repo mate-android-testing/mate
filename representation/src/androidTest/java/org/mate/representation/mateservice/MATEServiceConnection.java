@@ -13,11 +13,12 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.utils.MATELog;
+import org.mate.representation.DynamicTest;
 import org.mate.representation.commands.CommandHandler;
 import org.mate.representation.util.MATERepLog;
 
 /**
- * This class main responsibility is to connect the Representation Layer with the MATE Service.
+ * This class main's responsibility is to connect the Representation Layer with the MATE Service.
  *
  * In technical terms:
  * - First, this class establish an RPC connection through which the Representation Layer can
@@ -26,14 +27,31 @@ import org.mate.representation.util.MATERepLog;
  * - After this, the MATE Service can send us commands using the provided interface.
  */
 public class MATEServiceConnection implements ServiceConnection {
+    /**
+     * Package name of the MATE Client.
+     */
     public static final String MATE_SERVICE_PACKAGE_NAME = "org.mate";
+
+    /**
+     * Fully qualified class name of the MATE Service.
+     */
     public static final String MATE_SERVICE_CLASS_NAME = "org.mate.service.MATEService";
 
-    // Current connection to the MATE Service.
+    /**
+     * Current connection to the MATE Service.
+     */
     public static MATEServiceConnection connection = null;
 
-    private final CommandHandler commandHandler;
+    /**
+     * The MATE Service proxy object obtained after connection is established.
+     */
     private IMATEServiceInterface mateService;
+
+    /**
+     * The command handler to resolve requests received from the MATE Service.
+     */
+    private final CommandHandler commandHandler;
+
 
     public MATEServiceConnection() {
         commandHandler = new CommandHandler();
@@ -67,6 +85,9 @@ public class MATEServiceConnection implements ServiceConnection {
         }
     }
 
+    /**
+     * Tear down existing connection with the MATE Service.
+     */
     public static void tearDownIfConnected() {
         if (connection == null) {
             return;
@@ -78,11 +99,18 @@ public class MATEServiceConnection implements ServiceConnection {
         context.unbindService(connection);
     }
 
+    /**
+     * Called when a connection to the MATE Service has been established, with the IBinder of the
+     * communication channel to the Service.
+     *
+     * @param name
+     * @param mateServiceBinder
+     */
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
+    public void onServiceConnected(ComponentName name, IBinder mateServiceBinder) {
         MATERepLog.info("Representation layer connected to MATE Service");
 
-        mateService = IMATEServiceInterface.Stub.asInterface(service);
+        mateService = IMATEServiceInterface.Stub.asInterface(mateServiceBinder);
         commandHandler.setMateService(mateService);
 
         try {
@@ -94,8 +122,13 @@ public class MATEServiceConnection implements ServiceConnection {
         }
     }
 
+    /**
+     * Called when the connection to the MATE Service has been lost.
+     * @param componentName
+     */
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
         MATERepLog.info("Representation layer disconnected from MATE Service");
+        DynamicTest.keepRunning = false;
     }
 }

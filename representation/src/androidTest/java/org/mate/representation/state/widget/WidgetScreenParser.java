@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Auxiliary class to parse the widgets in the current screen.
+ */
 public class WidgetScreenParser {
 
     /**
@@ -39,6 +42,9 @@ public class WidgetScreenParser {
      */
     private static final Map<String, String> editTextHints = new Hashtable<String, String>();
 
+    /**
+     * The UiDevice provided by the DeviceInfo class.
+     */
     private final UiDevice device;
 
     public WidgetScreenParser() {
@@ -48,10 +54,17 @@ public class WidgetScreenParser {
         parseWidgets();
     }
 
+    /**
+     * @return the widgets parsed.
+     */
     public List<Widget> getWidgets() {
         return widgets;
     }
 
+    /**
+     * Parse the widgets in the current screen.
+     * This is done by inspecting the UI hierarchy from the root view in the active window.
+     */
     public void parseWidgets() {
         AccessibilityNodeInfo rootNode =
                 getInstrumentation().getUiAutomation().getRootInActiveWindow();

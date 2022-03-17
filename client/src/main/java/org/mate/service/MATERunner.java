@@ -23,6 +23,10 @@ import org.mate.service.execution.ExecuteMATESapienz;
 import org.mate.service.execution.ExecuteMATEStandardGE;
 import org.mate.service.execution.ExecuteMATEStandardGeneticAlgorithm;
 
+/**
+ * Auxiliary class for routing a MATE Client exploration to the corresponding class, based on the
+ * algorithm's name.
+ */
 public class MATERunner {
     public static void run(String packageName,
                            String algorithm,

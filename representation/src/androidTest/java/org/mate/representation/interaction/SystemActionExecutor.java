@@ -9,6 +9,9 @@ import org.mate.representation.ExplorationInfo;
 import java.io.IOException;
 import java.util.regex.Matcher;
 
+/**
+ * ActionExecutor class for System actions.
+ */
 public class SystemActionExecutor extends ActionExecutor {
 
     /**
@@ -17,6 +20,7 @@ public class SystemActionExecutor extends ActionExecutor {
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
+    @Override
     public boolean perform(Action action) throws AUTCrashException {
         return executeAction((SystemAction) action);
     }

@@ -10,6 +10,9 @@ import org.mate.commons.interaction.action.intent.ComponentType;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.utils.MATELog;
 
+/**
+ * ActionExecutor class for IntentBased actions.
+ */
 public class IntentBasedActionExecutor extends ActionExecutor {
 
     /**
@@ -18,6 +21,7 @@ public class IntentBasedActionExecutor extends ActionExecutor {
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
+    @Override
     public boolean perform(Action action) throws AUTCrashException {
         return executeAction((IntentBasedAction) action);
     }

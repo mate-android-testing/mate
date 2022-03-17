@@ -41,16 +41,33 @@ import java.util.concurrent.TimeUnit;
  */
 public class MATEService extends Service implements IBinder.DeathRecipient {
 
+    /**
+     * Name of intent extra indicating the package name on which to perform exploration.
+     */
     public static final String PACKAGE_NAME_INTENT_EXTRA = "packageName";
+
+    /**
+     * Name of intent extra indicating the algorithm to be used for exploration.
+     */
     public static final String ALGORITHM_INTENT_EXTRA = "algorithm";
+
+    /**
+     * Name of intent extra indicating that the MATE Service should wait that debugger is
+     * attached before starting exploration.
+     */
     public static final String WAIT_FOR_DEBUGGER = "waitForDebugger";
 
     /**
-     * Representation Layer associated to the MATE Service.
+     * The Representation Layer proxy object obtained after the representation layer registers
+     * itself with our class.
      * To ensure that updates to this variable propagate predictable to other threads, we apply
      * the volatile modifier.
      */
     private volatile static IRepresentationLayerInterface representationLayer;
+
+    /**
+     * Representation Layer's Binder object.
+     */
     private volatile static IBinder representationLayerBinder;
 
     /**
@@ -75,6 +92,12 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      */
     private static boolean waitForDebugger = false;
 
+    /**
+     * Fires up Representation Layer if it is not already running.
+     * Then, it waits for the Representation Layer to establish a connection with us and to
+     * register itself afterwards.
+     * If Representation Layer was already connected and alive, this method does nothing.
+     */
     public static void ensureRepresentationLayerIsConnected() {
         log(String.format("ensureRepresentationLayerIsConnected called on thread %s",
                 Thread.currentThread().getName()));
@@ -107,6 +130,13 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         configureRepresentationLayer();
     }
 
+    /**
+     * Configures Representation Layer after it has just started.
+     * This mainly takes care of forwarding properties present in the MATE Client.
+     * Moreover, it asks the Representation Layer to grant Storage runtime permissions for the AUT.
+     * The latter is needed so that the Representation Layer can access files in the sdcard
+     * (e.g., staticStrings.xml).
+     */
     private static void configureRepresentationLayer() {
         try {
             if (waitForDebugger) {
@@ -139,6 +169,11 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         }
     }
 
+    /**
+     * Disconnects the currently connected Representation Layer.
+     * Sadly, this can not be forced on a service client. We can only ask the representation
+     * layer to gently exit itself from us.
+     */
     public static void disconnectRepresentationLayer() {
         if (isRepresentationLayerAlive()) {
             try {
@@ -151,6 +186,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         representationLayer = null;
     }
 
+    /**
+     * @return whether we have a non-null proxy for the Representation Layer and it answers
+     * successfully to the "ping" command.
+     */
     public static boolean isRepresentationLayerAlive() {
         if (representationLayer == null) {
             return false;
@@ -164,6 +203,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         }
     }
 
+    /**
+     * @return the currently connected Representation Layer.
+     * @throws AUTCrashException if object is null.
+     */
     public static IRepresentationLayerInterface getRepresentationLayer() throws AUTCrashException {
         if (representationLayer == null) {
             throw new AUTCrashException("Trying to use a disconnected representation layer");
@@ -189,7 +232,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      * adb shell am start-foreground-service -n org.mate/.service.MATEService -e packageName
      * [aut-package-name] -e algorithm [mate-algorithm]
      *
-     * Notice that the "-e" flag indicate extra parameters that will be received in this method.
+     * Notice that the "-e" flag indicates extra parameters that will be received in this method.
      *
      * @param intent
      * @param flags
@@ -321,6 +364,14 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         }
     }
 
+    /**
+     * Launches the Main activity of a package name.
+     * This might fail if the request package does not have a Launchers specified in its
+     * AndroidManifest.
+     *
+     * @param packageName
+     * @return whether the activity was started successfully or not.
+     */
     private boolean launchPackageName(String packageName) {
         Context context = getApplicationContext();
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
@@ -416,11 +467,11 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         representationLayer = null;
         representationLayerBinder.unlinkToDeath(this,0);
 
-        // TODO: process this information somehow
+        // TODO (Ivan): process this information somehow
     }
 
     /**
-     * Save representation layer interface stub and add listener in case it dies.
+     * Save representation layer interface stub and add a listener in case it dies.
      *
      * @param representationLayer
      * @param binder
@@ -442,6 +493,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         representationLayerConnectionCountDown.countDown();
     }
 
+    /**
+     * MATE Service binder to return when a client connects with us.
+     * Basically, it knows how to answer to commands that might be triggered by the service clients.
+     */
     private final IMATEServiceInterface.Stub binder = new IMATEServiceInterface.Stub() {
         @Override
         public void registerRepresentationLayer(IRepresentationLayerInterface representationLayer,

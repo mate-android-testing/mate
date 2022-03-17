@@ -16,6 +16,9 @@ import org.mate.representation.input_generation.TextDataGenerator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * ActionExecutor class for Primitive actions.
+ */
 public class PrimitiveActionExecutor extends ActionExecutor {
 
     /**
@@ -24,6 +27,7 @@ public class PrimitiveActionExecutor extends ActionExecutor {
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
+    @Override
     public boolean perform(Action action) throws AUTCrashException {
         return executeAction((PrimitiveAction) action);
     }

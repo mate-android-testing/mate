@@ -18,8 +18,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
- * This class is responsible for providing basic information about the exploration being carried at
- * the moment.
+ * This class is responsible for providing basic information about the exploration being carried
+ * out at the moment.
  */
 public class ExplorationInfo {
     /**
@@ -47,9 +47,11 @@ public class ExplorationInfo {
      */
     private boolean widgetBasedActions = false;
 
-    private ExplorationInfo() {
-    }
+    private ExplorationInfo() {}
 
+    /**
+     * @return the singleton instance of the ExplorationInfo class.
+     */
     public static ExplorationInfo getInstance() {
         if (instance == null) {
             instance = new ExplorationInfo();
@@ -58,47 +60,67 @@ public class ExplorationInfo {
         return instance;
     }
 
+    /**
+     * @return the package name of the AUT.
+     */
     public String getTargetPackageName() {
         return targetPackageName;
     }
 
+    /**
+     * Sets the random seed to be used during exploration in the Representation Layer.
+     * @param seed
+     */
     public void setRandomSeed(long seed) {
         rnd = new MersenneTwister(seed);
         Randomness.setRnd(rnd);
     }
 
+    /**
+     * @return the Random instance to be used during exploration in the Representation Layer.
+     */
     public Random getRandom() {
         return rnd;
     }
 
+    /**
+     * Sets replay mode to true.
+     */
     public void setReplayMode() {
         replayMode = true;
     }
 
+    /**
+     * @return whether the exploration is running on replay mode or not.
+     */
     public boolean isReplayMode() {
         return replayMode;
     }
 
+    /**
+     * Sets widget-based actions mode to true.
+     */
     public void setWidgetBasedActions() {
         widgetBasedActions = true;
     }
 
+    /**
+     * @return whether the exploration is running on widget-based actions mode or not.
+     */
     public boolean useWidgetBasedActions() {
         return widgetBasedActions;
     }
 
     /**
-     *
-     * @return the name of the currently visible package.
+     * @return the name of the currently visible package (might be different than the AUT's
+     * package name).
      */
     public String getCurrentPackageName() {
         return DeviceInfo.getInstance().getUiDevice().getCurrentPackageName();
     }
 
     /**
-     * Retrieves the name of the currently visible activity.
-     *
-     * @return Returns the name of the currently visible activity.
+     * @return the name of the currently visible activity.
      */
     public String getCurrentActivityName() {
         try {
@@ -120,7 +142,7 @@ public class ExplorationInfo {
     /**
      * Returns the name of the current activity on an emulator running API 25.
      *
-     * @return Returns the current activity name.
+     * @return the current activity name.
      */
     private String getCurrentActivityAPI25() throws IOException {
         String output = DeviceInfo.getInstance().executeShellCommand("dumpsys activity top");
@@ -130,18 +152,17 @@ public class ExplorationInfo {
     /**
      * Returns the name of the current activity on an emulator running API 28.
      *
-     * @return Returns the current activity name.
+     * @return the current activity name.
      */
     private String getCurrentActivityAPI28() throws IOException {
         String output = DeviceInfo.getInstance().executeShellCommand("dumpsys activity activities");
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
 
+    /**
+     * @return the activity names of the AUT
+     */
     public List<String> getTargetPackageActivityNames() {
-        if (targetPackageName == null) {
-            return null;
-        }
-
         try {
             // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
             PackageInfo pi =
@@ -156,9 +177,7 @@ public class ExplorationInfo {
     }
 
     /**
-     * Returns the currently visible fragments.
-     *
-     * @return Returns the currently visible fragments.
+     * @return the currently visible fragments.
      */
     public List<String> getCurrentFragments() {
         // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
@@ -178,7 +197,7 @@ public class ExplorationInfo {
      * Extracts the visible fragments from the given output.
      *
      * @param output The output of the command 'dumpsys activity <activity-name>'.
-     * @return Returns the visible fragments.
+     * @return the visible fragments.
      */
     private List<String> extractFragments(String output) {
 

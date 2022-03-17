@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * ActionExecutor class for Motif actions.
+ */
 public class MotifActionExecutor extends ActionExecutor {
-
 
     private final WidgetActionExecutor widgetActionExecutor = new WidgetActionExecutor();
     private final PrimitiveActionExecutor primitiveActionExecutor = new PrimitiveActionExecutor();
@@ -34,6 +36,7 @@ public class MotifActionExecutor extends ActionExecutor {
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
+    @Override
     public boolean perform(Action action) throws AUTCrashException {
         return executeAction((MotifAction) action);
     }

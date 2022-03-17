@@ -8,6 +8,9 @@ import org.mate.commons.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 
+/**
+ * Auxiliary class to get the appropriate ActionExecutor class based on an Action's class.
+ */
 public class ActionExecutorFactory {
     public static ActionExecutor getExecutor(Action action) {
         if (action instanceof WidgetAction) {

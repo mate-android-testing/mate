@@ -2,27 +2,16 @@ package org.mate.representation;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
-import androidx.test.uiautomator.UiObject;
-import androidx.test.uiautomator.UiSelector;
 
 import org.mate.commons.utils.MATELog;
-import org.mate.commons.utils.MersenneTwister;
-import org.mate.commons.utils.Randomness;
-import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * This class is responsible for providing basic information about the Device.
@@ -34,6 +23,9 @@ public class DeviceInfo {
      */
     private static DeviceInfo instance;
 
+    /**
+     * Instrumentation instance gathered from the InstrumentationRegistry.
+     */
     private final Instrumentation instrumentation;
 
     /**
@@ -59,6 +51,9 @@ public class DeviceInfo {
         this.disabledAutoRotate = false;
     }
 
+    /**
+     * @return the singleton instance of the DeviceInfo class.
+     */
     public static DeviceInfo getInstance() {
         if (instance == null) {
             instance = new DeviceInfo();
@@ -67,31 +62,65 @@ public class DeviceInfo {
         return instance;
     }
 
+    /**
+     * Get the UiDevice to get access to state information about the device.
+     * This class can also be used to simulate user actions on the device.
+     *
+     * @return the instance of UiDevice provided by the InstrumentationRegistry.
+     */
     public UiDevice getUiDevice() {
         return device;
     }
 
+    /**
+     * @return the Context of the DynamicTest that started the Representation Layer.
+     */
     public Context getRepresentationLayerContext() {
         return instrumentation.getContext();
     }
 
+    /**
+     * @return the Context of the AUT.
+     */
     public Context getAUTContext() {
         return instrumentation.getTargetContext();
     }
 
+    /**
+     * @return the width of the display, in pixels. The width and height details are reported
+     * based on the current orientation of the display.
+     */
     public int getDisplayWidth() {
         return device.getDisplayWidth();
     }
 
+    /**
+     * @return the height of the display, in pixels. The width and height details are reported
+     * based on the current orientation of the display.
+     */
     public int getDisplayHeight() {
         return device.getDisplayHeight();
     }
 
+    /**
+     * Executes a shell command using shell user identity, and returns the standard output in
+     * string.
+     *
+     * @param command to execute
+     * @return the output of the command or null if an exception was found during execution.
+     */
     public String executeShellCommand(String command) {
         try {
             return device.executeShellCommand(command);
         } catch (IOException e) {
-            e.printStackTrace();
+            MATELog.log_error("An error occurred executing shell command: " + e.getMessage());
+
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            String stackTrace = sw.toString();
+            MATELog.log_error(stackTrace);
+
             return null;
         }
     }
@@ -106,22 +135,40 @@ public class DeviceInfo {
         return isInPortraitMode;
     }
 
+    /**
+     * Stores whether the emulator is in portrait mode or not.
+     */
     public void setInPortraitMode(boolean inPortraitMode) {
         isInPortraitMode = inPortraitMode;
     }
 
+    /**
+     * Toggles the boolean indicating if emulator is in portrait mode or not.
+     */
     public void toggleInPortraitMode() {
         isInPortraitMode = !isInPortraitMode;
     }
 
+    /**
+     * @return whether auto-rotate is disabled or not.
+     */
     public boolean isDisabledAutoRotate() {
         return disabledAutoRotate;
     }
 
+    /**
+     * Sets whether auto-rotate is disabled or not.
+     */
     public void setDisabledAutoRotate(boolean disabledAutoRotate) {
         this.disabledAutoRotate = disabledAutoRotate;
     }
 
+    /**
+     * Grants a runtime permission for the AUT.
+     *
+     * @param permission to grant.
+     * @return whether the grant was successful or not.
+     */
     public boolean grantRuntimePermission(String permission) {
         String packageName = ExplorationInfo.getInstance().getTargetPackageName();
 
@@ -137,7 +184,7 @@ public class DeviceInfo {
             // an empty response indicates success of the operation
             return grantedPermission.isEmpty();
         } catch (IOException e) {
-            MATELog.log_error("Couldn't grant runtime permissions!");
+            MATELog.log_error("Couldn't grant runtime permissions! " + e.getMessage());
             return false;
         }
     }
