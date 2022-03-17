@@ -130,6 +130,10 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
                 representationLayer.setWidgetBasedActions();
             }
 
+            MATELog.log("Setting Storage runtime permissions for Representation Layer");
+            representationLayer.grantRuntimePermission("android.permission.READ_EXTERNAL_STORAGE");
+            representationLayer.grantRuntimePermission("android.permission.WRITE_EXTERNAL_STORAGE");
+
         } catch (RemoteException e) {
             throw new IllegalStateException("Couldn't configure Representation Layer");
         }

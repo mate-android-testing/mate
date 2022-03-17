@@ -23,7 +23,7 @@ import java.util.Set;
 public final class IntentInfoParser {
 
     // the file containing the additional information (obtained from pre-conducted static analysis)
-    private static final String STATIC_INFO_FILE = "/data/data/org.mate/staticIntentInfo.xml";
+    private static final String STATIC_INFO_FILE = "/sdcard/staticIntentInfo.xml";
 
     private IntentInfoParser() {
         throw new UnsupportedOperationException("Utility class can't be instantiated!");

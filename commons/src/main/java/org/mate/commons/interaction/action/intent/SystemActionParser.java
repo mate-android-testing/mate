@@ -10,7 +10,7 @@ import java.util.List;
 
 public final class SystemActionParser {
 
-    private static final String SYSTEM_EVENTS_FILE = "data/data/org.mate/broadcast_actions.txt";
+    private static final String SYSTEM_EVENTS_FILE = "/sdcard/broadcast_actions.txt";
 
     private SystemActionParser() {
         throw new UnsupportedOperationException("Utility class can't be instantiated!");

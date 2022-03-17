@@ -20,7 +20,7 @@ public final class StaticStringsParser {
     /**
      * The location where the xml file should reside.
      */
-    private static final String STATIC_STRINGS_XML_FILE =  "/data/data/org.mate/staticStrings.xml";
+    private static final String STATIC_STRINGS_XML_FILE =  "/sdcard/staticStrings.xml";
 
     /**
      * The private utility class constructor.
@@ -42,6 +42,7 @@ public final class StaticStringsParser {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
             File staticStringsXMLFile = new File(STATIC_STRINGS_XML_FILE);
+
             if (staticStringsXMLFile.exists()) {
                 InputStream inputStream = new FileInputStream(staticStringsXMLFile);
                 parser.setInput(inputStream, null);

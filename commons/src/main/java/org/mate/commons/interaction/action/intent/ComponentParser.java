@@ -15,7 +15,7 @@ import java.util.List;
 
 public final class ComponentParser {
 
-    private static final String MANIFEST_FILE = "/data/data/org.mate/AndroidManifest.xml";
+    private static final String MANIFEST_FILE = "/sdcard/AndroidManifest.xml";
 
     private ComponentParser() {
         throw new UnsupportedOperationException("Utility class can't be instantiated!");
