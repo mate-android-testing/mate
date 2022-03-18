@@ -1102,7 +1102,7 @@ public class DeviceMgr {
      */
     private String generateTextData(final Widget widget, final int maxLength) {
 
-        final String activityName = convertClassName(widget.getActivity());
+        final String activityName = widget.getActivity();
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = Registry.getRandom();
@@ -1257,37 +1257,19 @@ public class DeviceMgr {
 
         try {
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
-                return convertActivityName(getCurrentActivityAPI25());
+                return convertClassName(getCurrentActivityAPI25());
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-                return convertActivityName(getCurrentActivityAPI28());
+                return convertClassName(getCurrentActivityAPI28());
             } else {
                 // fall back mechanism (slow)
-                return convertActivityName(Registry.getEnvironmentManager().getCurrentActivityName());
+                return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
             }
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve current activity name via local shell!");
             MATE.log_warn(e.getMessage());
 
             // fall back mechanism (slow)
-            return convertActivityName(Registry.getEnvironmentManager().getCurrentActivityName());
-        }
-    }
-
-    /**
-     * Converts the short form 'package/.subpackage.activity' to 'package.subpackage.activity'.
-     * This is necessary since the output of adb commands and the package manager diverge.
-     *
-     * @param activity The activity name.
-     * @return Returns the unified activity name.
-     */
-    private String convertActivityName(String activity) {
-        String[] tokens = activity.split("/");
-        String packageName = tokens[0];
-        String activityName = tokens[1];
-        if (activityName.startsWith(".")) {
-            return packageName + activityName;
-        } else {
-            return activity;
+            return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
         }
     }
 
