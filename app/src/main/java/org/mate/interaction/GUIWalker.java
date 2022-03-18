@@ -45,13 +45,18 @@ public class GUIWalker {
     /**
      * Whether quick launch should be used or not.
      */
-    private final boolean quickLaunch = Properties.QUICK_LAUNCH();
+    private static final boolean quickLaunch = Properties.QUICK_LAUNCH();
 
     /**
      * The exported activities from the AndroidManifest.xml. Only present, when {@link #quickLaunch}
      * is enabled.
      */
     private List<ComponentDescription> activities;
+
+    /**
+     * The name of the main activity.
+     */
+    private static final String mainActivity = Registry.getMainActivity();
 
     /**
      * Initialises the gui walker.
@@ -128,6 +133,10 @@ public class GUIWalker {
     private boolean quickLaunch(String activityName) {
 
         MATE.log_acc("Try to quick launch activity: " + activityName);
+
+        if (mainActivity.equals(activityName)) {
+            return goToMainActivity();
+        }
 
         // look up whether the activity has been exported via the manifest
         Optional<ComponentDescription> optActivityComponent = activities.stream()
@@ -377,6 +386,6 @@ public class GUIWalker {
             MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
         }
         context.startActivity(intent);
-        return uiAbstractionLayer.getCurrentActivity().equals(Registry.getMainActivity());
+        return uiAbstractionLayer.getCurrentActivity().equals(mainActivity);
     }
 }
