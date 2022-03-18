@@ -65,8 +65,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private final Set<IScreenState> visitedScreenStates = new HashSet<>();
 
-    public AimDroidChromosomeFactory(boolean resetApp, int maxNumEvents, double epsilon) {
-        super(resetApp, maxNumEvents);
+    public AimDroidChromosomeFactory(int maxNumEvents, double epsilon) {
+        super(false, maxNumEvents);
         this.epsilon = epsilon;
         guiModel = uiAbstractionLayer.getGuiModel();
         qValues = new HashMap<>();

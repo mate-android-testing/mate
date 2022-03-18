@@ -38,13 +38,11 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
     /**
      * Initialises the activity insulation multi level exploration strategy.
      *
-     * @param alwaysReset Whether to reset the AUT before creating a new chromosome (test case).
      * @param maxNumEvents The maximal number of actions per test case.
      * @param epsilon The epsilon used in the greedy learning police of SARSA.
      */
-    public ActivityInsulatedMultiLevelExploration(boolean alwaysReset, int maxNumEvents, double epsilon) {
-        // TODO: remove alwaysReset param if not needed
-        aimDroidChromosomeFactory = new AimDroidChromosomeFactory(alwaysReset, maxNumEvents, epsilon);
+    public ActivityInsulatedMultiLevelExploration(int maxNumEvents, double epsilon) {
+        aimDroidChromosomeFactory = new AimDroidChromosomeFactory(maxNumEvents, epsilon);
     }
 
     /**
