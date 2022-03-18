@@ -602,4 +602,13 @@ public class UIAbstractionLayer {
     public boolean moveToActivity(String activity) {
         return guiWalker.goToActivity(activity);
     }
+
+    /**
+     * Checks whether the AUT is currently opened.
+     *
+     * @return Returns {@code true} if the AUT is currently opened, otherwise {@code false} is returned.
+     */
+    public boolean isAppOpened() {
+        return lastScreenState.getPackageName().equals(packageName);
+    }
 }

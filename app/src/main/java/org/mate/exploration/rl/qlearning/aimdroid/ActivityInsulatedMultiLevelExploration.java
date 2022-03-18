@@ -113,19 +113,27 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
             visitedActivities.add(targetActivity);
 
-            // line 14 onwards
+            /*
+            * As in the AimDroid paper, we explore the target activity until either
+            * (1) an activity or app transitions happens
+            * (2) a crash occurs
+            * (3) the maximal number of events per test case is reached
+             */
             aimDroidChromosomeFactory.setTargetActivity(targetActivity);
             IChromosome<TestCase> chromosome = aimDroidChromosomeFactory.createChromosome();
             TestCase testCase = chromosome.getValue();
 
-            // TODO: check for activity transition and re-enqueue activity  -> if R = R_1_^
-            if (!visitedActivities.contains(uiAbstractionLayer.getCurrentActivity())) {
-                queue.add(uiAbstractionLayer.getCurrentActivity());
+            // check whether there was an activity transition to a new activity - line 19
+            String currentActivity = uiAbstractionLayer.getCurrentActivity();
+            if (uiAbstractionLayer.isAppOpened() && !visitedActivities.contains(currentActivity)) {
+                MATE.log_acc("Discovered new activity: " + currentActivity);
+                queue.add(currentActivity);
                 stop = false;
             }
 
-            // if R = R_3_^
+            // check whether we discovered a new crash - line 24
             if (testCase.getCrashDetected()) {
+                MATE.log_acc("Discovered a crash!");
                 // TODO: only if crash is new
                 stop = false;
             }
