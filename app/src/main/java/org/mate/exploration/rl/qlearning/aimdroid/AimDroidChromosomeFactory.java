@@ -1,5 +1,6 @@
 package org.mate.exploration.rl.qlearning.aimdroid;
 
+import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
@@ -45,6 +46,16 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     private final double epsilon;
 
     /**
+     * We need to memorize the last action to compute its reward and update the q-Value.
+     */
+    private Action lastAction;
+
+    /**
+     * We need to memorize the index of the last action to compute its reward and update the q-Value.
+     */
+    private int lastActionIndex;
+
+    /**
      * The activity that should be explored intensively.
      */
     private String targetActivity;
@@ -69,21 +80,32 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         this.targetActivity = targetActivity;
     }
 
-    @Override
-    public IChromosome<TestCase> createChromosome() {
-
-        // TODO: set target activity here
+    /**
+     * Checks whether we reached a new state. In this case, we need to initialise the q-Values
+     * to the default value of 1.
+     */
+    private void checkForNewState() {
 
         IScreenState lastScreenState = uiAbstractionLayer.getLastScreenState();
 
         if (!visitedScreenStates.contains(lastScreenState)) {
+            MATE.log_acc("Discovered new state: " + lastScreenState);
             // initialise qValue of all actions with default value 1
             visitedScreenStates.add(lastScreenState);
+            MATE.log_acc("Initialising q-Values...");
             int numberOfActions = lastScreenState.getActions().size();
             List<Double> initialQValues
                     = new ArrayList<>(Collections.nCopies(numberOfActions, 1.0));
             qValues.put(lastScreenState, initialQValues);
         }
+    }
+
+    @Override
+    public IChromosome<TestCase> createChromosome() {
+
+        // TODO: set target activity here
+
+        checkForNewState();
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
@@ -92,6 +114,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
                 boolean leftApp = !testCase.updateTestCase(selectAction(), actionsCount);
+
+                checkForNewState();
 
                 // TODO: compute reward of last action + update q-values
 
@@ -134,18 +158,22 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     @Override
     protected Action selectAction() {
-        double rnd = Randomness.getRnd().nextDouble();
-        if (rnd < epsilon) {
-            IScreenState lastScreenState = uiAbstractionLayer.getLastScreenState();
 
+        IScreenState lastScreenState = uiAbstractionLayer.getLastScreenState();
+        MATE.log_acc("Selecting action on state: " + lastScreenState);
+        double rnd = Randomness.getRnd().nextDouble();
+
+        if (rnd < epsilon) {
+            // select randomly
+            lastActionIndex = Randomness.randomIndex(lastScreenState.getActions());
+            lastAction = lastScreenState.getActions().get(lastActionIndex);
+        } else {
             // pick the action with the highest q-value, choose random if there are multiple
             List<Double> qValues = this.qValues.get(lastScreenState);
             List<Integer> bestQValueIndices = ListUtils.getMaximaPositions(qValues);
-            int selectedActionIndex = Randomness.randomElement(bestQValueIndices);
-            return lastScreenState.getActions().get(selectedActionIndex);
-        } else {
-            // select randomly
-            return super.selectAction();
+            lastActionIndex = Randomness.randomElement(bestQValueIndices);
+            lastAction = lastScreenState.getActions().get(lastActionIndex);
         }
+        return lastAction;
     }
 }
