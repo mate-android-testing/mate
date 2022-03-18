@@ -1399,11 +1399,11 @@ public class DeviceMgr {
     }
 
     /**
-     * Returns the activity names of the AUT.
+     * Returns the activities of the AUT.
      *
-     * @return Returns the activity names of the AUT.
+     * @return Returns the activities of the AUT.
      */
-    public List<String> getActivityNames() {
+    public List<String> getActivities() {
 
         Instrumentation instrumentation = getInstrumentation();
 
