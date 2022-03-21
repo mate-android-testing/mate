@@ -46,8 +46,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
     @Override
     public void run() {
 
-        MATE.log_acc("Starting exploration...");
-
         /*
          * Unlike in the AimDroid paper, we add initially all activities that are exported according
          * to the manifest to the queue. Otherwise, the exploration may end very quickly, e.g. if
@@ -58,7 +56,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
         Set<String> exportedActivities = Registry.getManifest().getExportedActivities().stream()
                 .map(ComponentDescription::getFullyQualifiedName)
                 .filter(activity -> !activity.equals(Registry.getMainActivity()))
-                .peek(activity -> MATE.log_acc("Exported activity: " + activity))
                 .collect(Collectors.toSet());
 
         // we start with the main activity
@@ -71,7 +68,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             exploreInCage(queue, targetActivity);
         }
 
-        MATE.log_acc("Finished exploration...");
         MATE.log_acc("Discovered the following activities: "
                 + aimDroidChromosomeFactory.getVisitedActivities());
     }
@@ -90,6 +86,11 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
             MATE.log_acc("Exploring in cage: " + targetActivity);
 
+            if (!uiAbstractionLayer.isAppOpened()) {
+                // TODO: Evaluate whether restart helps in reaching a target activity.
+                uiAbstractionLayer.restartApp();
+            }
+
             stop = true;
 
             // try to directly launch the the target activity
@@ -97,11 +98,8 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
             if (!success) {
                 MATE.log_acc("Couldn't move AUT into activity: " + targetActivity);
-                // Remove activity from seen activities so it can be explored later if found during exploration
-                // Intuition: if activity is found later, there should be a way to get from root to the activity
-
-                // TODO: Maybe re-enqueue activity, but according to Dominik this will end in a endless
-                //  loop of those activities that can't be targeted!
+                // TODO: Evaluate whether re-enqueuing is helpful.
+                queue.add(targetActivity);
                 break;
             }
 
@@ -126,11 +124,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             if (aimDroidChromosomeFactory.hasDiscoveredNewCrash()) {
                 MATE.log_acc("Discovered a new crash!");
                 stop = false;
-            }
-
-            // TODO: should we restart the app explicitly in case we left the AUT?
-            if (!uiAbstractionLayer.isAppOpened()) {
-                MATE.log_acc("May restart AUT at this point???");
             }
         }
     }

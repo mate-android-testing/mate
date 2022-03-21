@@ -5,7 +5,6 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.interaction.action.Action;
-import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
@@ -29,11 +28,6 @@ import java.util.Set;
  * (3) An activity transition happened.
  */
 public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
-
-    /**
-     * The current gui model.
-     */
-    private final IGUIModel guiModel;
 
     /**
      * Maintains the q-values for each state and action.
@@ -100,7 +94,6 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         this.epsilon = epsilon;
         this.alpha = alpha;
         this.gamma = gamma;
-        guiModel = uiAbstractionLayer.getGuiModel();
         qValues = new HashMap<>();
     }
 
@@ -153,10 +146,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         IScreenState lastScreenState = uiAbstractionLayer.getLastScreenState();
 
         if (!visitedScreenStates.contains(lastScreenState)) {
-            MATE.log_acc("Discovered new state: " + lastScreenState);
-            // initialise qValue of all actions with default value 1
+            // initialise q-value of all actions with default value 1
             visitedScreenStates.add(lastScreenState);
-            MATE.log_acc("Initialising q-Values...");
             int numberOfActions = lastScreenState.getActions().size();
             List<Double> initialQValues
                     = new ArrayList<>(Collections.nCopies(numberOfActions, 1.0));
@@ -175,38 +166,33 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     private double computeReward(boolean leftApp, boolean hasCrashDetected) {
 
         if (leftApp) {
-
-            // check whether we discovered a new crash
+            // check whether we discovered a (new) crash or just left the app by a regular action
             if (hasCrashDetected) {
-
                 String stackTrace = uiAbstractionLayer.getLastCrashStackTrace();
 
+                // TODO: Check if we need to strip off some information for a suitable comparison.
                 if (!stackTraces.contains(stackTrace)) {
-                    MATE.log_acc("Detected a new crash!");
+                    // an action leading to a new crash gets a high reward
                     stackTraces.add(stackTrace);
                     discoveredNewCrash = true;
                     return 1d;
                 } else {
+                    // producing the same crash multiple times is not interesting
                     return 0d;
                 }
-
             } else {
-
-                // this must be a regular app transition
+                // an app transition or closing the app are not desired
                 return -1d;
             }
         } else {
-
+            // check for (new) activity transition
             final String currentActivity = uiAbstractionLayer.getCurrentActivity();
 
-            // check for activity transition
             if (currentActivity.equals(targetActivity)) {
-                MATE.log_acc("Still on target activity!");
                 return 0.0d;
             } else {
-                MATE.log_acc("Activity transition!");
                 if (!visitedActivities.contains(currentActivity)) {
-                    MATE.log_acc("New activity transition: " + currentActivity);
+                    // new activity transitions get a high reward
                     visitedActivities.add(currentActivity);
                     discoveredNewActivity = true;
                     return 1d;
@@ -218,8 +204,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
-     * Updates the q-Value following equation (3) in the paper. We consider as future reward the
-     * the highest q-Value in the current state.
+     * Updates the q-value following equation (3) in the paper. We consider as future reward the
+     * the highest q-value in the current state.
      *
      * @param reward The reward of the last executed action.
      * @param oldState The state before the last action was executed.
@@ -227,12 +213,14 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private void updateQValue(double reward, final IScreenState oldState, final IScreenState newState) {
 
+        MATE.log_acc("Reward for last action " + lastAction + ": " + reward);
+
         double oldQValue = qValues.get(oldState).get(lastActionIndex);
 
         // Q(s, a) ← Q(s, a) + α(r + γQ(s′, a′) − Q(s, a))
         double qValue = oldQValue + alpha * (reward + gamma * Collections.max(qValues.get(newState))
             - oldQValue);
-        MATE.log_acc("New qValue is: " + qValue);
+        MATE.log_acc("New q-value is: " + qValue);
         qValues.get(oldState).set(lastActionIndex, qValue);
     }
 
@@ -263,9 +251,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
                 boolean leftApp = !testCase.updateTestCase(selectAction(), actionsCount);
                 IScreenState newState = checkForNewState();
 
-                // compute reward of last action + update q-Value
+                // compute reward of last action + update q-value
                 double reward = computeReward(leftApp, testCase.hasCrashDetected());
-                MATE.log_acc("Reward for last action " + lastAction + ": " + reward);
                 updateQValue(reward, oldState, newState);
 
                 if (leftApp) {
@@ -275,8 +262,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         } finally {
             if (!isTestSuiteExecution) {
                 /*
-                 * If we deal with a test suite execution, the storing of coverage
-                 * and fitness data is handled by the AndroidSuiteRandomChromosomeFactory itself.
+                 * If we deal with a test suite execution, the storing of coverage and fitness data
+                 * is handled by the AndroidSuiteRandomChromosomeFactory itself.
                  */
                 FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
@@ -309,7 +296,6 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     protected Action selectAction() {
 
         IScreenState lastScreenState = uiAbstractionLayer.getLastScreenState();
-        MATE.log_acc("Selecting action on state: " + lastScreenState);
         double rnd = Randomness.getRnd().nextDouble();
 
         if (rnd < epsilon) {

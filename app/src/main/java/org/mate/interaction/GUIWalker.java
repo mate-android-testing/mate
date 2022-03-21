@@ -166,14 +166,12 @@ public class GUIWalker {
 
             // check whether the resolver is happy with the constructed intent for the activity
             if (getTargetContext().getPackageManager().resolveActivity(intent, 0) != null) {
-                MATE.log_acc("Found suitable intent...");
                 IntentBasedAction intentBasedAction
                         = new IntentBasedAction(intent, activityComponent, intentFilter);
                 boolean success = replayActions(Collections.singletonList(intentBasedAction));
 
                 // check that we actually reached the target activity
                 if (success && Registry.getUiAbstractionLayer().getCurrentActivity().equals(activityName)) {
-                    MATE.log_acc("Successfully reached target activity through intent!");
                     return true;
                 }
             }
@@ -192,7 +190,7 @@ public class GUIWalker {
      */
     private boolean quickLaunchCloseActivity(String activity) {
 
-        MATE.log_acc("QuickLaunchCloseActivity for: " + activity);
+        MATE.log_acc("Try to quick launch activity from close activity!");
 
         Set<String> activityPredecessors = guiModel.getActivityPredecessors(activity);
 
@@ -209,7 +207,6 @@ public class GUIWalker {
                 // try to move to any state of the target activity
                 for (IScreenState targetActivityState : targetActivityStates) {
                     if (goFromTo(uiAbstractionLayer.getLastScreenState(), targetActivityState)) {
-                        MATE.log_acc("QuickLaunchCloseActivity succeeded!");
                         return true;
                     }
                 }
@@ -228,8 +225,6 @@ public class GUIWalker {
      */
     private Intent constructIntentForActivity(final ComponentDescription activityComponent,
                                               final IntentFilterDescription intentFilter) {
-
-        MATE.log_acc("Constructing intent...");
 
         Intent intent = new Intent();
 
@@ -257,7 +252,6 @@ public class GUIWalker {
         }
 
         // TODO: add further properties like a data uri if necessary
-
         return intent;
     }
 
@@ -270,7 +264,6 @@ public class GUIWalker {
      */
     private boolean replayActions(final List<Action> actions) {
         for (Action action : actions) {
-            MATE.log_acc("Replaying action: " + action);
             ActionResult result = uiAbstractionLayer.executeAction(action);
             if (result != ActionResult.SUCCESS && result != ActionResult.SUCCESS_NEW_STATE) {
                 return false;
@@ -364,8 +357,6 @@ public class GUIWalker {
                 goFromTo(uiAbstractionLayer.getLastScreenState(), targetActivityState);
             }
         }
-
-        MATE.log_acc("We couldn't reach the target activity: " + activity);
         return false;
     }
 
