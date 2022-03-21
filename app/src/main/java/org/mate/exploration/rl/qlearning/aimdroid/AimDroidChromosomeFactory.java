@@ -102,6 +102,15 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private boolean discoveredNewActivity = false;
 
+    /**
+     * Initialises the AimDroid chromosome factory with the mandatory attributes.
+     *
+     * @param minL The minimum number of actions per test case.
+     * @param maxL The maximum number of actions per test case.
+     * @param epsilon The epsilon used in the greedy learning policy.
+     * @param alpha The alpha used in the SARSA equation.
+     * @param gamma The gamma used in the SARSA equation.
+     */
     public AimDroidChromosomeFactory(int minL, int maxL, double epsilon, double alpha, double gamma) {
         super(false, maxL);
         this.minL = minL;
@@ -258,8 +267,17 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
-        // TODO: block activity transitions, see https://icsnju.github.io/AimDroid-ICSME-2017/unrooted-AimDroid.html
-
+        /*
+        * TODO: Use hidden API feature when MATE supports API level 30.
+        * One can limit activity transitions by either modifying the relevant framework calls or
+        * resort to the hidden API features as described on the following page:
+        *       https://icsnju.github.io/AimDroid-ICSME-2017/unrooted-AimDroid.html
+        * However, those hidden API features are changing from one API level to the other, in
+        * particular the ActivityManager and ActivityController that are required to block activity
+        * transitions. Since MATE already builds against API level 30, but only supports emulators
+        * up to level 28, we should postpone this feature, since downgrading is no option.
+         */
+        
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
