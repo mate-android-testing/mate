@@ -3,13 +3,10 @@ package org.mate.exploration.rl.qlearning.aimdroid;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
-import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.model.TestCase;
 import org.mate.utils.manifest.element.ComponentDescription;
 
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,18 +28,16 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
     private final UIAbstractionLayer uiAbstractionLayer = Registry.getUiAbstractionLayer();
 
     /**
-     * The set of visited activities.
-     */
-    private final Set<String> visitedActivities = new HashSet<>();
-
-    /**
      * Initialises the activity insulation multi level exploration strategy.
      *
      * @param maxNumEvents The maximal number of actions per test case.
-     * @param epsilon The epsilon used in the greedy learning police of SARSA.
+     * @param epsilon The epsilon used in the greedy learning policy.
+     * @param alpha The alpha used in the SARSA equation.
+     * @param gamma The gamma used in the SARSA equation.
      */
-    public ActivityInsulatedMultiLevelExploration(int maxNumEvents, double epsilon) {
-        aimDroidChromosomeFactory = new AimDroidChromosomeFactory(maxNumEvents, epsilon);
+    public ActivityInsulatedMultiLevelExploration(int maxNumEvents, double epsilon, double alpha,
+                                                  double gamma) {
+        aimDroidChromosomeFactory = new AimDroidChromosomeFactory(maxNumEvents, epsilon, alpha, gamma);
     }
 
     /**
@@ -77,7 +72,8 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
         }
 
         MATE.log_acc("Finished exploration...");
-        MATE.log_acc("Discovered the following activities: " + visitedActivities);
+        MATE.log_acc("Discovered the following activities: "
+                + aimDroidChromosomeFactory.getVisitedActivities());
     }
 
     /**
@@ -109,8 +105,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
                 break;
             }
 
-            visitedActivities.add(targetActivity);
-
             /*
             * As in the AimDroid paper, we explore the target activity until either
             * (1) an activity or app transitions happens
@@ -118,22 +112,25 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             * (3) the maximal number of events per test case is reached
              */
             aimDroidChromosomeFactory.setTargetActivity(targetActivity);
-            IChromosome<TestCase> chromosome = aimDroidChromosomeFactory.createChromosome();
-            TestCase testCase = chromosome.getValue();
+            aimDroidChromosomeFactory.createChromosome();
 
             // check whether there was an activity transition to a new activity - line 19
             String currentActivity = uiAbstractionLayer.getCurrentActivity();
-            if (uiAbstractionLayer.isAppOpened() && !visitedActivities.contains(currentActivity)) {
-                MATE.log_acc("Discovered new activity: " + currentActivity);
+            if (aimDroidChromosomeFactory.hasDiscoveredNewActivity()) {
+                MATE.log_acc("Discovered a new activity: " + currentActivity);
                 queue.add(currentActivity);
                 stop = false;
             }
 
             // check whether we discovered a new crash - line 24
-            if (testCase.getCrashDetected()) {
-                MATE.log_acc("Discovered a crash!");
-                // TODO: only if crash is new
+            if (aimDroidChromosomeFactory.hasDiscoveredNewCrash()) {
+                MATE.log_acc("Discovered a new crash!");
                 stop = false;
+            }
+
+            // TODO: should we restart the app explicitly in case we left the AUT?
+            if (!uiAbstractionLayer.isAppOpened()) {
+                MATE.log_acc("May restart AUT at this point???");
             }
         }
     }
