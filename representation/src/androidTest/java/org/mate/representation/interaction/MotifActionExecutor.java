@@ -150,9 +150,6 @@ public class MotifActionExecutor extends ActionExecutor {
             }
         }
 
-        // TODO (Ivan): I'm assuming that handleFillFormAndSubmit method is always successful,
-        //  because it is not clear that we should report a failing action if one of the many
-        //  actions inside this method fails.
         return true;
     }
 
