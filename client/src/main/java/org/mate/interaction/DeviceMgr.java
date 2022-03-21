@@ -274,30 +274,11 @@ public class DeviceMgr {
      * @return Returns the stack trace of the last crash.
      */
     public String getLastCrashStackTrace() {
-        // TODO (Ivan): Check if this actually works when the application crashes
+        // Do not use the Representation Layer here.
+        // If we have detected a failing action that led to a crash, then both AUT and
+        // Representation Layer are dead. Thus, any request sent to the Representation Layer will
+        // fail.
 
-        try {
-            String response = MATEService.getRepresentationLayer().executeShellCommand("run-as " + packageName
-                    + " logcat -b crash -t 2000 AndroidRuntime:E *:S");
-
-            List<String> lines = Arrays.asList(response.split("\n"));
-
-            // traverse the stack trace from bottom up until we reach the beginning
-            for (int i = lines.size() - 1; i >= 0; i--) {
-                if (lines.get(i).contains("E AndroidRuntime: FATAL EXCEPTION: ")) {
-                    return lines.subList(i, lines.size()).stream()
-                            .collect(Collectors.joining("\n"));
-                }
-            }
-
-        } catch(Exception e) {
-            MATELog.log_warn("Couldn't retrieve stack trace of last crash!");
-            if (e.getMessage() != null) {
-                MATELog.log_warn(e.getMessage());
-            }
-        }
-
-        // fallback mechanism
         return Registry.getEnvironmentManager().getLastCrashStackTrace();
     }
 
