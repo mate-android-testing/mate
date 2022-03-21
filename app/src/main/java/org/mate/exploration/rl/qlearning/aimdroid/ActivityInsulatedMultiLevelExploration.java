@@ -119,6 +119,21 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
                 MATE.log_acc("Discovered a new activity: " + currentActivity);
                 queue.add(currentActivity);
                 stop = false;
+
+                /*
+                * TODO: Verify that the q-value is lower after re-selection than at least other actions
+                *  that haven't been executed on the same state, otherwise the problematic as
+                *  described below appears again and again.
+                * Since we can't block activity transitions right now, we should re-enqueue the
+                * target activity again unlike in the AimDroid paper. Otherwise, we may execute
+                * only a single action on the target activity in the worst case if the selected
+                * action leads to an activity transition, since a new activity transition gets the
+                * highest reward initially, which in turn leads to re-selecting the same action.
+                * Now, the action gets a reward of 0, but since we couldn't block activity
+                * transitions, we end the exploration in cage and throw away the activity from the
+                * working queue.
+                 */
+                queue.add(targetActivity);
             }
 
             // check whether we discovered a new crash - line 24
