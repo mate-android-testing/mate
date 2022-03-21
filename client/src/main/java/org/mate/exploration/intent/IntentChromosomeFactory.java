@@ -179,7 +179,6 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     @Override
     protected Action selectAction() {
-        // TODO (Ivan): Should this be Registry.getRandom() ?
         double random = Math.random();
 
         if (random < relativeIntentAmount) {

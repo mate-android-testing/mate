@@ -140,7 +140,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
     private static void configureRepresentationLayer() {
         try {
             if (waitForDebugger) {
-                // TODO (Ivan): the following does not seem to be useful.
+                // The following does not seem to work.
                 //  Android Studio does not show the process of the representation layer to
                 //  attach to it. Maybe this is because the representation layer's process has
                 //  the name of the AUT's package name.
@@ -466,8 +466,6 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
         log("Client just died");
         representationLayer = null;
         representationLayerBinder.unlinkToDeath(this,0);
-
-        // TODO (Ivan): process this information somehow
     }
 
     /**
