@@ -268,7 +268,7 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         /*
-        * TODO: Use hidden API feature when MATE supports API level 30.
+        * TODO: Use hidden API feature to block activity transitions when MATE supports API level 30.
         * One can limit activity transitions by either modifying the relevant framework calls or
         * resort to the hidden API features as described on the following page:
         *       https://icsnju.github.io/AimDroid-ICSME-2017/unrooted-AimDroid.html
@@ -277,7 +277,7 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         * transitions. Since MATE already builds against API level 30, but only supports emulators
         * up to level 28, we should postpone this feature, since downgrading is no option.
          */
-        
+
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
