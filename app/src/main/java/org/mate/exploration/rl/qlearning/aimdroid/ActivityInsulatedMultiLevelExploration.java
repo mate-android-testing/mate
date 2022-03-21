@@ -30,14 +30,15 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
     /**
      * Initialises the activity insulation multi level exploration strategy.
      *
-     * @param maxNumEvents The maximal number of actions per test case.
+     * @param minL The minimal number of actions per test case.
+     * @param maxL The maximal number of actions per test case.
      * @param epsilon The epsilon used in the greedy learning policy.
      * @param alpha The alpha used in the SARSA equation.
      * @param gamma The gamma used in the SARSA equation.
      */
-    public ActivityInsulatedMultiLevelExploration(int maxNumEvents, double epsilon, double alpha,
+    public ActivityInsulatedMultiLevelExploration(int minL, int maxL, double epsilon, double alpha,
                                                   double gamma) {
-        aimDroidChromosomeFactory = new AimDroidChromosomeFactory(maxNumEvents, epsilon, alpha, gamma);
+        aimDroidChromosomeFactory = new AimDroidChromosomeFactory(minL, maxL, epsilon, alpha, gamma);
     }
 
     /**
@@ -107,7 +108,7 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             * As in the AimDroid paper, we explore the target activity until either
             * (1) an activity or app transitions happens
             * (2) a crash occurs
-            * (3) the maximal number of events per test case is reached
+            * (3) the computed bound of actions is reached
              */
             aimDroidChromosomeFactory.setTargetActivity(targetActivity);
             aimDroidChromosomeFactory.createChromosome();

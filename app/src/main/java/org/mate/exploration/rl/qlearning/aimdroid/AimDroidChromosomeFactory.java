@@ -19,13 +19,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Simulates the 'exploreInCage' functionality as outlined in Algorithm 1. We explore a given activity
  * as long as possible, i.e. until one of the following conditions is met:
- * (1) The maximal number of events is reached.
- * (2) A crash occurred.
- * (3) An activity transition happened.
+ * (1) an activity or app transitions happens
+ * (2) a crash occurs
+ * (3) the computed bound of actions is reached
  */
 public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
 
@@ -33,6 +34,18 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      * Maintains the q-values for each state and action.
      */
     private final Map<IScreenState, List<Double>> qValues;
+
+    /**
+     * The minL constant used in the bound method. Defines the minimal number of actions on a given
+     * target activity.
+     */
+    private final int minL;
+
+    /**
+     * The maxL constant used in the bound method. Defines the maximal number of actions on a given
+     * target activity.
+     */
+    private final int maxL;
 
     /**
      * The epsilon used in the ɛ-greedy learning policy, see equation (2).
@@ -89,8 +102,10 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private boolean discoveredNewActivity = false;
 
-    public AimDroidChromosomeFactory(int maxNumEvents, double epsilon, double alpha, double gamma) {
-        super(false, maxNumEvents);
+    public AimDroidChromosomeFactory(int minL, int maxL, double epsilon, double alpha, double gamma) {
+        super(false, maxL);
+        this.minL = minL;
+        this.maxL = maxL;
         this.epsilon = epsilon;
         this.alpha = alpha;
         this.gamma = gamma;
@@ -243,6 +258,8 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
+        // TODO: block activity transitions, see https://icsnju.github.io/AimDroid-ICSME-2017/unrooted-AimDroid.html
+
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
@@ -275,16 +292,34 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
+     * Computes the bound, i.e. the number of maximal actions, that should be applied on the given
+     * target activity.
+     *
+     * @param targetActivity The target activity.
+     * @return Returns the maximal number of actions that should be applied.
+     */
+    private int bound(String targetActivity) {
+
+        // the number of different actions that can be applied on the given activity (any activity state)
+        int actionCount = uiAbstractionLayer.getGuiModel().getActivityStates(targetActivity).stream()
+                .flatMap(state -> state.getActions().stream())
+                .collect(Collectors.toSet())
+                .size();
+        return Math.min(Math.max(minL, actionCount), maxL);
+    }
+
+    /**
      * Determines when the test case execution should be aborted. In the case of AimDroid, we want
-     * explore an activity as long as possible, i.e. until the maximal number of events is reached
-     * or we left the activity.
+     * explore an activity as long as possible, i.e. until the bound is reached or we left the
+     * target activity.
      *
      * @return Returns {@code true} when the test case execution should be aborted, otherwise
      *         {@code false} is returned.
      */
     @Override
     protected boolean finishTestCase() {
-        return super.finishTestCase() || !uiAbstractionLayer.getCurrentActivity().equals(targetActivity);
+        return !uiAbstractionLayer.getCurrentActivity().equals(targetActivity)
+                || actionsCount >= bound(targetActivity);
     }
 
     /**

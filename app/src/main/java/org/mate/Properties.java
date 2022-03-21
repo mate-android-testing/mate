@@ -336,6 +336,20 @@ public class Properties {
      */
     public static double GAMMA() { return propertyOr(0.8d); }
 
+    /**
+     * The minL constant used in the bound method (the minimal number of actions).
+     *
+     * @return Returns the minL constant.
+     */
+    public static int MIN_L() { return propertyOr(20); }
+
+    /**
+     * The maxL constant used in the bound method (the maximal number of actions).
+     *
+     * @return Returns the maxL constant.
+     */
+    public static int MAX_L() { return propertyOr(50); }
+
     /*
      * End AimDroid properties
      */
