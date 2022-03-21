@@ -115,7 +115,7 @@ public class TestCase {
     public void finish() {
         MATE.log("Finishing test case!");
 
-        MATE.log("Found crash: " + getCrashDetected());
+        MATE.log("Found crash: " + hasCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
@@ -260,7 +260,7 @@ public class TestCase {
      * @return Returns {@code true} if the test case caused a crash,
      *          otherwise {@code false} is returned.
      */
-    public boolean getCrashDetected() {
+    public boolean hasCrashDetected() {
         return this.crashDetected;
     }
 

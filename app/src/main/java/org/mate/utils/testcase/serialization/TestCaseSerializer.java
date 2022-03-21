@@ -47,7 +47,7 @@ public final class TestCaseSerializer {
         }
 
         // log whether execution of test case resulted in a crash
-        if (testCase.getCrashDetected()) {
+        if (testCase.hasCrashDetected()) {
             MATE.log("TestCase " + recordCounter + " caused a crash!");
         }
 
