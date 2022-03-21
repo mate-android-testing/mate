@@ -72,6 +72,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public boolean isCrashDialogPresent() throws RemoteException {
+        return DeviceInfo.getInstance().isCrashDialogPresent();
+    }
+
+    @Override
     public String getCurrentPackageName() throws RemoteException {
         return ExplorationInfo.getInstance().getCurrentPackageName();
     }

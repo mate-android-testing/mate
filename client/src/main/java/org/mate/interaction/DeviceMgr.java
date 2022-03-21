@@ -64,9 +64,25 @@ public class DeviceMgr {
      * @throws AUTCrashException Thrown when the last action caused a crash of the application.
      */
     private void checkForCrash() throws AUTCrashException {
-        if (!MATEService.isRepresentationLayerAlive()) {
+        if (!MATEService.isRepresentationLayerAlive() || isCrashDialogPresent()) {
+            // Either Representation Layer is not even alive, and thus AUT has crashed, or a
+            // separate component has crashed and there is a crash dialog on the screen.
             MATELog.log("CRASH");
             throw new AUTCrashException("App crashed");
+        }
+    }
+
+    /**
+     * Checks whether a crash dialog is visible on the current screen.
+     *
+     * @return {@code true} if a crash dialog is visible, otherwise {@code false} is returned.
+     */
+    public boolean isCrashDialogPresent() {
+        try {
+            return MATEService.getRepresentationLayer().isCrashDialogPresent();
+        } catch (RemoteException | AUTCrashException e) {
+            MATELog.log_error("Unable to check if crash dialog is present");
+            return false;
         }
     }
 

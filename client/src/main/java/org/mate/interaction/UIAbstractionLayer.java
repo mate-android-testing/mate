@@ -12,6 +12,7 @@ import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.fsm.FSMModel;
+import org.mate.service.MATEService;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
@@ -251,17 +252,19 @@ public class UIAbstractionLayer {
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
     private boolean handleCrashDialog() {
-        // TODO (Ivan): Do we need to handle crash dialog? How do we do it if Representation
-        //  Layer is off?
-        /*if (deviceMgr.checkForCrashDialog()) {
+        if (!MATEService.isRepresentationLayerAlive()) {
+            // Representation Layer is disconnected: We can not analyze current screen.
+            return false;
+        }
+
+        if (deviceMgr.isCrashDialogPresent()) {
             MATELog.log("Detected crash dialog!");
             // TODO: Should we really press 'HOME' or better click 'OK' on the dialog?
             deviceMgr.pressHome();
             return true;
         } else {
             return false;
-        }*/
-        return false;
+        }
     }
 
     /**

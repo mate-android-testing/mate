@@ -18,6 +18,7 @@ interface IRepresentationLayerInterface {
     int getDisplayWidth();
     int getDisplayHeight();
     boolean grantRuntimePermission(String permission);
+    boolean isCrashDialogPresent();
 
     // Activities info
     String getCurrentPackageName();

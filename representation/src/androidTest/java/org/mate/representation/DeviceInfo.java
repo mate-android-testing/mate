@@ -6,6 +6,8 @@ import android.os.Build;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiSelector;
 
 import org.mate.commons.utils.MATELog;
 
@@ -187,5 +189,21 @@ public class DeviceInfo {
             MATELog.log_error("Couldn't grant runtime permissions! " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Checks whether a crash dialog is visible on the current screen.
+     *
+     * @return Returns {@code true} if a crash dialog is visible, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isCrashDialogPresent() {
+        UiObject crashDialog1 = device.findObject(
+                new UiSelector().packageName("android").textContains("keeps stopping"));
+        UiObject crashDialog2 = device.findObject(
+                new UiSelector().packageName("android").textContains("has stopped"));
+
+        return crashDialog1.exists() || crashDialog2.exists();
+
     }
 }
