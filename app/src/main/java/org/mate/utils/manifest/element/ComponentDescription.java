@@ -51,6 +51,17 @@ public class ComponentDescription {
     private boolean isDynamicReceiver = false;
 
     /**
+     * Whether the component is an activity alias.
+     */
+    private boolean isActivityAlias = false;
+
+    /**
+     * The name of the target activity that can be launched through the activity-alias. Solely
+     * relevant for activity aliases.
+     */
+    private String targetActivity = null;
+
+    /**
      * String constants discovered through a static analysis of the bytecode, see
      * {@link org.mate.exploration.intent.parsers.IntentInfoParser}.
      */
@@ -158,6 +169,43 @@ public class ComponentDescription {
      */
     public void setHandlingOnNewIntent(boolean handleOnNewIntent) {
         this.handleOnNewIntent = handleOnNewIntent;
+    }
+
+    /**
+     * Whether the component represents an activity alias.
+     *
+     * @return Returns {@code true} if the component is an activity alias, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean isActivityAlias() {
+        return isActivityAlias;
+    }
+
+    /**
+     * Controls whether the component is an activity alias or not.
+     *
+     * @param activityAlias Whether the component is an activity alias or not.
+     */
+    public void setActivityAlias(boolean activityAlias) {
+        isActivityAlias = activityAlias;
+    }
+
+    /**
+     * Returns the target activity that can be launched through the activity alias.
+     *
+     * @return Returns the target activity specified in the activity alias.
+     */
+    public String getTargetActivity() {
+        return targetActivity;
+    }
+
+    /**
+     * Sets the target activity of the activity alias.
+     *
+     * @param targetActivity The target activity of the activity alias.
+     */
+    public void setTargetActivity(String targetActivity) {
+        this.targetActivity = targetActivity;
     }
 
     /**
