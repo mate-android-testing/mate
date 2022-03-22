@@ -10,6 +10,7 @@ import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.ListUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.StackTrace;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     /**
      * The set of recorded stack traces (crashes).
      */
-    private final Set<String> stackTraces = new HashSet<>();
+    private final Set<StackTrace> stackTraces = new HashSet<>();
 
     /**
      * The set of visited screen states.
@@ -192,7 +193,7 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         if (leftApp) {
             // check whether we discovered a (new) crash or just left the app by a regular action
             if (hasCrashDetected) {
-                String stackTrace = uiAbstractionLayer.getLastCrashStackTrace();
+                StackTrace stackTrace = uiAbstractionLayer.getLastCrashStackTrace();
 
                 // TODO: Check if we need to strip off some information for a suitable comparison.
                 if (!stackTraces.contains(stackTrace)) {
