@@ -132,6 +132,12 @@ public class GUIWalker {
      */
     private boolean quickLaunch(String activityName) {
 
+        /*
+        * TODO: Under certain (yet unknown) conditions a quick launch might not work. This can be
+        *  even the main activity or any activity alias referring to the main activity. There might
+        *  be a relation to crash that happened shortly before.
+         */
+
         MATE.log_acc("Try to quick launch activity: " + activityName);
 
         if (mainActivity.equals(activityName)) {
@@ -170,8 +176,18 @@ public class GUIWalker {
                         = new IntentBasedAction(intent, activityComponent, intentFilter);
                 boolean success = replayActions(Collections.singletonList(intentBasedAction));
 
+                final String currentActivity = Registry.getUiAbstractionLayer().getCurrentActivity();
+
                 // check that we actually reached the target activity
-                if (success && Registry.getUiAbstractionLayer().getCurrentActivity().equals(activityName)) {
+                if(success && (currentActivity.equals(activityName)
+                        /*
+                        * TODO: Re-verify this behaviour once the current activity name can be
+                        *  fetched reliable. Right now, it seems like the current activity equals
+                        *  the name of the activity alias and this alternative in the if statement
+                        *  is superfluous.
+                         */
+                        || (activityComponent.isActivityAlias()
+                        && currentActivity.equals(activityComponent.getTargetActivity())))) {
                     return true;
                 }
             }
