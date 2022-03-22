@@ -31,6 +31,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
@@ -1458,7 +1459,7 @@ public class DeviceMgr {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
 
         try {
             String response = device.executeShellCommand("run-as " + packageName
@@ -1469,8 +1470,8 @@ public class DeviceMgr {
             // traverse the stack trace from bottom up until we reach the beginning
             for (int i = lines.size() - 1; i >= 0; i--) {
                 if (lines.get(i).contains("E AndroidRuntime: FATAL EXCEPTION: ")) {
-                    return lines.subList(i, lines.size()).stream()
-                            .collect(Collectors.joining("\n"));
+                    return new StackTrace(lines.subList(i, lines.size()).stream()
+                            .collect(Collectors.joining("\n")));
                 }
             }
 
@@ -1480,7 +1481,7 @@ public class DeviceMgr {
         }
 
         // fallback mechanism
-        return Registry.getEnvironmentManager().getLastCrashStackTrace();
+        return new StackTrace(Registry.getEnvironmentManager().getLastCrashStackTrace());
     }
 
 }

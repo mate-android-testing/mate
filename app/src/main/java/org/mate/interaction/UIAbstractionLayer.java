@@ -17,6 +17,7 @@ import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
 import java.util.Date;
@@ -553,7 +554,7 @@ public class UIAbstractionLayer {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
         return deviceMgr.getLastCrashStackTrace();
     }
 
