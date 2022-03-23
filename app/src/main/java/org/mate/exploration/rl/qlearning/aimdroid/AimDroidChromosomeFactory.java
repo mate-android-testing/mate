@@ -161,6 +161,15 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
+     * Retrieves the action that was executed last.
+     *
+     * @return Returns the last executed action.
+     */
+    public Action getLastAction() {
+        return lastAction;
+    }
+
+    /**
      * Checks whether we reached a new state. In this case, we need to initialise the q-Values
      * to the default value of 1.
      *

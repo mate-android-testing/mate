@@ -4,6 +4,9 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.ActionType;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.manifest.element.ComponentDescription;
 
 import java.util.Deque;
@@ -139,6 +142,23 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             // check whether we discovered a new crash - line 24
             if (aimDroidChromosomeFactory.hasDiscoveredNewCrash()) {
                 MATE.log_acc("Discovered a new crash!");
+                stop = false;
+            }
+
+            /*
+            * If we immediately would select the BACK action on the main activity and leave the app,
+            * the exploration of the main activity ends early. Furthermore, if this would happen in
+            * the original AimDroid approach, the entire exploration ends because the working queue
+            * is initially on filled with the main activity. Since the reward is negative for an
+            * app transition (R2), it is unlikely that the BACK action is selected again.
+             */
+            Action lastAction = aimDroidChromosomeFactory.getLastAction();
+
+            if (lastAction instanceof UIAction
+                    && ((UIAction) lastAction).getActionType() == ActionType.BACK
+                    && Registry.getMainActivity().equals(targetActivity)
+                    && !uiAbstractionLayer.isAppOpened()) {
+                MATE.log_acc("Leaving main activity through clicking BACK button!");
                 stop = false;
             }
         }
