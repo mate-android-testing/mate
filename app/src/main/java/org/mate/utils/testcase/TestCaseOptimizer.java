@@ -3,11 +3,11 @@ package org.mate.utils.testcase;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
+import org.mate.utils.manifest.element.ComponentType;
 
 import java.util.ArrayList;
 import java.util.Collections;

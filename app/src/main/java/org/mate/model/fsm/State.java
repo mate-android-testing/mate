@@ -44,6 +44,6 @@ public class State {
     @NonNull
     @Override
     public String toString() {
-        return "s" + id + " [" + screenState.getActivityName() + "]";
+        return "S" + id + " [" + screenState.getActivityName() + "]";
     }
 }

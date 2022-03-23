@@ -1,7 +1,5 @@
 package org.mate.utils;
 
-import android.app.VoiceInteractor;
-
 public class Optional<T> {
     private final T value;
     private final boolean hasValue;

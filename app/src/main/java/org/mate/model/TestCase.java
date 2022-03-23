@@ -5,8 +5,8 @@ import android.support.annotation.NonNull;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
@@ -32,22 +32,22 @@ public class TestCase {
     /**
      * The set of visited activities.
      */
-    private Set<String> visitedActivities;
+    private final Set<String> visitedActivities;
 
     /**
      * The set of visited screen states (ids).
      */
-    private Set<String> visitedStates;
+    private final Set<String> visitedStates;
 
     /**
      * The actions that has been executed by this test case.
      */
-    private List<Action> eventSequence;
+    private final List<Action> eventSequence;
 
     /**
      * The visited activities in the order they appeared.
      */
-    private List<String> activitySequence;
+    private final List<String> activitySequence;
 
     /**
      * Whether a crash has been triggered by an action of the test case.
@@ -391,7 +391,7 @@ public class TestCase {
         MATE.log("executing action " + actionID + ": " + action);
 
         addEvent(action);
-        UIAbstractionLayer.ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
         // track the activity transitions of each action
         String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
