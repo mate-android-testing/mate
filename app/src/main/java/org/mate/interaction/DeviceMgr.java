@@ -31,6 +31,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
@@ -1102,7 +1103,7 @@ public class DeviceMgr {
      */
     private String generateTextData(final Widget widget, final int maxLength) {
 
-        final String activityName = convertClassName(widget.getActivity());
+        final String activityName = widget.getActivity();
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = Registry.getRandom();
@@ -1257,37 +1258,19 @@ public class DeviceMgr {
 
         try {
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
-                return convertActivityName(getCurrentActivityAPI25());
+                return convertClassName(getCurrentActivityAPI25());
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-                return convertActivityName(getCurrentActivityAPI28());
+                return convertClassName(getCurrentActivityAPI28());
             } else {
                 // fall back mechanism (slow)
-                return convertActivityName(Registry.getEnvironmentManager().getCurrentActivityName());
+                return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
             }
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve current activity name via local shell!");
             MATE.log_warn(e.getMessage());
 
             // fall back mechanism (slow)
-            return convertActivityName(Registry.getEnvironmentManager().getCurrentActivityName());
-        }
-    }
-
-    /**
-     * Converts the short form 'package/.subpackage.activity' to 'package.subpackage.activity'.
-     * This is necessary since the output of adb commands and the package manager diverge.
-     *
-     * @param activity The activity name.
-     * @return Returns the unified activity name.
-     */
-    private String convertActivityName(String activity) {
-        String[] tokens = activity.split("/");
-        String packageName = tokens[0];
-        String activityName = tokens[1];
-        if (activityName.startsWith(".")) {
-            return packageName + activityName;
-        } else {
-            return activity;
+            return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
         }
     }
 
@@ -1417,11 +1400,11 @@ public class DeviceMgr {
     }
 
     /**
-     * Returns the activity names of the AUT.
+     * Returns the activities of the AUT.
      *
-     * @return Returns the activity names of the AUT.
+     * @return Returns the activities of the AUT.
      */
-    public List<String> getActivityNames() {
+    public List<String> getActivities() {
 
         Instrumentation instrumentation = getInstrumentation();
 
@@ -1476,7 +1459,7 @@ public class DeviceMgr {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
 
         try {
             String response = device.executeShellCommand("run-as " + packageName
@@ -1487,8 +1470,8 @@ public class DeviceMgr {
             // traverse the stack trace from bottom up until we reach the beginning
             for (int i = lines.size() - 1; i >= 0; i--) {
                 if (lines.get(i).contains("E AndroidRuntime: FATAL EXCEPTION: ")) {
-                    return lines.subList(i, lines.size()).stream()
-                            .collect(Collectors.joining("\n"));
+                    return new StackTrace(lines.subList(i, lines.size()).stream()
+                            .collect(Collectors.joining("\n")));
                 }
             }
 
@@ -1498,7 +1481,7 @@ public class DeviceMgr {
         }
 
         // fallback mechanism
-        return Registry.getEnvironmentManager().getLastCrashStackTrace();
+        return new StackTrace(Registry.getEnvironmentManager().getLastCrashStackTrace());
     }
 
 }

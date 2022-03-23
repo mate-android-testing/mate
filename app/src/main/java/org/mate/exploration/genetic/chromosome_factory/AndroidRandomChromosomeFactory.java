@@ -39,7 +39,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     /**
      * The current action count.
      */
-    private int actionsCount;
+    protected int actionsCount;
 
     /**
      * Initialises a new chromosome factory that is capable of generating random {@link TestCase}s.

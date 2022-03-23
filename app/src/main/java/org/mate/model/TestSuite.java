@@ -39,7 +39,7 @@ public class TestSuite {
      */
     public boolean getCrashDetected() {
         for (TestCase testCase : testCases) {
-            if (testCase.getCrashDetected()) {
+            if (testCase.hasCrashDetected()) {
                 return true;
             }
         }

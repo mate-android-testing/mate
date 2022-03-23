@@ -17,6 +17,7 @@ import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
 import java.util.Date;
@@ -77,6 +78,11 @@ public class UIAbstractionLayer {
     private final GUIWalker guiWalker;
 
     /**
+     * The activities belonging to the AUT.
+     */
+    private final List<String> activities;
+
+    /**
      * Initialises the ui abstraction layer.
      *
      * @param deviceMgr The device manager responsible for executing all kind of actions.
@@ -85,6 +91,7 @@ public class UIAbstractionLayer {
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
+        activities = deviceMgr.getActivities();
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
@@ -534,12 +541,12 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the activity names of the AUT.
+     * Returns the activities of the AUT.
      *
-     * @return Returns the activity names of the AUT.
+     * @return Returns the activities of the AUT.
      */
-    public List<String> getActivityNames() {
-        return deviceMgr.getActivityNames();
+    public List<String> getActivities() {
+        return activities;
     }
 
     /**
@@ -547,7 +554,7 @@ public class UIAbstractionLayer {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
         return deviceMgr.getLastCrashStackTrace();
     }
 
@@ -601,5 +608,14 @@ public class UIAbstractionLayer {
      */
     public boolean moveToActivity(String activity) {
         return guiWalker.goToActivity(activity);
+    }
+
+    /**
+     * Checks whether the AUT is currently opened.
+     *
+     * @return Returns {@code true} if the AUT is currently opened, otherwise {@code false} is returned.
+     */
+    public boolean isAppOpened() {
+        return lastScreenState.getPackageName().equals(packageName);
     }
 }

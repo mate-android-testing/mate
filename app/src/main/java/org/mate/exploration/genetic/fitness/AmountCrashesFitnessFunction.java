@@ -22,12 +22,12 @@ public class AmountCrashesFitnessFunction<T> implements IFitnessFunction<T> {
             TestSuite testSuite = (TestSuite) chromosome.getValue();
             int amountCrashes = 0;
             for (TestCase testCase : testSuite.getTestCases()) {
-                amountCrashes += testCase.getCrashDetected() ? 1 : 0;
+                amountCrashes += testCase.hasCrashDetected() ? 1 : 0;
             }
             return amountCrashes;
         } else if (chromosome.getValue() instanceof TestCase) {
             TestCase testCase = (TestCase) chromosome.getValue();
-            return testCase.getCrashDetected() ? 1 : 0;
+            return testCase.hasCrashDetected() ? 1 : 0;
         } else {
             throw new UnsupportedOperationException("Chromosome type "
                     + chromosome.getValue().getClass() + " not yet supported!");

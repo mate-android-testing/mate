@@ -12,6 +12,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
+import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
@@ -64,7 +65,7 @@ public class TestCase {
      * The stack trace that has been triggered by a potential crash.
      * Only recorded when {@link org.mate.Properties#RECORD_STACK_TRACE()} is defined.
      */
-    private String crashStackTrace = null;
+    private StackTrace crashStackTrace = null;
 
     /**
      * Should be used for the creation of dummy test cases.
@@ -115,7 +116,7 @@ public class TestCase {
     public void finish() {
         MATE.log("Finishing test case!");
 
-        MATE.log("Found crash: " + getCrashDetected());
+        MATE.log("Found crash: " + hasCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
@@ -260,7 +261,7 @@ public class TestCase {
      * @return Returns {@code true} if the test case caused a crash,
      *          otherwise {@code false} is returned.
      */
-    public boolean getCrashDetected() {
+    public boolean hasCrashDetected() {
         return this.crashDetected;
     }
 
@@ -278,7 +279,7 @@ public class TestCase {
      *          this should be typically the last action.
      */
     @SuppressWarnings("unused")
-    public String getCrashStackTrace() {
+    public StackTrace getCrashStackTrace() {
         if (Properties.RECORD_STACK_TRACE()) {
             return crashStackTrace;
         } else {
