@@ -6,12 +6,31 @@ machine which is responsible for some analysis that can not be performed by the
 instrumentation tests themselves. The repository containing the MATE server can be found
 [here](https://github.com/mate-android-testing/mate-server).
 
+## Supported Devices:
+
+We have tested MATE on the following devices:
+
+* Nexus 5 (API 25 & 28)
+* Pixel C (API 25 & 28)
+* Pixel XL (API 25 & 28)
+
+You have to employ on the emulator a *x86* image that is not provided by *Google*, i.e. don't use
+neither a *Google Play* nor a *Google API* image. This is due to recent changes that otherwise lead
+to permission issues.
+
 ## How to run MATE
+
+The simplest option is to make use of the supplied `mate-commander`:
+* [Windows](https://github.com/mate-android-testing/mate-commander/tree/mate-commander-windows) 
+* [Linux](https://github.com/mate-android-testing/mate-commander) 
+
+If you however want to debug MATE and MATE Server follow the instructions below:
+
 ### 1) Start the device
 Setup the emulator or attach your device via USB and enable USB-Debugging.
 Install and open(!) the app you want to test.
 
-### 2) Build and run MATE server
+### 2) Build and run MATE Server
 Refer to the [instructions](https://github.com/mate-android-testing/mate-server/blob/master/README.md)
 from the MATE server repository.
 
@@ -85,3 +104,6 @@ chromosome_factory=ANDROID_RANDOM_CHROMOSOME_FACTORY
 ```
 The available properties can be looked up in the class
 `org.mate.Properties`.
+
+## Algorithm Documentation
+For more information on grammatical evolution refer to the [documentation](doc/GrammaticalEvolution.md).

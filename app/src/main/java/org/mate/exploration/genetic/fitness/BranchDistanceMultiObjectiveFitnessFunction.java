@@ -10,8 +10,8 @@ import java.util.Map;
 
 /**
  * Provides a fitness metric based on branch distance for multi-objective algorithms. This requires
- * that the AUT has been instrumented with the branch distance module. Based on the paper
- * "It Does Matter How You Normalise the Branch Distance in Search Based Software Testing".
+ * that the AUT has been instrumented with the branch distance module. The retrieved fitness values
+ * are already normalised in the range [0,1].
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
@@ -47,22 +47,38 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double branchDistance;
+        if (!cache.get(branch).containsKey(chromosome)) {
 
-        if (cache.get(branch).containsKey(chromosome)) {
-            branchDistance = cache.get(branch).get(chromosome);
-        } else {
             // retrieves the fitness value for every single branch
             List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, branches);
 
-            // insert them into the cache
+            // update the cache
             for (int i = 0; i < branchDistanceVector.size(); i++) {
                 cache.get(branches.get(i)).put(chromosome, branchDistanceVector.get(i));
             }
-
-            branchDistance = cache.get(branch).get(chromosome);
         }
 
-        return branchDistance;
+        return cache.get(branch).get(chromosome);
+    }
+
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code false} since this fitness functions aims to minimise the branch distance.
+     */
+    @Override
+    public boolean isMaximizing() {
+        return false;
+    }
+
+    /**
+     * Returns the normalised fitness value, i.e. the branch distance between 0 and 1.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome);
     }
 }

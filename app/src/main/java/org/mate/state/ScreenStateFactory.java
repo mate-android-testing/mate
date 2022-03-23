@@ -1,6 +1,8 @@
 package org.mate.state;
 
 import org.mate.MATE;
+import org.mate.Registry;
+import org.mate.interaction.DeviceMgr;
 import org.mate.state.executables.ActionsScreenState;
 import org.mate.state.executables.AppScreen;
 import org.mate.utils.Utils;
@@ -11,8 +13,7 @@ import org.mate.utils.Utils;
 public class ScreenStateFactory {
 
     /**
-     * Indicates how many retrials are allowed when fetching
-     * the current screen state.
+     * Indicates how many retrials are allowed when fetching the current screen state.
      */
     private static final int MAX_NUMBER_OF_RETRIES = 3;
 
@@ -26,10 +27,13 @@ public class ScreenStateFactory {
 
         MATE.log_debug("Try retrieving screen state ...");
 
+        // TODO: get rid of this static reference
+        final DeviceMgr deviceMgr = Registry.getDeviceMgr();
+
         switch (stateType) {
             case ACTION_SCREEN_STATE:
 
-                IScreenState state =  new ActionsScreenState(new AppScreen());
+                IScreenState state =  new ActionsScreenState(new AppScreen(deviceMgr));
                 int retries = 0;
 
                 /*
@@ -40,7 +44,7 @@ public class ScreenStateFactory {
                 while (retries < MAX_NUMBER_OF_RETRIES && state.getActions().size() == 0) {
                     MATE.log_debug("Retry fetching screen state!");
                     Utils.sleep(5000);
-                    state =  new ActionsScreenState(new AppScreen());
+                    state = new ActionsScreenState(new AppScreen(deviceMgr));
                     retries++;
                 }
 

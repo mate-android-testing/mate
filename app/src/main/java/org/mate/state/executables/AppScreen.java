@@ -1,7 +1,7 @@
 package org.mate.state.executables;
 
-import android.app.Instrumentation;
 import android.graphics.Rect;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -10,9 +10,9 @@ import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
-import org.mate.Registry;
-import org.mate.interaction.EnvironmentManager;
+import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.action.ui.Widget;
+import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,8 +20,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Models an app screen with all (discoverable) widgets on it.
@@ -41,13 +39,13 @@ public class AppScreen {
     /**
      * A list of discovered widgets on the app screen.
      */
-    private List<Widget> widgets;
+    private final List<Widget> widgets;
 
     /**
      * Collects the text hints for editable fields over all app screens.
      * The key is defined through the resource id of the widget.
      */
-    private static Map<String, String> editTextHints = new Hashtable<String,String>();
+    private static final Map<String, String> editTextHints = new Hashtable<String, String>();
 
     /**
      * Stores relevant information about the device, e.g. the display height.
@@ -58,30 +56,26 @@ public class AppScreen {
     /**
      * Creates a new app screen containing the widgets on it.
      */
-    public AppScreen() {
+    public AppScreen(DeviceMgr deviceMgr) {
 
-        Instrumentation instrumentation = getInstrumentation();
-        this.device = UiDevice.getInstance(instrumentation);
+        this.device = deviceMgr.getDevice();
 
         this.widgets = new ArrayList<>();
-        this.activityName = Registry.getEnvironmentManager().getCurrentActivityName();
-
-        if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
-            this.packageName = device.getCurrentPackageName();
-        } else {
-            this.packageName = activityName.split("/")[0];
-        }
+        this.activityName = deviceMgr.getCurrentActivity();
+        this.packageName = device.getCurrentPackageName();
 
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().getRootInActiveWindow();
 
         if (rootNode == null) {
+
             /*
-            * TODO: Check whether this is the expected behaviour. I would rather assume that
-            *  the UIAutomator throws an exception and we can't react it properly, similar
-            *  to what can happen when executing an action in the DeviceMgr.
+             * It can happen that the device is in an unstable state and hence the UIAutomator
+             * connection may get lost. In this case, we should wait some time until we try to
+             * re-connect.
              */
             MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+            Utils.sleep(1000);
 
             // try to reconnect
             rootNode = InstrumentationRegistry.getInstrumentation()
@@ -101,11 +95,11 @@ public class AppScreen {
     /**
      * Extracts the widgets from the ui hierarchy.
      *
-     * @param node Describes a node in the ui hierarchy. Initially, the root node.
-     * @param parent The parent widget, {@code null} for the root node.
-     * @param depth The depth of the node in the ui hierarchy (tree).
+     * @param node        Describes a node in the ui hierarchy. Initially, the root node.
+     * @param parent      The parent widget, {@code null} for the root node.
+     * @param depth       The depth of the node in the ui hierarchy (tree).
      * @param globalIndex A global index based on DFS order.
-     * @param localIndex A local index for each child widget, i.e. the child number.
+     * @param localIndex  A local index for each child widget, i.e. the child number.
      * @return Returns the current global index.
      */
     private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
@@ -116,8 +110,11 @@ public class AppScreen {
         MATE.log_debug("Node class: " + node.getClassName());
 
         Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
-        checkForHint(node, widget);
         widgets.add(widget);
+
+        if (widget.isEditable()) {
+            checkForHint(node, widget);
+        }
 
         if (parent != null) {
             parent.addChild(widget);
@@ -129,67 +126,88 @@ public class AppScreen {
         // traverse children
         for (int i = 0; i < node.getChildCount(); i++) {
             // the local index is simply the child number
-            globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
+            if (node.getChild(i) == null) {
+                MATE.log_warn("Child node " + i + " at depth " + depth + " not available!");
+            } else {
+                globalIndex = parseWidgets(node.getChild(i), widget, depth, globalIndex, i);
+            }
         }
         return globalIndex;
     }
 
     /**
-     * Checks whether a widget displays some hint. Globally collects
-     * all hints.
+     * Checks whether an editable widget displays some hint.
      *
-     * @param node A node in the ui hierarchy.
+     * @param node   A node in the ui hierarchy.
      * @param widget The widget corresponding to the node.
      */
     private void checkForHint(AccessibilityNodeInfo node, Widget widget) {
 
-        /*
-         * TODO: We should replace the following code with node.isShowingHintText()
-         *  and node.getHintText() in the future, however this requires min API level 26.
-         */
-        // try to retrieve the hint of a widget
-        if (widget.isEditable()) {
+        String hint = editTextHints.get(widget.getResourceID());
 
-            String hint = editTextHints.get(widget.getResourceID());
+        if (hint == null) {
 
-            if (hint == null) {
-
-                UiObject2 uiObject = null;
-
-                if (widget.getResourceID().isEmpty()) {
-                    uiObject = device.findObject(By.text(widget.getText()));
-                } else {
-                    uiObject = device.findObject(By.res(widget.getResourceID()));
-                }
-
-                if (uiObject != null) {
-
-                    /*
-                     * In order to retrieve the hint of a widget, we have to clear the
-                     * input, and this in turn should display the hint if we are lucky.
-                     */
-
-                    // save original input
-                    String textBeforeClear = Objects.toString(uiObject.getText(), "");
-
-                    // reset input and hope that this causes a hint to be set
-                    uiObject.setText("");
-                    String textAfterClear = Objects.toString(uiObject.getText(), "");
-
-                    // restore original input
-                    uiObject.setText(textBeforeClear);
-
-                    hint = textAfterClear;
-
-                    if (!widget.getResourceID().isEmpty()) {
-                        editTextHints.put(widget.getResourceID(), hint);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (node.isShowingHintText()) {
+                    if(node.getHintText() instanceof String){
+                        hint = (String) node.getHintText();
                     }
                 }
+            } else {
+                // fallback mechanism for older devices
+                hint = getHintAPI25AndLower(widget);
             }
 
-            hint = Objects.toString(hint, "");
-            widget.setHint(hint);
+            // save hint for subsequent requests
+            if (hint != null) {
+                if (!widget.getResourceID().isEmpty()) {
+                    editTextHints.put(widget.getResourceID(), hint);
+                }
+            }
         }
+
+        hint = Objects.toString(hint, "");
+        widget.setHint(hint);
+    }
+
+    /**
+     * Retrieves the hint of an input field for an emulator running an API level <= 25.
+     *
+     * @param widget The widget representing the input field.
+     * @return Returns the hint contained in the input field.
+     */
+    private String getHintAPI25AndLower(Widget widget) {
+
+        String hint = null;
+        UiObject2 uiObject;
+
+        if (widget.getResourceID().isEmpty()) {
+            uiObject = device.findObject(By.text(widget.getText()));
+        } else {
+            uiObject = device.findObject(By.res(widget.getResourceID()));
+        }
+
+        if (uiObject != null) {
+
+            /*
+             * In order to retrieve the hint of a widget, we have to clear the
+             * input, and this in turn should display the hint if we are lucky.
+             */
+
+            // save original input
+            String textBeforeClear = Objects.toString(uiObject.getText(), "");
+
+            // reset input and hope that this causes a hint to be set
+            uiObject.setText("");
+            String textAfterClear = Objects.toString(uiObject.getText(), "");
+
+            // restore original input
+            uiObject.setText(textBeforeClear);
+
+            hint = textAfterClear;
+        }
+
+        return hint;
     }
 
     /**
@@ -206,7 +224,7 @@ public class AppScreen {
      *
      * @return Returns the widgets of the app screen.
      */
-    public List<Widget> getWidgets(){
+    public List<Widget> getWidgets() {
         return Collections.unmodifiableList(widgets);
     }
 
@@ -263,7 +281,7 @@ public class AppScreen {
      *
      * @param o The other app screen to compare against.
      * @return Returns {@code true} if the two app screens are identical,
-     *          otherwise {@code false} is returned.
+     * otherwise {@code false} is returned.
      */
     @Override
     public boolean equals(Object o) {

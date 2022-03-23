@@ -1,7 +1,9 @@
 package org.mate;
 
+import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.utils.manifest.Manifest;
 
 import java.io.IOException;
 import java.util.Random;
@@ -13,10 +15,14 @@ public class Registry {
     private static Random random;
 
     /**
-     * An abstraction of the app screen enabling the execution
-     * of actions and various other tasks.
+     * An abstraction of the app screen enabling the execution of actions and various other tasks.
      */
     private static UIAbstractionLayer uiAbstractionLayer;
+
+    /**
+     * Enables the interaction with the device (emulator).
+     */
+    private static DeviceMgr deviceMgr;
 
     /**
      * The package name of the AUT.
@@ -27,6 +33,29 @@ public class Registry {
      * The time out in milli seconds.
      */
     private static Long timeout;
+
+    /**
+     * Whether we are in replay mode. Default: Off
+     */
+    private static boolean replayMode;
+
+    /**
+     * Represents an abstraction of the AndroidManifest.xml file.
+     */
+    private static Manifest manifest;
+
+    /**
+     * The name of the main activity.
+     */
+    private static String mainActivity;
+
+    public static void registerReplayMode() {
+        replayMode = true;
+    }
+
+    public static boolean isReplayMode() {
+        return replayMode;
+    }
 
     public static void registerUiAbstractionLayer(UIAbstractionLayer uiAbstractionLayer) {
         Registry.uiAbstractionLayer = uiAbstractionLayer;
@@ -117,5 +146,41 @@ public class Registry {
 
     public static void unregisterRandom() {
         random = null;
+    }
+
+    public static DeviceMgr getDeviceMgr() {
+        return deviceMgr;
+    }
+
+    public static void registerDeviceMgr(final DeviceMgr deviceMgr) {
+        Registry.deviceMgr = deviceMgr;
+    }
+
+    public static void unregisterDeviceMgr() {
+        deviceMgr = null;
+    }
+
+    public static Manifest getManifest() {
+        return manifest;
+    }
+
+    public static void registerManifest(Manifest manifest) {
+        Registry.manifest = manifest;
+    }
+
+    public static void unregisterManifest() {
+        Registry.manifest = null;
+    }
+
+    public static String getMainActivity() {
+        return mainActivity;
+    }
+
+    public static void registerMainActivity(String mainActivity) {
+        Registry.mainActivity = mainActivity;
+    }
+
+    public static void unregisterMainActivity() {
+        Registry.mainActivity = null;
     }
 }

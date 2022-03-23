@@ -1,6 +1,5 @@
 package org.mate.utils;
 
-import org.mate.MATE;
 import org.mate.Registry;
 
 import java.util.ArrayList;
@@ -8,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.IntStream;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Randomness {
     public static Random getRnd() {
@@ -60,6 +59,23 @@ public class Randomness {
     }
 
     /**
+     * Randomly retrieves {@param count} elements from a given list.
+     *
+     * @param list The input list.
+     * @param count The number of elements that should be retrieved.
+     * @param <T> The element type.
+     * @return Returns a list with {@param count} random elements from a given list.
+     */
+    public static <T> List<T> randomElements(List<T> list, int count) {
+
+        List<T> result = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            result.add(randomElement(list));
+        }
+        return result;
+    }
+
+    /**
      * Randomly retrieves {@param count} elements from a given set.
      *
      * @param set The input set.
@@ -74,6 +90,17 @@ public class Randomness {
             result.add(randomElementOrNull(set));
         }
         return result;
+    }
+
+    /**
+     * Generates a random double in the range [min,max).
+     *
+     * @param min The minimal value (inclusive).
+     * @param max The maximal value (exclusive).
+     * @return Returns a random number in the range [min,max).
+     */
+    public static double getRandom(double min, double max) {
+        return ThreadLocalRandom.current().nextDouble(min, max);
     }
 
     public static int getInRangeStd(int range) {

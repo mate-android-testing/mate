@@ -9,17 +9,19 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.utils.coverage.Coverage;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
+import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageUtils;
+import org.mate.utils.manifest.Manifest;
+import org.mate.utils.manifest.ManifestParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -67,8 +69,20 @@ public class MATE {
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
-        UiDevice device = UiDevice.getInstance(getInstrumentation());
-        DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        try {
+            Manifest manifest = ManifestParser.parseManifest(Registry.getPackageName());
+            Registry.registerManifest(manifest);
+            Registry.registerMainActivity(manifest.getMainActivity());
+        } catch (XmlPullParserException | IOException e) {
+            throw new IllegalStateException("Couldn't parse AndroidManifest.xml!", e);
+        }
+
+        MATE.log_acc("Main activity: " + Registry.getMainActivity());
+
+        final UiDevice device = UiDevice.getInstance(getInstrumentation());
+        final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
+        Registry.registerDeviceMgr(deviceMgr);
+
         // internally checks for permission dialogs and grants permissions if required
         Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
@@ -101,17 +115,14 @@ public class MATE {
     public void testApp(final Algorithm algorithm) {
 
         MATE.log_acc("Activities:");
-        for (String s : Registry.getEnvironmentManager().getActivityNames()) {
-            MATE.log_acc("\t" + s);
+        for (String activity : Registry.getUiAbstractionLayer().getActivities()) {
+            MATE.log_acc("\t" + activity);
         }
 
         try {
-            TimeoutRun.timeoutRun(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    algorithm.run();
-                    return null;
-                }
+            TimeoutRun.timeoutRun(() -> {
+                algorithm.run();
+                return null;
             }, Registry.getTimeout());
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,9 +141,10 @@ public class MATE {
             try {
                 Registry.unregisterEnvironmentManager();
                 Registry.unregisterUiAbstractionLayer();
+                Registry.unregisterDeviceMgr();
                 Registry.unregisterProperties();
                 Registry.unregisterRandom();
-                Registry.getPackageName();
+                Registry.unregisterPackageName();
                 Registry.unregisterTimeout();
             } catch (IOException e) {
                 e.printStackTrace();

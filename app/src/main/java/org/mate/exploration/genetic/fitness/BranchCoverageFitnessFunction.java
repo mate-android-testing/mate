@@ -12,6 +12,12 @@ import org.mate.utils.FitnessUtils;
  */
 public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
 
+    /**
+     * Computes the branch coverage for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the fitness should be evaluated.
+     * @return Returns the branch coverage obtained by the branch coverage module.
+     */
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
@@ -21,7 +27,27 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
             ConditionalTerminationCondition.satisfiedCondition();
         }
 
-        // TODO: normalise fitness value in the range [0,1]
         return branchCoverage;
+    }
+
+    /**
+     * Returns whether this fitness function is maximising or not.
+     *
+     * @return Returns {@code true} since this fitness functions aims to maximise the branch coverage.
+     */
+    @Override
+    public boolean isMaximizing() {
+        return true;
+    }
+
+    /**
+     * Returns the normalised fitness value, i.e. the branch coverage divided by 100.
+     *
+     * @param chromosome The chromosome for which the normalised fitness should be evaluated.
+     * @return Returns the normalised fitness value bounded in [0,1].
+     */
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome) {
+        return getFitness(chromosome) / 100;
     }
 }

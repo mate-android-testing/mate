@@ -72,7 +72,8 @@ public class DepthFirst {
             WidgetAction action = executableActions.get(i);
 
             //reaches the screen node/state being explored (backtrack)
-            stateFound = deviceMgr.goToState(guiModel,selectedStateId);
+            // stateFound = deviceMgr.goToState(guiModel,selectedStateId);
+            stateFound = false;
 
 
             //if the app is in the screen node/state being explored

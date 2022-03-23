@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
@@ -54,7 +55,7 @@ public class Properties {
     /*
     * Intent fuzzing related properties.
      */
-    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(1.0f); }
+    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(0.0f); }
 
     /**
      * The optimisation strategy that should be applied.
@@ -79,14 +80,6 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /**
-     *  Added by vin on 24/05/2018
-     */
-    // if 0 any point will be added to the archive
-    public static float NOVELTY_THRESHOLD() {
-        return propertyOr(0);
-    }
-
     public static int K_VALUE() {
         return propertyOr(2);
     }
@@ -94,10 +87,6 @@ public class Properties {
     //10;
     public static double RANK_BIAS() {
         return propertyOr(1.7);
-    }
-
-    public static int ARCHIVE_SIZE() {
-        return propertyOr(10);
     }
 
     //10;
@@ -136,10 +125,6 @@ public class Properties {
     public static double P_MUTATE() {
         return propertyOr(0.3);
     }
-    // for mutation functions that apply multiple mutations based on the given probability
-    public static double P_INNER_MUTATE() {
-        return propertyOr(0.3);
-    }
 
     public static double P_SAMPLE_RANDOM() {
         return propertyOr(0.5);
@@ -153,9 +138,23 @@ public class Properties {
         return propertyOr(10);
     }
 
+    public static int MUTATION_RATE() { return propertyOr(1); }
+
+    public static int TOURNAMENT_SIZE() { return propertyOr(2); }
+
+    public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
+
     public static FitnessFunction FITNESS_FUNCTION() {
         return propertyOr(null);
     }
+
+    /**
+     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTION()}
+     * provides the mapping from geno to phenotype, this property specifies the core fitness function.
+     *
+     * @return Returns the core fitness function used in the context of GE.
+     */
+    public static FitnessFunction GE_FITNESS_FUNCTION() { return propertyOr(null); }
 
     public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
 
@@ -171,9 +170,40 @@ public class Properties {
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
 
+    /*
+     * Begin Greybox Fuzzing properties
+     */
+
+    /**
+     * The coverage type that should steer the exploration.
+     *
+     * @return Returns the coverage type that steers the exploration, defaults to activity coverage.
+     */
+    public static Coverage GREY_BOX_COVERAGE_CRITERION() {
+        return propertyOr(Coverage.ACTIVITY_COVERAGE);
+    }
+
+    /**
+     * The initial size of the seed corpus S.
+     *
+     * @return Returns the initial size of the seed corpus.
+     */
+    public static int SEED_CORPUS_SIZE() { return propertyOr(10); }
+
+    /**
+     * The maximal assignable energy p.
+     *
+     * @return Returns the maximal assignable energy.
+     */
+    public static int MAX_ENERGY() { return propertyOr(10); }
+
+    /*
+     * End Greybox Fuzzing properties
+     */
+
     /**
      * Indicates which objective should be used for the multi-/many-objective
-     * search, i.e. branches or lines.
+     * search, e.g. branches or lines.
      *
      * @return Returns the objective or {@code null} if none was specified.
      */
@@ -212,6 +242,11 @@ public class Properties {
         return propertyOr(true);
     }
 
+    // whether only AUT classes should be resolved
+    public static boolean RESOLVE_ONLY_AUT_CLASSES() {
+        return propertyOr(true);
+    }
+
     // whether ART classes should be excluded when constructing the graph
     public static boolean EXCLUDE_ART_CLASSES() {
         return propertyOr(true);
@@ -241,6 +276,92 @@ public class Properties {
      * Added by stockinger on 28/09/2020
      */
     public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
+
+    // grammatical evolution properties
+    public static int GE_SEQUENCE_LENGTH() {
+        return propertyOr(100);
+    }
+
+    public static int GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND() {
+        return propertyOr(AndroidListBasedBiasedMapping.BIAS_50_PERCENT);
+    }
+
+    public static int GE_MUTATION_COUNT() {
+        return propertyOr(3);
+    }
+
+    /**
+     * Novelty Search - Defines the novelty threshold. A value of 0 indicates that every
+     * chromosome will be added to the archive.
+     *
+     * @return Returns the novelty threshold T.
+     */
+    public static double NOVELTY_THRESHOLD() { return propertyOr(0.0); }
+
+    /**
+     * Novelty Search - Defines the maximal size of the archive.
+     *
+     * @return Returns the archive size L.
+     */
+    public static int ARCHIVE_LIMIT() { return propertyOr(10); }
+
+    /**
+     * Novelty Search - Defines the number of nearest neighbours that should be considered
+     * for the novelty metric.
+     *
+     * @return Returns the number of nearest neighbours k.
+     */
+    public static int NEAREST_NEIGHBOURS() { return propertyOr(3); }
+
+    /**
+     * Controls whether quick launch is enabled or disabled.
+     *
+     * @return Returns {@code true} if quick launch is enabled, otherwise {@code false} is returned.
+     */
+    public static boolean QUICK_LAUNCH() { return propertyOr(true); }
+
+    /*
+     * Begin AimDroid properties
+     */
+
+    /**
+     * The epsilon used in the epsilon greedy learning policy.
+     *
+     * @return Returns the epsilon used in the learning policy.
+     */
+    public static double EPSILON() { return propertyOr(0.1d);}
+
+    /**
+     * The alpha used in the SARSA equation.
+     *
+     * @return Returns the alpha used in the SARSA equation.
+     */
+    public static double ALPHA() { return propertyOr(0.8d); }
+
+    /**
+     * The gamma used in the SARSA equation.
+     *
+     * @return Returns the gamma used in the SARSA equation.
+     */
+    public static double GAMMA() { return propertyOr(0.8d); }
+
+    /**
+     * The minL constant used in the bound method (the minimal number of actions).
+     *
+     * @return Returns the minL constant.
+     */
+    public static int MIN_L() { return propertyOr(20); }
+
+    /**
+     * The maxL constant used in the bound method (the maximal number of actions).
+     *
+     * @return Returns the maxL constant.
+     */
+    public static int MAX_L() { return propertyOr(50); }
+
+    /*
+     * End AimDroid properties
+     */
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
@@ -300,14 +421,14 @@ public class Properties {
                             property.getValue());
                     store.put(key, parsedObj);
                 } catch (Exception e) {
-                    MATE.log(
+                    MATE.log_acc(
                             "Failure while trying to parse \""
                                     + property.getValue()
                                     + "\" as instance of class "
                                     + propertiesInfo.get(key).getCanonicalName());
                 }
             } else {
-                MATE.log("Unknown property with key: " + property.getKey());
+                MATE.log_acc("Unknown property with key: " + property.getKey());
             }
         }
     }

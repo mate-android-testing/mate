@@ -33,7 +33,7 @@ public class ManualExploration implements Algorithm {
     public void run() {
 
         Action manualAction = new UIAction(ActionType.MANUAL_ACTION,
-                uiAbstractionLayer.getCurrentActivity());
+                Registry.getUiAbstractionLayer().getCurrentActivity());
 
         while (true) {
 

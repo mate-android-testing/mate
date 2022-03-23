@@ -1,16 +1,13 @@
 package org.mate.interaction;
 
 import android.os.RemoteException;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiSelector;
 import android.util.Log;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.PrimitiveAction;
+import org.mate.interaction.action.ActionResult;
+import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -20,57 +17,96 @@ import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
+import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
+import static org.mate.interaction.action.ActionResult.SUCCESS;
+import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
-// TODO: make singleton
+/**
+ * TODO: make singleton
+ * Enables high-level interactions with the AUT.
+ */
 public class UIAbstractionLayer {
 
+    /**
+     * The maximal number of retries (screen state fetching) when the ui automator is disconnected.
+     */
     private static final int UiAutomatorDisconnectedRetries = 3;
+
+    /**
+     * The error message when the ui automator is disconnected.
+     */
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
-    private String packageName;
-    private DeviceMgr deviceMgr;
+
+    /**
+     * The package name of the AUT.
+     */
+    private final String packageName;
+
+    /**
+     * Provides the low-level routines to execute different kind of actions.
+     */
+    private final DeviceMgr deviceMgr;
+
+    /**
+     * The last fetched screen state.
+     */
     private IScreenState lastScreenState;
+
+    /**
+     * The assigned index to the last screen state.
+     */
     private int lastScreenStateNumber = 0;
 
-    private IGUIModel guiModel;
+    /**
+     * The current gui model.
+     */
+    private final IGUIModel guiModel;
 
+    /**
+     * Enables moving the AUT into an arbitrary state or activity.
+     */
+    private final GUIWalker guiWalker;
+
+    /**
+     * The activities belonging to the AUT.
+     */
+    private final List<String> activities;
+
+    /**
+     * Initialises the ui abstraction layer.
+     *
+     * @param deviceMgr The device manager responsible for executing all kind of actions.
+     * @param packageName The package name of the AUT.
+     */
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
+        activities = deviceMgr.getActivities();
         // check for any kind of dialogs (permission, crash, ...) initially
-        clearScreen();
-        lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+        lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
-        guiModel = new FSMModel(lastScreenState);
+        guiModel = new FSMModel(lastScreenState, packageName);
+        guiWalker = new GUIWalker(this);
     }
 
     /**
-     * Returns the list of executable widget actions on the current screen.
+     * Returns the list of executable ui actions on the current screen.
      *
      * @return Returns the list of executable widget actions.
      */
     public List<UIAction> getExecutableActions() {
         return getLastScreenState().getActions();
-    }
-
-    /**
-     * Returns the name of the current activity.
-     *
-     * @return Returns the name of the current activity.
-     */
-    public String getCurrentActivity() {
-        return getLastScreenState().getActivityName();
     }
 
     /**
@@ -96,7 +132,7 @@ public class UIAbstractionLayer {
                 return executeActionUnsafe(action);
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
-                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
                         && retryCount < UiAutomatorDisconnectedRetries) {
                     retry = true;
                     retryCount += 1;
@@ -121,28 +157,18 @@ public class UIAbstractionLayer {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
-            MATE.log_acc("CRASH MESSAGE" + e.getMessage());
+            MATE.log_acc("CRASH MESSAGE " + e.getMessage());
             deviceMgr.pressHome();
-
-            if (action instanceof PrimitiveAction) {
-                return FAILURE_APP_CRASH;
-            }
 
             // update screen state model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
             guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
-
             return FAILURE_APP_CRASH;
         }
 
-        if (action instanceof PrimitiveAction) {
-            return SUCCESS;
-        }
-
-        clearScreen();
-        state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+        state = clearScreen();
 
         // TODO: assess if timeout should be added to primitive actions as well
         // check whether there is a progress bar on the screen
@@ -156,9 +182,8 @@ public class UIAbstractionLayer {
                 WidgetAction wa = (WidgetAction) action;
                 wa.setTimeToWait(timeToWait);
             }
-            clearScreen();
             // get a new state
-            state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+            state = clearScreen();
         }
 
         // get the package name of the app currently running
@@ -196,97 +221,52 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Clears the screen from all sorts of dialogs. In particular, whenever
-     * a permission dialog pops up, the permission is granted. If a crash dialog
-     * appears, we press 'HOME'. If a google-sign dialog appears, the 'BACK'
-     * button is pressed to return to the AUT. Clicks on 'OK' when a build
-     * warning pops up.
+     * Clears the screen from all sorts of dialog, e.g. a permission dialog.
+     *
+     * @return Returns the current screen state.
      */
-    public void clearScreen() {
+    public IScreenState clearScreen() {
+
+        IScreenState screenState = null;
         boolean change = true;
         boolean retry = true;
         int retryCount = 0;
 
+        // iterate over screen until no dialog appears anymore
         while (change || retry) {
             retry = false;
             change = false;
             try {
 
-                // check for crash dialog
-                UiObject crashDialog1 = deviceMgr.getDevice().findObject(new UiSelector()
-                        .packageName("android").textContains("keeps stopping"));
-                UiObject crashDialog2 = deviceMgr.getDevice().findObject(new UiSelector()
-                        .packageName("android").textContains("has stopped"));
+                screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
-                if (crashDialog1.exists() || crashDialog2.exists()) {
-                    // TODO: Click 'OK' on crash dialog window rather than 'HOME'?
-                    // press 'HOME' button
-                    deviceMgr.pressHome();
+                // check for presence of crash dialog
+                if (handleCrashDialog()) {
                     change = true;
                     continue;
                 }
 
-                // check for outdated build warnings
-                IScreenState screenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-                for (Widget widget : screenState.getWidgets()) {
-                    if (widget.getText().equals("This app was built for an older version of Android " +
-                            "and may not work properly. Try checking for updates, or contact the developer.")) {
-                        for (UIAction action : screenState.getActions()) {
-                            if (action instanceof WidgetAction && ((WidgetAction) action).getWidget().getText().equals("OK")) {
-                                try {
-                                    deviceMgr.executeAction(action);
-                                    break;
-                                } catch (AUTCrashException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                        change = true;
-                    }
-                }
-                if (change) {
+                // check for presence of build warnings dialog
+                if (handleBuildWarnings(screenState)) {
+                    change = true;
                     continue;
                 }
 
                 // check for google sign in dialog
-                if (screenState.getPackageName().equals("com.google.android.gms")) {
-                    // press BACK to return to AUT
-                    MATE.log("Google Sign Dialog detected! Returning.");
-                    deviceMgr.pressBack();
+                if (handleGoogleSignInDialog(screenState)) {
                     change = true;
                     continue;
                 }
 
-                // check for permission dialog (API 25/28 tested)
-                if (screenState.getPackageName().equals("com.google.android.packageinstaller")
-                        || screenState.getPackageName().equals("com.android.packageinstaller")) {
-                    List<UIAction> actions = screenState.getActions();
-                    for (UIAction action : actions) {
-                        if (action instanceof WidgetAction) {
-                            WidgetAction widgetAction = (WidgetAction) action;
-
-                            /*
-                             * The resource id for the allow button stays the same for both API 25
-                             * and API 28, although the package name differs.
-                             */
-                            if (widgetAction.getWidget().getResourceID()
-                                    .equals("com.android.packageinstaller:id/permission_allow_button")
-                                    || widgetAction.getWidget().getText().toLowerCase().equals("allow")) {
-                                try {
-                                    deviceMgr.executeAction(action);
-                                } catch (AUTCrashException e) {
-                                    e.printStackTrace();
-                                }
-                                break;
-                            }
-                        }
-                    }
+                // check for presence of permission dialog
+                if (handlePermissionDialog(screenState)) {
                     change = true;
                     continue;
                 }
+
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
-                        && e.getMessage().equals(UiAutomatorDisconnectedMessage)
+                        && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
                         && retryCount < UiAutomatorDisconnectedRetries) {
                     retry = true;
                     retryCount += 1;
@@ -295,6 +275,128 @@ public class UIAbstractionLayer {
                 Log.e("acc", "", e);
             }
         }
+        return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows a 'Google SignIn' dialog. If this is the case,
+     * we press the 'BACK' button as we can't login.
+     *
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleGoogleSignInDialog(IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.google.android.gms")) {
+            MATE.log("Detected Google SignIn Dialog!");
+            deviceMgr.pressBack();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a crash dialog. If this is the case,
+     * we press the 'HOME' button.
+     *
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleCrashDialog() {
+
+        if (deviceMgr.checkForCrashDialog()) {
+            MATE.log("Detected crash dialog!");
+            // TODO: Should we really press 'HOME' or better click 'OK' on the dialog?
+            deviceMgr.pressHome();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a permission dialog. If this is the case,
+     * the permission is tried to be granted by clicking on the 'allow button'.
+     *
+     * @param screenState The current screen.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handlePermissionDialog(IScreenState screenState) {
+
+        /*
+         * The permission dialog has a different package name depending on the API level.
+         * We currently support API level 25 and 28.
+         */
+        if (screenState.getPackageName().equals("com.google.android.packageinstaller")
+                || screenState.getPackageName().equals("com.android.packageinstaller")
+                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")) {
+
+            MATE.log("Detected permission dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                Widget widget = action.getWidget();
+
+                /*
+                 * The resource id for the allow button stays the same for both API 25
+                 * and API 28, although the package name differs.
+                 */
+                if (action.getActionType() == ActionType.CLICK
+                        && (widget.getResourceID()
+                                .equals("com.android.packageinstaller:id/permission_allow_button")
+                            || widget.getText().toLowerCase().equals("allow"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on permission dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            /*
+            * In rare circumstances it can happen that the 'ALLOW' button is not discovered for yet
+            * unknown reasons. The discovered widgets on the current screen point to the permission
+            * dialog, but none of the buttons have the desired resource id. The only reasonable
+            * option seems to re-fetch the screen state and hope that the problem is gone.
+             */
+            MATE.log_warn("Couldn't find any applicable action on permission dialog!");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a build warnings dialog. If this is the case,
+     * we try to click on the 'OK' button.
+     *
+     * @param screenState The current screen.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleBuildWarnings(IScreenState screenState) {
+
+        for (Widget widget : screenState.getWidgets()) {
+            if (widget.getText().equals("This app was built for an older version of Android " +
+                    "and may not work properly. Try checking for updates, or contact the developer.")) {
+
+                MATE.log("Detected build warnings dialog!");
+
+                for (WidgetAction action : screenState.getWidgetActions()) {
+                    if (action.getActionType() == ActionType.CLICK
+                            && action.getWidget().getText().equals("OK")) {
+                        try {
+                            deviceMgr.executeAction(action);
+                            return true;
+                        } catch (AUTCrashException e) {
+                            MATE.log_warn("Couldn't click on build warnings dialog!");
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -355,21 +457,23 @@ public class UIAbstractionLayer {
      * Resets an app, i.e. clearing the app cache and restarting the app.
      */
     public void resetApp() {
+
         try {
             deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
             MATE.log("Wake up couldn't be performed");
             e.printStackTrace();
         }
-        Registry.getEnvironmentManager().setPortraitMode();
+
+        if (!deviceMgr.isInPortraitMode()) {
+            deviceMgr.setPortraitMode();
+        }
+
         deviceMgr.reinstallApp();
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-        }
+        lastScreenState = clearScreen();
     }
 
     /**
@@ -378,10 +482,7 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        clearScreen();
-        if (Properties.WIDGET_BASED_ACTIONS()) {
-            lastScreenState = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-        }
+        lastScreenState = clearScreen();
     }
 
     /**
@@ -430,9 +531,91 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * The possible outcomes of applying an action.
+     * Retrieves the name of the currently visible activity.
+     *
+     * @return Returns the name of the currently visible activity.
      */
-    public enum ActionResult {
-        FAILURE_UNKNOWN, FAILURE_EMULATOR_CRASH, FAILURE_APP_CRASH, SUCCESS_NEW_STATE, SUCCESS, SUCCESS_OUTBOUND
+    public String getCurrentActivity() {
+        // TODO: check whether we can use the cached activity -> getLastScreenState().getActivityName();
+        return deviceMgr.getCurrentActivity();
+    }
+
+    /**
+     * Returns the activities of the AUT.
+     *
+     * @return Returns the activities of the AUT.
+     */
+    public List<String> getActivities() {
+        return activities;
+    }
+
+    /**
+     * Retrieves the stack trace of the last discovered crash.
+     *
+     * @return Returns the stack trace of the last crash.
+     */
+    public StackTrace getLastCrashStackTrace() {
+        return deviceMgr.getLastCrashStackTrace();
+    }
+
+    /**
+     * Returns the current gui model.
+     *
+     * @return Returns the current gui model.
+     */
+    public IGUIModel getGuiModel() {
+        return guiModel;
+    }
+
+    /**
+     * Moves the AUT into the given screen state.
+     *
+     * @param screenState The given screen state.
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToState(final IScreenState screenState) {
+        return guiWalker.goToState(screenState);
+    }
+
+    /**
+     * Moves the AUT into the given screen state.
+     *
+     * @param screenStateId The screen state id.
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToState(String screenStateId) {
+        return guiWalker.goToState(screenStateId);
+    }
+
+    /**
+     * Launches the main activity of the AUT.
+     *
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToMainActivity() {
+        return guiWalker.goToMainActivity();
+    }
+
+    /**
+     * Moves the AUT to the given activity.
+     *
+     * @param activity The activity that should be launched.
+     * @return Returns {@code true} if the transition to the given activity was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToActivity(String activity) {
+        return guiWalker.goToActivity(activity);
+    }
+
+    /**
+     * Checks whether the AUT is currently opened.
+     *
+     * @return Returns {@code true} if the AUT is currently opened, otherwise {@code false} is returned.
+     */
+    public boolean isAppOpened() {
+        return lastScreenState.getPackageName().equals(packageName);
     }
 }

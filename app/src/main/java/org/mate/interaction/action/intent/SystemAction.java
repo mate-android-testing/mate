@@ -3,20 +3,39 @@ package org.mate.interaction.action.intent;
 import android.support.annotation.NonNull;
 
 import org.mate.interaction.action.Action;
+import org.mate.utils.manifest.element.ComponentDescription;
+import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.Objects;
 
 /**
- * Describes a system event notification that should be broad-casted
- * to a certain receiver component.
+ * Describes a system event notification that should be broad-casted to a certain receiver component.
  */
 public class SystemAction extends Action {
 
+    /**
+     * The component describing the receiver of the system action.
+     */
     private final ComponentDescription component;
+
+    /**
+     * The intent-filter of the receiver.
+     */
     private final IntentFilterDescription intentFilter;
 
+    /**
+     * The name of the receiver.
+     */
     private final String receiver;
+
+    /**
+     * Whether we deal with a dynamic broadcast receiver or not.
+     */
     private boolean dynamic = false;
+
+    /**
+     * The action that the receiver expects.
+     */
     private final String action;
 
     // TODO: certain system events may also require a category, which should be included in the intent
@@ -54,18 +73,27 @@ public class SystemAction extends Action {
         return dynamic;
     }
 
+    /**
+     * Returns the name of the broadcast receiver.
+     *
+     * @return Returns the name of the broadcast receiver.
+     */
     public String getReceiver() {
         return receiver;
     }
 
+    /**
+     * Returns the action that the broadcast receiver expects.
+     *
+     * @return Returns the action that the broadcast receiver expects.
+     */
     public String getAction() {
         return action;
     }
 
     /**
-     * Defines a custom representation of a system action. Do not
-     * alter this representation without changing the parsing routine
-     * of the analysis framework!
+     * Defines a custom representation of a system action. Do not alter this representation without
+     * changing the parsing routine of the analysis framework!
      *
      * @return Returns the string representation of a system action.
      */
@@ -75,6 +103,14 @@ public class SystemAction extends Action {
         return "system action: act=" + action + " cmp=" + receiver;
     }
 
+    /**
+     * Defines an equality metric for two system actions. In our context, two system actions are
+     * identical if they refer to the same (dynamic) receiver and contain the same action.
+     *
+     * @param o The other system action to be checked for equality.
+     * @return Returns {@code true} if two system actions are identical, otherwise {@code false}
+     *      is returned.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -89,11 +125,21 @@ public class SystemAction extends Action {
         }
     }
 
+    /**
+     * Computes the hash code of the system action.
+     *
+     * @return Returns the hash code of the system action.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(receiver, dynamic, action);
     }
 
+    /**
+     * Returns a short string representation used by the {@link org.mate.model.IGUIModel}.
+     *
+     * @return Returns a short string representation.
+     */
     @NonNull
     @Override
     public String toShortString() {
