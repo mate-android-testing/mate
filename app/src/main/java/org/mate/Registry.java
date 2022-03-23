@@ -3,6 +3,7 @@ package org.mate;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.utils.manifest.Manifest;
 
 import java.io.IOException;
 import java.util.Random;
@@ -37,6 +38,16 @@ public class Registry {
      * Whether we are in replay mode. Default: Off
      */
     private static boolean replayMode;
+
+    /**
+     * Represents an abstraction of the AndroidManifest.xml file.
+     */
+    private static Manifest manifest;
+
+    /**
+     * The name of the main activity.
+     */
+    private static String mainActivity;
 
     public static void registerReplayMode() {
         replayMode = true;
@@ -147,5 +158,29 @@ public class Registry {
 
     public static void unregisterDeviceMgr() {
         deviceMgr = null;
+    }
+
+    public static Manifest getManifest() {
+        return manifest;
+    }
+
+    public static void registerManifest(Manifest manifest) {
+        Registry.manifest = manifest;
+    }
+
+    public static void unregisterManifest() {
+        Registry.manifest = null;
+    }
+
+    public static String getMainActivity() {
+        return mainActivity;
+    }
+
+    public static void registerMainActivity(String mainActivity) {
+        Registry.mainActivity = mainActivity;
+    }
+
+    public static void unregisterMainActivity() {
+        Registry.mainActivity = null;
     }
 }

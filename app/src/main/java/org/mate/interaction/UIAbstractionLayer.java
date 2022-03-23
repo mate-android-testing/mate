@@ -6,6 +6,7 @@ import android.util.Log;
 import org.mate.MATE;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -16,6 +17,7 @@ import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
 import java.util.Date;
@@ -23,32 +25,79 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_OUTBOUND;
+import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
+import static org.mate.interaction.action.ActionResult.SUCCESS;
+import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
-// TODO: make singleton
+/**
+ * TODO: make singleton
+ * Enables high-level interactions with the AUT.
+ */
 public class UIAbstractionLayer {
 
+    /**
+     * The maximal number of retries (screen state fetching) when the ui automator is disconnected.
+     */
     private static final int UiAutomatorDisconnectedRetries = 3;
+
+    /**
+     * The error message when the ui automator is disconnected.
+     */
     private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
+
+    /**
+     * The package name of the AUT.
+     */
     private final String packageName;
+
+    /**
+     * Provides the low-level routines to execute different kind of actions.
+     */
     private final DeviceMgr deviceMgr;
+
+    /**
+     * The last fetched screen state.
+     */
     private IScreenState lastScreenState;
+
+    /**
+     * The assigned index to the last screen state.
+     */
     private int lastScreenStateNumber = 0;
 
+    /**
+     * The current gui model.
+     */
     private final IGUIModel guiModel;
 
+    /**
+     * Enables moving the AUT into an arbitrary state or activity.
+     */
+    private final GUIWalker guiWalker;
+
+    /**
+     * The activities belonging to the AUT.
+     */
+    private final List<String> activities;
+
+    /**
+     * Initialises the ui abstraction layer.
+     *
+     * @param deviceMgr The device manager responsible for executing all kind of actions.
+     * @param packageName The package name of the AUT.
+     */
     public UIAbstractionLayer(DeviceMgr deviceMgr, String packageName) {
         this.deviceMgr = deviceMgr;
         this.packageName = packageName;
+        activities = deviceMgr.getActivities();
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
-        guiModel = new FSMModel(lastScreenState);
+        guiModel = new FSMModel(lastScreenState, packageName);
+        guiWalker = new GUIWalker(this);
     }
 
     /**
@@ -278,7 +327,8 @@ public class UIAbstractionLayer {
          * We currently support API level 25 and 28.
          */
         if (screenState.getPackageName().equals("com.google.android.packageinstaller")
-                || screenState.getPackageName().equals("com.android.packageinstaller")) {
+                || screenState.getPackageName().equals("com.android.packageinstaller")
+                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")) {
 
             MATE.log("Detected permission dialog!");
 
@@ -491,12 +541,12 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Returns the activity names of the AUT.
+     * Returns the activities of the AUT.
      *
-     * @return Returns the activity names of the AUT.
+     * @return Returns the activities of the AUT.
      */
-    public List<String> getActivityNames() {
-        return deviceMgr.getActivityNames();
+    public List<String> getActivities() {
+        return activities;
     }
 
     /**
@@ -504,19 +554,68 @@ public class UIAbstractionLayer {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
         return deviceMgr.getLastCrashStackTrace();
     }
 
     /**
-     * The possible outcomes of applying an action.
+     * Returns the current gui model.
+     *
+     * @return Returns the current gui model.
      */
-    public enum ActionResult {
-        FAILURE_UNKNOWN,
-        FAILURE_EMULATOR_CRASH,
-        FAILURE_APP_CRASH,
-        SUCCESS_NEW_STATE,
-        SUCCESS,
-        SUCCESS_OUTBOUND;
+    public IGUIModel getGuiModel() {
+        return guiModel;
+    }
+
+    /**
+     * Moves the AUT into the given screen state.
+     *
+     * @param screenState The given screen state.
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToState(final IScreenState screenState) {
+        return guiWalker.goToState(screenState);
+    }
+
+    /**
+     * Moves the AUT into the given screen state.
+     *
+     * @param screenStateId The screen state id.
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToState(String screenStateId) {
+        return guiWalker.goToState(screenStateId);
+    }
+
+    /**
+     * Launches the main activity of the AUT.
+     *
+     * @return Returns {@code true} if the transition to the screen state was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToMainActivity() {
+        return guiWalker.goToMainActivity();
+    }
+
+    /**
+     * Moves the AUT to the given activity.
+     *
+     * @param activity The activity that should be launched.
+     * @return Returns {@code true} if the transition to the given activity was successful, otherwise
+     *          {@code false} is returned.
+     */
+    public boolean moveToActivity(String activity) {
+        return guiWalker.goToActivity(activity);
+    }
+
+    /**
+     * Checks whether the AUT is currently opened.
+     *
+     * @return Returns {@code true} if the AUT is currently opened, otherwise {@code false} is returned.
+     */
+    public boolean isAppOpened() {
+        return lastScreenState.getPackageName().equals(packageName);
     }
 }

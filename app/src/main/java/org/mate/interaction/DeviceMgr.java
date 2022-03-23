@@ -21,7 +21,6 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
@@ -30,9 +29,9 @@ import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
+import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
@@ -40,6 +39,7 @@ import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.manifest.element.ComponentType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.support.test.InstrumentationRegistry.getContext;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
@@ -126,7 +127,12 @@ public class DeviceMgr {
      */
     private final StaticStrings staticStrings;
 
-
+    /**
+     * Initialises the device manager.
+     *
+     * @param device The underlying ui device provided by the uiautomator framework.
+     * @param packageName The package name of the AUT.
+     */
     public DeviceMgr(UiDevice device, String packageName) {
         this.device = device;
         this.packageName = packageName;
@@ -1071,6 +1077,11 @@ public class DeviceMgr {
      */
     private String convertClassName(String className) {
 
+        if (!className.contains("/")) {
+            // the class name is already in its desired form
+            return className;
+        }
+
         String[] tokens = className.split("/");
         String packageName = tokens[0];
         String componentName = tokens[1];
@@ -1092,7 +1103,7 @@ public class DeviceMgr {
      */
     private String generateTextData(final Widget widget, final int maxLength) {
 
-        final String activityName = convertClassName(widget.getActivity());
+        final String activityName = widget.getActivity();
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = Registry.getRandom();
@@ -1247,19 +1258,19 @@ public class DeviceMgr {
 
         try {
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
-                return getCurrentActivityAPI25();
+                return convertClassName(getCurrentActivityAPI25());
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-                return getCurrentActivityAPI28();
+                return convertClassName(getCurrentActivityAPI28());
             } else {
                 // fall back mechanism (slow)
-                return Registry.getEnvironmentManager().getCurrentActivityName();
+                return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
             }
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve current activity name via local shell!");
             MATE.log_warn(e.getMessage());
 
             // fall back mechanism (slow)
-            return Registry.getEnvironmentManager().getCurrentActivityName();
+            return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
         }
     }
 
@@ -1359,7 +1370,7 @@ public class DeviceMgr {
     @SuppressWarnings("unused")
     public boolean grantRuntimePermissions() {
 
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Instrumentation instrumentation = getInstrumentation();
 
         final String readPermission = "android.permission.READ_EXTERNAL_STORAGE";
         final String writePermission = "android.permission.WRITE_EXTERNAL_STORAGE";
@@ -1389,19 +1400,20 @@ public class DeviceMgr {
     }
 
     /**
-     * Returns the activity names of the AUT.
+     * Returns the activities of the AUT.
      *
-     * @return Returns the activity names of the AUT.
+     * @return Returns the activities of the AUT.
      */
-    public List<String> getActivityNames() {
+    public List<String> getActivities() {
 
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Instrumentation instrumentation = getInstrumentation();
 
         try {
             // see: https://stackoverflow.com/questions/23671165/get-all-activities-by-using-package-name
             PackageInfo pi = instrumentation.getTargetContext().getPackageManager().getPackageInfo(
                     packageName, PackageManager.GET_ACTIVITIES);
 
+            // TODO: Ensure that the short form '/.subpackage.activityName' is not used!!!
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {
@@ -1429,7 +1441,7 @@ public class DeviceMgr {
              */
             if (Properties.COVERAGE() == Coverage.LINE_COVERAGE) {
                 device.executeShellCommand("run-as " + packageName + " mkdir -p files");
-                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exe");
+                device.executeShellCommand("run-as " + packageName + " touch files/coverage.exec");
                 // device.executeShellCommand("run-as " + packageName + " exit");
             }
 
@@ -1447,7 +1459,7 @@ public class DeviceMgr {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
 
         try {
             String response = device.executeShellCommand("run-as " + packageName
@@ -1458,8 +1470,8 @@ public class DeviceMgr {
             // traverse the stack trace from bottom up until we reach the beginning
             for (int i = lines.size() - 1; i >= 0; i--) {
                 if (lines.get(i).contains("E AndroidRuntime: FATAL EXCEPTION: ")) {
-                    return lines.subList(i, lines.size()).stream()
-                            .collect(Collectors.joining("\n"));
+                    return new StackTrace(lines.subList(i, lines.size()).stream()
+                            .collect(Collectors.joining("\n")));
                 }
             }
 
@@ -1469,12 +1481,7 @@ public class DeviceMgr {
         }
 
         // fallback mechanism
-        return Registry.getEnvironmentManager().getLastCrashStackTrace();
-    }
-
-    @Deprecated
-    public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
-        return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
+        return new StackTrace(Registry.getEnvironmentManager().getLastCrashStackTrace());
     }
 
 }

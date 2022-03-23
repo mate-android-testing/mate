@@ -11,7 +11,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.utils.Utils;
 
@@ -63,12 +62,7 @@ public class AppScreen {
 
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
-
-        if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
-            this.packageName = device.getCurrentPackageName();
-        } else {
-            this.packageName = activityName.split("/")[0];
-        }
+        this.packageName = device.getCurrentPackageName();
 
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().getRootInActiveWindow();

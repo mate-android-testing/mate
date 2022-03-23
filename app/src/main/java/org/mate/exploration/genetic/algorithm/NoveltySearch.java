@@ -256,7 +256,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                 if (archive.size() < archiveLimit) {
                     archive.add(chromosome);
                 } else {
-                    // replace with 'worst' chromosome in the archive
+                    // replace 'worst' chromosome in the archive
                     List<Double> noveltyScores = noveltyFitnessFunction.getFitness(archive, nearestNeighbours);
                     double worstNovelty = Collections.min(noveltyScores);
                     IChromosome<T> worst = archive.get(noveltyScores.indexOf(worstNovelty));

@@ -152,7 +152,7 @@ public class GreyBoxCoverageFuzzer<T> extends GreyBoxFuzzing<T> {
         }
 
         if (s.getValue() instanceof TestCase) {
-            return ((TestCase) s.getValue()).getCrashDetected();
+            return ((TestCase) s.getValue()).hasCrashDetected();
         } else if (s.getValue() instanceof TestSuite) {
             return ((TestSuite) s.getValue()).getCrashDetected();
         } else {

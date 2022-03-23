@@ -1,4 +1,4 @@
-package org.mate.interaction.action.intent;
+package org.mate.exploration.intent;
 
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -6,179 +6,30 @@ import android.util.Size;
 import android.util.SizeF;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.utils.DataPool;
 import org.mate.utils.Randomness;
+import org.mate.utils.manifest.element.ComponentDescription;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class ComponentDescription {
+/**
+ * Generates a {@link Bundle} for a given component.
+ */
+public final class BundleGenerator {
 
-    private final String name;
-    private final ComponentType type;
-
-    // whether the component handles onNewIntent (solely activities do so)
-    private boolean handleOnNewIntent = false;
-
-    // a component may define optionally intent filter tags
-    private Set<IntentFilterDescription> intentFilters = new HashSet<>();
-
-    // additional information used in combination with intents
-    private Set<String> stringConstants = new HashSet<>();
-    private Map<String, String> extras = new HashMap<>();
-
-    public ComponentDescription(String name, String type) {
-        this.name = name;
-        this.type = ComponentType.mapStringToComponent(type);
-    }
-
-    public ComponentDescription(String name, ComponentType type) {
-        this.name = name;
-        this.type = type;
-    }
-
-    public boolean isHandlingOnNewIntent() {
-        return handleOnNewIntent;
-    }
-
-    public void setHandlingOnNewIntent(boolean handleOnNewIntent) {
-        this.handleOnNewIntent = handleOnNewIntent;
-    }
-
-    void addStringConstants(Set<String> stringConstants) {
-        this.stringConstants.addAll(stringConstants);
-    }
-
-    public void addIntentFilters(Set<IntentFilterDescription> intentFilters) {
-        this.intentFilters.addAll(intentFilters);
-    }
-
-    public void addExtras(Map<String, String> extras) {
-        this.extras.putAll(extras);
-    }
-
-    public boolean isActivity() {
-        return type == ComponentType.ACTIVITY;
-    }
-
-    public boolean isService() {
-        return type == ComponentType.SERVICE;
-    }
-
-    public boolean isBroadcastReceiver() {
-        return type == ComponentType.BROADCAST_RECEIVER;
-    }
-
-    public boolean isContentProvider() {
-        return type == ComponentType.CONTENT_PROVIDER;
-    }
-
-    public boolean hasIntentFilter() {
-        return !intentFilters.isEmpty();
-    }
-
-    public boolean hasExtra() {
-        return !extras.isEmpty();
-    }
-
-    public void removeIntentFilters(Collection<IntentFilterDescription> intentFilters) {
-        this.intentFilters.removeAll(intentFilters);
-    }
-
-    ComponentType getType() {
-        return type;
-    }
-
-    public void addIntentFilter(IntentFilterDescription intentFilter) {
-        intentFilters.add(intentFilter);
+    private BundleGenerator() {
+        throw new UnsupportedOperationException("Utility class can't be instantiated!");
     }
 
     /**
-     * Returns the FQN of the component. That is package name + class name.
+     * Generates a bundle with semi-random entries for the given component.
      *
-     * @return Returns the FQN of the component.
-     */
-    public String getFullyQualifiedName() {
-
-        if (name.startsWith(".")) {
-            return Registry.getPackageName() + name;
-        } else {
-            return name;
-        }
-    }
-
-    /**
-     * Retrieves a component from a list of components by name.
-     *
-     * @param components The list of components.
-     * @param name The name of the component to be looked up.
-     * @return Returns the component matching the given name in the list of components
-     *          or {@code null} if the component couldn't be found.
-     */
-    public static ComponentDescription getComponentByName(final List<ComponentDescription> components, final String name) {
-
-        for (ComponentDescription component : components) {
-            if (component.getFullyQualifiedName().equals(name)) {
-                return component;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the set of attached intent filters.
-     *
-     * @return Returns the attached intent filters.
-     */
-    public Set<IntentFilterDescription> getIntentFilters() {
-        return Collections.unmodifiableSet(intentFilters);
-    }
-
-    /**
-     * Returns a map describing the key-value entries of a possible attached bundle.
-     *
-     * @return Returns the extra (the bundle object).
-     */
-    public Map<String, String> getExtras() {
-        return Collections.unmodifiableMap(extras);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Component: " + name + System.lineSeparator());
-        builder.append("Type: " + type + System.lineSeparator());
-
-        builder.append("Intent Filters: " + System.lineSeparator());
-        builder.append("-------------------------------------------" + System.lineSeparator());
-        for (IntentFilterDescription intentFilter : intentFilters) {
-            builder.append(intentFilter + System.lineSeparator());
-        }
-        builder.append("-------------------------------------------" + System.lineSeparator());
-
-        builder.append("Strings: " + stringConstants + System.lineSeparator());
-        builder.append("Extras: " + extras + System.lineSeparator());
-
-        if (isActivity()) {
-            builder.append("Handles OnNewIntent: " + handleOnNewIntent + System.lineSeparator());
-        }
-
-        return builder.toString();
-    }
-
-    /**
-     * Generates a bundle with random entries.
-     *
+     * @param component The component for which a bundle should be generated.
      * @return Returns the randomly generated bundle.
      */
-    Bundle generateRandomBundle() {
+    public static Bundle generateRandomBundle(final ComponentDescription component) {
 
         Bundle bundle = new Bundle();
 
@@ -186,7 +37,7 @@ public class ComponentDescription {
         final int COUNT = 5;
         final int BOUND = 100;
 
-        for (Map.Entry<String, String> extra : extras.entrySet()) {
+        for (Map.Entry<String, String> extra : component.getExtras().entrySet()) {
 
             // depending on the type we need to select a value out of a pre-defined pool
             switch (extra.getValue()) {
@@ -203,10 +54,10 @@ public class ComponentDescription {
                     break;
                 case "String":
                 case "CharSequence": // interface typ of string class
-                    if (!stringConstants.isEmpty()) {
+                    if (component.hasStringConstants()) {
                         // choose randomly constant from extracted strings
                         bundle.putCharSequence(extra.getKey(),
-                                Randomness.randomElementOrNull(stringConstants));
+                                Randomness.randomElementOrNull(component.getStringConstants()));
                     } else {
                         // generate random string
                         bundle.putCharSequence(extra.getKey(),
@@ -215,10 +66,10 @@ public class ComponentDescription {
                     break;
                 case "String[]":
                 case "CharSequence[]":
-                    if (!(stringConstants.size() < COUNT)) {
+                    if (!(component.getStringConstants().size() < COUNT)) {
                         // choose randomly constants from extracted strings
                         bundle.putCharSequenceArray(extra.getKey(),
-                                Randomness.randomElements(stringConstants, COUNT)
+                                Randomness.randomElements(component.getStringConstants(), COUNT)
                                         .toArray(new CharSequence[0]));
                     } else {
                         // TODO: generate random strings
@@ -227,15 +78,15 @@ public class ComponentDescription {
                     break;
                 case "String<>":
                 case "CharSequence<>":
-                    if (!(stringConstants.size() < COUNT)) {
+                    if (!(component.getStringConstants().size() < COUNT)) {
                         // choose randomly constants from extracted strings
                         bundle.putCharSequenceArrayList(extra.getKey(),
-                                new ArrayList<CharSequence>(Randomness
-                                        .randomElements(stringConstants, COUNT)));
+                                new ArrayList<>(Randomness
+                                        .randomElements(component.getStringConstants(), COUNT)));
                     } else {
                         // TODO: generate random strings
                         bundle.putCharSequenceArrayList(extra.getKey(),
-                                new ArrayList<CharSequence>(DataPool.STRING_LIST_WITH_NULL));
+                                new ArrayList<>(DataPool.STRING_LIST_WITH_NULL));
                     }
                     break;
                 case "Float":
@@ -283,10 +134,10 @@ public class ComponentDescription {
                     bundle.putCharArray(extra.getKey(), Randomness.getRandomCharArray(COUNT));
                     break;
                 case "Serializable": // strings are serializable
-                    if (!stringConstants.isEmpty()) {
+                    if (component.hasStringConstants()) {
                         // choose randomly constant from extracted strings
                         bundle.putSerializable(extra.getKey(),
-                                Randomness.randomElementOrNull(stringConstants));
+                                Randomness.randomElementOrNull(component.getStringConstants()));
                     } else {
                         // generate random string
                         bundle.putSerializable(extra.getKey(),
@@ -318,12 +169,11 @@ public class ComponentDescription {
                     bundle.putBundle(extra.getKey(), new Bundle());
                     break;
                 default:
-                    MATE.log("Data type not yet supported: " + extra.getValue());
+                    MATE.log_warn("Data type not yet supported: " + extra.getValue());
                     // omit bundle entry
                     break;
             }
         }
         return bundle;
     }
-
 }
