@@ -7,12 +7,19 @@ import org.mate.MATE;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * Represents an abstraction of a real stack trace.
  */
 public class StackTrace {
+
+    /**
+     * The pattern to recognize object references of the form '@e2b062c'.
+     */
+    private static final Pattern OBJECT_REFERENCE_PATTERN = Pattern.compile("(\\w+\\.)*(\\w+)@[abcdef\\d]+");
 
     /**
      * The exception type.
@@ -25,9 +32,14 @@ public class StackTrace {
     private String message;
 
     /**
-     * The actual stack trace.
+     * The list of method calls.
      */
-    private List<String> stackTrace;
+    private List<String> methodCalls;
+
+    /**
+     * The list of 'Caused by' lines.
+     */
+    private List<String> causedByLines;
 
     /**
      * The process that has thrown the exception.
@@ -55,10 +67,6 @@ public class StackTrace {
      */
     private void parseStackTrace(String log) {
 
-        // TODO: remove object references from the exception message to enable a valid comparison
-
-        // TODO: may update type and message with later type and message from 'Caused by' line
-
         String[] lines = Arrays.stream(log.split("\n"))
                 .filter(line -> line.contains("E AndroidRuntime:"))
                 .map(line -> line.split("E AndroidRuntime:")[1])
@@ -75,26 +83,59 @@ public class StackTrace {
         pid = Integer.parseInt(tokens[1].split("PID: ")[1].trim());
 
         // the exception type and the message are contained in the third line
-        String thirdLine = lines[2];
-        tokens = thirdLine.split(":", 1);
+        parseExceptionLine(lines[2]);
 
-        if (tokens.length > 1) {
-            // the message is optional
-            type = tokens[0].trim();
-            message = tokens[1].trim();
-        } else {
-            type = thirdLine.trim();
-        }
+        // each line starting with 'at' describes a method call
+        methodCalls = Arrays.stream(lines)
+                .filter(line -> line.startsWith("at"))
+                .collect(Collectors.toList());
 
-        // each line starting with 'at' or 'Caused by' belongs to the stack trace
-        stackTrace = Arrays.stream(lines)
-                .filter(line -> line.startsWith("at") || line.startsWith("Caused by"))
+        // TODO: may update type and message with later type and message from 'Caused by' line
+
+        // each line starting with 'Caused by' describes a further
+        causedByLines = Arrays.stream(lines)
+                .filter(line -> line.startsWith("Caused by"))
+                .map(this::removeObjectReferences)
                 .collect(Collectors.toList());
     }
 
     /**
+     * Extracts from exception line the type and the message if present.
+     *
+     * @param exceptionLine The exception line containing the type and the optional message.
+     */
+    private void parseExceptionLine(String exceptionLine) {
+
+        String[] tokens = exceptionLine.split(":", 2);
+
+        if (tokens.length > 1) {
+            // the message is optional
+            type = tokens[0].trim();
+            message = removeObjectReferences(tokens[1].trim());
+        } else {
+            type = exceptionLine.trim();
+        }
+    }
+
+    /**
+     * Removes any object reference from the given input string.
+     *
+     * @param input The input string.
+     * @return Returns the input string without the object references.
+     */
+    private String removeObjectReferences(String input) {
+        Matcher matcher = OBJECT_REFERENCE_PATTERN.matcher(input);
+        while (matcher.find()) {
+            String match = matcher.group(0);
+            String objectReference = match.substring(match.indexOf('@'));
+            input = input.replace(objectReference, "");
+        }
+        return input;
+    }
+
+    /**
      * Compares two stack traces for equality. We consider two stack traces equal iff they have
-     * the same exception type, message and stack trace lines as well as origin from the same process.
+     * the same exception type, message and method calls as well as origin from the same process.
      *
      * @param o The other stack trace.
      * @return Returns {@code true} if the stack traces are equal, otherwise {@code false} is returned.
@@ -106,7 +147,8 @@ public class StackTrace {
         StackTrace other = (StackTrace) o;
         return Objects.equals(type, other.type) &&
                 Objects.equals(message, other.message) &&
-                Objects.equals(stackTrace, other.stackTrace) &&
+                Objects.equals(methodCalls, other.methodCalls) &&
+                Objects.equals(causedByLines, other.causedByLines) &&
                 Objects.equals(process, other.process);
     }
 
@@ -117,7 +159,7 @@ public class StackTrace {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(type, message, stackTrace, process);
+        return Objects.hash(type, message, methodCalls, causedByLines, process);
     }
 
     /**
@@ -129,11 +171,12 @@ public class StackTrace {
     @Override
     public String toString() {
         return "StackTrace{" +
-                "type='" + type + '\'' +
-                ", message='" + message + '\'' +
-                ", stackTrace=" + stackTrace +
-                ", process='" + process + '\'' +
+                "process='" + process + '\'' +
                 ", pid=" + pid +
+                ", type='" + type + '\'' +
+                ", message='" + message + '\'' +
+                ", methodCalls=" + methodCalls +
+                ", causedByLines=" + causedByLines +
                 '}';
     }
 }
