@@ -2,8 +2,6 @@ package org.mate.utils;
 
 import android.support.annotation.NonNull;
 
-import org.mate.MATE;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -72,9 +70,6 @@ public class StackTrace {
                 .map(line -> line.split("E AndroidRuntime:")[1])
                 .map(String::trim)
                 .toArray(String[]::new);
-
-        MATE.log_acc("Lines: ");
-        MATE.log_acc("" + Arrays.asList(lines));
 
         // the pid and the process name are contained in the second line
         String[] tokens = lines[1].split(",");
