@@ -195,7 +195,6 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
             if (hasCrashDetected) {
                 StackTrace stackTrace = uiAbstractionLayer.getLastCrashStackTrace();
 
-                // TODO: Check if we need to strip off some information for a suitable comparison.
                 if (!stackTraces.contains(stackTrace)) {
                     // an action leading to a new crash gets a high reward
                     stackTraces.add(stackTrace);
