@@ -102,7 +102,12 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
             if (!success) {
                 MATE.log_acc("Couldn't move AUT into activity: " + targetActivity);
-                // TODO: Evaluate whether re-enqueuing is helpful.
+                /*
+                * TODO: Find a better strategy here. Re-enqueuing can be helpful, since we may
+                *  discover a path to a target activity later in the exploration, but at some point
+                *  in time, we end up wasting the search budget by trying to open a target activity
+                *  that can't be launched in an endless loop.
+                 */
                 queue.add(targetActivity);
                 break;
             }
