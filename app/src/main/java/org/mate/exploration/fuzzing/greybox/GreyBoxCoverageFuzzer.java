@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  *
  * @param <T> Either a {@link TestCase} or a {@link TestSuite}.
  */
-public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
+public class GreyBoxCoverageFuzzer<T> extends GreyBoxFuzzing<T> {
 
     /**
      * We need to maintain the total coverage to check whether a mutated chromosome increased it.
@@ -30,20 +31,28 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
     private boolean isInteresting = false;
 
     /**
+     * The selected coverage criterion, i.e. the coverage type that should steer the exploration.
+     */
+    private final Coverage coverageCriterion;
+
+    /**
      * Initialises the greybox fuzzer.
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param mutationFunction The used mutation function.
      * @param terminationCondition The used termination condition.
+     * @param coverageCriterion The used coverage criterion.
      * @param corpusSize The initial size of the seed corpus S.
      * @param maxEnergy The maximal assignable energy p.
      */
-    public GreyBoxFuzzer(IChromosomeFactory<T> chromosomeFactory,
-                         IMutationFunction<T> mutationFunction,
-                         ITerminationCondition terminationCondition,
-                         int corpusSize,
-                         int maxEnergy) {
+    public GreyBoxCoverageFuzzer(IChromosomeFactory<T> chromosomeFactory,
+                                 IMutationFunction<T> mutationFunction,
+                                 ITerminationCondition terminationCondition,
+                                 Coverage coverageCriterion,
+                                 int corpusSize,
+                                 int maxEnergy) {
         super(chromosomeFactory, mutationFunction, terminationCondition, corpusSize, maxEnergy);
+        this.coverageCriterion = coverageCriterion;
     }
 
     /**
@@ -59,8 +68,8 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
         IChromosome<T> best = seedCorpus.get(0);
 
         for (IChromosome<T> s : seedCorpus) {
-            double coverage = CoverageUtils.getCoverage(Properties.COVERAGE(), s).getCoverage();
-            if (coverage > CoverageUtils.getCoverage(Properties.COVERAGE(), best).getCoverage()) {
+            double coverage = CoverageUtils.getCoverage(coverageCriterion, s).getCoverage(coverageCriterion);
+            if (coverage > CoverageUtils.getCoverage(coverageCriterion, best).getCoverage(coverageCriterion)) {
                 best = s;
             }
         }
@@ -82,7 +91,7 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
         * We need to make a snapshot of the total coverage here in order to tell whether a
         * mutated chromosome s' is going to increase the total coverage or not.
          */
-        totalCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE()).getCoverage();
+        totalCoverage = CoverageUtils.getCombinedCoverage(coverageCriterion).getCoverage(coverageCriterion);
 
         if (s.getValue() instanceof TestCase) {
             int size = ((TestCase) s.getValue()).getEventSequence().size();
@@ -134,7 +143,7 @@ public class GreyBoxFuzzer<T> extends GreyBoxFuzzing<T> {
         * subsequent isInteresting() check. Thus, we need to make that decision here and update
         * the total coverage accordingly.
          */
-        double combinedCoverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE()).getCoverage();
+        double combinedCoverage = CoverageUtils.getCombinedCoverage(coverageCriterion).getCoverage(coverageCriterion);
         if (combinedCoverage > totalCoverage) {
             isInteresting = true;
             totalCoverage = combinedCoverage;

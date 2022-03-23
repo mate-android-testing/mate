@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.fuzzing.greybox.GreyBoxFuzzer;
+import org.mate.exploration.fuzzing.greybox.GreyBoxCoverageFuzzer;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
@@ -22,7 +22,7 @@ import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATEGreyBoxFuzzing {
+public class ExecuteMATEGreyBoxCoverageFuzzing {
 
     @Test
     public void useAppContext() {
@@ -31,16 +31,17 @@ public class ExecuteMATEGreyBoxFuzzing {
 
         MATE mate = new MATE();
 
-        final GreyBoxFuzzer<?> greyBoxFuzzer = new GreyBoxFuzzer<>(
+        final GreyBoxCoverageFuzzer<?> greyBoxCoverageFuzzer = new GreyBoxCoverageFuzzer<>(
                 translateChromosomeFactory(Properties.CHROMOSOME_FACTORY()),
                 translateMutationFunction(Properties.MUTATION_FUNCTION()),
                 translateTerminationCondition(Properties.TERMINATION_CONDITION()),
+                Properties.GREY_BOX_COVERAGE_CRITERION(),
                 Properties.SEED_CORPUS_SIZE(),
                 Properties.MAX_ENERGY()
         );
 
-        mate.testApp(greyBoxFuzzer);
-        MATE.log_acc("Total number of crashes: " + greyBoxFuzzer.getCrashingInputs().size());
+        mate.testApp(greyBoxCoverageFuzzer);
+        MATE.log_acc("Total number of crashes: " + greyBoxCoverageFuzzer.getCrashingInputs().size());
     }
 
     private IChromosomeFactory translateChromosomeFactory(ChromosomeFactory chromosomeFactory) {
