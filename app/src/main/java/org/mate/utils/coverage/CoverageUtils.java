@@ -330,7 +330,13 @@ public final class CoverageUtils {
         Set<String> visitedActivitiesTotal = new HashSet<>();
 
         for (Set<String> activities : visitedActivities.values()) {
-            visitedActivitiesTotal.addAll(activities);
+
+            Set<String> visitedActivitiesOfApp = activities.stream()
+                    // only consider activities belonging to the AUT
+                    .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                    .collect(Collectors.toSet());
+
+            visitedActivitiesTotal.addAll(visitedActivitiesOfApp);
         }
 
         return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
@@ -386,7 +392,12 @@ public final class CoverageUtils {
                         + chromosome + "!");
             }
 
-            visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
+            Set<String> visitedActivitiesOfApp = visitedActivities.get(chromosome).stream()
+                    // only consider activities belonging to the AUT
+                    .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                    .collect(Collectors.toSet());
+
+            visitedActivitiesTotal.addAll(visitedActivitiesOfApp);
         }
 
         return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
@@ -436,7 +447,13 @@ public final class CoverageUtils {
      * @return Returns the activity coverage of the given test case.
      */
     private static double getActivityCoverage(TestCase testCase) {
-        return (double) testCase.getVisitedActivities().size() / getActivities().size() * 100;
+
+        Set<String> visitedActivitiesOfApp = testCase.getVisitedActivities().stream()
+                // only consider activities belonging to the AUT
+                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                .collect(Collectors.toSet());
+
+        return (double) visitedActivitiesOfApp.size() / getActivities().size() * 100;
     }
 
     /**
