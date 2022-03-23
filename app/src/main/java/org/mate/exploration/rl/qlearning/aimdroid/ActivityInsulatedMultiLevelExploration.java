@@ -71,9 +71,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             String targetActivity = queue.poll();
             exploreInCage(queue, targetActivity);
         }
-
-        MATE.log_acc("Discovered the following activities: "
-                + aimDroidChromosomeFactory.getVisitedActivities());
     }
 
     /**

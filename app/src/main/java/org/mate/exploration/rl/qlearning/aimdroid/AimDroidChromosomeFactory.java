@@ -152,15 +152,6 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
-     * Retrieves the set of visited activities.
-     *
-     * @return Returns the visited activities.
-     */
-    public Set<String> getVisitedActivities() {
-        return visitedActivities;
-    }
-
-    /**
      * Retrieves the action that was executed last.
      *
      * @return Returns the last executed action.
