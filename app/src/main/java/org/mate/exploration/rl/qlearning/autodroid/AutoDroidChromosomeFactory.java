@@ -8,11 +8,17 @@ import org.mate.model.TestCase;
 public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
+     * The initial q-value for a new action.
+     */
+    private final double initialQValue;
+
+    /**
      *
      * @param maxEpisodeLength
      */
-    public AutoDroidChromosomeFactory(int maxEpisodeLength) {
+    public AutoDroidChromosomeFactory(int maxEpisodeLength, double initialQValue) {
         super(false, maxEpisodeLength);
+        this.initialQValue = initialQValue;
     }
 
     @Override

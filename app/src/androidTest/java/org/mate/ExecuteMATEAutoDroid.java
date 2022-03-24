@@ -17,7 +17,7 @@ public class ExecuteMATEAutoDroid {
 
         EpisodicExploration episodicExploration
                 = new EpisodicExploration(Properties.MAX_NUM_OF_EPISODES(),
-                Properties.MAX_EPISODE_LENGTH());
+                Properties.MAX_EPISODE_LENGTH(), Properties.INITIAL_Q_VALUE());
         mate.testApp(episodicExploration);
     }
 }

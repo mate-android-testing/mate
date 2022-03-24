@@ -368,6 +368,13 @@ public class Properties {
      */
 
     /**
+     * The initial q-value for a new action.
+     *
+     * @return Returns the initial q-value for a new action.
+     */
+    public static double INITIAL_Q_VALUE() { return propertyOr(500d); }
+
+    /**
      * The maximal number of episodes (testcases).
      *
      * @return Returns the maximal number of episodes.

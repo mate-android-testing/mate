@@ -26,10 +26,11 @@ public class EpisodicExploration implements Algorithm {
      *
      * @param maxNumOfEpisodes The maximal number of episodes (test cases).
      * @param maxEpisodeLength The maximal length of an episode (actions per test case).
+     * @param initialQValue The initial q-value for a new action.
      */
-    public EpisodicExploration(int maxNumOfEpisodes, int maxEpisodeLength) {
+    public EpisodicExploration(int maxNumOfEpisodes, int maxEpisodeLength, double initialQValue) {
         this.maxNumOfEpisodes = maxNumOfEpisodes;
-        autoDroidChromosomeFactory = new AutoDroidChromosomeFactory(maxEpisodeLength);
+        autoDroidChromosomeFactory = new AutoDroidChromosomeFactory(maxEpisodeLength, initialQValue);
     }
 
     @Override
