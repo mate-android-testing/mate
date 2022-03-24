@@ -4,6 +4,10 @@ import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.UIAbstractionLayer;
 
+/**
+ * An implementation based on the paper 'Reinforcement Learning for Android GUI Testing', see
+ * https://davidadamojr.com/wp-content/uploads/2018/11/Reinforcement-Learning-for-Android-GUI-Testing.pdf.
+ */
 public class EpisodicExploration implements Algorithm {
 
     /**
@@ -27,10 +31,12 @@ public class EpisodicExploration implements Algorithm {
      * @param maxNumOfEpisodes The maximal number of episodes (test cases).
      * @param maxEpisodeLength The maximal length of an episode (actions per test case).
      * @param initialQValue The initial q-value for a new action.
+     * @param pHomeButton The probability for selecting the home button as next action.
      */
-    public EpisodicExploration(int maxNumOfEpisodes, int maxEpisodeLength, double initialQValue) {
+    public EpisodicExploration(int maxNumOfEpisodes, int maxEpisodeLength, float initialQValue,
+                               float pHomeButton) {
         this.maxNumOfEpisodes = maxNumOfEpisodes;
-        autoDroidChromosomeFactory = new AutoDroidChromosomeFactory(maxEpisodeLength, initialQValue);
+        autoDroidChromosomeFactory = new AutoDroidChromosomeFactory(maxEpisodeLength, initialQValue, pHomeButton);
     }
 
     @Override

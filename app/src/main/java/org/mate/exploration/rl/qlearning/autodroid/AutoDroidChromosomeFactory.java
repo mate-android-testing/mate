@@ -10,15 +10,17 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
     /**
      * The initial q-value for a new action.
      */
-    private final double initialQValue;
+    private final float initialQValue;
 
     /**
-     *
-     * @param maxEpisodeLength
+     * The probability for selecting the home button as next action.
      */
-    public AutoDroidChromosomeFactory(int maxEpisodeLength, double initialQValue) {
+    private final float pHomeButton;
+
+    public AutoDroidChromosomeFactory(int maxEpisodeLength, float initialQValue, float pHomeButton) {
         super(false, maxEpisodeLength);
         this.initialQValue = initialQValue;
+        this.pHomeButton = pHomeButton;
     }
 
     @Override

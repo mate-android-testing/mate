@@ -368,11 +368,18 @@ public class Properties {
      */
 
     /**
+     * The probability for pressing the home button.
+     *
+     * @return Returns the probability for selecting the home button.
+     */
+    public static float P_HOME_BUTTON() { return propertyOr(0.05f); }
+
+    /**
      * The initial q-value for a new action.
      *
      * @return Returns the initial q-value for a new action.
      */
-    public static double INITIAL_Q_VALUE() { return propertyOr(500d); }
+    public static float INITIAL_Q_VALUE() { return propertyOr(500f); }
 
     /**
      * The maximal number of episodes (testcases).
