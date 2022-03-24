@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Generates a new {@link IChromosome} or in the context of AutoDroid, a new episode is generated.
+ */
 public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
@@ -40,15 +43,106 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private final float pHomeButton;
 
+    /**
+     * Initialises the AutoDroid chromosome factory with the mandatory attributes.
+     *
+     * @param maxEpisodeLength The maximal episode length (max number of actions per test case).
+     * @param initialQValue The initial q-value for a new action.
+     * @param pHomeButton The probability for selecting the home button action.
+     */
     public AutoDroidChromosomeFactory(int maxEpisodeLength, float initialQValue, float pHomeButton) {
         super(false, maxEpisodeLength);
         this.initialQValue = initialQValue;
         this.pHomeButton = pHomeButton;
     }
 
+    /**
+     * Creates a new chromosome (represents an episode in the context of AutoDroid). The chromosome
+     * is filled with actions until either the maximal episode length is reached or an action closes
+     * the AUT, either by a regular action or a crash.
+     *
+     * @return Returns the newly generated chromosome.
+     */
     @Override
     public IChromosome<TestCase> createChromosome() {
-        return super.createChromosome();
+
+        TestCase testCase = TestCase.newInitializedTestCase();
+        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
+
+        try {
+            for (actionsCount = 0; !finishTestCase(); actionsCount++) {
+
+                IScreenState currentState = uiAbstractionLayer.getLastScreenState();
+
+                Action nextAction = selectAction();
+                boolean leftApp = !testCase.updateTestCase(nextAction, actionsCount);
+
+                if (leftApp) {
+                    qValues.get(currentState).put(nextAction, 0.0d);
+                    return chromosome;
+                }
+
+                // compute reward of last action + update q-value
+                double reward = computeReward(currentState, nextAction);
+                IScreenState newState = uiAbstractionLayer.getLastScreenState();
+                updateQValue(reward, nextAction, currentState, newState);
+            }
+        } finally {
+            if (!isTestSuiteExecution) {
+                /*
+                 * If we deal with a test suite execution, the storing of coverage and fitness data
+                 * is handled by the AndroidSuiteRandomChromosomeFactory itself.
+                 */
+                FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
+                CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+                CoverageUtils.logChromosomeCoverage(chromosome);
+            }
+            testCase.finish();
+        }
+        return chromosome;
+    }
+
+    /**
+     * Updates the q-value for the last executed action.
+     *
+     * @param reward The computed immediate reward for the given action.
+     * @param action The last executed action.
+     * @param oldState The state before executing the action.
+     * @param newState The state after executing the action.
+     */
+    private void updateQValue(double reward, Action action, IScreenState oldState, IScreenState newState) {
+
+        double discountFactor = computeDiscountFactor(newState);
+        double futureReward = initialQValue;
+
+        if (qValues.containsKey(newState)) {
+            // pick the highest q-value as future reward
+            futureReward = Collections.max(qValues.get(newState).values());
+        }
+
+        double qValue = reward + discountFactor * futureReward;
+        qValues.get(oldState).put(action, qValue);
+    }
+
+    /**
+     * Computes the dynamic discount factor.
+     *
+     * @param screenState The current screen state.
+     * @return Returns the discount factor.
+     */
+    private double computeDiscountFactor(IScreenState screenState) {
+        return 0.9 * Math.exp(-0.1*(screenState.getActions().size() - 1));
+    }
+
+    /**
+     * Computes the reward for the last executed action.
+     *
+     * @param lastState The state before the action was executed.
+     * @param lastAction The last executed action.
+     * @return Returns the reward for the given action.
+     */
+    private double computeReward(IScreenState lastState, Action lastAction) {
+        return (double) 1 / stateActionFrequencyMap.get(lastState).get(lastAction);
     }
 
     /**
