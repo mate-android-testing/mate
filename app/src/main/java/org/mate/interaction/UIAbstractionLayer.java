@@ -480,7 +480,7 @@ public class UIAbstractionLayer {
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        lastScreenState = clearScreen();
+        lastScreenState = toRecordedScreenState(clearScreen());
     }
 
     /**
@@ -489,7 +489,7 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        lastScreenState = clearScreen();
+        lastScreenState = toRecordedScreenState(clearScreen());
     }
 
     /**
