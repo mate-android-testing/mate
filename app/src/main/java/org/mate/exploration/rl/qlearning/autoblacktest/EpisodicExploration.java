@@ -8,6 +8,10 @@ import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 
+/**
+ * Provides an implementation based on the paper 'AutoBlackTest: Automatic Black-Box Testing of
+ * Interactive Applications', see https://ieeexplore.ieee.org/document/6200099.
+ */
 public class EpisodicExploration implements Algorithm {
 
     /**
@@ -45,7 +49,6 @@ public class EpisodicExploration implements Algorithm {
         autoBlackTestChromosomeFactory
                 = new AutoBlackTestChromosomeFactory(maxEpisodeLength, epsilon, discountFactor);
     }
-
 
     /**
      * Explores the AUT in episodes until the maximal number of episodes is reached or the specified
