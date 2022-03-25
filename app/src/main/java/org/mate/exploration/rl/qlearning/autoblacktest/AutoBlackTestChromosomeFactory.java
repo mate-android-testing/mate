@@ -60,7 +60,7 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
 
                 // compute reward of last action + update q-value
                 IScreenState newState = uiAbstractionLayer.getLastScreenState();
-                double reward = computeReward(oldState, newState, nextAction);
+                double reward = computeReward(oldState, newState);
                 updateQValue(reward, oldState, newState);
 
                 if (leftApp) {
@@ -82,8 +82,38 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         return chromosome;
     }
 
-    private double computeReward(IScreenState oldState, IScreenState newState, Action action) {
-        return 0.0;
+    /**
+     * Computes the intermediate reward for the last action, see the definition on page 84.
+     *
+     * @param oldState The state before executing the last action.
+     * @param newState The state after executing the last action.
+     * @return Returns the intermediate reward of the last action.
+     */
+    private double computeReward(IScreenState oldState, IScreenState newState) {
+
+        // |AS 2 \t AS 1 |
+        int stateDifference = stateDifference(newState, oldState);
+
+        // |+∑ w1∈AS 1, w2∈AS 2, w1 =t w2 diff(w1,w2)
+        int widgetDifferences = 0;
+
+        for (Widget thisWidget : oldState.getWidgets()) {
+            for (Widget otherWidget : newState.getWidgets()) {
+
+                WidgetTrait thisTrait = new WidgetTrait(thisWidget);
+                WidgetTrait otherTrait = new WidgetTrait(otherWidget);
+
+                if (thisTrait.equals(otherTrait)) {
+                    widgetDifferences += widgetDifference(thisWidget, otherWidget);
+                }
+            }
+        }
+
+        return (double) (stateDifference + widgetDifferences) / newState.getWidgets().size();
+    }
+
+    private int widgetDifference(Widget firstWidget, Widget secondWidget) {
+        return 0;
     }
 
     /**
