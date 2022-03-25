@@ -54,5 +54,25 @@ public class EpisodicExploration implements Algorithm {
     @Override
     public void run() {
 
+        for (int i = 0; i < maxNumOfEpisodes; i++) {
+            MATE.log_acc("Episode #" + (i + 1));
+
+            /*
+             * We start an episode in a random state. If we couldn't reach the randomly selected state,
+             * we start the episode in that state.
+             */
+            IScreenState randomScreenState = Randomness.randomElement(guiModel.getAppStates());
+            boolean success = uiAbstractionLayer.moveToState(randomScreenState);
+
+            MATE.log_acc("Starting episode in random state: " + success);
+            MATE.log_acc("Starting episode in activity: " + uiAbstractionLayer.getCurrentActivity());
+
+            if (!uiAbstractionLayer.isAppOpened()) {
+                // start episode from main activity
+                uiAbstractionLayer.restartApp();
+            }
+
+            autoBlackTestChromosomeFactory.createChromosome();
+        }
     }
 }
