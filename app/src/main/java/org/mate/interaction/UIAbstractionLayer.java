@@ -158,6 +158,13 @@ public class UIAbstractionLayer {
         } catch (AUTCrashException e) {
 
             MATE.log_acc("CRASH MESSAGE " + e.getMessage());
+            /*
+            * TODO: Evaluate whether pressing the home button makes sense, i.e. whether the gui
+            *  model is updated correctly. By pressing home, we switch to the home screen but the
+            *  crash dialog still appears. As a result, could it happen that actually two different
+            *  crashes / crash dialogs are considered equal, because they appear on the same
+            *  underlying home screen?
+             */
             deviceMgr.pressHome();
 
             // update screen state model
