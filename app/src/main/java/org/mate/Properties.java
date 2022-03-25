@@ -363,6 +363,42 @@ public class Properties {
      * End AimDroid properties
      */
 
+    /*
+     * Begin AutoBlackTest properties
+     */
+
+    /**
+     * The epsilon used in the epsilon greedy learning policy.
+     *
+     * @return Returns the epsilon used in the greedy learning policy.
+     */
+    public static float ABT_EPSILON() { return propertyOr(0.8f); }
+
+    /**
+     * The static discount factor used in equation (1).
+     *
+     * @return Returns the static discount factor.
+     */
+    public static float ABT_DISCOUNT_FACTOR() { return propertyOr(0.9f); }
+
+    /**
+     * The maximal number of episodes (testcases).
+     *
+     * @return Returns the maximal number of episodes.
+     */
+    public static int ABT_MAX_NUM_OF_EPISODES() { return propertyOr(100); }
+
+    /**
+     * The maximal length of an episode (a test case).
+     *
+     * @return Returns the maximal episode length.
+     */
+    public static int ABT_MAX_EPISODE_LENGTH() { return propertyOr(50); }
+
+    /*
+     * End AutoBlackTest properties
+     */
+
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored

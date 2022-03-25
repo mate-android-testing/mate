@@ -7,8 +7,20 @@ import org.mate.model.TestCase;
 
 public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFactory {
 
-    public AutoBlackTestChromosomeFactory() {
-        super(false, 50);
+    /**
+     * The epsilon used in the epsilon-greedy learning policy.
+     */
+    private final float epsilon;
+
+    /**
+     * The static discount factor gamma used in equation (1).
+     */
+    private final float discountFactor;
+
+    public AutoBlackTestChromosomeFactory(int maxEpisodeLength, float epsilon, float discountFactor) {
+        super(false, maxEpisodeLength);
+        this.epsilon = epsilon;
+        this.discountFactor = discountFactor;
     }
 
     @Override
