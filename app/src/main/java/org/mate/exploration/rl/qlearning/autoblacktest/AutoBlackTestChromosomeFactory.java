@@ -45,30 +45,20 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
-                IScreenState currentState = uiAbstractionLayer.getLastScreenState();
+                IScreenState oldState = uiAbstractionLayer.getLastScreenState();
 
                 Action nextAction = selectAction();
                 MATE.log_acc("Next action: " + nextAction);
                 boolean leftApp = !testCase.updateTestCase(nextAction, actionsCount);
 
-                if (leftApp) {
-                    MATE.log_acc("We left the app!");
-
-                    /*
-                     * If we directly select the home button action on a new state, the qValues map is
-                     * not properly initialised and hence updating the map would lead to a crash.
-                     */
-                    if (qValues.containsKey(currentState)) {
-                        qValues.get(currentState).put(nextAction, 0.0d);
-                    }
-
-                    return chromosome;
-                }
-
                 // compute reward of last action + update q-value
                 IScreenState newState = uiAbstractionLayer.getLastScreenState();
-                double reward = computeReward(currentState, newState, nextAction);
-                updateQValue(reward, currentState, newState);
+                double reward = computeReward(oldState, newState, nextAction);
+                updateQValue(reward, oldState, newState);
+
+                if (leftApp) {
+                    return chromosome;
+                }
             }
         } finally {
             if (!isTestSuiteExecution) {
