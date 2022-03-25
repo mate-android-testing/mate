@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Generates a new {@link IChromosome} or in the context of AutoBlackTest, a new episode is generated.
+ */
 public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
@@ -37,6 +40,13 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
      */
     private final Map<IScreenState, Map<Action, Double>> qValues = new HashMap<>();
 
+    /**
+     * Initialises the AutoBlackTest chromosome factory with the mandatory attributes.
+     *
+     * @param maxEpisodeLength The maximal episode length (maximal number of actions per test case).
+     * @param epsilon The epsilon used in the epsilon-greedy action selection strategy.
+     * @param discountFactor The discount factor gamma used in the q-learning formula.
+     */
     public AutoBlackTestChromosomeFactory(int maxEpisodeLength, float epsilon, float discountFactor) {
         super(false, maxEpisodeLength);
         this.epsilon = epsilon;
@@ -113,6 +123,11 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
     }
 
     private int widgetDifference(Widget firstWidget, Widget secondWidget) {
+        // we can base this on the changing properties, e.g. visible, enabled, text, ...
+
+        // diffw (w1, w2) = |P1 \P2 |+|P2 \P1 |
+        //|P1 |+|P2 | .
+
         return 0;
     }
 
