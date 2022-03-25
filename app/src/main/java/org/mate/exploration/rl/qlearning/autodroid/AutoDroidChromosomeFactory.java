@@ -81,7 +81,15 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
 
                 if (leftApp) {
                     MATE.log_acc("We left the app!");
-                    qValues.get(currentState).put(nextAction, 0.0d);
+
+                    /*
+                    * If we directly select the home button action on a new state, the qValues map is
+                    * not properly initialised and hence updating the map would lead to a crash.
+                     */
+                    if (qValues.containsKey(currentState)) {
+                        qValues.get(currentState).put(nextAction, 0.0d);
+                    }
+
                     return chromosome;
                 }
 
