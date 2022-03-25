@@ -73,6 +73,8 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     public IntentChromosomeFactory(boolean resetApp, int maxNumEvents, float relativeIntentAmount) {
         super(resetApp, maxNumEvents);
 
+        this.intentProvider = new IntentProvider(Registry.getPackageName());
+
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
         determineRelativeComponentAmount();
