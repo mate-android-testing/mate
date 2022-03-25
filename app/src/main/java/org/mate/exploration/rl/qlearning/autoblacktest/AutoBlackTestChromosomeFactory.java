@@ -61,7 +61,7 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
                 // compute reward of last action + update q-value
                 IScreenState newState = uiAbstractionLayer.getLastScreenState();
                 double reward = computeReward(oldState, newState);
-                updateQValue(reward, oldState, newState);
+                updateQValue(reward, oldState, newState, nextAction);
 
                 if (leftApp) {
                     return chromosome;
@@ -159,8 +159,35 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         return widgets.size();
     }
 
-    private void updateQValue(double reward, IScreenState oldState, IScreenState newState) {
+    /**
+     * Updates the q-value of the last action according to the q-Learning formula shown in
+     * equation (1) on page 85 in the paper.
+     *
+     * @param reward The intermediate reward.
+     * @param oldState The state before executing the last action.
+     * @param newState The state after executing the last action.
+     * @param lastAction The last executed action.
+     */
+    private void updateQValue(double reward, IScreenState oldState, IScreenState newState, Action lastAction) {
 
+        MATE.log_acc("Updating q-value...");
+
+        // the future reward is defined as the maximal q-value in the new state
+        double futureReward = 0.0d;
+
+        if (qValues.containsKey(newState)) {
+            MATE.log_acc("Finding highest q-value in new state...");
+            Map<Action, Double> actionQValueMapping = qValues.get(newState);
+            futureReward = Collections.max(actionQValueMapping.values());
+        }
+
+        double qValue = reward + discountFactor * futureReward;
+
+        MATE.log_acc("Intermediate reward: " + reward);
+        MATE.log_acc("Future reward: " + futureReward);
+        MATE.log_acc("New q-value: " + qValue);
+
+        qValues.get(oldState).put(lastAction, qValue);
     }
 
     /**
