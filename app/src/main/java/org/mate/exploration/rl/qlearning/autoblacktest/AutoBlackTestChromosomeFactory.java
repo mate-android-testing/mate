@@ -5,6 +5,7 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.Widget;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
@@ -83,6 +84,49 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
 
     private double computeReward(IScreenState oldState, IScreenState newState, Action action) {
         return 0.0;
+    }
+
+    /**
+     * Computes the state difference in terms of the number of widgets that only appear in the first
+     * state but not in the second state according to its traits. See the restriction operator \t
+     * defined on page 83 in the paper.
+     *
+     * @param firstState The first state.
+     * @param secondState The second state.
+     * @return Returns the number of widgets that only appear in the first state but not in the second.
+     */
+    private int stateDifference(IScreenState firstState, IScreenState secondState) {
+
+        // if the states are equal according to our global equality check -> diff close to 0 ???
+        if (firstState.equals(secondState)) {
+            MATE.log_acc("Comparing same states!");
+        }
+
+        // the widgets that only appear in the first and not in the second state according to its traits.
+        Set<Widget> widgets = new HashSet<>();
+
+        for (Widget thisWidget : firstState.getWidgets()) {
+
+            WidgetTrait thisTrait = new WidgetTrait(thisWidget);
+            boolean notContainedInSecondState = true;
+
+            for (Widget otherWidget : secondState.getWidgets()) {
+
+                WidgetTrait otherTrait = new WidgetTrait(otherWidget);
+
+                if (thisTrait.equals(otherTrait)) {
+                    notContainedInSecondState = false;
+                    break;
+                }
+            }
+
+            if (notContainedInSecondState) {
+                widgets.add(thisWidget);
+            }
+        }
+
+        MATE.log_acc("Number of widgets in set difference: " + widgets.size());
+        return widgets.size();
     }
 
     private void updateQValue(double reward, IScreenState oldState, IScreenState newState) {
