@@ -53,6 +53,13 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         this.discountFactor = discountFactor;
     }
 
+    /**
+     * Creates a new chromosome (represents an episode in the context of AutoBlackTest). The chromosome
+     * is filled with actions until either the maximal episode length is reached or an action closes
+     * the AUT, either by a regular action or a crash.
+     *
+     * @return Returns the newly generated chromosome.
+     */
     @Override
     public IChromosome<TestCase> createChromosome() {
 
