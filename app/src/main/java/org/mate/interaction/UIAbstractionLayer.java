@@ -480,6 +480,13 @@ public class UIAbstractionLayer {
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
+
+        /*
+         * TODO: Try to merge different start screen states. If the restart leads to a different
+         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
+         *  gui model with the next update call. Another possible fix is to introduce an dedicated
+         *  restart action that then connects the subgraph through a restart edge.
+         */
         lastScreenState = toRecordedScreenState(clearScreen());
     }
 
@@ -489,6 +496,13 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
+
+        /*
+         * TODO: Try to merge different start screen states. If the restart leads to a different
+         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
+         *  gui model with the next update call. Another possible fix is to introduce an dedicated
+         *  restart action that then connects the subgraph through a restart edge.
+         */
         lastScreenState = toRecordedScreenState(clearScreen());
     }
 
