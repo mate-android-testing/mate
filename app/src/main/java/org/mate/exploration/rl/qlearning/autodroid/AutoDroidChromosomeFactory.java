@@ -1,5 +1,6 @@
 package org.mate.exploration.rl.qlearning.autodroid;
 
+import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
@@ -75,9 +76,11 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
                 IScreenState currentState = uiAbstractionLayer.getLastScreenState();
 
                 Action nextAction = selectAction();
+                MATE.log_acc("Next action: " + nextAction);
                 boolean leftApp = !testCase.updateTestCase(nextAction, actionsCount);
 
                 if (leftApp) {
+                    MATE.log_acc("We left the app!");
                     qValues.get(currentState).put(nextAction, 0.0d);
                     return chromosome;
                 }
@@ -120,7 +123,12 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
             futureReward = Collections.max(qValues.get(newState).values());
         }
 
+        MATE.log_acc("Discount factor: " + discountFactor);
+        MATE.log_acc("Intermediate reward: " + reward);
+        MATE.log_acc("Future reward: " + futureReward);
+
         double qValue = reward + discountFactor * futureReward;
+        MATE.log_acc("New q-value: " + qValue);
         qValues.get(oldState).put(action, qValue);
     }
 

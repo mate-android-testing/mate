@@ -8,6 +8,8 @@ import org.mate.interaction.UIAbstractionLayer;
 /**
  * An implementation based on the paper 'Reinforcement Learning for Android GUI Testing', see
  * https://davidadamojr.com/wp-content/uploads/2018/11/Reinforcement-Learning-for-Android-GUI-Testing.pdf.
+ * Since the authors didn't provide any particular name for their approach, we stick to the name
+ * of the tool in which the approach was implemented.
  */
 public class EpisodicExploration implements Algorithm {
 
