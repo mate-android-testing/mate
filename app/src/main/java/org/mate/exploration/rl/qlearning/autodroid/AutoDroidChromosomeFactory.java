@@ -172,27 +172,19 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
             IScreenState currentState = uiAbstractionLayer.getLastScreenState();
             List<UIAction> availableActions = currentState.getActions();
 
-            // set the execution counter to 0 for new actions
-            if (!stateActionFrequencyMap.containsKey(currentState)) {
-                Map<Action, Integer> actionFrequency = new HashMap<>();
-                for (Action action : availableActions) {
-                    actionFrequency.put(action, 0);
-                }
-                stateActionFrequencyMap.put(currentState, actionFrequency);
-            }
-
-            // associate non-executed actions with the initial q-value
-            Map<Action, Integer> actionFrequency = stateActionFrequencyMap.get(currentState);
+            // associate non-executed actions with the initial q-value and initialise execution counter
+            Map<Action, Integer> actionFrequency = stateActionFrequencyMap.getOrDefault(currentState, new HashMap<>());
             Map<Action, Double> actionQValues = qValues.getOrDefault(currentState, new HashMap<>());
 
-            for (Action action : availableActions) {
-                int executionCount = actionFrequency.get(action);
-                if (executionCount == 0) {
+            if (!stateActionFrequencyMap.containsKey(currentState)) {
+                MATE.log_acc("Setting initial q-values and execution counter...");
+                for (Action action : availableActions) {
+                    actionFrequency.put(action, 0);
                     actionQValues.put(action, (double) initialQValue);
                 }
+                stateActionFrequencyMap.put(currentState, actionFrequency);
+                qValues.put(currentState, actionQValues);
             }
-
-            qValues.put(currentState, actionQValues);
 
             // select an action associated with the highest q-value
             double maxQValue = Collections.max(actionQValues.values());
@@ -205,7 +197,6 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
 
             // update the execution counter
             actionFrequency.computeIfPresent(nextAction, (action, ctr) -> ctr + 1);
-
             return nextAction;
         }
     }
