@@ -8,10 +8,16 @@ import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
+import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFactory {
 
@@ -83,8 +89,45 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
 
     }
 
+    /**
+     * Selects the action that should be executed next. We choose with a probability of epsilon
+     * a random action and with a of probability 1 - epsilon the action with the highest q-value.
+     *
+     * @return Returns the action that should be executed next.
+     */
     @Override
     protected Action selectAction() {
-        return super.selectAction();
+
+        IScreenState lastScreenState = uiAbstractionLayer.getLastScreenState();
+        double rnd = Randomness.getRnd().nextDouble();
+
+        if (rnd < epsilon) {
+            // select randomly with probability epsilon
+            MATE.log_acc("Selecting random action!");
+            return Randomness.randomElement(lastScreenState.getActions());
+        } else {
+            // select the action with the highest q-value with probability 1 - epsilon
+            MATE.log_acc("Selecting action with highest q-value!");
+
+            // init q-values for new state
+            if (!qValues.containsKey(lastScreenState)) {
+                MATE.log_acc("New state: " + lastScreenState);
+                Map<Action, Double> actionQValueMapping = new HashMap<>();
+                for (Action action : lastScreenState.getActions()) {
+                    actionQValueMapping.put(action, 0.0d);
+                }
+                this.qValues.put(lastScreenState, actionQValueMapping);
+            }
+
+            // select an action associated with the highest q-value
+            Map<Action, Double> actionQValueMapping = qValues.get(lastScreenState);
+            double maxQValue = Collections.max(actionQValueMapping.values());
+            List<Action> highestQValueActions = actionQValueMapping.entrySet().stream()
+                    .filter(entry -> entry.getValue() == maxQValue)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            return Randomness.randomElement(highestQValueActions);
+        }
     }
 }
