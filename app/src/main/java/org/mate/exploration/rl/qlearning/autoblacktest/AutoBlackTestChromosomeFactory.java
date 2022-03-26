@@ -108,10 +108,10 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
      */
     private double computeReward(IScreenState oldState, IScreenState newState) {
 
-        // |AS 2 \t AS 1 |
+        // |AS 2 \t AS 1|
         int stateDifference = stateDifference(newState, oldState);
 
-        // |+∑ w1∈AS 1, w2∈AS 2, w1 =t w2 diff(w1,w2)
+        // ∑ w1∈AS 1, w2∈AS 2, w1 =t w2 diff(w1,w2)
         int widgetDifferences = 0;
 
         for (Widget thisWidget : oldState.getWidgets()) {
