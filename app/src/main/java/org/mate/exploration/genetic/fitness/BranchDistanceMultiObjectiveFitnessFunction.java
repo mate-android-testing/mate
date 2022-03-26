@@ -21,7 +21,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
     private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
 
     // all branches (shared by instances)
-    private static List<String> branches = new ArrayList<>();
+    private static final List<String> branches = new ArrayList<>();
 
     // the current branch we want to evaluate this fitness function against
     private final String branch;
