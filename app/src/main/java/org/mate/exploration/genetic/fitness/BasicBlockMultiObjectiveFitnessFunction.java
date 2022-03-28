@@ -21,7 +21,7 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
     private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
 
     // all basic blocks (shared by instances)
-    private static List<String> blocks = new ArrayList<>();
+    private static final List<String> blocks = new ArrayList<>();
 
     // the current basic block we want to evaluate this fitness function against
     private final String block;
