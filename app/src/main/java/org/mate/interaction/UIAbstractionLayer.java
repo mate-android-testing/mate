@@ -158,6 +158,13 @@ public class UIAbstractionLayer {
         } catch (AUTCrashException e) {
 
             MATE.log_acc("CRASH MESSAGE " + e.getMessage());
+            /*
+            * TODO: Evaluate whether pressing the home button makes sense, i.e. whether the gui
+            *  model is updated correctly. By pressing home, we switch to the home screen but the
+            *  crash dialog still appears. As a result, could it happen that actually two different
+            *  crashes / crash dialogs are considered equal, because they appear on the same
+            *  underlying home screen?
+             */
             deviceMgr.pressHome();
 
             // update screen state model
@@ -473,7 +480,14 @@ public class UIAbstractionLayer {
         Utils.sleep(5000);
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        lastScreenState = clearScreen();
+
+        /*
+         * TODO: Try to merge different start screen states. If the restart leads to a different
+         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
+         *  gui model with the next update call. Another possible fix is to introduce an dedicated
+         *  restart action that then connects the subgraph through a restart edge.
+         */
+        lastScreenState = toRecordedScreenState(clearScreen());
     }
 
     /**
@@ -482,7 +496,14 @@ public class UIAbstractionLayer {
     public void restartApp() {
         deviceMgr.restartApp();
         Utils.sleep(2000);
-        lastScreenState = clearScreen();
+
+        /*
+         * TODO: Try to merge different start screen states. If the restart leads to a different
+         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
+         *  gui model with the next update call. Another possible fix is to introduce an dedicated
+         *  restart action that then connects the subgraph through a restart edge.
+         */
+        lastScreenState = toRecordedScreenState(clearScreen());
     }
 
     /**
