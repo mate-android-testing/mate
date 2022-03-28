@@ -67,6 +67,18 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
+    public Set<Edge> getEdges() {
+        return fsm.getTransitions().stream()
+                .map(transition -> new Edge(transition.getAction(),
+                        transition.getSource().getScreenState(),
+                        transition.getTarget().getScreenState()))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean reachedNewState() {
         return fsm.reachedNewState();
     }

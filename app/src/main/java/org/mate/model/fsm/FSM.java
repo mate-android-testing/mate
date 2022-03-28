@@ -109,6 +109,15 @@ public class FSM {
     }
 
     /**
+     * Returns the transitions in the FSM.
+     *
+     * @return Returns the transitions in the FSM.
+     */
+    public Set<Transition> getTransitions() {
+        return Collections.unmodifiableSet(transitions);
+    }
+
+    /**
      * Returns the number of states in the FSM.
      *
      * @return Returns the number of states in the FSM.
