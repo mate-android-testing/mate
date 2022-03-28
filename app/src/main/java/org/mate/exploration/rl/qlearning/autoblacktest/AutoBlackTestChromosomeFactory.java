@@ -113,7 +113,7 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         int stateDifference = stateDifference(newState, oldState);
 
         // ∑ w1∈AS 1, w2∈AS 2, w1 =t w2 diff(w1,w2)
-        int widgetDifferences = 0;
+        double widgetDifferences = 0;
 
         for (Widget thisWidget : oldState.getWidgets()) {
             for (Widget otherWidget : newState.getWidgets()) {
@@ -130,13 +130,46 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         return (double) (stateDifference + widgetDifferences) / newState.getWidgets().size();
     }
 
-    private int widgetDifference(Widget firstWidget, Widget secondWidget) {
-        // we can base this on the changing properties, e.g. visible, enabled, text, ...
+    /**
+     * Computes the difference of two widgets in terms of the changed property values, see the
+     * equation on page 84.
+     *
+     * @param firstWidget The first widget.
+     * @param secondWidget The second widget.
+     * @return Returns the difference of two widgets in terms of changed property values.
+     */
+    private double widgetDifference(Widget firstWidget, Widget secondWidget) {
 
-        // diffw (w1, w2) = |P1 \P2 |+|P2 \P1 |
-        //|P1 |+|P2 | .
+        // diff(w1,w2) = |P1\P2| + |P2\P1| / |P1| + |P2|
+        int widgetDifferences = 0;
 
-        return 0;
+        if (firstWidget.isEnabled() != secondWidget.isEnabled()) {
+            widgetDifferences++;
+        }
+
+        if (firstWidget.isVisible() != secondWidget.isVisible()) {
+            widgetDifferences++;
+        }
+
+        if (firstWidget.isEditable() != secondWidget.isEditable()) {
+            widgetDifferences++;
+        }
+
+        if (firstWidget.isChecked() != secondWidget.isChecked()) {
+            widgetDifferences++;
+        }
+
+        if (firstWidget.isFocused() != secondWidget.isFocused()) {
+            widgetDifferences++;
+        }
+
+        if (!firstWidget.getText().equals(secondWidget.getText())) {
+            widgetDifferences++;
+        }
+
+        MATE.log_acc("Widget differences: " + widgetDifferences);
+
+        return (double) widgetDifferences / 6 + 6;
     }
 
     /**
