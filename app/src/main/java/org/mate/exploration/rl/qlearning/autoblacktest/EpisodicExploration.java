@@ -67,8 +67,7 @@ public class EpisodicExploration implements Algorithm {
             IScreenState randomScreenState = Randomness.randomElement(guiModel.getAppStates());
             boolean success = uiAbstractionLayer.moveToState(randomScreenState);
 
-            MATE.log_acc("Starting episode in random state: " + success);
-            MATE.log_acc("Starting episode in activity: " + uiAbstractionLayer.getCurrentActivity());
+            MATE.log_acc("Starting episode in randomly selected state: " + success);
 
             if (!uiAbstractionLayer.isAppOpened()) {
                 // start episode from main activity

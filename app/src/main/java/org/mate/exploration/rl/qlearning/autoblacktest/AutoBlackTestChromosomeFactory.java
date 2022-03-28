@@ -167,8 +167,6 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
             widgetDifferences++;
         }
 
-        MATE.log_acc("Widget differences: " + widgetDifferences);
-
         return (double) widgetDifferences / 6 + 6;
     }
 
@@ -182,11 +180,6 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
      * @return Returns the number of widgets that only appear in the first state but not in the second.
      */
     private int stateDifference(IScreenState firstState, IScreenState secondState) {
-
-        // if the states are equal according to our global equality check -> diff close to 0 ???
-        if (firstState.equals(secondState)) {
-            MATE.log_acc("Comparing same states!");
-        }
 
         // the widgets that only appear in the first and not in the second state according to its traits.
         Set<Widget> widgets = new HashSet<>();
@@ -211,7 +204,6 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
             }
         }
 
-        MATE.log_acc("Number of widgets in set difference: " + widgets.size());
         return widgets.size();
     }
 
@@ -226,13 +218,10 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
      */
     private void updateQValue(double reward, IScreenState oldState, IScreenState newState, Action lastAction) {
 
-        MATE.log_acc("Updating q-value...");
-
         // the future reward is defined as the maximal q-value in the new state
         double futureReward = 0.0d;
 
         if (qValues.containsKey(newState)) {
-            MATE.log_acc("Finding highest q-value in new state...");
             Map<Action, Double> actionQValueMapping = qValues.get(newState);
             futureReward = Collections.max(actionQValueMapping.values());
         }
@@ -279,20 +268,15 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
 
         if (rnd < epsilon) {
             // select randomly with probability epsilon
-            MATE.log_acc("Selecting random action!");
             return Randomness.randomElement(lastScreenState.getActions());
         } else {
             // select the action with the highest q-value with probability 1 - epsilon
-            MATE.log_acc("Selecting action with highest q-value!");
-
-            // select an action associated with the highest q-value
             Map<Action, Double> actionQValueMapping = qValues.get(lastScreenState);
             double maxQValue = Collections.max(actionQValueMapping.values());
             List<Action> highestQValueActions = actionQValueMapping.entrySet().stream()
                     .filter(entry -> entry.getValue() == maxQValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
-
             return Randomness.randomElement(highestQValueActions);
         }
     }
