@@ -94,7 +94,7 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
             stop = true;
 
-            // try to directly launch the the target activity
+            // try to directly launch the target activity
             boolean success = uiAbstractionLayer.moveToActivity(targetActivity);
 
             if (!success) {
@@ -126,9 +126,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
                 stop = false;
 
                 /*
-                * TODO: Verify that the q-value is lower after re-selection than at least other actions
-                *  that haven't been executed on the same state, otherwise the problematic as
-                *  described below appears again and again.
                 * Since we can't block activity transitions right now, we should re-enqueue the
                 * target activity again unlike in the AimDroid paper. Otherwise, we may execute
                 * only a single action on the target activity in the worst case if the selected
