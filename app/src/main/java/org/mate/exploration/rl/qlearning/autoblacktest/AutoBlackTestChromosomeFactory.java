@@ -70,6 +70,7 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
                 IScreenState oldState = uiAbstractionLayer.getLastScreenState();
+                checkForNewState(oldState);
 
                 Action nextAction = selectAction();
                 MATE.log_acc("Next action: " + nextAction);
@@ -213,6 +214,25 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
     }
 
     /**
+     * Checks whether the given state represents a new state and in this case the q-Value map
+     * is initialised.
+     *
+     * @param screenState The screen state to be checked.
+     */
+    private void checkForNewState(IScreenState screenState) {
+
+        // init q-values for new state
+        if (!qValues.containsKey(screenState)) {
+            MATE.log_acc("New state: " + screenState);
+            Map<Action, Double> actionQValueMapping = new HashMap<>();
+            for (Action action : screenState.getActions()) {
+                actionQValueMapping.put(action, 0.0d);
+            }
+            this.qValues.put(screenState, actionQValueMapping);
+        }
+    }
+
+    /**
      * Selects the action that should be executed next. We choose with a probability of epsilon
      * a random action and with a of probability 1 - epsilon the action with the highest q-value.
      *
@@ -231,16 +251,6 @@ public class AutoBlackTestChromosomeFactory extends AndroidRandomChromosomeFacto
         } else {
             // select the action with the highest q-value with probability 1 - epsilon
             MATE.log_acc("Selecting action with highest q-value!");
-
-            // init q-values for new state
-            if (!qValues.containsKey(lastScreenState)) {
-                MATE.log_acc("New state: " + lastScreenState);
-                Map<Action, Double> actionQValueMapping = new HashMap<>();
-                for (Action action : lastScreenState.getActions()) {
-                    actionQValueMapping.put(action, 0.0d);
-                }
-                this.qValues.put(lastScreenState, actionQValueMapping);
-            }
 
             // select an action associated with the highest q-value
             Map<Action, Double> actionQValueMapping = qValues.get(lastScreenState);
