@@ -51,7 +51,6 @@ public class Properties {
         return propertyOr(3);
     }
 
-
     /*
     * Intent fuzzing related properties.
      */
@@ -80,21 +79,6 @@ public class Properties {
         return propertyOr(false);
     }
 
-    public static int K_VALUE() {
-        return propertyOr(2);
-    }
-
-    //10;
-    public static double RANK_BIAS() {
-        return propertyOr(1.7);
-    }
-
-    //10;
-    public static double GREEDY_EPSILON() {
-        return propertyOr(0.7);
-    }
-
-
     /*
      * Misc properties
      */
@@ -102,13 +86,14 @@ public class Properties {
         return propertyOr(null);
     }
 
-
     /*
      * Genetic Algorithm properties
      */
     public static int POPULATION_SIZE() {
         return propertyOr(20);
     }
+
+    public static int BIG_POPULATION_SIZE() { return propertyOr(40); }
 
     public static int NUMBER_TESTCASES() {
         return propertyOr(2);
@@ -272,12 +257,10 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /**
-     * Added by stockinger on 28/09/2020
+    /*
+    * Begin GE properties
      */
-    public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
 
-    // grammatical evolution properties
     public static int GE_SEQUENCE_LENGTH() {
         return propertyOr(100);
     }
@@ -289,6 +272,10 @@ public class Properties {
     public static int GE_MUTATION_COUNT() {
         return propertyOr(3);
     }
+
+    /*
+    * End GE properties
+     */
 
     /**
      * Novelty Search - Defines the novelty threshold. A value of 0 indicates that every
