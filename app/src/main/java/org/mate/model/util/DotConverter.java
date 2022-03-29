@@ -3,6 +3,7 @@ package org.mate.model.util;
 import org.mate.MATE;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
+import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 
 import java.io.File;
@@ -23,7 +24,7 @@ public final class DotConverter {
     private static int counter = 0;
 
     /**
-     * Converts a gui model to a dot file. The dot file is stored on the app-internal storage of
+     * Converts the gui model to a dot file. The dot file is stored on the app-internal storage of
      * MATE, see {@link #DOT_DIR}.
      *
      * @param guiModel The gui model that should be converted.
@@ -36,16 +37,27 @@ public final class DotConverter {
         }
 
         File dotFile = new File(dotDir, "GUIModel" + counter + ".dot");
-        MATE.log_acc("Dot: ");
-        MATE.log_acc(toDOT(guiModel));
 
         try (Writer fileWriter = new FileWriter(dotFile)) {
             fileWriter.write(toDOT(guiModel));
             fileWriter.flush();
+            // TODO: Fetch and remove dot file from emulator!
         } catch (IOException e) {
             throw new IllegalStateException("Couldn't save dot file!", e);
         }
         counter++;
+    }
+
+    /**
+     * Converts the gui model to a dot file. The dot file is stored on the app-internal storage of
+     * MATE, see {@link #DOT_DIR}. Highlights the given test case in the dot file.
+     *
+     * @param guiModel The gui model to be converted.
+     * @param testCase The test case that should be highlighted.
+     */
+    public static void convert(IGUIModel guiModel, TestCase testCase) {
+        // TODO: Highlight the given test case in the produced dot file.
+        throw new UnsupportedOperationException("Not yet supported!");
     }
 
     /**
@@ -55,6 +67,8 @@ public final class DotConverter {
      * @return Returns the dot conform gui model.
      */
     private static String toDOT(IGUIModel guiModel) {
+
+        // TODO: Shorten label of edges and avoid overlapping labels!
 
         StringBuilder builder = new StringBuilder();
         builder.append("strict digraph g {\n");

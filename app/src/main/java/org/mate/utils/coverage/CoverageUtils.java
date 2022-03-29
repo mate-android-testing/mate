@@ -126,7 +126,6 @@ public final class CoverageUtils {
      */
     public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
                                                                 String activity) {
-
         Set<String> visited = visitedActivities.getOrDefault(chromosome, new HashSet<>());
         visited.add(activity);
         visitedActivities.put(chromosome, visited);
