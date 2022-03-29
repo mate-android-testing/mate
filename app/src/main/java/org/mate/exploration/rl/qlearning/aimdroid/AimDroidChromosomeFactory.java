@@ -295,13 +295,6 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
             }
         } finally {
-
-            /*
-            * Activity-aliases that are triggered through the quick launch functionality don't show
-            * up in the chromosomes. This would in turn falsify the activity coverage computation.
-             */
-            testCase.getVisitedActivities().add(targetActivity);
-
             if (!isTestSuiteExecution) {
                 /*
                  * If we deal with a test suite execution, the storing of coverage and fitness data
@@ -309,6 +302,14 @@ public class AimDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
                  */
                 FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+
+                /*
+                 * Activity-aliases that are triggered through the quick launch functionality don't
+                 * show up in the chromosomes. This would in turn falsify the activity coverage
+                 * computation.
+                 */
+                CoverageUtils.updateTestCaseChromosomeActivityCoverage(chromosome, targetActivity);
+
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
             testCase.finish();
