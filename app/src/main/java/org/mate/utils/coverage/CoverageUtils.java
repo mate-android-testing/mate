@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Provides utility functions to retrieve coverage-related information.
@@ -116,6 +115,21 @@ public final class CoverageUtils {
             default:
                 break;
         }
+    }
+
+    /**
+     * Updates the activity coverage for the given test case chromosome. This is only necessary for
+     * activities that have been discovered through an action not belonging to the test case.
+     *
+     * @param chromosome The test case chromosome.
+     * @param activity The activity that has been visited.
+     */
+    public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
+                                                                String activity) {
+
+        Set<String> visited = visitedActivities.getOrDefault(chromosome, new HashSet<>());
+        visited.add(activity);
+        visitedActivities.put(chromosome, visited);
     }
 
     /**
