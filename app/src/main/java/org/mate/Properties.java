@@ -9,6 +9,7 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
+import org.mate.model.util.DotConverter;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -421,6 +422,13 @@ public class Properties {
     /*
      * End AutoDroid properties
      */
+
+    /**
+     * Whether the gui model should be converted to a dot file and how often.
+     *
+     * @return Returns the conversion option.
+     */
+    public static DotConverter.Option CONVERT_GUI_TO_DOT() { return propertyOr(DotConverter.Option.NONE); }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the

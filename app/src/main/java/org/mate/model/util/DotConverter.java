@@ -75,4 +75,25 @@ public final class DotConverter {
         builder.append("}\n");
         return builder.toString();
     }
+
+    /**
+     * Describes the different conversion options.
+     */
+    public enum Option {
+
+        /**
+         * There should be no conversion at all.
+         */
+        NONE,
+
+        /**
+         * Only the final gui model should be converted.
+         */
+        ONLY_FINAL_MODEL,
+
+        /**
+         * The conversion should take place after each test case and at the end.
+         */
+        ALL;
+    }
 }
