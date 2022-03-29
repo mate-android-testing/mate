@@ -64,7 +64,7 @@ public class ListUtils {
      * @param <T> The type of the list elements.
      * @return Returns the converted set.
      */
-    public static <T> Set<T> toList(List<T> list) {
+    public static <T> Set<T> toSet(List<T> list) {
         return new HashSet<>(list);
     }
 }
