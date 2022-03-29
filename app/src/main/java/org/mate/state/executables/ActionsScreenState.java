@@ -248,11 +248,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 MATE.log_debug("Widget is a spinner instance!");
 
                 /*
-                * TODO: Add a proper scrolling action. Right now we simply
-                *  click on the spinner, which in turn opens a list view,
-                *  on which we can click again. However, the better option would
-                *  be some sort of motif gene that does this two step operation
-                *  in one step.
+                * Although there is a proper motif action for spinner widgets in the meantime, we
+                * keep the click action as kind of fallback mechanism and when motif actions
+                * shouldn't be allowed.
+                * 
                  */
 
                 if (widget.isClickable()) {
