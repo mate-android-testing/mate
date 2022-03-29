@@ -2,7 +2,9 @@ package org.mate.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility functions for arbitrary {@link List}s.
@@ -53,5 +55,16 @@ public class ListUtils {
         }
 
         return maximaPositions;
+    }
+
+    /**
+     * Converts the given list to a {@link Set}.
+     *
+     * @param list The list to be converted.
+     * @param <T> The type of the list elements.
+     * @return Returns the converted set.
+     */
+    public static <T> Set<T> toList(List<T> list) {
+        return new HashSet<>(list);
     }
 }
