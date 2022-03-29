@@ -23,11 +23,11 @@ public class ActivityFitnessFunction<T> implements IFitnessFunction<T> {
     @Override
     public double getFitness(IChromosome<T> chromosome) {
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getVisitedActivities().size();
+            return ((TestCase) chromosome.getValue()).getVisitedActivitiesOfApp().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             Set<String> coveredActivities = new HashSet<>();
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                coveredActivities.addAll(testCase.getVisitedActivities());
+                coveredActivities.addAll(testCase.getVisitedActivitiesOfApp());
             }
             return coveredActivities.size();
         } else {
