@@ -9,6 +9,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
@@ -121,6 +122,10 @@ public class TestCase {
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
             TestCaseSerializer.serializeTestCase(this);
+        }
+
+        if (Properties.CONVERT_GUI_TO_DOT() == DotConverter.Option.ALL) {
+            DotConverter.convert(Registry.getUiAbstractionLayer().getGuiModel());
         }
 
         // record stats about a test case, in particular about intent based actions

@@ -10,6 +10,7 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.util.DotConverter;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
@@ -141,6 +142,10 @@ public class MATE {
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 CoverageUtils.logFinalCoverage();
+            }
+
+            if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+                DotConverter.convert(Registry.getUiAbstractionLayer().getGuiModel());
             }
 
             if (Properties.GRAPH_TYPE() != null) {
