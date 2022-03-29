@@ -356,6 +356,7 @@ public class ActionsScreenState extends AbstractScreenState {
         List<WidgetAction> spinnerClickActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isClickable()
                         && widgetAction.getWidget().isSpinnerType())
+                .filter(widgetAction -> widgetAction.getWidget().hasChildren())
                 .collect(Collectors.toList());
 
         spinnerClickActions.stream().forEach(spinnerClickAction -> {
