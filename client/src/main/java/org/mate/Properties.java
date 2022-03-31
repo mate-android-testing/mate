@@ -363,14 +363,14 @@ public class Properties {
                             property.getValue());
                     store.put(key, parsedObj);
                 } catch (Exception e) {
-                    MATELog.log(
+                    MATELog.log_acc(
                             "Failure while trying to parse \""
                                     + property.getValue()
                                     + "\" as instance of class "
                                     + propertiesInfo.get(key).getCanonicalName());
                 }
             } else {
-                MATELog.log("Unknown property with key: " + property.getKey());
+                MATELog.log_acc("Unknown property with key: " + property.getKey());
             }
         }
     }
