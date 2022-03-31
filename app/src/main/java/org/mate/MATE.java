@@ -1,5 +1,6 @@
 package org.mate;
 
+import android.os.Debug;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -29,6 +30,16 @@ public class MATE {
 
     // TODO: make singleton
     public MATE() {
+
+        // check whether we would like to debug the execution
+        boolean waitForDebugger = Boolean.parseBoolean(InstrumentationRegistry.getArguments()
+                .getString("wait-for-debugger"));
+
+        if (waitForDebugger) {
+            // attach the debugger via Run -> 'Attach Debugger to Android Process' -> 'org.mate'
+            MATE.log_acc("Waiting for debugger...");
+            Debug.waitForDebugger();
+        }
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();

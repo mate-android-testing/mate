@@ -24,7 +24,7 @@ The simplest option is to make use of the supplied `mate-commander`:
 * [Windows](https://github.com/mate-android-testing/mate-commander/tree/mate-commander-windows) 
 * [Linux](https://github.com/mate-android-testing/mate-commander) 
 
-If you however want to debug MATE and MATE Server follow the instructions below:
+If you however want to run MATE and MATE Server manually follow the instructions below:
 
 ### 1) Start the device
 Setup the emulator or attach your device via USB and enable USB-Debugging.
@@ -72,7 +72,25 @@ Replace `ExecuteMATERandomExploration` with the desired testing strategy and `<p
 1) Run the command `aapt dump badging <path-to-apk> | grep package:\ name`.
 2) Extract the package name from the `AndroidManifest.xml`.
 
-### 4) Further configurations
+### 4) Debug MATE
+
+If you would like to debug the execution of MATE, you have several options:
+
+#### a) Android Studio
+
+* Provide an additional instrumentation argument `wait-for-debugger` set to `true` (run configuration)
+  and click on `Run -> 'Attach Debugger to Android Process' -> 'org.mate'` once the log 
+  "Waiting for debugger..." appears in the android logcat output.
+* Or run the test, e.g. `ExecuteMATERandomExploration` in debug mode.
+
+#### b) Gradle
+
+* Provide an additional argument `-e wait-for-debugger true` to the `adb shell am instrument` command
+  and click on `Run -> 'Attach Debugger to Android Process' -> 'org.mate'` once the log 
+  "Waiting for debugger..." appears in the android logcat output.
+* Or change the argument `-e debug false` to `-e debug true` and attach to the debugger immediately.
+
+### 5) Further configurations
 
 Most properties necessary for the various algorithms can be now specified dynamically by providing a file called `mate.properties`.
 For instance, you can run an arbitrary genetic algorithm by

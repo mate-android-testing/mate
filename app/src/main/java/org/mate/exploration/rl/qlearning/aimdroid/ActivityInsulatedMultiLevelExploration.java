@@ -3,6 +3,7 @@ package org.mate.exploration.rl.qlearning.aimdroid;
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
+import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.ActionType;
@@ -10,25 +11,43 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.manifest.element.ComponentDescription;
 
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * An implementation of the paper ' AimDroid: Activity-Insulated Multi-level Automated Testing for
+ * An implementation of the paper 'AimDroid: Activity-Insulated Multi-level Automated Testing for
  * Android Applications', see https://ieeexplore.ieee.org/document/8094413.
  */
 public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
     /**
-     * The used factory to produce new chromosomes (test cases).
+     * The chromosome factory used to produce test case chromosomes targeting a specific activity.
      */
     private final AimDroidChromosomeFactory aimDroidChromosomeFactory;
+
+    /**
+     * The chromosome factory used to generate random test case chromosomes.
+     */
+    private final AndroidRandomChromosomeFactory randomChromosomeFactory;
 
     /**
      * Enables the interaction with the AUT.
      */
     private final UIAbstractionLayer uiAbstractionLayer = Registry.getUiAbstractionLayer();
+
+    /**
+     * The number of allowed activity launch failures. If an activity reaches this limit, the
+     * activity won't be re-enqueued in the working queue.
+     */
+    private static final int MAX_ACTIVITY_LAUNCH_FAILURES = 3;
+
+    /**
+     * Tracks how often an activity couldn't be launched by quick launch or a path in the gui model.
+     */
+    private final Map<String, Integer> activityLaunchFailures;
 
     /**
      * Initialises the activity insulation multi level exploration strategy.
@@ -42,6 +61,8 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
     public ActivityInsulatedMultiLevelExploration(int minL, int maxL, double epsilon, double alpha,
                                                   double gamma) {
         aimDroidChromosomeFactory = new AimDroidChromosomeFactory(minL, maxL, epsilon, alpha, gamma);
+        randomChromosomeFactory = new AndroidRandomChromosomeFactory(true, maxL);
+        activityLaunchFailures = new HashMap<>();
     }
 
     /**
@@ -71,6 +92,16 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
             String targetActivity = queue.poll();
             exploreInCage(queue, targetActivity);
         }
+
+        /*
+        * Although this is not explicitly stated in the AimDroid paper, the algorithm proceeds with
+        * a random exploration starting from the main activity until the search budget is exhausted.
+         */
+        MATE.log_acc("Running random exploration until time out is reached...");
+        while (true) {
+            MATE.log_acc("Sampling new random chromosome...");
+            randomChromosomeFactory.createChromosome();
+        }
     }
 
     /**
@@ -94,18 +125,25 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
 
             stop = true;
 
-            // try to directly launch the the target activity
+            // try to directly launch the target activity
             boolean success = uiAbstractionLayer.moveToActivity(targetActivity);
 
             if (!success) {
                 MATE.log_acc("Couldn't move AUT into activity: " + targetActivity);
+
                 /*
-                * TODO: Find a better strategy here. Re-enqueuing can be helpful, since we may
-                *  discover a path to a target activity later in the exploration, but at some point
-                *  in time, we end up wasting the search budget by trying to open a target activity
-                *  that can't be launched in an endless loop.
+                * Unlike in the AimDroid paper, we re-enqueue to some degree an activity that
+                * couldn't be launched. There is a chance that a path to the target activity gets
+                * discovered later in the exploration process, but at some point in time we may end
+                * up re-enqueuing the same activity again and again. Thus, there is an upper limit
+                * for the number of retries per activity.
                  */
-                queue.add(targetActivity);
+                int faultyLaunches = activityLaunchFailures.getOrDefault(targetActivity, 0) + 1;
+                activityLaunchFailures.put(targetActivity, faultyLaunches);
+
+                if (faultyLaunches < MAX_ACTIVITY_LAUNCH_FAILURES) {
+                    queue.add(targetActivity);
+                }
                 break;
             }
 
@@ -126,9 +164,6 @@ public class ActivityInsulatedMultiLevelExploration implements Algorithm {
                 stop = false;
 
                 /*
-                * TODO: Verify that the q-value is lower after re-selection than at least other actions
-                *  that haven't been executed on the same state, otherwise the problematic as
-                *  described below appears again and again.
                 * Since we can't block activity transitions right now, we should re-enqueue the
                 * target activity again unlike in the AimDroid paper. Otherwise, we may execute
                 * only a single action on the target activity in the worst case if the selected
