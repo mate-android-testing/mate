@@ -249,7 +249,7 @@ public final class CoverageUtils {
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-            MATE.log_acc("Intermediate coverage: " + getCombinedCoverage(Properties.COVERAGE()));
+            MATE.log_acc("Intermediate Coverage: " + getCombinedCoverage(Properties.COVERAGE()));
         }
     }
 
