@@ -55,7 +55,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
      * Name of intent extra indicating that the MATE Service should wait that debugger is
      * attached before starting exploration.
      */
-    public static final String WAIT_FOR_DEBUGGER = "waitForDebugger";
+    public static final String WAIT_FOR_DEBUGGER = "wait-for-debugger";
 
     /**
      * The Representation Layer proxy object obtained after the representation layer registers
@@ -262,8 +262,9 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             }
         }
 
-        // Did user add "--ez waitForDebugger true" to the startservice command?
+        // Did user add "--ez wait-for-debugger true" to the startservice command?
         if (intent.hasExtra(WAIT_FOR_DEBUGGER) && intent.getBooleanExtra(WAIT_FOR_DEBUGGER, false)) {
+            // attach the debugger via Run -> 'Attach Debugger to Android Process' -> 'org.mate'
             log("MATE Service waiting for Debugger to be attached to Android Process");
             waitForDebugger = true;
             Debug.waitForDebugger();
