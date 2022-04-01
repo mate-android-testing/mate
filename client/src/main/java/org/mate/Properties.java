@@ -176,6 +176,15 @@ public class Properties {
      */
 
     /**
+     * The coverage type that should steer the exploration.
+     *
+     * @return Returns the coverage type that steers the exploration, defaults to activity coverage.
+     */
+    public static Coverage GREY_BOX_COVERAGE_CRITERION() {
+        return propertyOr(Coverage.ACTIVITY_COVERAGE);
+    }
+
+    /**
      * The initial size of the seed corpus S.
      *
      * @return Returns the initial size of the seed corpus.

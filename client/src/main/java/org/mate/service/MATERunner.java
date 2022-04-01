@@ -5,7 +5,7 @@ import android.content.Context;
 import org.mate.service.execution.ExecuteMATEAccManualExploration;
 import org.mate.service.execution.ExecuteMATEEqualWeightedGE;
 import org.mate.service.execution.ExecuteMATEGeneticAlgorithm;
-import org.mate.service.execution.ExecuteMATEGreyBoxFuzzing;
+import org.mate.service.execution.ExecuteMATEGreyBoxCoverageFuzzing;
 import org.mate.service.execution.ExecuteMATEHeuristicRandomExploration;
 import org.mate.service.execution.ExecuteMATEListAnalogousGE;
 import org.mate.service.execution.ExecuteMATEMIO;
@@ -44,8 +44,8 @@ public class MATERunner {
                 ExecuteMATEGeneticAlgorithm.run(packageName, context);
                 break;
             }
-            case "GreyBoxFuzzing": {
-                ExecuteMATEGreyBoxFuzzing.run(packageName, context);
+            case "GreyBoxCoverageFuzzing": {
+                ExecuteMATEGreyBoxCoverageFuzzing.run(packageName, context);
                 break;
             }
             case "HeuristicRandomExploration": {

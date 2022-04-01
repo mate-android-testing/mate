@@ -106,9 +106,9 @@ public class CoverageDTO {
      *
      * @return Returns the raw coverage information depending on the specified coverage criterion.
      */
-    public double getCoverage() {
+    public double getCoverage(Coverage coverage) {
 
-        switch (Properties.COVERAGE()) {
+        switch (coverage) {
             case ACTIVITY_COVERAGE:
                 return getActivityCoverage();
             case METHOD_COVERAGE:
@@ -118,6 +118,7 @@ public class CoverageDTO {
                 return getBranchCoverage();
             case LINE_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
+            case ALL_COVERAGE:
                 return getLineCoverage();
             default:
                 throw new UnsupportedOperationException("Coverage type "
