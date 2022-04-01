@@ -3,6 +3,7 @@ package org.mate.service;
 import android.content.Context;
 
 import org.mate.service.execution.ExecuteMATEAccManualExploration;
+import org.mate.service.execution.ExecuteMATEAutoBlackTest;
 import org.mate.service.execution.ExecuteMATEAutoDroid;
 import org.mate.service.execution.ExecuteMATEEqualWeightedGE;
 import org.mate.service.execution.ExecuteMATEGeneticAlgorithm;
@@ -35,6 +36,10 @@ public class MATERunner {
         switch (algorithm) {
             case "AccManualExploration": {
                 ExecuteMATEAccManualExploration.run(packageName, context);
+                break;
+            }
+            case "AutoBlackTest": {
+                ExecuteMATEAutoBlackTest.run(packageName, context);
                 break;
             }
             case "AutoDroid": {

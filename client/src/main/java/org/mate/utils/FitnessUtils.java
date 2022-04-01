@@ -103,6 +103,8 @@ public class FitnessUtils {
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
+        // TODO: Apply the same clean cache functionality for any many/multi-objective fitness function.
+
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
             LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
         }

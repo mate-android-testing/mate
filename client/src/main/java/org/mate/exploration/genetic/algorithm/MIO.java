@@ -293,7 +293,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             updateParameters();
         }
 
-        // TODO: Remove! This just tries to keep the cache size reasonable by dropping unused chromosomes.
+        // clean the cache from time to time, otherwise we end up with an OOM error for large apps
         List<IChromosome<T>> activeChromosomes = new ArrayList<>();
         for (List<ChromosomeFitnessTuple> tuples : archive.values()) {
             for (ChromosomeFitnessTuple tuple : tuples) {
