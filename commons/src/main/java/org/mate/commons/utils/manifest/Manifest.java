@@ -61,6 +61,19 @@ public final class Manifest {
     }
 
     /**
+     * Returns the exported activities declared in the manifest.
+     *
+     * @return Returns the list of exported activities of the manifest.
+     */
+    public List<ComponentDescription> getExportedActivities() {
+        return components.stream()
+                .filter(ComponentDescription::isActivity)
+                .filter(ComponentDescription::isExported)
+                .filter(ComponentDescription::isEnabled)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Returns the package name.
      *
      * @return Returns the package name.

@@ -63,7 +63,7 @@ public class TextDataGenerator {
     public String generateTextData(final Widget widget,
                                     final int maxLength) {
 
-        final String activityName = convertClassName(widget.getActivity());
+        final String activityName = widget.getActivity();
 
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = ExplorationInfo.getInstance().getRandom();
@@ -131,32 +131,6 @@ public class TextDataGenerator {
 
         // fallback mechanism
         return generateRandomInput(inputFieldType, maxLength);
-    }
-
-    /**
-     * Converts a fully-qualified class name to solely it's class name, i.e. the possibly redundant
-     * package name is stripped off.
-     *
-     * @param className The fully-qualified class name consisting of <package-name>/<class-name>.
-     * @return Returns the simple class name.
-     */
-    private String convertClassName(String className) {
-
-        if (!className.contains("/")) {
-            // the class name is already in its desired form
-            return className;
-        }
-
-        String[] tokens = className.split("/");
-        String packageName = tokens[0];
-        String componentName = tokens[1];
-
-        // if the component resides in the application package, a dot is used instead of the package name
-        if (componentName.startsWith(".")) {
-            componentName = packageName + componentName;
-        }
-
-        return componentName;
     }
 
     /**

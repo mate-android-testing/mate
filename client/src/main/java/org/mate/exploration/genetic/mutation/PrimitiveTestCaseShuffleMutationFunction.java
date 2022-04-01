@@ -39,7 +39,7 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
         CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-        MATELog.log_acc("Found crash: " + chromosome.getValue().getCrashDetected());
+        MATELog.log_acc("Found crash: " + chromosome.getValue().hasCrashDetected());
 
         return mutatedChromosome;
     }

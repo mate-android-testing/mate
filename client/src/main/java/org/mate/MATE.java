@@ -132,7 +132,7 @@ public class MATE {
     public void testApp(final Algorithm algorithm) {
 
         MATELog.log_acc("Activities:");
-        for (String activity : Registry.getUiAbstractionLayer().getActivityNames()) {
+        for (String activity : Registry.getUiAbstractionLayer().getActivities()) {
             MATELog.log_acc("\t" + activity);
         }
 

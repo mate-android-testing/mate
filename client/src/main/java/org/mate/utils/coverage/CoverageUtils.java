@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Provides utility functions to retrieve coverage-related information.
@@ -81,7 +82,7 @@ public final class CoverageUtils {
      */
     private static Set<String> getActivities() {
         if (activities == null) {
-            activities = new HashSet<>(Registry.getUiAbstractionLayer().getActivityNames());
+            activities = new HashSet<>(Registry.getUiAbstractionLayer().getActivities());
         }
 
         if (activities.size() == 0) {
@@ -171,7 +172,12 @@ public final class CoverageUtils {
                     + chromosome + "!");
         }
 
-        return (double) visitedActivities.get(chromosome).size() / getActivities().size() * 100;
+        Set<String> visitedActivitiesOfApp = visitedActivities.get(chromosome).stream()
+                // only consider activities belonging to the AUT
+                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                .collect(Collectors.toSet());
+
+        return (double) visitedActivitiesOfApp.size() / getActivities().size() * 100;
     }
 
     /**
@@ -278,7 +284,9 @@ public final class CoverageUtils {
 
             MATELog.log_acc("Total visited activities: ");
             for (String activity : visitedActivitiesTotal) {
-                MATELog.log_acc(activity);
+                if (Registry.getUiAbstractionLayer().getActivities().contains(activity)) {
+                    MATELog.log_acc(activity);
+                }
             }
         }
     }
@@ -322,7 +330,13 @@ public final class CoverageUtils {
         Set<String> visitedActivitiesTotal = new HashSet<>();
 
         for (Set<String> activities : visitedActivities.values()) {
-            visitedActivitiesTotal.addAll(activities);
+
+            Set<String> visitedActivitiesOfApp = activities.stream()
+                    // only consider activities belonging to the AUT
+                    .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                    .collect(Collectors.toSet());
+
+            visitedActivitiesTotal.addAll(visitedActivitiesOfApp);
         }
 
         return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
@@ -378,7 +392,12 @@ public final class CoverageUtils {
                         + chromosome + "!");
             }
 
-            visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
+            Set<String> visitedActivitiesOfApp = visitedActivities.get(chromosome).stream()
+                    // only consider activities belonging to the AUT
+                    .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                    .collect(Collectors.toSet());
+
+            visitedActivitiesTotal.addAll(visitedActivitiesOfApp);
         }
 
         return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
@@ -428,7 +447,13 @@ public final class CoverageUtils {
      * @return Returns the activity coverage of the given test case.
      */
     private static double getActivityCoverage(TestCase testCase) {
-        return (double) testCase.getVisitedActivities().size() / getActivities().size() * 100;
+
+        Set<String> visitedActivitiesOfApp = testCase.getVisitedActivities().stream()
+                // only consider activities belonging to the AUT
+                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                .collect(Collectors.toSet());
+
+        return (double) visitedActivitiesOfApp.size() / getActivities().size() * 100;
     }
 
     /**

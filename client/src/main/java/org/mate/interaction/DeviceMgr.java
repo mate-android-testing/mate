@@ -12,6 +12,7 @@ import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 import org.mate.service.MATEService;
+import org.mate.utils.StackTrace;
 
 import java.util.List;
 
@@ -218,11 +219,10 @@ public class DeviceMgr {
      */
     public String getCurrentActivity() {
         try {
-            String currentActivityName =
-                    convertActivityName(MATEService.getRepresentationLayer()
-                            .getCurrentActivityName());
+            String currentActivityName = MATEService.getRepresentationLayer()
+                    .getCurrentActivityName();
             if (currentActivityName != null) {
-                return currentActivityName;
+                return convertClassName(currentActivityName);
             }
         } catch (RemoteException | AUTCrashException e) {
             if (e.getMessage() != null) {
@@ -231,25 +231,33 @@ public class DeviceMgr {
         }
 
         // fall back mechanism (slow)
-        return convertActivityName(Registry.getEnvironmentManager().getCurrentActivityName());
+        return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
     }
 
     /**
-     * Converts the short form 'package/.subpackage.activity' to 'package.subpackage.activity'.
-     * This is necessary since the output of adb commands and the package manager diverge.
+     * Converts a fully-qualified class name to solely it's class name, i.e. the possibly redundant
+     * package name is stripped off.
      *
-     * @param activity The activity name.
-     * @return Returns the unified activity name.
+     * @param className The fully-qualified class name consisting of <package-name>/<class-name>.
+     * @return Returns the simple class name.
      */
-    private String convertActivityName(String activity) {
-        String[] tokens = activity.split("/");
-        String packageName = tokens[0];
-        String activityName = tokens[1];
-        if (activityName.startsWith(".")) {
-            return packageName + activityName;
-        } else {
-            return activity;
+    private String convertClassName(String className) {
+
+        if (!className.contains("/")) {
+            // the class name is already in its desired form
+            return className;
         }
+
+        String[] tokens = className.split("/");
+        String packageName = tokens[0];
+        String componentName = tokens[1];
+
+        // if the component resides in the application package, a dot is used instead of the package name
+        if (componentName.startsWith(".")) {
+            componentName = packageName + componentName;
+        }
+
+        return componentName;
     }
 
     /**
@@ -287,11 +295,11 @@ public class DeviceMgr {
     }
 
     /**
-     * Returns the activity names of the AUT.
+     * Returns the activities of the AUT.
      *
-     * @return Returns the activity names of the AUT.
+     * @return Returns the activities of the AUT.
      */
-    public List<String> getActivityNames() {
+    public List<String> getActivities() {
         try {
             return MATEService.getRepresentationLayer().getTargetPackageActivityNames();
         } catch (RemoteException | AUTCrashException e) {
@@ -310,12 +318,12 @@ public class DeviceMgr {
      *
      * @return Returns the stack trace of the last crash.
      */
-    public String getLastCrashStackTrace() {
+    public StackTrace getLastCrashStackTrace() {
         // Do not use the Representation Layer here.
         // If we have detected a failing action that led to a crash, then both AUT and
         // Representation Layer are dead. Thus, any request sent to the Representation Layer will
         // fail.
 
-        return Registry.getEnvironmentManager().getLastCrashStackTrace();
+        return new StackTrace(Registry.getEnvironmentManager().getLastCrashStackTrace());
     }
 }

@@ -312,6 +312,49 @@ public class Properties {
      */
     public static boolean QUICK_LAUNCH() { return propertyOr(true); }
 
+    /*
+     * Begin AimDroid properties
+     */
+
+    /**
+     * The epsilon used in the epsilon greedy learning policy.
+     *
+     * @return Returns the epsilon used in the learning policy.
+     */
+    public static double EPSILON() { return propertyOr(0.1d);}
+
+    /**
+     * The alpha used in the SARSA equation.
+     *
+     * @return Returns the alpha used in the SARSA equation.
+     */
+    public static double ALPHA() { return propertyOr(0.8d); }
+
+    /**
+     * The gamma used in the SARSA equation.
+     *
+     * @return Returns the gamma used in the SARSA equation.
+     */
+    public static double GAMMA() { return propertyOr(0.8d); }
+
+    /**
+     * The minL constant used in the bound method (the minimal number of actions).
+     *
+     * @return Returns the minL constant.
+     */
+    public static int MIN_L() { return propertyOr(20); }
+
+    /**
+     * The maxL constant used in the bound method (the maximal number of actions).
+     *
+     * @return Returns the maxL constant.
+     */
+    public static int MAX_L() { return propertyOr(50); }
+
+    /*
+     * End AimDroid properties
+     */
+
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored

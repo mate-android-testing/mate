@@ -65,7 +65,9 @@ public final class ManifestParser {
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.getEventType() == XmlPullParser.START_TAG) {
 
-                switch (parser.getName()) {
+                final String startTag = parser.getName();
+
+                switch (startTag) {
                     case "activity":
                     case "activity-alias":
                     case "service":
@@ -87,6 +89,14 @@ public final class ManifestParser {
                                 componentType);
                         currentComponent.setExported(exported);
                         currentComponent.setEnabled(enabled);
+
+                        if (startTag.equals("activity-alias")) {
+                            currentComponent.setActivityAlias(true);
+                            final String targetActivity
+                                    = parser.getAttributeValue(null, "targetActivity");
+                            currentComponent.setTargetActivity(targetActivity);
+                        }
+
                         break;
 
                     case "intent-filter":
