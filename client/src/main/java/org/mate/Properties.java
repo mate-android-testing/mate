@@ -364,6 +364,42 @@ public class Properties {
      * End AimDroid properties
      */
 
+    /*
+    * Begin AutoDroid properties
+     */
+
+    /**
+     * The probability for pressing the home button.
+     *
+     * @return Returns the probability for selecting the home button.
+     */
+    public static float P_HOME_BUTTON() { return propertyOr(0.05f); }
+
+    /**
+     * The initial q-value for a new action.
+     *
+     * @return Returns the initial q-value for a new action.
+     */
+    public static float INITIAL_Q_VALUE() { return propertyOr(500f); }
+
+    /**
+     * The maximal number of episodes (testcases).
+     *
+     * @return Returns the maximal number of episodes.
+     */
+    public static int MAX_NUM_OF_EPISODES() { return propertyOr(100); }
+
+    /**
+     * The maximal length of an episode (a test case).
+     *
+     * @return Returns the maximal episode length.
+     */
+    public static int MAX_EPISODE_LENGTH() { return propertyOr(50); }
+
+    /*
+     * End AutoDroid properties
+     */
+
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored

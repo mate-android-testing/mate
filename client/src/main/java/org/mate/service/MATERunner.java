@@ -3,6 +3,7 @@ package org.mate.service;
 import android.content.Context;
 
 import org.mate.service.execution.ExecuteMATEAccManualExploration;
+import org.mate.service.execution.ExecuteMATEAutoDroid;
 import org.mate.service.execution.ExecuteMATEEqualWeightedGE;
 import org.mate.service.execution.ExecuteMATEGeneticAlgorithm;
 import org.mate.service.execution.ExecuteMATEGreyBoxCoverageFuzzing;
@@ -34,6 +35,10 @@ public class MATERunner {
         switch (algorithm) {
             case "AccManualExploration": {
                 ExecuteMATEAccManualExploration.run(packageName, context);
+                break;
+            }
+            case "AutoDroid": {
+                ExecuteMATEAutoDroid.run(packageName, context);
                 break;
             }
             case "EqualWeightedGE": {
