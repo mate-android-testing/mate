@@ -6,9 +6,9 @@ import android.content.Intent;
 
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.interaction.action.intent.ComponentType;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.manifest.element.ComponentType;
 
 /**
  * ActionExecutor class for IntentBased actions.

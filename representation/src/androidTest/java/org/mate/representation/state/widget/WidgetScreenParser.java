@@ -14,11 +14,6 @@ import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 import org.mate.representation.DeviceInfo;
 import org.mate.representation.ExplorationInfo;
-import org.mate.MATE;
-import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.EnvironmentManager;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
