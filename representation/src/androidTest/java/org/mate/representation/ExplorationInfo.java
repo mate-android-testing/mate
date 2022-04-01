@@ -169,6 +169,7 @@ public class ExplorationInfo {
                     DeviceInfo.getInstance().getAUTContext().getPackageManager().getPackageInfo(
                     targetPackageName, PackageManager.GET_ACTIVITIES);
 
+            // TODO: Ensure that the short form '/.subpackage.activityName' is not used!!!
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {

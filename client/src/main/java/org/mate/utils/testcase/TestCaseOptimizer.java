@@ -2,11 +2,11 @@ package org.mate.utils.testcase;
 
 import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.utils.MATELog;
-import org.mate.commons.interaction.action.intent.ComponentType;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.interaction.action.intent.SystemAction;
 import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.manifest.element.ComponentType;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;

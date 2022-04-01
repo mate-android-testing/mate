@@ -2,10 +2,11 @@ package org.mate;
 
 import android.content.Context;
 
+import org.mate.commons.utils.Randomness;
+import org.mate.commons.utils.manifest.Manifest;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.commons.utils.Randomness;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -46,6 +47,16 @@ public class Registry {
      * Context provided by the MATE Service.
      */
     private static WeakReference<Context> context;
+
+    /**
+     * Represents an abstraction of the AndroidManifest.xml file.
+     */
+    private static Manifest manifest;
+
+    /**
+     * The name of the main activity.
+     */
+    private static String mainActivity;
 
     public static void registerReplayMode() {
         replayMode = true;
@@ -165,5 +176,29 @@ public class Registry {
 
     public static Context getContext() {
         return Registry.context.get();
+    }
+
+    public static Manifest getManifest() {
+        return manifest;
+    }
+
+    public static void registerManifest(Manifest manifest) {
+        Registry.manifest = manifest;
+    }
+
+    public static void unregisterManifest() {
+        Registry.manifest = null;
+    }
+
+    public static String getMainActivity() {
+        return mainActivity;
+    }
+
+    public static void registerMainActivity(String mainActivity) {
+        Registry.mainActivity = mainActivity;
+    }
+
+    public static void unregisterMainActivity() {
+        Registry.mainActivity = null;
     }
 }

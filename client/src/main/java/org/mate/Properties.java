@@ -306,6 +306,13 @@ public class Properties {
     public static int NEAREST_NEIGHBOURS() { return propertyOr(3); }
 
     /**
+     * Controls whether quick launch is enabled or disabled.
+     *
+     * @return Returns {@code true} if quick launch is enabled, otherwise {@code false} is returned.
+     */
+    public static boolean QUICK_LAUNCH() { return propertyOr(true); }
+
+    /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored
      * the given default value will be returned.

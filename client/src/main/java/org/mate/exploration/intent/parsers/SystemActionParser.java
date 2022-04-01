@@ -1,27 +1,34 @@
-package org.mate.commons.interaction.action.intent;
-
-import org.mate.commons.utils.MATELog;
+package org.mate.exploration.intent.parsers;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides a simple parser for the broadcast_actions.txt file, which is located within the folder
+ * Android/Sdk/platforms/<api-level>/.
+ */
 public final class SystemActionParser {
 
-    private static final String SYSTEM_EVENTS_FILE = "/sdcard/broadcast_actions.txt";
+    /**
+     * The location where the broadcast_actions.txt file needs to be pushed in advance.
+     */
+    private static final File SYSTEM_EVENTS_FILE
+            = new File("/data/data/org.mate/broadcast_actions.txt");
 
     private SystemActionParser() {
         throw new UnsupportedOperationException("Utility class can't be instantiated!");
     }
 
     /**
-     * Reads the list of system events, in particular the name of the corresponding actions.
+     * Parses the supported system event actions from the specified broadcast_actions.txt file.
      *
      * @return Returns a list of system events that can be received by broadcast receivers.
      */
-    public static List<String> loadSystemEventActions() {
+    public static List<String> parseSystemEventActions() {
 
         try(BufferedReader br = new BufferedReader(new FileReader(SYSTEM_EVENTS_FILE))) {
 
@@ -35,8 +42,7 @@ public final class SystemActionParser {
 
             return systemEvents;
         } catch (IOException e) {
-            MATELog.log("Reading system events from file failed!");
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Reading system events from broadcast_actions.txt failed!", e);
         }
     }
 }

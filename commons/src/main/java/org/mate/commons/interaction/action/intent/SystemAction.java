@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.manifest.element.ComponentDescription;
+import org.mate.commons.utils.manifest.element.IntentFilterDescription;
 
 import java.util.Objects;
 

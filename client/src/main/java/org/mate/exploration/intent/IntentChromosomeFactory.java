@@ -7,10 +7,8 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.interaction.action.intent.ComponentDescription;
-import org.mate.commons.interaction.action.intent.ComponentType;
-import org.mate.commons.interaction.action.intent.IntentProvider;
-import org.mate.interaction.DeviceMgr;
+import org.mate.commons.utils.manifest.element.ComponentDescription;
+import org.mate.commons.utils.manifest.element.ComponentType;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
@@ -54,7 +52,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         super(maxNumEvents);
 
-        this.intentProvider = new IntentProvider(Registry.getPackageName());
+        this.intentProvider = new IntentProvider();
 
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
@@ -73,7 +71,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     public IntentChromosomeFactory(boolean resetApp, int maxNumEvents, float relativeIntentAmount) {
         super(resetApp, maxNumEvents);
 
-        this.intentProvider = new IntentProvider(Registry.getPackageName());
+        this.intentProvider = new IntentProvider();
 
         assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
         this.relativeIntentAmount = relativeIntentAmount;
@@ -86,6 +84,12 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private void determineRelativeComponentAmount() {
 
+        /*
+        * TODO: Fix the relative component type computation. The problem is that broadcast receivers
+        *  can be a mixture of usual, dynamic and system event receivers, whereas a system event
+        *  receiver can be as well dynamic in nature. Moreover, a system event receiver shows up
+        *  multiple times in the list of system event receivers, one entry for each intent filter.
+         */
         int numberOfComponents = intentProvider.getComponents().size()
                 + intentProvider.getSystemEventReceivers().size() + intentProvider.getDynamicReceivers().size();
 
@@ -209,10 +213,9 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 double rnd = Math.random();
 
                 // select with p = 1/2 either onNewIntent or OnCreate
-                String currentActivityName = Registry.getDeviceMgr().getCurrentActivity();
-                if (rnd < 0.5 && intentProvider.isCurrentActivityHandlingOnNewIntent(currentActivityName)) {
+                if (rnd < 0.5 && intentProvider.isCurrentActivityHandlingOnNewIntent()) {
                     // we trigger the onNewIntent method of the current activity
-                    return intentProvider.generateIntentBasedActionForCurrentActivity(currentActivityName);
+                    return intentProvider.generateIntentBasedActionForCurrentActivity();
                 } else {
                     // we trigger the onCreate method of any activity
                     return intentProvider.getAction(ComponentType.ACTIVITY);

@@ -142,6 +142,11 @@ public class TextDataGenerator {
      */
     private String convertClassName(String className) {
 
+        if (!className.contains("/")) {
+            // the class name is already in its desired form
+            return className;
+        }
+
         String[] tokens = className.split("/");
         String packageName = tokens[0];
         String componentName = tokens[1];

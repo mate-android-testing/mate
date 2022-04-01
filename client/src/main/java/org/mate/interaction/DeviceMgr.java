@@ -1,6 +1,5 @@
 package org.mate.interaction;
 
-import android.os.Build;
 import android.os.RemoteException;
 
 import org.mate.Registry;
@@ -12,12 +11,9 @@ import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
-import org.mate.model.deprecated.graph.IGUIModel;
 import org.mate.service.MATEService;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The device manager is responsible for the actual execution of the various actions.
@@ -27,6 +23,11 @@ public class DeviceMgr {
 
     private final String packageName;
 
+    /**
+     * Initialises the device manager.
+     *
+     * @param packageName The package name of the AUT.
+     */
     public DeviceMgr(String packageName) {
         this.packageName = packageName;
 
@@ -217,7 +218,9 @@ public class DeviceMgr {
      */
     public String getCurrentActivity() {
         try {
-            String currentActivityName = MATEService.getRepresentationLayer().getCurrentActivityName();
+            String currentActivityName =
+                    convertActivityName(MATEService.getRepresentationLayer()
+                            .getCurrentActivityName());
             if (currentActivityName != null) {
                 return currentActivityName;
             }
@@ -228,7 +231,25 @@ public class DeviceMgr {
         }
 
         // fall back mechanism (slow)
-        return Registry.getEnvironmentManager().getCurrentActivityName();
+        return convertActivityName(Registry.getEnvironmentManager().getCurrentActivityName());
+    }
+
+    /**
+     * Converts the short form 'package/.subpackage.activity' to 'package.subpackage.activity'.
+     * This is necessary since the output of adb commands and the package manager diverge.
+     *
+     * @param activity The activity name.
+     * @return Returns the unified activity name.
+     */
+    private String convertActivityName(String activity) {
+        String[] tokens = activity.split("/");
+        String packageName = tokens[0];
+        String activityName = tokens[1];
+        if (activityName.startsWith(".")) {
+            return packageName + activityName;
+        } else {
+            return activity;
+        }
     }
 
     /**
@@ -296,10 +317,5 @@ public class DeviceMgr {
         // fail.
 
         return Registry.getEnvironmentManager().getLastCrashStackTrace();
-    }
-
-    @Deprecated
-    public boolean goToState(IGUIModel guiModel, String targetScreenStateId) {
-        return new GUIWalker(guiModel, packageName, this).goToState(targetScreenStateId);
     }
 }
