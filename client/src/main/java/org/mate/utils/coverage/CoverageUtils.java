@@ -247,6 +247,10 @@ public final class CoverageUtils {
             default:
                 break;
         }
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            MATELog.log_acc("Intermediate Coverage: " + getCombinedCoverage(Properties.COVERAGE()));
+        }
     }
 
     /**

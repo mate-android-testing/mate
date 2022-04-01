@@ -117,7 +117,7 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
 
         int count = 0;
         for (String line : lines) {
-            Map<IChromosome, Double> lineCache =  cache.get(line);
+            Map<IChromosome, Double> lineCache = cache.get(line);
             for (IChromosome chromosome: new ArrayList<>(lineCache.keySet())) {
                 if (!activeChromosomes.contains(chromosome)) {
                     lineCache.remove(chromosome);

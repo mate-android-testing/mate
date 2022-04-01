@@ -3,6 +3,8 @@ package org.mate.utils;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
@@ -103,10 +105,12 @@ public class FitnessUtils {
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        // TODO: Apply the same clean cache functionality for any many/multi-objective fitness function.
-
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
             LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
+            BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
+            BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
         }
     }
 

@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.fitness;
 
+import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.FitnessUtils;
 
@@ -88,5 +89,31 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
         return getFitness(chromosome);
+    }
+
+    /**
+     * Removes chromosomes from the cache that are no longer in use in order to avoid memory issues.
+     *
+     * @param chromosomes The list of active chromosomes.
+     */
+    public static <T> void cleanCache(List<IChromosome<T>> chromosomes) {
+
+        if (blocks.size() == 0 || cache.size() == 0) {
+            return;
+        }
+
+        List<IChromosome<T>> activeChromosomes = new ArrayList<>(chromosomes);
+
+        int count = 0;
+        for (String block : blocks) {
+            Map<IChromosome, Double> blockCache = cache.get(block);
+            for (IChromosome chromosome: new ArrayList<>(blockCache.keySet())) {
+                if (!activeChromosomes.contains(chromosome)) {
+                    blockCache.remove(chromosome);
+                    count++;
+                }
+            }
+        }
+        MATELog.log_acc("Cleaning cache: " + count + " inactive chromosome removed.");
     }
 }
