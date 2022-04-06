@@ -1261,6 +1261,8 @@ public class DeviceMgr {
                 return convertClassName(getCurrentActivityAPI25());
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
                 return convertClassName(getCurrentActivityAPI28());
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                return convertClassName(getCurrentActivityAPI29());
             } else {
                 // fall back mechanism (slow)
                 return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
@@ -1290,6 +1292,16 @@ public class DeviceMgr {
      * @return Returns the current activity name.
      */
     private String getCurrentActivityAPI28() throws IOException {
+        String output = device.executeShellCommand("dumpsys activity activities");
+        return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 29.
+     *
+     * @return Returns the current activity name.
+     */
+    private String getCurrentActivityAPI29() throws IOException {
         String output = device.executeShellCommand("dumpsys activity activities");
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
