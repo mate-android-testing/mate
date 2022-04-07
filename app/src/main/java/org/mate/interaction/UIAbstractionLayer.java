@@ -331,11 +331,16 @@ public class UIAbstractionLayer {
 
         /*
          * The permission dialog has a different package name depending on the API level.
-         * We currently support API level 25 and 28.
+         * We currently support API level 25, 28 and 29.
          */
+
+        // API 25, 28:
         if (screenState.getPackageName().equals("com.google.android.packageinstaller")
                 || screenState.getPackageName().equals("com.android.packageinstaller")
-                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")) {
+                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")
+                // API 29:
+                || screenState.getPackageName().equals("com.android.permissioncontroller")
+                || screenState.getPackageName().equals("com.google.android.permissioncontroller")) {
 
             MATE.log("Detected permission dialog!");
 
@@ -344,12 +349,19 @@ public class UIAbstractionLayer {
                 Widget widget = action.getWidget();
 
                 /*
-                 * The resource id for the allow button stays the same for both API 25
-                 * and API 28, although the package name differs.
+                 * The resource id of the allow button may differ as well between different API levels.
                  */
                 if (action.getActionType() == ActionType.CLICK
+                        // API 25, 28:
                         && (widget.getResourceID()
                                 .equals("com.android.packageinstaller:id/permission_allow_button")
+                            // API: 29
+                            || widget.getResourceID().equals(
+                                    "com.android.permissioncontroller:id/permission_allow_button")
+                            || widget.getResourceID().equals(
+                                    "com.android.packageinstaller:id/continue_button")
+                            || widget.getText().toLowerCase().equals("continue")
+                            // API 25, 28, 29:
                             || widget.getText().toLowerCase().equals("allow"))) {
                     try {
                         deviceMgr.executeAction(action);
