@@ -9,6 +9,7 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
+import org.mate.state.executables.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -50,6 +51,23 @@ public class Properties {
     public static float BEST_ANT() {
         return propertyOr(3);
     }
+
+    /**
+     * Defines the equivalence check for two screen states.
+     *
+     * @return Returns the selected state equivalence check.
+     */
+    public static StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL() {
+        return propertyOr(StateEquivalenceLevel.WIDGET);
+    }
+
+    /**
+     * The cosine similarity threshold. Only necessary if {@link StateEquivalenceLevel#COSINE_SIMILARITY}
+     * is selected as state equivalence check.
+     *
+     * @return Returns the cosine similarity threshold.
+     */
+    public static double COSINE_SIMILARITY_THRESHOLD() { return propertyOr(0.95); }
 
     /*
     * Intent fuzzing related properties.
