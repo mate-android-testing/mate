@@ -24,9 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static android.support.test.InstrumentationRegistry.getContext;
-import static android.support.test.InstrumentationRegistry.getTargetContext;
-
 /**
  * Enables to move directly or indirectly to a given {@link IScreenState} or activity.
  */
@@ -171,7 +168,7 @@ public class GUIWalker {
             Intent intent = constructIntentForActivity(activityComponent, intentFilter);
 
             // check whether the resolver is happy with the constructed intent for the activity
-            if (getTargetContext().getPackageManager().resolveActivity(intent, 0) != null) {
+            if (Registry.getContext().getPackageManager().resolveActivity(intent, 0) != null) {
                 IntentBasedAction intentBasedAction
                         = new IntentBasedAction(intent, activityComponent, intentFilter);
                 boolean success = replayActions(Collections.singletonList(intentBasedAction));
@@ -383,7 +380,7 @@ public class GUIWalker {
      *          is returned.
      */
     public boolean goToMainActivity() {
-        Context context = getContext();
+        Context context = Registry.getContext();
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(Registry.getPackageName());
         try {

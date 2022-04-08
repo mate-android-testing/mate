@@ -206,4 +206,8 @@ public class DeviceInfo {
         return crashDialog1.exists() || crashDialog2.exists();
 
     }
+
+    public String getTargetPackageFilesDir() {
+        return getAUTContext().getFilesDir().getAbsolutePath();
+    }
 }

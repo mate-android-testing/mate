@@ -77,6 +77,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public String getTargetPackageFilesDir() throws RemoteException {
+        return DeviceInfo.getInstance().getTargetPackageFilesDir();
+    }
+
+    @Override
     public String getCurrentPackageName() throws RemoteException {
         return ExplorationInfo.getInstance().getCurrentPackageName();
     }

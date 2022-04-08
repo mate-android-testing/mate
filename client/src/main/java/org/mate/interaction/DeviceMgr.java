@@ -14,6 +14,7 @@ import org.mate.commons.utils.Utils;
 import org.mate.service.MATEService;
 import org.mate.utils.StackTrace;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -325,5 +326,19 @@ public class DeviceMgr {
         // fail.
 
         return new StackTrace(Registry.getEnvironmentManager().getLastCrashStackTrace());
+    }
+
+    public File getTargetPackageFilesDir() {
+        try {
+            return new File(MATEService.getRepresentationLayer().getTargetPackageFilesDir());
+        } catch (RemoteException | AUTCrashException e) {
+            MATELog.log_warn("Couldn't retrieve target package files dir!");
+            if (e.getMessage() != null) {
+                MATELog.log_warn(e.getMessage());
+            }
+        }
+
+        // "fallback" mechanism
+        return new File(String.format("/data/data/%s/files", Registry.getPackageName()));
     }
 }

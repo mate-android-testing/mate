@@ -1,7 +1,6 @@
 package org.mate.exploration.intent;
 
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
 
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
@@ -133,7 +132,7 @@ public final class DataUriGenerator {
 
                 if (fileName != null) {
                     String[] pathParts = Uri.fromFile(
-                            new File(InstrumentationRegistry.getTargetContext().getFilesDir(),
+                            new File(Registry.getDeviceMgr().getTargetPackageFilesDir(),
                                     fileName)).toString().split("/");
 
                     pathParts[pathParts.length - 3] = Registry.getPackageName();
