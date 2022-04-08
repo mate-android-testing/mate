@@ -131,10 +131,6 @@ public abstract class AbstractScreenState implements IScreenState {
         }
     }
 
-    private static double cosineSimilarity(AbstractScreenState first, AbstractScreenState second) {
-        return 0.0d;
-    }
-
     /**
      * Computes a hash code for the abstract screen state.
      *

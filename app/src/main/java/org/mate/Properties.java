@@ -61,14 +61,6 @@ public class Properties {
         return propertyOr(StateEquivalenceLevel.WIDGET);
     }
 
-    /**
-     * The cosine similarity threshold. Only necessary if {@link StateEquivalenceLevel#COSINE_SIMILARITY}
-     * is selected as state equivalence check.
-     *
-     * @return Returns the cosine similarity threshold.
-     */
-    public static double COSINE_SIMILARITY_THRESHOLD() { return propertyOr(0.95); }
-
     /*
     * Intent fuzzing related properties.
      */
