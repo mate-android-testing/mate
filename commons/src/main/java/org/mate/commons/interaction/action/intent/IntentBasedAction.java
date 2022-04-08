@@ -2,7 +2,7 @@ package org.mate.commons.interaction.action.intent;
 
 import android.content.Intent;
 import android.os.Parcel;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.manifest.element.ComponentDescription;
