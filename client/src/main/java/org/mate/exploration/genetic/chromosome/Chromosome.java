@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.chromosome;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Provides an implementation of a chromosome.

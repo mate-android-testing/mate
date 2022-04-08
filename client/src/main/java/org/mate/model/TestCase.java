@@ -1,6 +1,6 @@
 package org.mate.model;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.Properties;
 import org.mate.Registry;

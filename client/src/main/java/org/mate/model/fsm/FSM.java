@@ -1,6 +1,6 @@
 package org.mate.model.fsm;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;

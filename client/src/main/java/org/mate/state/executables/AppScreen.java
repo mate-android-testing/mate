@@ -2,7 +2,7 @@ package org.mate.state.executables;
 
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.ui.Widget;

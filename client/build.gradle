@@ -43,7 +43,7 @@ task checkstyle(type: Checkstyle) {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion '30.0.2'
     defaultConfig {
         applicationId "org.mate"
@@ -51,7 +51,7 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -84,16 +84,18 @@ android {
 
 dependencies {
     implementation project(path: ':commons')
+    implementation files('libs/xstream-1.4.11-java7.jar')
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.core:core:1.7.0'
+    implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    implementation 'androidx.test:runner:1.4.0'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.10.1'
-    runtimeOnly group: 'androidx.appcompat', name: 'appcompat', version: '1.3.1'
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
-    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.6.1'
-    implementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
-    implementation 'com.android.support.test:runner:1.0.2'
-    implementation files('libs/xstream-1.4.11-java7.jar')
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
-    implementation 'androidx.core:core:1.6.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.1'
+    testImplementation 'org.mockito:mockito-inline:4.6.1'
 }

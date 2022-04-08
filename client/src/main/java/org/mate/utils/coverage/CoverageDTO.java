@@ -1,6 +1,6 @@
 package org.mate.utils.coverage;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.Properties;
 

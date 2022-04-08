@@ -1,6 +1,6 @@
 package org.mate.exploration.rl.qlearning.autoblacktest;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.commons.interaction.action.ui.Widget;
 
