@@ -61,6 +61,14 @@ public class Properties {
         return propertyOr(StateEquivalenceLevel.WIDGET);
     }
 
+    /**
+     * Whether the surrogate model should be used or not.
+     *
+     * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
+     *          is returned.
+     */
+    public static boolean SURROGATE_MODEL() { return propertyOr(true); }
+
     /*
     * Intent fuzzing related properties.
      */
