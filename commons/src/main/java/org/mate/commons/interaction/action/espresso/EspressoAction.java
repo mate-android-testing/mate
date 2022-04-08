@@ -1,10 +1,19 @@
 package org.mate.commons.interaction.action.espresso;
 
-import androidx.annotation.NonNull;
+import static androidx.test.espresso.Espresso.onView;
 
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.ViewInteraction;
+
+import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.espresso.actions.EspressoViewAction;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
+
+import java.util.List;
 
 /**
  * An Espresso action is composed of a ViewMatcher (that tells Espresso which is the target view)
@@ -12,12 +21,34 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
  */
 public class EspressoAction extends Action {
 
-    private final EspressoViewAction viewAction;
-    private final EspressoViewMatcher viewMatcher;
+    private final EspressoViewAction espressoViewAction;
+    private final EspressoViewMatcher espressoViewMatcher;
 
-    public EspressoAction(EspressoViewAction viewAction, EspressoViewMatcher viewMatcher) {
-        this.viewAction = viewAction;
-        this.viewMatcher = viewMatcher;
+    public EspressoAction(EspressoViewAction espressoViewAction,
+                          EspressoViewMatcher espressoViewMatcher) {
+        this.espressoViewAction = espressoViewAction;
+        this.espressoViewMatcher = espressoViewMatcher;
+    }
+
+    public boolean execute() {
+        try {
+            Matcher<View> viewMatcher = espressoViewMatcher.getViewMatcher();
+            ViewAction viewAction = espressoViewAction.getViewAction();
+            onView(viewMatcher).perform(viewAction);
+            return true;
+        } catch (Exception e) {
+            // do nothing
+        }
+
+        return false;
+    }
+
+    public String getCode() {
+        String viewMatcherCode = espressoViewMatcher.getCode();
+        String viewActionCode = espressoViewAction.getCode();
+        String code = String.format("onView(%s).perform(%s)", viewMatcherCode, viewActionCode);
+
+        return code;
     }
 
     /**
@@ -35,7 +66,7 @@ public class EspressoAction extends Action {
             return false;
         } else {
             EspressoAction other = (EspressoAction) o;
-            return viewAction == other.viewAction && viewMatcher.equals(other.viewMatcher);
+            return espressoViewAction == other.espressoViewAction && espressoViewMatcher.equals(other.espressoViewMatcher);
         }
     }
 
@@ -46,7 +77,7 @@ public class EspressoAction extends Action {
      */
     @Override
     public int hashCode() {
-        return viewAction.hashCode() + viewMatcher.hashCode();
+        return espressoViewAction.hashCode() + espressoViewMatcher.hashCode();
     }
 
     /**
@@ -56,7 +87,7 @@ public class EspressoAction extends Action {
     @Override
     public String toString() {
         return String.format("onView(%s).perform(%s)",
-                viewMatcher.toString(), viewAction.toString());
+                espressoViewMatcher.toString(), espressoViewAction.toString());
     }
 
     @NonNull

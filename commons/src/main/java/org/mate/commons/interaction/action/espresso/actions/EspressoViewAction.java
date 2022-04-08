@@ -1,6 +1,10 @@
 package org.mate.commons.interaction.action.espresso.actions;
 
-public class EspressoViewAction {
+import androidx.test.espresso.ViewAction;
+
+import org.mate.commons.interaction.action.espresso.EspressoCodeProducer;
+
+public abstract class EspressoViewAction extends EspressoCodeProducer {
     private EspressoViewActionType type;
 
     public EspressoViewAction(EspressoViewActionType type) {
@@ -10,4 +14,6 @@ public class EspressoViewAction {
     public EspressoViewActionType getType() {
         return type;
     }
+
+    public abstract ViewAction getViewAction();
 }
