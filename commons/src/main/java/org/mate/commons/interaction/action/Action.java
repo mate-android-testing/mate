@@ -21,6 +21,7 @@ public abstract class Action implements Parcelable {
     public static final int ACTION_SUBCLASS_MOTIF = 5;
     public static final int ACTION_SUBCLASS_UI = 6;
     public static final int ACTION_SUBCLASS_START = 7;
+    public static final int ACTION_SUBCLASS_ESPRESSO = 8;
 
     /**
      * A detailed description of the action. Primarily used
