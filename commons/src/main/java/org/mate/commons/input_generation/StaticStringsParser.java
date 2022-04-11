@@ -20,7 +20,7 @@ public final class StaticStringsParser {
     /**
      * The location where the xml file should reside.
      */
-    private static final String STATIC_STRINGS_XML_FILE =  "/sdcard/staticStrings.xml";
+    private static final String STATIC_STRINGS_XML_FILE =  "/data/data/org.mate/staticStrings.xml";
 
     /**
      * The private utility class constructor.
