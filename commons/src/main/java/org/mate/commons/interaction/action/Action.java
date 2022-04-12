@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.interaction.action.intent.SystemAction;
 import org.mate.commons.interaction.action.ui.MotifAction;
@@ -107,6 +108,8 @@ public abstract class Action implements Parcelable {
                 return new UIAction(source);
             case ACTION_SUBCLASS_START:
                 return new VirtualStartAction(source);
+            case ACTION_SUBCLASS_ESPRESSO:
+                return new EspressoAction(source);
             default:
                 throw new IllegalStateException("Invalid int for Action subclass found: " +
                         intForActionSubClass);

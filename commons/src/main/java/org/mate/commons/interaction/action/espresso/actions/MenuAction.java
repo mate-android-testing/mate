@@ -2,6 +2,8 @@ package org.mate.commons.interaction.action.espresso.actions;
 
 import static androidx.test.espresso.action.ViewActions.pressMenuKey;
 
+import android.os.Parcel;
+
 import androidx.test.espresso.ViewAction;
 
 public class MenuAction extends EspressoViewAction {
@@ -18,4 +20,34 @@ public class MenuAction extends EspressoViewAction {
     public String getCode() {
         return "pressMenuKey()";
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+    }
+
+    protected MenuAction(Parcel in) {
+        this();
+    }
+
+    public static final Creator<MenuAction> CREATOR = new Creator<MenuAction>() {
+        @Override
+        public MenuAction createFromParcel(Parcel source) {
+            // We need to use the EspressoViewAction.CREATOR here, because we want to make sure
+            // to remove the EspressoViewAction's type integer from the beginning of Parcel and call
+            // the appropriate constructor for this action.
+            // Otherwise, the first integer will be read as data for an instance variable.
+            return (MenuAction) EspressoViewAction.CREATOR.createFromParcel(source);
+        }
+
+        @Override
+        public MenuAction[] newArray(int size) {
+            return new MenuAction[size];
+        }
+    };
 }

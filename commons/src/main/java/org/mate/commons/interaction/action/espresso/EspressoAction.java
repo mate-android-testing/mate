@@ -2,18 +2,16 @@ package org.mate.commons.interaction.action.espresso;
 
 import static androidx.test.espresso.Espresso.onView;
 
+import android.os.Parcel;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.test.espresso.ViewAction;
-import androidx.test.espresso.ViewInteraction;
 
 import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.espresso.actions.EspressoViewAction;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
-
-import java.util.List;
 
 /**
  * An Espresso action is composed of a ViewMatcher (that tells Espresso which is the target view)
@@ -21,8 +19,8 @@ import java.util.List;
  */
 public class EspressoAction extends Action {
 
-    private final EspressoViewAction espressoViewAction;
-    private final EspressoViewMatcher espressoViewMatcher;
+    private EspressoViewAction espressoViewAction;
+    private EspressoViewMatcher espressoViewMatcher;
 
     public EspressoAction(EspressoViewAction espressoViewAction,
                           EspressoViewMatcher espressoViewMatcher) {
@@ -100,4 +98,34 @@ public class EspressoAction extends Action {
     public int getIntForActionSubClass() {
         return ACTION_SUBCLASS_ESPRESSO;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeParcelable(this.espressoViewAction, flags);
+        dest.writeParcelable(this.espressoViewMatcher, flags);
+    }
+
+    public EspressoAction(Parcel in) {
+        super(in);
+        this.espressoViewAction = in.readParcelable(EspressoViewAction.class.getClassLoader());
+        this.espressoViewMatcher = in.readParcelable(EspressoViewMatcher.class.getClassLoader());
+    }
+
+    public static final Creator<EspressoAction> CREATOR = new Creator<EspressoAction>() {
+        @Override
+        public EspressoAction createFromParcel(Parcel source) {
+            return new EspressoAction(source);
+        }
+
+        @Override
+        public EspressoAction[] newArray(int size) {
+            return new EspressoAction[size];
+        }
+    };
 }

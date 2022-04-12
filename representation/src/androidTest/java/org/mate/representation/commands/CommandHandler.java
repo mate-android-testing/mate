@@ -6,6 +6,7 @@ import android.os.RemoteException;
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.representation.DeviceInfo;
@@ -18,6 +19,7 @@ import org.mate.representation.test.BuildConfig;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -147,6 +149,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
             throw e;
         }
+    }
+
+    @Override
+    public List<EspressoAction> getCurrentScreenEspressoActions() throws RemoteException {
+        return new ArrayList<>();
     }
 
     @Override
