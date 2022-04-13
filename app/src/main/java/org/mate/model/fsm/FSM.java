@@ -54,6 +54,11 @@ public class FSM {
     private final String packageName;
 
     /**
+     * The current state in the FSM.
+     */
+    private State currentState;
+
+    /**
      * Creates a new finite state machine with an initial start state.
      *
      * @param root The start or root state.
@@ -68,6 +73,7 @@ public class FSM {
 
         // the initial state is a new state
         reachedNewState = true;
+        currentState = root;
     }
 
     /**
@@ -89,6 +95,8 @@ public class FSM {
         if (transitions.add(transition)) {
             MATE.log_debug(String.valueOf(this));
         }
+
+        currentState = transition.getTarget();
     }
 
     /**
@@ -280,6 +288,29 @@ public class FSM {
         }
 
         return activityPredecessors;
+    }
+
+    /**
+     * Returns the state the FSM is in right now.
+     *
+     * @return Returns the current state.
+     */
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    /**
+     * Moves the FSM in the given state.
+     *
+     * @param state The new state to which the FSM should move.
+     */
+    public void goToState(State state) {
+
+        if (!states.contains(state)) {
+            throw new IllegalStateException("Can't move FSM in a state that it has not seen yet!");
+        }
+
+        currentState = state;
     }
 
     /**
