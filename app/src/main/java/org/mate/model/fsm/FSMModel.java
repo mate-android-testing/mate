@@ -20,12 +20,12 @@ public class FSMModel implements IGUIModel {
     /**
      * The finite state machine.
      */
-    private final FSM fsm;
+    protected final FSM fsm;
 
     /**
      * The package name of the AUT.
      */
-    private final String packageName;
+    protected final String packageName;
 
     /**
      * Creates a new FSM based model with a given initial state.
