@@ -99,6 +99,11 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
+
+            if(Properties.SURROGATE_MODEL()) {
+                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                  * If we deal with a test suite execution, the storing of coverage
@@ -108,6 +113,7 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;

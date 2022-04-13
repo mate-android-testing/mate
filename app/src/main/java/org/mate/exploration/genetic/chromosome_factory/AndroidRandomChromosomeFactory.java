@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -97,6 +98,11 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
+
+            if(Properties.SURROGATE_MODEL()) {
+                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                 * If we deal with a test suite execution, the storing of coverage
@@ -106,6 +112,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;

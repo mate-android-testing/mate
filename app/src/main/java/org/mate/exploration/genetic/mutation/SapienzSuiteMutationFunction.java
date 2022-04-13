@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.mutation;
 
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -101,8 +102,14 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase executed = TestCase.fromDummy(testCase);
                 mutatedTestSuite.getTestCases().add(executed);
 
+                if(Properties.SURROGATE_MODEL()) {
+                    Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                }
+
                 FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, executed);
                 CoverageUtils.storeTestSuiteChromosomeCoverage(mutatedChromosome, executed);
+
+                executed.finish();
             } else {
                 mutatedTestSuite.getTestCases().add(testCase);
             }
