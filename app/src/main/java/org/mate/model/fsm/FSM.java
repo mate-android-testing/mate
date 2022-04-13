@@ -77,21 +77,18 @@ public class FSM {
     }
 
     /**
-     * Adds a new transition to the FSM linking two states with an action.
-     * As a side effect tracks whether we reached a new state.
+     * Adds a new transition to the FSM linking two states with an action. As a side effect tracks
+     * whether we reached a new state and internally updates the current FSM state.
      *
-     * @param source The source state.
-     * @param target The target or destination state.
-     * @param action The action linking both states.
+     * @param transition The new transition.
      */
-    public void addTransition(State source, State target, Action action) {
+    public void addTransition(Transition transition) {
 
-        states.add(source);
+        states.add(transition.getSource());
 
         // check whether we reached a new state
-        reachedNewState = states.add(target);
+        reachedNewState = states.add(transition.getTarget());
 
-        Transition transition = new Transition(source, target, action);
         if (transitions.add(transition)) {
             MATE.log_debug(String.valueOf(this));
         }

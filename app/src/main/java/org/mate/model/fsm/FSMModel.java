@@ -45,7 +45,8 @@ public class FSMModel implements IGUIModel {
     public void update(IScreenState source, IScreenState target, Action action) {
         State sourceState = fsm.getState(source);
         State targetState = fsm.getState(target);
-        fsm.addTransition(sourceState, targetState, action);
+        Transition transition = new Transition(sourceState, targetState, action);
+        fsm.addTransition(transition);
     }
 
     /**
