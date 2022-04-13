@@ -205,9 +205,23 @@ public class FSM {
      * @param source The source state.
      * @return Returns the outgoing transitions from the given state.
      */
-    private Set<Transition> getOutgoingTransitions(State source) {
+    public Set<Transition> getOutgoingTransitions(State source) {
         return transitions.stream()
                 .filter(transition -> transition.getSource().equals(source))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the outgoing transitions from the given source state with the given action.
+     *
+     * @param source The source state.
+     * @param action The given action.
+     * @return Returns the outgoing transitions from the given state and action.
+     */
+    public Set<Transition> getOutgoingTransitions(State source, Action action) {
+        return transitions.stream()
+                .filter(transition -> transition.getSource().equals(source))
+                .filter(transition -> transition.getAction().equals(action))
                 .collect(Collectors.toSet());
     }
 
