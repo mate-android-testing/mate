@@ -4,6 +4,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
@@ -14,9 +15,11 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.fsm.FSMModel;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
@@ -29,6 +32,7 @@ import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
 import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
 import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.interaction.action.ActionResult.SUCCESS;
+import static org.mate.interaction.action.ActionResult.SUCCESS_NEW_STATE;
 import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
 /**
@@ -96,7 +100,11 @@ public class UIAbstractionLayer {
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
-        guiModel = new FSMModel(lastScreenState, packageName);
+        if (Properties.SURROGATE_MODEL()) {
+            guiModel = new SurrogateModel(lastScreenState, packageName);
+        } else {
+            guiModel = new FSMModel(lastScreenState, packageName);
+        }
         guiWalker = new GUIWalker(this);
     }
 
@@ -145,14 +153,57 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Executes the given action. As a side effect, the screen state
-     * model is updated.
+     * Executes the given action. As a side effect, the gui model is updated.
      *
      * @param action The action to be executed.
      * @return Returns the outcome of the execution, e.g. success.
      */
     private ActionResult executeActionUnsafe(Action action) {
+
         IScreenState state;
+
+        if (Properties.SURROGATE_MODEL()) {
+
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+
+            if(surrogateModel.isInPrediction()) {
+
+                // check if the surrogate model can predict the action
+                ActionResult actionResult = surrogateModel.canPredictAction(action);
+
+                if (actionResult != null) {
+                    surrogateModel.addPredictedAction(action);
+                    return actionResult;
+                } else {
+                    /*
+                    * The surrogate model couldn't successfully predict the action, thus we need to
+                    * return to the last check point and execute all cached actions.
+                     */
+                    surrogateModel.setInPrediction(false);
+                    surrogateModel.goToLastCheckPointState();
+                    ActionResult result = executeCachedActions(surrogateModel.getPredictedActions());
+                    surrogateModel.resetPredictedActions();
+                    surrogateModel.setInPrediction(true);
+
+                    // If a cached action closes the AUT, we abort the action execution here.
+                    if((result != SUCCESS && result != SUCCESS_NEW_STATE) && result != null) {
+                        return result;
+                    }
+                }
+            }
+
+            /*
+            * Since the execution of cached actions may lead to a different screen state than
+            * expected, the given action might be not applicable anymore. In such a case, we pick
+            * a random action that is applicable on the current screen.
+             */
+            if(!getExecutableActions().contains(action)) {
+                action = Randomness.randomElement(getExecutableActions());
+            }
+
+            surrogateModel.setExecutedAction(true);
+        }
+
         try {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
@@ -167,11 +218,22 @@ public class UIAbstractionLayer {
              */
             deviceMgr.pressHome();
 
-            // update screen state model
+            // update gui model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
-            guiModel.update(lastScreenState, state, action);
             lastScreenState = state;
+
+            if(Properties.SURROGATE_MODEL()) {
+                SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+                Set<String> traces = deviceMgr.getTraces();
+                surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+                // TODO: I don't understand yet, why this is only set in case of a crash, a crash
+                //  can be the result of a valid prediction? -> see updating of gui model in non-crash case
+                surrogateModel.setPredictedEveryAction(false);
+            } else {
+                guiModel.update(lastScreenState, state, action);
+            }
+
             return FAILURE_APP_CRASH;
         }
 
@@ -203,18 +265,77 @@ public class UIAbstractionLayer {
             // TODO: what to do when the emulator crashes?
         }
 
-        // update gui model
-        state = toRecordedScreenState(state);
-        guiModel.update(lastScreenState, state, action);
-        lastScreenState = state;
+        ActionResult result;
 
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log("current package different from app package: " + currentPackageName);
-            return SUCCESS_OUTBOUND;
+            result = SUCCESS_OUTBOUND;
         } else {
-            return SUCCESS;
+            result = SUCCESS;
+        }
+
+        // update gui model
+        state = toRecordedScreenState(state);
+        lastScreenState = state;
+
+        if(Properties.SURROGATE_MODEL()) {
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            Set<String> traces = deviceMgr.getTraces();
+            surrogateModel.update(lastScreenState, state, action, result, traces);
+        } else {
+            guiModel.update(lastScreenState, state, action);
+        }
+
+        return result;
+    }
+
+    /**
+     * Executes the cached actions as long as an action doesn't leave the AUT.
+     *
+     * @param actions The list of cached actions.
+     * @return Returns the action result associated with the last executed action.
+     */
+    private ActionResult executeCachedActions(List<Action> actions) {
+
+        assert Properties.SURROGATE_MODEL();
+
+        ActionResult result = null;
+
+        for(Action action : actions) {
+            result = executeActionUnsafe(action);
+            if(result != SUCCESS && result != SUCCESS_NEW_STATE) {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Resets the state of the surrogate model. This needs to be called after each test case.
+     */
+    public void resetSurrogateModelState() {
+
+        if (Properties.SURROGATE_MODEL()) {
+            MATE.log_acc("Resetting surrogate model state...");
+
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+
+            int numberOfPredictedActions = surrogateModel.getPredictedActions().size();
+            MATE.log_acc("Predicted " + numberOfPredictedActions + " actions!");
+
+            // TODO: I don't understand this yet
+            surrogateModel.setPredictedEveryAction(!surrogateModel.hasExecutedAction());
+            surrogateModel.setExecutedAction(false);
+
+            if (surrogateModel.hasPredictedEveryAction()) {
+                MATE.log_acc("Predicted every action");
+            }
+
+            deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
+            surrogateModel.reset();
         }
     }
 
@@ -476,6 +597,14 @@ public class UIAbstractionLayer {
      * Resets an app, i.e. clearing the app cache and restarting the app.
      */
     public void resetApp() {
+
+        if (Properties.SURROGATE_MODEL()) {
+            // If the surrogate model was able to predict every action, we can save the reset.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            if (surrogateModel.hasPredictedEveryAction()) {
+                return;
+            }
+        }
 
         try {
             deviceMgr.getDevice().wakeUp();
