@@ -3,11 +3,14 @@ package org.mate.utils;
 import org.mate.Registry;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class Randomness {
     public static Random getRnd() {
@@ -20,6 +23,22 @@ public class Randomness {
 
     public static <T> int randomIndex(List<T> list) {
         return getRnd().nextInt(list.size());
+    }
+
+    public static <T> T randomIndexWithProbabilities(Map<T, Double> elementsWithProbabilities) {
+        double randomNumber = getRnd().nextDouble();
+        List<Map.Entry<T, Double>> sortedProbabilities = elementsWithProbabilities.entrySet().stream()
+                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+                .collect(Collectors.toList());
+
+        double sum = 0;
+        int index = 0;
+        while (sum < randomNumber) {
+            sum += sortedProbabilities.get(index).getValue();
+            index++;
+        }
+
+        return sortedProbabilities.get(index - 1).getKey();
     }
 
     /**
