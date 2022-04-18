@@ -240,6 +240,8 @@ public class Properties {
     // how and which target vertex should be selected, e.g. a random branch vertex
     public static String TARGET() { return propertyOr("no_target"); }
 
+    public static String ACTIVITY_GRAPH_MAP() { return propertyOr("no_activity_graph"); }
+
     // whether to draw raw graph or 'extended' graph
     public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }
 

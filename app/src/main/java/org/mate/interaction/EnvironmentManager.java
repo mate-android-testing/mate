@@ -593,6 +593,40 @@ public class EnvironmentManager {
         return Double.parseDouble(response.getParameter("branch_distance"));
     }
 
+    public <T> double getActivityDistance(IChromosome<T> chromosome) {
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve branch distance of dummy test case...");
+                // a dummy test case has a branch distance of 1.0 (worst value)
+                return Integer.MAX_VALUE;
+            }
+        }
+
+        String activities = ((TestCase) chromosome.getValue()).getActivitySequence().stream().map(a -> a.replaceAll("/", "")).collect(Collectors.joining(","));
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_activity_distance")
+                .withParameter("targetActivities", Properties.TARGET())
+                .withParameter("activitySequence", activities);
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("activity_distance"));
+    }
+
+    public int getMaxActivityDistance() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_max_activity_distance")
+                .withParameter("targetActivities", Properties.TARGET());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Integer.parseInt(response.getParameter("max_activity_distance"));
+    }
+
+    public void activityGraphInit() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/activity_graph_init")
+                .withParameter("activityGraphMap", Properties.ACTIVITY_GRAPH_MAP());
+
+        Message response = sendMessage(messageBuilder.build());
+    }
+
     /**
      * Retrieves the branch fitness vector for the given chromosome. A branch fitness
      * vector consists of n entries, where n refers to the number of branches.

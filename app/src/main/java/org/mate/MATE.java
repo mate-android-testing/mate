@@ -116,6 +116,11 @@ public class MATE {
             MATE.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
         }
+
+        if (Properties.ACTIVITY_GRAPH_MAP() != null) {
+            MATE.log_acc("Initialising activity graph!");
+            Registry.getEnvironmentManager().activityGraphInit();
+        }
     }
 
     /**
