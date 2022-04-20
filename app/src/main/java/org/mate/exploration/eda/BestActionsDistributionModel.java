@@ -35,6 +35,7 @@ public class BestActionsDistributionModel<Node extends Action> implements IDistr
         this.root = root;
     }
 
+    @Override
     public void update(Set<List<Node>> best) {
         Map<Node, Set<Node>> newEdges = getGraph(best);
         Queue<Node> workQueue = new LinkedList<>();
@@ -103,6 +104,7 @@ public class BestActionsDistributionModel<Node extends Action> implements IDistr
         return drawNextNode(root);
     }
 
+    @Override
     public Optional<Node> drawNextNode(Node start) {
         Map<Node, Integer> children = edges.get(start == null ? root : start);
 
