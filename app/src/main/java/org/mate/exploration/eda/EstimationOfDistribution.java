@@ -9,7 +9,6 @@ import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
@@ -30,7 +29,7 @@ public class EstimationOfDistribution implements Algorithm {
     private final int populationSize;
     private final int maxNumEvents;
     private final double pRandomAction;
-    private final IDistributionModel<Action> model;
+    private final IDistributionModel<UIAction> model;
 
     private int currentGenerationNumber = 0;
 
@@ -38,7 +37,7 @@ public class EstimationOfDistribution implements Algorithm {
                                     ISelectionFunction<TestCase> selectionFunction,
                                     IChromosomeFactory<TestCase> chromosomeFactory,
                                     ITerminationCondition terminationCondition,
-                                    IDistributionModel<Action> model,
+                                    IDistributionModel<UIAction> model,
                                     int populationSize, int maxNumEvents, double pRandomAction) {
         this.fitnessFunctions = fitnessFunctions;
         this.selectionFunction = selectionFunction;
@@ -57,7 +56,7 @@ public class EstimationOfDistribution implements Algorithm {
 
         while (!terminationCondition.isMet()) {
             List<IChromosome<TestCase>> best = selectionFunction.select(population, fitnessFunctions);
-            model.update(best.stream().map(c -> c.getValue().getEventSequence()).collect(Collectors.toSet()));
+            model.update(best.stream().map(c -> c.getValue().getEventSequence().stream().map(a -> (UIAction) a).collect(Collectors.toList())).collect(Collectors.toSet()));
 
             population = Stream.generate(this::drawTestCase)
                     .limit(population.size())
@@ -90,11 +89,11 @@ public class EstimationOfDistribution implements Algorithm {
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
-        Action prevAction = null;
+        UIAction prevAction = null;
 
         try {
             for (int actionsCount = 0; actionsCount < maxNumEvents; actionsCount++) {
-                Action action = selectAction(prevAction);
+                UIAction action = selectAction(prevAction);
                 if (action instanceof WidgetAction
                         && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
                     MATE.log("LOL wtf ");
@@ -118,13 +117,13 @@ public class EstimationOfDistribution implements Algorithm {
         return chromosome;
     }
 
-    private Action selectAction(Action prevAction) {
+    private UIAction selectAction(UIAction prevAction) {
         List<UIAction> executableActions = Registry.getUiAbstractionLayer().getExecutableActions();
-        Optional<Action> nextAction = model.drawNextNode(prevAction);
+        Optional<UIAction> nextAction = model.drawNextNode(prevAction);
 
         if (Randomness.getRnd().nextDouble() >= pRandomAction) {
             if (nextAction.isPresent()) {
-                Action action = nextAction.get();
+                UIAction action = nextAction.get();
 
                 if (action instanceof UIAction && executableActions.contains(action)) {
                     MATE.log("Taking action from model");
