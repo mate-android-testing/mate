@@ -26,34 +26,36 @@ public class ExecuteMATEEDA {
         MATE.log_acc("Starting EDA strategy ...");
         MATE mate = new MATE();
 
+        UIAction dummyRoot = new UIAction(null, "ROOT") {
+            @NonNull
+            @Override
+            public String toString() {
+                return "ROOT";
+            }
+
+            @NonNull
+            @Override
+            public String toShortString() {
+                return "ROOT";
+            }
+
+            @Override
+            public int hashCode() {
+                return 0;
+            }
+
+            @Override
+            public boolean equals(@Nullable Object o) {
+                return o == this;
+            }
+        };
+
         EstimationOfDistribution estimationOfDistribution = new EstimationOfDistribution(
                 Collections.singletonList(new TargetActivityFitnessFunction<>()),
                 new FitnessSelectionFunction<>(),
                 new HeuristicalChromosomeFactory(Properties.MAX_NUMBER_EVENTS()),
                 new ConditionalTerminationCondition(),
-                new BestActionsDistributionModel<>(new UIAction(null, "ROOT") {
-                    @NonNull
-                    @Override
-                    public String toString() {
-                        return "ROOT";
-                    }
-
-                    @NonNull
-                    @Override
-                    public String toShortString() {
-                        return "ROOT";
-                    }
-
-                    @Override
-                    public int hashCode() {
-                        return 0;
-                    }
-
-                    @Override
-                    public boolean equals(@Nullable Object o) {
-                        return o == this;
-                    }
-                }),
+                Properties.DISTRIBUTION_MODEL().get(dummyRoot),
                 Properties.POPULATION_SIZE(),
                 Properties.MAX_NUMBER_EVENTS(),
                 0.1);

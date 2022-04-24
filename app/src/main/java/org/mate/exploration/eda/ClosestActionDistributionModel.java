@@ -22,9 +22,9 @@ public class ClosestActionDistributionModel<Node extends UIAction> extends Proba
     private final Map<String, Integer> minActivityDistances; // min distance from activity a to target activity
     private final int maxDistance = Registry.getEnvironmentManager().getMaxActivityDistance();
 
-    public ClosestActionDistributionModel(Node root, Map<String, Integer> minActivityDistances) {
+    public ClosestActionDistributionModel(Node root) {
         super(root);
-        this.minActivityDistances = minActivityDistances;
+        this.minActivityDistances = Registry.getEnvironmentManager().getAllActivityDistances();
         MATE.log(minActivityDistances.entrySet().stream().map(e -> e.getKey() + ":" + e.getValue()).collect(Collectors.joining("\n")));
     }
 

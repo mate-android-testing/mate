@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.exploration.eda.DistributionModel;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -154,6 +155,8 @@ public class Properties {
     public static ChromosomeFactory CHROMOSOME_FACTORY() { return propertyOr(null); }
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
+
+    public static DistributionModel DISTRIBUTION_MODEL() { return propertyOr(null); }
 
     /*
      * Begin Greybox Fuzzing properties
