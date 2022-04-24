@@ -31,6 +31,10 @@ public class Randomness {
                 .sorted(Comparator.comparingDouble(Map.Entry::getValue))
                 .collect(Collectors.toList());
 
+        if (sortedProbabilities.size() == 1) {
+            return sortedProbabilities.get(0).getKey();
+        }
+
         double sum = 0;
         int index = 0;
         while (sum < randomNumber) {
