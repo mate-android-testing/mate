@@ -7,12 +7,13 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.eda.BestActionsDistributionModel;
+import org.mate.exploration.eda.ClosestActionDistributionModel;
 import org.mate.exploration.eda.EstimationOfDistribution;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.fitness.TargetActivityFitnessFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
-import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.UIAction;
 
 import java.util.Collections;
 
@@ -30,7 +31,7 @@ public class ExecuteMATEEDA {
                 new FitnessSelectionFunction<>(),
                 new HeuristicalChromosomeFactory(Properties.MAX_NUMBER_EVENTS()),
                 new ConditionalTerminationCondition(),
-                new BestActionsDistributionModel<>(new Action() {
+                new BestActionsDistributionModel<>(new UIAction(null, "ROOT") {
                     @NonNull
                     @Override
                     public String toString() {
