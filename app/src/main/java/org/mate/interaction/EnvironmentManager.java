@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -618,6 +619,21 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Integer.parseInt(response.getParameter("max_activity_distance"));
+    }
+
+    public Map<String, Integer> getAllActivityDistances() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_all_activity_distances")
+                .withParameter("targetActivities", Properties.TARGET());
+
+        Message response = sendMessage(messageBuilder.build());
+        String map = response.getParameter("activity_distances");
+
+        Map<String, Integer> distances = new HashMap<>();
+        for (String entry : map.split(";")) {
+            String[] parts = entry.split(":");
+            distances.put(parts[0], Integer.parseInt(parts[1]));
+        }
+        return distances;
     }
 
     public void activityGraphInit() {
