@@ -1379,9 +1379,7 @@ public class DeviceMgr {
      * Grants the AUT the read and write runtime permissions for the external storage.
      * <p>
      * Depending on the API level, we can either use the very fast method grantRuntimePermissions()
-     * (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
-     * MATE-Server granting those permissions directly before executing a privileged command in
-     * order to avoid unnecessary requests.
+     * (API >= 28) or the slow routine executeShellCommand().
      * <p>
      * In order to verify that the runtime permissions got granted, check the output of the
      * following command:
@@ -1389,7 +1387,6 @@ public class DeviceMgr {
      *
      * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
      */
-    @SuppressWarnings("unused")
     public boolean grantRuntimePermissions() {
 
         Instrumentation instrumentation = getInstrumentation();
@@ -1416,8 +1413,7 @@ public class DeviceMgr {
             // an empty response indicates success of the operation
             return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
         } catch (IOException e) {
-            MATE.log_error("Couldn't grant runtime permissions!");
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Couldn't grant runtime permissions!", e);
         }
     }
 
@@ -1465,6 +1461,14 @@ public class DeviceMgr {
                 device.executeShellCommand("run-as " + packageName + " mkdir -p files");
                 device.executeShellCommand("run-as " + packageName + " touch files/coverage.exec");
                 // device.executeShellCommand("run-as " + packageName + " exit");
+            }
+
+            if (Properties.SURROGATE_MODEL()) {
+                /*
+                * The execution of the 'pm clear' command also drops the runtime permissions of the
+                * AUT, thus we have to re-grant it in order to write the traces properly.
+                 */
+                MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
             }
 
         } catch (IOException e) {
