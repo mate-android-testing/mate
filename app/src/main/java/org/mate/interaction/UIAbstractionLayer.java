@@ -169,7 +169,7 @@ public class UIAbstractionLayer {
             if(surrogateModel.isInPrediction()) {
 
                 // check if the surrogate model can predict the action
-                ActionResult actionResult = surrogateModel.canPredictAction(action);
+                ActionResult actionResult = surrogateModel.predictAction(action);
 
                 if (actionResult != null) {
                     surrogateModel.addPredictedAction(action);
@@ -200,8 +200,6 @@ public class UIAbstractionLayer {
             if(!getExecutableActions().contains(action)) {
                 action = Randomness.randomElement(getExecutableActions());
             }
-
-            surrogateModel.setExecutedAction(true);
         }
 
         try {
@@ -229,7 +227,7 @@ public class UIAbstractionLayer {
                 surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
                 // TODO: I don't understand yet, why this is only set in case of a crash, a crash
                 //  can be the result of a valid prediction? -> see updating of gui model in non-crash case
-                surrogateModel.setPredictedEveryAction(false);
+                // surrogateModel.setPredictedEveryAction(false);
             } else {
                 guiModel.update(lastScreenState, state, action);
             }
@@ -294,10 +292,11 @@ public class UIAbstractionLayer {
     /**
      * Executes the cached actions as long as an action doesn't leave the AUT.
      *
-     * @param actions The list of cached actions.
-     * @return Returns the action result associated with the last executed action.
+     * @param actions The list of actions to be executed, might be empty.
+     * @return Returns the action result associated with the last executed action or {@code null}
+     *          if no cached action was executed at all.
      */
-    private ActionResult executeCachedActions(List<Action> actions) {
+    private ActionResult executeCachedActions(final List<Action> actions) {
 
         assert Properties.SURROGATE_MODEL();
 
@@ -323,12 +322,7 @@ public class UIAbstractionLayer {
 
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
 
-            int numberOfPredictedActions = surrogateModel.getPredictedActions().size();
-            MATE.log_acc("Predicted " + numberOfPredictedActions + " actions!");
-
-            // TODO: I don't understand this yet
-            surrogateModel.setPredictedEveryAction(!surrogateModel.hasExecutedAction());
-            surrogateModel.setExecutedAction(false);
+            MATE.log_acc("Predicted " + surrogateModel.getNumberOfPredictedActions() + " actions!");
 
             if (surrogateModel.hasPredictedEveryAction()) {
                 MATE.log_acc("Predicted every action");
