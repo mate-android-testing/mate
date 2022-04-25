@@ -9,6 +9,7 @@ import org.mate.model.fsm.Transition;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -16,14 +17,14 @@ import java.util.Set;
 
 public class SurrogateModel extends FSMModel {
 
-    private List<Action> predictedActions;
+    private final List<Action> predictedActions;
 
     private boolean inPrediction = true;
     private boolean predictedEveryAction = false;
     private boolean executedAction = false;
 
-    private Set<String> currentTraces;
-    private Set<String> predictedTraces;
+    private final Set<String> currentTraces;
+    private final Set<String> predictedTraces;
 
 
     private State checkPointState;
@@ -47,6 +48,7 @@ public class SurrogateModel extends FSMModel {
         currentTraces = new HashSet<>();
         predictedTraces = new HashSet<>();
         checkPointState = fsm.getCurrentState();
+        predictedActions = new ArrayList<>();
     }
 
     public void update(IScreenState source, IScreenState target, Action action,
