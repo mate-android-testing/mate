@@ -15,27 +15,48 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Wraps a surrogate model around the traditional FSM model. This enables the prediction of actions
+ * and complete test cases in the best case. In general, we assume a higher throughput of actions
+ * the longer the execution takes and the more actions that could be predicted.
+ */
 public class SurrogateModel extends FSMModel {
 
+    /**
+     * The predicted actions so far.
+     */
     private final List<Action> predictedActions;
 
+    /**
+     * Whether we are currently in prediction mode or not.
+     */
     private boolean inPrediction = true;
-    private boolean predictedEveryAction = false;
-    private boolean executedAction = false;
 
+    /**
+     * The set of traces that have been collected so far.
+     */
     private final Set<String> currentTraces;
+
+    /**
+     * The set of traces that could be predicted so far.
+     */
     private final Set<String> predictedTraces;
 
-
+    /**
+     * The last check point to which the surrogate model returns in case a prediction couldn't be
+     * performed.
+     */
     private State checkPointState;
 
-    private static final double TRANSITION_THRESHOLD = 0.8;
+    /**
+     * The number of non-predicted actions per test case.
+     */
+    private int numberOfNonPredictedActions = 0;
 
-    private int notPredictedActions = 0;
-
+    /**
+     * The number of predicted actions per test case.
+     */
     private int numberOfPredictedActions = 0;
-
-    private boolean executedActions = false;
 
     /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
@@ -51,8 +72,34 @@ public class SurrogateModel extends FSMModel {
         predictedActions = new ArrayList<>();
     }
 
-    public void update(IScreenState source, IScreenState target, Action action,
-                       ActionResult actionResult, Set<String> traces) {
+    /**
+     * Resets the surrogate model. This should be called at the end of each test case.
+     */
+    public void reset() {
+
+        // TODO: Can we assume that a new test case always starts in the same (root) state?
+        fsm.goToState(fsm.getRootState());
+        checkPointState = fsm.getCurrentState();
+
+        currentTraces.clear();
+        predictedTraces.clear();
+        predictedActions.clear();
+
+        numberOfNonPredictedActions = 0;
+        numberOfPredictedActions = 0;
+    }
+
+    /**
+     * Updates the surrogate model and inherently the underlying FSM with a new transition.
+     *
+     * @param source The source state.
+     * @param target the target state.
+     * @param action The action leading from the source to the target state.
+     * @param actionResult The action result associated with the given action.
+     * @param traces The traces produced by executing the given action.
+     */
+    public void update(final IScreenState source, final IScreenState target, final Action action,
+                       final ActionResult actionResult, final Set<String> traces) {
 
         State from = fsm.getState(source);
         State to = fsm.getState(target);
@@ -62,40 +109,42 @@ public class SurrogateModel extends FSMModel {
             MATE.log_acc("Something fishy here...");
         }
 
+        // TODO: Shouldn't the 'from' state also match the current state?
+        // TODO: Shouldn't we look up for a matching transition from the 'from' state?
         State currentState = fsm.getCurrentState();
         Set<Transition> transitions = fsm.getOutgoingTransitions(currentState, action);
 
         SurrogateTransition matchingTransition = null;
 
-        // take the first matching transition
+        // re-use the first matching transition
         for (Transition transition : transitions) {
             SurrogateTransition surrogateTransition = (SurrogateTransition) transition;
             if (surrogateTransition.getSource().equals(from)
                     && surrogateTransition.getTarget().equals(to)
                     && surrogateTransition.getTraces().equals(traces)) {
                 matchingTransition = surrogateTransition;
-                matchingTransition.increaseCounter();
                 break;
             }
         }
 
-        // TODO: What was the intention here?
         if (matchingTransition == null) {
+            // create a new transition if it doesn't exist yet
             matchingTransition = new SurrogateTransition(from, to, action, actionResult, traces);
-            //notPredictedActions++;
-        } else {
-            // Check threshold maybe?
-            //predictedActions++;
         }
 
-        // update FSM
         fsm.addTransition(matchingTransition);
-
         currentTraces.addAll(traces);
         checkPointState = fsm.getCurrentState();
     }
 
-    public ActionResult canPredictAction(Action action) {
+    /**
+     * Tries to predict the given action.
+     *
+     * @param action The action that should be predicted.
+     * @return Returns the action result associated with the given action or {@code null} if the
+     *      action couldn't be predicted.
+     */
+    public ActionResult predictAction(Action action) {
 
         State currentState = fsm.getCurrentState();
         Set<Transition> transitions = fsm.getOutgoingTransitions(currentState, action);
@@ -103,9 +152,8 @@ public class SurrogateModel extends FSMModel {
         if (transitions.isEmpty()) {
             // can't predict action -> reset
             MATE.log_acc("Can't predict action: " + action + " in FSM state: " + currentState);
-            executedActions = true;
             predictedTraces.clear();
-            notPredictedActions++;
+            numberOfNonPredictedActions++;
             return null;
         } else {
             MATE.log_acc("Can predict action: " + action + " in FSM state: " + currentState);
@@ -139,101 +187,89 @@ public class SurrogateModel extends FSMModel {
             // update predicted traces so far
             predictedTraces.addAll(transition.getTraces());
 
-            // TODO: Is this 'external' move really necessary or can we do this within update()?
             fsm.goToState(transition.getTarget());
-
             return transition.getActionResult();
         }
     }
 
     /**
-     * Resets the pointer of the current state where the prediction is made.
-     * Resets the traces list for computing the traces associated with the last transition.
+     * Moves the surrogate model back to the last check point.
      */
-    public void reset() {
-
-        executedActions = false;
-
-        // reset state
-        fsm.goToState(fsm.getRootState());
-        checkPointState = fsm.getCurrentState();
-
-        currentTraces.clear();
-        predictedTraces.clear();
-
-        notPredictedActions = 0;
-        numberOfPredictedActions = 0;
-
-        resetPredictedActions();
-    }
-
     public void goToLastCheckPointState() {
-        predictedTraces.clear();
         fsm.goToState(checkPointState);
     }
 
     /**
-     * Gets a set of the traces of the current test case that is predicted/modeled.
+     * Retrieves the set of traces that have been produced for the last test case.
      *
-     * @return The set with the traces.
+     * @return Returns the set of collected traces.
      */
     public Set<String> getCurrentTraces() {
         Set<String> allTraces = new HashSet<>(predictedTraces);
         allTraces.addAll(currentTraces);
-        allTraces.addAll(predictedTraces);
         return allTraces;
     }
 
     /**
-     * Checks whether the model is at the root state.
+     * Whether the surrogate model is in prediction mode or not.
      *
-     * @return True if the current state is the root state.
+     * @return Returns {@code true} if in prediction mode, otherwise {@code false} is returned.
      */
-    public boolean initialState() {
-        return fsm.getCurrentState().equals(fsm.getRootState());
-    }
-
-    public int notPredictedActions() {
-        return this.notPredictedActions;
-    }
-
-    public boolean executedActions() {
-        return this.executedActions;
-    }
-
     public boolean isInPrediction() {
         return inPrediction;
     }
 
+    /**
+     * Turns on or off the prediction mode.
+     *
+     * @param inPrediction {@code true} to turn on prediction mode or {@code false} to turn off
+     *          prediction mode.
+     */
     public void setInPrediction(boolean inPrediction) {
         this.inPrediction = inPrediction;
     }
 
+    /**
+     * Adds an action to the list of predicted actions.
+     *
+     * @param action The predictable action.
+     */
     public void addPredictedAction(Action action) {
         predictedActions.add(action);
     }
 
+    /**
+     * Returns the list of predicted actions.
+     *
+     * @return Returns the list of predicted actions.
+     */
     public List<Action> getPredictedActions() {
         return Collections.unmodifiableList(predictedActions);
     }
 
+    /**
+     * Removes all actions from the list of predicted actions.
+     */
     public void resetPredictedActions() {
         predictedActions.clear();
     }
 
-    public void setExecutedAction(boolean executedAction) {
-        this.executedAction = executedAction;
-    }
-
-    public boolean hasExecutedAction() {
-        return executedAction;
-    }
-
-    public void setPredictedEveryAction(boolean predictedEveryAction) {
-        this.predictedEveryAction = predictedEveryAction;
-    }
-
+    /**
+     * Checks whether all actions of a test case could be predicted or not.
+     *
+     * @return Returns {@code true} if all actions of a test case could be predicted, otherwise
+     *          {@code false} is returned.
+     */
     public boolean hasPredictedEveryAction() {
-        return predictedEveryAction;
+        return numberOfNonPredictedActions == 0;
+    }
+
+    /**
+     * Returns the number of predicted actions of the last test case.
+     *
+     * @return Returns the number of predicted actions.
+     */
+    public int getNumberOfPredictedActions() {
+        return numberOfPredictedActions;
     }
 }

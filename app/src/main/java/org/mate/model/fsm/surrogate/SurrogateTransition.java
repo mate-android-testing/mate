@@ -7,6 +7,7 @@ import org.mate.interaction.action.ActionResult;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,9 +27,6 @@ public class SurrogateTransition extends Transition {
      */
     private final ActionResult actionResult;
 
-    // TODO: necessary for what?
-    private int transitionCounter;
-
     /**
      * Creates a new transition from a given state to a target state with a given action. Each
      * transition is additionally associated with a set of traces and the action result.
@@ -44,17 +42,48 @@ public class SurrogateTransition extends Transition {
         super(source, target, action);
         this.actionResult = actionResult;
         this.traces = traces;
-        transitionCounter = 1;
     }
 
+    /**
+     * Returns the action result associated with the action leading from the source to the target
+     * state.
+     *
+     * @return Returns the action result.
+     */
+    ActionResult getActionResult() {
+        return actionResult;
+    }
+
+    /**
+     * Returns the traces associated with the transition.
+     *
+     * @return Returns the set of traces associated with the transition.
+     */
+    Set<String> getTraces() {
+        return Collections.unmodifiableSet(traces);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     State getSource() {
         return source;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     State getTarget() {
         return target;
     }
 
+    /**
+     * Compares two transitions for equality.
+     *
+     * @param o The other transition.
+     * @return Returns {@code true} if the transitions are identical, otherwise {@code false} is
+     *          returned.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -70,36 +99,26 @@ public class SurrogateTransition extends Transition {
         }
     }
 
+    /**
+     * Computes the hash code for the given transition.
+     *
+     * @return Returns the hash code of the transition.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(source, target, action, this.traces);
     }
 
+    /**
+     * Provides a simple textual representation of the transition.
+     *
+     * @return Returns the string representation of the transition.
+     */
     @NonNull
     @Override
     public String toString() {
         return "(" + source + ", " + action.toShortString() + ", "
                 + target + ", " + traces + ")";
-    }
-
-    ActionResult getActionResult() {
-        return actionResult;
-    }
-
-    void setTraces(Set<String> traces) {
-        this.traces.addAll(traces);
-    }
-
-    Set<String> getTraces() {
-        return traces;
-    }
-
-    void increaseCounter() {
-        transitionCounter++;
-    }
-
-    int getCounter() {
-        return transitionCounter;
     }
 }
 
