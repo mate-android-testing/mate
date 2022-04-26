@@ -108,11 +108,8 @@ public class SurrogateModel extends FSMModel {
         if (!from.equals(checkPointState)) {
             MATE.log_acc("Something fishy here...");
         }
-
-        // TODO: Shouldn't the 'from' state also match the current state?
-        // TODO: Shouldn't we look up for a matching transition from the 'from' state?
-        State currentState = fsm.getCurrentState();
-        Set<Transition> transitions = fsm.getOutgoingTransitions(currentState, action);
+        
+        Set<Transition> transitions = fsm.getOutgoingTransitions(from, action);
 
         SurrogateTransition matchingTransition = null;
 
