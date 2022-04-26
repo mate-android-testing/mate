@@ -100,6 +100,14 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         } finally {
 
             if(Properties.SURROGATE_MODEL()) {
+                /*
+                * We need to store both files traces.txt and info.txt on the external storage such
+                * that the subsequent calls of the FitnessUtils and CoverageUtils class work properly.
+                * However, those calls will send again a broadcast to the tracer, which in turn
+                * overwrites the info.txt with a value not matching the actual number of traces.
+                * This only works because MATE-Server doesn't enforce equality between these numbers,
+                * but we should be aware of this issue.
+                 */
                 Registry.getUiAbstractionLayer().resetSurrogateModelState();
             }
 
