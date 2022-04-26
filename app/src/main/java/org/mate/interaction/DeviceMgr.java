@@ -1570,8 +1570,8 @@ public class DeviceMgr {
         }
 
         // remove both files
-        MATE.log_acc("Deleted traces.txt: " + traceFile.delete());
-        MATE.log_acc("Deleted info.txt: " + infoFile.delete());
+        traceFile.delete();
+        infoFile.delete();
 
         return traces;
     }
