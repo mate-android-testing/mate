@@ -108,7 +108,7 @@ public class SurrogateModel extends FSMModel {
         if (!from.equals(checkPointState)) {
             MATE.log_acc("Something fishy here...");
         }
-        
+
         Set<Transition> transitions = fsm.getOutgoingTransitions(from, action);
 
         SurrogateTransition matchingTransition = null;
@@ -116,8 +116,7 @@ public class SurrogateModel extends FSMModel {
         // re-use the first matching transition
         for (Transition transition : transitions) {
             SurrogateTransition surrogateTransition = (SurrogateTransition) transition;
-            if (surrogateTransition.getSource().equals(from)
-                    && surrogateTransition.getTarget().equals(to)
+            if (surrogateTransition.getTarget().equals(to)
                     && surrogateTransition.getTraces().equals(traces)) {
                 matchingTransition = surrogateTransition;
                 break;
