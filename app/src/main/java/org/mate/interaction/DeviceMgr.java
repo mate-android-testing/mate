@@ -1541,7 +1541,7 @@ public class DeviceMgr {
          */
         while(!infoFile.exists()) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new IllegalStateException("Waiting for info.txt failed!", e);
             }
