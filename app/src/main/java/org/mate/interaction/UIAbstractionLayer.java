@@ -225,9 +225,6 @@ public class UIAbstractionLayer {
                 SurrogateModel surrogateModel = (SurrogateModel) guiModel;
                 Set<String> traces = deviceMgr.getTraces();
                 surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
-                // TODO: I don't understand yet, why this is only set in case of a crash, a crash
-                //  can be the result of a valid prediction? -> see updating of gui model in non-crash case
-                // surrogateModel.setPredictedEveryAction(false);
             } else {
                 guiModel.update(lastScreenState, state, action);
             }
