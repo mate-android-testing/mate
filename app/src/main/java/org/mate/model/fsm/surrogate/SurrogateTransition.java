@@ -27,6 +27,8 @@ public class SurrogateTransition extends Transition {
      */
     private final ActionResult actionResult;
 
+    // TODO: add visit counter
+
     /**
      * Creates a new transition from a given state to a target state with a given action. Each
      * transition is additionally associated with a set of traces and the action result.
@@ -42,6 +44,7 @@ public class SurrogateTransition extends Transition {
         super(source, target, action);
         this.actionResult = actionResult;
         this.traces = traces;
+        // TODO: init visit counter
     }
 
     /**

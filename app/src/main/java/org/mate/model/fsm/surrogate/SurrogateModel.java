@@ -119,6 +119,7 @@ public class SurrogateModel extends FSMModel {
             if (surrogateTransition.getTarget().equals(to)
                     && surrogateTransition.getTraces().equals(traces)) {
                 matchingTransition = surrogateTransition;
+                // TODO: increase visit counter
                 break;
             }
         }
@@ -155,29 +156,9 @@ public class SurrogateModel extends FSMModel {
             MATE.log_acc("Can predict action: " + action + " in FSM state: " + currentState);
             numberOfPredictedActions++;
 
-            // TODO: This seems to be the logic for updating the transition counter (how often it was taken)
-            //  and selecting the (last) transition exceeding some pre-defined threshold. If no transition
-            //  fulfills the criteria, no prediction was performed.
-
-            /*int total_updates = 0;
-            for(SurrogateTransition trans : transitions) {
-                total_updates += trans.getCounter();
-            }
-            SurrogateTransition transition = null;
-            for(SurrogateTransition trans : transitions) {
-                if(trans.getCounter()/total_updates >= TRANSITION_THRESHOLD) {
-                    transition = trans;
-                }
-            }
-            if(transition == null) {
-                executedActions = true;
-                predictedTraces.clear();
-                return null;
-            }*/
+            // TODO: get transition with highest visit counter
 
             MATE.log_acc("Matching transitions: " + transitions.size());
-
-            // TODO: Does it matter which transition we take?
             SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(transitions);
 
             // update predicted traces so far
