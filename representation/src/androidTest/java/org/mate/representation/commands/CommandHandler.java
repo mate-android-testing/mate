@@ -130,7 +130,18 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
     @Override
     public List<Widget> getCurrentScreenWidgets() throws RemoteException {
-        return new WidgetScreenParser().getWidgets();
+        try {
+            return new WidgetScreenParser().getWidgets();
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            String stackTrace = sw.toString();
+
+            MATELog.log_error(String.format("Exception occurred: %s", stackTrace));
+
+            throw e;
+        }
     }
 
     @Override

@@ -2,8 +2,8 @@ package org.mate.commons.utils.manifest;
 
 import org.mate.commons.utils.manifest.element.ComponentDescription;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Represents the AndroidManifest that is a mandatory part of each app. See
@@ -55,9 +55,15 @@ public final class Manifest {
      * @return Returns the activities declared in the manifest.
      */
     public List<ComponentDescription> getActivities() {
-        return components.stream()
-                .filter(ComponentDescription::isActivity)
-                .collect(Collectors.toList());
+        List<ComponentDescription> activities = new ArrayList<>();
+
+        for (ComponentDescription component : components) {
+            if (component.isActivity()) {
+                activities.add(component);
+            }
+        }
+
+        return activities;
     }
 
     /**
@@ -66,11 +72,15 @@ public final class Manifest {
      * @return Returns the list of exported activities of the manifest.
      */
     public List<ComponentDescription> getExportedActivities() {
-        return components.stream()
-                .filter(ComponentDescription::isActivity)
-                .filter(ComponentDescription::isExported)
-                .filter(ComponentDescription::isEnabled)
-                .collect(Collectors.toList());
+        List<ComponentDescription> exportedActivities = new ArrayList<>();
+
+        for (ComponentDescription component : components) {
+            if (component.isActivity() && component.isExported() && component.isEnabled()) {
+                exportedActivities.add(component);
+            }
+        }
+
+        return exportedActivities;
     }
 
     /**

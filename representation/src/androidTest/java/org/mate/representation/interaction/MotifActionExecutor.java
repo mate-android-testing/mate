@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * ActionExecutor class for Motif actions.
@@ -115,13 +114,19 @@ public class MotifActionExecutor extends ActionExecutor {
                 List<Widget> widgets = new WidgetScreenParser().getWidgets();
                 String currentActivity = ExplorationInfo.getInstance().getCurrentActivityName();
 
-                List<Widget> inputFields = widgets.stream()
-                        .filter(Widget::isEditTextType)
-                        .collect(Collectors.toList());
+                List<Widget> inputFields = new ArrayList<>();
+                for (Widget widget : widgets) {
+                    if (widget.isEditTextType()) {
+                        inputFields.add(widget);
+                    }
+                }
 
-                List<Widget> buttons = widgets.stream()
-                        .filter(Widget::isButtonType)
-                        .collect(Collectors.toList());
+                List<Widget> buttons = new ArrayList<>();
+                for (Widget widget : widgets) {
+                    if (widget.isButtonType()) {
+                        buttons.add(widget);
+                    }
+                }
 
                 if (!inputFields.isEmpty() && !buttons.isEmpty()) {
 
@@ -270,10 +275,12 @@ public class MotifActionExecutor extends ActionExecutor {
                  * the current screen. In addition, we need to record the executed actions in order to
                  * make replaying deterministic.
                  */
-                List<Widget> spinners = widgets.stream()
-                        .filter(Widget::isClickable)
-                        .filter(Widget::isSpinnerType)
-                        .collect(Collectors.toList());
+                List<Widget> spinners = new ArrayList<>();
+                for (Widget widget : widgets) {
+                    if (widget.isClickable() && widget.isSpinnerType()) {
+                        spinners.add(widget);
+                    }
+                }
 
                 /*
                  * If no spinner is available on the current screen, we simply do nothing alike

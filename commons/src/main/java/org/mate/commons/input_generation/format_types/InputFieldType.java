@@ -3,11 +3,13 @@ package org.mate.commons.input_generation.format_types;
 
 import android.text.InputType;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import org.threeten.bp.LocalDate;
+import org.threeten.bp.LocalTime;
+import org.threeten.bp.format.DateTimeFormatter;
+import org.threeten.bp.format.DateTimeParseException;
+
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -237,16 +239,20 @@ public enum InputFieldType {
      * @return Returns {@code true} if the date string is valid, otherwise {@code false}.
      */
     public static boolean isDate(final String dateStr) {
-        int counter = 0;
         for (DateFormat d : DateFormat.values()) {
             try {
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(d.getPattern());
-                LocalDate.parse(dateStr, dateFormatter);
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(d.getPattern(), Locale.US);
+                LocalDate date = LocalDate.parse(dateStr, dateFormatter);
+
+                if (date != null) {
+                    return true;
+                }
             } catch (DateTimeParseException e) {
-                counter++;
+                // not a date
             }
         }
-        return counter != DateFormat.values().length;
+
+        return false;
     }
 
     /**
@@ -257,20 +263,26 @@ public enum InputFieldType {
      * @return Returns {@code true} if the time string is valid, otherwise {@code false}.
      */
     public static boolean isTime(final String timeStr) {
-        int counter = 0;
         for (TimeFormat d : TimeFormat.values()) {
             try {
                 DateTimeFormatter dateFormatter;
+
                 if (d.getLocale() != null) {
                     dateFormatter = DateTimeFormatter.ofPattern(d.getPattern(), d.getLocale());
                 } else {
-                    dateFormatter = DateTimeFormatter.ofPattern(d.getPattern());
+                    dateFormatter = DateTimeFormatter.ofPattern(d.getPattern(), Locale.US);
                 }
-                LocalTime.parse(timeStr, dateFormatter);
+
+                LocalTime date = LocalTime.parse(timeStr, dateFormatter);
+
+                if (date != null) {
+                    return true;
+                }
             } catch (DateTimeParseException e) {
-                counter++;
+                // not a time
             }
         }
-        return counter != TimeFormat.values().length;
+
+        return false;
     }
 }

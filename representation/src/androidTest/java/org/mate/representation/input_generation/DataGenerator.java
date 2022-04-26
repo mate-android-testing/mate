@@ -13,11 +13,13 @@ import org.mate.commons.utils.Randomness;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 /**
  * Generates random input strings.
@@ -127,9 +129,14 @@ public final class DataGenerator {
 
         // If no word with given length was found.
         if (stb.length() == 0) {
-            stb.append(Randomness.randomElement(words.stream()
-                    .filter(word -> word.length() < maxLength)
-                    .collect(Collectors.toSet())));
+            Set<String> wordsUpToMaxLength = new HashSet<>();
+            for (String word : words) {
+                if (word.length() < maxLength) {
+                    wordsUpToMaxLength.add(word);
+                }
+            }
+
+            stb.append(Randomness.randomElement(wordsUpToMaxLength));
         } else {
 
             // Remove the last white space.

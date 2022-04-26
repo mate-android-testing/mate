@@ -1,5 +1,6 @@
 package org.mate.representation;
 
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -11,11 +12,11 @@ import org.mate.representation.test.BuildConfig;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * This class is responsible for providing basic information about the exploration being carried
@@ -124,7 +125,9 @@ public class ExplorationInfo {
      */
     public String getCurrentActivityName() {
         try {
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+                return getCurrentActivityAPI21to24();
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
                 return getCurrentActivityAPI25();
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
                 return getCurrentActivityAPI28();
@@ -139,6 +142,17 @@ public class ExplorationInfo {
 
             return null;
         }
+    }
+
+    /**
+     * Returns the name of the current activity on an emulator running API 21 to 24.
+     *
+     * @return the current activity name.
+     */
+    private String getCurrentActivityAPI21to24() throws IOException {
+        String output = DeviceInfo.getInstance().executeShellCommand("dumpsys activity activities");
+        String mResumedActivityLine = output.split("mResumedActivity")[1].split("\n")[0].trim();
+        return mResumedActivityLine.split(" ")[3];
     }
 
     /**
@@ -182,8 +196,13 @@ public class ExplorationInfo {
                     targetPackageName, PackageManager.GET_ACTIVITIES);
 
             // TODO: Ensure that the short form '/.subpackage.activityName' is not used!!!
-            return Arrays.stream(pi.activities).map(activity -> activity.name)
-                    .collect(Collectors.toList());
+            List<String> activityNames = new ArrayList<>();
+
+            for (ActivityInfo activity : pi.activities) {
+                activityNames.add(activity.name);
+            }
+
+            return activityNames;
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
@@ -238,11 +257,17 @@ public class ExplorationInfo {
                 .split("Back Stack Index:")[0] // this line is not always present
                 .split(System.lineSeparator());
 
-        return Arrays.stream(fragmentLines)
-                .filter(line -> !line.replaceAll("\\s+","").isEmpty())
-                .map(line -> line.split(":")[1])
-                .map(line -> line.split("\\{")[0])
-                .map(String::trim)
-                .collect(Collectors.toList());
+        List<String> result = new ArrayList<>();
+        for (String line : fragmentLines) {
+            if (!line.replaceAll("\\s+","").isEmpty()) {
+                String aux = line.split(":")[1];
+                aux = aux.split("\\{")[0];
+                aux = aux.trim();
+
+                result.add(aux);
+            }
+        }
+
+        return result;
     }
 }
