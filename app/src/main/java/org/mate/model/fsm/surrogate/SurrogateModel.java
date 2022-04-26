@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Wraps a surrogate model around the traditional FSM model. This enables the prediction of actions
@@ -119,7 +120,7 @@ public class SurrogateModel extends FSMModel {
             if (surrogateTransition.getTarget().equals(to)
                     && surrogateTransition.getTraces().equals(traces)) {
                 matchingTransition = surrogateTransition;
-                // TODO: increase visit counter
+                matchingTransition.increaseFrequencyCounter();
                 break;
             }
         }
@@ -156,10 +157,18 @@ public class SurrogateModel extends FSMModel {
             MATE.log_acc("Can predict action: " + action + " in FSM state: " + currentState);
             numberOfPredictedActions++;
 
-            // TODO: get transition with highest visit counter
+            // pick the transition with the highest frequency counter
+            final int highestCounter = transitions.stream()
+                    .mapToInt(transition -> ((SurrogateTransition)transition).getFrequencyCounter())
+                    .max()
+                    .orElseThrow(() -> new IllegalStateException("Empty set not allowed!"));
 
-            MATE.log_acc("Matching transitions: " + transitions.size());
-            SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(transitions);
+            Set<Transition> mostVisitedTransitions = transitions.stream()
+                    .filter(transition -> ((SurrogateTransition)transition).getFrequencyCounter() == highestCounter)
+                    .collect(Collectors.toSet());
+
+            MATE.log_acc("Matching transitions: " + mostVisitedTransitions.size());
+            SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(mostVisitedTransitions);
 
             // update predicted traces so far
             predictedTraces.addAll(transition.getTraces());

@@ -27,7 +27,10 @@ public class SurrogateTransition extends Transition {
      */
     private final ActionResult actionResult;
 
-    // TODO: add visit counter
+    /**
+     * Tracks how often the transition was taken.
+      */
+    private int frequencyCounter;
 
     /**
      * Creates a new transition from a given state to a target state with a given action. Each
@@ -44,7 +47,7 @@ public class SurrogateTransition extends Transition {
         super(source, target, action);
         this.actionResult = actionResult;
         this.traces = traces;
-        // TODO: init visit counter
+        frequencyCounter = 0;
     }
 
     /**
@@ -78,6 +81,22 @@ public class SurrogateTransition extends Transition {
      */
     State getTarget() {
         return target;
+    }
+
+    /**
+     * Returns the frequency counter.
+     *
+     * @return Returns the frequency counter.
+     */
+    int getFrequencyCounter() {
+        return frequencyCounter;
+    }
+
+    /**
+     * Increases the frequency counter.
+     */
+    void increaseFrequencyCounter() {
+        frequencyCounter++;
     }
 
     /**
