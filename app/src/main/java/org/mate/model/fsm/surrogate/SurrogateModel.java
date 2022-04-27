@@ -247,7 +247,12 @@ public class SurrogateModel extends FSMModel {
      *          {@code false} is returned.
      */
     public boolean hasPredictedEveryAction() {
-        return numberOfNonPredictedActions == 0;
+        /*
+        * The second condition is mandatory in order to distinguish the initial state of the
+        * surrogate model from any other state. Without this condition, the very first restart of
+        * the AUT wouldn't be executed for instance.
+         */
+        return numberOfNonPredictedActions == 0 && numberOfPredictedActions > 0;
     }
 
     /**
