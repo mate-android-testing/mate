@@ -108,7 +108,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 * This only works because MATE-Server doesn't enforce equality between these numbers,
                 * but we should be aware of this issue.
                  */
-                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                Registry.getUiAbstractionLayer().storeTraces();
             }
 
             if (!isTestSuiteExecution) {

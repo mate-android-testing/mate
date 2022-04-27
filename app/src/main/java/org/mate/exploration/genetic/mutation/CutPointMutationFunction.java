@@ -87,7 +87,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         } finally {
 
             if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                Registry.getUiAbstractionLayer().storeTraces();
             }
 
             if (!isTestSuiteExecution) {

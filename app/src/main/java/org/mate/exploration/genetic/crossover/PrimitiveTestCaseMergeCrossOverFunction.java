@@ -70,7 +70,7 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
             if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                Registry.getUiAbstractionLayer().storeTraces();
             }
 
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);

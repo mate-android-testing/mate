@@ -159,7 +159,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         } finally {
 
             if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                Registry.getUiAbstractionLayer().storeTraces();
             }
 
             if (!isTestSuiteExecution) {

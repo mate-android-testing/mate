@@ -186,7 +186,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
             if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                Registry.getUiAbstractionLayer().storeTraces();
             }
 
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);

@@ -103,7 +103,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 mutatedTestSuite.getTestCases().add(executed);
 
                 if(Properties.SURROGATE_MODEL()) {
-                    Registry.getUiAbstractionLayer().resetSurrogateModelState();
+                    Registry.getUiAbstractionLayer().storeTraces();
                 }
 
                 FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, executed);

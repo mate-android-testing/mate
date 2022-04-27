@@ -6,6 +6,7 @@ import android.util.Log;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.ActionType;
@@ -14,6 +15,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
+import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.state.IScreenState;
@@ -312,24 +314,28 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Resets the state of the surrogate model. This needs to be called after each test case.
+     * Stores the traces on the external storage that have been collected by the surrogate model
+     * for the last test case. This needs to be called after each test case and before a call to
+     * {@link org.mate.utils.FitnessUtils#storeTestCaseChromosomeFitness(IChromosome)},
+     * {@link org.mate.utils.FitnessUtils#storeTestSuiteChromosomeFitness(IChromosome, TestCase)},
+     * {@link org.mate.utils.coverage.CoverageUtils#storeTestCaseChromosomeCoverage(IChromosome)} or
+     * {@link org.mate.utils.coverage.CoverageUtils#storeTestSuiteChromosomeCoverage(IChromosome, TestCase)}.
      */
-    public void resetSurrogateModelState() {
+    public void storeTraces() {
 
-        if (Properties.SURROGATE_MODEL()) {
-            MATE.log_acc("Resetting surrogate model state...");
-
-            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-
-            MATE.log_acc("Predicted " + surrogateModel.getNumberOfPredictedActions() + " actions!");
-
-            if (surrogateModel.hasPredictedEveryAction()) {
-                MATE.log_acc("Predicted every action");
-            }
-
-            deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
-            surrogateModel.reset();
+        if (!Properties.SURROGATE_MODEL()) {
+            throw new IllegalStateException("Only call this method when the surrogate model is turned on!");
         }
+
+        SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+
+        MATE.log_acc("Predicted " + surrogateModel.getNumberOfPredictedActions() + " actions!");
+
+        if (surrogateModel.hasPredictedEveryAction()) {
+            MATE.log_acc("Predicted every action");
+        }
+
+        deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
     }
 
     /**

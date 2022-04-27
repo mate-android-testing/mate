@@ -38,7 +38,7 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
 
         if(Properties.SURROGATE_MODEL()) {
-            Registry.getUiAbstractionLayer().resetSurrogateModelState();
+            Registry.getUiAbstractionLayer().storeTraces();
         }
 
         FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
