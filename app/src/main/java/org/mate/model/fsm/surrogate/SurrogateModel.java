@@ -95,14 +95,9 @@ public class SurrogateModel extends FSMModel {
      * @param screenState The current screen state.
      */
     private void goToState(IScreenState screenState) {
-        MATE.log_acc("Go to state: " + screenState);
         State state = fsm.getState(screenState);
-        if (state.equals(fsm.getRootState())) {
-            MATE.log_acc("Go back to root state!");
-        }
         fsm.goToState(state);
         checkPointState = fsm.getCurrentState();
-        MATE.log_acc("Moved to checkpoint: " + checkPointState);
     }
 
     /**
@@ -120,9 +115,11 @@ public class SurrogateModel extends FSMModel {
         State from = fsm.getState(source);
         State to = fsm.getState(target);
 
-        // TODO: Is this really correct?
         if (!from.equals(checkPointState)) {
-            MATE.log_acc("Something fishy here...");
+            MATE.log_warn("Surrogate model not in expected state!");
+            MATE.log_warn("From state: " + from);
+            MATE.log_warn("Check point state: " + checkPointState);
+            MATE.log_warn("Current FSM state: " + fsm.getCurrentState());
         }
 
         Set<Transition> transitions = fsm.getOutgoingTransitions(from, action);
@@ -164,12 +161,10 @@ public class SurrogateModel extends FSMModel {
 
         if (transitions.isEmpty()) {
             // can't predict action -> reset
-            MATE.log_acc("Can't predict action: " + action + " in FSM state: " + currentState);
             predictedTraces.clear();
             numberOfNonPredictedActions++;
             return null;
         } else {
-            MATE.log_acc("Can predict action: " + action + " in FSM state: " + currentState);
             numberOfPredictedActions++;
 
             // pick the transition with the highest frequency counter
@@ -182,12 +177,9 @@ public class SurrogateModel extends FSMModel {
                     .filter(transition -> ((SurrogateTransition)transition).getFrequencyCounter() == highestCounter)
                     .collect(Collectors.toSet());
 
-            MATE.log_acc("Matching transitions: " + mostVisitedTransitions.size());
             SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(mostVisitedTransitions);
 
-            // update predicted traces so far
             predictedTraces.addAll(transition.getTraces());
-
             fsm.goToState(transition.getTarget());
             return transition.getActionResult();
         }
@@ -277,5 +269,14 @@ public class SurrogateModel extends FSMModel {
      */
     public int getNumberOfPredictedActions() {
         return numberOfPredictedActions;
+    }
+
+    /**
+     * Returns the number of non-predicted actions of the last test case.
+     *
+     * @return Returns the number of non-predicted actions.
+     */
+    public int getNumberOfNonPredictedActions() {
+        return numberOfNonPredictedActions;
     }
 }

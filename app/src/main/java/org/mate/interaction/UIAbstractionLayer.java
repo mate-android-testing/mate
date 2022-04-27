@@ -329,10 +329,12 @@ public class UIAbstractionLayer {
 
         SurrogateModel surrogateModel = (SurrogateModel) guiModel;
 
-        MATE.log_acc("Predicted " + surrogateModel.getNumberOfPredictedActions() + " actions!");
+        // These logs are parsed by the analysis framework!
+        MATE.log("Predicted actions: " + surrogateModel.getNumberOfPredictedActions());
+        MATE.log("Non-predicted actions: " + surrogateModel.getNumberOfNonPredictedActions());
 
         if (surrogateModel.hasPredictedEveryAction()) {
-            MATE.log_acc("Predicted every action");
+            MATE.log("Predicted every action!");
         }
 
         deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
