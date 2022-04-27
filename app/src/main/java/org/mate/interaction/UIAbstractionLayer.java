@@ -219,7 +219,6 @@ public class UIAbstractionLayer {
             // update gui model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
-            lastScreenState = state;
 
             if(Properties.SURROGATE_MODEL()) {
                 SurrogateModel surrogateModel = (SurrogateModel) guiModel;
@@ -228,6 +227,8 @@ public class UIAbstractionLayer {
             } else {
                 guiModel.update(lastScreenState, state, action);
             }
+
+            lastScreenState = state;
 
             return FAILURE_APP_CRASH;
         }
@@ -273,7 +274,6 @@ public class UIAbstractionLayer {
 
         // update gui model
         state = toRecordedScreenState(state);
-        lastScreenState = state;
 
         if(Properties.SURROGATE_MODEL()) {
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
@@ -282,6 +282,8 @@ public class UIAbstractionLayer {
         } else {
             guiModel.update(lastScreenState, state, action);
         }
+
+        lastScreenState = state;
 
         return result;
     }
