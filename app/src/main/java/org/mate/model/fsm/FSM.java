@@ -317,6 +317,7 @@ public class FSM {
      */
     public void goToState(State state) {
 
+        // TODO: This may happen if the start screen state is not deterministic!
         if (!states.contains(state)) {
             throw new IllegalStateException("Can't move FSM in a state that it has not seen yet!");
         }
