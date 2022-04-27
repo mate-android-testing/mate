@@ -76,11 +76,7 @@ public class SurrogateModel extends FSMModel {
     /**
      * Resets the surrogate model. This should be called at the end of each test case.
      */
-    public void reset() {
-
-        // TODO: Can we assume that a new test case always starts in the same (root) state?
-        fsm.goToState(fsm.getRootState());
-        checkPointState = fsm.getCurrentState();
+    public void reset(IScreenState screenState) {
 
         currentTraces.clear();
         predictedTraces.clear();
@@ -88,6 +84,25 @@ public class SurrogateModel extends FSMModel {
 
         numberOfNonPredictedActions = 0;
         numberOfPredictedActions = 0;
+
+        // we need to bring the FSM in the correct state again
+        goToState(screenState);
+    }
+
+    /**
+     * Moves the underlying FSM in the given state.
+     *
+     * @param screenState The current screen state.
+     */
+    private void goToState(IScreenState screenState) {
+        MATE.log_acc("Go to state: " + screenState);
+        State state = fsm.getState(screenState);
+        if (state.equals(fsm.getRootState())) {
+            MATE.log_acc("Go back to root state!");
+        }
+        fsm.goToState(state);
+        checkPointState = fsm.getCurrentState();
+        MATE.log_acc("Moved to checkpoint: " + checkPointState);
     }
 
     /**

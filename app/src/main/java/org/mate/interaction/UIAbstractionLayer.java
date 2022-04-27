@@ -601,6 +601,7 @@ public class UIAbstractionLayer {
             // If the surrogate model was able to predict every action, we can save the reset.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             if (surrogateModel.hasPredictedEveryAction()) {
+                surrogateModel.reset(lastScreenState);
                 return;
             }
         }
@@ -628,6 +629,12 @@ public class UIAbstractionLayer {
          *  restart action that then connects the subgraph through a restart edge.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.reset(lastScreenState);
+        }
     }
 
     /**
