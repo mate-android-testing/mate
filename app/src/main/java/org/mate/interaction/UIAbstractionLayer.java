@@ -200,6 +200,7 @@ public class UIAbstractionLayer {
             * a random action that is applicable on the current screen.
              */
             if(!getExecutableActions().contains(action)) {
+                MATE.log_warn("Can't apply given action on current screen! Select random action.");
                 action = Randomness.randomElement(getExecutableActions());
             }
         }
