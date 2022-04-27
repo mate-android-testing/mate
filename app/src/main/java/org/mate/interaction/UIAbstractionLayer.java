@@ -601,7 +601,7 @@ public class UIAbstractionLayer {
     public void resetApp() {
 
         if (Properties.SURROGATE_MODEL()) {
-            // If the surrogate model was able to predict every action, we can save the reset.
+            // If the surrogate model was able to predict every action, we can avoid the reset.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             if (surrogateModel.hasPredictedEveryAction()) {
                 surrogateModel.reset(lastScreenState);
