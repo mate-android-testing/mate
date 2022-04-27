@@ -1462,21 +1462,21 @@ public class DeviceMgr {
                 device.executeShellCommand("run-as " + packageName + " touch files/coverage.exec");
                 // device.executeShellCommand("run-as " + packageName + " exit");
             }
-
-            if (Properties.SURROGATE_MODEL()) {
-                /*
-                * The execution of the 'pm clear' command also drops the runtime permissions of the
-                * AUT, thus we have to re-grant it in order to write the traces properly.
-                 */
-                MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
-            }
-
         } catch (IOException e) {
             MATE.log_warn("Couldn't clear app data!");
             MATE.log_warn(e.getMessage());
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
+        }
+
+        if (Properties.SURROGATE_MODEL()) {
+            /*
+             * The execution of the 'pm clear' command also drops the runtime permissions of the
+             * AUT, thus we have to re-grant it in order to write the traces properly.
+             */
+            MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
+
         }
     }
 
