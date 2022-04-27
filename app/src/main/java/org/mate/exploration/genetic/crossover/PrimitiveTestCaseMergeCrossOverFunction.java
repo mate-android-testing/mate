@@ -1,6 +1,8 @@
 package org.mate.exploration.genetic.crossover;
 
 import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
@@ -67,9 +69,15 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
             TestCase executedTestCase = TestCase.fromDummy(offspring);
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
+            if(Properties.SURROGATE_MODEL()) {
+                Registry.getUiAbstractionLayer().storeTraces();
+            }
+
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
             CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
             CoverageUtils.logChromosomeCoverage(chromosome);
+
+            executedTestCase.finish();
 
             return Collections.singletonList(chromosome);
         }

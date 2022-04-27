@@ -54,6 +54,11 @@ public class FSM {
     private final String packageName;
 
     /**
+     * The current state in the FSM.
+     */
+    private State currentState;
+
+    /**
      * Creates a new finite state machine with an initial start state.
      *
      * @param root The start or root state.
@@ -68,27 +73,27 @@ public class FSM {
 
         // the initial state is a new state
         reachedNewState = true;
+        currentState = root;
     }
 
     /**
-     * Adds a new transition to the FSM linking two states with an action.
-     * As a side effect tracks whether we reached a new state.
+     * Adds a new transition to the FSM linking two states with an action. As a side effect tracks
+     * whether we reached a new state and internally updates the current FSM state.
      *
-     * @param source The source state.
-     * @param target The target or destination state.
-     * @param action The action linking both states.
+     * @param transition The new transition.
      */
-    public void addTransition(State source, State target, Action action) {
+    public void addTransition(Transition transition) {
 
-        states.add(source);
+        states.add(transition.getSource());
 
         // check whether we reached a new state
-        reachedNewState = states.add(target);
+        reachedNewState = states.add(transition.getTarget());
 
-        Transition transition = new Transition(source, target, action);
         if (transitions.add(transition)) {
             MATE.log_debug(String.valueOf(this));
         }
+
+        currentState = transition.getTarget();
     }
 
     /**
@@ -200,9 +205,23 @@ public class FSM {
      * @param source The source state.
      * @return Returns the outgoing transitions from the given state.
      */
-    private Set<Transition> getOutgoingTransitions(State source) {
+    public Set<Transition> getOutgoingTransitions(State source) {
         return transitions.stream()
                 .filter(transition -> transition.getSource().equals(source))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the outgoing transitions from the given source state with the given action.
+     *
+     * @param source The source state.
+     * @param action The given action.
+     * @return Returns the outgoing transitions from the given state and action.
+     */
+    public Set<Transition> getOutgoingTransitions(State source, Action action) {
+        return transitions.stream()
+                .filter(transition -> transition.getSource().equals(source))
+                .filter(transition -> transition.getAction().equals(action))
                 .collect(Collectors.toSet());
     }
 
@@ -280,6 +299,30 @@ public class FSM {
         }
 
         return activityPredecessors;
+    }
+
+    /**
+     * Returns the state the FSM is in right now.
+     *
+     * @return Returns the current state.
+     */
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    /**
+     * Moves the FSM in the given state.
+     *
+     * @param state The new state to which the FSM should move.
+     */
+    public void goToState(State state) {
+
+        // TODO: This may happen if the start screen state is not deterministic!
+        if (!states.contains(state)) {
+            throw new IllegalStateException("Can't move FSM in a state that it has not seen yet!");
+        }
+
+        currentState = state;
     }
 
     /**

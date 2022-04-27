@@ -20,12 +20,12 @@ public class FSMModel implements IGUIModel {
     /**
      * The finite state machine.
      */
-    private final FSM fsm;
+    protected final FSM fsm;
 
     /**
      * The package name of the AUT.
      */
-    private final String packageName;
+    protected final String packageName;
 
     /**
      * Creates a new FSM based model with a given initial state.
@@ -45,7 +45,8 @@ public class FSMModel implements IGUIModel {
     public void update(IScreenState source, IScreenState target, Action action) {
         State sourceState = fsm.getState(source);
         State targetState = fsm.getState(target);
-        fsm.addTransition(sourceState, targetState, action);
+        Transition transition = new Transition(sourceState, targetState, action);
+        fsm.addTransition(transition);
     }
 
     /**

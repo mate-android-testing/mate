@@ -1,11 +1,13 @@
 package org.mate.interaction;
 
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
@@ -41,14 +43,22 @@ import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
 import org.mate.utils.manifest.element.ComponentType;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -1369,9 +1379,7 @@ public class DeviceMgr {
      * Grants the AUT the read and write runtime permissions for the external storage.
      * <p>
      * Depending on the API level, we can either use the very fast method grantRuntimePermissions()
-     * (API >= 28) or the slow routine executeShellCommand(). Right now, however, we let the
-     * MATE-Server granting those permissions directly before executing a privileged command in
-     * order to avoid unnecessary requests.
+     * (API >= 28) or the slow routine executeShellCommand().
      * <p>
      * In order to verify that the runtime permissions got granted, check the output of the
      * following command:
@@ -1379,7 +1387,6 @@ public class DeviceMgr {
      *
      * @return Returns {@code true} when operation succeeded, otherwise {@code false} is returned.
      */
-    @SuppressWarnings("unused")
     public boolean grantRuntimePermissions() {
 
         Instrumentation instrumentation = getInstrumentation();
@@ -1406,8 +1413,7 @@ public class DeviceMgr {
             // an empty response indicates success of the operation
             return grantedReadPermission.isEmpty() && grantedWritePermission.isEmpty();
         } catch (IOException e) {
-            MATE.log_error("Couldn't grant runtime permissions!");
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Couldn't grant runtime permissions!", e);
         }
     }
 
@@ -1456,13 +1462,21 @@ public class DeviceMgr {
                 device.executeShellCommand("run-as " + packageName + " touch files/coverage.exec");
                 // device.executeShellCommand("run-as " + packageName + " exit");
             }
-
         } catch (IOException e) {
             MATE.log_warn("Couldn't clear app data!");
             MATE.log_warn(e.getMessage());
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
+        }
+
+        if (Properties.SURROGATE_MODEL()) {
+            /*
+             * The execution of the 'pm clear' command also drops the runtime permissions of the
+             * AUT, thus we have to re-grant it in order to write the traces properly.
+             */
+            MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
+
         }
     }
 
@@ -1496,4 +1510,105 @@ public class DeviceMgr {
         return new StackTrace(Registry.getEnvironmentManager().getLastCrashStackTrace());
     }
 
+    /**
+     * Sends a broadcast to the tracer, which in turn dumps the collected traces to a file on
+     * the external storage.
+     */
+    private void sendBroadcastToTracer() {
+        Intent intent = new Intent("STORE_TRACES");
+        intent.setComponent(new ComponentName(Registry.getPackageName(),
+                "de.uni_passau.fim.auermich.tracer.Tracer"));
+        InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+    }
+
+    /**
+     * Reads the traces from the external memory and deletes afterwards the traces file.
+     *
+     * @return Returns the set of traces.
+     *
+     */
+    public Set<String> getTraces() {
+
+        // triggers the dumping of traces to a file called traces.txt
+        sendBroadcastToTracer();
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File infoFile = new File(sdCard, "info.txt");
+
+        /*
+        * We need to wait until the info.txt file is generated, once it is there, we know that all
+        * traces have been dumped.
+         */
+        while(!infoFile.exists()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new IllegalStateException("Waiting for info.txt failed!", e);
+            }
+        }
+
+        File traceFile = new File(sdCard, "traces.txt");
+
+        if (!traceFile.exists()) {
+            throw new IllegalStateException("The file traces.txt doesn't exist!");
+        }
+
+        Set<String> traces = new HashSet<>();
+
+        try (BufferedReader reader
+                     = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile)))) {
+
+            String line = reader.readLine();
+
+            while (line != null) {
+                traces.add(line);
+                line = reader.readLine();
+            }
+
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't read traces!", e);
+        }
+
+        // remove both files
+        traceFile.delete();
+        infoFile.delete();
+
+        return traces;
+    }
+
+    /**
+     * Stores the traces to a file called traces.txt on the external memory.
+     *
+     * @param traces The traces to be stored.
+     */
+    public void storeTraces(Set<String> traces) {
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File traceFile = new File(sdCard, "traces.txt");
+
+        try (Writer fileWriter = new FileWriter(traceFile)) {
+
+            for(String trace : traces) {
+                fileWriter.write(trace);
+                fileWriter.write(System.lineSeparator());
+            }
+
+            fileWriter.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't write to traces.txt!", e);
+        }
+
+        /*
+        * The info.txt indicates that the dumping of traces has been completed and it contains
+        * the number of written traces.
+         */
+        File infoFile = new File(sdCard, "info.txt");
+
+        try (Writer fileWriter = new FileWriter(infoFile)) {
+            fileWriter.write(traces.size());
+            fileWriter.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't write to info.txt!", e);
+        }
+    }
 }

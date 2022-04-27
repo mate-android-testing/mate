@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -97,6 +98,19 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
+
+            if(Properties.SURROGATE_MODEL()) {
+                /*
+                * We need to store both files traces.txt and info.txt on the external storage such
+                * that the subsequent calls of the FitnessUtils and CoverageUtils class work properly.
+                * However, those calls will send again a broadcast to the tracer, which in turn
+                * overwrites the info.txt with a value not matching the actual number of traces.
+                * This only works because MATE-Server doesn't enforce equality between these numbers,
+                * but we should be aware of this issue.
+                 */
+                Registry.getUiAbstractionLayer().storeTraces();
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                 * If we deal with a test suite execution, the storing of coverage
@@ -106,6 +120,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;

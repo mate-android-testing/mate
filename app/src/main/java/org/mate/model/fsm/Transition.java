@@ -8,11 +8,11 @@ import java.util.Objects;
 
 public class Transition {
 
-    private final State source;
-    private final State target;
-    private final Action action;
+    protected final State source;
+    protected final State target;
+    protected final Action action;
 
-    Transition(State source, State target, Action action) {
+    protected Transition(State source, State target, Action action) {
         this.source = source;
         this.target = target;
         this.action = action;

@@ -100,7 +100,7 @@ public class TestCase {
      * Checks whether this is a dummy test case.
      *
      * @return Returns {@code true} when this test case is a dummy test case,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isDummy() {
         return getId().equals("dummy");
@@ -133,6 +133,7 @@ public class TestCase {
 
     /**
      * Returns the activity name before the execution of the given action.
+     *
      * @param actionIndex The action index.
      * @return Returns the activity in foreground before the given action was executed.
      */
@@ -259,7 +260,7 @@ public class TestCase {
      * Checks whether the test case caused a crash.
      *
      * @return Returns {@code true} if the test case caused a crash,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean hasCrashDetected() {
         return this.crashDetected;
@@ -276,7 +277,7 @@ public class TestCase {
      * Returns the stack trace triggered by a crash of the test case.
      *
      * @return Returns the stack trace caused by the test case;
-     *          this should be typically the last action.
+     *         this should be typically the last action.
      */
     @SuppressWarnings("unused")
     public StackTrace getCrashStackTrace() {
@@ -314,40 +315,35 @@ public class TestCase {
             finalSize = testCase.desiredSize.getValue();
         }
 
-        try {
-            int count = 0;
-            for (Action action0 : testCase.eventSequence) {
-                if (count < finalSize) {
-                    if (!(action0 instanceof WidgetAction)
-                            || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
-                        if (!resultingTc.updateTestCase(action0, count)) {
-                            return resultingTc;
-                        }
-                        count++;
-                    } else {
-                        break;
+        int count = 0;
+        for (Action action0 : testCase.eventSequence) {
+            if (count < finalSize) {
+                if (!(action0 instanceof WidgetAction)
+                        || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
+                    if (!resultingTc.updateTestCase(action0, count)) {
+                        return resultingTc;
                     }
+                    count++;
                 } else {
-                    return resultingTc;
+                    break;
                 }
+            } else {
+                return resultingTc;
             }
-            for (; count < finalSize; count++) {
-                Action action;
-                if (Properties.WIDGET_BASED_ACTIONS()) {
-                    action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
-                } else {
-                    action = PrimitiveAction.randomAction();
-                }
-                if (!resultingTc.updateTestCase(action, count)) {
-                    return resultingTc;
-                }
-            }
-
-            return resultingTc;
-        } finally {
-            // serialize test case, record test case stats, etc.
-            resultingTc.finish();
         }
+        for (; count < finalSize; count++) {
+            Action action;
+            if (Properties.WIDGET_BASED_ACTIONS()) {
+                action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
+            } else {
+                action = PrimitiveAction.randomAction();
+            }
+            if (!resultingTc.updateTestCase(action, count)) {
+                return resultingTc;
+            }
+        }
+
+        return resultingTc;
     }
 
     /**
@@ -379,7 +375,7 @@ public class TestCase {
      * @param action The action to be executed.
      * @param actionID The id of the action.
      * @return Returns {@code true} if the given action didn't cause a crash of the app
-     *          or left the AUT, otherwise {@code false} is returned.
+     *         or left the AUT, otherwise {@code false} is returned.
      */
     public boolean updateTestCase(Action action, int actionID) {
 
@@ -405,8 +401,8 @@ public class TestCase {
         }
 
         MATE.log("executed action " + actionID + ": " + action);
-        MATE.log("Activity Transition for action " +  actionID
-                + ":" + activityBeforeAction  + "->" + activityAfterAction);
+        MATE.log("Activity Transition for action " + actionID
+                + ":" + activityBeforeAction + "->" + activityAfterAction);
 
         switch (actionResult) {
             case SUCCESS:
