@@ -408,7 +408,6 @@ public class TestCase {
 
         switch (actionResult) {
             case SUCCESS:
-            case SUCCESS_NEW_STATE:
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
