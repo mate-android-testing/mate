@@ -278,7 +278,7 @@ public class GUIWalker {
     private boolean replayActions(final List<Action> actions) {
         for (Action action : actions) {
             ActionResult result = uiAbstractionLayer.executeAction(action);
-            if (result != ActionResult.SUCCESS && result != ActionResult.SUCCESS_NEW_STATE) {
+            if (result != ActionResult.SUCCESS) {
                 return false;
             }
         }

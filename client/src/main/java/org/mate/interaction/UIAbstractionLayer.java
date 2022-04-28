@@ -4,7 +4,6 @@ import static org.mate.commons.interaction.action.ActionResult.FAILURE_APP_CRASH
 import static org.mate.commons.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
 import static org.mate.commons.interaction.action.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.commons.interaction.action.ActionResult.SUCCESS;
-import static org.mate.commons.interaction.action.ActionResult.SUCCESS_NEW_STATE;
 import static org.mate.commons.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
 import android.util.Log;
@@ -188,7 +187,7 @@ public class UIAbstractionLayer {
                     surrogateModel.setInPrediction(true);
 
                     // If a cached action closes the AUT, we abort the action execution here.
-                    if((result != SUCCESS && result != SUCCESS_NEW_STATE) && result != null) {
+                    if(result != SUCCESS && result != null) {
                         return result;
                     }
                 }
@@ -303,7 +302,7 @@ public class UIAbstractionLayer {
 
         for(Action action : actions) {
             result = executeActionUnsafe(action);
-            if(result != SUCCESS && result != SUCCESS_NEW_STATE) {
+            if(result != SUCCESS) {
                 return result;
             }
         }

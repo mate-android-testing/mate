@@ -49,6 +49,13 @@ public interface IGUIModel {
     Set<Edge> getEdges(Action action);
 
     /**
+     * Returns the edges contained in the GUI model.
+     *
+     * @return Returns the edges between the GUI states.
+     */
+    Set<Edge> getEdges();
+
+    /**
      * Tries to find the shortest path between two given states.
      *
      * @param from The source state.

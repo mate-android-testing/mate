@@ -11,16 +11,17 @@ import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Optional;
 import org.mate.commons.utils.Randomness;
-import org.mate.utils.StackTrace;
 import org.mate.state.IScreenState;
+import org.mate.utils.ListUtils;
+import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TestCase {
 
@@ -31,14 +32,9 @@ public class TestCase {
     private String id;
 
     /**
-     * The set of visited activities.
+     * The states (ids) in the order they were visited.
      */
-    private final Set<String> visitedActivities;
-
-    /**
-     * The set of visited screen states (ids).
-     */
-    private final Set<String> visitedStates;
+    private final List<String> stateSequence;
 
     /**
      * The actions that has been executed by this test case.
@@ -75,8 +71,7 @@ public class TestCase {
     private TestCase() {
         setId("dummy");
         crashDetected = false;
-        visitedActivities = new HashSet<>();
-        visitedStates = new HashSet<>();
+        stateSequence = new ArrayList<>();
         eventSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
     }
@@ -90,8 +85,7 @@ public class TestCase {
         MATELog.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
-        visitedActivities = new HashSet<>();
-        visitedStates = new HashSet<>();
+        stateSequence = new ArrayList<>();
         eventSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
     }
@@ -212,39 +206,41 @@ public class TestCase {
     }
 
     /**
-     * Updates the set of visited activities.
+     * Returns the set of visited activities. This includes activities not belonging to the AUT.
      *
-     * @param activity A new activity to be added.
-     */
-    public void updateVisitedActivities(String activity) {
-        this.visitedActivities.add(activity);
-    }
-
-    /**
-     * Returns the set of visited activities.
-     *
-     * @return Returns the visited activities.
+     * @return Returns the set of visited activities.
      */
     public Set<String> getVisitedActivities() {
-        return visitedActivities;
+        return ListUtils.toSet(activitySequence);
     }
 
     /**
-     * Updates the visited states with a new screen state.
+     * Returns the set of visited activities belonging to the AUT.
      *
-     * @param GUIState The new screen state.
+     * @return Returns the set of visited activities.
      */
-    public void updateVisitedStates(IScreenState GUIState) {
-        this.visitedStates.add(GUIState.getId());
+    public Set<String> getVisitedActivitiesOfApp() {
+        return getVisitedActivities().stream()
+                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                .collect(Collectors.toSet());
     }
 
     /**
-     * Returns the visited screen states, actually the screen state ids.
+     * Returns the visited screen state sequence, actually the screen state ids.
      *
-     * @return Returns the visited states.
+     * @return Returns the visited state sequence.
+     */
+    public List<String> getStateSequence() {
+        return stateSequence;
+    }
+
+    /**
+     * Returns the set of visited states, actually the screen state ids.
+     *
+     * @return Returns the set of visited states.
      */
     public Set<String> getVisitedStates() {
-        return visitedStates;
+        return ListUtils.toSet(stateSequence);
     }
 
     /**
@@ -367,9 +363,7 @@ public class TestCase {
      * @return Returns a new test case with a random id.
      */
     public static TestCase newInitializedTestCase() {
-        TestCase tc = new TestCase(UUID.randomUUID().toString());
-        tc.updateTestCase("init");
-        return tc;
+        return new TestCase(UUID.randomUUID().toString());
     }
 
     /**
@@ -387,20 +381,28 @@ public class TestCase {
             throw new IllegalStateException("Action not applicable to current state!");
         }
 
-        String activityBeforeAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
-        MATELog.log("executing action " + actionID + ": " + action);
+        IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
 
+        MATELog.log("executing action " + actionID + ": " + action);
         addEvent(action);
         ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
-        // track the activity transitions of each action
-        String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
+        IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
+
+        // track the activity and state transition of each action
+        String activityBeforeAction = oldState.getActivityName();
+        String activityAfterAction = newState.getActivityName();
+        String oldStateID = oldState.getId();
+        String newStateID = newState.getId();
 
         if (actionID == 0) {
             activitySequence.add(activityBeforeAction);
             activitySequence.add(activityAfterAction);
+            stateSequence.add(oldStateID);
+            stateSequence.add(newStateID);
         } else {
             activitySequence.add(activityAfterAction);
+            stateSequence.add(newStateID);
         }
 
         MATELog.log("executed action " + actionID + ": " + action);
@@ -409,8 +411,6 @@ public class TestCase {
 
         switch (actionResult) {
             case SUCCESS:
-            case SUCCESS_NEW_STATE:
-                updateTestCase(String.valueOf(actionID));
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
@@ -425,16 +425,5 @@ public class TestCase {
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
-    }
-
-    /**
-     * Updates the test case with the given event.
-     *
-     * @param event A new event, e.g. the action id.
-     */
-    private void updateTestCase(String event) {
-        IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
-        updateVisitedStates(currentScreenState);
-        updateVisitedActivities(currentScreenState.getActivityName());
     }
 }
