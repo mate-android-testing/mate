@@ -4,10 +4,12 @@ import static org.mate.commons.interaction.action.ActionResult.FAILURE_APP_CRASH
 import static org.mate.commons.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
 import static org.mate.commons.interaction.action.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.commons.interaction.action.ActionResult.SUCCESS;
+import static org.mate.commons.interaction.action.ActionResult.SUCCESS_NEW_STATE;
 import static org.mate.commons.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
 import android.util.Log;
 
+import org.mate.Properties;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;
@@ -17,13 +19,17 @@ import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
+import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.service.MATEService;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.commons.utils.Randomness;
 import org.mate.utils.StackTrace;
 
 import java.util.Date;
@@ -96,7 +102,11 @@ public class UIAbstractionLayer {
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
         lastScreenStateNumber++;
-        guiModel = new FSMModel(lastScreenState, packageName);
+        if (Properties.SURROGATE_MODEL()) {
+            guiModel = new SurrogateModel(lastScreenState, packageName);
+        } else {
+            guiModel = new FSMModel(lastScreenState, packageName);
+        }
         guiWalker = new GUIWalker(this);
     }
 
@@ -145,14 +155,56 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Executes the given action. As a side effect, the screen state
-     * model is updated.
+     * Executes the given action. As a side effect, the gui model is updated.
      *
      * @param action The action to be executed.
      * @return Returns the outcome of the execution, e.g. success.
      */
     private ActionResult executeActionUnsafe(Action action) throws AUTCrashException {
+
         IScreenState state;
+
+        if (Properties.SURROGATE_MODEL()) {
+
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+
+            if(surrogateModel.isInPrediction()) {
+
+                // check if the surrogate model can predict the action
+                ActionResult actionResult = surrogateModel.predictAction(action);
+
+                if (actionResult != null) {
+                    surrogateModel.addPredictedAction(action);
+                    return actionResult;
+                } else {
+                    /*
+                    * The surrogate model couldn't successfully predict the action, thus we need to
+                    * return to the last check point and execute all cached actions.
+                     */
+                    surrogateModel.setInPrediction(false);
+                    surrogateModel.goToLastCheckPointState();
+                    ActionResult result = executeCachedActions(surrogateModel.getPredictedActions());
+                    surrogateModel.resetPredictedActions();
+                    surrogateModel.setInPrediction(true);
+
+                    // If a cached action closes the AUT, we abort the action execution here.
+                    if((result != SUCCESS && result != SUCCESS_NEW_STATE) && result != null) {
+                        return result;
+                    }
+                }
+            }
+
+            /*
+            * Since the execution of cached actions may lead to a different screen state than
+            * expected, the given action might be not applicable anymore. In such a case, we pick
+            * a random action that is applicable on the current screen.
+             */
+            if(!getExecutableActions().contains(action)) {
+                MATELog.log_warn("Can't apply given action on current screen! Select random action.");
+                action = Randomness.randomElement(getExecutableActions());
+            }
+        }
+
         try {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
@@ -164,11 +216,20 @@ public class UIAbstractionLayer {
              */
             // deviceMgr.pressHome();
 
-            // update screen state model
+            // update gui model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
-            guiModel.update(lastScreenState, state, action);
+
+            if(Properties.SURROGATE_MODEL()) {
+                SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+                Set<String> traces = deviceMgr.getTraces();
+                surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+            } else {
+                guiModel.update(lastScreenState, state, action);
+            }
+
             lastScreenState = state;
+
             return FAILURE_APP_CRASH;
         }
 
@@ -200,19 +261,81 @@ public class UIAbstractionLayer {
             // TODO: what to do when the emulator crashes?
         }
 
-        // update gui model
-        state = toRecordedScreenState(state);
-        guiModel.update(lastScreenState, state, action);
-        lastScreenState = state;
+        ActionResult result;
 
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
         if (!currentPackageName.equals(this.packageName)) {
             MATELog.log("current package different from app package: " + currentPackageName);
-            return SUCCESS_OUTBOUND;
+            result = SUCCESS_OUTBOUND;
         } else {
-            return SUCCESS;
+            result = SUCCESS;
         }
+
+        // update gui model
+        state = toRecordedScreenState(state);
+
+        if(Properties.SURROGATE_MODEL()) {
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            Set<String> traces = deviceMgr.getTraces();
+            surrogateModel.update(lastScreenState, state, action, result, traces);
+        } else {
+            guiModel.update(lastScreenState, state, action);
+        }
+
+        lastScreenState = state;
+
+        return result;
+    }
+
+    /**
+     * Executes the cached actions as long as an action doesn't leave the AUT.
+     *
+     * @param actions The list of actions to be executed, might be empty.
+     * @return Returns the action result associated with the last executed action or {@code null}
+     *          if no cached action was executed at all.
+     */
+    private ActionResult executeCachedActions(final List<Action> actions) throws AUTCrashException {
+
+        assert Properties.SURROGATE_MODEL();
+
+        ActionResult result = null;
+
+        for(Action action : actions) {
+            result = executeActionUnsafe(action);
+            if(result != SUCCESS && result != SUCCESS_NEW_STATE) {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Stores the traces on the external storage that have been collected by the surrogate model
+     * for the last test case. This needs to be called after each test case and before a call to
+     * {@link org.mate.utils.FitnessUtils#storeTestCaseChromosomeFitness(IChromosome)},
+     * {@link org.mate.utils.FitnessUtils#storeTestSuiteChromosomeFitness(IChromosome, TestCase)},
+     * {@link org.mate.utils.coverage.CoverageUtils#storeTestCaseChromosomeCoverage(IChromosome)} or
+     * {@link org.mate.utils.coverage.CoverageUtils#storeTestSuiteChromosomeCoverage(IChromosome, TestCase)}.
+     */
+    public void storeTraces() {
+
+        if (!Properties.SURROGATE_MODEL()) {
+            throw new IllegalStateException("Only call this method when the surrogate model is turned on!");
+        }
+
+        SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+
+        // These logs are parsed by the analysis framework!
+        MATELog.log("Predicted actions: " + surrogateModel.getNumberOfPredictedActions());
+        MATELog.log("Non-predicted actions: " + surrogateModel.getNumberOfNonPredictedActions());
+
+        if (surrogateModel.hasPredictedEveryAction()) {
+            MATELog.log("Predicted every action!");
+        }
+
+        deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
     }
 
     /**
@@ -478,6 +601,16 @@ public class UIAbstractionLayer {
      */
     public void resetApp() {
 
+        if (Properties.SURROGATE_MODEL()) {
+            // If the surrogate model was able to predict every action, we can avoid the reset.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            if (surrogateModel.hasPredictedEveryAction()) {
+                surrogateModel.reset(lastScreenState);
+                return;
+            }
+        }
+
+        // TODO (Ivan): Remove or address the following commented code
         /*try {
             deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
@@ -501,6 +634,12 @@ public class UIAbstractionLayer {
          *  restart action that then connects the subgraph through a restart edge.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.reset(lastScreenState);
+        }
     }
 
     /**

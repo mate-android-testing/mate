@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -84,17 +85,22 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                 }
             }
         } finally {
-            mutant.finish();
-        }
 
-        if (!isTestSuiteExecution) {
-            /*
-             * If we deal with a test suite execution, the storing of coverage
-             * and fitness data is handled by the test suite mutation operator itself.
-             */
-            FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
-            CoverageUtils.logChromosomeCoverage(mutatedChromosome);
+            if(Properties.SURROGATE_MODEL()) {
+                Registry.getUiAbstractionLayer().storeTraces();
+            }
+
+            if (!isTestSuiteExecution) {
+                /*
+                 * If we deal with a test suite execution, the storing of coverage
+                 * and fitness data is handled by the test suite mutation operator itself.
+                 */
+                FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
+                CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
+                CoverageUtils.logChromosomeCoverage(mutatedChromosome);
+            }
+
+            mutant.finish();
         }
 
         return mutatedChromosome;

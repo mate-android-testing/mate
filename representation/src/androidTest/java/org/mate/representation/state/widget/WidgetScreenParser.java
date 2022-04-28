@@ -108,7 +108,7 @@ public class WidgetScreenParser {
                 + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
         MATELog.log_debug("Node class: " + node.getClassName());
 
-        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
+        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex, ExplorationInfo.getInstance().getStateEquivalenceLevel());
         widgets.add(widget);
 
         if (widget.isEditable()) {

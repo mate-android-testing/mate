@@ -3,6 +3,7 @@ package org.mate.commons;
 
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.state.executable.StateEquivalenceLevel;
 
 interface IRepresentationLayerInterface {
     // Representation Layer status & config
@@ -13,6 +14,7 @@ interface IRepresentationLayerInterface {
     void setRandomSeed(long seed);
     void setReplayMode();
     void setWidgetBasedActions();
+    void setStateEquivalenceLevel(in StateEquivalenceLevel level);
 
     // General device info & config
     int getDisplayWidth();
@@ -20,6 +22,9 @@ interface IRepresentationLayerInterface {
     boolean grantRuntimePermission(String permission);
     boolean isCrashDialogPresent();
     String getTargetPackageFilesDir();
+
+    // Coverage
+    void sendBroadcastToTracer();
 
     // Activities info
     String getCurrentPackageName();

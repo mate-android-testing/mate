@@ -1,10 +1,13 @@
 package org.mate.representation;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import org.mate.commons.state.executable.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;
@@ -13,7 +16,6 @@ import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -47,6 +49,11 @@ public class ExplorationInfo {
      * Whether we should use widget based actions instead of primitive actions.
      */
     private boolean widgetBasedActions = false;
+
+    /**
+     * Which StateEquivalenceLevel to use when creating Widgets during exploration.
+     */
+    private StateEquivalenceLevel stateEquivalenceLevel;
 
     private ExplorationInfo() {}
 
@@ -110,6 +117,21 @@ public class ExplorationInfo {
      */
     public boolean useWidgetBasedActions() {
         return widgetBasedActions;
+    }
+
+    /**
+     * Sets the StateEquivalenceLevel to use when creating Widgets.
+     * @param level
+     */
+    public void setStateEquivalenceLevel(StateEquivalenceLevel level) {
+        this.stateEquivalenceLevel = level;
+    }
+
+    /**
+     * @return the StateEquivalenceLevel to use when creating Widgets.
+     */
+    public StateEquivalenceLevel getStateEquivalenceLevel() {
+        return stateEquivalenceLevel;
     }
 
     /**
@@ -269,5 +291,16 @@ public class ExplorationInfo {
         }
 
         return result;
+    }
+
+    /**
+     * Sends a broadcast to the tracer, which in turn dumps the collected traces to a file on
+     * the external storage.
+     */
+    public void sendBroadcastToTracer() {
+        Intent intent = new Intent("STORE_TRACES");
+        intent.setComponent(new ComponentName(getTargetPackageName(),
+                "de.uni_passau.fim.auermich.tracer.Tracer"));
+        DeviceInfo.getInstance().getAUTContext().sendBroadcast(intent);
     }
 }

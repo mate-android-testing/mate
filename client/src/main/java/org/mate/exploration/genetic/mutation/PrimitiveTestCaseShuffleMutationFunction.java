@@ -2,6 +2,8 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.commons.interaction.action.ui.PrimitiveAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.commons.interaction.action.Action;
@@ -36,10 +38,16 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         TestCase executedTestCase = TestCase.fromDummy(testCase);
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
 
+        if(Properties.SURROGATE_MODEL()) {
+            Registry.getUiAbstractionLayer().storeTraces();
+        }
+
         FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
         CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         MATELog.log_acc("Found crash: " + chromosome.getValue().hasCrashDetected());
+
+        executedTestCase.finish();
 
         return mutatedChromosome;
     }

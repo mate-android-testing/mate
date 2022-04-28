@@ -152,6 +152,8 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             // time we reset exploration, causing it to execute always the same actions.
             representationLayer.setRandomSeed(Properties.RANDOM_SEED() + representationLayerLaunches);
 
+            representationLayer.setStateEquivalenceLevel(Properties.STATE_EQUIVALENCE_LEVEL());
+
             if (Registry.isReplayMode()) {
                 representationLayer.setReplayMode();
             }

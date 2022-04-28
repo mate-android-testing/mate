@@ -1,5 +1,6 @@
 package org.mate.exploration.intent;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.utils.MATELog;
@@ -161,7 +162,11 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
             }
         } finally {
-            // store coverage, serialize, record stats about test case if desired
+
+            if(Properties.SURROGATE_MODEL()) {
+                Registry.getUiAbstractionLayer().storeTraces();
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                  * If we deal with a test suite execution, the storing of coverage
@@ -171,6 +176,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;

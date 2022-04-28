@@ -1,11 +1,13 @@
 package org.mate.exploration.genetic.crossover;
 
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Collections;
@@ -67,9 +69,15 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
             TestCase executedTestCase = TestCase.fromDummy(offspring);
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
+            if(Properties.SURROGATE_MODEL()) {
+                Registry.getUiAbstractionLayer().storeTraces();
+            }
+
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
             CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
             CoverageUtils.logChromosomeCoverage(chromosome);
+
+            executedTestCase.finish();
 
             return Collections.singletonList(chromosome);
         }
