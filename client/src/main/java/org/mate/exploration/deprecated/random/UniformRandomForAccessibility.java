@@ -73,10 +73,6 @@ public class UniformRandomForAccessibility {
                     long timeToWait = waitForProgressBar(state);
                     //if there is a progress bar
                     if (timeToWait>0) {
-                        //add 2 sec just to be sure
-                        timeToWait += 2000;
-                        //set that the current action needs to wait before new action
-                        action.setTimeToWait(timeToWait);
                         //get a new state
                         state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
                     }

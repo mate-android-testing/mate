@@ -31,7 +31,6 @@ import org.mate.state.ScreenStateType;
 import org.mate.commons.utils.Randomness;
 import org.mate.utils.StackTrace;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -234,22 +233,6 @@ public class UIAbstractionLayer {
 
         state = clearScreen();
 
-        // TODO: assess if timeout should be added to primitive actions as well
-        // check whether there is a progress bar on the screen
-        long timeToWait = waitForProgressBar(state);
-        // if there is a progress bar
-        if (timeToWait > 0) {
-            // add 2 sec just to be sure
-            timeToWait += 2000;
-            // set that the current action needs to wait before new action
-            if (action instanceof WidgetAction) {
-                WidgetAction wa = (WidgetAction) action;
-                wa.setTimeToWait(timeToWait);
-            }
-            // get a new state
-            state = clearScreen();
-        }
-
         // get the package name of the app currently running
         String currentPackageName = state.getPackageName();
 
@@ -372,6 +355,18 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for presence of permission dialog
+                if (handlePermissionDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                // check for presence of progress bar
+                if (handleProgressBar(screenState)) {
+                    change = true;
+                    continue;
+                }
+
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
                     change = true;
@@ -380,12 +375,6 @@ public class UIAbstractionLayer {
 
                 // check for google sign in dialog
                 if (handleGoogleSignInDialog(screenState)) {
-                    change = true;
-                    continue;
-                }
-
-                // check for presence of permission dialog
-                if (handlePermissionDialog(screenState)) {
                     change = true;
                     continue;
                 }
@@ -402,6 +391,26 @@ public class UIAbstractionLayer {
             }
         }
         return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows a progress bar. If this is the case, we wait 10 seconds.
+     * This may take several iterations until the progress bar is gone.
+     *
+     * @param screenState The current screen.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleProgressBar(IScreenState screenState) {
+
+        // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
+
+        if (deviceMgr.checkForProgressBar(screenState)) {
+            MATELog.log("Detected progress bar! Waiting...");
+            Utils.sleep(10000);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -542,42 +551,6 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Checks whether a progress bar appeared on the screen. If this is the case,
-     * waits a certain amount of time that the progress bar can reach completion.
-     *
-     * @param state The recording of the current screen.
-     * @return Returns the amount of time it has waited for completion.
-     */
-    private long waitForProgressBar(IScreenState state) throws AUTCrashException {
-
-        long ini = new Date().getTime();
-        long end = new Date().getTime();
-        boolean hadProgressBar = false;
-        boolean hasProgressBar = true;
-
-        // wait a certain amount of time (22 seconds at max)
-        while (hasProgressBar && (end - ini) < 22000) {
-
-            // check whether a widget represents a progress bar
-            hasProgressBar = false;
-
-            for (Widget widget : state.getWidgets()) {
-                if (deviceMgr.checkForProgressBar(widget)) {
-                    MATELog.log("WAITING PROGRESS BAR TO FINISH");
-                    hasProgressBar = true;
-                    hadProgressBar = true;
-                    Utils.sleep(3000);
-                    state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-                }
-            }
-            end = new Date().getTime();
-        }
-        if (!hadProgressBar)
-            return 0;
-        return end - ini;
-    }
-
-    /**
      * Returns the screen width.
      *
      * @return Returns the screen width in pixels.
@@ -613,7 +586,7 @@ public class UIAbstractionLayer {
         /*try {
             deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
-            MATE.log("Wake up couldn't be performed");
+            MATELog.log("Wake up couldn't be performed");
             e.printStackTrace();
         }
 

@@ -990,6 +990,24 @@ public class Widget implements Parcelable {
         }
     }
 
+    /**
+     * Checks whether this widget represents a progress bar. See:
+     * https://developer.android.com/reference/android/widget/ProgressBar for more details.
+     *
+     * @return Returns {@code true} if this widget is a progress bar, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isProgressBarType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.ProgressBar.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATELog.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
     public boolean isPassword() {
         return password;
     }

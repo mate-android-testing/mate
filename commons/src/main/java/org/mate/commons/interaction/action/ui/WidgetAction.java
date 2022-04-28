@@ -32,11 +32,6 @@ public class WidgetAction extends UIAction {
     @Deprecated
     private String extraInfo;
 
-    /**
-     * The time to wait after the action has been executed.
-     */
-    private long timeToWait;
-
     @Deprecated
     private float pheromone;
 
@@ -104,26 +99,6 @@ public class WidgetAction extends UIAction {
     @Deprecated
     public List<WidgetAction> getAdjActions() {
         return adjActions;
-    }
-
-    /**
-     * Returns the wait time, i.e. the time to wait after
-     * the execution of the action.
-     *
-     * @return Returns the wait time.
-     */
-    public long getTimeToWait() {
-        return timeToWait;
-    }
-
-    /**
-     * Defines a wait time, i.e. the time how long we should wait
-     * after executing the action.
-     *
-     * @param timeToWait The new wait time.
-     */
-    public void setTimeToWait(long timeToWait) {
-        this.timeToWait = timeToWait;
     }
 
     @Deprecated
@@ -229,7 +204,6 @@ public class WidgetAction extends UIAction {
         dest.writeParcelable(this.widget, flags);
         dest.writeTypedList(this.adjActions);
         dest.writeString(this.extraInfo);
-        dest.writeLong(this.timeToWait);
         dest.writeFloat(this.pheromone);
         dest.writeFloat(this.proportionalPheromone);
     }
@@ -239,7 +213,6 @@ public class WidgetAction extends UIAction {
         this.widget = in.readParcelable(Widget.class.getClassLoader());
         this.adjActions = in.createTypedArrayList(WidgetAction.CREATOR);
         this.extraInfo = in.readString();
-        this.timeToWait = in.readLong();
         this.pheromone = in.readFloat();
         this.proportionalPheromone = in.readFloat();
     }

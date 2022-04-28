@@ -83,9 +83,6 @@ public class WidgetActionExecutor extends ActionExecutor {
                         + " not implemented for widget actions.");
         }
 
-        // if there is a progress bar associated to that action
-        Utils.sleep(action.getTimeToWait());
-
         return success;
     }
 

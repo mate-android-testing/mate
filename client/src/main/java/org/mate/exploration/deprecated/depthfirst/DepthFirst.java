@@ -107,9 +107,6 @@ public class DepthFirst {
                     IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     long timeToWait = waitForProgressBar(state);
-                    if (timeToWait>300)
-                        timeToWait+=2000;
-                    action.setTimeToWait(timeToWait);
                     state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     MATELog.log("\n\nnumber of actions (new state?): " + state.getActions().size()+"\n\n");

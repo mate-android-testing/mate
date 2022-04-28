@@ -13,6 +13,7 @@ import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Utils;
 import org.mate.service.MATEService;
+import org.mate.state.IScreenState;
 import org.mate.utils.StackTrace;
 
 import java.io.BufferedReader;
@@ -99,16 +100,21 @@ public class DeviceMgr {
     }
 
     /**
-     * Checks whether the given widget represents a progress bar.
+     * Checks whether the given screen contains a progress bar.
      *
-     * @param widget The given widget.
-     * @return Returns {@code true} if the widget refers to a progress bar,
-     *         otherwise {@code false} is returned.
+     * @param screenState The given screen state.
+     * @return Returns {@code true} if the screen contains a progress bar, otherwise {@code false}
+     *          is returned.
      */
-    public boolean checkForProgressBar(Widget widget) {
-        return widget.getClazz().contains("ProgressBar")
-                && widget.isEnabled()
-                && widget.getContentDesc().contains("Loading");
+    public boolean checkForProgressBar(IScreenState screenState) {
+
+        for (Widget widget : screenState.getWidgets()) {
+            if (widget.isProgressBarType() && widget.isEnabled() && widget.isVisible()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
