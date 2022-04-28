@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Provides utility functions to retrieve coverage-related information.
@@ -52,7 +51,7 @@ public final class CoverageUtils {
          */
         Set<String> visitedActivitiesOfTestCases = new HashSet<>();
         for (TestCase testCase : testCases) {
-            visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
+            visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivitiesOfApp());
         }
 
         if (visitedActivities.containsKey(targetChromosome)) {
@@ -101,7 +100,7 @@ public final class CoverageUtils {
     public static void storeTestCaseChromosomeCoverage(IChromosome<TestCase> chromosome) {
 
         // store data about activity coverage in any case
-        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
+        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
 
         switch (Properties.COVERAGE()) {
             case BRANCH_COVERAGE:
@@ -116,6 +115,21 @@ public final class CoverageUtils {
             default:
                 break;
         }
+    }
+
+    /**
+     * Updates the activity coverage for the given test case chromosome. This is only necessary for
+     * activities that have been discovered through an action not belonging to the test case.
+     *
+     * @param chromosome The test case chromosome.
+     * @param activity The activity that has been visited.
+     */
+    public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
+                                                                String activity) {
+
+        Set<String> visited = visitedActivities.getOrDefault(chromosome, new HashSet<>());
+        visited.add(activity);
+        visitedActivities.put(chromosome, visited);
     }
 
     /**
@@ -134,7 +148,7 @@ public final class CoverageUtils {
          * coverage of the individual test cases, one has to iterate over the
          * test cases manually.
          */
-        Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
+        Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivitiesOfApp();
 
         // merge with already visited activities of other test cases in the test suite
         if (visitedActivities.containsKey(chromosome)) {
@@ -172,12 +186,7 @@ public final class CoverageUtils {
                     + chromosome + "!");
         }
 
-        Set<String> visitedActivitiesOfApp = visitedActivities.get(chromosome).stream()
-                // only consider activities belonging to the AUT
-                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
-                .collect(Collectors.toSet());
-
-        return (double) visitedActivitiesOfApp.size() / getActivities().size() * 100;
+        return (double) visitedActivities.get(chromosome).size() / getActivities().size() * 100;
     }
 
     /**
@@ -334,13 +343,7 @@ public final class CoverageUtils {
         Set<String> visitedActivitiesTotal = new HashSet<>();
 
         for (Set<String> activities : visitedActivities.values()) {
-
-            Set<String> visitedActivitiesOfApp = activities.stream()
-                    // only consider activities belonging to the AUT
-                    .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
-                    .collect(Collectors.toSet());
-
-            visitedActivitiesTotal.addAll(visitedActivitiesOfApp);
+            visitedActivitiesTotal.addAll(activities);
         }
 
         return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
@@ -395,13 +398,7 @@ public final class CoverageUtils {
                 throw new IllegalStateException("No visited activities for chromosome "
                         + chromosome + "!");
             }
-
-            Set<String> visitedActivitiesOfApp = visitedActivities.get(chromosome).stream()
-                    // only consider activities belonging to the AUT
-                    .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
-                    .collect(Collectors.toSet());
-
-            visitedActivitiesTotal.addAll(visitedActivitiesOfApp);
+            visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
         }
 
         return (double) visitedActivitiesTotal.size() / getActivities().size() * 100;
@@ -451,13 +448,7 @@ public final class CoverageUtils {
      * @return Returns the activity coverage of the given test case.
      */
     private static double getActivityCoverage(TestCase testCase) {
-
-        Set<String> visitedActivitiesOfApp = testCase.getVisitedActivities().stream()
-                // only consider activities belonging to the AUT
-                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
-                .collect(Collectors.toSet());
-
-        return (double) visitedActivitiesOfApp.size() / getActivities().size() * 100;
+        return (double) testCase.getVisitedActivitiesOfApp().size() / getActivities().size() * 100;
     }
 
     /**

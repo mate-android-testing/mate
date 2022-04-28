@@ -28,6 +28,7 @@ public final class TestCaseStatistics {
 
         MATE.log("Visited activities in order: " + testCase.getActivitySequence());
         MATE.log("Visited activities: " + testCase.getVisitedActivities());
+        MATE.log("Visited states in order: " + testCase.getStateSequence());
 
         // intent related statistics
         if (Properties.RELATIVE_INTENT_AMOUNT() > 0.0f) {
