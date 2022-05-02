@@ -987,14 +987,11 @@ public class Widget {
      *         is returned.
      */
     public boolean isProgressBarType() {
-        try {
-            Class<?> clazz = Class.forName(this.getClazz());
-            return android.widget.ProgressBar.class.isAssignableFrom(clazz);
-        } catch (ClassNotFoundException e) {
-            // classes from androidx package fail for instance (no dependency defined)
-            MATE.log_warn("Class " + getClazz() + " not found!");
-            return false;
-        }
+        /*
+        * There are a few sub classes of the base class ProgressBar, but those don't represent
+        * progress bars in the classical sense, i.e. they are 'abused' for primarily rating bars.
+         */
+        return getClazz().equals("android.widget.ProgressBar");
     }
 
     public boolean isPassword() {
