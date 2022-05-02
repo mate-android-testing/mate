@@ -1543,11 +1543,7 @@ public class DeviceMgr {
         * traces have been dumped.
          */
         while(!infoFile.exists()) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new IllegalStateException("Waiting for info.txt failed!", e);
-            }
+            Utils.sleep(200);
         }
 
         File traceFile = new File(sdCard, "traces.txt");
