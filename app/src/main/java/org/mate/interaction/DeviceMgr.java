@@ -1543,6 +1543,7 @@ public class DeviceMgr {
         * traces have been dumped.
          */
         while(!infoFile.exists()) {
+            MATE.log("Waiting for info.txt...");
             Utils.sleep(200);
         }
 

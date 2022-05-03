@@ -67,7 +67,7 @@ public class Properties {
      * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
      *          is returned.
      */
-    public static boolean SURROGATE_MODEL() { return propertyOr(true); }
+    public static boolean SURROGATE_MODEL() { return propertyOr(false); }
 
     /*
     * Intent fuzzing related properties.
