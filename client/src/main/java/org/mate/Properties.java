@@ -1,5 +1,6 @@
 package org.mate;
 
+import org.mate.commons.state.executable.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
@@ -10,7 +11,6 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
-import org.mate.commons.state.executable.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -68,7 +68,7 @@ public class Properties {
      * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
      *          is returned.
      */
-    public static boolean SURROGATE_MODEL() { return propertyOr(true); }
+    public static boolean SURROGATE_MODEL() { return propertyOr(false); }
 
     /*
     * Intent fuzzing related properties.
