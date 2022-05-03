@@ -8,7 +8,6 @@ import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.EnvironmentManager;
 import org.mate.service.MATEService;
 
 import java.util.ArrayList;
@@ -49,12 +48,7 @@ public class AppScreen {
         this.deviceMgr = deviceMgr;
 
         this.activityName = this.deviceMgr.getCurrentActivity();
-
-        if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
-            this.packageName = this.deviceMgr.getCurrentPackageName();
-        } else {
-            this.packageName = activityName.split("/")[0];
-        }
+        this.packageName = this.deviceMgr.getCurrentPackageName();
 
         // retrieve widgets from current screen
         try {
