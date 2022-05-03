@@ -388,6 +388,7 @@ public class DeviceMgr {
          * traces have been dumped.
          */
         while(!infoFile.exists()) {
+            MATELog.log("Waiting for info.txt...");
             Utils.sleep(200);
         }
 
