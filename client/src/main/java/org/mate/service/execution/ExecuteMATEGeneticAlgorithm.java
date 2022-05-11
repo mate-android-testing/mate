@@ -10,6 +10,7 @@ import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 
 import java.util.List;
 
@@ -42,6 +43,8 @@ public class ExecuteMATEGeneticAlgorithm {
             for (String objective : objectives) {
                 builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
             }
+        } else if (Properties.ALGORITHM() == Algorithm.NOVELTY_SEARCH) {
+            builder = builder.withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name());
         } else {
             builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
         }

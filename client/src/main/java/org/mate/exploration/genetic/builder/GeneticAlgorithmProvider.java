@@ -442,6 +442,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NoveltySearch requires a termination condition. You have to" +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.OBJECTIVE() == null) {
+            throw new IllegalStateException("NoveltySearch requires an objective. You have to" +
+                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
         return new NoveltySearch<>(
