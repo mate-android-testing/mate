@@ -231,7 +231,23 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     protected void logCurrentFitness() {
 
-        if (population.size() <= 10) {
+        if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
+            /*
+            * We need to force the evaluation of all chromosomes such that the fitness and coverage
+            * data are produced.
+             */
+            for (int i = 0; i < fitnessFunctions.size(); i++) {
+                MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
+                MATE.log_acc("Fitness function " + (i + 1) + ":");
+                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                for (int j = 0; j < population.size(); j++) {
+                    IChromosome<T> chromosome = population.get(j);
+                    MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));
+                }
+            }
+        }
+
+        if (population.size() <= 10 && Properties.FITNESS_FUNCTION() != FitnessFunction.GENO_TO_PHENO_TYPE) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
