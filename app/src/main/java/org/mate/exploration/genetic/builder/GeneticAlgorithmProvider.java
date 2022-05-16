@@ -251,15 +251,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("NSGA-II requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("NSGA-II requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
-        } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to " +
-                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
         return new NSGAII<>(
