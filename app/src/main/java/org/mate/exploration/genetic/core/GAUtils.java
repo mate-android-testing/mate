@@ -212,8 +212,12 @@ public class GAUtils {
                     dominationCounters.put(q, dominationCtr);
 
                     if (dominationCtr == 0) {
-                        // q belongs to the next front
-                        nextParetoFront.add(q);
+                        // q belongs to the next front (actually all duplicates as well)
+                        for (IChromosome<T> chromosome : population) {
+                            if (chromosome.equals(q)) {
+                                nextParetoFront.add(q);
+                            }
+                        }
                     }
                 }
             }
