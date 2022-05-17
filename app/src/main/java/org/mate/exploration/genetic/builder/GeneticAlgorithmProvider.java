@@ -537,9 +537,6 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("Sapienz requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            throw new IllegalStateException("Sapienz requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
