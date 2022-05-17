@@ -98,8 +98,8 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
 
         int count = 0;
         for (String branch : branches) {
-            Map<IChromosome, Double> branchCache =  cache.get(branch);
-            for (IChromosome chromosome: new ArrayList<>(branchCache.keySet())) {
+            Map<IChromosome, Double> branchCache = cache.get(branch);
+            for (IChromosome chromosome : new ArrayList<>(branchCache.keySet())) {
                 if (!activeChromosomes.contains(chromosome)) {
                     branchCache.remove(chromosome);
                     count++;

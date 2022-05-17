@@ -5,6 +5,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
@@ -111,6 +112,8 @@ public class FitnessUtils {
             BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
             BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
+            BranchMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
         }
     }
 
