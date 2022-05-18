@@ -30,6 +30,11 @@ public class ExecuteMATESapienz {
                         .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
                         .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                         .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)
+                        /*
+                        * As long as we can only define a single fitness function property, the
+                        * fitness function that produces traces (e.g. branch coverage) needs to be
+                        * specified first, otherwise the traces are omitted.
+                         */
                         .withFitnessFunction(FitnessFunction.BRANCH_COVERAGE)
                         .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
                         .withFitnessFunction(FitnessFunction.TEST_LENGTH)

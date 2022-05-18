@@ -77,9 +77,11 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
         * We only need to compute the fronts F (= F1, F2,...) and the crowding distances once
         * for the selection function.
          */
-        Map<Integer, List<IChromosome<T>>> paretoFronts = GAUtils.fastNonDominatedSort(population, fitnessFunctions);
+        Map<Integer, List<IChromosome<T>>> paretoFronts
+                = GAUtils.fastNonDominatedSort(population, fitnessFunctions);
         Map<IChromosome<T>, Integer> rankMap = GAUtils.getRankMap(paretoFronts);
-        Map<IChromosome<T>, Double> crowdingDistanceMap = GAUtils.crowdingDistanceAssignment(population, fitnessFunctions);
+        Map<IChromosome<T>, Double> crowdingDistanceMap
+                = GAUtils.crowdingDistanceAssignment(population, fitnessFunctions);
 
         while (newGeneration.size() < bigPopulationSize) {
 
