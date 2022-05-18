@@ -225,9 +225,10 @@ public class DeviceMgr {
             if (e.getMessage() != null) {
                 MATELog.log_warn(e.getMessage());
             }
-
-            return null;
         }
+
+        // fall back mechanism (slow)
+        return Registry.getEnvironmentManager().getCurrentPackageName();
     }
 
     /**

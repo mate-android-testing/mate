@@ -295,6 +295,29 @@ public class EnvironmentManager {
     }
 
     /**
+     * Retrieves the name of the currently visible application. It can happen that the AUT just crashed
+     * and the package name wasn't updated, then the string 'unknown' is returned.
+     *
+     * @return Returns the name of the current package or the string 'unknown' if extraction failed.
+     */
+    public String getCurrentPackageName() {
+
+        if (emulator == null || emulator.isEmpty()) {
+            return ACTIVITY_UNKNOWN;
+        }
+
+        String currentActivityName = Registry.getEnvironmentManager().getCurrentActivityName();
+        if (!currentActivityName.contains("/")) {
+            // we didn't get a fully-qualified name, so it is not possible to guess which part of
+            // the string is the package name and which is the activity.
+            return ACTIVITY_UNKNOWN;
+        }
+
+        String packageName = currentActivityName.split("/")[0];
+        return packageName;
+    }
+
+    /**
      * Retrieves the name of the currently visible activity. It can happen that the AUT just crashed
      * and the activity name wasn't updated, then the string 'unknown' is returned.
      *
