@@ -301,7 +301,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             Utils.sleep(2000);
 
         } catch (Exception e) {
-            log("An exception occurred: " + e.getMessage());
+            log("An exception occurred trying to launch AUT: " + e.getMessage());
             stopService();
         }
 
@@ -323,7 +323,7 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             try {
                 MATERunner.run(packageName, algorithm, getApplicationContext());
             } catch (Exception e) {
-                log("An exception occurred: " + e.getMessage());
+                log("An exception occurred while running MATE Client: " + e.getMessage());
 
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
