@@ -35,6 +35,12 @@ public class FitnessUtils {
     public static void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
                                         IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
+        /*
+         * TODO: Support multi-valued fitness function property. We may want to combine multiple
+         *  fitness functions that all produce some sort of traces. Right now, we can only handle
+         *  one such fitness function at a time.
+         */
+
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
@@ -55,6 +61,12 @@ public class FitnessUtils {
      * @param chromosome The given test case.
      */
     public static void storeTestCaseChromosomeFitness(IChromosome<TestCase> chromosome) {
+
+        /*
+        * TODO: Support multi-valued fitness function property. We may want to combine multiple
+        *  fitness functions that all produce some sort of traces. Right now, we can only handle
+        *  one such fitness function at a time.
+         */
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
@@ -83,6 +95,12 @@ public class FitnessUtils {
      */
     public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, TestCase testCase) {
 
+        /*
+         * TODO: Support multi-valued fitness function property. We may want to combine multiple
+         *  fitness functions that all produce some sort of traces. Right now, we can only handle
+         *  one such fitness function at a time.
+         */
+
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
@@ -105,6 +123,12 @@ public class FitnessUtils {
      * @param activeChromosomes The list of active chromosomes.
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
+
+        /*
+         * TODO: Support multi-valued fitness function property. We may want to combine multiple
+         *  fitness functions that all produce some sort of traces. Right now, we can only handle
+         *  one such fitness function at a time.
+         */
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
             LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
