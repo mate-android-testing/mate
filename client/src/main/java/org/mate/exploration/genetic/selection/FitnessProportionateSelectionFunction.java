@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.selection;
 
+import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -32,6 +33,8 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
         final IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
         final boolean maximizing = fitnessFunction.isMaximizing();
 
+        MATE.log_acc("Performing selection on " + population.size() + " chromosomes...");
+
         List<IChromosome<T>> selection = new ArrayList<>();
         List<IChromosome<T>> candidates = new LinkedList<>(population);
         int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
@@ -40,8 +43,8 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
 
             /*
             * Constructs the roulette wheel. Each chromosome is assigned a range proportionate
-            * to its fitness value. The first chromosome c1 covers the range [0.0,fitness(c1)],
-            * the second chromosome c2 the range (fitness(c1),fitness(c2)], and so on.
+            * to its fitness value. The first chromosome c1 covers the range [0.0,fitness(c1)),
+            * the second chromosome c2 the range [fitness(c1),fitness(c2)), and so on.
              */
             double sum = 0.0;
 
@@ -50,23 +53,35 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
                 sum += maximizing ? fitness : invertFitnessValue(fitness);
             }
 
-            /*
-            * The maximal spectrum of the roulette wheel is defined by the range [0.0,sum].
-            * Thus, we pick a random number in that spectrum. The candidate that covers the
-            * random number represents the selected chromosome.
-             */
-            double rnd = Randomness.getRandom(0.0, sum);
             IChromosome<T> selected = null;
 
-            double start = 0.0;
-            for (IChromosome<T> chromosome : candidates) {
-                double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-                double end = start + (maximizing ? fitness : invertFitnessValue(fitness));
-                if (rnd <= end) {
-                    selected = chromosome;
-                    break;
-                } else {
-                    start = end;
+            if (sum == 0.0) {
+                // we pick random if all chromosomes have a fitness of 0.0
+                MATE.log_acc("Picking random from " + candidates.size() + " chromosomes...");
+                selected = Randomness.randomElement(candidates);
+            } else {
+                /*
+                 * The maximal spectrum of the roulette wheel is defined by the range [0.0,sum).
+                 * Thus, we pick a random number in that spectrum. The candidate that covers the
+                 * random number represents the selected chromosome.
+                 */
+                double rnd = Randomness.getRandom(0.0, sum);
+
+                MATE.log_acc("Picking from " + candidates.size() + " chromosomes...");
+                MATE.log_acc("Sum: " + sum);
+                MATE.log_acc("Random selection: " + rnd);
+
+                double start = 0.0;
+                for (IChromosome<T> chromosome : candidates) {
+                    double fitness = fitnessFunction.getNormalizedFitness(chromosome);
+                    double end = start + (maximizing ? fitness : invertFitnessValue(fitness));
+                    MATE.log_acc("Interval: [" + start + "," + end + ")");
+                    if (rnd < end) {
+                        selected = chromosome;
+                        break;
+                    } else {
+                        start = end;
+                    }
                 }
             }
 
