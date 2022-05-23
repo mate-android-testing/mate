@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.selection;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -33,8 +32,6 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
         final IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(0);
         final boolean maximizing = fitnessFunction.isMaximizing();
 
-        MATE.log_acc("Performing selection on " + population.size() + " chromosomes...");
-
         List<IChromosome<T>> selection = new ArrayList<>();
         List<IChromosome<T>> candidates = new LinkedList<>(population);
         int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
@@ -57,7 +54,6 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
 
             if (sum == 0.0) {
                 // we pick random if all chromosomes have a fitness of 0.0
-                MATE.log_acc("Picking random from " + candidates.size() + " chromosomes...");
                 selected = Randomness.randomElement(candidates);
             } else {
                 /*
@@ -67,15 +63,10 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
                  */
                 double rnd = Randomness.getRandom(0.0, sum);
 
-                MATE.log_acc("Picking from " + candidates.size() + " chromosomes...");
-                MATE.log_acc("Sum: " + sum);
-                MATE.log_acc("Random selection: " + rnd);
-
                 double start = 0.0;
                 for (IChromosome<T> chromosome : candidates) {
                     double fitness = fitnessFunction.getNormalizedFitness(chromosome);
                     double end = start + (maximizing ? fitness : invertFitnessValue(fitness));
-                    MATE.log_acc("Interval: [" + start + "," + end + ")");
                     if (rnd < end) {
                         selected = chromosome;
                         break;
