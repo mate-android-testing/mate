@@ -40,8 +40,8 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
 
             /*
             * Constructs the roulette wheel. Each chromosome is assigned a range proportionate
-            * to its fitness value. The first chromosome c1 covers the range [0.0,fitness(c1)],
-            * the second chromosome c2 the range (fitness(c1),fitness(c2)], and so on.
+            * to its fitness value. The first chromosome c1 covers the range [0.0,fitness(c1)),
+            * the second chromosome c2 the range [fitness(c1),fitness(c2)), and so on.
              */
             double sum = 0.0;
 
@@ -50,23 +50,29 @@ public class FitnessProportionateSelectionFunction<T> implements ISelectionFunct
                 sum += maximizing ? fitness : invertFitnessValue(fitness);
             }
 
-            /*
-            * The maximal spectrum of the roulette wheel is defined by the range [0.0,sum].
-            * Thus, we pick a random number in that spectrum. The candidate that covers the
-            * random number represents the selected chromosome.
-             */
-            double rnd = Randomness.getRandom(0.0, sum);
             IChromosome<T> selected = null;
 
-            double start = 0.0;
-            for (IChromosome<T> chromosome : candidates) {
-                double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-                double end = start + (maximizing ? fitness : invertFitnessValue(fitness));
-                if (rnd <= end) {
-                    selected = chromosome;
-                    break;
-                } else {
-                    start = end;
+            if (sum == 0.0) {
+                // we pick random if all chromosomes have a fitness of 0.0
+                selected = Randomness.randomElement(candidates);
+            } else {
+                /*
+                 * The maximal spectrum of the roulette wheel is defined by the range [0.0,sum).
+                 * Thus, we pick a random number in that spectrum. The candidate that covers the
+                 * random number represents the selected chromosome.
+                 */
+                double rnd = Randomness.getRandom(0.0, sum);
+
+                double start = 0.0;
+                for (IChromosome<T> chromosome : candidates) {
+                    double fitness = fitnessFunction.getNormalizedFitness(chromosome);
+                    double end = start + (maximizing ? fitness : invertFitnessValue(fitness));
+                    if (rnd < end) {
+                        selected = chromosome;
+                        break;
+                    } else {
+                        start = end;
+                    }
                 }
             }
 
