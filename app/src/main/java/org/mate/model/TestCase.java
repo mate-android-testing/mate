@@ -398,29 +398,10 @@ public class TestCase {
         // track the activity and state transition of each action
         String activityBeforeAction = oldState.getActivityName();
         String activityAfterAction = newState.getActivityName();
-        String oldStateID = oldState.getId();
         String newStateID = newState.getId();
 
-        if (actionID == 0) {
-
-            MATE.log_acc("Start activity: " + activityBeforeAction);
-            MATE.log_acc("Saved start activity: " + activitySequence.get(0));
-
-            if (!activityBeforeAction.equals(activitySequence.get(0))) {
-                MATE.log_acc("Unexpected start activity!");
-            }
-
-            MATE.log_acc("Start state: " + oldStateID);
-            MATE.log_acc("Saved start state: " + stateSequence.get(0));
-
-            if (!oldStateID.equals(stateSequence.get(0))) {
-                MATE.log_acc("Unexpected start state!");
-            }
-
-        } else {
-            activitySequence.add(activityAfterAction);
-            stateSequence.add(newStateID);
-        }
+        activitySequence.add(activityAfterAction);
+        stateSequence.add(newStateID);
 
         MATE.log("executed action " + actionID + ": " + action);
         MATE.log("Activity Transition for action " + actionID
