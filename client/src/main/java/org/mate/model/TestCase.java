@@ -88,6 +88,15 @@ public class TestCase {
         stateSequence = new ArrayList<>();
         eventSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
+
+        /*
+        * In rare circumstances, test cases without any action are created. This, however, means
+        * that updateTestCase() was never called, thus the state and activity sequence is empty,
+        * which in turn may falsify activity coverage and the gui model.
+         */
+        IScreenState lastScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
+        stateSequence.add(lastScreenState.getId());
+        activitySequence.add(lastScreenState.getActivityName());
     }
 
     /**
@@ -396,10 +405,21 @@ public class TestCase {
         String newStateID = newState.getId();
 
         if (actionID == 0) {
-            activitySequence.add(activityBeforeAction);
-            activitySequence.add(activityAfterAction);
-            stateSequence.add(oldStateID);
-            stateSequence.add(newStateID);
+
+            MATE.log_acc("Start activity: " + activityBeforeAction);
+            MATE.log_acc("Saved start activity: " + activitySequence.get(0));
+
+            if (!activityBeforeAction.equals(activitySequence.get(0))) {
+                MATE.log_acc("Unexpected start activity!");
+            }
+
+            MATE.log_acc("Start state: " + oldStateID);
+            MATE.log_acc("Saved start state: " + stateSequence.get(0));
+
+            if (!oldStateID.equals(stateSequence.get(0))) {
+                MATE.log_acc("Unexpected start state!");
+            }
+
         } else {
             activitySequence.add(activityAfterAction);
             stateSequence.add(newStateID);
