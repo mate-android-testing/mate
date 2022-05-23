@@ -88,6 +88,15 @@ public class TestCase {
         stateSequence = new ArrayList<>();
         eventSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
+
+        /*
+        * In rare circumstances, test cases without any action are created. This, however, means
+        * that updateTestCase() was never called, thus the state and activity sequence is empty,
+        * which in turn may falsify activity coverage and the gui model.
+         */
+        IScreenState lastScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
+        stateSequence.add(lastScreenState.getId());
+        activitySequence.add(lastScreenState.getActivityName());
     }
 
     /**
@@ -389,18 +398,10 @@ public class TestCase {
         // track the activity and state transition of each action
         String activityBeforeAction = oldState.getActivityName();
         String activityAfterAction = newState.getActivityName();
-        String oldStateID = oldState.getId();
         String newStateID = newState.getId();
 
-        if (actionID == 0) {
-            activitySequence.add(activityBeforeAction);
-            activitySequence.add(activityAfterAction);
-            stateSequence.add(oldStateID);
-            stateSequence.add(newStateID);
-        } else {
-            activitySequence.add(activityAfterAction);
-            stateSequence.add(newStateID);
-        }
+        activitySequence.add(activityAfterAction);
+        stateSequence.add(newStateID);
 
         MATE.log("executed action " + actionID + ": " + action);
         MATE.log("Activity Transition for action " + actionID
