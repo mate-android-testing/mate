@@ -17,7 +17,7 @@ From the root of this repository run the following:
 
 `./gradlew -PtargetPackage=com.example :representation:clean :representation:assembleDebugAndroidTest`
 
-This will take care of building the `androidTest` APK and setting the appropiate `targetPackage` property in manifest.
+This will take care of building the `androidTest` APK and setting the appropriate `targetPackage` property in manifest.
 Output can be found at `./representation/build/outputs/apk/androidTest/debug/representation-debug-androidTest.apk`
 
 You can check that it has the proper target package name by executing:
