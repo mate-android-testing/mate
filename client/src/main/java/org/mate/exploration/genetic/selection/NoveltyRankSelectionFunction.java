@@ -71,11 +71,11 @@ public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
             }
 
             /*
-             * The maximal spectrum of the roulette wheel is defined by the range [0.0,sum].
+             * The maximal spectrum of the roulette wheel is defined by the range [0,sum).
              * Thus, we pick a random number in that spectrum. The candidate that covers the
              * random number represents the selected chromosome.
              */
-            int rnd = Randomness.getRnd().nextInt(sum + 1);
+            int rnd = Randomness.getRnd().nextInt(sum);
             Pair<IChromosome<T>, Double> selected = null;
 
             int start = 0;
@@ -85,7 +85,7 @@ public class NoveltyRankSelectionFunction<T> implements ISelectionFunction<T> {
 
                 int end = start + rank;
 
-                if (rnd <= end) {
+                if (rnd < end) {
                     selected = candidate;
                     break;
                 } else {
