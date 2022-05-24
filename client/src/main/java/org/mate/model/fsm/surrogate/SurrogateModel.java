@@ -312,14 +312,9 @@ public class SurrogateModel extends FSMModel {
      */
     private void updateTestCaseSequences(TestCase testCase) {
 
-        MATELog.log_acc("Updating sequences of test case...");
-
         final List<Action> actionSequence = new ArrayList<>();
         final List<String> stateSequence = new ArrayList<>();
         final List<String> activitySequence = new ArrayList<>();
-
-        MATELog.log_acc("Executed transitions: " + executedTransitions);
-        MATELog.log_acc("Predicted transitions: " + predictedTransitions);
 
         // either one of both lists is empty or we need to merge both lists in the right order
         List<SurrogateTransition> transitions = new ArrayList<>(executedTransitions);
