@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -138,7 +137,6 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
      * @return Returns the randomly selected ui action.
      */
     protected Action selectAction() {
-        MATE.log_acc("Selecting action on " + uiAbstractionLayer.getLastScreenState());
         return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
     }
 }

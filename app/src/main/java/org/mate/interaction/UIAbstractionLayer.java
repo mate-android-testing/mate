@@ -99,7 +99,6 @@ public class UIAbstractionLayer {
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
         lastScreenState.setId("S" + lastScreenStateNumber);
-        MATE.log_acc("Setting lastScreenState initially: " + lastScreenState);
         lastScreenStateNumber++;
         if (Properties.SURROGATE_MODEL()) {
             guiModel = new SurrogateModel(lastScreenState, packageName);
@@ -175,7 +174,6 @@ public class UIAbstractionLayer {
                 if (actionResult != null) {
                     surrogateModel.addPredictedAction(action);
                     lastScreenState = surrogateModel.getCurrentScreenState();
-                    MATE.log_acc("Updating last screen after succ prediction: " + lastScreenState);
                     return actionResult;
                 } else {
                     /*
@@ -190,7 +188,6 @@ public class UIAbstractionLayer {
 
                     // If a cached action closes the AUT, we abort the action execution here.
                     if(result != SUCCESS && result != null) {
-                        MATE.log_acc("Cached action left AUT...");
                         return result;
                     }
                 }
@@ -202,7 +199,7 @@ public class UIAbstractionLayer {
             * a random action that is applicable on the current screen.
              */
             if(!getExecutableActions().contains(action)) {
-                MATE.log_acc("Can't apply given action on current screen! Select random action.");
+                MATE.log_warn("Can't apply given action on current screen! Select random action.");
                 action = Randomness.randomElement(getExecutableActions());
             }
         }
@@ -233,7 +230,6 @@ public class UIAbstractionLayer {
                 guiModel.update(lastScreenState, state, action);
             }
 
-            MATE.log_acc("Updating lastScreenState in case of a crash! " + lastScreenState);
             lastScreenState = state;
 
             return FAILURE_APP_CRASH;
@@ -273,7 +269,6 @@ public class UIAbstractionLayer {
             guiModel.update(lastScreenState, state, action);
         }
 
-        MATE.log_acc("Updating lastScreenState after action! " + lastScreenState);
         lastScreenState = state;
 
         return result;
@@ -595,7 +590,6 @@ public class UIAbstractionLayer {
          *  restart action that then connects the subgraph through a restart edge.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
-        MATE.log_acc("Updating lastScreenState after reset! " + lastScreenState);
 
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
@@ -618,7 +612,6 @@ public class UIAbstractionLayer {
          *  restart action that then connects the subgraph through a restart edge.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
-        MATE.log_acc("Updating lastScreenState after restart! " + lastScreenState);
     }
 
     /**

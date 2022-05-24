@@ -178,10 +178,8 @@ public class SurrogateModel extends FSMModel {
 
         if (transitions.isEmpty()) {
             // can't predict action -> reset
-            MATE.log_acc("Could not predict action...");
             predictedTraces.clear();
             numberOfNonPredictedActions++;
-            MATE.log_acc("Removing predicted transitions so far: " + predictedTransitions);
             predictedTransitions.clear();
             return null;
         } else {
@@ -202,8 +200,6 @@ public class SurrogateModel extends FSMModel {
             predictedTraces.addAll(transition.getTraces());
             predictedTransitions.add(transition);
             fsm.goToState(transition.getTarget());
-            MATE.log_acc("Could predict action...");
-            MATE.log_acc("Moved FSM in state after prediction: " + fsm.getCurrentState());
             return transition.getActionResult();
         }
     }
@@ -324,14 +320,9 @@ public class SurrogateModel extends FSMModel {
      */
     private void updateTestCaseSequences(TestCase testCase) {
 
-        MATE.log_acc("Updating sequences of test case...");
-
         final List<Action> actionSequence = new ArrayList<>();
         final List<String> stateSequence = new ArrayList<>();
         final List<String> activitySequence = new ArrayList<>();
-
-        MATE.log_acc("Executed transitions: " + executedTransitions);
-        MATE.log_acc("Predicted transitions: " + predictedTransitions);
 
         // either one of both lists is empty or we need to merge both lists in the right order
         List<SurrogateTransition> transitions = new ArrayList<>(executedTransitions);
