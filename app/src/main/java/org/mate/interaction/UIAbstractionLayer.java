@@ -173,6 +173,7 @@ public class UIAbstractionLayer {
 
                 if (actionResult != null) {
                     surrogateModel.addPredictedAction(action);
+                    lastScreenState = surrogateModel.getCurrentScreenState();
                     return actionResult;
                 } else {
                     /*
@@ -180,7 +181,7 @@ public class UIAbstractionLayer {
                     * return to the last check point and execute all cached actions.
                      */
                     surrogateModel.setInPrediction(false);
-                    surrogateModel.goToLastCheckPointState();
+                    lastScreenState = surrogateModel.goToLastCheckPointState();
                     ActionResult result = executeCachedActions(surrogateModel.getPredictedActions());
                     surrogateModel.resetPredictedActions();
                     surrogateModel.setInPrediction(true);
