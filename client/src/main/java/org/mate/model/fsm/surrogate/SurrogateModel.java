@@ -3,11 +3,11 @@ package org.mate.model.fsm.surrogate;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
 import org.mate.state.IScreenState;
-import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -168,10 +168,8 @@ public class SurrogateModel extends FSMModel {
 
         if (transitions.isEmpty()) {
             // can't predict action -> reset
-            MATE.log_acc("Could not predict action...");
             predictedTraces.clear();
             numberOfNonPredictedActions++;
-            MATE.log_acc("Removing predicted transitions so far: " + predictedTransitions);
             predictedTransitions.clear();
             return null;
         } else {
@@ -192,8 +190,6 @@ public class SurrogateModel extends FSMModel {
             predictedTraces.addAll(transition.getTraces());
             predictedTransitions.add(transition);
             fsm.goToState(transition.getTarget());
-            MATE.log_acc("Could predict action...");
-            MATE.log_acc("Moved FSM in state after prediction: " + fsm.getCurrentState());
             return transition.getActionResult();
         }
     }
