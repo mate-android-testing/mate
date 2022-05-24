@@ -2,15 +2,16 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.exploration.genetic.chromosome.Chromosome;
-import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.interaction.UIAbstractionLayer;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.PrimitiveAction;
-import org.mate.model.TestCase;
-import org.mate.utils.FitnessUtils;
 import org.mate.commons.utils.Randomness;
+import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
 
 /**
@@ -100,8 +101,10 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
             }
 
             if (!isTestSuiteExecution) {

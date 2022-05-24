@@ -1,11 +1,5 @@
 package org.mate.interaction;
 
-import static org.mate.commons.interaction.action.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.commons.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.commons.interaction.action.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.commons.interaction.action.ActionResult.SUCCESS;
-import static org.mate.commons.interaction.action.ActionResult.SUCCESS_OUTBOUND;
-
 import android.util.Log;
 
 import org.mate.Properties;
@@ -17,6 +11,7 @@ import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.commons.utils.Utils;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.Edge;
@@ -28,12 +23,17 @@ import org.mate.service.MATEService;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
-import org.mate.commons.utils.Randomness;
 import org.mate.utils.StackTrace;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.mate.commons.interaction.action.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.commons.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.commons.interaction.action.ActionResult.FAILURE_UNKNOWN;
+import static org.mate.commons.interaction.action.ActionResult.SUCCESS;
+import static org.mate.commons.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
 /**
  * TODO: make singleton
@@ -295,30 +295,15 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Stores the traces on the external storage that have been collected by the surrogate model
-     * for the last test case. This needs to be called after each test case and before a call to
+     * Stores the given traces on the external storage. This needs to be called after each test case
+     * and before a call to
      * {@link org.mate.utils.FitnessUtils#storeTestCaseChromosomeFitness(IChromosome)},
      * {@link org.mate.utils.FitnessUtils#storeTestSuiteChromosomeFitness(IChromosome, TestCase)},
      * {@link org.mate.utils.coverage.CoverageUtils#storeTestCaseChromosomeCoverage(IChromosome)} or
      * {@link org.mate.utils.coverage.CoverageUtils#storeTestSuiteChromosomeCoverage(IChromosome, TestCase)}.
      */
-    public void storeTraces() {
-
-        if (!Properties.SURROGATE_MODEL()) {
-            throw new IllegalStateException("Only call this method when the surrogate model is turned on!");
-        }
-
-        SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-
-        // These logs are parsed by the analysis framework!
-        MATELog.log("Predicted actions: " + surrogateModel.getNumberOfPredictedActions());
-        MATELog.log("Non-predicted actions: " + surrogateModel.getNumberOfNonPredictedActions());
-
-        if (surrogateModel.hasPredictedEveryAction()) {
-            MATELog.log("Predicted every action!");
-        }
-
-        deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
+    public void storeTraces(Set<String> traces) {
+        deviceMgr.storeTraces(traces);
     }
 
     /**

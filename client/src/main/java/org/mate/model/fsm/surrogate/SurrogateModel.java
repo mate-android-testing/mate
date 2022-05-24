@@ -1,5 +1,6 @@
 package org.mate.model.fsm.surrogate;
 
+import org.mate.Registry;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;
 import org.mate.commons.utils.MATELog;
@@ -303,11 +304,13 @@ public class SurrogateModel extends FSMModel {
     }
 
     /**
-     * Updates the given test case's action, state and activity sequence.
+     * Updates the given test case's action, state and activity sequence. This is necessary since
+     * a previous prediction might be wrong. This method needs to be called after a test case is
+     * complete and before {@link TestCase#finish()} is called.
      *
      * @param testCase The test case that needs to be updated.
      */
-    public void updateSequences(TestCase testCase) {
+    private void updateTestCaseSequences(TestCase testCase) {
 
         MATELog.log_acc("Updating sequences of test case...");
 
@@ -349,5 +352,42 @@ public class SurrogateModel extends FSMModel {
 
         predictedTransitions.clear();
         executedTransitions.clear();
+    }
+
+    /**
+     * Updates the given test case, i.e. it updates the activity, state and action sequence as well
+     * as writes the collected traces to the external storage. This method needs to be called after
+     * a test case has been fully constructed and before the call to {@link TestCase#finish()}.
+     *
+     * @param testCase The test case to be updated.
+     */
+    public void updateTestCase(TestCase testCase) {
+
+        /*
+         * We need to manually adjust the activity, state and action sequence of a test case,
+         * since intermediate predictions by the surrogate model might be wrong, i.e. when
+         * we execute cached (predicted) actions and those lead to a different state. Likewise,
+         * we need to log the action sequence and activity transitions after the test case
+         * is complete.
+         */
+        updateTestCaseSequences(testCase);
+
+        // These logs are parsed by the analysis framework!
+        MATELog.log("Predicted actions: " + getNumberOfPredictedActions());
+        MATELog.log("Non-predicted actions: " + getNumberOfNonPredictedActions());
+
+        if (hasPredictedEveryAction()) {
+            MATELog.log("Predicted every action!");
+        }
+
+        /*
+         * We need to store both files traces.txt and info.txt on the external storage such
+         * that the subsequent calls of the FitnessUtils and CoverageUtils class work properly.
+         * However, those calls will send again a broadcast to the tracer, which in turn
+         * overwrites the info.txt with a value not matching the actual number of traces.
+         * This only works because MATE-Server doesn't enforce equality between these numbers,
+         * but we should be aware of this issue.
+         */
+        Registry.getUiAbstractionLayer().storeTraces(currentTraces);
     }
 }

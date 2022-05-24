@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
@@ -102,8 +103,11 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase executed = TestCase.fromDummy(testCase);
                 mutatedTestSuite.getTestCases().add(executed);
 
-                if(Properties.SURROGATE_MODEL()) {
-                    Registry.getUiAbstractionLayer().storeTraces();
+                if (Properties.SURROGATE_MODEL()) {
+                    // update sequences + write traces to external storage
+                    SurrogateModel surrogateModel
+                            = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+                    surrogateModel.updateTestCase(executed);
                 }
 
                 FitnessUtils.storeTestSuiteChromosomeFitness(mutatedChromosome, executed);

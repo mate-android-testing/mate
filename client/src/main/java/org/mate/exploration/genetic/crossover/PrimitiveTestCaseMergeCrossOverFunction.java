@@ -7,6 +7,7 @@ import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
 
@@ -69,8 +70,11 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
             TestCase executedTestCase = TestCase.fromDummy(offspring);
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel
+                        = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+                surrogateModel.updateTestCase(executedTestCase);
             }
 
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
