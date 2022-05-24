@@ -301,4 +301,53 @@ public class SurrogateModel extends FSMModel {
     public IScreenState getCurrentScreenState() {
         return fsm.getCurrentState().getScreenState();
     }
+
+    /**
+     * Updates the given test case's action, state and activity sequence.
+     *
+     * @param testCase The test case that needs to be updated.
+     */
+    public void updateSequences(TestCase testCase) {
+
+        MATELog.log_acc("Updating sequences of test case...");
+
+        final List<Action> actionSequence = new ArrayList<>();
+        final List<String> stateSequence = new ArrayList<>();
+        final List<String> activitySequence = new ArrayList<>();
+
+        MATELog.log_acc("Executed transitions: " + executedTransitions);
+        MATELog.log_acc("Predicted transitions: " + predictedTransitions);
+
+        // either one of both lists is empty or we need to merge both lists in the right order
+        List<SurrogateTransition> transitions = new ArrayList<>(executedTransitions);
+        transitions.addAll(predictedTransitions);
+
+        int actionID = 0;
+
+        for (SurrogateTransition transition : transitions) {
+
+            IScreenState source = transition.getSource().getScreenState();
+            IScreenState target = transition.getTarget().getScreenState();
+            Action action = transition.getAction();
+
+            actionSequence.add(action);
+            stateSequence.add(target.getId());
+            activitySequence.add(target.getActivityName());
+
+            // We need to report the correct logs for the analysis framework!
+            MATELog.log("executing action " + actionID + ": " + action);
+            MATELog.log("executed action " + actionID + ": " + action);
+            MATELog.log("Activity Transition for action " + actionID
+                    + ":" + source.getActivityName() + "->" + target.getActivityName());
+
+            actionID++;
+        }
+
+        testCase.getActionSequence().addAll(actionSequence);
+        testCase.getStateSequence().addAll(stateSequence);
+        testCase.getActivitySequence().addAll(activitySequence);
+
+        predictedTransitions.clear();
+        executedTransitions.clear();
+    }
 }
