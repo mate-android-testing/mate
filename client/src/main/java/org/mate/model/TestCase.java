@@ -206,15 +206,6 @@ public class TestCase {
     }
 
     /**
-     * Adds a new action to the list of executed actions.
-     *
-     * @param event The action to be added.
-     */
-    public void addEvent(Action event) {
-        this.actionSequence.add(event);
-    }
-
-    /**
      * Returns the set of visited activities. This includes activities not belonging to the AUT.
      *
      * @return Returns the set of visited activities.
@@ -393,7 +384,6 @@ public class TestCase {
         IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         MATELog.log("executing action " + actionID + ": " + action);
-        addEvent(action);
         ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
         IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
@@ -403,6 +393,7 @@ public class TestCase {
         String activityAfterAction = newState.getActivityName();
         String newStateID = newState.getId();
 
+        actionSequence.add(action);
         activitySequence.add(activityAfterAction);
         stateSequence.add(newStateID);
 
