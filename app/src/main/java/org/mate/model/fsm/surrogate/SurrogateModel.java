@@ -3,6 +3,7 @@ package org.mate.model.fsm.surrogate;
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
+import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
@@ -303,5 +304,54 @@ public class SurrogateModel extends FSMModel {
      */
     public IScreenState getCurrentScreenState() {
         return fsm.getCurrentState().getScreenState();
+    }
+
+    /**
+     * Updates the given test case's action, state and activity sequence.
+     *
+     * @param testCase The test case that needs to be updated.
+     */
+    public void updateSequences(TestCase testCase) {
+
+        MATE.log_acc("Updating sequences of test case...");
+
+        final List<Action> actionSequence = new ArrayList<>();
+        final List<String> stateSequence = new ArrayList<>();
+        final List<String> activitySequence = new ArrayList<>();
+
+        MATE.log_acc("Executed transitions: " + executedTransitions);
+        MATE.log_acc("Predicted transitions: " + predictedTransitions);
+
+        // either one of both lists is empty or we need to merge both lists in the right order
+        List<SurrogateTransition> transitions = new ArrayList<>(executedTransitions);
+        transitions.addAll(predictedTransitions);
+
+        int actionID = 0;
+
+        for (SurrogateTransition transition : transitions) {
+
+                IScreenState source = transition.getSource().getScreenState();
+                IScreenState target = transition.getTarget().getScreenState();
+                Action action = transition.getAction();
+
+                actionSequence.add(action);
+                stateSequence.add(target.getId());
+                activitySequence.add(target.getActivityName());
+
+                // We need to report the correct logs for the analysis framework!
+                MATE.log("executing action " + actionID + ": " + action);
+                MATE.log("executed action " + actionID + ": " + action);
+                MATE.log("Activity Transition for action " + actionID
+                    + ":" + source.getActivityName() + "->" + target.getActivityName());
+
+                actionID++;
+        }
+
+        testCase.getActionSequence().addAll(actionSequence);
+        testCase.getStateSequence().addAll(stateSequence);
+        testCase.getActivitySequence().addAll(activitySequence);
+
+        predictedTransitions.clear();
+        executedTransitions.clear();
     }
 }
