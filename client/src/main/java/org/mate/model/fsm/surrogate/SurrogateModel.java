@@ -59,6 +59,10 @@ public class SurrogateModel extends FSMModel {
      */
     private int numberOfPredictedActions = 0;
 
+    private final List<SurrogateTransition> predictedTransitions;
+
+    private final List<SurrogateTransition> executedTransitions;
+
     /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
      *
@@ -71,6 +75,8 @@ public class SurrogateModel extends FSMModel {
         predictedTraces = new HashSet<>();
         checkPointState = fsm.getCurrentState();
         predictedActions = new ArrayList<>();
+        predictedTransitions = new ArrayList<>();
+        executedTransitions = new ArrayList<>();
     }
 
     /**
@@ -142,6 +148,7 @@ public class SurrogateModel extends FSMModel {
             matchingTransition = new SurrogateTransition(from, to, action, actionResult, traces);
         }
 
+        executedTransitions.add(matchingTransition);
         fsm.addTransition(matchingTransition);
         currentTraces.addAll(traces);
         checkPointState = fsm.getCurrentState();
@@ -161,8 +168,11 @@ public class SurrogateModel extends FSMModel {
 
         if (transitions.isEmpty()) {
             // can't predict action -> reset
+            MATE.log_acc("Could not predict action...");
             predictedTraces.clear();
             numberOfNonPredictedActions++;
+            MATE.log_acc("Removing predicted transitions so far: " + predictedTransitions);
+            predictedTransitions.clear();
             return null;
         } else {
             numberOfPredictedActions++;
@@ -180,7 +190,10 @@ public class SurrogateModel extends FSMModel {
             SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(mostVisitedTransitions);
 
             predictedTraces.addAll(transition.getTraces());
+            predictedTransitions.add(transition);
             fsm.goToState(transition.getTarget());
+            MATE.log_acc("Could predict action...");
+            MATE.log_acc("Moved FSM in state after prediction: " + fsm.getCurrentState());
             return transition.getActionResult();
         }
     }
