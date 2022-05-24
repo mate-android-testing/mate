@@ -166,7 +166,7 @@ public class UIAbstractionLayer {
 
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
 
-            if(surrogateModel.isInPrediction()) {
+            if (surrogateModel.isInPrediction()) {
 
                 // check if the surrogate model can predict the action
                 ActionResult actionResult = surrogateModel.predictAction(action);
