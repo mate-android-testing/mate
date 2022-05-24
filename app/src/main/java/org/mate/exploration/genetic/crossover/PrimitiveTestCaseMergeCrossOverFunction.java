@@ -58,12 +58,12 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
         TestCase parent0 = parents.get(0).getValue();
         TestCase parent1 = parents.get(1).getValue();
         TestCase offspring = TestCase.newDummy();
-        int l0 = parent0.getEventSequence().size() / 2;
-        int l1 = parent1.getEventSequence().size() / 2;
+        int l0 = parent0.getActionSequence().size() / 2;
+        int l1 = parent1.getActionSequence().size() / 2;
         int start0 = Randomness.getRnd().nextInt(l0 + 1);
         int start1 = Randomness.getRnd().nextInt(l1 + 1);
-        offspring.getEventSequence().addAll(parent0.getEventSequence().subList(start0, start0 + l0));
-        offspring.getEventSequence().addAll(parent1.getEventSequence().subList(start1, start1 + l1));
+        offspring.getActionSequence().addAll(parent0.getActionSequence().subList(start0, start0 + l0));
+        offspring.getActionSequence().addAll(parent1.getActionSequence().subList(start1, start1 + l1));
 
         if (executeActions) {
             TestCase executedTestCase = TestCase.fromDummy(offspring);

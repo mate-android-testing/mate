@@ -30,10 +30,10 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
     @Override
     public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome) {
 
-        List<Action> actions = new ArrayList<>(chromosome.getValue().getEventSequence());
+        List<Action> actions = new ArrayList<>(chromosome.getValue().getActionSequence());
         Randomness.shuffleList(actions);
         TestCase testCase = TestCase.newDummy();
-        testCase.getEventSequence().addAll(actions);
+        testCase.getActionSequence().addAll(actions);
         TestCase executedTestCase = TestCase.fromDummy(testCase);
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
 

@@ -57,7 +57,7 @@ public final class TestCaseStatistics {
         // track the number of unrelated widget actions
         int widgetUnrelatedActions = 0;
 
-        for (Action action : testCase.getEventSequence()) {
+        for (Action action : testCase.getActionSequence()) {
             if (action instanceof WidgetAction) {
 
                 ActionType actionType = ((WidgetAction) action).getActionType();
@@ -100,7 +100,7 @@ public final class TestCaseStatistics {
      */
     private static void countComponentsPerType(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         int activities = 0;
         int services = 0;
@@ -146,7 +146,7 @@ public final class TestCaseStatistics {
 
     private static void printURIs(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         for (Action action : actions) {
 
@@ -163,7 +163,7 @@ public final class TestCaseStatistics {
 
     private static void countInvalidURIs(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
         int countInvalidURIs = 0;
         int countTotalURIs = 0;
 
@@ -194,7 +194,7 @@ public final class TestCaseStatistics {
      */
     private static void countActionsPerType(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
         MATE.log("Total number of actions: " + actions.size());
 
         int numberOfUIActions = 0;
@@ -220,7 +220,7 @@ public final class TestCaseStatistics {
 
     private static void countNullValues(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         int nullCtr = 0;
 

@@ -39,10 +39,10 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
         if (executeActions) {
             throw new UnsupportedOperationException("Not implemented yet!");
         } else {
-            List<Action> actions =  chromosome.getValue().getEventSequence();
+            List<Action> actions =  chromosome.getValue().getActionSequence();
             Randomness.shuffleList(actions);
             TestCase mutatedTestCase = TestCase.newDummy();
-            mutatedTestCase.getEventSequence().addAll(actions);
+            mutatedTestCase.getActionSequence().addAll(actions);
             IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutatedTestCase);
             return mutatedChromosome;
         }

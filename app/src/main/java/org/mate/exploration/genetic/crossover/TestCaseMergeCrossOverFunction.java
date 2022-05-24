@@ -62,8 +62,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             return Collections.singletonList(parents.get(0));
         }
 
-        List<Action> l1 = parents.get(0).getValue().getEventSequence();
-        List<Action> l2 = parents.get(1).getValue().getEventSequence();
+        List<Action> l1 = parents.get(0).getValue().getActionSequence();
+        List<Action> l2 = parents.get(1).getValue().getActionSequence();
         if (l2.size() < l1.size()) {
             List<Action> tmp = l1;
             l1 = l2;
@@ -179,7 +179,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
 
         TestCase testCase = TestCase.newDummy();
         testCase.setDesiredSize(Optional.some(finalSize));
-        testCase.getEventSequence().addAll(all);
+        testCase.getActionSequence().addAll(all);
 
         if (executeActions) {
             TestCase executedTestCase = TestCase.fromDummy(testCase);

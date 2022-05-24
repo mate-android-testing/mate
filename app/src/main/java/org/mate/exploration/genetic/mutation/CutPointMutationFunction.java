@@ -75,7 +75,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             for (int i = 0; i < maxNumEvents; i++) {
                 UIAction newAction;
                 if (i < cutPoint) {
-                    newAction = (UIAction) chromosome.getValue().getEventSequence().get(i);
+                    newAction = (UIAction) chromosome.getValue().getActionSequence().get(i);
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
@@ -113,11 +113,11 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
      * @return Returns the selected cut point.
      */
     private int chooseCutPoint(TestCase testCase) {
-        if (testCase.getEventSequence().isEmpty()) {
+        if (testCase.getActionSequence().isEmpty()) {
             MATE.log_warn("Choosing cut point from empty test case " + testCase + "!");
             return 0;
         } else {
-            return Randomness.getRnd().nextInt(testCase.getEventSequence().size());
+            return Randomness.getRnd().nextInt(testCase.getActionSequence().size());
         }
     }
 }

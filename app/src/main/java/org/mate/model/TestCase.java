@@ -39,7 +39,7 @@ public class TestCase {
     /**
      * The actions that has been executed by this test case.
      */
-    private final List<Action> eventSequence;
+    private final List<Action> actionSequence;
 
     /**
      * The visited activities in the order they appeared.
@@ -72,7 +72,7 @@ public class TestCase {
         setId("dummy");
         crashDetected = false;
         stateSequence = new ArrayList<>();
-        eventSequence = new ArrayList<>();
+        actionSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -86,7 +86,7 @@ public class TestCase {
         setId(id);
         crashDetected = false;
         stateSequence = new ArrayList<>();
-        eventSequence = new ArrayList<>();
+        actionSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
 
         /*
@@ -211,7 +211,7 @@ public class TestCase {
      * @param event The action to be added.
      */
     public void addEvent(Action event) {
-        this.eventSequence.add(event);
+        this.actionSequence.add(event);
     }
 
     /**
@@ -257,8 +257,8 @@ public class TestCase {
      *
      * @return Returns the action sequence.
      */
-    public List<Action> getEventSequence() {
-        return this.eventSequence;
+    public List<Action> getActionSequence() {
+        return this.actionSequence;
     }
 
     /**
@@ -314,14 +314,14 @@ public class TestCase {
         Registry.getUiAbstractionLayer().resetApp();
         TestCase resultingTc = newInitializedTestCase();
 
-        int finalSize = testCase.eventSequence.size();
+        int finalSize = testCase.actionSequence.size();
 
         if (testCase.desiredSize.hasValue()) {
             finalSize = testCase.desiredSize.getValue();
         }
 
         int count = 0;
-        for (Action action0 : testCase.eventSequence) {
+        for (Action action0 : testCase.actionSequence) {
             if (count < finalSize) {
                 if (!(action0 instanceof WidgetAction)
                         || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
