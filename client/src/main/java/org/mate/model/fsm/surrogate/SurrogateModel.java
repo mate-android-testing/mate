@@ -4,6 +4,7 @@ import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.Randomness;
+import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
@@ -159,7 +160,7 @@ public class SurrogateModel extends FSMModel {
      *
      * @param action The action that should be predicted.
      * @return Returns the action result associated with the given action or {@code null} if the
-     *      action couldn't be predicted.
+     *         action couldn't be predicted.
      */
     public ActionResult predictAction(Action action) {
 
@@ -177,12 +178,12 @@ public class SurrogateModel extends FSMModel {
 
             // pick the transition with the highest frequency counter
             final int highestCounter = transitions.stream()
-                    .mapToInt(transition -> ((SurrogateTransition)transition).getFrequencyCounter())
+                    .mapToInt(transition -> ((SurrogateTransition) transition).getFrequencyCounter())
                     .max()
                     .orElseThrow(() -> new IllegalStateException("Empty set not allowed!"));
 
             Set<Transition> mostVisitedTransitions = transitions.stream()
-                    .filter(transition -> ((SurrogateTransition)transition).getFrequencyCounter() == highestCounter)
+                    .filter(transition -> ((SurrogateTransition) transition).getFrequencyCounter() == highestCounter)
                     .collect(Collectors.toSet());
 
             SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(mostVisitedTransitions);
@@ -228,7 +229,7 @@ public class SurrogateModel extends FSMModel {
      * Turns on or off the prediction mode.
      *
      * @param inPrediction {@code true} to turn on prediction mode or {@code false} to turn off
-     *          prediction mode.
+     *         prediction mode.
      */
     public void setInPrediction(boolean inPrediction) {
         this.inPrediction = inPrediction;
@@ -263,13 +264,13 @@ public class SurrogateModel extends FSMModel {
      * Checks whether all actions of a test case could be predicted or not.
      *
      * @return Returns {@code true} if all actions of a test case could be predicted, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean hasPredictedEveryAction() {
         /*
-        * The second condition is mandatory in order to distinguish the initial state of the
-        * surrogate model from any other state. Without this condition, the very first restart of
-        * the AUT wouldn't be executed for instance.
+         * The second condition is mandatory in order to distinguish the initial state of the
+         * surrogate model from any other state. Without this condition, the very first restart of
+         * the AUT wouldn't be executed for instance.
          */
         return numberOfNonPredictedActions == 0 && numberOfPredictedActions > 0;
     }
