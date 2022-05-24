@@ -279,4 +279,13 @@ public class SurrogateModel extends FSMModel {
     public int getNumberOfNonPredictedActions() {
         return numberOfNonPredictedActions;
     }
+
+    /**
+     * Returns the current screen state the FSM is in.
+     *
+     * @return Returns the current screen state.
+     */
+    public IScreenState getCurrentScreenState() {
+        return getScreenStateById(fsm.getCurrentStateId());
+    }
 }
