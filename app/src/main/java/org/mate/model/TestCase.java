@@ -380,23 +380,31 @@ public class TestCase {
 
         IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
 
-        MATE.log("executing action " + actionID + ": " + action);
+        // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
+        if (!Properties.SURROGATE_MODEL()) {
+            MATE.log("executing action " + actionID + ": " + action);
+        }
+
         ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
-        IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
+        // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
+        if (!Properties.SURROGATE_MODEL()) {
 
-        // track the activity and state transition of each action
-        String activityBeforeAction = oldState.getActivityName();
-        String activityAfterAction = newState.getActivityName();
-        String newStateID = newState.getId();
+            IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
 
-        actionSequence.add(action);
-        activitySequence.add(activityAfterAction);
-        stateSequence.add(newStateID);
+            // track the activity and state transition of each action
+            String activityBeforeAction = oldState.getActivityName();
+            String activityAfterAction = newState.getActivityName();
+            String newStateID = newState.getId();
 
-        MATE.log("executed action " + actionID + ": " + action);
-        MATE.log("Activity Transition for action " + actionID
-                + ":" + activityBeforeAction + "->" + activityAfterAction);
+            actionSequence.add(action);
+            activitySequence.add(activityAfterAction);
+            stateSequence.add(newStateID);
+
+            MATE.log("executed action " + actionID + ": " + action);
+            MATE.log("Activity Transition for action " + actionID
+                    + ":" + activityBeforeAction + "->" + activityAfterAction);
+        }
 
         switch (actionResult) {
             case SUCCESS:
