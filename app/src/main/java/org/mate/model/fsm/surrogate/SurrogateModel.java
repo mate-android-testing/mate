@@ -187,9 +187,12 @@ public class SurrogateModel extends FSMModel {
 
     /**
      * Moves the surrogate model back to the last check point.
+     *
+     * @return Returns the screen state backed by the current FSM state.
      */
-    public void goToLastCheckPointState() {
+    public IScreenState goToLastCheckPointState() {
         fsm.goToState(checkPointState);
+        return checkPointState.getScreenState();
     }
 
     /**
@@ -286,6 +289,6 @@ public class SurrogateModel extends FSMModel {
      * @return Returns the current screen state.
      */
     public IScreenState getCurrentScreenState() {
-        return getScreenStateById(fsm.getCurrentStateId());
+        return fsm.getCurrentState().getScreenState();
     }
 }
