@@ -4,12 +4,12 @@ import android.content.Intent;
 
 import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.utils.MATELog;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.interaction.action.intent.SystemAction;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.model.TestCase;
 
 import java.util.EnumSet;
@@ -57,7 +57,7 @@ public final class TestCaseStatistics {
         // track the number of unrelated widget actions
         int widgetUnrelatedActions = 0;
 
-        for (Action action : testCase.getEventSequence()) {
+        for (Action action : testCase.getActionSequence()) {
             if (action instanceof WidgetAction) {
 
                 ActionType actionType = ((WidgetAction) action).getActionType();
@@ -100,7 +100,7 @@ public final class TestCaseStatistics {
      */
     private static void countComponentsPerType(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         int activities = 0;
         int services = 0;
@@ -146,7 +146,7 @@ public final class TestCaseStatistics {
 
     private static void printURIs(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         for (Action action : actions) {
 
@@ -163,7 +163,7 @@ public final class TestCaseStatistics {
 
     private static void countInvalidURIs(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
         int countInvalidURIs = 0;
         int countTotalURIs = 0;
 
@@ -194,7 +194,7 @@ public final class TestCaseStatistics {
      */
     private static void countActionsPerType(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
         MATELog.log("Total number of actions: " + actions.size());
 
         int numberOfUIActions = 0;
@@ -220,7 +220,7 @@ public final class TestCaseStatistics {
 
     private static void countNullValues(TestCase testCase) {
 
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         int nullCtr = 0;
 

@@ -2,14 +2,14 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
-import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 /**
@@ -75,7 +75,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             for (int i = 0; i < maxNumEvents; i++) {
                 UIAction newAction;
                 if (i < cutPoint) {
-                    newAction = (UIAction) chromosome.getValue().getEventSequence().get(i);
+                    newAction = (UIAction) chromosome.getValue().getActionSequence().get(i);
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
@@ -113,11 +113,11 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
      * @return Returns the selected cut point.
      */
     private int chooseCutPoint(TestCase testCase) {
-        if (testCase.getEventSequence().isEmpty()) {
+        if (testCase.getActionSequence().isEmpty()) {
             MATELog.log_warn("Choosing cut point from empty test case " + testCase + "!");
             return 0;
         } else {
-            return Randomness.getRnd().nextInt(testCase.getEventSequence().size());
+            return Randomness.getRnd().nextInt(testCase.getActionSequence().size());
         }
     }
 }

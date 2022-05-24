@@ -2,17 +2,17 @@ package org.mate.exploration.genetic.crossover;
 
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Optional;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.commons.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Optional;
-import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
@@ -64,8 +64,8 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             return Collections.singletonList(parents.get(0));
         }
 
-        List<Action> l1 = parents.get(0).getValue().getEventSequence();
-        List<Action> l2 = parents.get(1).getValue().getEventSequence();
+        List<Action> l1 = parents.get(0).getValue().getActionSequence();
+        List<Action> l2 = parents.get(1).getValue().getActionSequence();
         if (l2.size() < l1.size()) {
             List<Action> tmp = l1;
             l1 = l2;
@@ -181,7 +181,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
 
         TestCase testCase = TestCase.newDummy();
         testCase.setDesiredSize(Optional.some(finalSize));
-        testCase.getEventSequence().addAll(all);
+        testCase.getActionSequence().addAll(all);
 
         if (executeActions) {
             TestCase executedTestCase = TestCase.fromDummy(testCase);

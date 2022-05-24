@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
@@ -14,7 +15,6 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -302,11 +302,11 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
     private int getChromosomeLength(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+            return ((TestCase) chromosome.getValue()).getActionSequence().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             int length = 0;
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                length += testCase.getEventSequence().size();
+                length += testCase.getActionSequence().size();
             }
             return length;
         } else {

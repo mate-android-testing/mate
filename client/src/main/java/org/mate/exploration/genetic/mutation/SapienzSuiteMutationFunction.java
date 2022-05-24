@@ -2,12 +2,12 @@ package org.mate.exploration.genetic.mutation;
 
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
@@ -89,8 +89,8 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                 TestCase mutatedTestCase = mutant.getValue();
 
                 // we need to make the mutation in place
-                testCase.getEventSequence().clear();
-                testCase.getEventSequence().addAll(mutatedTestCase.getEventSequence());
+                testCase.getActionSequence().clear();
+                testCase.getActionSequence().addAll(mutatedTestCase.getActionSequence());
                 notMutatedTestCases.remove(testCase);
             }
         }
@@ -136,22 +136,22 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     private void onePointCrossover(TestCase t1, TestCase t2) {
 
         TestCase copyT1 = TestCase.newDummy();
-        copyT1.getEventSequence().addAll(t1.getEventSequence());
+        copyT1.getActionSequence().addAll(t1.getActionSequence());
         TestCase copyT2 = TestCase.newDummy();
-        copyT2.getEventSequence().addAll(t2.getEventSequence());
+        copyT2.getActionSequence().addAll(t2.getActionSequence());
 
-        int lengthT1 = t1.getEventSequence().size();
-        int lengthT2 = t2.getEventSequence().size();
+        int lengthT1 = t1.getActionSequence().size();
+        int lengthT2 = t2.getActionSequence().size();
         int min = Math.min(lengthT1, lengthT2);
         int cutPoint = Randomness.getRnd().nextInt(min);
 
-        t1.getEventSequence().clear();
-        t2.getEventSequence().clear();
+        t1.getActionSequence().clear();
+        t2.getActionSequence().clear();
 
-        t1.getEventSequence().addAll(copyT1.getEventSequence().subList(0, cutPoint));
-        t1.getEventSequence().addAll(copyT2.getEventSequence().subList(cutPoint, lengthT2));
+        t1.getActionSequence().addAll(copyT1.getActionSequence().subList(0, cutPoint));
+        t1.getActionSequence().addAll(copyT2.getActionSequence().subList(cutPoint, lengthT2));
 
-        t2.getEventSequence().addAll(copyT2.getEventSequence().subList(0, cutPoint));
-        t2.getEventSequence().addAll(copyT1.getEventSequence().subList(cutPoint, lengthT1));
+        t2.getActionSequence().addAll(copyT2.getActionSequence().subList(0, cutPoint));
+        t2.getActionSequence().addAll(copyT1.getActionSequence().subList(cutPoint, lengthT1));
     }
 }

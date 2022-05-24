@@ -6,10 +6,10 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.utils.MATELog;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.commons.utils.MATELog;
 import org.mate.model.TestCase;
 import org.mate.utils.testcase.TestCaseOptimizer;
 import org.mate.utils.testcase.TestCaseStatistics;
@@ -114,9 +114,9 @@ public class ExecuteMATEReplayRun {
     private static boolean replayTestCase(TestCase testCase) {
 
         // get the actions for replaying
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
-        for (int i = 0; i < testCase.getEventSequence().size(); i++) {
+        for (int i = 0; i < testCase.getActionSequence().size(); i++) {
 
             // TODO: track for how many actions current and expected activity diverge
             MATELog.log("Current Activity: " + Registry.getUiAbstractionLayer().getCurrentActivity());

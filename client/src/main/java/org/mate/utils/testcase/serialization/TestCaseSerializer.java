@@ -130,7 +130,7 @@ public final class TestCaseSerializer {
             xstream.registerConverter(new WidgetActionConverter());
 
             TestCase testCase = (TestCase) xstream.fromXML(testCaseFile);
-            MATELog.log("Number of Actions: " + testCase.getEventSequence().size());
+            MATELog.log("Number of Actions: " + testCase.getActionSequence().size());
 
             // update counter
             replayCounter++;
