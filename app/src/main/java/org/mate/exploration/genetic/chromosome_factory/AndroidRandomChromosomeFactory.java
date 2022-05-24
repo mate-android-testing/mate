@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -7,6 +8,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -99,16 +101,10 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                /*
-                * We need to store both files traces.txt and info.txt on the external storage such
-                * that the subsequent calls of the FitnessUtils and CoverageUtils class work properly.
-                * However, those calls will send again a broadcast to the tracer, which in turn
-                * overwrites the info.txt with a value not matching the actual number of traces.
-                * This only works because MATE-Server doesn't enforce equality between these numbers,
-                * but we should be aware of this issue.
-                 */
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
             }
 
             if (!isTestSuiteExecution) {
@@ -142,6 +138,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
      * @return Returns the randomly selected ui action.
      */
     protected Action selectAction() {
+        MATE.log_acc("Selecting action on " + uiAbstractionLayer.getLastScreenState());
         return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
     }
 }

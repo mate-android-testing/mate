@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.manifest.element.ComponentDescription;
@@ -158,8 +159,10 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
             }
 
             if (!isTestSuiteExecution) {

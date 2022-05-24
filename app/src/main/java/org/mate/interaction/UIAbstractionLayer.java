@@ -303,30 +303,15 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Stores the traces on the external storage that have been collected by the surrogate model
-     * for the last test case. This needs to be called after each test case and before a call to
+     * Stores the given traces on the external storage. This needs to be called after each test case
+     * and before a call to
      * {@link org.mate.utils.FitnessUtils#storeTestCaseChromosomeFitness(IChromosome)},
      * {@link org.mate.utils.FitnessUtils#storeTestSuiteChromosomeFitness(IChromosome, TestCase)},
      * {@link org.mate.utils.coverage.CoverageUtils#storeTestCaseChromosomeCoverage(IChromosome)} or
      * {@link org.mate.utils.coverage.CoverageUtils#storeTestSuiteChromosomeCoverage(IChromosome, TestCase)}.
      */
-    public void storeTraces() {
-
-        if (!Properties.SURROGATE_MODEL()) {
-            throw new IllegalStateException("Only call this method when the surrogate model is turned on!");
-        }
-
-        SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-
-        // These logs are parsed by the analysis framework!
-        MATE.log("Predicted actions: " + surrogateModel.getNumberOfPredictedActions());
-        MATE.log("Non-predicted actions: " + surrogateModel.getNumberOfNonPredictedActions());
-
-        if (surrogateModel.hasPredictedEveryAction()) {
-            MATE.log("Predicted every action!");
-        }
-
-        deviceMgr.storeTraces(surrogateModel.getCurrentTraces());
+    public void storeTraces(Set<String> traces) {
+        deviceMgr.storeTraces(traces);
     }
 
     /**

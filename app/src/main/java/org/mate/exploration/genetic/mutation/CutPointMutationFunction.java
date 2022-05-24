@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -86,8 +87,11 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel
+                        = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+                surrogateModel.updateTestCase(mutant);
             }
 
             if (!isTestSuiteExecution) {
