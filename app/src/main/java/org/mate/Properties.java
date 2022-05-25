@@ -22,6 +22,8 @@ import java.util.Map;
 
 public class Properties {
 
+    public static String FITNESS_PREFIX = "fitness_function_";
+
     // the timeout in minutes
     public static int TIMEOUT() { return propertyOr(5); }
 
@@ -439,6 +441,48 @@ public class Properties {
     /*
      * End AutoDroid properties
      */
+
+    public static FitnessFunction[] getFitnessFunctions() {
+        Properties propertiesInstance = Registry.getProperties();
+        FitnessFunction[] allFitnessFunctions = FitnessFunction.values();
+        FitnessFunction[] selected = null;
+        boolean[] selectsFunction = new boolean[allFitnessFunctions.length];
+        int counter = 0;
+
+
+        for (int i = 0; i < allFitnessFunctions.length; i++) {
+            String functionName = FITNESS_PREFIX + allFitnessFunctions[i].name();
+
+            if (propertiesInstance.store.containsKey(functionName)) {
+                String valueOfKey = (String) propertiesInstance.store.get(functionName);
+
+                if (valueOfKey != null && valueOfKey.equals("true")) {
+                    selectsFunction[i] = true;
+                    counter++;
+                } else {
+                    selectsFunction[i] = false;
+                }
+            } else {
+                selectsFunction[i] = false;
+            }
+        }
+
+        if (counter == 0) {
+            selected = new FitnessFunction[]{FITNESS_FUNCTION()};
+        } else {
+            selected = new FitnessFunction[counter];
+            counter = 0;
+
+            for (int i = 0; i < allFitnessFunctions.length; i++) {
+                if (selectsFunction[i] && (counter < selected.length)) {
+                    selected[counter] = allFitnessFunctions[i];
+                    counter++;
+                }
+            }
+        }
+
+        return selected;
+    }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
