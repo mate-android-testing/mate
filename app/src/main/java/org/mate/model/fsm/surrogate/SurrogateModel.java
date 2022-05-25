@@ -1,8 +1,10 @@
 package org.mate.model.fsm.surrogate;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
+import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
@@ -60,6 +62,18 @@ public class SurrogateModel extends FSMModel {
     private int numberOfPredictedActions = 0;
 
     /**
+     * Stores the list of predicted transitions; this is necessary to construct the activity, state
+     * and action sequence after a test case is complete.
+     */
+    private final List<SurrogateTransition> predictedTransitions;
+
+    /**
+     * Stores the list of executed transitions; this is necessary to construct the activity, state
+     * and action sequence after a test case is complete.
+     */
+    private final List<SurrogateTransition> executedTransitions;
+
+    /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
      *
      * @param rootState The root state of the FSM.
@@ -71,6 +85,8 @@ public class SurrogateModel extends FSMModel {
         predictedTraces = new HashSet<>();
         checkPointState = fsm.getCurrentState();
         predictedActions = new ArrayList<>();
+        predictedTransitions = new ArrayList<>();
+        executedTransitions = new ArrayList<>();
     }
 
     /**
@@ -142,6 +158,7 @@ public class SurrogateModel extends FSMModel {
             matchingTransition = new SurrogateTransition(from, to, action, actionResult, traces);
         }
 
+        executedTransitions.add(matchingTransition);
         fsm.addTransition(matchingTransition);
         currentTraces.addAll(traces);
         checkPointState = fsm.getCurrentState();
@@ -152,7 +169,7 @@ public class SurrogateModel extends FSMModel {
      *
      * @param action The action that should be predicted.
      * @return Returns the action result associated with the given action or {@code null} if the
-     *      action couldn't be predicted.
+     *         action couldn't be predicted.
      */
     public ActionResult predictAction(Action action) {
 
@@ -163,23 +180,25 @@ public class SurrogateModel extends FSMModel {
             // can't predict action -> reset
             predictedTraces.clear();
             numberOfNonPredictedActions++;
+            predictedTransitions.clear();
             return null;
         } else {
             numberOfPredictedActions++;
 
             // pick the transition with the highest frequency counter
             final int highestCounter = transitions.stream()
-                    .mapToInt(transition -> ((SurrogateTransition)transition).getFrequencyCounter())
+                    .mapToInt(transition -> ((SurrogateTransition) transition).getFrequencyCounter())
                     .max()
                     .orElseThrow(() -> new IllegalStateException("Empty set not allowed!"));
 
             Set<Transition> mostVisitedTransitions = transitions.stream()
-                    .filter(transition -> ((SurrogateTransition)transition).getFrequencyCounter() == highestCounter)
+                    .filter(transition -> ((SurrogateTransition) transition).getFrequencyCounter() == highestCounter)
                     .collect(Collectors.toSet());
 
             SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(mostVisitedTransitions);
 
             predictedTraces.addAll(transition.getTraces());
+            predictedTransitions.add(transition);
             fsm.goToState(transition.getTarget());
             return transition.getActionResult();
         }
@@ -187,9 +206,12 @@ public class SurrogateModel extends FSMModel {
 
     /**
      * Moves the surrogate model back to the last check point.
+     *
+     * @return Returns the screen state backed by the current FSM state.
      */
-    public void goToLastCheckPointState() {
+    public IScreenState goToLastCheckPointState() {
         fsm.goToState(checkPointState);
+        return checkPointState.getScreenState();
     }
 
     /**
@@ -216,7 +238,7 @@ public class SurrogateModel extends FSMModel {
      * Turns on or off the prediction mode.
      *
      * @param inPrediction {@code true} to turn on prediction mode or {@code false} to turn off
-     *          prediction mode.
+     *         prediction mode.
      */
     public void setInPrediction(boolean inPrediction) {
         this.inPrediction = inPrediction;
@@ -251,13 +273,13 @@ public class SurrogateModel extends FSMModel {
      * Checks whether all actions of a test case could be predicted or not.
      *
      * @return Returns {@code true} if all actions of a test case could be predicted, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean hasPredictedEveryAction() {
         /*
-        * The second condition is mandatory in order to distinguish the initial state of the
-        * surrogate model from any other state. Without this condition, the very first restart of
-        * the AUT wouldn't be executed for instance.
+         * The second condition is mandatory in order to distinguish the initial state of the
+         * surrogate model from any other state. Without this condition, the very first restart of
+         * the AUT wouldn't be executed for instance.
          */
         return numberOfNonPredictedActions == 0 && numberOfPredictedActions > 0;
     }
@@ -278,5 +300,97 @@ public class SurrogateModel extends FSMModel {
      */
     public int getNumberOfNonPredictedActions() {
         return numberOfNonPredictedActions;
+    }
+
+    /**
+     * Returns the current screen state the FSM is in.
+     *
+     * @return Returns the current screen state.
+     */
+    public IScreenState getCurrentScreenState() {
+        return fsm.getCurrentState().getScreenState();
+    }
+
+    /**
+     * Updates the given test case's action, state and activity sequence. This is necessary since
+     * a previous prediction might be wrong. This method needs to be called after a test case is
+     * complete and before {@link TestCase#finish()} is called.
+     *
+     * @param testCase The test case that needs to be updated.
+     */
+    private void updateTestCaseSequences(TestCase testCase) {
+
+        final List<Action> actionSequence = new ArrayList<>();
+        final List<String> stateSequence = new ArrayList<>();
+        final List<String> activitySequence = new ArrayList<>();
+
+        // either one of both lists is empty or we need to merge both lists in the right order
+        List<SurrogateTransition> transitions = new ArrayList<>(executedTransitions);
+        transitions.addAll(predictedTransitions);
+
+        int actionID = 0;
+
+        for (SurrogateTransition transition : transitions) {
+
+            IScreenState source = transition.getSource().getScreenState();
+            IScreenState target = transition.getTarget().getScreenState();
+            Action action = transition.getAction();
+
+            actionSequence.add(action);
+            stateSequence.add(target.getId());
+            activitySequence.add(target.getActivityName());
+
+            // We need to report the correct logs for the analysis framework!
+            MATE.log("executing action " + actionID + ": " + action);
+            MATE.log("executed action " + actionID + ": " + action);
+            MATE.log("Activity Transition for action " + actionID
+                    + ":" + source.getActivityName() + "->" + target.getActivityName());
+
+            actionID++;
+        }
+
+        testCase.getActionSequence().addAll(actionSequence);
+        testCase.getStateSequence().addAll(stateSequence);
+        testCase.getActivitySequence().addAll(activitySequence);
+
+        predictedTransitions.clear();
+        executedTransitions.clear();
+    }
+
+    /**
+     * Updates the given test case, i.e. it updates the activity, state and action sequence as well
+     * as writes the collected traces to the external storage. This method needs to be called after
+     * a test case has been fully constructed and before the call to {@link TestCase#finish()}.
+     *
+     * @param testCase The test case to be updated.
+     */
+    public void updateTestCase(TestCase testCase) {
+
+        /*
+         * We need to manually adjust the activity, state and action sequence of a test case,
+         * since intermediate predictions by the surrogate model might be wrong, i.e. when
+         * we execute cached (predicted) actions and those lead to a different state. Likewise,
+         * we need to log the action sequence and activity transitions after the test case
+         * is complete.
+         */
+        updateTestCaseSequences(testCase);
+
+        // These logs are parsed by the analysis framework!
+        MATE.log("Predicted actions: " + getNumberOfPredictedActions());
+        MATE.log("Non-predicted actions: " + getNumberOfNonPredictedActions());
+
+        if (hasPredictedEveryAction()) {
+            MATE.log("Predicted every action!");
+        }
+
+        /*
+         * We need to store both files traces.txt and info.txt on the external storage such
+         * that the subsequent calls of the FitnessUtils and CoverageUtils class work properly.
+         * However, those calls will send again a broadcast to the tracer, which in turn
+         * overwrites the info.txt with a value not matching the actual number of traces.
+         * This only works because MATE-Server doesn't enforce equality between these numbers,
+         * but we should be aware of this issue.
+         */
+        Registry.getUiAbstractionLayer().storeTraces(currentTraces);
     }
 }

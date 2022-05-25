@@ -9,6 +9,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -100,8 +101,10 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
             }
 
             if (!isTestSuiteExecution) {
