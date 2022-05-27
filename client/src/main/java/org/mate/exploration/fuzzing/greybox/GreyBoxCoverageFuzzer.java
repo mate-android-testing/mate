@@ -94,7 +94,7 @@ public class GreyBoxCoverageFuzzer<T> extends GreyBoxFuzzing<T> {
         totalCoverage = CoverageUtils.getCombinedCoverage(coverageCriterion).getCoverage(coverageCriterion);
 
         if (s.getValue() instanceof TestCase) {
-            int size = ((TestCase) s.getValue()).getEventSequence().size();
+            int size = ((TestCase) s.getValue()).getActionSequence().size();
             return Math.max(1, Math.round(maxEnergy
                     - ((float) maxEnergy / Properties.MAX_NUMBER_EVENTS()) * size));
         } else if (s.getValue() instanceof TestSuite) {
@@ -105,7 +105,7 @@ public class GreyBoxCoverageFuzzer<T> extends GreyBoxFuzzing<T> {
             int size = 0;
             List<TestCase> testCases = ((TestSuite) s.getValue()).getTestCases();
             for (TestCase testCase : testCases) {
-                size += testCase.getEventSequence().size();
+                size += testCase.getActionSequence().size();
             }
             return Math.max(1, Math.round(maxEnergy
                     - ((float) maxEnergy / Properties.NUMBER_TESTCASES()) * size));

@@ -2,15 +2,16 @@ package org.mate.exploration.intent;
 
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.manifest.element.ComponentDescription;
+import org.mate.commons.utils.manifest.element.ComponentType;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.commons.interaction.action.Action;
-import org.mate.commons.utils.manifest.element.ComponentDescription;
-import org.mate.commons.utils.manifest.element.ComponentType;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
 
@@ -163,8 +164,10 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
             }
 
             if (!isTestSuiteExecution) {

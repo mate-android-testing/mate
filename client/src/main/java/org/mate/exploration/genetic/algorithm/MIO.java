@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.algorithm;
 
 import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -11,7 +12,6 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Randomness;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -676,8 +676,8 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> snd = o2.chromosome;
 
             if (fst.getValue() instanceof TestCase) {
-                return ((TestCase) snd.getValue()).getEventSequence().size()
-                        - ((TestCase) fst.getValue()).getEventSequence().size();
+                return ((TestCase) snd.getValue()).getActionSequence().size()
+                        - ((TestCase) fst.getValue()).getActionSequence().size();
             } else if (fst.getValue() instanceof TestSuite) {
                 return ((TestSuite) snd.getValue()).getTestCases().size()
                         - ((TestSuite) fst.getValue()).getTestCases().size();
@@ -717,7 +717,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             int size = -1;
 
             if (chromosome.getValue() instanceof TestCase) {
-                size = ((TestCase) chromosome.getValue()).getEventSequence().size();
+                size = ((TestCase) chromosome.getValue()).getActionSequence().size();
             } else if (chromosome.getValue() instanceof TestSuite) {
                 size = ((TestSuite) chromosome.getValue()).getTestCases().size();
             }

@@ -1,15 +1,16 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.commons.interaction.action.ui.PrimitiveAction;
-import org.mate.commons.utils.MATELog;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.ui.PrimitiveAction;
+import org.mate.commons.utils.MATELog;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.commons.interaction.action.Action;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
-import org.mate.commons.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
@@ -31,15 +32,18 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
     @Override
     public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome) {
 
-        List<Action> actions = new ArrayList<>(chromosome.getValue().getEventSequence());
+        List<Action> actions = new ArrayList<>(chromosome.getValue().getActionSequence());
         Randomness.shuffleList(actions);
         TestCase testCase = TestCase.newDummy();
-        testCase.getEventSequence().addAll(actions);
+        testCase.getActionSequence().addAll(actions);
         TestCase executedTestCase = TestCase.fromDummy(testCase);
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
 
-        if(Properties.SURROGATE_MODEL()) {
-            Registry.getUiAbstractionLayer().storeTraces();
+        if (Properties.SURROGATE_MODEL()) {
+            // update sequences + write traces to external storage
+            SurrogateModel surrogateModel
+                    = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+            surrogateModel.updateTestCase(executedTestCase);
         }
 
         FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);

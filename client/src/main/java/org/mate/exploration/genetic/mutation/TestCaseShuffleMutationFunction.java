@@ -1,10 +1,10 @@
 package org.mate.exploration.genetic.mutation;
 
+import org.mate.commons.interaction.action.Action;
+import org.mate.commons.utils.Randomness;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.commons.interaction.action.Action;
 import org.mate.model.TestCase;
-import org.mate.commons.utils.Randomness;
 
 import java.util.List;
 
@@ -39,10 +39,10 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
         if (executeActions) {
             throw new UnsupportedOperationException("Not implemented yet!");
         } else {
-            List<Action> actions =  chromosome.getValue().getEventSequence();
+            List<Action> actions =  chromosome.getValue().getActionSequence();
             Randomness.shuffleList(actions);
             TestCase mutatedTestCase = TestCase.newDummy();
-            mutatedTestCase.getEventSequence().addAll(actions);
+            mutatedTestCase.getActionSequence().addAll(actions);
             IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutatedTestCase);
             return mutatedChromosome;
         }

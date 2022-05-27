@@ -320,6 +320,15 @@ public class FSM {
     }
 
     /**
+     * Returns the id of the current FSM state.
+     *
+     * @return Returns the current state id.
+     */
+    public String getCurrentStateId() {
+        return currentState.getScreenState().getId();
+    }
+
+    /**
      * Moves the FSM in the given state.
      *
      * @param state The new state to which the FSM should move.

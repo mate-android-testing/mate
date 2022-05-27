@@ -84,6 +84,11 @@ public class SurrogateTransition extends Transition {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    Action getAction() { return action; }
+
+    /**
      * Returns the frequency counter.
      *
      * @return Returns the frequency counter.
