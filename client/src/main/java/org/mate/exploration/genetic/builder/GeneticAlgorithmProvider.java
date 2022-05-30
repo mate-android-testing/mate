@@ -778,7 +778,7 @@ public class GeneticAlgorithmProvider {
             case BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
             case BRANCH_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(index);
             case BRANCH_DISTANCE:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:

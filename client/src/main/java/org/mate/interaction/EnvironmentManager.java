@@ -598,22 +598,22 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the branch fitness vector for the given chromosome. A branch fitness
-     * vector consists of n entries, where n refers to the number of branches.
-     * The nth entry in the vector refers to the fitness value of the nth branch.
+     * Retrieves the branch fitness vector for the given chromosome. A branch fitness vector consists
+     * of n entries, where n refers to the number of branches. The nth entry in the vector refers to
+     * the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of branches.
+     * @param numberOfBranches The number of branches.
      * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch fitness vector for the given chromosome.
      */
-    public <T> List<Double> getBranchFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
+    public <T> BitSet getBranchFitnessVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATELog.log_warn("Trying to retrieve branch fitness vector of dummy test case...");
                 // a dummy test case has a branch fitness of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(objectives.size(), 0.0);
+                return new BitSet(numberOfBranches);
             }
         }
 
@@ -625,11 +625,17 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
-        List<Double> branchFitnessVector = new ArrayList<>();
-        String[] branchFitnessValues = response.getParameter("branch_fitness_vector").split("\\+");
 
-        for (String branchFitnessValue : branchFitnessValues) {
-            branchFitnessVector.add(Double.parseDouble(branchFitnessValue));
+        String[] branchFitnessValues = response.getParameter("branch_fitness_vector").split("\\+");
+        assert branchFitnessValues.length == numberOfBranches;
+
+        final BitSet branchFitnessVector = new BitSet(branchFitnessValues.length);
+
+        for (int i = 0; i < branchFitnessValues.length; ++i) {
+            final String fitness = branchFitnessValues[i];
+            if (fitness.equals("1")) {
+                branchFitnessVector.set(i);
+            }
         }
 
         return branchFitnessVector;
