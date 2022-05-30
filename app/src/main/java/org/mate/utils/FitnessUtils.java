@@ -215,7 +215,8 @@ public class FitnessUtils {
             // TODO: Replace by bit set implementation in the near future!
             throw new UnsupportedOperationException("Not supported anymore!");
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBranchFitnessVector(chromosome, objectives);
+            // TODO: Replace by bit set implementation in the near future!
+            throw new UnsupportedOperationException("Not supported anymore!");
         }
 
         throw new UnsupportedOperationException("Fitness function "
