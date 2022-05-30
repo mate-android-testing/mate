@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -223,7 +224,7 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases        The test cases belonging to the source chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
      */
     public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
@@ -262,7 +263,7 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases        The test cases belonging to the source chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
      */
     public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
                                  IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
@@ -369,7 +370,7 @@ public class EnvironmentManager {
         } else if (objective == Objective.BRANCHES) {
             objectives = getBranches();
         } else if (objective == Objective.BLOCKS) {
-            objectives =  getBasicBlocks();
+            objectives = getBasicBlocks();
         } else {
             throw new UnsupportedOperationException("Objective " + objective + " not yet supported!");
         }
@@ -400,7 +401,7 @@ public class EnvironmentManager {
      * Also removes the serialized test case afterwards.
      *
      * @param testcaseDir The test case directory.
-     * @param testCase    The name of the test case file.
+     * @param testCase The name of the test case file.
      */
     public boolean fetchTestCase(String testcaseDir, String testCase) {
 
@@ -419,9 +420,9 @@ public class EnvironmentManager {
      * a system event to a certain receiver.
      *
      * @param packageName The package name of the AUT.
-     * @param receiver    The receiver listening for the system event.
-     * @param action      The system event.
-     * @param dynamic     Whether the receiver is a dynamic receiver or not.
+     * @param receiver The receiver listening for the system event.
+     * @param action The system event.
+     * @param dynamic Whether the receiver is a dynamic receiver or not.
      * @return Returns whether broadcasting the system event succeeded or not.
      */
     public boolean executeSystemEvent(String packageName, String receiver, String action, boolean dynamic) {
@@ -527,8 +528,8 @@ public class EnvironmentManager {
      * Stores the fitness data for the given chromosome.
      *
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
-     *                   otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      */
     public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId) {
 
@@ -603,7 +604,7 @@ public class EnvironmentManager {
      *
      * @param chromosome The given chromosome.
      * @param objectives The list of branches.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch fitness vector for the given chromosome.
      */
     public <T> List<Double> getBranchFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
@@ -640,17 +641,17 @@ public class EnvironmentManager {
      * The nth entry in the vector refers to the fitness value of the nth basic block.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of basic blocks.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @param numberOfBasicBlocks The number of basic blocks.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the basic block fitness vector for the given chromosome.
      */
-    public <T> List<Double> getBasicBlockFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
+    public <T> BitSet getBasicBlockFitnessVector(IChromosome<T> chromosome, int numberOfBasicBlocks) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATELog.log_warn("Trying to retrieve basic block fitness vector of dummy test case...");
                 // a dummy test case has a basic block fitness of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(objectives.size(), 0.0);
+                return new BitSet(numberOfBasicBlocks);
             }
         }
 
@@ -662,11 +663,17 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
-        List<Double> basicBlockFitnessVector = new ArrayList<>();
-        String[] basicBlockFitnessValues = response.getParameter("basic_block_fitness_vector").split("\\+");
 
-        for (String basicBlockFitnessValue : basicBlockFitnessValues) {
-            basicBlockFitnessVector.add(Double.parseDouble(basicBlockFitnessValue));
+        String[] basicBlockFitnessValues = response.getParameter("basic_block_fitness_vector").split("\\+");
+        assert basicBlockFitnessValues.length == numberOfBasicBlocks;
+
+        final BitSet basicBlockFitnessVector = new BitSet(basicBlockFitnessValues.length);
+
+        for (int i = 0; i < basicBlockFitnessValues.length; ++i) {
+            final String fitness = basicBlockFitnessValues[i];
+            if (fitness.equals("1")) {
+                basicBlockFitnessVector.set(i);
+            }
         }
 
         return basicBlockFitnessVector;
@@ -679,7 +686,7 @@ public class EnvironmentManager {
      *
      * @param chromosome The given chromosome.
      * @param objectives The list of branches. Is not transmitted to avoid load on socket.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
     public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, List<String> objectives) {
@@ -732,10 +739,10 @@ public class EnvironmentManager {
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      * This method is used to store the coverage data for the last incomplete test case.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
-     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
-     *                     otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
 
@@ -768,10 +775,10 @@ public class EnvironmentManager {
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      *
-     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
-     *                   otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      */
     public <T> void storeCoverageData(Coverage coverage, IChromosome<T> chromosome, String entityId) {
 
@@ -816,10 +823,10 @@ public class EnvironmentManager {
     /**
      * Requests the combined coverage information for the given set of test cases / test suites.
      *
-     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomes The list of chromosomes (test cases or test suites) for which the
-     *                    coverage should be computed.
-     * @param <T>         Refers to a test case or a test suite.
+     *         coverage should be computed.
+     * @param <T> Refers to a test case or a test suite.
      * @return Returns the combined coverage information for a set of chromosomes.
      */
     public <T> CoverageDTO getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
@@ -891,9 +898,9 @@ public class EnvironmentManager {
      * A convenient function to retrieve the coverage of a single test case within
      * a test suite.
      *
-     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param testSuiteId Identifies the test suite.
-     * @param testCaseId  Identifies the individual test case.
+     * @param testCaseId Identifies the individual test case.
      * @return Returns the coverage of the given test case.
      */
     public CoverageDTO getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
@@ -913,7 +920,7 @@ public class EnvironmentManager {
      * A chromosome can be either a test case or a test suite. This method is used
      * to retrieve the coverage of the last incomplete test case.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
      * @return Returns the coverage of the given test case.
      */
@@ -932,7 +939,7 @@ public class EnvironmentManager {
      * Convenient function to request the coverage information for a given chromosome.
      * A chromosome can be either a test case or a test suite.
      *
-     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the coverage of the given test case.
      */
@@ -962,8 +969,8 @@ public class EnvironmentManager {
      * where each entry indicates to which degree the line was covered.
      *
      * @param chromosome The given chromosome.
-     * @param lines      The lines for which coverage should be retrieved.
-     * @param <T>        Indicates the type of the chromosome, i.e. test case or test suite.
+     * @param lines The lines for which coverage should be retrieved.
+     * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
      * @return Returns line percentage coverage vector.
      */
     public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
@@ -1024,7 +1031,7 @@ public class EnvironmentManager {
      * Records a screenshot.
      *
      * @param packageName The package name of the AUT.
-     * @param nodeId      Some id of the screen state.
+     * @param nodeId Some id of the screen state.
      */
     public void takeScreenshot(String packageName, String nodeId) {
 
@@ -1040,9 +1047,9 @@ public class EnvironmentManager {
      * Checks whether a flickering of a screen state can be detected.
      *
      * @param packageName The package name of the screen state.
-     * @param stateId     Identifies the screen state.
+     * @param stateId Identifies the screen state.
      * @return Returns {@code true} if flickering was detected, otherwise
-     * {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean checkForFlickering(String packageName, String stateId) {
 
@@ -1071,8 +1078,8 @@ public class EnvironmentManager {
      * Another accessibility function.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId     The id of the screen state.
-     * @param widget      The widget for which this metric should be evaluated.
+     * @param stateId The id of the screen state.
+     * @param widget The widget for which this metric should be evaluated.
      * @return Returns ...
      */
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget) {
@@ -1093,8 +1100,8 @@ public class EnvironmentManager {
      * Retrieves the contrast ratio of the widget residing on the screen state.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId     Identifies the screens state.
-     * @param widget      The widget on which the contrast ratio should be evaluated.
+     * @param stateId Identifies the screens state.
+     * @param widget The widget on which the contrast ratio should be evaluated.
      * @return Returns the contrast ratio.
      */
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
@@ -1138,8 +1145,8 @@ public class EnvironmentManager {
      * Gets the luminance of the given widget.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId     Identifies the screens state.
-     * @param widget      The widget on which the contrast ratio should be evaluated.
+     * @param stateId Identifies the screens state.
+     * @param widget The widget on which the contrast ratio should be evaluated.
      * @return Returns the luminance of the given widget.
      */
     public String getLuminance(String packageName, String stateId, Widget widget) {
@@ -1218,7 +1225,7 @@ public class EnvironmentManager {
      * Returns the chromosome id of the given chromosome.
      *
      * @param chromosome The chromosome.
-     * @param <T>        Refers either to a {@link TestCase} or a {@link TestSuite}.
+     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
      * @return Returns the chromosome id of the given chromosome.
      */
     private <T> String getChromosomeId(IChromosome<T> chromosome) {

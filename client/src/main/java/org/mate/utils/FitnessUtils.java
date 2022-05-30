@@ -209,7 +209,8 @@ public class FitnessUtils {
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
             return Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, objectives);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBasicBlockFitnessVector(chromosome, objectives);
+            // TODO: Replace by bit set implementation in the near future!
+            throw new UnsupportedOperationException("Not supported anymore!");
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
             return Registry.getEnvironmentManager().getBranchFitnessVector(chromosome, objectives);
         }

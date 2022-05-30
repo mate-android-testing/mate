@@ -743,6 +743,7 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the i-th fitness function of the genetic algorithm.
      *
+     * @param index The fitness function index.
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the i-th fitness function used by the genetic algorithm.
      */
@@ -783,7 +784,7 @@ public class GeneticAlgorithmProvider {
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
                 return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
             case BASIC_BLOCK_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(index);
             case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
             case LINE_PERCENTAGE_COVERAGE:
