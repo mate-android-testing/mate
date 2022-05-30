@@ -39,7 +39,7 @@ public class TestCase {
     /**
      * The actions that has been executed by this test case.
      */
-    private final List<Action> eventSequence;
+    private final List<Action> actionSequence;
 
     /**
      * The visited activities in the order they appeared.
@@ -72,7 +72,7 @@ public class TestCase {
         setId("dummy");
         crashDetected = false;
         stateSequence = new ArrayList<>();
-        eventSequence = new ArrayList<>();
+        actionSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -86,8 +86,17 @@ public class TestCase {
         setId(id);
         crashDetected = false;
         stateSequence = new ArrayList<>();
-        eventSequence = new ArrayList<>();
+        actionSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
+
+        /*
+        * In rare circumstances, test cases without any action are created. This, however, means
+        * that updateTestCase() was never called, thus the state and activity sequence is empty,
+        * which in turn may falsify activity coverage and the gui model.
+         */
+        IScreenState lastScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
+        stateSequence.add(lastScreenState.getId());
+        activitySequence.add(lastScreenState.getActivityName());
     }
 
     /**
@@ -197,15 +206,6 @@ public class TestCase {
     }
 
     /**
-     * Adds a new action to the list of executed actions.
-     *
-     * @param event The action to be added.
-     */
-    public void addEvent(Action event) {
-        this.eventSequence.add(event);
-    }
-
-    /**
      * Returns the set of visited activities. This includes activities not belonging to the AUT.
      *
      * @return Returns the set of visited activities.
@@ -248,8 +248,8 @@ public class TestCase {
      *
      * @return Returns the action sequence.
      */
-    public List<Action> getEventSequence() {
-        return this.eventSequence;
+    public List<Action> getActionSequence() {
+        return this.actionSequence;
     }
 
     /**
@@ -305,14 +305,14 @@ public class TestCase {
         Registry.getUiAbstractionLayer().resetApp();
         TestCase resultingTc = newInitializedTestCase();
 
-        int finalSize = testCase.eventSequence.size();
+        int finalSize = testCase.actionSequence.size();
 
         if (testCase.desiredSize.hasValue()) {
             finalSize = testCase.desiredSize.getValue();
         }
 
         int count = 0;
-        for (Action action0 : testCase.eventSequence) {
+        for (Action action0 : testCase.actionSequence) {
             if (count < finalSize) {
                 if (!(action0 instanceof WidgetAction)
                         || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
@@ -380,31 +380,31 @@ public class TestCase {
 
         IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
 
-        MATE.log("executing action " + actionID + ": " + action);
-        addEvent(action);
-        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
-
-        IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
-
-        // track the activity and state transition of each action
-        String activityBeforeAction = oldState.getActivityName();
-        String activityAfterAction = newState.getActivityName();
-        String oldStateID = oldState.getId();
-        String newStateID = newState.getId();
-
-        if (actionID == 0) {
-            activitySequence.add(activityBeforeAction);
-            activitySequence.add(activityAfterAction);
-            stateSequence.add(oldStateID);
-            stateSequence.add(newStateID);
-        } else {
-            activitySequence.add(activityAfterAction);
-            stateSequence.add(newStateID);
+        // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
+        if (!Properties.SURROGATE_MODEL()) {
+            MATE.log("executing action " + actionID + ": " + action);
         }
 
-        MATE.log("executed action " + actionID + ": " + action);
-        MATE.log("Activity Transition for action " + actionID
-                + ":" + activityBeforeAction + "->" + activityAfterAction);
+        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+
+        // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
+        if (!Properties.SURROGATE_MODEL()) {
+
+            IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
+
+            // track the activity and state transition of each action
+            String activityBeforeAction = oldState.getActivityName();
+            String activityAfterAction = newState.getActivityName();
+            String newStateID = newState.getId();
+
+            actionSequence.add(action);
+            activitySequence.add(activityAfterAction);
+            stateSequence.add(newStateID);
+
+            MATE.log("executed action " + actionID + ": " + action);
+            MATE.log("Activity Transition for action " + actionID
+                    + ":" + activityBeforeAction + "->" + activityAfterAction);
+        }
 
         switch (actionResult) {
             case SUCCESS:
