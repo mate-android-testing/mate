@@ -1,13 +1,15 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.utils.FitnessUtils;
 
-import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides a fitness metric based on basic block coverage for multi-objective algorithms. This
@@ -18,24 +20,57 @@ import java.util.Map;
  */
 public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunction<T> {
 
-    // a cache that stores for each basic block the set of test cases and its fitness value
-    private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
-
-    // all basic blocks (shared by instances)
-    private static final List<String> blocks = new ArrayList<>();
-
-    // the current basic block we want to evaluate this fitness function against
-    private final String block;
+    /**
+     * The cache is essentially a flat two-dimensional array where the first dimension describes
+     * the position of a chromosome and the second dimension the position of the n-th basic block
+     * or fitness function. Hence, by having a chromosome index, see {@link #chromosomeToCacheIndex},
+     * and the fitness function index, see {@link #index}, we can look up the fitness for each
+     * chromosome and basic block.
+     *
+     * A visual representation of the cache would look as follows:
+     *
+     *      chromosome 1 || chromosome 2 || ... || chromosome n
+     *      [1,0,1,0,..]    [0,1,0,1,..]           [1,1,0,1,..]
+     *      block 1 to n    block 1 to n           block 1 to n
+     *
+     * We could also say that we joined together multiple bit sets, where each bit set represents
+     * the fitness values of a chromosome. To get the fitness value for a given chromosome and
+     * basic block (objective), we can use the following formula:
+     *
+     *      fitness = cache[chromosomeIndex * numberOfBasicBlocks + indexOfBasicBlock]
+     */
+    private static final BitSet cache = new BitSet();
 
     /**
-     * Initialises the fitness function with the given basic block as target.
-     *
-     * @param block The target basic block.
+     * Maps a chromosome to its index in the cache.
      */
-    public BasicBlockMultiObjectiveFitnessFunction(String block) {
-        this.block = block;
-        blocks.add(block);
-        cache.put(block, new HashMap<>());
+    private static final Map<IChromosome, Integer> chromosomeToCacheIndex = new HashMap<>();
+
+    /**
+     * We keep track of the used cache indices. Since we clean the cache from time to time, certain
+     * indices get available again, which we re-use when assigning a new index, see
+     * {@link #assignNewCacheIndex(IChromosome)}.
+     */
+    private static final BitSet usedCacheIndices = new BitSet();
+
+    /**
+     * Tracks the total number of basic blocks / fitness functions.
+     */
+    private static int numberOfBasicBlocks;
+
+    /**
+     * Represents the index of the n-th basic block / fitness function.
+     */
+    private final int index;
+
+    /**
+     * Initialises the fitness function with the given index of the basic block.
+     *
+     * @param index The index of the n-th basic block / fitness function.
+     */
+    public BasicBlockMultiObjectiveFitnessFunction(int index) {
+        this.index = index;
+        numberOfBasicBlocks++;
     }
 
     /**
@@ -49,30 +84,43 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double basicBlockFitnessValue;
+        Integer cacheIndex = chromosomeToCacheIndex.get(chromosome);
 
-        if (cache.get(block).containsKey(chromosome)) {
-            basicBlockFitnessValue = cache.get(block).get(chromosome);
-        } else {
-            // retrieves the fitness value for every single basic block
-            List<Double> basicBlockFitnessVector = FitnessUtils.getFitness(chromosome, blocks);
+        if (cacheIndex == null) {
+            // the chromosome isn't cached yet
+            cacheIndex = assignNewCacheIndex(chromosome);
 
-            // insert them into the cache
-            for (int i = 0; i < basicBlockFitnessVector.size(); i++) {
-                cache.get(blocks.get(i)).put(chromosome, basicBlockFitnessVector.get(i));
+            // retrieve the fitness value for every single basic block
+            final BitSet basicBlockFitnessVector
+                    = Registry.getEnvironmentManager().getBasicBlockFitnessVector(chromosome, numberOfBasicBlocks);
+
+            // update cache
+            for (int i = 0; i < numberOfBasicBlocks; i++) {
+                cache.set(cacheIndex * numberOfBasicBlocks + i, basicBlockFitnessVector.get(i));
             }
-
-            basicBlockFitnessValue = cache.get(block).get(chromosome);
         }
 
-        return basicBlockFitnessValue;
+        return cache.get(cacheIndex * numberOfBasicBlocks + index) ? 1.0 : 0.0;
+    }
+
+    /**
+     * Assigns to the given chromosome a new index in the cache.
+     *
+     * @param chromosome The given chromosome.
+     * @return Returns the new cache index of the chromosome.
+     */
+    private int assignNewCacheIndex(final IChromosome<T> chromosome) {
+        final int newIndex = usedCacheIndices.nextClearBit(0);
+        usedCacheIndices.set(newIndex);
+        chromosomeToCacheIndex.put(chromosome, newIndex);
+        return newIndex;
     }
 
     /**
      * Returns whether this fitness function is maximising or not.
      *
      * @return Returns {@code true} since this fitness functions aims to maximise coverage of
-     *          basic blocks.
+     *         basic blocks.
      */
     @Override
     public boolean isMaximizing() {
@@ -94,26 +142,21 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
     /**
      * Removes chromosomes from the cache that are no longer in use in order to avoid memory issues.
      *
-     * @param chromosomes The list of active chromosomes.
+     * @param activeChromosomes The list of active chromosomes.
      */
-    public static <T> void cleanCache(List<IChromosome<T>> chromosomes) {
+    public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        if (blocks.size() == 0 || cache.size() == 0) {
-            return;
+        Set<IChromosome<T>> cachedChromosomes = new HashSet(chromosomeToCacheIndex.keySet());
+
+        for (IChromosome<T> activeChromosome : activeChromosomes) {
+            cachedChromosomes.remove(activeChromosome);
         }
 
-        List<IChromosome<T>> activeChromosomes = new ArrayList<>(chromosomes);
-
-        int count = 0;
-        for (String block : blocks) {
-            Map<IChromosome, Double> blockCache = cache.get(block);
-            for (IChromosome chromosome: new ArrayList<>(blockCache.keySet())) {
-                if (!activeChromosomes.contains(chromosome)) {
-                    blockCache.remove(chromosome);
-                    count++;
-                }
-            }
+        for (IChromosome<T> inactiveChromosome : cachedChromosomes) {
+            final int index = chromosomeToCacheIndex.remove(inactiveChromosome);
+            usedCacheIndices.clear(index);
         }
-        MATE.log_acc("Cleaning cache: " + count + " inactive chromosome removed.");
+
+        MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
     }
 }
