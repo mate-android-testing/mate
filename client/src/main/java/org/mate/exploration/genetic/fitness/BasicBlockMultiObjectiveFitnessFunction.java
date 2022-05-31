@@ -92,7 +92,7 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
 
             // retrieve the fitness value for every single basic block
             final BitSet basicBlockFitnessVector
-                    = Registry.getEnvironmentManager().getBasicBlockFitnessVector(chromosome, numberOfBasicBlocks);
+                    = FitnessUtils.getBasicBlockFitnessVector(chromosome, numberOfBasicBlocks);
 
             // update cache
             for (int i = 0; i < numberOfBasicBlocks; i++) {

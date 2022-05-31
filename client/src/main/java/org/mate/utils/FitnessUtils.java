@@ -11,6 +11,7 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.coverage.Coverage;
 
+import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -186,32 +187,71 @@ public class FitnessUtils {
     }
 
     /**
-     * Retrieves the fitness vector for the given chromosome, i.e. the chromosome is evaluated
-     * against each single objective, e.g. branch.
+     * Retrieves the branch fitness vector for the given chromosome.
      *
-     * @param chromosome The chromosome for which the fitness vector should be evaluated.
-     * @param objectives A list of objectives, e.g. lines or branches, or {@code null} if not required.
-     * @param <T> Specifies whether the chromosome is a test suite or a test case.
-     * @return Returns the fitness vector for the given chromosome.
+     * @param chromosome The chromosome for which fitness should be evaluated.
+     * @param numberOfBranches The number of branches.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the branch fitness vector for the given chromosome.
      */
-    public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives) {
+    public static <T> BitSet getBranchFitnessVector(IChromosome<T> chromosome, int numberOfBranches) {
 
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
-            // TODO: Replace by bit set implementation in the near future!
-            throw new UnsupportedOperationException("Not supported anymore!");
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            // TODO: Replace by bit set implementation in the near future!
-            throw new UnsupportedOperationException("Not supported anymore!");
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
-            // TODO: Replace by bit set implementation in the near future!
-            throw new UnsupportedOperationException("Not supported anymore!");
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
-            // TODO: Replace by bit set implementation in the near future!
-            throw new UnsupportedOperationException("Not supported anymore!");
+        if (Properties.FITNESS_FUNCTION() != FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
+            throw new IllegalStateException("Unexpected fitness function!");
         }
 
-        throw new UnsupportedOperationException("Fitness function "
-                + Properties.FITNESS_FUNCTION() + " not yet supported!");
+        return Registry.getEnvironmentManager().getBranchFitnessVector(chromosome, numberOfBranches);
+    }
+
+    /**
+     * Retrieves the basic block fitness vector for the given chromosome.
+     *
+     * @param chromosome The chromosome for which fitness should be evaluated.
+     * @param numberOfBasicBlocks The number of basic blocks.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the basic block fitness vector for the given chromosome.
+     */
+    public static <T> BitSet getBasicBlockFitnessVector(IChromosome<T> chromosome, int numberOfBasicBlocks) {
+
+        if (Properties.FITNESS_FUNCTION() != FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
+            throw new IllegalStateException("Unexpected fitness function!");
+        }
+
+        return Registry.getEnvironmentManager().getBasicBlockFitnessVector(chromosome, numberOfBasicBlocks);
+    }
+
+    /**
+     * Retrieves the branch distance vector for the given chromosome.
+     *
+     * @param chromosome The chromosome for which fitness should be evaluated.
+     * @param numberOfBranches The number of branches.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    public static <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
+
+        if (Properties.FITNESS_FUNCTION() != FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
+            throw new IllegalStateException("Unexpected fitness function!");
+        }
+
+        return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome, numberOfBranches);
+    }
+
+    /**
+     * Retrieves the line percentage vector for the given chromosome.
+     *
+     * @param chromosome The chromosome for which fitness should be evaluated.
+     * @param numberOfLines The number of lines.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the line percentage vector for the given chromosome.
+     */
+    public static <T> List<Float> getLinePercentageVector(IChromosome<T> chromosome, int numberOfLines) {
+
+        if (Properties.FITNESS_FUNCTION() != FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
+            throw new IllegalStateException("Unexpected fitness function!");
+        }
+
+        return Registry.getEnvironmentManager().getLinePercentageVector(chromosome, numberOfLines);
     }
 
     /**

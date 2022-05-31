@@ -89,7 +89,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
 
             // retrieve the fitness value for every single branch
             final List<Float> branchDistanceVector
-                    = Registry.getEnvironmentManager().getBranchDistanceVector(chromosome, numberOfBranches);
+                    = FitnessUtils.getBranchDistanceVector(chromosome, numberOfBranches);
 
             // describes the starting position of the chromosome in the cache
             final int baseIndex = cacheIndex * numberOfBranches;

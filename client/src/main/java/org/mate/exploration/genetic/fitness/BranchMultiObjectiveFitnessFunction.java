@@ -92,8 +92,7 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
 
             // retrieve the fitness value for every single branch
             final BitSet branchFitnessVector
-                    // TODO: Replace by call to FitnessUtils.getFitness()!
-                    = Registry.getEnvironmentManager().getBranchFitnessVector(chromosome, numberOfBranches);
+                    = FitnessUtils.getBranchFitnessVector(chromosome, numberOfBranches);
 
             // update cache
             for (int i = 0; i < numberOfBranches; i++) {
