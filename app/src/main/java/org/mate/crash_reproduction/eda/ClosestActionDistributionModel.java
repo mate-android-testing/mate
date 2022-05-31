@@ -1,15 +1,16 @@
-package org.mate.exploration.eda;
+package org.mate.crash_reproduction.eda;
 
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.ui.UIAction;
+import org.mate.model.TestCase;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,8 +30,9 @@ public class ClosestActionDistributionModel<Node extends UIAction> extends Proba
     }
 
     @Override
-    public void update(Set<List<Node>> bestSequences) {
-        Map<Node, Set<Node>> newEdges = getGraph(bestSequences);
+    public void update(Set<IChromosome<TestCase>> bestSequences) {
+        Set<List<Node>> sequences = bestSequences.stream().map(ch -> ch.getValue().getEventSequence().stream().map(a -> (Node) a).collect(Collectors.toList())).collect(Collectors.toSet());
+        Map<Node, Set<Node>> newEdges = getGraph(sequences);
 
         newEdges.forEach((from, to) -> edges.compute(from, (f, existingChildren) -> {
             if (existingChildren == null) {

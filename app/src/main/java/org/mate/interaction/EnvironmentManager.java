@@ -466,6 +466,12 @@ public class EnvironmentManager {
         return Boolean.parseBoolean(response.getParameter("response"));
     }
 
+    public double getCallTreeDistance(IChromosome<?> chromosome) {
+        String chromosomeId = getChromosomeId(chromosome);
+
+        return Double.parseDouble(sendMessage(new Message.MessageBuilder("/graph/call_tree_distance").withParameter("chromosome", chromosomeId).withParameter("packageName", Registry.getPackageName()).build()).getParameter("distance"));
+    }
+
     /**
      * Initialises a graph.
      */
@@ -492,6 +498,54 @@ public class EnvironmentManager {
         sendMessage(messageBuilder.build());
     }
 
+    private String chromosome = null;
+
+    public void setChromosome(IChromosome<?> chromosome) {
+        this.chromosome = getChromosomeId(chromosome) + "+lastIncompleteTestCase";
+    }
+
+    public Set<String> getTargetActivities() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_target_activities")
+                .withParameter("package", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        String targets = response.getParameter("target_activities");
+        MATE.log("Targets are: " + targets);
+        return new HashSet<>(Arrays.asList(targets.split(",")));
+    }
+
+    private Set<String> tokens = null;
+    public Set<String> getStackTraceTokens() {
+        if (emulator == null) {
+            return Collections.EMPTY_SET;
+        }
+
+        if (tokens == null) {
+            Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace_tokens")
+                    .withParameter("package", Registry.getPackageName());
+
+            Message response = sendMessage(messageBuilder.build());
+            tokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
+        }
+
+        MATE.log("Tokens are: " + tokens);
+
+        return tokens;
+    }
+
+    private Set<String> userInputTokens = null;
+    public Set<String> getStackTraceUserInput() {
+        if (userInputTokens == null) {
+            Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace_user_tokens")
+                    .withParameter("package", Registry.getPackageName());
+
+            Message response = sendMessage(messageBuilder.build());
+            userInputTokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
+        }
+
+        return userInputTokens;
+    }
+
     /**
      * Requests the drawing of the graph.
      *
@@ -503,6 +557,11 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(raw));
+
+        if (chromosome != null) {
+            messageBuilder.withParameter("chromosome", chromosome);
+        }
+
         sendMessage(messageBuilder.build());
     }
 
@@ -519,6 +578,14 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Arrays.asList(response.getParameter("branches").split("\\+"));
+    }
+
+    public List<String> getStackTrace() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace")
+                .withParameter("packageName", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Arrays.asList(response.getParameter("stack_trace").split(","));
     }
 
     /**
@@ -638,7 +705,7 @@ public class EnvironmentManager {
 
     public void activityGraphInit() {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/activity_graph_init")
-                .withParameter("activityGraphMap", Properties.ACTIVITY_GRAPH_MAP());
+                .withParameter("packageName", Registry.getPackageName());
 
         Message response = sendMessage(messageBuilder.build());
     }
@@ -1047,6 +1114,11 @@ public class EnvironmentManager {
         }
     }
 
+    public void writeFile(String fileName, String content) {
+        MATE.log("Writing file " + fileName);
+        sendMessage(new Message.MessageBuilder("/utility/write_file").withParameter("fileName", fileName).withParameter("content", content).build());
+    }
+
     /**
      * Extracts the last stack trace from the logcat.
      *
@@ -1074,12 +1146,25 @@ public class EnvironmentManager {
      * @param nodeId      Some id of the screen state.
      */
     public void takeScreenshot(String packageName, String nodeId) {
+        if (emulator == null) {
+            MATE.log_warn("Cannot take screenshot before emulator is allocated");
+            return;
+        }
 
         sendMessage(new Message.MessageBuilder("/emulator/interaction")
                 .withParameter("deviceId", emulator)
                 .withParameter("type", "take_screenshot")
                 .withParameter("packageName", packageName)
                 .withParameter("nodeId", nodeId)
+                .build());
+    }
+
+    public void markOnImage(List<Widget> widgets, String stateId) {
+        sendMessage(new Message.MessageBuilder("/emulator/interaction")
+                .withParameter("type", "mark_on_screenshot")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("state", stateId)
+                .withParameter("rectangles", widgets.stream().map(w -> String.format("%d,%d,%d,%d", w.getX1(), w.getY1(), w.getX2(), w.getY2())).collect(Collectors.joining(";")))
                 .build());
     }
 

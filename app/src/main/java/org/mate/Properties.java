@@ -1,6 +1,6 @@
 package org.mate;
 
-import org.mate.exploration.eda.DistributionModel;
+import org.mate.crash_reproduction.eda.DistributionModel;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -217,7 +217,7 @@ public class Properties {
 
     // the path to the APK file
     public static String APK() {
-        return propertyOr(null);
+        return propertyOr("plain-apps/" + Registry.getPackageName() + ".apk");
     }
 
     // specifies the method name when an intra CFG should be constructed
@@ -243,7 +243,7 @@ public class Properties {
     // how and which target vertex should be selected, e.g. a random branch vertex
     public static String TARGET() { return propertyOr("no_target"); }
 
-    public static String ACTIVITY_GRAPH_MAP() { return propertyOr("no_activity_graph"); }
+    public static boolean ACTIVITY_GRAPH() { return propertyOr(false); }
 
     // whether to draw raw graph or 'extended' graph
     public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }

@@ -16,10 +16,12 @@ import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Models an app screen with all (discoverable) widgets on it.
@@ -30,6 +32,8 @@ public class AppScreen {
      * Defines the activity name that corresponds to the app screen.
      */
     private final String activityName;
+
+    private final Set<String> fragmentNames;
 
     /**
      * Defines the package name that corresponds to the app screen.
@@ -62,6 +66,7 @@ public class AppScreen {
 
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
+        this.fragmentNames = new HashSet<>(deviceMgr.getCurrentFragments(this.activityName));
         this.packageName = device.getCurrentPackageName();
 
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
@@ -217,6 +222,10 @@ public class AppScreen {
      */
     public String getActivityName() {
         return activityName;
+    }
+
+    public Set<String> getFragmentNames() {
+        return fragmentNames;
     }
 
     /**

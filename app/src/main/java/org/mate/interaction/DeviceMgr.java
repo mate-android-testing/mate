@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -78,6 +79,8 @@ public class DeviceMgr {
      * The probability for using a static string or the input generation.
      */
     private static final double PROB_STATIC_STRING = 0.5;
+
+    private static final double PROB_STACK_TRACE_USER_INPUT = 0.8;
 
     /**
      * The probability for mutating a static string.
@@ -1108,6 +1111,17 @@ public class DeviceMgr {
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = Registry.getRandom();
 
+        if (Properties.TARGET().equals("stack_trace")) {
+            if (random.nextDouble() < PROB_STACK_TRACE_USER_INPUT) {
+                Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
+
+                if (!tokens.isEmpty()) {
+                    MATE.log("TEXT DATA: stack trace user input");
+                    return Randomness.randomElement(tokens);
+                }
+            }
+        }
+
         /*
          * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
          * with probability PROB_HINT_MUTATION we mutate the given hint.
@@ -1115,8 +1129,10 @@ public class DeviceMgr {
         if (widget.isHintPresent()) {
             if (inputFieldType.isValid(widget.getHint()) && random.nextDouble() < PROB_HINT) {
                 if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
+                    MATE.log("TEXT DATA: hint mutated");
                     return Mutation.mutateInput(inputFieldType, widget.getHint());
                 } else {
+                    MATE.log("TEXT DATA: hint");
                     return widget.getHint();
                 }
             }
@@ -1153,6 +1169,7 @@ public class DeviceMgr {
                         if (random.nextDouble() < PROB_STATIC_STRING_MUTATION) {
                             randomStaticString = Mutation.mutateInput(inputFieldType, randomStaticString);
                         }
+                        MATE.log("TEXT DATA: random static string");
                         return randomStaticString;
                     }
                 }
@@ -1164,12 +1181,14 @@ public class DeviceMgr {
                  */
                 randomStaticString = staticStrings.getRandomStringFor(uiComponents);
                 if (randomStaticString != null) {
+                    MATE.log("TEXT DATA: random static string");
                     return randomStaticString;
                 }
             }
         }
 
         // fallback mechanism
+        MATE.log("TEXT DATA: fallback, static strings initialized: " + staticStrings.isInitialised());
         return generateRandomInput(inputFieldType, maxLength);
     }
 
@@ -1306,22 +1325,26 @@ public class DeviceMgr {
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
 
+    private List<String> getCurrentFragments() {
+        return getCurrentFragments(getCurrentActivity());
+    }
+
     /**
      * Returns the currently visible fragments.
      *
      * @return Returns the currently visible fragments.
      */
-    private List<String> getCurrentFragments() {
+    public List<String> getCurrentFragments(String currentActivity) {
 
         // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
         try {
-            String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
+            String output = device.executeShellCommand("dumpsys activity " + currentActivity);
             List<String> fragments = extractFragments(output);
             MATE.log_debug("Currently active fragments: " + fragments);
             return fragments;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
-            return Collections.emptyList();
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1344,7 +1367,7 @@ public class DeviceMgr {
         *     FragmentManager misc state:
         */
 
-        final String fragmentActivityState = output.split("Local FragmentActivity")[1];
+        final String fragmentActivityState = output; //.split("Local FragmentActivity")[1];
         
         // If no fragment is visible, the 'Added Fragments:' line is missing!
         if (!fragmentActivityState.contains("Added Fragments:")) {
@@ -1353,7 +1376,7 @@ public class DeviceMgr {
 
         final String[] fragmentLines = fragmentActivityState
                 .split("Added Fragments:")[1]
-                .split("FragmentManager")[0]
+                .split("FragmentManager|Fragments Created Menus")[0]
                 .split("Back Stack Index:")[0] // this line is not always present
                 .split(System.lineSeparator());
 

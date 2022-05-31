@@ -174,4 +174,8 @@ public class StackTrace {
                 ", causedByLines=" + causedByLines +
                 '}';
     }
+
+    public List<String> getMethodCalls() {
+        return methodCalls;
+    }
 }

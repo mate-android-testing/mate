@@ -4,6 +4,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
+import org.mate.Registry;
+import org.mate.accessibility.AccessibilityViolation;
+import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
@@ -20,10 +23,14 @@ import org.mate.state.ScreenStateType;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
 import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
@@ -107,6 +114,35 @@ public class UIAbstractionLayer {
      */
     public List<UIAction> getExecutableActions() {
         return getLastScreenState().getActions();
+    }
+
+    public List<WidgetAction> getPromisingActions() {
+        return getPromisingActions(getLastScreenState());
+    }
+
+    public List<WidgetAction> getPromisingActions(IScreenState state) {
+        Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
+        List<WidgetAction> widgetActions = state.getWidgetActions();
+        List<WidgetAction> actionsContainingToken = widgetActions.stream()
+                .filter(a -> a.getWidget().containsAnyToken(tokens))
+                .collect(Collectors.toList());
+        List<WidgetAction> promisingActions = new LinkedList<>();
+
+        for (WidgetAction action : actionsContainingToken) {
+            if (action.getWidget().isTextViewType()) {
+                // Assume this is the label to an input
+                Optional<WidgetAction> closestEditText = widgetActions.stream()
+                        .filter(a -> a.getWidget().isEditTextType() || a.getWidget().isSpinnerType())
+                        .min(Comparator.comparingDouble(w -> w.getWidget().distanceTo(action.getWidget())));
+
+                closestEditText.ifPresent(promisingActions::add);
+                promisingActions.add(action);
+            } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
+                promisingActions.add(action);
+            }
+        }
+
+        return promisingActions;
     }
 
     /**
@@ -549,6 +585,12 @@ public class UIAbstractionLayer {
             }
         }
         screenState.setId("S" + lastScreenStateNumber);
+        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), screenState.getId());
+        List<Widget> widgets = getPromisingActions(screenState).stream().map(WidgetAction::getWidget).collect(Collectors.toList());
+
+        if (!widgets.isEmpty()) {
+            Registry.getEnvironmentManager().markOnImage(widgets, screenState.getId());
+        }
         lastScreenStateNumber++;
         return screenState;
     }

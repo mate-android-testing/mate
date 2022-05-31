@@ -6,6 +6,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
+import org.mate.crash_reproduction.CrashReproduction;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
@@ -23,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
+import java.util.Set;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -117,10 +119,12 @@ public class MATE {
             Registry.getEnvironmentManager().initGraph();
         }
 
-        if (Properties.ACTIVITY_GRAPH_MAP() != null) {
+        if (Properties.ACTIVITY_GRAPH()) {
             MATE.log_acc("Initialising activity graph!");
             Registry.getEnvironmentManager().activityGraphInit();
         }
+
+        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), Registry.getUiAbstractionLayer().getLastScreenState().getId());
     }
 
     /**
@@ -150,6 +154,11 @@ public class MATE {
 
             if (Properties.GRAPH_TYPE() != null) {
                 Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            }
+
+            if (Properties.TARGET().equals("stack_trace")) {
+                Set<String> targets = Registry.getEnvironmentManager().getTargetActivities();
+                Registry.getEnvironmentManager().writeFile("guiModel.dot", Registry.getUiAbstractionLayer().getGuiModel().toDotGraph(s -> CrashReproduction.reachedTarget(targets, s)));
             }
 
             Registry.getEnvironmentManager().releaseEmulator();

@@ -1,8 +1,8 @@
-package org.mate.exploration.eda;
+package org.mate.crash_reproduction.eda;
 
 import android.support.annotation.NonNull;
 
-import org.mate.interaction.action.Action;
+import org.mate.Registry;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.Randomness;
 
@@ -55,11 +55,17 @@ public abstract class ProbabilityGraphDistributionModel<Node, Weight> implements
         return bestPath;
     }
 
+    @Override
     public Optional<Node> getNextBestNode(Node start) {
         return Optional.ofNullable(edges.get(start))
                 .map(this::weightsToProbabilities)
                 .flatMap(children -> children.entrySet().stream().max(Comparator.comparingDouble(Map.Entry::getValue)))
                 .map(Map.Entry::getKey);
+    }
+
+    @Override
+    public Set<Node> getPossibleNodes(Node startNode) {
+        return edges.getOrDefault(startNode, new HashMap<>()).keySet();
     }
 
     protected abstract Map<Node, Double> weightsToProbabilities(@NonNull Map<Node, Weight> children);
@@ -70,24 +76,40 @@ public abstract class ProbabilityGraphDistributionModel<Node, Weight> implements
 
         graph.add("digraph G {");
 
-        getAllNodes().forEach(node -> nodeColor(node).ifPresent(color -> graph.add(String.format("\"%s\" [color = %s]", nodeToString(node), color))));
+        getAllNodes().forEach(node -> {
+            List<String> attributes = new LinkedList<>();
+
+            nodeColor(node).ifPresent(color -> attributes.add("color = \"" + color + "\""));
+            getImage(node).ifPresent(image -> attributes.add("image = \"" + image + "\", imagescale=true, height=0.4, shape=square"));
+
+            if (!attributes.isEmpty()) {
+                graph.add(String.format("\"%s\" [%s]", nodeToString(node), attributes.stream().collect(Collectors.joining(", "))));
+            }
+        });
+
+        Map<Node, Set<Node>> bestSequence = getGraph(getBestSequence(root));
 
         for (Map.Entry<Node, Map<Node, Weight>> entry : edges.entrySet()) {
             Map<Node, Weight> children = entry.getValue();
             Map<Node, Double> childrenProbabilities = weightsToProbabilities(children);
 
             children.entrySet().stream().forEach(e -> graph.add(String.format(Locale.getDefault(),
-                    "\"%s\" -> \"%s\" [ label=\"abs: %s, rel: %f\" ];",
+                    "\"%s\" -> \"%s\" [ label=\"abs: %s, rel: %f\", color=\"%s\" ];",
                     nodeToString(entry.getKey()),
                     nodeToString(e.getKey()),
                     e.getValue(),
-                    childrenProbabilities.get(e.getKey())
+                    childrenProbabilities.get(e.getKey()),
+                    bestSequence.getOrDefault(entry.getKey(), new HashSet<>()).contains(e.getKey()) ? "red" : "black"
             )));
         }
 
         graph.add("}");
 
         return graph.toString();
+    }
+
+    protected Optional<String> getImage(Node node) {
+        return Optional.empty();
     }
 
     protected Optional<String> nodeColor(Node node) {
@@ -136,7 +158,7 @@ public abstract class ProbabilityGraphDistributionModel<Node, Weight> implements
         return acc;
     }
 
-    private Stream<Node> getAllNodes() {
+    protected Stream<Node> getAllNodes() {
         return Stream.concat(edges.keySet().stream(), edges.values().stream().flatMap(a -> a.keySet().stream())).distinct();
     }
 }

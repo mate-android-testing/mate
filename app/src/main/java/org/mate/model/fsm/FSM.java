@@ -108,6 +108,10 @@ public class FSM {
         return transitions;
     }
 
+    public Set<Transition> getTransitions(IScreenState screenState) {
+        return transitions.stream().filter(transition -> transition.getSource().getScreenState().equals(screenState)).collect(Collectors.toSet());
+    }
+
     /**
      * Returns the number of states in the FSM.
      *

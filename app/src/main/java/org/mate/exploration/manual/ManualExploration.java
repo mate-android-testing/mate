@@ -32,8 +32,10 @@ public class ManualExploration implements Algorithm {
     @Override
     public void run() {
 
+        String currentActivity = Registry.getUiAbstractionLayer().getCurrentActivity();
         Action manualAction = new UIAction(ActionType.MANUAL_ACTION,
-                Registry.getUiAbstractionLayer().getCurrentActivity());
+                currentActivity,
+                Registry.getDeviceMgr().getCurrentFragments(currentActivity));
 
         while (true) {
 

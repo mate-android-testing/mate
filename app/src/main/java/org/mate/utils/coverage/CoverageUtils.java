@@ -103,19 +103,8 @@ public final class CoverageUtils {
         // store data about activity coverage in any case
         visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
 
-        switch (Properties.COVERAGE()) {
-            case BRANCH_COVERAGE:
-            case LINE_COVERAGE:
-            case METHOD_COVERAGE:
-            case BASIC_BLOCK_LINE_COVERAGE:
-            case BASIC_BLOCK_BRANCH_COVERAGE:
-            case ALL_COVERAGE:
-                Registry.getEnvironmentManager().storeCoverageData(
-                        Properties.COVERAGE(), chromosome, null);
-                break;
-            default:
-                break;
-        }
+        Registry.getEnvironmentManager().storeCoverageData(
+                Properties.COVERAGE(), chromosome, null);
     }
 
     /**

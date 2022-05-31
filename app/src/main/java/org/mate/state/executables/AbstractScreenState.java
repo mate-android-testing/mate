@@ -6,6 +6,7 @@ import org.mate.state.IScreenState;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Models an abstract screen state. That is nothing more than a screen with its widgets,
@@ -17,6 +18,8 @@ public abstract class AbstractScreenState implements IScreenState {
      * The activity name to which the screen state refers.
      */
     protected final String activityName;
+
+    protected final Set<String> fragmentNames;
 
     /**
      * The package name to which the screen state refers.
@@ -40,10 +43,11 @@ public abstract class AbstractScreenState implements IScreenState {
      * @param activityName The activity name that corresponds to the screen state.
      * @param widgets The list of widgets part of the screen state.
      */
-    public AbstractScreenState(String packageName, String activityName, List<Widget> widgets){
+    public AbstractScreenState(String packageName, String activityName, List<Widget> widgets, Set<String> fragmentNames){
         this.widgets = widgets;
         this.packageName = packageName;
         this.activityName = activityName;
+        this.fragmentNames = fragmentNames;
     }
 
     /**
@@ -84,6 +88,11 @@ public abstract class AbstractScreenState implements IScreenState {
     @Override
     public String getActivityName() {
         return activityName;
+    }
+
+    @Override
+    public Set<String> getFragmentNames() {
+        return fragmentNames;
     }
 
     /**

@@ -7,11 +7,18 @@ import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
+import org.mate.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Represents an element in the ui hierarchy, i.e. a wrapper around a {@link AccessibilityNodeInfo}
@@ -135,6 +142,7 @@ public class Widget {
     private final boolean password;
     private final boolean clickable;
     private final boolean longClickable;
+    private final Set<String> tokens;
 
     // mutable properties
     private String hint;
@@ -246,6 +254,37 @@ public class Widget {
             labelBy = Objects.toString(lb.getViewIdResourceName(), "");
         }
         this.labeledBy = labelBy;
+
+        this.tokens = Stream.concat(
+                Stream.of(text, contentDesc, labeledBy, errorText, labelFor, hint),
+                children.stream().flatMap(Widget::getTokens)
+        ).filter(Objects::nonNull)
+                .flatMap(s -> Arrays.stream(s.split("\\s|,|;|:|\\.")))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(s -> !s.isEmpty())
+                .peek(a -> MATE.log("STRING DUMP: " + a)).collect(Collectors.toSet());
+    }
+
+    public double distanceTo(Widget other) {
+        int xCenter = this.x2 - this.x1;
+        int yCenter = this.y2 - this.y1;
+        int otherXCenter = other.x2 - other.x1;
+        int otherYCenter = other.y2 - other.y1;
+
+        return Math.sqrt((xCenter - otherXCenter)^2 + (yCenter - otherYCenter)^2);
+    }
+
+    public boolean containsAnyToken(Set<String> tokens) {
+        return getTokens().anyMatch(t1 -> tokens.stream().anyMatch(t2 -> {
+            return t1.equals(t2)
+                    || (Math.abs(t1.length() - t2.length()) == 1 && (t1.contains(t2) || t2.contains(t1))) // Off by one (catches plural)
+            ;
+        }));
+    }
+
+    public Stream<String> getTokens() {
+        return tokens.stream();
     }
 
     /**
@@ -1027,7 +1066,9 @@ public class Widget {
                     && getX1() == other.getX1() &&
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
-                    getY2() == other.getY2();
+                    getY2() == other.getY2()
+//                    && tokens.equals(other.tokens)
+                    ;
         }
     }
 
@@ -1043,7 +1084,9 @@ public class Widget {
                 getX1(),
                 getX2(),
                 getY1(),
-                getY2());
+                getY2()
+//                ,tokens
+        );
     }
 
     /**

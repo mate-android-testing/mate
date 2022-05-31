@@ -6,6 +6,7 @@ import org.mate.state.IScreenState;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public interface IGUIModel {
 
@@ -47,6 +48,8 @@ public interface IGUIModel {
      * @return Returns the edges that are labeled by the given action.
      */
     Set<Edge> getEdges(Action action);
+
+    Set<Edge> getOutgoingEdges(IScreenState from);
 
     /**
      * Tries to find the shortest path between two given states.
@@ -101,6 +104,8 @@ public interface IGUIModel {
      * @return Returns a textual representation of the GUI model.
      */
     String toString();
+
+    String toDotGraph(Predicate<IScreenState> markState);
 
     // boolean containsState(IScreenState screenState);
     // void draw();

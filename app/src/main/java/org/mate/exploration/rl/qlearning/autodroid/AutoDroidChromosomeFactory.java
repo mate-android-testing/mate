@@ -1,6 +1,7 @@
 package org.mate.exploration.rl.qlearning.autodroid;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
@@ -174,7 +175,8 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         double rnd = Randomness.getRnd().nextDouble();
 
         if (rnd < pHomeButton) {
-            return new UIAction(ActionType.HOME, uiAbstractionLayer.getCurrentActivity());
+            String currentActivity = uiAbstractionLayer.getCurrentActivity();
+            return new UIAction(ActionType.HOME, currentActivity, Registry.getDeviceMgr().getCurrentFragments(currentActivity));
         } else {
 
             IScreenState currentState = uiAbstractionLayer.getLastScreenState();

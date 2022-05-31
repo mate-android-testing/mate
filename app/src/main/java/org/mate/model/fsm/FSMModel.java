@@ -1,15 +1,19 @@
 package org.mate.model.fsm;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -61,6 +65,11 @@ public class FSMModel implements IGUIModel {
             edges.add(new Edge(action, source, target));
         }
         return edges;
+    }
+
+    @Override
+    public Set<Edge> getOutgoingEdges(IScreenState from) {
+        return fsm.getTransitions(from).stream().map(transition -> new Edge(transition.getAction(), transition.getSource().getScreenState(), transition.getTarget().getScreenState())).collect(Collectors.toSet());
     }
 
     /**
@@ -160,5 +169,30 @@ public class FSMModel implements IGUIModel {
     @Override
     public String toString() {
         return fsm.toString();
+    }
+
+    @Override
+    public String toDotGraph(Predicate<IScreenState> markState) {
+        StringJoiner graph = new StringJoiner("\n");
+        graph.add("digraph D {");
+
+        for (State state : fsm.getStates()) {
+            List<String> attributes = new LinkedList<>();
+            attributes.add("image=\"results/pictures/" + Registry.getPackageName() + "/" + state.getScreenState().getId() + ".png\"");
+            attributes.add("imagescale=true, height=6, fixedsize=true, shape=square");
+            if (markState.test(state.getScreenState())) {
+                attributes.add("fillcolor=red, style=filled");
+            }
+
+            graph.add(String.format("\"%s\" [%s]", state.getScreenState(), attributes.stream().collect(Collectors.joining(", "))));
+
+            for (Transition transition : fsm.getTransitions(state.getScreenState())) {
+                graph.add(String.format("\"%s\" -> \"%s\"", transition.getSource().getScreenState(), transition.getTarget().getScreenState()));
+            }
+        }
+
+        graph.add("}");
+
+        return graph.toString();
     }
 }

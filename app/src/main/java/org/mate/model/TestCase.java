@@ -2,25 +2,34 @@ package org.mate.model;
 
 import android.support.annotation.NonNull;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
+import org.mate.utils.Utils;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TestCase {
 
@@ -50,6 +59,14 @@ public class TestCase {
      */
     private final List<String> activitySequence;
 
+    private final Set<String> visitedFragments = new HashSet<>();
+
+    private final List<IScreenState> stateSequence = new LinkedList<>();
+
+    public List<IScreenState> getStateSequence() {
+        return stateSequence;
+    }
+
     /**
      * Whether a crash has been triggered by an action of the test case.
      */
@@ -67,6 +84,9 @@ public class TestCase {
      */
     private StackTrace crashStackTrace = null;
 
+    @XStreamOmitField
+    private String nickName = "";
+
     /**
      * Should be used for the creation of dummy test cases.
      * This suppresses the log that indicates a new test case
@@ -74,6 +94,7 @@ public class TestCase {
      */
     private TestCase() {
         setId("dummy");
+        number = counter++;
         crashDetected = false;
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
@@ -81,6 +102,12 @@ public class TestCase {
         activitySequence = new ArrayList<>();
     }
 
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    private static int counter = 0;
+    private final int number;
     /**
      * Creates a new test case object with the given id.
      *
@@ -89,6 +116,7 @@ public class TestCase {
     public TestCase(String id) {
         MATE.log("Initialising new test case!");
         setId(id);
+        number = counter++;
         crashDetected = false;
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
@@ -127,6 +155,11 @@ public class TestCase {
         if (Properties.RECORD_TEST_CASE_STATS()) {
             TestCaseStatistics.recordStats(this);
         }
+
+        Chromosome<TestCase> chromosome = new Chromosome<>(this);
+        MATE.log(nickName + " Testcase fitness: " + Registry.getEnvironmentManager().getCallTreeDistance(chromosome));
+        MATE.log(nickName + " Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
+        MATE.log(nickName + " Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
 
         // TODO: log the test case actions in a proper format
     }
@@ -235,6 +268,7 @@ public class TestCase {
      */
     public void updateVisitedStates(IScreenState GUIState) {
         this.visitedStates.add(GUIState.getId());
+        this.stateSequence.add(GUIState);
     }
 
     /**
@@ -393,7 +427,12 @@ public class TestCase {
 
         addEvent(action);
         ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+//        Chromosome<TestCase> chromosome = new Chromosome<>(this);
+//        FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
+//        CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+//        MATE.log("Branch Distance after action: " + new BranchDistanceFitnessFunction<TestCase>().getNormalizedFitness(chromosome));
 
+//        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), "T" + counter + "_" + actionID);
         // track the activity transitions of each action
         String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
 
@@ -437,5 +476,33 @@ public class TestCase {
         IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
         updateVisitedStates(currentScreenState);
         updateVisitedActivities(currentScreenState.getActivityName());
+    }
+
+    public boolean reachedTarget(List<String> targetStackTrace) {
+        return hasCrashDetected() && stackTraceMatchesTarget(getCrashStackTrace().getMethodCalls(), targetStackTrace);
+    }
+
+    private boolean stackTraceMatchesTarget(List<String> detectedStackTrace, List<String> targetStackTrace) {
+        String packageName = Registry.getPackageName();
+        List<String> detectedStackTraceWithoutLineNumbers = detectedStackTrace.stream().map(line -> line.split("\\(")[0]).collect(Collectors.toList());
+
+        List<String> exactMatch = new LinkedList<>();
+        List<String> withoutLineNumberMatch = new LinkedList<>();
+        List<String> noMatch = new LinkedList<>();
+
+        for (String line : targetStackTrace) {
+            if (detectedStackTrace.contains(line)) {
+                exactMatch.add(line);
+            } else if (line.startsWith(packageName)) {
+                // Expecting exact match for lines from AUT
+                return false;
+            } else if (detectedStackTraceWithoutLineNumbers.contains(line.split("\\(")[0])) {
+                withoutLineNumberMatch.add(line);
+            } else {
+                noMatch.add(line);
+            }
+        }
+
+        return noMatch.size() <= 1;
     }
 }

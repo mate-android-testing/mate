@@ -1,5 +1,6 @@
-package org.mate.exploration.eda;
+package org.mate.crash_reproduction.eda;
 
+import org.mate.Registry;
 import org.mate.interaction.action.ui.UIAction;
 
 public enum DistributionModel {
@@ -7,6 +8,18 @@ public enum DistributionModel {
         @Override
         public <T extends UIAction> IDistributionModel<T> get(T root) {
             return new ClosestActionDistributionModel<>(root);
+        }
+    },
+    GUI_MODEL {
+        @Override
+        public <T extends UIAction> IDistributionModel<T> get(T root) {
+            return new GUIModelDistributionModel<>(Registry.getUiAbstractionLayer().getGuiModel());
+        }
+    },
+    QLEARNING {
+        @Override
+        public <T extends UIAction> IDistributionModel<T> get(T root) {
+            return new PMBGNPRLModel<>();
         }
     },
     BEST_ACTION {

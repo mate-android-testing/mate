@@ -88,6 +88,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
         }
 
         TestCase testCase = TestCase.newInitializedTestCase();
+        testCase.setNickName("RANDOM");
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
