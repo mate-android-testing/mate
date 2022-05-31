@@ -333,12 +333,13 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the list of objectives based on objective property.
+     * Returns the number of objectives based on objective property.
      *
      * @param objective The specified objective property.
-     * @return Returns a list of objectives, e.g. the list of branches.
+     * @return Returns the number of objectives, e.g. the number of branches.
      */
-    public List<String> getObjectives(Objective objective) {
+    public int getNumberOfObjectives(Objective objective) {
+
         if (objective == null) {
             throw new IllegalStateException("Objective property not defined!");
         }
@@ -358,7 +359,7 @@ public class EnvironmentManager {
         }
 
         MATE.log_acc("Number of objectives: " + objectives.size());
-        return objectives;
+        return objectives.size();
     }
 
     /**
