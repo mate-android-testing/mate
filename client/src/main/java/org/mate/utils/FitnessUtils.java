@@ -205,7 +205,8 @@ public class FitnessUtils {
     public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives) {
 
         if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome, objectives);
+            // TODO: Replace by bit set implementation in the near future!
+            throw new UnsupportedOperationException("Not supported anymore!");
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
             return Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, objectives);
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
