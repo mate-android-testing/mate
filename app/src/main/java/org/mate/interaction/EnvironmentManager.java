@@ -683,22 +683,22 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the branch distance vector for the given chromosome. A branch distance
-     * vector consists of n entries, where n refers to the number of branches.
-     * The nth entry in the vector refers to the fitness value of the nth branch.
+     * Retrieves the branch distance vector for the given chromosome. A branch distance vector
+     * consists of n entries, where n refers to the number of branches. The nth entry in the vector
+     * refers to the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of branches. Is not transmitted to avoid load on socket.
+     * @param numberOfBranches The number of branches.
      * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, List<String> objectives) {
+    public <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
                 // a dummy test case has a branch distance of 1.0 (worst value) for each objective
-                return Collections.nCopies(objectives.size(), 1.0);
+                return Collections.nCopies(numberOfBranches, 1.0f);
             }
         }
 
@@ -709,11 +709,13 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
-        List<Double> branchDistanceVector = new ArrayList<>();
         String[] branchDistances = response.getParameter("branch_distance_vector").split("\\+");
+        assert branchDistances.length == numberOfBranches;
+
+        List<Float> branchDistanceVector = new ArrayList<>();
 
         for (String branchDistance : branchDistances) {
-            branchDistanceVector.add(Double.parseDouble(branchDistance));
+            branchDistanceVector.add(Float.parseFloat(branchDistance));
         }
 
         return branchDistanceVector;
