@@ -346,20 +346,20 @@ public class EnvironmentManager {
 
         MATE.log_acc("Getting objectives...!");
 
-        List<String> objectives;
+        int numberOfObjectives;
 
         if (objective == Objective.LINES) {
-            objectives = getSourceLines();
+            numberOfObjectives = getSourceLines().size();
         } else if (objective == Objective.BRANCHES) {
-            objectives = getBranches();
+            numberOfObjectives = getNumberOfBranches();
         } else if (objective == Objective.BLOCKS) {
-            objectives = getBasicBlocks();
+            numberOfObjectives = getNumberOfBasicBlocks();
         } else {
             throw new UnsupportedOperationException("Objective " + objective + " not yet supported!");
         }
 
-        MATE.log_acc("Number of objectives: " + objectives.size());
-        return objectives.size();
+        MATE.log_acc("Number of objectives: " + numberOfObjectives);
+        return numberOfObjectives;
     }
 
     /**
@@ -369,6 +369,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of basic blocks.
      */
+    @SuppressWarnings("unused")
     public List<String> getBasicBlocks() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_basic_blocks")
@@ -377,6 +378,21 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
 
         return Arrays.asList(response.getParameter("blocks").split("\\+"));
+    }
+
+    /**
+     * Requests the number of basic blocks of the AUT. Each basic block typically represents a
+     * testing target in the context of MIO/MOSA.
+     *
+     * @return Returns the number of branches.
+     */
+    public int getNumberOfBasicBlocks() {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_number_of_basic_blocks")
+                .withParameter("packageName", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Integer.parseInt(response.getParameter("blocks"));
     }
 
     /**
@@ -513,6 +529,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of branches.
      */
+    @SuppressWarnings("unused")
     public List<String> getBranches() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_branches")
@@ -520,6 +537,21 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Arrays.asList(response.getParameter("branches").split("\\+"));
+    }
+
+    /**
+     * Requests the number of branches of the AUT. Each branch typically represents a testing target
+     * in the context of MIO/MOSA.
+     *
+     * @return Returns the number of branches.
+     */
+    public int getNumberOfBranches() {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_number_of_branches")
+                .withParameter("packageName", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Integer.parseInt(response.getParameter("branches"));
     }
 
     /**
