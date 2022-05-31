@@ -80,10 +80,6 @@ public class FitnessUtils {
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome, null);
         }
-
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-        }
     }
 
     /**
@@ -110,10 +106,6 @@ public class FitnessUtils {
 
         if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
             Registry.getEnvironmentManager().storeFitnessData(chromosome, testCase.getId());
-        }
-
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 
@@ -211,7 +203,8 @@ public class FitnessUtils {
             // TODO: Replace by bit set implementation in the near future!
             throw new UnsupportedOperationException("Not supported anymore!");
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            return Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, objectives);
+            // TODO: Replace by bit set implementation in the near future!
+            throw new UnsupportedOperationException("Not supported anymore!");
         } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
             // TODO: Replace by bit set implementation in the near future!
             throw new UnsupportedOperationException("Not supported anymore!");

@@ -970,21 +970,21 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns a fitness vector for the given chromosome and the specified lines
-     * where each entry indicates to which degree the line was covered.
+     * Returns a fitness vector for the given chromosome and the specified lines where each entry
+     * indicates to which degree the line was covered.
      *
      * @param chromosome The given chromosome.
-     * @param lines The lines for which coverage should be retrieved.
+     * @param numberOfLines The number of lines.
      * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
      * @return Returns line percentage coverage vector.
      */
-    public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
+    public <T> List<Float> getLineCoveredPercentage(IChromosome<T> chromosome, int numberOfLines) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve line percentage vector of dummy test case...");
                 // a dummy test case has a line percentage of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(lines.size(), 0.0);
+                return Collections.nCopies(numberOfLines, 0.0f);
             }
         }
 
@@ -992,7 +992,6 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("lines", lines.stream().collect(Collectors.joining("*")))
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
 
@@ -1000,12 +999,11 @@ public class EnvironmentManager {
             MATE.log_acc("Retrieving line covered percentages failed!");
             throw new IllegalStateException(response.getParameter("info"));
         } else {
-            // convert result
-            List<Double> coveragePercentagesVector = new ArrayList<>();
+            List<Float> coveragePercentagesVector = new ArrayList<>();
             String[] coveragePercentages = response.getParameter("coveragePercentages").split("\n");
 
             for (String coveragePercentage : coveragePercentages) {
-                coveragePercentagesVector.add(Double.parseDouble(coveragePercentage));
+                coveragePercentagesVector.add(Float.parseFloat(coveragePercentage));
             }
 
             return coveragePercentagesVector;

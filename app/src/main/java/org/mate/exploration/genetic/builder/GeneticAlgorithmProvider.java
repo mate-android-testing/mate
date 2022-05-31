@@ -790,7 +790,7 @@ public class GeneticAlgorithmProvider {
             case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(index);
             case BASIC_BLOCK_LINE_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:
