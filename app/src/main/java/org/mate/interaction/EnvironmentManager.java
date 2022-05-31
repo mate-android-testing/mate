@@ -349,7 +349,7 @@ public class EnvironmentManager {
         int numberOfObjectives;
 
         if (objective == Objective.LINES) {
-            numberOfObjectives = getSourceLines().size();
+            numberOfObjectives = getNumberOfSourceLines();
         } else if (objective == Objective.BRANCHES) {
             numberOfObjectives = getNumberOfBranches();
         } else if (objective == Objective.BLOCKS) {
@@ -755,21 +755,43 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the list of source lines of the AUT. A single
-     * source line has the following format:
+     * Returns the list of source lines of the AUT. A single source line has the following format:
      * package name + class name + line number
      *
      * @return Returns the sources lines of the AUT.
      */
+    @SuppressWarnings("unused")
     public List<String> getSourceLines() {
+
         Message response = sendMessage(new Message.MessageBuilder("/coverage/getSourceLines")
                 .withParameter("packageName", Registry.getPackageName())
                 .build());
-        if (!"/coverage/getSourceLines".equals(response.getSubject())) {
-            MATE.log_acc("ERROR: unable to retrieve source lines");
-            return null;
+
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Unable to retrieve source lines!");
+            throw new IllegalStateException(response.getParameter("info"));
+        } else {
+            return Arrays.asList(response.getParameter("lines").split("\n"));
         }
-        return Arrays.asList(response.getParameter("lines").split("\n"));
+    }
+
+    /**
+     * Returns the number of source lines of the AUT.
+     *
+     * @return Returns the sources lines of the AUT.
+     */
+    public int getNumberOfSourceLines() {
+
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/getNumberOfSourceLines")
+                .withParameter("packageName", Registry.getPackageName())
+                .build());
+
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Unable to retrieve number of source lines!");
+            throw new IllegalStateException(response.getParameter("info"));
+        } else {
+            return Integer.parseInt(response.getParameter("lines"));
+        }
     }
 
     /**
