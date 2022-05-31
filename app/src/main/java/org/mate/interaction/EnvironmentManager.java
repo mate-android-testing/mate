@@ -1033,7 +1033,7 @@ public class EnvironmentManager {
      * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
      * @return Returns line percentage coverage vector.
      */
-    public <T> List<Float> getLineCoveredPercentage(IChromosome<T> chromosome, int numberOfLines) {
+    public <T> List<Float> getLinePercentageVector(IChromosome<T> chromosome, int numberOfLines) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {

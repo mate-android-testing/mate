@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.utils.FitnessUtils;
 
 import java.util.BitSet;
 import java.util.HashMap;
@@ -92,8 +92,7 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
 
             // retrieve the fitness value for every single branch
             final BitSet branchFitnessVector
-                    // TODO: Replace by call to FitnessUtils.getFitness()!
-                    = Registry.getEnvironmentManager().getBranchFitnessVector(chromosome, numberOfBranches);
+                    = FitnessUtils.getBranchFitnessVector(chromosome, numberOfBranches);
 
             // update cache
             for (int i = 0; i < numberOfBranches; i++) {

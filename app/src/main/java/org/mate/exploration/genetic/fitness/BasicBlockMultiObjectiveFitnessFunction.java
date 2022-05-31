@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.utils.FitnessUtils;
 
 import java.util.BitSet;
 import java.util.HashMap;
@@ -92,8 +92,7 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
 
             // retrieve the fitness value for every single basic block
             final BitSet basicBlockFitnessVector
-                    // TODO: Replace by call to FitnessUtils.getFitness()!
-                    = Registry.getEnvironmentManager().getBasicBlockFitnessVector(chromosome, numberOfBasicBlocks);
+                    = FitnessUtils.getBasicBlockFitnessVector(chromosome, numberOfBasicBlocks);
 
             // update cache
             for (int i = 0; i < numberOfBasicBlocks; i++) {

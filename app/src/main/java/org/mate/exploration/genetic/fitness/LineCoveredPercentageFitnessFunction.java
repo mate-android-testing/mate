@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -86,7 +86,7 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
 
             // retrieve the fitness value for every single line
             final List<Float> lineCoverageVector
-                    = Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, numberOfLines);
+                    = FitnessUtils.getLinePercentageVector(chromosome, numberOfLines);
 
             // describes the starting position of the chromosome in the cache
             final int baseIndex = cacheIndex * numberOfLines;

@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -89,7 +89,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
 
             // retrieve the fitness value for every single branch
             final List<Float> branchDistanceVector
-                    = Registry.getEnvironmentManager().getBranchDistanceVector(chromosome, numberOfBranches);
+                    = FitnessUtils.getBranchDistanceVector(chromosome, numberOfBranches);
 
             // describes the starting position of the chromosome in the cache
             final int baseIndex = cacheIndex * numberOfBranches;
