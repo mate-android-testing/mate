@@ -2,7 +2,6 @@ package org.mate.service.execution;
 
 import android.content.Context;
 
-import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -10,8 +9,6 @@ import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-
-import java.util.List;
 
 public class ExecuteMATEMIO {
 
