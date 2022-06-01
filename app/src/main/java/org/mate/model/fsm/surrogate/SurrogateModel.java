@@ -36,12 +36,12 @@ public class SurrogateModel extends FSMModel {
     private boolean inPrediction = true;
 
     /**
-     * The set of traces that have been collected so far.
+     * The traces of actions that have been executed so far.
      */
-    private final Set<String> currentTraces;
+    private final Set<String> executedTraces;
 
     /**
-     * The set of traces that could be predicted so far.
+     * The traces of actions that have been predicted so far.
      */
     private final Set<String> predictedTraces;
 
@@ -81,7 +81,7 @@ public class SurrogateModel extends FSMModel {
      */
     public SurrogateModel(IScreenState rootState, String packageName) {
         super(rootState, packageName);
-        currentTraces = new HashSet<>();
+        executedTraces = new HashSet<>();
         predictedTraces = new HashSet<>();
         checkPointState = fsm.getCurrentState();
         predictedActions = new ArrayList<>();
@@ -94,7 +94,7 @@ public class SurrogateModel extends FSMModel {
      */
     public void reset(IScreenState screenState) {
 
-        currentTraces.clear();
+        executedTraces.clear();
         predictedTraces.clear();
         predictedActions.clear();
 
@@ -160,7 +160,7 @@ public class SurrogateModel extends FSMModel {
 
         executedTransitions.add(matchingTransition);
         fsm.addTransition(matchingTransition);
-        currentTraces.addAll(traces);
+        executedTraces.addAll(traces);
         checkPointState = fsm.getCurrentState();
     }
 
@@ -215,13 +215,13 @@ public class SurrogateModel extends FSMModel {
     }
 
     /**
-     * Retrieves the set of traces that have been produced for the last test case.
+     * Retrieves the set of traces that have been associated with the last test case.
      *
      * @return Returns the set of collected traces.
      */
-    public Set<String> getCurrentTraces() {
+    private Set<String> getTraces() {
         Set<String> allTraces = new HashSet<>(predictedTraces);
-        allTraces.addAll(currentTraces);
+        allTraces.addAll(executedTraces);
         return allTraces;
     }
 
@@ -391,6 +391,6 @@ public class SurrogateModel extends FSMModel {
          * This only works because MATE-Server doesn't enforce equality between these numbers,
          * but we should be aware of this issue.
          */
-        Registry.getUiAbstractionLayer().storeTraces(currentTraces);
+        Registry.getUiAbstractionLayer().storeTraces(getTraces());
     }
 }
