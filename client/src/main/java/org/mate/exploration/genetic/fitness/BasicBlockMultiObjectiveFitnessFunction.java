@@ -1,8 +1,8 @@
 package org.mate.exploration.genetic.fitness;
 
-import org.mate.Registry;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.utils.FitnessUtils;
 
 import java.util.BitSet;
 import java.util.HashMap;
