@@ -2,7 +2,6 @@ package org.mate.service.execution;
 
 import android.content.Context;
 
-import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -11,8 +10,6 @@ import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.selection.SelectionFunction;
-
-import java.util.List;
 
 public class ExecuteMATEMOSA {
 
@@ -35,12 +32,12 @@ public class ExecuteMATEMOSA {
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER());
 
-        List<String> objectives = Registry.getEnvironmentManager()
-                .getObjectives(Properties.OBJECTIVE());
+        int numberOfObjectives
+                = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
         // we need to associate with each objective (branch, line) a fitness function
-        for (String objective : objectives) {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
+        for (int i = 0; i < numberOfObjectives; i++) {
+            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
         }
 
         final IGeneticAlgorithm mosa = builder.build();
