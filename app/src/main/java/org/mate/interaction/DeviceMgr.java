@@ -1111,7 +1111,7 @@ public class DeviceMgr {
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = Registry.getRandom();
 
-        if (Properties.TARGET().equals("stack_trace")) {
+        if (Properties.STACK_TRACE_USER_INPUT_SEEDING()) {
             if (random.nextDouble() < PROB_STACK_TRACE_USER_INPUT) {
                 Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
 

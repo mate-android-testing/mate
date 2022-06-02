@@ -243,6 +243,8 @@ public class Properties {
     // how and which target vertex should be selected, e.g. a random branch vertex
     public static String TARGET() { return propertyOr("no_target"); }
 
+    public static boolean STACK_TRACE_USER_INPUT_SEEDING() { return propertyOr(false); }
+
     public static boolean ACTIVITY_GRAPH() { return propertyOr(false); }
 
     // whether to draw raw graph or 'extended' graph
