@@ -35,6 +35,7 @@ public class EstimationOfDistribution extends CrashReproduction {
     private final double pRandomAction;
     private final IDistributionModel<UIAction> model;
     private final LocalDateTime start = LocalDateTime.now();
+    private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
 
     public EstimationOfDistribution(List<IFitnessFunction<TestCase>> fitnessFunctions,
                                     ISelectionFunction<TestCase> selectionFunction,
@@ -65,9 +66,19 @@ public class EstimationOfDistribution extends CrashReproduction {
         String fileName = String.format("%s-gen-%d-model.dot", start.format(DateTimeFormatter.ISO_DATE_TIME), currentGenerationNumber);
         Registry.getEnvironmentManager().writeFile(fileName, model.toString());
 
-        return Stream.generate(this::drawTestCase)
-                .limit(prevPopulation.size())
-                .collect(Collectors.toList());
+        List<IChromosome<TestCase>> newPopulation = new LinkedList<>();
+
+        for (int i = 0; i < prevPopulation.size(); i++) {
+            IChromosome<TestCase> testCase = this.drawTestCase();
+            newPopulation.add(testCase);
+
+            if (testCase.getValue().reachedTarget(targetStackTrace)) {
+                MATE.log("Early exit because we reached target");
+                break;
+            }
+        }
+
+        return newPopulation;
     }
 
     private IChromosome<TestCase> drawTestCase() {
