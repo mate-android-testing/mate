@@ -24,11 +24,13 @@ import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestCase {
@@ -484,24 +486,30 @@ public class TestCase {
 
     private boolean stackTraceMatchesTarget(List<String> detectedStackTrace, List<String> targetStackTrace) {
         String packageName = Registry.getPackageName();
-        List<String> detectedStackTraceWithoutLineNumbers = detectedStackTrace.stream().map(line -> line.split("\\(")[0]).collect(Collectors.toList());
+        List<Function<String, String>> allowedAUTTransformations = new LinkedList<>();
+        // Exact match
+        allowedAUTTransformations.add(Function.identity());
+        // Match filename and line number (sometimes the name of anonymous classes is not the same)
+        allowedAUTTransformations.add(line -> !line.contains("Native Method") ? line.split("\\(")[1].split("\\)")[0] : line);
 
-        List<String> exactMatch = new LinkedList<>();
-        List<String> withoutLineNumberMatch = new LinkedList<>();
+        List<Function<String, String>> allowedTransformations = new LinkedList<>(allowedAUTTransformations);
+        // Match without linenumber (different java implementations)
+        allowedTransformations.add(line -> line.split("\\(")[0]);
+
         List<String> noMatch = new LinkedList<>();
 
         for (String line : targetStackTrace) {
-            if (detectedStackTrace.contains(line)) {
-                exactMatch.add(line);
-            } else if (line.startsWith(packageName)) {
-                // Expecting exact match for lines from AUT
-                return false;
-            } else if (detectedStackTraceWithoutLineNumbers.contains(line.split("\\(")[0])) {
-                withoutLineNumberMatch.add(line);
-            } else {
+            List<Function<String, String>> transformationsToTry = line.contains(packageName)
+                    ? allowedAUTTransformations
+                    : allowedTransformations;
+
+            if (transformationsToTry.stream().noneMatch(transformation -> detectedStackTrace.stream().map(transformation).anyMatch(l -> l.equals(transformation.apply(line))))) {
                 noMatch.add(line);
             }
         }
+
+        // Ignore internal implementation differences
+        noMatch.removeIf(line -> line.contains("at dalvik.") || line.contains("at java."));
 
         return noMatch.size() <= 1;
     }
