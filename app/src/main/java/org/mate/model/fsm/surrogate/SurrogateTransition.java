@@ -29,7 +29,7 @@ public class SurrogateTransition extends Transition {
 
     /**
      * Tracks how often the transition was taken.
-      */
+     */
     private int frequencyCounter;
 
     /**
@@ -86,7 +86,9 @@ public class SurrogateTransition extends Transition {
     /**
      * {@inheritDoc}
      */
-    Action getAction() { return action; }
+    Action getAction() {
+        return action;
+    }
 
     /**
      * Returns the frequency counter.
@@ -109,7 +111,7 @@ public class SurrogateTransition extends Transition {
      *
      * @param o The other transition.
      * @return Returns {@code true} if the transitions are identical, otherwise {@code false} is
-     *          returned.
+     *         returned.
      */
     @Override
     public boolean equals(Object o) {
@@ -144,9 +146,7 @@ public class SurrogateTransition extends Transition {
     @NonNull
     @Override
     public String toString() {
-        // TODO: Link Transition to SurrogateModel to print string traces here instead of the BitSet.
-        return "(" + source + ", " + action.toShortString() + ", "
-                + target + ", " + traces + ")";
+        return "(" + source + ", " + action.toShortString() + ", " + target + ", " + traces + ")";
     }
 }
 
