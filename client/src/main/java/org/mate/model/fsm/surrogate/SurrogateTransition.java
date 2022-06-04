@@ -122,7 +122,7 @@ public class SurrogateTransition extends Transition {
             return source.equals(other.source)
                     && target.equals(other.target)
                     && action.equals(other.action)
-                    && this.traces == other.traces;
+                    && traces.equals(other.traces);
         }
     }
 
