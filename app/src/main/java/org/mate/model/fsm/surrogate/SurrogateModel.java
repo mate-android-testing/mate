@@ -82,13 +82,13 @@ public class SurrogateModel extends FSMModel {
      * Stores the list of predicted transitions; this is necessary to construct the activity, state
      * and action sequence after a test case is complete.
      */
-    private final List<SurrogateTransition> predictedTransitions;
+    private final List<SurrogateTransition> predictedTransitions = new ArrayList<>();
 
     /**
      * Stores the list of executed transitions; this is necessary to construct the activity, state
      * and action sequence after a test case is complete.
      */
-    private final List<SurrogateTransition> executedTransitions;
+    private final List<SurrogateTransition> executedTransitions = new ArrayList<>();
 
     /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
@@ -407,6 +407,15 @@ public class SurrogateModel extends FSMModel {
         if (hasPredictedEveryAction()) {
             MATE.log("Predicted every action!");
         }
+
+        MATE.log_sm("Current SM stats: ");
+        MATE.log_sm("Number of states: " + fsm.getNumberOfStates());
+        MATE.log_sm("Number of transitions: " + fsm.getTransitions().size());
+        MATE.log_sm("Number of traces: " + fsm.getTransitions().stream()
+                .mapToInt(transition -> ((SurrogateTransition) transition).getTraces().cardinality())
+                .sum());
+        MATE.log_sm("Number of assigned indices: " + index.size());
+        MATE.log_sm("Number of stored traces: " + tracesList.size());
 
         /*
          * We need to store both files traces.txt and info.txt on the external storage such

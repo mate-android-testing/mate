@@ -182,4 +182,8 @@ public class MATE {
     public static void log_error(String msg) {
         Log.e("error", msg);
     }
+
+    public static void log_sm(String msg) {
+        Log.e("sm", msg);
+    }
 }
