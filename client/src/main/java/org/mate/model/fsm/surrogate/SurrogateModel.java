@@ -40,25 +40,24 @@ public class SurrogateModel extends FSMModel {
     private boolean inPrediction = true;
 
     /**
-     * Index all strings from 0..index.size() to save memory.
+     * Assigns every trace a unique index.
      */
-    private final Map<String, Integer> index = new HashMap<>();
+    private final Map<String, Integer> traceIndices = new HashMap<>();
 
     /**
-     * We use this List to Map backwards from index to traces. Need for the getTraces() method.
+     * By providing a trace index, see {@link #traceIndices}, we can look up the corresponding trace.
      */
-    private final List<String> tracesList = new ArrayList<>();
+    private final List<String> traces = new ArrayList<>();
 
     /**
-     * The traces of actions that have been executed so far, represented by a BitSet which stores
-     * the indexes of the traces.
-     *
+     * The traces of actions that have been executed so far, represented by a bit set that stores
+     * the indices of the traces.
      */
     private final BitSet executedTraces = new BitSet();
 
     /**
-     * The traces of actions that have been predicted so far, represented by a BitSet which stores
-     * the indexes of the traces.
+     * The traces of actions that have been predicted so far, represented by a bit set that stores
+     * the indices of the traces.
      */
     private final BitSet predictedTraces = new BitSet();
 
@@ -140,7 +139,8 @@ public class SurrogateModel extends FSMModel {
     public void update(final IScreenState source, final IScreenState target, final Action action,
                        final ActionResult actionResult, final Set<String> traces) {
 
-        final BitSet indexedTraces = indexTraces(traces);
+        // map each trace to its index
+        final BitSet traceIndices = indexTraces(traces);
 
         State from = fsm.getState(source);
         State to = fsm.getState(target);
@@ -160,7 +160,7 @@ public class SurrogateModel extends FSMModel {
         for (Transition transition : transitions) {
             SurrogateTransition surrogateTransition = (SurrogateTransition) transition;
             if (surrogateTransition.getTarget().equals(to)
-                    && surrogateTransition.getTraces().equals(indexedTraces)) {
+                    && surrogateTransition.getTraces().equals(traceIndices)) {
                 matchingTransition = surrogateTransition;
                 matchingTransition.increaseFrequencyCounter();
                 break;
@@ -169,12 +169,12 @@ public class SurrogateModel extends FSMModel {
 
         if (matchingTransition == null) {
             // create a new transition if it doesn't exist yet
-            matchingTransition = new SurrogateTransition(from, to, action, actionResult, indexedTraces);
+            matchingTransition = new SurrogateTransition(from, to, action, actionResult, traceIndices);
         }
 
         executedTransitions.add(matchingTransition);
         fsm.addTransition(matchingTransition);
-        addTraces(executedTraces, indexedTraces);
+        addTraces(executedTraces, traceIndices);
         checkPointState = fsm.getCurrentState();
     }
 
@@ -234,18 +234,19 @@ public class SurrogateModel extends FSMModel {
      * @return Returns the set of collected traces.
      */
     private Set<String> getTraces() {
+
         BitSet allTraces = new BitSet(Math.max(predictedTraces.size(), executedTraces.size()));
         addTraces(allTraces, predictedTraces);
         addTraces(allTraces, executedTraces);
-        Set<String> result = new HashSet<>();
 
-        // Iterate over all set bits in a bitset. Should replace this with allTraces.stream() once
-        // we require Android Nougat.
-        for (int i = allTraces.nextSetBit(0); i >= 0; i = allTraces.nextSetBit(i+1)) {
-           result.add(tracesList.get(i));
+        Set<String> traces = new HashSet<>();
+
+        // get the indices of all set bits and look up the corresponding traces
+        for (int i = allTraces.nextSetBit(0); i >= 0; i = allTraces.nextSetBit(i + 1)) {
+            traces.add(this.traces.get(i));
         }
 
-        return result;
+        return traces;
     }
 
     /**
@@ -417,26 +418,48 @@ public class SurrogateModel extends FSMModel {
         Registry.getUiAbstractionLayer().storeTraces(getTraces());
     }
 
+    /**
+     * Maps a trace to its index.
+     *
+     * @param trace The trace to be indexed.
+     * @return Returns the index of the trace in the {@link #traceIndices} map.
+     */
     private Integer indexTrace(final String trace) {
-        assert index.size() == tracesList.size();
-        final Integer newIndex = index.size();
-        final Integer oldIndex = index.putIfAbsent(trace, newIndex);
 
-        if(oldIndex == null) {
-            tracesList.add(trace);
+        assert traceIndices.size() == traces.size();
+
+        final Integer newIndex = traceIndices.size();
+        final Integer oldIndex = traceIndices.putIfAbsent(trace, newIndex);
+
+        if (oldIndex == null) {
+            // we have a new trace
+            traces.add(trace);
             return newIndex;
-        }  else {
+        } else {
             return oldIndex;
         }
     }
 
+    /**
+     * Maps multiple traces to its indices.
+     *
+     * @param traces The traces to be indexed.
+     * @return Returns the indices of the traces in the {@link #traceIndices} map.
+     */
     private BitSet indexTraces(final Collection<String> traces) {
-        final BitSet result = new BitSet();
-        traces.stream().map(this::indexTrace).forEach(result::set);
-        return result;
+        final BitSet traceIndices = new BitSet();
+        traces.stream().map(this::indexTrace).forEach(traceIndices::set);
+        return traceIndices;
     }
 
-    private void addTraces(final BitSet target ,final BitSet source) {
+    /**
+     * Adds (unions) the source traces to the target traces. At the bit level, this is simple a
+     * logical or operation.
+     *
+     * @param target The target traces.
+     * @param source The source traces.
+     */
+    private void addTraces(final BitSet target, final BitSet source) {
         target.or(source);
     }
 }
