@@ -78,9 +78,17 @@ public class SurrogateModel extends FSMModel {
      */
     private int numberOfPredictedActions = 0;
 
-    private final List<SurrogateTransition> predictedTransitions;
+    /**
+     * Stores the list of predicted transitions; this is necessary to construct the activity, state
+     * and action sequence after a test case is complete.
+     */
+    private final List<SurrogateTransition> predictedTransitions = new ArrayList<>();
 
-    private final List<SurrogateTransition> executedTransitions;
+    /**
+     * Stores the list of executed transitions; this is necessary to construct the activity, state
+     * and action sequence after a test case is complete.
+     */
+    private final List<SurrogateTransition> executedTransitions = new ArrayList<>();
 
     /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
@@ -227,8 +235,6 @@ public class SurrogateModel extends FSMModel {
      */
     private Set<String> getTraces() {
         BitSet allTraces = new BitSet(Math.max(predictedTraces.size(), executedTraces.size()));
-        MATE.log_sm("Number of predicted traces: " + predictedTraces.cardinality());
-        MATE.log_sm("Number of executed traces: " + executedTraces.cardinality());
         addTraces(allTraces, predictedTraces);
         addTraces(allTraces, executedTraces);
         Set<String> result = new HashSet<>();
