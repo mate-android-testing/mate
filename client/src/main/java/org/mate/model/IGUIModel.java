@@ -74,11 +74,11 @@ public interface IGUIModel {
     IScreenState getScreenStateById(String screenStateId);
 
     /**
-     * Returns the root state, i.e. the start screen of the AUT.
+     * Returns the root states, i.e. the start screens of the AUT.
      *
-     * @return Returns the start screen state.
+     * @return Returns the start screen states.
      */
-    IScreenState getRootState();
+    Set<IScreenState> getRootState();
 
     /**
      * Returns the screen states describing the given activity.

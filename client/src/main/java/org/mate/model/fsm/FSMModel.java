@@ -1,6 +1,9 @@
 package org.mate.model.fsm;
 
+import static java.util.stream.Collectors.toSet;
+
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.StartAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
  * Represents the gui model through a finite state machine.
  */
 public class FSMModel implements IGUIModel {
+
+    private final static State virtualRoot = new State(-1, null);
 
     /**
      * The finite state machine.
@@ -35,7 +40,8 @@ public class FSMModel implements IGUIModel {
      */
     public FSMModel(IScreenState rootState, String packageName) {
         this.packageName = packageName;
-        fsm = new FSM(new State(0, rootState), packageName);
+        fsm = new FSM(virtualRoot, packageName);
+        fsm.addTransition(new Transition(virtualRoot, new State(0, rootState), new StartAction()));
     }
 
     /**
@@ -73,7 +79,7 @@ public class FSMModel implements IGUIModel {
                 .map(transition -> new Edge(transition.getAction(),
                         transition.getSource().getScreenState(),
                         transition.getTarget().getScreenState()))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     /**
@@ -135,8 +141,12 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
-    public IScreenState getRootState() {
-        return fsm.getRootState().getScreenState();
+    public Set<IScreenState> getRootState() {
+        return fsm.getOutgoingTransitions(fsm.getRootState())
+                  .stream()
+                  .map(Transition::getTarget)
+                  .map(State::getScreenState)
+                   .collect(toSet());
     }
 
     /**
@@ -146,7 +156,7 @@ public class FSMModel implements IGUIModel {
     public Set<IScreenState> getActivityStates(String activity) {
         return getStates().stream()
                 .filter(screenState -> screenState.getActivityName().equals(activity))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     /**
@@ -156,7 +166,7 @@ public class FSMModel implements IGUIModel {
     public Set<IScreenState> getAppStates() {
         return getStates().stream()
                 .filter(screenState -> screenState.getPackageName().equals(packageName))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     /**
