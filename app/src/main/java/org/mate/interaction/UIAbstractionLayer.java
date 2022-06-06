@@ -477,9 +477,9 @@ public class UIAbstractionLayer {
                                     "com.android.permissioncontroller:id/permission_allow_button")
                             || widget.getResourceID().equals(
                                     "com.android.packageinstaller:id/continue_button")
-                            || widget.getText().toLowerCase().equals("continue")
+                            || widget.getText().equalsIgnoreCase("continue")
                             // API 25, 28, 29:
-                            || widget.getText().toLowerCase().equals("allow"))) {
+                            || widget.getText().equalsIgnoreCase("allow"))) {
                     try {
                         deviceMgr.executeAction(action);
                         return true;
