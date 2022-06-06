@@ -55,6 +55,12 @@ public class FSMModel implements IGUIModel {
         fsm.addTransition(transition);
     }
 
+    @Override
+    public void addRoot(IScreenState newRoot) {
+        State root = fsm.getState(newRoot);
+        fsm.addTransition(new Transition(virtualRoot, root, new StartAction()));
+    }
+
     /**
      * {@inheritDoc}
      */
