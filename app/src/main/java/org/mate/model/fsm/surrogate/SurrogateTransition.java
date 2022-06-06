@@ -7,9 +7,8 @@ import org.mate.interaction.action.ActionResult;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
 
-import java.util.Collections;
+import java.util.BitSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Describes a transition in the {@link org.mate.model.fsm.FSM}. Stores in addition the traces
@@ -18,9 +17,10 @@ import java.util.Set;
 public class SurrogateTransition extends Transition {
 
     /**
-     * The traces associated with the execution of the action.
+     * The traces associated with the execution of the action, represented by a BitSet which stores
+     * the indexes of the traces.
      */
-    private final Set<String> traces;
+    private final BitSet traces;
 
     /**
      * The action result associated with the execution of the action.
@@ -29,7 +29,7 @@ public class SurrogateTransition extends Transition {
 
     /**
      * Tracks how often the transition was taken.
-      */
+     */
     private int frequencyCounter;
 
     /**
@@ -43,7 +43,7 @@ public class SurrogateTransition extends Transition {
      * @param traces The set of traces associated with the execution of the given action.
      */
     public SurrogateTransition(State source, State target, Action action, ActionResult actionResult,
-                               Set<String> traces) {
+                               BitSet traces) {
         super(source, target, action);
         this.actionResult = actionResult;
         this.traces = traces;
@@ -65,8 +65,8 @@ public class SurrogateTransition extends Transition {
      *
      * @return Returns the set of traces associated with the transition.
      */
-    Set<String> getTraces() {
-        return Collections.unmodifiableSet(traces);
+    BitSet getTraces() {
+        return traces;
     }
 
     /**
@@ -86,7 +86,9 @@ public class SurrogateTransition extends Transition {
     /**
      * {@inheritDoc}
      */
-    Action getAction() { return action; }
+    Action getAction() {
+        return action;
+    }
 
     /**
      * Returns the frequency counter.
@@ -109,7 +111,7 @@ public class SurrogateTransition extends Transition {
      *
      * @param o The other transition.
      * @return Returns {@code true} if the transitions are identical, otherwise {@code false} is
-     *          returned.
+     *         returned.
      */
     @Override
     public boolean equals(Object o) {
@@ -122,7 +124,7 @@ public class SurrogateTransition extends Transition {
             return source.equals(other.source)
                     && target.equals(other.target)
                     && action.equals(other.action)
-                    && this.traces == other.traces;
+                    && traces.equals(other.traces);
         }
     }
 
@@ -133,7 +135,7 @@ public class SurrogateTransition extends Transition {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(source, target, action, this.traces);
+        return Objects.hash(source, target, action, traces);
     }
 
     /**
@@ -144,8 +146,7 @@ public class SurrogateTransition extends Transition {
     @NonNull
     @Override
     public String toString() {
-        return "(" + source + ", " + action.toShortString() + ", "
-                + target + ", " + traces + ")";
+        return "(" + source + ", " + action.toShortString() + ", " + target + ", " + traces + ")";
     }
 }
 

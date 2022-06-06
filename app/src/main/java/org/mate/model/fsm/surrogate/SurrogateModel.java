@@ -12,9 +12,13 @@ import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,7 +32,7 @@ public class SurrogateModel extends FSMModel {
     /**
      * The predicted actions so far.
      */
-    private final List<Action> predictedActions;
+    private final List<Action> predictedActions = new ArrayList<>();
 
     /**
      * Whether we are currently in prediction mode or not.
@@ -36,14 +40,26 @@ public class SurrogateModel extends FSMModel {
     private boolean inPrediction = true;
 
     /**
-     * The traces of actions that have been executed so far.
+     * Assigns every trace a unique index.
      */
-    private final Set<String> executedTraces;
+    private final Map<String, Integer> traceIndices = new HashMap<>();
 
     /**
-     * The traces of actions that have been predicted so far.
+     * By providing a trace index, see {@link #traceIndices}, we can look up the corresponding trace.
      */
-    private final Set<String> predictedTraces;
+    private final List<String> traces = new ArrayList<>();
+
+    /**
+     * The traces of actions that have been executed so far, represented by a bit set that stores
+     * the indices of the traces.
+     */
+    private final BitSet executedTraces = new BitSet();
+
+    /**
+     * The traces of actions that have been predicted so far, represented by a bit set that stores
+     * the indices of the traces.
+     */
+    private final BitSet predictedTraces = new BitSet();
 
     /**
      * The last check point to which the surrogate model returns in case a prediction couldn't be
@@ -65,13 +81,13 @@ public class SurrogateModel extends FSMModel {
      * Stores the list of predicted transitions; this is necessary to construct the activity, state
      * and action sequence after a test case is complete.
      */
-    private final List<SurrogateTransition> predictedTransitions;
+    private final List<SurrogateTransition> predictedTransitions = new ArrayList<>();
 
     /**
      * Stores the list of executed transitions; this is necessary to construct the activity, state
      * and action sequence after a test case is complete.
      */
-    private final List<SurrogateTransition> executedTransitions;
+    private final List<SurrogateTransition> executedTransitions = new ArrayList<>();
 
     /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
@@ -81,12 +97,7 @@ public class SurrogateModel extends FSMModel {
      */
     public SurrogateModel(IScreenState rootState, String packageName) {
         super(rootState, packageName);
-        executedTraces = new HashSet<>();
-        predictedTraces = new HashSet<>();
         checkPointState = fsm.getCurrentState();
-        predictedActions = new ArrayList<>();
-        predictedTransitions = new ArrayList<>();
-        executedTransitions = new ArrayList<>();
     }
 
     /**
@@ -128,6 +139,9 @@ public class SurrogateModel extends FSMModel {
     public void update(final IScreenState source, final IScreenState target, final Action action,
                        final ActionResult actionResult, final Set<String> traces) {
 
+        // map each trace to its index
+        final BitSet traceIndices = indexTraces(traces);
+
         State from = fsm.getState(source);
         State to = fsm.getState(target);
 
@@ -146,7 +160,7 @@ public class SurrogateModel extends FSMModel {
         for (Transition transition : transitions) {
             SurrogateTransition surrogateTransition = (SurrogateTransition) transition;
             if (surrogateTransition.getTarget().equals(to)
-                    && surrogateTransition.getTraces().equals(traces)) {
+                    && surrogateTransition.getTraces().equals(traceIndices)) {
                 matchingTransition = surrogateTransition;
                 matchingTransition.increaseFrequencyCounter();
                 break;
@@ -155,12 +169,12 @@ public class SurrogateModel extends FSMModel {
 
         if (matchingTransition == null) {
             // create a new transition if it doesn't exist yet
-            matchingTransition = new SurrogateTransition(from, to, action, actionResult, traces);
+            matchingTransition = new SurrogateTransition(from, to, action, actionResult, traceIndices);
         }
 
         executedTransitions.add(matchingTransition);
         fsm.addTransition(matchingTransition);
-        executedTraces.addAll(traces);
+        addTraces(executedTraces, traceIndices);
         checkPointState = fsm.getCurrentState();
     }
 
@@ -197,7 +211,7 @@ public class SurrogateModel extends FSMModel {
 
             SurrogateTransition transition = (SurrogateTransition) Randomness.randomElement(mostVisitedTransitions);
 
-            predictedTraces.addAll(transition.getTraces());
+            addTraces(predictedTraces, transition.getTraces());
             predictedTransitions.add(transition);
             fsm.goToState(transition.getTarget());
             return transition.getActionResult();
@@ -220,9 +234,19 @@ public class SurrogateModel extends FSMModel {
      * @return Returns the set of collected traces.
      */
     private Set<String> getTraces() {
-        Set<String> allTraces = new HashSet<>(predictedTraces);
-        allTraces.addAll(executedTraces);
-        return allTraces;
+
+        BitSet allTraces = new BitSet(Math.max(predictedTraces.size(), executedTraces.size()));
+        addTraces(allTraces, predictedTraces);
+        addTraces(allTraces, executedTraces);
+
+        Set<String> traces = new HashSet<>();
+
+        // get the indices of all set bits and look up the corresponding traces
+        for (int i = allTraces.nextSetBit(0); i >= 0; i = allTraces.nextSetBit(i + 1)) {
+            traces.add(this.traces.get(i));
+        }
+
+        return traces;
     }
 
     /**
@@ -392,5 +416,50 @@ public class SurrogateModel extends FSMModel {
          * but we should be aware of this issue.
          */
         Registry.getUiAbstractionLayer().storeTraces(getTraces());
+    }
+
+    /**
+     * Maps a trace to its index.
+     *
+     * @param trace The trace to be indexed.
+     * @return Returns the index of the trace in the {@link #traceIndices} map.
+     */
+    private Integer indexTrace(final String trace) {
+
+        assert traceIndices.size() == traces.size();
+
+        final Integer newIndex = traceIndices.size();
+        final Integer oldIndex = traceIndices.putIfAbsent(trace, newIndex);
+
+        if (oldIndex == null) {
+            // we have a new trace
+            traces.add(trace);
+            return newIndex;
+        } else {
+            return oldIndex;
+        }
+    }
+
+    /**
+     * Maps multiple traces to its indices.
+     *
+     * @param traces The traces to be indexed.
+     * @return Returns the indices of the traces in the {@link #traceIndices} map.
+     */
+    private BitSet indexTraces(final Collection<String> traces) {
+        final BitSet traceIndices = new BitSet();
+        traces.stream().map(this::indexTrace).forEach(traceIndices::set);
+        return traceIndices;
+    }
+
+    /**
+     * Adds (unions) the source traces to the target traces. At the bit level, this is simple a
+     * logical or operation.
+     *
+     * @param target The target traces.
+     * @param source The source traces.
+     */
+    private void addTraces(final BitSet target, final BitSet source) {
+        target.or(source);
     }
 }
