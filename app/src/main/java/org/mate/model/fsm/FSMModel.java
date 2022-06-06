@@ -3,9 +3,14 @@ package org.mate.model.fsm;
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.StartAction;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +28,53 @@ public class FSMModel implements IGUIModel {
      * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
      * screen state.
      */
-    private static final State VIRTUAL_ROOT_STATE = new State(-1, null);
+    private static final State VIRTUAL_ROOT_STATE = new State(-1, new IScreenState() {
+
+        @Override
+        public String getId() {
+            return "VIRTUAL_ROOT_STATE";
+        }
+
+        @Override
+        public void setId(String stateId) {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<Widget> getWidgets() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<UIAction> getActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<WidgetAction> getWidgetActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<MotifAction> getMotifActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public String getActivityName() {
+            return "VIRTUAL_ROOT_STATE_ACTIVITY";
+        }
+
+        @Override
+        public String getPackageName() {
+            return "VIRTUAL_ROOT_STATE_PACKAGE";
+        }
+
+        @Override
+        public ScreenStateType getType() {
+            return ScreenStateType.ACTION_SCREEN_STATE;
+        }
+    });
 
     /**
      * The finite state machine.
