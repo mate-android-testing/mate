@@ -277,7 +277,7 @@ public class FSM {
     }
 
     /**
-     * Returns the root state of the FSM.
+     * Returns the (virtual) root state of the FSM.
      *
      * @return Returns the root state.
      */

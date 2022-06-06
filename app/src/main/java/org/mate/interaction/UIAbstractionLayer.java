@@ -584,12 +584,11 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
 
         /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
+        * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+        * possible root states.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRootState(lastScreenState);
 
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
@@ -606,12 +605,11 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
 
         /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
+         * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+         * possible root states.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRootState(lastScreenState);
     }
 
     /**

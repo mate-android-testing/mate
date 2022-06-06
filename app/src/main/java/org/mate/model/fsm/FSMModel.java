@@ -2,6 +2,7 @@ package org.mate.model.fsm;
 
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
@@ -16,6 +17,13 @@ import java.util.stream.Collectors;
  * Represents the gui model through a finite state machine.
  */
 public class FSMModel implements IGUIModel {
+
+    /**
+     * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
+     * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
+     * screen state.
+     */
+    private static final State VIRTUAL_ROOT_STATE = new State(-1, null);
 
     /**
      * The finite state machine.
@@ -35,7 +43,9 @@ public class FSMModel implements IGUIModel {
      */
     public FSMModel(IScreenState rootState, String packageName) {
         this.packageName = packageName;
-        fsm = new FSM(new State(0, rootState), packageName);
+        fsm = new FSM(VIRTUAL_ROOT_STATE, packageName);
+        fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, new State(0, rootState),
+                new StartAction()));
     }
 
     /**
@@ -135,8 +145,22 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
-    public IScreenState getRootState() {
-        return fsm.getRootState().getScreenState();
+    public Set<IScreenState> getRootStates() {
+        return fsm.getOutgoingTransitions(fsm.getRootState())
+                .stream()
+                .map(Transition::getTarget)
+                .map(State::getScreenState)
+                .collect(Collectors.toSet());
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addRootState(IScreenState rootState) {
+        State root = fsm.getState(rootState);
+        fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, root, new StartAction()));
     }
 
     /**
