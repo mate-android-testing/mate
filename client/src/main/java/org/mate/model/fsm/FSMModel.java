@@ -4,11 +4,17 @@ import static java.util.stream.Collectors.toSet;
 
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.StartAction;
+import org.mate.commons.interaction.action.ui.MotifAction;
+import org.mate.commons.interaction.action.ui.UIAction;
+import org.mate.commons.interaction.action.ui.Widget;
+import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +25,6 @@ import java.util.stream.Collectors;
  * Represents the gui model through a finite state machine.
  */
 public class FSMModel implements IGUIModel {
-
-    private final static State virtualRoot = new State(-1, null);
-
     /**
      * The finite state machine.
      */
@@ -32,6 +35,8 @@ public class FSMModel implements IGUIModel {
      */
     protected final String packageName;
 
+    private final State virtualRoot;
+
     /**
      * Creates a new FSM based model with a given initial state.
      *
@@ -40,6 +45,56 @@ public class FSMModel implements IGUIModel {
      */
     public FSMModel(IScreenState rootState, String packageName) {
         this.packageName = packageName;
+        IScreenState screenState = new IScreenState() {
+            private String id = "Virtual start screen";
+
+            @Override
+            public String getId() {
+                return id;
+            }
+
+            @Override
+            public void setId(String stateId) {
+                id = stateId;
+            }
+
+            @Override
+            public List<Widget> getWidgets() {
+                return new ArrayList<>(0);
+            }
+
+            @Override
+            public List<UIAction> getActions() {
+                return new ArrayList<>(0);
+            }
+
+            @Override
+            public List<WidgetAction> getWidgetActions() {
+                return new ArrayList<>(0);
+            }
+
+            @Override
+            public List<MotifAction> getMotifActions() {
+                return new ArrayList<>(0);
+            }
+
+            @Override
+            public String getActivityName() {
+                return "Virtual start activity";
+            }
+
+            @Override
+            public String getPackageName() {
+                return packageName;
+            }
+
+            @Override
+            public ScreenStateType getType() {
+                return ScreenStateType.ACTION_SCREEN_STATE;
+            }
+        };
+
+        virtualRoot = new State(-2, screenState);
         fsm = new FSM(virtualRoot, packageName);
         fsm.addTransition(new Transition(virtualRoot, new State(0, rootState), new StartAction()));
     }
