@@ -7,7 +7,6 @@ import org.mate.commons.interaction.action.espresso.matchers.base.WithContentDes
 import org.mate.commons.interaction.action.espresso.matchers.base.WithIdMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithTextMatcher;
 import org.mate.commons.interaction.action.espresso.matchers_combination.MatcherForPath;
-import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTree;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTreeNode;
 import org.mate.commons.interaction.action.espresso.view_tree.PathStep;
 import org.mate.commons.interaction.action.espresso.view_tree.PathStepType;
@@ -35,19 +34,19 @@ public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
             EspressoViewMatcher newMatcher = null;
 
             switch (matcherForPath.getType()) {
-                case ResourceId:
+                case WITH_ID:
                     newMatcher = new WithIdMatcher(node.getEspressoView().getId());
                     break;
-                case ClassName:
-                    newMatcher =
-                            new WithClassNameMatcher(node.getEspressoView().getClassName());
+                case WITH_TEXT:
+                    newMatcher = new WithTextMatcher(node.getEspressoView().getText());
                     break;
-                case ContentDescription:
+                case WITH_CONTENT_DESCRIPTION:
                     newMatcher =
                             new WithContentDescriptionMatcher(node.getEspressoView().getContentDescription());
                     break;
-                case Text:
-                    newMatcher = new WithTextMatcher(node.getEspressoView().getText());
+                case WITH_CLASS_NAME:
+                    newMatcher =
+                            new WithClassNameMatcher(node.getEspressoView().getClassName());
                     break;
             }
 

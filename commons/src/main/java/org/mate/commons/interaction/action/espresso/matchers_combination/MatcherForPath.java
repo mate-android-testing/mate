@@ -1,13 +1,14 @@
 package org.mate.commons.interaction.action.espresso.matchers_combination;
 
+import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 import org.mate.commons.interaction.action.espresso.view_tree.PathInTree;
 
 public class MatcherForPath {
 
     private PathInTree pathFromTarget;
-    private BaseMatcherType type;
+    private EspressoViewMatcherType type;
 
-    public MatcherForPath(PathInTree pathFromTarget, BaseMatcherType type) {
+    public MatcherForPath(PathInTree pathFromTarget, EspressoViewMatcherType type) {
         this.pathFromTarget = pathFromTarget;
         this.type = type;
     }
@@ -16,7 +17,7 @@ public class MatcherForPath {
         return pathFromTarget;
     }
 
-    public BaseMatcherType getType() {
+    public EspressoViewMatcherType getType() {
         return type;
     }
 }

@@ -1,15 +1,17 @@
 package org.mate.commons;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_CLASS_NAME;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_CONTENT_DESCRIPTION;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_ID;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_TEXT;
 
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.junit.Test;
-import org.mate.commons.interaction.action.espresso.matchers_combination.BaseMatcherType;
 import org.mate.commons.interaction.action.espresso.matchers_combination.EspressoViewMatcherCombination;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTree;
 import org.mate.commons.interaction.action.espresso.view_tree.PathStepType;
@@ -33,7 +35,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.ResourceId) &&
+                m.getType().equals(WITH_ID) &&
                         m.getPath().getSteps().size() == 0));
     }
 
@@ -52,7 +54,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.Text) &&
+                m.getType().equals(WITH_TEXT) &&
                         m.getPath().getSteps().size() == 0));
     }
 
@@ -71,7 +73,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.ContentDescription) &&
+                m.getType().equals(WITH_CONTENT_DESCRIPTION) &&
                         m.getPath().getSteps().size() == 0));
     }
 
@@ -90,7 +92,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.ClassName) &&
+                m.getType().equals(WITH_CLASS_NAME) &&
                         m.getPath().getSteps().size() == 0));
     }
 
@@ -113,7 +115,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.ResourceId) &&
+                m.getType().equals(WITH_ID) &&
                         m.getPath().getSteps().size() == 1 &&
                         m.getPath().getSteps().get(0).getType() == PathStepType.MOVE_TO_PARENT));
     }
@@ -137,7 +139,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.ResourceId) &&
+                m.getType().equals(WITH_ID) &&
                         m.getPath().getSteps().size() == 1 &&
                         m.getPath().getSteps().get(0).getType() == PathStepType.MOVE_TO_CHILD));
     }
@@ -163,7 +165,7 @@ public class EspressoViewMatcherCombinationTest {
         assertNotNull(matcherCombination);
 
         assertTrue(matcherCombination.getMatchers().stream().anyMatch(m ->
-                m.getType().equals(BaseMatcherType.Text) &&
+                m.getType().equals(WITH_TEXT) &&
                         m.getPath().getSteps().size() == 2 &&
                         m.getPath().getSteps().get(0).getType() == PathStepType.MOVE_TO_PARENT &&
                         m.getPath().getSteps().get(1).getType() == PathStepType.MOVE_TO_CHILD));

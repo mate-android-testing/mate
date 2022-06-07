@@ -1,6 +1,13 @@
 package org.mate.commons.interaction.action.espresso.matchers_combination;
 
+
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_CLASS_NAME;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_CONTENT_DESCRIPTION;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_ID;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_TEXT;
+
 import org.mate.commons.interaction.action.espresso.EspressoView;
+import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTree;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTreeIterator;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTreeNode;
@@ -13,6 +20,17 @@ import java.util.HashSet;
 import java.util.List;
 
 public class EspressoViewMatcherCombination {
+
+    /**
+     * The types of Base matchers to use during construction of a Matcher combination (in order
+     * of importance).
+     */
+    static EspressoViewMatcherType[] BASE_MATCHER_TYPES_FOR_COMBINATION = {
+        WITH_ID,
+        WITH_TEXT,
+        WITH_CONTENT_DESCRIPTION,
+        WITH_CLASS_NAME,
+    };
 
     private final EspressoViewTreeNode targetNode;
     private final EspressoViewTree viewTree;
@@ -83,7 +101,7 @@ public class EspressoViewMatcherCombination {
         for (EspressoViewTreeNodeWithPath espressoViewTreeNodeWithPath : treeIteratorForTargetNode) {
             PathInTree pathFromTarget = espressoViewTreeNodeWithPath.getPathFromTarget();
 
-            for (BaseMatcherType type : BaseMatcherType.values()) {
+            for (EspressoViewMatcherType type : BASE_MATCHER_TYPES_FOR_COMBINATION) {
                 matcherCombination.addMatcher(new MatcherForPath(pathFromTarget, type));
                 if (matcherCombination.isUnique()) {
                     uniqueMatcherFound = true;
@@ -249,20 +267,20 @@ public class EspressoViewMatcherCombination {
 
         EspressoView espressoViewAfterPath = nodeAfterPath.getEspressoView();
 
-        if (matcher.getType().equals(BaseMatcherType.ResourceId)) {
+        if (matcher.getType().equals(WITH_ID)) {
             hash.append(espressoViewAfterPath.getId());
         }
 
-        if (matcher.getType().equals(BaseMatcherType.ClassName)) {
-            hash.append(espressoViewAfterPath.getClassName());
+        if (matcher.getType().equals(WITH_TEXT)) {
+            hash.append(espressoViewAfterPath.getText());
         }
 
-        if (matcher.getType().equals(BaseMatcherType.ContentDescription)) {
+        if (matcher.getType().equals(WITH_CONTENT_DESCRIPTION)) {
             hash.append(espressoViewAfterPath.getContentDescription());
         }
 
-        if (matcher.getType().equals(BaseMatcherType.Text)) {
-            hash.append(espressoViewAfterPath.getText());
+        if (matcher.getType().equals(WITH_CLASS_NAME)) {
+            hash.append(espressoViewAfterPath.getClassName());
         }
     }
 
