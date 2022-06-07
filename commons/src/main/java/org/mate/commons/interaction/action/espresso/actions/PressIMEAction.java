@@ -3,6 +3,9 @@ package org.mate.commons.interaction.action.espresso.actions;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 
 import android.os.Parcel;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 
 import androidx.test.espresso.ViewAction;
 
@@ -14,6 +17,38 @@ public class PressIMEAction extends EspressoViewAction {
     @Override
     public ViewAction getViewAction() {
         return pressImeActionButton();
+    }
+
+    @Override
+    public boolean isValidForEnabledView(View view) {
+        if (!view.isEnabled() || !hasIMEAction(view)) {
+            return false;
+        }
+
+        return getViewAction().getConstraints().matches(view);
+    }
+
+    /**
+     * Returns whether a given View has an IME action or not.
+     */
+    public boolean hasIMEAction(View view) {
+        EditorInfo editorInfo = new EditorInfo();
+        InputConnection inputConnection = view.onCreateInputConnection(editorInfo);
+        if (inputConnection == null) {
+            // View does not support input methods
+            return false;
+        }
+
+        int actionId = editorInfo.actionId != 0
+                ? editorInfo.actionId
+                : editorInfo.imeOptions & EditorInfo.IME_MASK_ACTION;
+
+        if (actionId == EditorInfo.IME_ACTION_NONE) {
+            // No available action on view
+            return false;
+        }
+
+        return true;
     }
 
     @Override

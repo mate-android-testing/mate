@@ -2,6 +2,7 @@ package org.mate.commons.interaction.action.espresso.actions;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
@@ -18,7 +19,31 @@ public abstract class EspressoViewAction extends EspressoCodeProducer implements
         return type;
     }
 
+    /**
+     * Get actual Espresso's ViewAction instance represented by this EspressoViewAction
+     */
     public abstract ViewAction getViewAction();
+
+    /**
+     * Returns a boolean indicating whether this EspressoViewAction can be performed on the given
+     * View.
+     */
+    public boolean isValidForView(View view) {
+        if (!view.isEnabled()) {
+            // We don't perform actions on disabled views.
+            return false;
+        }
+
+        return isValidForEnabledView(view);
+    }
+
+    /**
+     * Returns a boolean indicating whether this EspressoViewAction can be performed on the given
+     * (enabled) View.
+     * Each implementation of this method should use the actual constraints provided by the
+     * actual Espresso's ViewAction. E.g., click().getConstraints().matches(view)
+     */
+    public abstract boolean isValidForEnabledView(View view);
 
     @Override
     public int describeContents() {

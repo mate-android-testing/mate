@@ -3,6 +3,7 @@ package org.mate.commons.interaction.action.espresso.actions;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
 
 import android.os.Parcel;
+import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
@@ -14,6 +15,15 @@ public class SwipeUpAction extends EspressoViewAction {
     @Override
     public ViewAction getViewAction() {
         return swipeUp();
+    }
+
+    @Override
+    public boolean isValidForEnabledView(View view) {
+        if (!view.isEnabled() || !view.canScrollVertically(-1)) {
+            return false;
+        }
+
+        return getViewAction().getConstraints().matches(view);
     }
 
     @Override

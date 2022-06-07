@@ -1,9 +1,11 @@
 package org.mate.commons.interaction.action.espresso.actions;
 
 import static androidx.test.espresso.action.ViewActions.pressKey;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 
 import android.os.Parcel;
 import android.view.KeyEvent;
+import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
@@ -15,6 +17,12 @@ public class EnterAction extends EspressoViewAction {
     @Override
     public ViewAction getViewAction() {
         return pressKey(KeyEvent.KEYCODE_ENTER);
+    }
+
+    @Override
+    public boolean isValidForEnabledView(View view) {
+        // This action can only be performed on the root view.
+        return isRoot().matches(view);
     }
 
     @Override

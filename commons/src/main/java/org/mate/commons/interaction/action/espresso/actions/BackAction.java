@@ -1,8 +1,10 @@
 package org.mate.commons.interaction.action.espresso.actions;
 
 import static androidx.test.espresso.action.ViewActions.pressBackUnconditionally;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 
 import android.os.Parcel;
+import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
@@ -14,6 +16,12 @@ public class BackAction extends EspressoViewAction {
     @Override
     public ViewAction getViewAction() {
         return pressBackUnconditionally();
+    }
+
+    @Override
+    public boolean isValidForEnabledView(View view) {
+        // This action can only be performed on the root view.
+        return isRoot().matches(view);
     }
 
     @Override

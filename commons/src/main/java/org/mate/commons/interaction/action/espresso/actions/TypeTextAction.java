@@ -3,6 +3,7 @@ package org.mate.commons.interaction.action.espresso.actions;
 import static androidx.test.espresso.action.ViewActions.typeText;
 
 import android.os.Parcel;
+import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
@@ -22,6 +23,15 @@ public class TypeTextAction extends EspressoViewAction {
         }
 
         return typeText(stringToBeTyped);
+    }
+
+    @Override
+    public boolean isValidForEnabledView(View view) {
+        if (!view.isEnabled()) {
+            return false;
+        }
+
+        return getViewAction().getConstraints().matches(view);
     }
 
     @Override

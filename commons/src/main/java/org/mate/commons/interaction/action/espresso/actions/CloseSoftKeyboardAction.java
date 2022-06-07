@@ -1,8 +1,10 @@
 package org.mate.commons.interaction.action.espresso.actions;
 
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 
 import android.os.Parcel;
+import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
@@ -14,6 +16,12 @@ public class CloseSoftKeyboardAction extends EspressoViewAction {
     @Override
     public ViewAction getViewAction() {
         return closeSoftKeyboard();
+    }
+
+    @Override
+    public boolean isValidForEnabledView(View view) {
+        // This action can only be performed on the root view.
+        return isRoot().matches(view);
     }
 
     @Override
