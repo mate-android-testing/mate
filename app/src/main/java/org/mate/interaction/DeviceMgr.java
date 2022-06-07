@@ -938,8 +938,15 @@ public class DeviceMgr {
         if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
-                X = obj.getVisibleBounds().centerX();
-                Y = obj.getVisibleBounds().centerY();
+                try {
+                    X = obj.getVisibleBounds().centerX();
+                    Y = obj.getVisibleBounds().centerY();
+                } catch (StaleObjectException e) {
+                    MATE.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
+                    X = widget.getX();
+                    Y = widget.getY();
+                }
             } else {
                 X = widget.getX();
                 Y = widget.getY();
