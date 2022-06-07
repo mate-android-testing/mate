@@ -3,6 +3,7 @@ package org.mate.representation.state.espresso;
 import android.content.res.Resources;
 import android.view.View;
 
+import org.mate.commons.interaction.action.espresso.EspressoView;
 import org.mate.commons.interaction.action.espresso.actions.ClearTextAction;
 import org.mate.commons.interaction.action.espresso.actions.ClickAction;
 import org.mate.commons.interaction.action.espresso.actions.DoubleClickAction;
@@ -23,16 +24,16 @@ import java.util.List;
 
 public class EspressoViewActionsParser {
 
-    private final View view;
+    private final EspressoView espressoView;
 
-    public EspressoViewActionsParser(View view) {
-        this.view = view;
+    public EspressoViewActionsParser(EspressoView espressoView) {
+        this.espressoView = espressoView;
     }
 
     public List<EspressoViewAction> parse() {
         List<EspressoViewAction> parsedActions = new ArrayList<>();
 
-        if (isAndroidView()) {
+        if (espressoView.isAndroidView(DeviceInfo.getInstance().getAUTContext())) {
             // we don't perform actions on Android views
             return parsedActions;
         }
@@ -57,40 +58,11 @@ public class EspressoViewActionsParser {
         };
 
         for (EspressoViewAction action : possibleActions) {
-            if (action.isValidForView(view)) {
+            if (action.isValidForView(espressoView.getView())) {
                 parsedActions.add(action);
             }
         }
 
         return parsedActions;
-    }
-
-    /**
-     * Returns a boolean indicating whether the view being parsed is an Android view (e.g.,
-     * created by the OS) or not.
-     */
-    public boolean isAndroidView() {
-        String resourceName = getResourceName();
-        if (resourceName == null) {
-            return false;
-        }
-
-        return resourceName.startsWith("android")
-                || resourceName.startsWith("com.google.android")
-                || resourceName.startsWith("com.android");
-    }
-
-    public String getResourceName() {
-        int id = view.getId();
-        if (View.NO_ID == id) {
-            return null;
-        }
-
-        try {
-            return DeviceInfo.getInstance().getAUTContext().getResources().getResourceName(id);
-        } catch (Resources.NotFoundException e) {
-            MATELog.log_warn(String.format("Unable to find resource name for view with id %d", id));
-            return null;
-        }
     }
 }

@@ -1,10 +1,14 @@
 package org.mate.commons.interaction.action.espresso;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+
+import org.mate.commons.utils.MATELog;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -70,5 +74,34 @@ public class EspressoView {
         }
 
         return "";
+    }
+
+    public @Nullable String getResourceName(Context autContext) {
+        int id = view.getId();
+        if (View.NO_ID == id) {
+            return null;
+        }
+
+        try {
+            return autContext.getResources().getResourceName(id);
+        } catch (Resources.NotFoundException e) {
+            MATELog.log_warn(String.format("Unable to find resource name for view with id %d", id));
+            return null;
+        }
+    }
+
+    /**
+     * Returns a boolean indicating whether this view is an Android view (e.g., created by the
+     * OS) or not.
+     */
+    public boolean isAndroidView(Context autContext) {
+        String resourceName = getResourceName(autContext);
+        if (resourceName == null) {
+            return false;
+        }
+
+        return resourceName.startsWith("android")
+                || resourceName.startsWith("com.google.android")
+                || resourceName.startsWith("com.android");
     }
 }

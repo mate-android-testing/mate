@@ -70,7 +70,7 @@ public class EspressoScreenParser {
 
         for (EspressoViewTreeNode node : viewTree.getAllNodes()) {
             EspressoViewActionsParser viewActionsParser =
-                    new EspressoViewActionsParser(node.getEspressoView().getView());
+                    new EspressoViewActionsParser(node.getEspressoView());
             List<EspressoViewAction> espressoViewActions = viewActionsParser.parse();
 
             if (espressoViewActions.size() == 0) {
