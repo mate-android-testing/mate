@@ -1,5 +1,6 @@
 package org.mate.utils;
 
+import org.mate.MATE;
 import org.mate.Registry;
 
 import java.util.ArrayList;
@@ -132,6 +133,13 @@ public class Randomness {
     }
 
     public static int getInRangeStd(int range, double std) {
+
+        if (range == 0 && std == 0.0) {
+            // avoid infinite loop
+            MATE.log_warn("Range and std should be not zero!");
+            return 0;
+        }
+
         int x;
         do {
             x = (int) Math.round(getRnd().nextGaussian() * std + (range - 1) / 2.0);
