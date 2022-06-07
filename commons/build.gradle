@@ -48,4 +48,7 @@ dependencies {
 
     // For using UiAutomator in tests
     implementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:4.6.0"
 }
