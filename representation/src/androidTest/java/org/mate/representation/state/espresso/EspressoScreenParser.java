@@ -50,6 +50,10 @@ public class EspressoScreenParser {
 
         EspressoViewTree viewTree = fetchViewTree();
         loadEspressoActions(viewTree);
+
+        for (EspressoAction action : espressoActions) {
+            MATELog.log("Espresso action: " + action.getCode());
+        }
     }
 
     public List<EspressoAction> getActions() {
