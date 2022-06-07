@@ -8,6 +8,7 @@ public enum EspressoViewMatcherType {
     WITH_ID,
     WITH_TEXT,
     WITH_HINT,
+    WITH_RESOURCE_NAME,
     // Recursive matchers
     ALL_OF,
     ANY_OF,

@@ -11,6 +11,7 @@ import org.mate.commons.interaction.action.espresso.matchers.base.WithClassNameM
 import org.mate.commons.interaction.action.espresso.matchers.base.WithContentDescriptionMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithHintMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithIdMatcher;
+import org.mate.commons.interaction.action.espresso.matchers.base.WithResourceNameMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithTextMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.recursive.AllOfMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.recursive.AnyOfMatcher;
@@ -84,6 +85,8 @@ public abstract class EspressoViewMatcher extends EspressoCodeProducer implement
                 return new WithContentDescriptionMatcher(source);
             case WITH_ID:
                 return new WithIdMatcher(source);
+            case WITH_RESOURCE_NAME:
+                return new WithResourceNameMatcher(source);
             case WITH_TEXT:
                 return new WithTextMatcher(source);
             case WITH_HINT:

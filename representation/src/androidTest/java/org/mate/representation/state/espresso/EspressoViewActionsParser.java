@@ -33,7 +33,7 @@ public class EspressoViewActionsParser {
     public List<EspressoViewAction> parse() {
         List<EspressoViewAction> parsedActions = new ArrayList<>();
 
-        if (espressoView.isAndroidView(DeviceInfo.getInstance().getAUTContext())) {
+        if (espressoView.isAndroidView()) {
             // we don't perform actions on Android views
             return parsedActions;
         }

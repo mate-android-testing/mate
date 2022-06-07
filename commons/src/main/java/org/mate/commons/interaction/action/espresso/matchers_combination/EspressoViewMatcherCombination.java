@@ -4,6 +4,7 @@ package org.mate.commons.interaction.action.espresso.matchers_combination;
 import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_CLASS_NAME;
 import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_CONTENT_DESCRIPTION;
 import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_ID;
+import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_RESOURCE_NAME;
 import static org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType.WITH_TEXT;
 
 import org.mate.commons.interaction.action.espresso.EspressoView;
@@ -26,10 +27,11 @@ public class EspressoViewMatcherCombination {
      * of importance).
      */
     static EspressoViewMatcherType[] BASE_MATCHER_TYPES_FOR_COMBINATION = {
-        WITH_ID,
-        WITH_TEXT,
-        WITH_CONTENT_DESCRIPTION,
-        WITH_CLASS_NAME,
+            WITH_RESOURCE_NAME,
+            WITH_ID,
+            WITH_TEXT,
+            WITH_CONTENT_DESCRIPTION,
+            WITH_CLASS_NAME,
     };
 
     private final EspressoViewTreeNode targetNode;
@@ -267,20 +269,25 @@ public class EspressoViewMatcherCombination {
 
         EspressoView espressoViewAfterPath = nodeAfterPath.getEspressoView();
 
-        if (matcher.getType().equals(WITH_ID)) {
-            hash.append(espressoViewAfterPath.getId());
-        }
-
-        if (matcher.getType().equals(WITH_TEXT)) {
-            hash.append(espressoViewAfterPath.getText());
-        }
-
-        if (matcher.getType().equals(WITH_CONTENT_DESCRIPTION)) {
-            hash.append(espressoViewAfterPath.getContentDescription());
-        }
-
-        if (matcher.getType().equals(WITH_CLASS_NAME)) {
-            hash.append(espressoViewAfterPath.getClassName());
+        switch (matcher.getType()) {
+            case WITH_RESOURCE_NAME:
+                hash.append(espressoViewAfterPath.getResourceName());
+                break;
+            case WITH_ID:
+                hash.append(espressoViewAfterPath.getId());
+                break;
+            case WITH_TEXT:
+                hash.append(espressoViewAfterPath.getText());
+                break;
+            case WITH_CONTENT_DESCRIPTION:
+                hash.append(espressoViewAfterPath.getContentDescription());
+                break;
+            case WITH_CLASS_NAME:
+                hash.append(espressoViewAfterPath.getClassName());
+                break;
+            default:
+                throw new IllegalStateException(String.format("Hash update not implemented for " +
+                        "matcher type: %s", matcher.getType()));
         }
     }
 
