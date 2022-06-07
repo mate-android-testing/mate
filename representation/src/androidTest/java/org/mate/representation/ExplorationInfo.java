@@ -11,6 +11,7 @@ import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;
 import org.mate.commons.utils.Utils;
+import org.mate.representation.test.BuildConfig;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;

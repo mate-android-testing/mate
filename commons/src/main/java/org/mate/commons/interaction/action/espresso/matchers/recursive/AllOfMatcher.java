@@ -9,10 +9,14 @@ import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AllOfMatcher extends EspressoViewMatcher {
-    private List<EspressoViewMatcher> matchers;
+public class AllOfMatcher extends MultipleRecursiveMatcher {
+
+    public AllOfMatcher() {
+        this(new ArrayList<>());
+    }
 
     public AllOfMatcher(List<EspressoViewMatcher> matchers) {
         super(EspressoViewMatcherType.ALL_OF);
@@ -21,6 +25,12 @@ public class AllOfMatcher extends EspressoViewMatcher {
 
     @Override
     public String getCode() {
+        if (matchers.size() == 1) {
+            // if this recursive matcher is being used for just one matcher, delete the
+            // intermediate matcher all together.
+            return matchers.get(0).getCode();
+        }
+
         StringBuilder viewMatchers = new StringBuilder();
         for (EspressoViewMatcher matcher : matchers) {
             viewMatchers.append(String.format("%s, ", matcher.getCode()));
@@ -35,6 +45,12 @@ public class AllOfMatcher extends EspressoViewMatcher {
 
     @Override
     public Matcher<View> getViewMatcher() {
+        if (matchers.size() == 1) {
+            // if this recursive matcher is being used for just one matcher, delete the
+            // intermediate matcher all together.
+            return matchers.get(0).getViewMatcher();
+        }
+
         Matcher<View>[] viewMatchers = new Matcher[matchers.size()];
         for (int i = 0; i < matchers.size(); i++) {
             viewMatchers[i] = matchers.get(i).getViewMatcher();

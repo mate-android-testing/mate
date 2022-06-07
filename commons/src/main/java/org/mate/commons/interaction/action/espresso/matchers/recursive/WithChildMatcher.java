@@ -9,22 +9,28 @@ import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
-public class WithChildMatcher extends EspressoViewMatcher {
-    private EspressoViewMatcher matcher;
+import java.util.ArrayList;
+import java.util.List;
 
-    public WithChildMatcher(EspressoViewMatcher matcher) {
+public class WithChildMatcher extends MultipleRecursiveMatcher {
+
+    public WithChildMatcher() {
+        this(new ArrayList<>());
+    }
+
+    public WithChildMatcher(List<EspressoViewMatcher> matchers) {
         super(EspressoViewMatcherType.WITH_CHILD);
-        this.matcher = matcher;
+        this.matchers = matchers;
     }
 
     @Override
     public String getCode() {
-        return String.format("withChild(%s)", matcher.getCode());
+        return String.format("withChild(%s)", new AllOfMatcher(matchers).getCode());
     }
 
     @Override
     public Matcher<View> getViewMatcher() {
-        return withChild(matcher.getViewMatcher());
+        return withChild(new AllOfMatcher(matchers).getViewMatcher());
     }
 
     @Override
@@ -35,11 +41,11 @@ public class WithChildMatcher extends EspressoViewMatcher {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeParcelable(this.matcher, flags);
+        dest.writeTypedList(this.matchers);
     }
 
     public WithChildMatcher(Parcel in) {
-        this((EspressoViewMatcher) in.readParcelable(EspressoViewMatcher.class.getClassLoader()));
+        this(in.createTypedArrayList(EspressoViewMatcher.CREATOR));
     }
 
     public static final Creator<WithChildMatcher> CREATOR = new Creator<WithChildMatcher>() {

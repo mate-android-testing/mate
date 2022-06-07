@@ -67,6 +67,16 @@ public class DeviceInfo {
     }
 
     /**
+     * Get the instantiated Instrumentation class.
+     * This class allows to monitor all the interaction that the system has with the application.
+     *
+     * @return the instance of Instrumentation provided by the InstrumentationRegistry.
+     */
+    public Instrumentation getInstrumentation() {
+        return instrumentation;
+    }
+
+    /**
      * Get the UiDevice to get access to state information about the device.
      * This class can also be used to simulate user actions on the device.
      *

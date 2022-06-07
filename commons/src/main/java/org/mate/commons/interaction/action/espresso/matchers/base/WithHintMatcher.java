@@ -1,7 +1,6 @@
 package org.mate.commons.interaction.action.espresso.matchers.base;
 
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
-import static org.hamcrest.Matchers.equalTo;
 
 import android.os.Parcel;
 import android.view.View;
@@ -20,12 +19,12 @@ public class WithHintMatcher extends EspressoViewMatcher {
 
     @Override
     public String getCode() {
-        return String.format("withHint(equalTo(%s))", hint);
+        return String.format("withHint(%s)", boxString(hint));
     }
 
     @Override
     public Matcher<View> getViewMatcher() {
-        return withHint(equalTo(hint));
+        return withHint(hint);
     }
 
     @Override

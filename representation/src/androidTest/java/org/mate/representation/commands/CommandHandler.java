@@ -14,6 +14,7 @@ import org.mate.representation.DynamicTest;
 import org.mate.representation.ExplorationInfo;
 import org.mate.representation.interaction.ActionExecutor;
 import org.mate.representation.interaction.ActionExecutorFactory;
+import org.mate.representation.state.espresso.EspressoScreenParser;
 import org.mate.representation.state.widget.WidgetScreenParser;
 import org.mate.representation.test.BuildConfig;
 
@@ -153,7 +154,7 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
     @Override
     public List<EspressoAction> getCurrentScreenEspressoActions() throws RemoteException {
-        return new ArrayList<>();
+        return new EspressoScreenParser().getActions();
     }
 
     @Override

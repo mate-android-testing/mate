@@ -1,7 +1,6 @@
 package org.mate.commons.interaction.action.espresso.matchers.base;
 
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
-import static org.hamcrest.Matchers.equalTo;
 
 import android.os.Parcel;
 import android.view.View;
@@ -20,12 +19,12 @@ public class WithContentDescriptionMatcher extends EspressoViewMatcher {
 
     @Override
     public String getCode() {
-        return String.format("withContentDescription(equalTo(%s))", boxString(contentDescription));
+        return String.format("withContentDescription(%s)", boxString(contentDescription));
     }
 
     @Override
     public Matcher<View> getViewMatcher() {
-        return withContentDescription(equalTo(contentDescription));
+        return withContentDescription(contentDescription);
     }
 
     @Override

@@ -9,22 +9,28 @@ import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
-public class IsDescendantOfAMatcher extends EspressoViewMatcher {
-    private EspressoViewMatcher matcher;
+import java.util.ArrayList;
+import java.util.List;
 
-    public IsDescendantOfAMatcher(EspressoViewMatcher matcher) {
-        super(EspressoViewMatcherType.IS_DESCENDANT_OF_A);
-        this.matcher = matcher;
+public class IsDescendantOfAMatcher extends MultipleRecursiveMatcher {
+
+    public IsDescendantOfAMatcher() {
+        this(new ArrayList<>());
+    }
+
+    public IsDescendantOfAMatcher(List<EspressoViewMatcher> matchers) {
+        super(EspressoViewMatcherType.HAS_DESCENDANT);
+        this.matchers = matchers;
     }
 
     @Override
     public String getCode() {
-        return String.format("isDescendantOfA(%s)", matcher.getCode());
+        return String.format("isDescendantOfA(%s)", new AllOfMatcher(matchers).getCode());
     }
 
     @Override
     public Matcher<View> getViewMatcher() {
-        return isDescendantOfA(matcher.getViewMatcher());
+        return isDescendantOfA(new AllOfMatcher(matchers).getViewMatcher());
     }
 
     @Override
@@ -35,11 +41,11 @@ public class IsDescendantOfAMatcher extends EspressoViewMatcher {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeParcelable(this.matcher, flags);
+        dest.writeTypedList(this.matchers);
     }
 
     public IsDescendantOfAMatcher(Parcel in) {
-        this((EspressoViewMatcher) in.readParcelable(EspressoViewMatcher.class.getClassLoader()));
+        this(in.createTypedArrayList(EspressoViewMatcher.CREATOR));
     }
 
     public static final Creator<IsDescendantOfAMatcher> CREATOR = new Creator<IsDescendantOfAMatcher>() {
