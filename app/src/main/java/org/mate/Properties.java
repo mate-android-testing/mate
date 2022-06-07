@@ -111,6 +111,16 @@ public class Properties {
         return propertyOr(false);
     }
 
+    /**
+     * Whether a {@link org.mate.model.TestCase} should be converted to an espresso test.
+     *
+     * @return Returns {@code true} if a test case should be converted to an espresso test,
+     *         otherwise {@code false} is returned.
+     */
+    public static boolean CONVERT_TEST_CASE_TO_ESPRESSO_TEST() {
+        return propertyOr(false);
+    }
+
     /*
      * Misc properties
      */
