@@ -46,6 +46,11 @@ public abstract class EspressoViewAction extends EspressoCodeProducer implements
     public abstract boolean isValidForEnabledView(View view);
 
     @Override
+    public String toString() {
+        return this.getCode();
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

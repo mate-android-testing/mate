@@ -54,6 +54,11 @@ public abstract class EspressoViewMatcher extends EspressoCodeProducer implement
         }
     };
 
+    @Override
+    public String toString() {
+        return this.getCode();
+    }
+
     /**
      * Auxiliary method to build an EspressoViewMatcher from a Parcel, using the correct subclass.
      * In order to do so, this method looks at the first integer in the Parcel.
