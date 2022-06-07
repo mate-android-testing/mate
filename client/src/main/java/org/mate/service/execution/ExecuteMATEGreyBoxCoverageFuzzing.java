@@ -9,6 +9,7 @@ import org.mate.exploration.fuzzing.greybox.GreyBoxCoverageFuzzer;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.EspressoRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
@@ -52,6 +53,8 @@ public class ExecuteMATEGreyBoxCoverageFuzzing {
                         Properties.MAX_NUMBER_EVENTS());
             case PRIMITIVE_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 return new PrimitiveAndroidRandomChromosomeFactory(true, Properties.MAX_NUMBER_EVENTS());
+            case ESPRESSO_RANDOM_CHROMOSOME_FACTORY:
+                return new EspressoRandomChromosomeFactory(true, Properties.MAX_NUMBER_EVENTS());
             default:
                 throw new IllegalArgumentException("Chromosome factory " + chromosomeFactory
                         + " not yet supported for greybox fuzzing!");

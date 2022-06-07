@@ -138,6 +138,6 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
      * @return Returns the randomly selected ui action.
      */
     protected Action selectAction() {
-        return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+        return Randomness.randomElement(uiAbstractionLayer.getExecutableUiActions());
     }
 }

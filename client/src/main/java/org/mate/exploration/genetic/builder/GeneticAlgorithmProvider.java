@@ -14,6 +14,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.BitSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.EspressoRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
@@ -603,6 +604,10 @@ public class GeneticAlgorithmProvider {
                 return (IChromosomeFactory<T>) new BitSequenceChromosomeFactory(getSequenceLength());
             case INTEGER_SEQUENCE_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntegerSequenceChromosomeFactory(getSequenceLength());
+            case ESPRESSO_RANDOM_CHROMOSOME_FACTORY:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IChromosomeFactory<T>) new EspressoRandomChromosomeFactory(getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);

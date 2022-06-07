@@ -315,7 +315,7 @@ public class TestCase {
         for (Action action0 : testCase.actionSequence) {
             if (count < finalSize) {
                 if (!(action0 instanceof WidgetAction)
-                        || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
+                        || Registry.getUiAbstractionLayer().getExecutableUiActions().contains(action0)) {
                     if (!resultingTc.updateTestCase(action0, count)) {
                         return resultingTc;
                     }
@@ -330,7 +330,8 @@ public class TestCase {
         for (; count < finalSize; count++) {
             Action action;
             if (Properties.WIDGET_BASED_ACTIONS()) {
-                action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
+                action =
+                        Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableUiActions());
             } else {
                 action = PrimitiveAction.randomAction(
                             Registry.getUiAbstractionLayer().getCurrentActivity(),
@@ -377,7 +378,7 @@ public class TestCase {
     public boolean updateTestCase(Action action, int actionID) {
 
         if (action instanceof WidgetAction
-                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+                && !Registry.getUiAbstractionLayer().getExecutableUiActions().contains(action)) {
             throw new IllegalStateException("Action not applicable to current state!");
         }
 

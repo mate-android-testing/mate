@@ -6,6 +6,7 @@ import org.mate.Properties;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
@@ -113,8 +114,17 @@ public class UIAbstractionLayer {
      *
      * @return Returns the list of executable widget actions.
      */
-    public List<UIAction> getExecutableActions() {
+    public List<UIAction> getExecutableUiActions() {
         return getLastScreenState().getActions();
+    }
+
+    /**
+     * Returns the list of executable Espresso actions on the current screen.
+     *
+     * @return Returns the list of executable Espresso actions.
+     */
+    public List<EspressoAction> getExecutableEspressoActions() {
+        return getLastScreenState().getEspressoActions();
     }
 
     /**

@@ -38,7 +38,7 @@ public class AndroidListAnalogousMapping extends AndroidListBasedMapping<Integer
      */
     @Override
     protected Action selectAction() {
-        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        List<UIAction> executableActions = uiAbstractionLayer.getExecutableUiActions();
         UIAction selectedAction = ListUtils.wrappedGet(
                 executableActions,
                 activeGenotypeChromosome.getValue().get(activeGenotypeCurrentCodonIndex));

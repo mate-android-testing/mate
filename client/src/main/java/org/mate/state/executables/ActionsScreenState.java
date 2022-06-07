@@ -1,11 +1,16 @@
 package org.mate.state.executables;
 
+import android.os.RemoteException;
+
+import org.mate.commons.exceptions.AUTCrashException;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.service.MATEService;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
@@ -26,6 +31,11 @@ public class ActionsScreenState extends AbstractScreenState {
     private List<UIAction> actions;
 
     /**
+     * Defines the Espresso actions that are applicable on the associated screen.
+     */
+    private List<EspressoAction> espressoActions;
+
+    /**
      * Represents the app screen with its widgets.
      */
     private final AppScreen appScreen;
@@ -39,6 +49,7 @@ public class ActionsScreenState extends AbstractScreenState {
         super(appScreen.getPackageName(), appScreen.getActivityName(), appScreen.getWidgets());
         this.appScreen = appScreen;
         this.actions = null;
+        this.espressoActions = null;
     }
 
     /**
@@ -83,6 +94,22 @@ public class ActionsScreenState extends AbstractScreenState {
             }
         }
         return Collections.unmodifiableList(motifActions);
+    }
+
+    @Override
+    public List<EspressoAction> getEspressoActions() {
+        if (espressoActions == null) {
+            try {
+                MATELog.log_debug("AppScreen: " + activityName);
+                this.espressoActions = MATEService.getRepresentationLayer().getCurrentScreenEspressoActions();
+                MATELog.log_debug("Number of Espresso actions: " + espressoActions.size());
+            } catch (RemoteException | AUTCrashException e) {
+                MATELog.log_warn("Using AppScreen after AUT has crashed");
+                this.espressoActions = new ArrayList<>();
+            }
+        }
+
+        return Collections.unmodifiableList(espressoActions);
     }
 
     /**

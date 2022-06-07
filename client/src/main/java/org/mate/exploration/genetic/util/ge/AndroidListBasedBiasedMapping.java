@@ -73,7 +73,7 @@ public class AndroidListBasedBiasedMapping extends AndroidListBasedMapping<Integ
      */
     @Override
     protected Action selectAction() {
-        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        List<UIAction> executableActions = uiAbstractionLayer.getExecutableUiActions();
         UIAction selectedAction = ListUtils.wrappedGet(
                 executableActions,
                 ListUtils.wrappedGet(
