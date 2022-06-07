@@ -1,6 +1,5 @@
 package org.mate.utils;
 
-import org.mate.MATE;
 import org.mate.Registry;
 
 import java.util.ArrayList;
@@ -128,16 +127,34 @@ public class Randomness {
         return ThreadLocalRandom.current().nextDouble(min, max);
     }
 
+    /**
+     * Returns a random int in [0,range).
+     *
+     * @param range The maximal value (exclusive).
+     * @return Returns a random int in [0,range).
+     */
     public static int getInRangeStd(int range) {
+
+        if (range <= 0) {
+            throw new IllegalArgumentException("Range must be greater than zero!");
+        }
+
         return getInRangeStd(range, 2.0/15.0 * range);
     }
 
+    /**
+     * Returns a random int in [0,range).
+     *
+     * @param range The maximal value (exclusive).
+     * @param std The standard deviation.
+     * @return Returns a random int in [0,range).
+     */
     public static int getInRangeStd(int range, double std) {
 
-        if (range == 0 && std == 0.0) {
-            // avoid infinite loop
-            MATE.log_warn("Range and std should be not zero!");
-            return 0;
+        if (range <= 0) {
+            throw new IllegalArgumentException("Range must be greater than zero!");
+        } else if (std < 0) {
+            throw new IllegalArgumentException("Standard deviation must be not negative!");
         }
 
         int x;
