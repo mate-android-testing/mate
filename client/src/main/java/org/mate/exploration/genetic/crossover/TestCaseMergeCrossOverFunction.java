@@ -77,6 +77,10 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         int lengthBias = Randomness.getRnd().nextInt(2);
         int finalSize = (l1.size() + l2.size() + lengthBias) / 2;
 
+        if (l1.isEmpty()) {
+            MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on empty list!");
+            return Collections.singletonList(parents.get(0));
+        }
 
         int choice = Randomness.getInRangeStd(l1.size());
         boolean right = choice != l1.size() - 1;
