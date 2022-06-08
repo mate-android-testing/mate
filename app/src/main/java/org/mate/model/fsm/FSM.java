@@ -3,8 +3,15 @@ package org.mate.model.fsm;
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
+import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceLevel;
+import org.mate.state.equivalence.checks.ActivityNameEquivalence;
+import org.mate.state.equivalence.checks.PackageNameEquivalence;
+import org.mate.state.equivalence.checks.WidgetEquivalence;
+import org.mate.state.equivalence.checks.WidgetWithAttributesEquivalence;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -57,6 +64,13 @@ public class FSM {
      * The current state in the FSM.
      */
     private State currentState;
+
+    /**
+     * The current state equivalence level that defines how two {@link State}s are compared for
+     * equality. Depending on the state equivalence level, the FSM may contain more or less states.
+     */
+    private static final StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL
+            = Properties.STATE_EQUIVALENCE_LEVEL();
 
     /**
      * Creates a new finite state machine with an initial start state.
@@ -132,22 +146,45 @@ public class FSM {
     }
 
     /**
-     * Converts the given screen state into a state used by the FSM.
-     * Returns a cached version of this state or a new state if the given
-     * screen state is new.
+     * Converts the given screen state into a state used by the FSM. Returns a cached version of
+     * this state or a new state if the given screen state is new.
      *
      * @param screenState The given screen state.
      * @return Returns a FSM state corresponding to the given screen state.
      */
     public State getState(IScreenState screenState) {
 
+        IStateEquivalence stateEquivalence = getStateEquivalenceCheck();
+
         for (State state : states) {
-            if (state.getScreenState().equals(screenState)) {
+            if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
                 return state;
             }
         }
 
         return new State(nextStateId++, screenState);
+    }
+
+    /**
+     * Returns the state equivalence check based on the selected {@link #STATE_EQUIVALENCE_LEVEL}.
+     *
+     * @return Returns the state equivalence check matching the selected state equivalence level.
+     */
+    private IStateEquivalence getStateEquivalenceCheck() {
+
+        switch (STATE_EQUIVALENCE_LEVEL) {
+            case PACKAGE_NAME:
+                return new PackageNameEquivalence();
+            case ACTIVITY_NAME:
+                return new ActivityNameEquivalence();
+            case WIDGET:
+                return new WidgetEquivalence();
+            case WIDGET_WITH_ATTRIBUTES:
+                return new WidgetWithAttributesEquivalence();
+            default:
+                throw new UnsupportedOperationException("Unsupported state equivalence level: "
+                        + STATE_EQUIVALENCE_LEVEL);
+        }
     }
 
     /**
