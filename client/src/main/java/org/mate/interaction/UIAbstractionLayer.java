@@ -563,6 +563,9 @@ public class UIAbstractionLayer {
             // If the surrogate model was able to predict every action, we can avoid the reset.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             if (surrogateModel.hasPredictedEveryAction()) {
+                // reset screen state
+                lastScreenState = toRecordedScreenState(clearScreen());
+                guiModel.addRoot(lastScreenState);
                 surrogateModel.reset(lastScreenState);
                 return;
             }
