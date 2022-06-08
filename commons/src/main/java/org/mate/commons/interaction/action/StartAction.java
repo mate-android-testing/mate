@@ -37,10 +37,9 @@ public final class StartAction extends Action {
     }
 
     /**
-     * A simple textual representation. This should conform with
-     * the analysis framework.
+     * Provides a textual representation of the virtual start action.
      *
-     * @return Returns the string representation.
+     * @return Returns the string representation of the virtual start action.
      */
     @NonNull
     @Override
@@ -49,7 +48,7 @@ public final class StartAction extends Action {
     }
 
     /**
-     * Another simple text representation used for MATE's IGUIModel.
+     * Another simple text representation used for the gui model.
      *
      * @return Returns a simplified string representation.
      */
@@ -60,9 +59,9 @@ public final class StartAction extends Action {
     }
 
     /**
-     * Computes the hashcode of the ui action.
+     * Computes the hash code for the given action.
      *
-     * @return Returns the hash code associated with the ui action.
+     * @return Returns the hash code for the given action.
      */
     @Override
     public int hashCode() {
@@ -70,11 +69,11 @@ public final class StartAction extends Action {
     }
 
     /**
-     * Compares two ui action for equality.
+     * Compares two {@link Action}s for equality.
      *
-     * @param other The other ui action to compare against.
-     * @return Returns {@code true} if both ui action are equal,
-     * otherwise {@code false} is returned.
+     * @param other The other action.
+     * @return Returns {@code true} if both action represent a start action, otherwise {@code false}
+     *         is returned.
      */
     @Override
     public boolean equals(@Nullable Object other) {

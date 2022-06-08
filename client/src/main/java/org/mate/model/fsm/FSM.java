@@ -154,7 +154,7 @@ public class FSM {
      * Whether the last transition lead to a new state.
      *
      * @return Returns {@code} if a new state has been reached,
-     *          otherwise {@code} false is returned.
+     *         otherwise {@code} false is returned.
      */
     public boolean reachedNewState() {
         return reachedNewState;
@@ -240,7 +240,7 @@ public class FSM {
      * @param source The source state.
      * @param target The target state.
      * @return Returns any transition between the given source and target state if such transition
-     *          exists.
+     *         exists.
      */
     private Optional<Transition> getAnyTransition(State source, State target) {
         return transitions.stream()
@@ -277,7 +277,7 @@ public class FSM {
     }
 
     /**
-     * Returns the root state of the FSM.
+     * Returns the (virtual) root state of the FSM.
      *
      * @return Returns the root state.
      */
@@ -344,7 +344,7 @@ public class FSM {
     }
 
     /**
-     *  Returns a simple text representation of the FSM.
+     * Returns a simple text representation of the FSM.
      *
      * @return Returns a simple string representation of the FSM.
      */

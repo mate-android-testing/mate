@@ -1,7 +1,5 @@
 package org.mate.model.fsm;
 
-import static java.util.stream.Collectors.toSet;
-
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.StartAction;
 import org.mate.commons.interaction.action.ui.MotifAction;
@@ -14,12 +12,13 @@ import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateType;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Represents the gui model through a finite state machine.
@@ -35,7 +34,58 @@ public class FSMModel implements IGUIModel {
      */
     protected final String packageName;
 
-    private final State virtualRoot;
+    /**
+     * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
+     * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
+     * screen state.
+     */
+    private static final State VIRTUAL_ROOT_STATE = new State(-1, new IScreenState() {
+
+        @Override
+        public String getId() {
+            return "VIRTUAL_ROOT_STATE";
+        }
+
+        @Override
+        public void setId(String stateId) {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<Widget> getWidgets() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<UIAction> getActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<WidgetAction> getWidgetActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<MotifAction> getMotifActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public String getActivityName() {
+            return "VIRTUAL_ROOT_STATE_ACTIVITY";
+        }
+
+        @Override
+        public String getPackageName() {
+            return "VIRTUAL_ROOT_STATE_PACKAGE";
+        }
+
+        @Override
+        public ScreenStateType getType() {
+            return ScreenStateType.ACTION_SCREEN_STATE;
+        }
+    });
 
     /**
      * Creates a new FSM based model with a given initial state.
@@ -45,58 +95,9 @@ public class FSMModel implements IGUIModel {
      */
     public FSMModel(IScreenState rootState, String packageName) {
         this.packageName = packageName;
-        IScreenState screenState = new IScreenState() {
-            private String id = "Virtual start screen";
-
-            @Override
-            public String getId() {
-                return id;
-            }
-
-            @Override
-            public void setId(String stateId) {
-                id = stateId;
-            }
-
-            @Override
-            public List<Widget> getWidgets() {
-                return new ArrayList<>(0);
-            }
-
-            @Override
-            public List<UIAction> getActions() {
-                return new ArrayList<>(0);
-            }
-
-            @Override
-            public List<WidgetAction> getWidgetActions() {
-                return new ArrayList<>(0);
-            }
-
-            @Override
-            public List<MotifAction> getMotifActions() {
-                return new ArrayList<>(0);
-            }
-
-            @Override
-            public String getActivityName() {
-                return "Virtual start activity";
-            }
-
-            @Override
-            public String getPackageName() {
-                return packageName;
-            }
-
-            @Override
-            public ScreenStateType getType() {
-                return ScreenStateType.ACTION_SCREEN_STATE;
-            }
-        };
-
-        virtualRoot = new State(-2, screenState);
-        fsm = new FSM(virtualRoot, packageName);
-        fsm.addTransition(new Transition(virtualRoot, new State(0, rootState), new StartAction()));
+        fsm = new FSM(VIRTUAL_ROOT_STATE, packageName);
+        fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, new State(0, rootState),
+                new StartAction()));
     }
 
     /**
@@ -110,10 +111,13 @@ public class FSMModel implements IGUIModel {
         fsm.addTransition(transition);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void addRoot(IScreenState newRoot) {
-        State root = fsm.getState(newRoot);
-        fsm.addTransition(new Transition(virtualRoot, root, new StartAction()));
+    public void addRootState(IScreenState rootState) {
+        State root = fsm.getState(rootState);
+        fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, root, new StartAction()));
     }
 
     /**
@@ -202,12 +206,12 @@ public class FSMModel implements IGUIModel {
      * {@inheritDoc}
      */
     @Override
-    public Set<IScreenState> getRootState() {
+    public Set<IScreenState> getRootStates() {
         return fsm.getOutgoingTransitions(fsm.getRootState())
-                  .stream()
-                  .map(Transition::getTarget)
-                  .map(State::getScreenState)
-                   .collect(toSet());
+                .stream()
+                .map(Transition::getTarget)
+                .map(State::getScreenState)
+                .collect(toSet());
     }
 
     /**
