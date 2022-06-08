@@ -8,7 +8,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.state.executables.StateEquivalenceLevel;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.ArrayList;
 import java.util.Collections;
