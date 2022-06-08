@@ -20,6 +20,7 @@ public abstract class Action implements Parcelable {
     public static final int ACTION_SUBCLASS_SYSTEM = 4;
     public static final int ACTION_SUBCLASS_MOTIF = 5;
     public static final int ACTION_SUBCLASS_UI = 6;
+    public static final int ACTION_SUBCLASS_START = 7;
 
     /**
      * A detailed description of the action. Primarily used
@@ -103,6 +104,8 @@ public abstract class Action implements Parcelable {
                 return new MotifAction(source);
             case ACTION_SUBCLASS_UI:
                 return new UIAction(source);
+            case ACTION_SUBCLASS_START:
+                return new StartAction(source);
             default:
                 throw new IllegalStateException("Invalid int for Action subclass found: " +
                         intForActionSubClass);

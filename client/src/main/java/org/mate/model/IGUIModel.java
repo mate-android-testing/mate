@@ -19,6 +19,14 @@ public interface IGUIModel {
     void update(IScreenState source, IScreenState target, Action action);
 
     /**
+     * Declares a screen state to be a  root state.
+     * Root states are the states that can be an initial states of an AUT after the AUT is restarted.
+     *
+     * @param newRoot The screen state which is to be marked as root state.
+     */
+    void addRoot(IScreenState newRoot);
+
+    /**
      * Returns the states of the GUI model.
      *
      * @return Returns the states of the GUI model.
@@ -74,11 +82,11 @@ public interface IGUIModel {
     IScreenState getScreenStateById(String screenStateId);
 
     /**
-     * Returns the root state, i.e. the start screen of the AUT.
+     * Returns the root states, i.e. the start screens of the AUT.
      *
-     * @return Returns the start screen state.
+     * @return Returns the start screen states.
      */
-    IScreenState getRootState();
+    Set<IScreenState> getRootState();
 
     /**
      * Returns the screen states describing the given activity.

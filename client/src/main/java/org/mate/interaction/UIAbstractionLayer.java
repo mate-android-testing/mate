@@ -478,9 +478,9 @@ public class UIAbstractionLayer {
                                     "com.android.permissioncontroller:id/permission_allow_button")
                             || widget.getResourceID().equals(
                                     "com.android.packageinstaller:id/continue_button")
-                            || widget.getText().toLowerCase().equals("continue")
+                            || widget.getText().equalsIgnoreCase("continue")
                             // API 25, 28, 29:
-                            || widget.getText().toLowerCase().equals("allow"))) {
+                            || widget.getText().equalsIgnoreCase("allow"))) {
                     try {
                         deviceMgr.executeAction(action);
                         return true;
@@ -563,6 +563,9 @@ public class UIAbstractionLayer {
             // If the surrogate model was able to predict every action, we can avoid the reset.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             if (surrogateModel.hasPredictedEveryAction()) {
+                // reset screen state
+                lastScreenState = toRecordedScreenState(clearScreen());
+                guiModel.addRoot(lastScreenState);
                 surrogateModel.reset(lastScreenState);
                 return;
             }
@@ -585,13 +588,8 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         Utils.sleep(2000);
 
-        /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
-         */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRoot(lastScreenState);
 
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
@@ -607,13 +605,8 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         Utils.sleep(2000);
 
-        /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
-         */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRoot(lastScreenState);
     }
 
     /**
