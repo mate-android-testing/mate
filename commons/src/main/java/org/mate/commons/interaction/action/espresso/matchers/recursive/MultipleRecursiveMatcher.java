@@ -12,6 +12,7 @@ import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTreeNo
 import org.mate.commons.interaction.action.espresso.view_tree.PathStep;
 import org.mate.commons.interaction.action.espresso.view_tree.PathStepType;
 
+import java.util.Collections;
 import java.util.List;
 
 public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
@@ -22,7 +23,7 @@ public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
     }
 
     public List<EspressoViewMatcher> getMatchers() {
-        return matchers;
+        return Collections.unmodifiableList(matchers);
     }
 
     public void addMatcher(EspressoViewMatcher matcher) {

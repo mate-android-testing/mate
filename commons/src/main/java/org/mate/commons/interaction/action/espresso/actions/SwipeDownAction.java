@@ -7,6 +7,9 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class SwipeDownAction extends EspressoViewAction {
     public SwipeDownAction() {
         super(EspressoViewActionType.SWIPE_DOWN);
@@ -19,7 +22,7 @@ public class SwipeDownAction extends EspressoViewAction {
 
     @Override
     public boolean isValidForEnabledView(View view) {
-        if (!view.isEnabled() || !view.canScrollVertically(1)) {
+        if (!view.canScrollVertically(1)) {
             return false;
         }
 
@@ -29,6 +32,18 @@ public class SwipeDownAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "swipeDown()";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.swipeDown");
+        return imports;
     }
 
     @Override

@@ -9,6 +9,9 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class EnterAction extends EspressoViewAction {
     public EnterAction() {
         super(EspressoViewActionType.ENTER);
@@ -28,6 +31,20 @@ public class EnterAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "pressKey(KeyEvent.KEYCODE_ENTER)";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("android.view.KeyEvent");
+        return imports;
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.pressKey");
+        return imports;
     }
 
     @Override

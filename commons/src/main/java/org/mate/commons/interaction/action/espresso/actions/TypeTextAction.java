@@ -7,36 +7,47 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class TypeTextAction extends EspressoViewAction {
     private String stringToBeTyped;
 
     public TypeTextAction(String stringToBeTyped) {
         super(EspressoViewActionType.TYPE_TEXT);
         this.stringToBeTyped = stringToBeTyped;
-    }
 
-    @Override
-    public ViewAction getViewAction() {
         if (!stringToBeTyped.endsWith("\n")) {
             // Appending a \n to the end of the string translates to a ENTER key event.
             stringToBeTyped += "\n";
         }
+    }
 
+    @Override
+    public ViewAction getViewAction() {
         return typeText(stringToBeTyped);
     }
 
     @Override
     public boolean isValidForEnabledView(View view) {
-        if (!view.isEnabled()) {
-            return false;
-        }
-
         return getViewAction().getConstraints().matches(view);
     }
 
     @Override
     public String getCode() {
         return String.format("typeText(%s)", boxString(stringToBeTyped));
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.typeText");
+        return imports;
     }
 
     @Override

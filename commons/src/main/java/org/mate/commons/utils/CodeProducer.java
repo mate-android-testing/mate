@@ -1,6 +1,6 @@
-package org.mate.commons.interaction.action.espresso;
+package org.mate.commons.utils;
 
-public abstract class EspressoCodeProducer {
+public abstract class CodeProducer {
     public abstract String getCode();
 
     /**

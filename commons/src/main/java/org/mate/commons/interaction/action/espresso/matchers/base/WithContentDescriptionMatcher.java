@@ -9,6 +9,9 @@ import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class WithContentDescriptionMatcher extends EspressoViewMatcher {
     private String contentDescription;
 
@@ -25,6 +28,18 @@ public class WithContentDescriptionMatcher extends EspressoViewMatcher {
     @Override
     public Matcher<View> getViewMatcher() {
         return withContentDescription(contentDescription);
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        HashSet<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.matcher.ViewMatchers.withContentDescription");
+        return imports;
     }
 
     @Override

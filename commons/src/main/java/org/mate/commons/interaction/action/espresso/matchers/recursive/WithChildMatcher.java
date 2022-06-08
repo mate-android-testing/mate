@@ -10,9 +10,13 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WithChildMatcher extends MultipleRecursiveMatcher {
+
+    private AllOfMatcher allOfMatcher;
 
     public WithChildMatcher() {
         this(new ArrayList<>());
@@ -21,16 +25,36 @@ public class WithChildMatcher extends MultipleRecursiveMatcher {
     public WithChildMatcher(List<EspressoViewMatcher> matchers) {
         super(EspressoViewMatcherType.WITH_CHILD);
         this.matchers = matchers;
+        allOfMatcher = new AllOfMatcher(matchers);
+    }
+
+    @Override
+    public void addMatcher(EspressoViewMatcher matcher) {
+        super.addMatcher(matcher);
+        this.allOfMatcher = new AllOfMatcher(matchers);
     }
 
     @Override
     public String getCode() {
-        return String.format("withChild(%s)", new AllOfMatcher(matchers).getCode());
+        return String.format("withChild(%s)", allOfMatcher.getCode());
     }
 
     @Override
     public Matcher<View> getViewMatcher() {
-        return withChild(new AllOfMatcher(matchers).getViewMatcher());
+        return withChild(allOfMatcher.getViewMatcher());
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return allOfMatcher.getNeededClassImports();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        HashSet<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.matcher.ViewMatchers.withChild");
+        imports.addAll(allOfMatcher.getNeededStaticImports());
+        return imports;
     }
 
     @Override

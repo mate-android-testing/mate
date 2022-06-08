@@ -15,8 +15,10 @@ import org.mate.state.IScreenState;
 import org.mate.utils.ListUtils;
 import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
-import org.mate.utils.testcase.serialization.TestCaseSerializer;
+import org.mate.utils.testcase.writer.EspressoTestCaseWriter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -123,7 +125,25 @@ public class TestCase {
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
-            TestCaseSerializer.serializeTestCase(this);
+            // TestCaseSerializer.serializeTestCase(this);
+
+            try {
+                EspressoTestCaseWriter espressoTestWriter = new EspressoTestCaseWriter(this);
+                boolean success = espressoTestWriter.writeToDefaultFolder();
+                if (!success) {
+                    MATELog.log_warn("Unable to write Espresso test case to internal storage");
+                }
+            } catch (IllegalArgumentException e) {
+                // do nothing, EspressoTestCaseWriter is not suitable for this test case.
+            } catch (Exception e) {
+                MATELog.log_warn("An exception happened while writing Espresso test case to " +
+                        "internal storage: " + e.getMessage());
+
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                MATELog.log_warn(sw.toString());
+            }
         }
 
         // record stats about a test case, in particular about intent based actions

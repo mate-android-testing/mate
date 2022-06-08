@@ -13,6 +13,9 @@ import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.espresso.actions.EspressoViewAction;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * An Espresso action is composed of a ViewMatcher (that tells Espresso which is the target view)
  * and a ViewAction (that tells Espresso what action to perform on the target view).
@@ -47,6 +50,25 @@ public class EspressoAction extends Action {
         String code = String.format("onView(%s).perform(%s)", viewMatcherCode, viewActionCode);
 
         return code;
+    }
+
+    public Set<String> getNeededClassImports() {
+        Set<String> imports = new HashSet<>();
+
+        imports.addAll(espressoViewMatcher.getNeededClassImports());
+        imports.addAll(espressoViewAction.getNeededClassImports());
+
+        return imports;
+    }
+
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.Espresso.onView");
+
+        imports.addAll(espressoViewMatcher.getNeededStaticImports());
+        imports.addAll(espressoViewAction.getNeededStaticImports());
+
+        return imports;
     }
 
     /**

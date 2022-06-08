@@ -10,7 +10,9 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AnyOfMatcher extends MultipleRecursiveMatcher {
 
@@ -57,6 +59,29 @@ public class AnyOfMatcher extends MultipleRecursiveMatcher {
         }
 
         return anyOf(viewMatchers);
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        HashSet<String> imports = new HashSet<>();
+
+        for (EspressoViewMatcher matcher : matchers) {
+            imports.addAll(matcher.getNeededClassImports());
+        }
+
+        return imports;
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        HashSet<String> imports = new HashSet<>();
+        imports.add("org.hamcrest.Matchers.anyOf");
+
+        for (EspressoViewMatcher matcher : matchers) {
+            imports.addAll(matcher.getNeededStaticImports());
+        }
+
+        return imports;
     }
 
     @Override

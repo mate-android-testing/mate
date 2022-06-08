@@ -8,6 +8,9 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class BackAction extends EspressoViewAction {
     public BackAction() {
         super(EspressoViewActionType.BACK);
@@ -27,6 +30,18 @@ public class BackAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "pressBackUnconditionally()";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.pressBackUnconditionally");
+        return imports;
     }
 
     @Override

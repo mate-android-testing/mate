@@ -7,6 +7,9 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class SwipeRightAction extends EspressoViewAction {
     public SwipeRightAction() {
         super(EspressoViewActionType.SWIPE_RIGHT);
@@ -19,7 +22,7 @@ public class SwipeRightAction extends EspressoViewAction {
 
     @Override
     public boolean isValidForEnabledView(View view) {
-        if (!view.isEnabled() || !view.canScrollHorizontally(-1)) {
+        if (!view.canScrollHorizontally(-1)) {
             return false;
         }
 
@@ -29,6 +32,18 @@ public class SwipeRightAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "swipeRight()";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.swipeRight");
+        return imports;
     }
 
     @Override

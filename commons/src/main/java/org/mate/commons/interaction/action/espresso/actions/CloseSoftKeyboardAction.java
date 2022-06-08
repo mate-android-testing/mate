@@ -8,6 +8,9 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class CloseSoftKeyboardAction extends EspressoViewAction {
     public CloseSoftKeyboardAction() {
         super(EspressoViewActionType.CLOSE_SOFT_KEYBOARD);
@@ -27,6 +30,18 @@ public class CloseSoftKeyboardAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "closeSoftKeyboard()";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.closeSoftKeyboard");
+        return imports;
     }
 
     @Override

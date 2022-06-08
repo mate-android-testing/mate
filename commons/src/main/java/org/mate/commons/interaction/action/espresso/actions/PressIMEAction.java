@@ -9,6 +9,9 @@ import android.view.inputmethod.InputConnection;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PressIMEAction extends EspressoViewAction {
     public PressIMEAction() {
         super(EspressoViewActionType.PRESS_IME);
@@ -21,7 +24,7 @@ public class PressIMEAction extends EspressoViewAction {
 
     @Override
     public boolean isValidForEnabledView(View view) {
-        if (!view.isEnabled() || !hasIMEAction(view)) {
+        if (!hasIMEAction(view)) {
             return false;
         }
 
@@ -54,6 +57,18 @@ public class PressIMEAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "pressImeActionButton()";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.pressImeActionButton");
+        return imports;
     }
 
     @Override

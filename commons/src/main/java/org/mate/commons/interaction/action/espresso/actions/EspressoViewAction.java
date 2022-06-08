@@ -6,9 +6,11 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
-import org.mate.commons.interaction.action.espresso.EspressoCodeProducer;
+import org.mate.commons.utils.CodeProducer;
 
-public abstract class EspressoViewAction extends EspressoCodeProducer implements Parcelable {
+import java.util.Set;
+
+public abstract class EspressoViewAction extends CodeProducer implements Parcelable {
     private final EspressoViewActionType type;
 
     public EspressoViewAction(EspressoViewActionType type) {
@@ -23,6 +25,10 @@ public abstract class EspressoViewAction extends EspressoCodeProducer implements
      * Get actual Espresso's ViewAction instance represented by this EspressoViewAction
      */
     public abstract ViewAction getViewAction();
+
+    public abstract Set<String> getNeededClassImports();
+
+    public abstract Set<String> getNeededStaticImports();
 
     /**
      * Returns a boolean indicating whether this EspressoViewAction can be performed on the given

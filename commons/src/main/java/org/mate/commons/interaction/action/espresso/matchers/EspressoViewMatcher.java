@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import org.hamcrest.Matcher;
-import org.mate.commons.interaction.action.espresso.EspressoCodeProducer;
+import org.mate.commons.utils.CodeProducer;
 import org.mate.commons.interaction.action.espresso.matchers.base.IsRootMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithClassNameMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithContentDescriptionMatcher;
@@ -20,7 +20,9 @@ import org.mate.commons.interaction.action.espresso.matchers.recursive.IsDescend
 import org.mate.commons.interaction.action.espresso.matchers.recursive.WithChildMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.recursive.WithParentMatcher;
 
-public abstract class EspressoViewMatcher extends EspressoCodeProducer implements Parcelable {
+import java.util.Set;
+
+public abstract class EspressoViewMatcher extends CodeProducer implements Parcelable {
     private EspressoViewMatcherType type;
 
     public EspressoViewMatcher(EspressoViewMatcherType type) {
@@ -32,6 +34,10 @@ public abstract class EspressoViewMatcher extends EspressoCodeProducer implement
     }
 
     public abstract Matcher<View> getViewMatcher();
+
+    public abstract Set<String> getNeededClassImports();
+
+    public abstract Set<String> getNeededStaticImports();
 
     @Override
     public int describeContents() {

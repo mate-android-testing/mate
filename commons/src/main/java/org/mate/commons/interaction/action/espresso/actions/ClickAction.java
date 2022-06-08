@@ -7,6 +7,9 @@ import android.view.View;
 
 import androidx.test.espresso.ViewAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ClickAction extends EspressoViewAction {
     public ClickAction() {
         super(EspressoViewActionType.CLICK);
@@ -19,7 +22,7 @@ public class ClickAction extends EspressoViewAction {
 
     @Override
     public boolean isValidForEnabledView(View view) {
-        if (!view.isEnabled() || !view.isClickable()) {
+        if (!view.isClickable()) {
             return false;
         }
 
@@ -29,6 +32,18 @@ public class ClickAction extends EspressoViewAction {
     @Override
     public String getCode() {
         return "click()";
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        Set<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.action.ViewActions.click");
+        return imports;
     }
 
     @Override

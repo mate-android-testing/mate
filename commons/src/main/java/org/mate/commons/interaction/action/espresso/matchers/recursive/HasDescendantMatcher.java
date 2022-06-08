@@ -10,9 +10,13 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcherType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HasDescendantMatcher extends MultipleRecursiveMatcher {
+
+    private AllOfMatcher allOfMatcher;
 
     public HasDescendantMatcher() {
         this(new ArrayList<>());
@@ -21,16 +25,36 @@ public class HasDescendantMatcher extends MultipleRecursiveMatcher {
     public HasDescendantMatcher(List<EspressoViewMatcher> matchers) {
         super(EspressoViewMatcherType.HAS_DESCENDANT);
         this.matchers = matchers;
+        allOfMatcher = new AllOfMatcher(matchers);
+    }
+
+    @Override
+    public void addMatcher(EspressoViewMatcher matcher) {
+        super.addMatcher(matcher);
+        this.allOfMatcher = new AllOfMatcher(matchers);
     }
 
     @Override
     public String getCode() {
-        return String.format("hasDescendant(%s)", new AllOfMatcher(matchers).getCode());
+        return String.format("hasDescendant(%s)", allOfMatcher.getCode());
     }
 
     @Override
     public Matcher<View> getViewMatcher() {
-        return hasDescendant(new AllOfMatcher(matchers).getViewMatcher());
+        return hasDescendant(allOfMatcher.getViewMatcher());
+    }
+
+    @Override
+    public Set<String> getNeededClassImports() {
+        return allOfMatcher.getNeededClassImports();
+    }
+
+    @Override
+    public Set<String> getNeededStaticImports() {
+        HashSet<String> imports = new HashSet<>();
+        imports.add("androidx.test.espresso.matcher.ViewMatchers.hasDescendant");
+        imports.addAll(allOfMatcher.getNeededStaticImports());
+        return imports;
     }
 
     @Override
