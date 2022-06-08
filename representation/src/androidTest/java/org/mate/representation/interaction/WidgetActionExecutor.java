@@ -1,9 +1,7 @@
 package org.mate.representation.interaction;
 
-import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_DOWN;
-import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_UP;
-
 import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.StaleObjectException;
 import androidx.test.uiautomator.UiObject2;
 
 import org.mate.commons.exceptions.AUTCrashException;
@@ -13,12 +11,14 @@ import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
-import org.mate.commons.utils.Utils;
 import org.mate.representation.ExplorationInfo;
 import org.mate.representation.input_generation.TextDataGenerator;
 
 import java.util.List;
 import java.util.Objects;
+
+import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_DOWN;
+import static org.mate.commons.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
  * ActionExecutor class for Widget actions.
@@ -128,8 +128,16 @@ public class WidgetActionExecutor extends ActionExecutor {
         if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
-                X = obj.getVisibleBounds().centerX();
-                Y = obj.getVisibleBounds().centerY();
+                try {
+                    X = obj.getVisibleBounds().centerX();
+                    Y = obj.getVisibleBounds().centerY();
+                } catch (StaleObjectException e) {
+                    MATELog.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
+                    X = widget.getX();
+                    Y = widget.getY();
+                }
+
             } else {
                 X = widget.getX();
                 Y = widget.getY();
