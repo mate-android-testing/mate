@@ -5,7 +5,6 @@ import org.mate.state.IScreenState;
 /**
  * Provides an interface for state equivalence checks between two {@link IScreenState}s.
  */
-@FunctionalInterface
 public interface IStateEquivalence {
 
     /**
