@@ -105,7 +105,7 @@ public abstract class Action implements Parcelable {
             case ACTION_SUBCLASS_UI:
                 return new UIAction(source);
             case ACTION_SUBCLASS_START:
-                return new StartAction(source);
+                return new VirtualStartAction(source);
             default:
                 throw new IllegalStateException("Invalid int for Action subclass found: " +
                         intForActionSubClass);

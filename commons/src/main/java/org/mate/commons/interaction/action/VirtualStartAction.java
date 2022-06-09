@@ -8,31 +8,31 @@ import android.support.annotation.Nullable;
  * Represent a virtual action that transitions the GUIModel from the virtual start state into the
  * initial state of the AUT after a restart.
  */
-public final class StartAction extends Action {
+public final class VirtualStartAction extends Action {
 
-    public static final Creator<StartAction> CREATOR = new Creator<StartAction>() {
+    public static final Creator<VirtualStartAction> CREATOR = new Creator<VirtualStartAction>() {
         @Override
-        public StartAction createFromParcel(Parcel source) {
+        public VirtualStartAction createFromParcel(Parcel source) {
             // We need to use the Action.CREATOR here, because we want to make sure to remove the
             // ActionSubClass integer from the beginning of Parcel and call the appropriate
             // constructor for this action.
             // Otherwise, the first integer will be read as data for an instance variable.
-            return (StartAction) Action.CREATOR.createFromParcel(source);
+            return (VirtualStartAction) Action.CREATOR.createFromParcel(source);
         }
 
         @Override
-        public StartAction[] newArray(int size) {
-            return new StartAction[size];
+        public VirtualStartAction[] newArray(int size) {
+            return new VirtualStartAction[size];
         }
     };
 
     /**
-     * Constructs a new StartAction.
+     * Constructs a new VirtualStartAction.
      */
-    public StartAction() {
+    public VirtualStartAction() {
     }
 
-    public StartAction(Parcel in) {
+    public VirtualStartAction(Parcel in) {
         super(in);
     }
 
@@ -72,8 +72,8 @@ public final class StartAction extends Action {
      * Compares two {@link Action}s for equality.
      *
      * @param other The other action.
-     * @return Returns {@code true} if both action represent a start action, otherwise {@code false}
-     *         is returned.
+     * @return Returns {@code true} if both action represent a virtual start action, otherwise
+     *         {@code false} is returned.
      */
     @Override
     public boolean equals(@Nullable Object other) {

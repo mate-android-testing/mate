@@ -1,7 +1,7 @@
 package org.mate.model.fsm;
 
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.interaction.action.StartAction;
+import org.mate.commons.interaction.action.VirtualStartAction;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
@@ -97,7 +97,7 @@ public class FSMModel implements IGUIModel {
         this.packageName = packageName;
         fsm = new FSM(VIRTUAL_ROOT_STATE, packageName);
         fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, new State(0, rootState),
-                new StartAction()));
+                new VirtualStartAction()));
     }
 
     /**
@@ -117,7 +117,7 @@ public class FSMModel implements IGUIModel {
     @Override
     public void addRootState(IScreenState rootState) {
         State root = fsm.getState(rootState);
-        fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, root, new StartAction()));
+        fsm.addTransition(new Transition(VIRTUAL_ROOT_STATE, root, new VirtualStartAction()));
     }
 
     /**
