@@ -7,11 +7,8 @@ import org.mate.Properties;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
 import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceFactory;
 import org.mate.state.equivalence.StateEquivalenceLevel;
-import org.mate.state.equivalence.checks.ActivityNameEquivalence;
-import org.mate.state.equivalence.checks.PackageNameEquivalence;
-import org.mate.state.equivalence.checks.WidgetEquivalence;
-import org.mate.state.equivalence.checks.WidgetWithAttributesEquivalence;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -154,7 +151,8 @@ public class FSM {
      */
     public State getState(IScreenState screenState) {
 
-        IStateEquivalence stateEquivalence = getStateEquivalenceCheck();
+        IStateEquivalence stateEquivalence
+                = StateEquivalenceFactory.getStateEquivalenceCheck(STATE_EQUIVALENCE_LEVEL);
 
         for (State state : states) {
             if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
@@ -163,28 +161,6 @@ public class FSM {
         }
 
         return new State(nextStateId++, screenState);
-    }
-
-    /**
-     * Returns the state equivalence check based on the selected {@link #STATE_EQUIVALENCE_LEVEL}.
-     *
-     * @return Returns the state equivalence check matching the selected state equivalence level.
-     */
-    private IStateEquivalence getStateEquivalenceCheck() {
-
-        switch (STATE_EQUIVALENCE_LEVEL) {
-            case PACKAGE_NAME:
-                return new PackageNameEquivalence();
-            case ACTIVITY_NAME:
-                return new ActivityNameEquivalence();
-            case WIDGET:
-                return new WidgetEquivalence();
-            case WIDGET_WITH_ATTRIBUTES:
-                return new WidgetWithAttributesEquivalence();
-            default:
-                throw new UnsupportedOperationException("Unsupported state equivalence level: "
-                        + STATE_EQUIVALENCE_LEVEL);
-        }
     }
 
     /**
