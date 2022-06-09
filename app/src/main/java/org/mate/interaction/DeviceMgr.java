@@ -1065,26 +1065,43 @@ public class DeviceMgr {
 
         if (uiObject != null) {
 
-            uiObject.setText(textData);
-
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText(textData);
-        } else {
-            // try to click on the widget, which in turn should get focused
-            device.click(widget.getX(), widget.getY());
-            UiObject2 obj = device.findObject(By.focused(true));
-            if (obj != null) {
-                obj.setText(textData);
+            try {
+                uiObject.setText(textData);
 
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText(textData);
-
-                // we need to close the soft keyboard, but only if it is present, see:
-                // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-                device.pressBack();
-            } else {
-                MATE.log("  ********* obj " + widget.getId() + "  not found");
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                handleEditFallback(widget, textData);
             }
+        } else {
+            handleEditFallback(widget, textData);
+        }
+    }
+
+    /**
+     * Provides a fallback mechanism for editing a text field.
+     *
+     * @param widget The text field widget.
+     * @param textData The text to be inserted.
+     */
+    private void handleEditFallback(Widget widget, String textData) {
+
+        // try to click on the widget, which in turn should get focused
+        device.click(widget.getX(), widget.getY());
+        UiObject2 obj = device.findObject(By.focused(true));
+        if (obj != null) {
+            obj.setText(textData);
+
+            // reflect change since we cache screen states and findObject() relies on it
+            widget.setText(textData);
+
+            // we need to close the soft keyboard, but only if it is present, see:
+            // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+            device.pressBack();
+        } else {
+            MATE.log("  ********* obj " + widget.getId() + "  not found");
         }
     }
 
