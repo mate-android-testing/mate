@@ -18,6 +18,10 @@ public class WidgetEquivalence implements IStateEquivalence {
         Objects.requireNonNull(first, "First screen state must be not null!");
         Objects.requireNonNull(second, "Second screen state must be not null!");
 
+        if (first == second) {
+            return true;
+        }
+
         return Objects.equals(first.getPackageName(), second.getPackageName())
                 && Objects.equals(first.getActivityName(), second.getActivityName())
                 && Objects.equals(first.getWidgets(), second.getWidgets());
