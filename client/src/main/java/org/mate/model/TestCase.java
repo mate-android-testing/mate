@@ -15,6 +15,7 @@ import org.mate.state.IScreenState;
 import org.mate.utils.ListUtils;
 import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.serialization.TestCaseSerializer;
 import org.mate.utils.testcase.writer.EspressoTestCaseWriter;
 
 import java.io.PrintWriter;
@@ -125,7 +126,7 @@ public class TestCase {
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
-            // TestCaseSerializer.serializeTestCase(this);
+            TestCaseSerializer.serializeTestCase(this);
 
             try {
                 EspressoTestCaseWriter espressoTestWriter = new EspressoTestCaseWriter(this);

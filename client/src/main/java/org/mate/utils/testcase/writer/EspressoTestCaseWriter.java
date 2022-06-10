@@ -60,4 +60,20 @@ public class EspressoTestCaseWriter extends TestCaseWriter {
         File espressoTestCasesFolder = new File(filesDir, "espresso-test-cases");
         return espressoTestCasesFolder.getAbsolutePath();
     }
+
+    @Override
+    protected void triggerMATEServerDownload() {
+        boolean success = Registry.getEnvironmentManager()
+                .fetchEspressoTest(getDefaultWriteFolder(), getTestCaseFileName());
+
+        if (!success) {
+            // re-try a second time
+            success = Registry.getEnvironmentManager()
+                    .fetchEspressoTest(getDefaultWriteFolder(), getTestCaseFileName());
+
+            if (!success) {
+                throw new IllegalStateException("Fetching TestCase " + writeCounter + " failed!");
+            }
+        }
+    }
 }

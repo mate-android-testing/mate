@@ -1,5 +1,6 @@
 package org.mate.utils.testcase.writer;
 
+import org.mate.Registry;
 import org.mate.model.TestCase;
 
 import java.io.File;
@@ -85,11 +86,19 @@ public abstract class TestCaseWriter {
         // close file writer
         fileWriter.close();
 
+        // Ask MATE Server to download the test case just written
+        triggerMATEServerDownload();
+
         // increase write counter for future writes
         writeCounter++;
 
-        return true;
+        return success;
     }
+
+    /**
+     * Asks MATE Server to retrieve the written test case from the emulator.
+     */
+    protected abstract void triggerMATEServerDownload();
 
     /**
      * Creates a folder if it doesn't exist.
