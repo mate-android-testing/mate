@@ -75,7 +75,10 @@ public class AllOfMatcher extends MultipleRecursiveMatcher {
     @Override
     public Set<String> getNeededStaticImports() {
         HashSet<String> imports = new HashSet<>();
-        imports.add("org.hamcrest.Matchers.allOf");
+
+        if (matchers.size() > 1) {
+            imports.add("org.hamcrest.Matchers.allOf");
+        }
 
         for (EspressoViewMatcher matcher : matchers) {
             imports.addAll(matcher.getNeededStaticImports());

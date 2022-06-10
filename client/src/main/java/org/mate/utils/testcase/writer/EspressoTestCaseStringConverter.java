@@ -103,7 +103,7 @@ public class EspressoTestCaseStringConverter extends CodeProducer {
     }
 
     private void writePackage() {
-        addExpressionLine(String.format("package %s", packageName));
+        addExpressionLine("package org.mate.espresso.tests");
         addEmptyLine();
     }
 
