@@ -105,7 +105,9 @@ public class GUIModelDistributionModel<Node extends UIAction> implements IDistri
         Optional<Edge> nextBestEdge = getNextBestEdge(edge.getTarget());
 
         // Going in circles
-        return nextBestEdge.isPresent() && nextBestEdge.get().getTarget().equals(edge.getSource());
+        return nextBestEdge.isPresent()
+                && !edge.getSource().equals(edge.getTarget())
+                && nextBestEdge.get().getTarget().equals(edge.getSource());
     }
 
     private Set<List<Edge>> getPathsToTarget() {
