@@ -9,8 +9,16 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Randomness {
 
+    /**
+     * The random number generator.
+     */
     private static Random rnd = new Random();
 
+    /**
+     * Sets the random number generator.
+     *
+     * @param rnd The new random number generator.
+     */
     public static void setRnd(Random rnd) {
         Randomness.rnd = rnd;
     }
