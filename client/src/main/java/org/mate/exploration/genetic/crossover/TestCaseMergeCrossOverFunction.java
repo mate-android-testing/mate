@@ -78,7 +78,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
         int finalSize = (l1.size() + l2.size() + lengthBias) / 2;
 
         if (l1.isEmpty()) {
-            MATE.log_warn("TestCaseMergeCrossoverFunction not applicable on empty list!");
+            MATELog.log_warn("TestCaseMergeCrossoverFunction not applicable on empty list!");
             return Collections.singletonList(parents.get(0));
         }
 
