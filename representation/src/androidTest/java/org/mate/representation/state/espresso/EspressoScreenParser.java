@@ -109,7 +109,9 @@ public class EspressoScreenParser {
      */
     private EspressoViewTree fetchViewTree() {
         Pair<View, Activity> result = getRootView();
+
         View rootView = result.first;
+        Activity activity = result.second;
 
         if (rootView == null) {
             MATELog.log_error("Unable to find root view on a resumed activity to get available " +
@@ -117,7 +119,7 @@ public class EspressoScreenParser {
             return new EspressoViewTree();
         }
 
-        return new EspressoViewTree(rootView);
+        return new EspressoViewTree(rootView, activity.getClass().getSimpleName());
     }
 
     /**

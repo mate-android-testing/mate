@@ -15,11 +15,15 @@ public class TypeTextAction extends EspressoViewAction {
 
     public TypeTextAction(String stringToBeTyped) {
         super(EspressoViewActionType.TYPE_TEXT);
+        setText(stringToBeTyped);
+    }
+
+    public void setText(String stringToBeTyped) {
         this.stringToBeTyped = stringToBeTyped;
 
         if (!stringToBeTyped.endsWith("\n")) {
             // Appending a \n to the end of the string translates to a ENTER key event.
-            stringToBeTyped += "\n";
+            this.stringToBeTyped += "\n";
         }
     }
 

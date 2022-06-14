@@ -18,6 +18,7 @@ import org.mate.commons.interaction.action.espresso.actions.SwipeUpAction;
 import org.mate.commons.interaction.action.espresso.actions.TypeTextAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.representation.DeviceInfo;
+import org.mate.representation.input_generation.TextDataGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,12 +54,18 @@ public class EspressoViewActionsParser {
             new SwipeLeftAction(),
             new SwipeRightAction(),
             new SwipeUpAction(),
-            // TODO (Ivan): Provide a properly generated text, not just a food
-            new TypeTextAction("Hamburger")
+            new TypeTextAction("") // use empty text until we know we can use this action
         };
 
         for (EspressoViewAction action : possibleActions) {
             if (action.isValidForView(espressoView.getView())) {
+
+                if (action instanceof TypeTextAction) {
+                    // change empty text for a more interesting one
+                    ((TypeTextAction) action).setText(TextDataGenerator.getInstance().
+                            generateTextData(espressoView));
+                }
+
                 parsedActions.add(action);
             }
         }

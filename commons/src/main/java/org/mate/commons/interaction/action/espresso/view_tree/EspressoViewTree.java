@@ -24,8 +24,8 @@ public class EspressoViewTree {
         // empty tree
     }
 
-    public EspressoViewTree(View root) {
-        this.root = new EspressoViewTreeNode(root);
+    public EspressoViewTree(View root, String activityName) {
+        this.root = new EspressoViewTreeNode(root, activityName);
     }
 
     public List<EspressoViewTreeNode> getAllNodes() {

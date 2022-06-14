@@ -22,11 +22,19 @@ public class EspressoView {
     // Note that this value will be different for different instances constructed with the same
     // View.
     private final UUID randomUUID;
-    private View view;
 
-    public EspressoView(View view) {
-        this.view = view;
+    private View view;
+    private String activityName;
+
+    public EspressoView(View view, String activityName) {
         this.randomUUID = UUID.randomUUID();
+
+        this.view = view;
+        this.activityName = activityName;
+    }
+
+    public String getActivity() {
+        return activityName;
     }
 
     public View getView() {

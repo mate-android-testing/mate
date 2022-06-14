@@ -1,9 +1,14 @@
 package org.mate.representation.input_generation;
 
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
 import org.mate.commons.input_generation.Mutation;
 import org.mate.commons.input_generation.StaticStrings;
 import org.mate.commons.input_generation.StaticStringsParser;
 import org.mate.commons.input_generation.format_types.InputFieldType;
+import org.mate.commons.interaction.action.espresso.EspressoView;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.representation.ExplorationInfo;
 
@@ -52,6 +57,46 @@ public class TextDataGenerator {
         return textDataGenerator;
     }
 
+    /**
+     * Generates a text input for the given view.
+     *
+     * @param espressoView The view.
+     * @return Returns a text input for the view.
+     */
+    public String generateTextData(final EspressoView espressoView) {
+        final Random random = ExplorationInfo.getInstance().getRandom();
+
+        final View view = espressoView.getView();
+        final String activityName = espressoView.getActivity();
+
+        String hint = null;
+        InputFieldType inputFieldType = InputFieldType.NOTHING;
+
+        if (view instanceof TextView) {
+            CharSequence nullableHint = ((TextView) view).getHint();
+            if (nullableHint != null) {
+                hint = nullableHint.toString();
+            }
+
+            inputFieldType = InputFieldType.getFieldTypeByNumber(((TextView) view).getInputType());
+        }
+
+        /*
+         * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
+         * with probability PROB_HINT_MUTATION we mutate the given hint.
+         */
+        if (hint != null && !hint.isEmpty()) {
+            if (inputFieldType.isValid(hint) && random.nextDouble() < PROB_HINT) {
+                if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
+                    return Mutation.mutateInput(inputFieldType, hint);
+                } else {
+                    return hint;
+                }
+            }
+        }
+
+        return getString(-1, activityName, inputFieldType);
+    }
 
     /**
      * Generates a text input for the given editable widget.
@@ -81,6 +126,21 @@ public class TextDataGenerator {
                 }
             }
         }
+
+        return getString(maxLength, activityName, inputFieldType);
+    }
+
+    /**
+     * Get string from staticStrings if initialized, otherwise it returns a random input.
+     *
+     * @param maxLength
+     * @param activityName
+     * @param inputFieldType
+     * @return
+     */
+    private String getString(int maxLength, String activityName, InputFieldType inputFieldType) {
+        final Random random = ExplorationInfo.getInstance().getRandom();
+
         if (staticStrings.isInitialised()) {
             /*
              * If the static strings from the bytecode were supplied and with probability

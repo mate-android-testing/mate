@@ -15,12 +15,13 @@ public class EspressoViewTreeNode {
     private EspressoViewTreeNode parent;
     private List<EspressoViewTreeNode> children = new ArrayList<>();
 
-    public EspressoViewTreeNode(View espressoView) {
-        this(espressoView, null);
+    public EspressoViewTreeNode(View espressoView, String activityName) {
+        this(espressoView, activityName, null);
     }
 
-    public EspressoViewTreeNode(View espressoView, EspressoViewTreeNode parent) {
-        this.espressoView = new EspressoView(espressoView);
+    public EspressoViewTreeNode(View espressoView, String activityName,
+                                EspressoViewTreeNode parent) {
+        this.espressoView = new EspressoView(espressoView, activityName);
         this.parent = parent;
 
         // if this node is a ViewGroup, load all children recursively
@@ -30,7 +31,7 @@ public class EspressoViewTreeNode {
 
             for (int i = 0; i < childCount; i++) {
                 View child = group.getChildAt(i);
-                children.add(new EspressoViewTreeNode(child, this));
+                children.add(new EspressoViewTreeNode(child, activityName, this));
             }
         }
     }
