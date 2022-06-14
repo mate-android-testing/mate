@@ -50,8 +50,9 @@ public class DeviceMgr {
      *
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
+     * @return whether the action was executed successfully or not.
      */
-    public void executeAction(Action action) throws AUTCrashException {
+    public boolean executeAction(Action action) throws AUTCrashException {
         boolean success = false;
         try {
             success = MATEService.getRepresentationLayer().executeAction(action);
@@ -62,13 +63,15 @@ public class DeviceMgr {
         if (!success && action instanceof SystemAction) {
             SystemAction systemAction = (SystemAction) action;
             // for System actions we can fall back to the MATE Server
-            Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
+            success = Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
                     systemAction.getReceiver(),
                     systemAction.getAction(),
                     systemAction.isDynamicReceiver());
         }
 
         checkForCrash();
+
+        return success;
     }
 
     /**

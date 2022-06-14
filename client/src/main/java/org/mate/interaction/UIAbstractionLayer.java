@@ -223,8 +223,10 @@ public class UIAbstractionLayer {
             }
         }
 
+        boolean actionExecutionSuccessful = false;
+
         try {
-            deviceMgr.executeAction(action);
+            actionExecutionSuccessful = deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
             MATELog.log_acc("CRASH MESSAGE " + e.getMessage());
@@ -267,11 +269,15 @@ public class UIAbstractionLayer {
 
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
-        if (!currentPackageName.equals(this.packageName)) {
-            MATELog.log("current package different from app package: " + currentPackageName);
-            result = SUCCESS_OUTBOUND;
+        if (actionExecutionSuccessful) {
+            if (!currentPackageName.equals(this.packageName)) {
+                MATELog.log("current package different from app package: " + currentPackageName);
+                result = SUCCESS_OUTBOUND;
+            } else {
+                result = SUCCESS;
+            }
         } else {
-            result = SUCCESS;
+            result = FAILURE_UNKNOWN;
         }
 
         // update gui model
