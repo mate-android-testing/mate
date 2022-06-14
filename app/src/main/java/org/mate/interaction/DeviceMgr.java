@@ -759,10 +759,9 @@ public class DeviceMgr {
                 handleLongClick(selectedWidget);
                 break;
             case TYPE_TEXT:
-                handleEdit(selectedWidget);
-                break;
             case TYPE_SPECIFIC_TEXT:
                 handleEdit(selectedWidget);
+                break;
             case CLEAR_WIDGET:
                 // TODO: Do we actually need this action?
                 //  A 'type text' action overwrites the previous text anyways.
