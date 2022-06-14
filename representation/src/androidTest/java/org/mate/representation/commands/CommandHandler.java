@@ -120,8 +120,8 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
         ActionExecutor executor = ActionExecutorFactory.getExecutor(action);
 
         try {
-            executor.perform(action);
-            return true;
+            boolean success = executor.perform(action);
+            return success;
         } catch (Exception e) {
             MATELog.log_error(
                     "An exception occurred executing action on representation layer: " +
