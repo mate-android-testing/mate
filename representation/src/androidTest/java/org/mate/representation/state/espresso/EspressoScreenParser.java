@@ -119,7 +119,7 @@ public class EspressoScreenParser {
             return new EspressoViewTree();
         }
 
-        return new EspressoViewTree(rootView, activity.getClass().getSimpleName());
+        return new EspressoViewTree(rootView, activity.getClass().getName());
     }
 
     /**
