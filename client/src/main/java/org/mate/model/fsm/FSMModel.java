@@ -2,6 +2,7 @@ package org.mate.model.fsm;
 
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.VirtualStartAction;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
@@ -68,6 +69,11 @@ public class FSMModel implements IGUIModel {
 
         @Override
         public List<MotifAction> getMotifActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<EspressoAction> getEspressoActions() {
             throw new UnsupportedOperationException("Do not call this method!");
         }
 

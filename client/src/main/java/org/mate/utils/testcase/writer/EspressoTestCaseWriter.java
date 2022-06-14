@@ -18,7 +18,7 @@ public class EspressoTestCaseWriter extends TestCaseWriter {
         // The Espresso test case writer is suitable for a test case if the Actions in the event
         // sequence are all instances of EspressoAction.
 
-        for (Action action : testCase.getEventSequence()) {
+        for (Action action : testCase.getActionSequence()) {
             if (!(action instanceof EspressoAction)) {
                 return false;
             }
@@ -36,7 +36,7 @@ public class EspressoTestCaseWriter extends TestCaseWriter {
                         getTestCaseName(),
                         "testMethod");
 
-        for (Action action : testCase.getEventSequence()) {
+        for (Action action : testCase.getActionSequence()) {
             EspressoAction espressoAction = (EspressoAction) action;
             converter.addAction(espressoAction);
         }

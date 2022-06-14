@@ -1,8 +1,8 @@
 package org.mate.commons.interaction.action;
 
 import android.os.Parcel;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Represent a virtual action that transitions the GUIModel from the virtual start state into the

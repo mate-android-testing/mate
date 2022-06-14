@@ -208,9 +208,18 @@ public class UIAbstractionLayer {
              * expected, the given action might be not applicable anymore. In such a case, we pick
              * a random action that is applicable on the current screen.
              */
-            if (!getExecutableActions().contains(action)) {
-                MATELog.log_warn("Can't apply given action on current screen! Select random action.");
-                action = Randomness.randomElement(getExecutableActions());
+            if (action instanceof EspressoAction) {
+                if (!getExecutableEspressoActions().contains(action)) {
+                    MATELog.log_warn("Can't apply given action on current screen! Select random " +
+                            "Espresso action.");
+                    action = Randomness.randomElement(getExecutableEspressoActions());
+                }
+            } else {
+                if (!getExecutableUiActions().contains(action)) {
+                    MATELog.log_warn("Can't apply given action on current screen! Select random " +
+                            "UI action.");
+                    action = Randomness.randomElement(getExecutableUiActions());
+                }
             }
         }
 
