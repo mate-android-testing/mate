@@ -989,14 +989,24 @@ public class DeviceMgr {
      * @param widget The widget on which a long click should be applied.
      */
     private void handleLongClick(Widget widget) {
+
         // TODO: consider https://stackoverflow.com/questions/21432561/how-to-achieve-long-click-in-uiautomator
         UiObject2 obj = findObject(widget);
-        int X = widget.getX();
-        int Y = widget.getY();
-        if (obj != null) {
-            X = obj.getVisibleBounds().centerX();
-            Y = obj.getVisibleBounds().centerY();
+
+        int X = 0, Y = 0;
+
+        try {
+            if (obj != null) {
+                X = obj.getVisibleBounds().centerX();
+                Y = obj.getVisibleBounds().centerY();
+            }
+        } catch (StaleObjectException e) {
+            MATE.log_warn("Stale UiObject2!");
+            e.printStackTrace();
+            X = widget.getX();
+            Y = widget.getY();
         }
+
         device.swipe(X, Y, X, Y, 120);
     }
 
