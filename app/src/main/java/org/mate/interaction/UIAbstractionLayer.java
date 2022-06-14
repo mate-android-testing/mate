@@ -350,11 +350,7 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
-                // check for presence of progress bar
-                if (handleProgressBar(screenState)) {
-                    change = true;
-                    continue;
-                }
+                // TODO: handle progress bar
 
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
@@ -389,7 +385,14 @@ public class UIAbstractionLayer {
      * @param screenState The current screen.
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
+    @SuppressWarnings("unused")
     private boolean handleProgressBar(IScreenState screenState) {
+
+        /*
+        * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
+        *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
+        *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
+         */
 
         // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
 
@@ -565,7 +568,7 @@ public class UIAbstractionLayer {
                 // reset screen state
                 lastScreenState = toRecordedScreenState(clearScreen());
                 guiModel.addRootState(lastScreenState);
-                surrogateModel.reset(lastScreenState);
+                surrogateModel.goToState(lastScreenState);
                 return;
             }
         }
@@ -596,7 +599,7 @@ public class UIAbstractionLayer {
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            surrogateModel.reset(lastScreenState);
+            surrogateModel.goToState(lastScreenState);
         }
     }
 
@@ -613,6 +616,12 @@ public class UIAbstractionLayer {
          */
         lastScreenState = toRecordedScreenState(clearScreen());
         guiModel.addRootState(lastScreenState);
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.goToState(lastScreenState);
+        }
     }
 
     /**

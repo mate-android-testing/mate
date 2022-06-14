@@ -101,9 +101,10 @@ public class SurrogateModel extends FSMModel {
     }
 
     /**
-     * Resets the surrogate model. This should be called at the end of each test case.
+     * Resets the surrogate model. This should be called after each test case or more specifically
+     * after {@link org.mate.interaction.UIAbstractionLayer#storeTraces(Set)}.
      */
-    public void reset(IScreenState screenState) {
+    private void reset() {
 
         executedTraces.clear();
         predictedTraces.clear();
@@ -112,8 +113,11 @@ public class SurrogateModel extends FSMModel {
         numberOfNonPredictedActions = 0;
         numberOfPredictedActions = 0;
 
-        // we need to bring the FSM in the correct state again
-        goToState(screenState);
+        /*
+        * If during the execution of the cached actions an exception occurs, the surrogate model
+        * would never return in prediction mode.
+         */
+        inPrediction = true;
     }
 
     /**
@@ -121,7 +125,7 @@ public class SurrogateModel extends FSMModel {
      *
      * @param screenState The current screen state.
      */
-    private void goToState(IScreenState screenState) {
+    public void goToState(IScreenState screenState) {
         State state = fsm.getState(screenState);
         fsm.goToState(state);
         checkPointState = fsm.getCurrentState();
@@ -416,6 +420,9 @@ public class SurrogateModel extends FSMModel {
          * but we should be aware of this issue.
          */
         Registry.getUiAbstractionLayer().storeTraces(getTraces());
+
+        // reset the surrogate model
+        reset();
     }
 
     /**

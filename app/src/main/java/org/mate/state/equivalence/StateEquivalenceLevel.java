@@ -1,4 +1,4 @@
-package org.mate.state.executables;
+package org.mate.state.equivalence;
 
 /**
  * Defines the various supported abstractions used in the {@link org.mate.state.IScreenState}

@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.state.executables.StateEquivalenceLevel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -988,8 +986,8 @@ public class Widget {
      */
     public boolean isProgressBarType() {
         /*
-        * There are a few sub classes of the base class ProgressBar, but those don't represent
-        * progress bars in the classical sense, i.e. they are 'abused' for primarily rating bars.
+         * There are a few sub classes of the base class ProgressBar, but those don't represent
+         * progress bars in the classical sense, i.e. they are 'abused' for primarily rating bars.
          */
         return getClazz().equals("android.widget.ProgressBar");
     }
@@ -1027,7 +1025,8 @@ public class Widget {
     }
 
     /**
-     * Compares two widgets for equality.
+     * Compares two {@link Widget}s for equality, which is given when the widgets have the same
+     * {@link #id} and are located at the same position.
      *
      * @param o The object to which we compare.
      * @return Returns {@code true} if both widgets are equal, otherwise {@code false} is returned.
@@ -1040,22 +1039,11 @@ public class Widget {
             return false;
         } else {
             Widget other = (Widget) o;
-
-            if (Properties.STATE_EQUIVALENCE_LEVEL() == StateEquivalenceLevel.WIDGET_WITH_ATTRIBUTES) {
-                return getId().equals(other.getId())
-                        && getX1() == other.getX1() &&
-                        getX2() == other.getX2() &&
-                        getY1() == other.getY1() &&
-                        getY2() == other.getY2() &&
-                        Objects.equals(getText(), other.getText()) &&
-                        Objects.equals(getContentDesc(), other.getContentDesc());
-            } else {
-                return getId().equals(other.getId())
-                        && getX1() == other.getX1() &&
-                        getX2() == other.getX2() &&
-                        getY1() == other.getY1() &&
-                        getY2() == other.getY2();
-            }
+            return getId().equals(other.getId())
+                    && getX1() == other.getX1() &&
+                    getX2() == other.getX2() &&
+                    getY1() == other.getY1() &&
+                    getY2() == other.getY2();
         }
     }
 
@@ -1066,23 +1054,12 @@ public class Widget {
      */
     @Override
     public int hashCode() {
-        if (Properties.STATE_EQUIVALENCE_LEVEL() == StateEquivalenceLevel.WIDGET_WITH_ATTRIBUTES) {
-            return Objects.hash(
-                    getId(),
-                    getX1(),
-                    getX2(),
-                    getY1(),
-                    getY2(),
-                    getText(),
-                    getContentDesc());
-        } else {
-            return Objects.hash(
-                    getId(),
-                    getX1(),
-                    getX2(),
-                    getY1(),
-                    getY2());
-        }
+        return Objects.hash(
+                getId(),
+                getX1(),
+                getX2(),
+                getY1(),
+                getY2());
     }
 
     /**

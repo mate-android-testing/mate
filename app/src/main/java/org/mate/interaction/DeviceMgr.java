@@ -1549,18 +1549,26 @@ public class DeviceMgr {
     }
 
     /**
-     * Reads the traces from the external memory and deletes afterwards the traces file.
+     * Reads the traces from the external memory and deletes afterwards the info and traces file.
      *
      * @return Returns the set of traces.
      *
      */
     public Set<String> getTraces() {
 
-        // triggers the dumping of traces to a file called traces.txt
-        sendBroadcastToTracer();
-
         File sdCard = Environment.getExternalStorageDirectory();
         File infoFile = new File(sdCard, "info.txt");
+
+        /*
+        * If the AUT has been crashed, the uncaught exception handler takes over and produces both
+        * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
+        * every other condition, there should be no info.txt present and the broadcast is necessary.
+        *
+         */
+        if (!infoFile.exists()) {
+            // triggers the dumping of traces to a file called traces.txt
+            sendBroadcastToTracer();
+        }
 
         /*
         * We need to wait until the info.txt file is generated, once it is there, we know that all
@@ -1573,7 +1581,14 @@ public class DeviceMgr {
 
         File traceFile = new File(sdCard, "traces.txt");
 
+        /*
+        * The method exists() may return 'false' if we try to access it while it is written by
+        * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
+        * only if the info.txt doesn't exist yet, this should never happen.
+        *
+         */
         if (!traceFile.exists()) {
+            infoFile.delete();
             throw new IllegalStateException("The file traces.txt doesn't exist!");
         }
 
@@ -1590,12 +1605,21 @@ public class DeviceMgr {
             }
 
         } catch (IOException e) {
+            infoFile.delete();
             throw new IllegalStateException("Couldn't read traces!", e);
         }
 
-        // remove both files
-        traceFile.delete();
-        infoFile.delete();
+        // delete both files in order that the next action is assigned the correct traces
+        boolean removedTracesFile = traceFile.delete();
+        boolean removedInfoFile = infoFile.delete();
+
+        if (!removedInfoFile) {
+            MATE.log_warn("Couldn't remove the info.txt file!");
+        }
+
+        if (!removedTracesFile) {
+            MATE.log_warn("Couldn't remove the traces.txt file!");
+        }
 
         return traces;
     }
