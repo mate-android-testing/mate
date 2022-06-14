@@ -218,6 +218,7 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isEditTextType()) {
                 MATE.log_debug("Widget is an edit text instance!");
                 widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
 
                /*
                * TODO: Use static analysis to detect whether an onclick handler is registered.
