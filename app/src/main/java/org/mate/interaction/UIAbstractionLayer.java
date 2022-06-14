@@ -565,7 +565,7 @@ public class UIAbstractionLayer {
                 // reset screen state
                 lastScreenState = toRecordedScreenState(clearScreen());
                 guiModel.addRootState(lastScreenState);
-                surrogateModel.reset(lastScreenState);
+                surrogateModel.goToState(lastScreenState);
                 return;
             }
         }
@@ -596,7 +596,7 @@ public class UIAbstractionLayer {
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            surrogateModel.reset(lastScreenState);
+            surrogateModel.goToState(lastScreenState);
         }
     }
 
@@ -617,7 +617,7 @@ public class UIAbstractionLayer {
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            surrogateModel.reset(lastScreenState);
+            surrogateModel.goToState(lastScreenState);
         }
     }
 
