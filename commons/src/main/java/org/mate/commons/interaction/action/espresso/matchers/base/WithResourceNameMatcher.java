@@ -22,7 +22,7 @@ public class WithResourceNameMatcher extends EspressoViewMatcher {
 
     @Override
     public String getCode() {
-        return String.format("withResourceName(R.id.%s)", resourceName);
+        return String.format("withResourceName(%s)", boxString(resourceName));
     }
 
     @Override
