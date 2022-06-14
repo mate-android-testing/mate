@@ -613,6 +613,12 @@ public class UIAbstractionLayer {
          */
         lastScreenState = toRecordedScreenState(clearScreen());
         guiModel.addRootState(lastScreenState);
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.reset(lastScreenState);
+        }
     }
 
     /**
