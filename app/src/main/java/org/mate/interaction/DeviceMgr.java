@@ -917,11 +917,23 @@ public class DeviceMgr {
      * @param widget The widget whose input should be cleared.
      */
     private void handleClear(Widget widget) {
-        UiObject2 obj = findObject(widget);
-        if (obj != null) {
-            obj.setText("");
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText("");
+
+        UiObject2 uiObject = findObject(widget);
+
+        if (uiObject != null) {
+
+            try {
+                uiObject.setText("");
+
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText("");
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                handleEditFallback(widget, "");
+            }
+        } else {
+            handleEditFallback(widget, "");
         }
     }
 
