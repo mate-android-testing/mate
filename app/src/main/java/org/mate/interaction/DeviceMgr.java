@@ -762,9 +762,7 @@ public class DeviceMgr {
             case TYPE_SPECIFIC_TEXT:
                 handleEdit(selectedWidget);
                 break;
-            case CLEAR_WIDGET:
-                // TODO: Do we actually need this action?
-                //  A 'type text' action overwrites the previous text anyways.
+            case CLEAR_TEXT:
                 handleClear(selectedWidget);
                 break;
             case SWIPE_DOWN:
