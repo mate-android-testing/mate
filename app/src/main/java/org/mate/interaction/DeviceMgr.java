@@ -358,7 +358,7 @@ public class DeviceMgr {
             if (widget.getClazz().equals(className)
                     && widget.getBounds().equals(bounds)
                     && Objects.equals(resourceID, resourceName)) {
-                    return widget;
+                return widget;
             }
         }
 
@@ -446,9 +446,9 @@ public class DeviceMgr {
             if (Registry.isReplayMode()) {
 
                 /*
-                * It is possible that the spinner action wasn't actually executed at record time,
-                * because there was no spinner available. In this case, we can't do anything else
-                * than simply ignoring the action.
+                 * It is possible that the spinner action wasn't actually executed at record time,
+                 * because there was no spinner available. In this case, we can't do anything else
+                 * than simply ignoring the action.
                  */
                 if (!action.getUIActions().isEmpty()) {
 
@@ -483,9 +483,9 @@ public class DeviceMgr {
                         .collect(Collectors.toList());
 
                 /*
-                * If no spinner is available on the current screen, we simply do nothing alike
-                * a primitive action may have no effect, e.g. a click on a random coordinate which
-                * area is not covered by any clickable widget.
+                 * If no spinner is available on the current screen, we simply do nothing alike
+                 * a primitive action may have no effect, e.g. a click on a random coordinate which
+                 * area is not covered by any clickable widget.
                  */
                 if (!spinners.isEmpty()) {
 
@@ -707,8 +707,8 @@ public class DeviceMgr {
                 e.printStackTrace();
 
                 /*
-                * Unfortunately, it can happen that the requested ui element gets immediately stale.
-                * The only way to recover from such a situation is to call findObject() another time.
+                 * Unfortunately, it can happen that the requested ui element gets immediately stale.
+                 * The only way to recover from such a situation is to call findObject() another time.
                  */
                 uiElement = device.findObject(By.focused(true));
                 if (uiElement != null) {
@@ -719,9 +719,9 @@ public class DeviceMgr {
             if (widget != null && widget.isEditTextType()) {
 
                 /*
-                * If we run in replay mode, we should use the recorded text instead of a new text
-                * that is randomly created. Otherwise, we may end up in a different state and
-                * subsequent actions might not show the same behaviour as in the recorded run.
+                 * If we run in replay mode, we should use the recorded text instead of a new text
+                 * that is randomly created. Otherwise, we may end up in a different state and
+                 * subsequent actions might not show the same behaviour as in the recorded run.
                  */
                 String textData = Registry.isReplayMode() ? action.getText() :
                         Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
@@ -816,7 +816,7 @@ public class DeviceMgr {
      *
      * @param screenState The given screen state.
      * @return Returns {@code true} if the screen contains a progress bar, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean checkForProgressBar(IScreenState screenState) {
 
@@ -1015,47 +1015,55 @@ public class DeviceMgr {
      * best effort approach.
      *
      * @param widget The widget whose ui object should be looked up.
-     * @return Returns the corresponding ui object or {@code null} if no
-     *         such ui object could be found.
+     * @return Returns the corresponding ui object or {@code null} if no sui ui object could be
+     *         found or the ui object got stale in the meantime.
      */
     private UiObject2 findObject(Widget widget) {
 
-        // retrieve all ui objects that match the given widget resource id
-        List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+        try {
 
-        if (objs != null) {
-            if (objs.size() == 1) {
-                return objs.get(0);
-            } else {
-                /*
-                 * It can happen that multiple widgets share the same resource id,
-                 * thus we need to compare on the text attribute.
-                 */
-                for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
-                        return uiObject2;
+            // retrieve all ui objects that match the given widget resource id
+            List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+
+            if (objs != null) {
+                if (objs.size() == 1) {
+                    return objs.get(0);
+                } else {
+                    /*
+                     * It can happen that multiple widgets share the same resource id,
+                     * thus we need to compare on the text attribute.
+                     */
+                    for (UiObject2 uiObject2 : objs) {
+                        if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
+                            return uiObject2;
+                    }
                 }
             }
-        }
 
-        // if no match for id, try to find the object by text match
-        objs = device.findObjects(By.text(widget.getText()));
+            // if no match for id, try to find the object by text match
+            objs = device.findObjects(By.text(widget.getText()));
 
-        if (objs != null) {
-            if (objs.size() == 1) {
-                return objs.get(0);
-            } else {
-                // try to match by content description or widget boundary
-                for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getContentDescription() != null
-                            && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
-                            (uiObject2.getVisibleBounds() != null
-                                    && uiObject2.getVisibleBounds().centerX() == widget.getX()
-                                    && uiObject2.getVisibleBounds().centerY() == widget.getY()))
-                        return uiObject2;
+            if (objs != null) {
+                if (objs.size() == 1) {
+                    return objs.get(0);
+                } else {
+                    // try to match by content description or widget boundary
+                    for (UiObject2 uiObject2 : objs) {
+                        if (uiObject2.getContentDescription() != null
+                                && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
+                                (uiObject2.getVisibleBounds() != null
+                                        && uiObject2.getVisibleBounds().centerX() == widget.getX()
+                                        && uiObject2.getVisibleBounds().centerY() == widget.getY()))
+                            return uiObject2;
+                    }
                 }
             }
+
+        } catch (StaleObjectException e) {
+            MATE.log_warn("Stale UiObject2!");
+            e.printStackTrace();
         }
+
         return null;
     }
 
@@ -1387,18 +1395,18 @@ public class DeviceMgr {
     private List<String> extractFragments(String output) {
 
         /*
-        * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
-        *
-        *  Local FragmentActivity 30388ff State:
-        *     Added Fragments:
-        *       #0: MyFragment{b4f3bc} (642de726-ae2d-439c-a047-4a4a35a6f435 id=0x7f080071)
-        *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
-        *     Back Stack Index: 0 (this line seems to be optional!)
-        *     FragmentManager misc state:
-        */
+         * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
+         *
+         *  Local FragmentActivity 30388ff State:
+         *     Added Fragments:
+         *       #0: MyFragment{b4f3bc} (642de726-ae2d-439c-a047-4a4a35a6f435 id=0x7f080071)
+         *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
+         *     Back Stack Index: 0 (this line seems to be optional!)
+         *     FragmentManager misc state:
+         */
 
         final String fragmentActivityState = output.split("Local FragmentActivity")[1];
-        
+
         // If no fragment is visible, the 'Added Fragments:' line is missing!
         if (!fragmentActivityState.contains("Added Fragments:")) {
             return Collections.emptyList();
@@ -1411,7 +1419,7 @@ public class DeviceMgr {
                 .split(System.lineSeparator());
 
         return Arrays.stream(fragmentLines)
-                .filter(line -> !line.replaceAll("\\s+","").isEmpty())
+                .filter(line -> !line.replaceAll("\\s+", "").isEmpty())
                 .map(line -> line.split(":")[1])
                 .map(line -> line.split("\\{")[0])
                 .map(String::trim)
@@ -1544,7 +1552,7 @@ public class DeviceMgr {
                 }
             }
 
-        } catch(IOException e) {
+        } catch (IOException e) {
             MATE.log_warn("Couldn't retrieve stack trace of last crash!");
             MATE.log_warn(e.getMessage());
         }
@@ -1568,7 +1576,6 @@ public class DeviceMgr {
      * Reads the traces from the external memory and deletes afterwards the info and traces file.
      *
      * @return Returns the set of traces.
-     *
      */
     public Set<String> getTraces() {
 
@@ -1576,10 +1583,10 @@ public class DeviceMgr {
         File infoFile = new File(sdCard, "info.txt");
 
         /*
-        * If the AUT has been crashed, the uncaught exception handler takes over and produces both
-        * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
-        * every other condition, there should be no info.txt present and the broadcast is necessary.
-        *
+         * If the AUT has been crashed, the uncaught exception handler takes over and produces both
+         * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
+         * every other condition, there should be no info.txt present and the broadcast is necessary.
+         *
          */
         if (!infoFile.exists()) {
             // triggers the dumping of traces to a file called traces.txt
@@ -1587,10 +1594,10 @@ public class DeviceMgr {
         }
 
         /*
-        * We need to wait until the info.txt file is generated, once it is there, we know that all
-        * traces have been dumped.
+         * We need to wait until the info.txt file is generated, once it is there, we know that all
+         * traces have been dumped.
          */
-        while(!infoFile.exists()) {
+        while (!infoFile.exists()) {
             MATE.log_debug("Waiting for info.txt...");
             Utils.sleep(200);
         }
@@ -1598,10 +1605,10 @@ public class DeviceMgr {
         File traceFile = new File(sdCard, "traces.txt");
 
         /*
-        * The method exists() may return 'false' if we try to access it while it is written by
-        * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
-        * only if the info.txt doesn't exist yet, this should never happen.
-        *
+         * The method exists() may return 'false' if we try to access it while it is written by
+         * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
+         * only if the info.txt doesn't exist yet, this should never happen.
+         *
          */
         if (!traceFile.exists()) {
             infoFile.delete();
@@ -1652,7 +1659,7 @@ public class DeviceMgr {
 
         try (Writer fileWriter = new FileWriter(traceFile)) {
 
-            for(String trace : traces) {
+            for (String trace : traces) {
                 fileWriter.write(trace);
                 fileWriter.write(System.lineSeparator());
             }
@@ -1663,8 +1670,8 @@ public class DeviceMgr {
         }
 
         /*
-        * The info.txt indicates that the dumping of traces has been completed and it contains
-        * the number of written traces.
+         * The info.txt indicates that the dumping of traces has been completed and it contains
+         * the number of written traces.
          */
         File infoFile = new File(sdCard, "info.txt");
 
