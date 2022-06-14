@@ -20,6 +20,12 @@ public class EspressoTestCaseStringConverter extends CodeProducer {
     private String espressoDependencyGroup;
     private String espressoDependencyVersion;
 
+    /**
+     * Indicates whether we are making an Espresso test for running inside the AUT's codebase,
+     * or to run it with our own Espresso-test-apk-builder.
+     */
+    private boolean convertingForAUTsCodeBase = false;
+
     private StringBuilder builder;
 
     public EspressoTestCaseStringConverter(String packageName,
@@ -49,6 +55,10 @@ public class EspressoTestCaseStringConverter extends CodeProducer {
         this.actions.add(espressoAction);
         this.classImports.addAll(espressoAction.getNeededClassImports());
         this.staticImports.addAll(espressoAction.getNeededStaticImports());
+    }
+
+    public void setConvertingForAUTsCodeBase(boolean convertingForAUTsCodeBase) {
+        this.convertingForAUTsCodeBase = convertingForAUTsCodeBase;
     }
 
     @Override
@@ -82,8 +92,10 @@ public class EspressoTestCaseStringConverter extends CodeProducer {
         classImports.add("org.junit.Test");
         classImports.add("org.junit.runner.RunWith");
 
-        // Add AUT's resources as a default import
-        classImports.add(String.format("%s.R", packageName));
+        if (convertingForAUTsCodeBase) {
+            // Add AUT's resources as a default import
+            classImports.add(String.format("%s.R", packageName));
+        }
     }
 
     private void addLine(String line) {
@@ -103,7 +115,11 @@ public class EspressoTestCaseStringConverter extends CodeProducer {
     }
 
     private void writePackage() {
-        addExpressionLine(String.format("package %s", packageName));
+        if (convertingForAUTsCodeBase) {
+            addExpressionLine(String.format("package %s", packageName));
+        } else {
+            addExpressionLine("package org.mate.espresso.tests");
+        }
         addEmptyLine();
     }
 
@@ -126,14 +142,25 @@ public class EspressoTestCaseStringConverter extends CodeProducer {
     private void writeTestClassHeader() {
         addAnnotationLine("LargeTest");
         addAnnotationLine("RunWith(AndroidJUnit4.class)");
-        addLine(String.format("public class %s {", testCaseName));
+        if (convertingForAUTsCodeBase) {
+            addLine(String.format("public class %s {", testCaseName));
+        } else {
+            addLine(String.format("public class %s extends TestUtils {", testCaseName));
+        }
         addEmptyLine();
     }
 
     private void writeTestActivityRule() {
-        addAnnotationLine("Rule");
-        addExpressionLine(String.format("public ActivityTestRule<%s> mActivityTestRule = " +
-                "new ActivityTestRule<>(%s.class);", startingActivityName, startingActivityName));
+        if (convertingForAUTsCodeBase) {
+            addAnnotationLine("Rule");
+            addExpressionLine(String.format("public ActivityTestRule<%s> mActivityTestRule = " +
+                    "new ActivityTestRule<>(%s.class)", startingActivityName, startingActivityName));
+        } else {
+            addLine("static {");
+            addExpressionLine(String.format("PACKAGE_NAME = \"%s\"", packageName));
+            addExpressionLine(String.format("START_ACTIVITY_NAME = \"%s\"", startingActivityName));
+            addLine("}");
+        }
         addEmptyLine();
     }
 
