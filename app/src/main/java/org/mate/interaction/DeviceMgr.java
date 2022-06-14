@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -343,15 +344,20 @@ public class DeviceMgr {
      */
     private Widget findWidget(UiObject2 uiElement) {
 
+        // cache attributes to avoid stale object exception
+        String className = uiElement.getClassName();
+        Rect bounds = uiElement.getVisibleBounds();
+        String resourceName = uiElement.getResourceName();
+
         IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         for (Widget widget : screenState.getWidgets()) {
 
             String resourceID = widget.getResourceID().isEmpty() ? null : widget.getResourceID();
 
-            if (widget.getClazz().equals(uiElement.getClassName())
-                    && widget.getBounds().equals(uiElement.getVisibleBounds())
-                    && Objects.equals(resourceID, uiElement.getResourceName())) {
+            if (widget.getClazz().equals(className)
+                    && widget.getBounds().equals(bounds)
+                    && Objects.equals(resourceID, resourceName)) {
                     return widget;
             }
         }
