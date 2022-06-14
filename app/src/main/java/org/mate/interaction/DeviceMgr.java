@@ -1116,16 +1116,22 @@ public class DeviceMgr {
         device.click(widget.getX(), widget.getY());
         UiObject2 obj = device.findObject(By.focused(true));
         if (obj != null) {
-            obj.setText(textData);
+            try {
+                obj.setText(textData);
 
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText(textData);
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText(textData);
 
-            // we need to close the soft keyboard, but only if it is present, see:
-            // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-            device.pressBack();
+                // we need to close the soft keyboard, but only if it is present, see:
+                // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+                device.pressBack();
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                MATE.log_warn("Couldn't edit widget: " + widget);
+            }
         } else {
-            MATE.log("  ********* obj " + widget.getId() + "  not found");
+            MATE.log_warn("Couldn't edit widget: " + widget);
         }
     }
 
