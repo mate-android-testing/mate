@@ -46,7 +46,8 @@ public class EspressoViewActionsParser {
         EspressoViewAction[] possibleActions = {
             new ClearTextAction(),
             new ClickAction(),
-            new DoubleClickAction(),
+            // Double click actions are disabled for now, since they tend to lead to flaky tests
+            // new DoubleClickAction(),
             new LongClickAction(),
             new PressIMEAction(),
             new ScrollToAction(),
