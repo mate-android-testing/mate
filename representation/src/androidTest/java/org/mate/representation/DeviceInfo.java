@@ -242,4 +242,13 @@ public class DeviceInfo {
         return false;
     }
 
+    /**
+     * Disable animations in the device.
+     * Using adb commands listed here: https://stackoverflow.com/a/44962044/2271834
+     */
+    public void disableAnimations() {
+        this.executeShellCommand("settings put global window_animation_scale 0");
+        this.executeShellCommand("settings put global transition_animation_scale 0");
+        this.executeShellCommand("settings put global animator_duration_scale 0");
+    }
 }

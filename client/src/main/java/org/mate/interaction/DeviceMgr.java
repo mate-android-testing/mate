@@ -483,4 +483,15 @@ public class DeviceMgr {
             throw new IllegalStateException("Couldn't write to info.txt!", e);
         }
     }
+
+    /**
+     * Disable animations on the device.
+     */
+    public void disableAnimations() {
+        try {
+            MATEService.getRepresentationLayer().disableAnimations();
+        } catch (Exception e) {
+            // do nothing
+        }
+    }
 }

@@ -18,6 +18,7 @@ interface IRepresentationLayerInterface {
     // General device info & config
     int getDisplayWidth();
     int getDisplayHeight();
+    void disableAnimations();
     boolean grantRuntimePermission(String permission);
     boolean isCrashDialogPresent();
     String getTargetPackageFilesDir();

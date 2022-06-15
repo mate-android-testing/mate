@@ -75,6 +75,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public void disableAnimations() throws RemoteException {
+        DeviceInfo.getInstance().disableAnimations();
+    }
+
+    @Override
     public boolean isCrashDialogPresent() throws RemoteException {
         return DeviceInfo.getInstance().isCrashDialogPresent();
     }
