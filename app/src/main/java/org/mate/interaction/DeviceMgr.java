@@ -283,7 +283,7 @@ public class DeviceMgr {
                 for (int i = 0; i < primitiveActions.size(); i++) {
                     PrimitiveAction primitiveAction = (PrimitiveAction) primitiveActions.get(i);
                     if (i < primitiveActions.size() - 1) {
-                        handleEdit(primitiveAction);
+                        handleEdit(primitiveAction, false);
                     } else {
                         // the last primitive action represents the click on the submit button
                         handleClick(primitiveAction);
@@ -319,7 +319,7 @@ public class DeviceMgr {
                     inputFields.stream().forEach(widget -> {
                         PrimitiveAction typeText = new PrimitiveAction(widget.getX(), widget.getY(),
                                 ActionType.TYPE_TEXT, currentActivity);
-                        handleEdit(typeText);
+                        handleEdit(typeText, false);
                         uiActions.add(typeText);
                     });
 
@@ -658,7 +658,10 @@ public class DeviceMgr {
                 device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
                 break;
             case TYPE_TEXT:
-                handleEdit(action);
+                handleEdit(action, false);
+                break;
+            case CLEAR_TEXT:
+                handleEdit(action, true);
                 break;
             case BACK:
                 device.pressBack();
@@ -686,8 +689,9 @@ public class DeviceMgr {
      * Inserts a text into a input field based on the given primitive action.
      *
      * @param action The given primitive action.
+     * @param clear Whether the text field should be cleared (filled with an empty string).
      */
-    private void handleEdit(PrimitiveAction action) {
+    private void handleEdit(PrimitiveAction action, boolean clear) {
 
         // clicking on the screen should get a focus on the underlying 'widget'
         device.click(action.getX(), action.getY());
@@ -705,7 +709,7 @@ public class DeviceMgr {
                 widget = findWidget(uiElement);
             } catch (StaleObjectException e) {
 
-                MATE.log_warn("Stale ui element!");
+                MATE.log_warn("Stale UiObject2!");
                 e.printStackTrace();
 
                 /*
@@ -714,31 +718,49 @@ public class DeviceMgr {
                  */
                 uiElement = device.findObject(By.focused(true));
                 if (uiElement != null) {
-                    widget = findWidget(uiElement);
+
+                    try {
+                        widget = findWidget(uiElement);
+                    } catch (StaleObjectException ex) {
+                        MATE.log_warn("Stale UiObject2!");
+                        ex.printStackTrace();
+                    }
                 }
             }
 
             if (widget != null && widget.isEditTextType()) {
 
-                /*
-                 * If we run in replay mode, we should use the recorded text instead of a new text
-                 * that is randomly created. Otherwise, we may end up in a different state and
-                 * subsequent actions might not show the same behaviour as in the recorded run.
-                 */
-                String textData = Registry.isReplayMode() ? action.getText() :
-                        Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
+                // use empty string for clearing
+                String textData = "";
+
+                if (!clear) {
+                    /*
+                     * If we run in replay mode, we should use the recorded text instead of a new text
+                     * that is randomly created. Otherwise, we may end up in a different state and
+                     * subsequent actions might not show the same behaviour as in the recorded run.
+                     */
+                    textData = Registry.isReplayMode() ? action.getText() :
+                            Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
+                }
 
                 MATE.log_debug("Inserting text: " + textData);
-                uiElement.setText(textData);
 
-                // record for possible replaying + findObject() relies on it
-                action.setText(textData);
-                widget.setText(textData);
+                try {
+                    uiElement.setText(textData);
+
+                    // record for possible replaying + findObject() relies on it
+                    action.setText(textData);
+                    widget.setText(textData);
+                } catch (StaleObjectException e) {
+                    MATE.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
+                } finally {
+                    // we need to close the soft keyboard, but only if it is present
+                    if (isKeyboardOpened()) {
+                        device.pressBack();
+                    }
+                }
             }
-
-            // we need to close the soft keyboard, but only if it is present, see:
-            // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-            device.pressBack();
         }
     }
 
@@ -1161,10 +1183,6 @@ public class DeviceMgr {
 
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText(textData);
-
-                // we need to close the soft keyboard, but only if it is present, see:
-                // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-                device.pressBack();
             } catch (StaleObjectException e) {
                 MATE.log_warn("Stale UiObject2!");
                 e.printStackTrace();
