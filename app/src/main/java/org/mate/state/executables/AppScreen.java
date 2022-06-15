@@ -121,17 +121,25 @@ public class AppScreen {
      * @return Returns the current package name associated with the app screen.
      */
     private String getCurrentPackageName() {
-        try {
-            return device.getCurrentPackageName();
-        } catch (IllegalStateException e) {
-            if (e.getMessage() != null && e.getMessage().equals(UiAutomatorDisconnectedMessage)) {
-                MATE.log_acc("UIAutomator disconnected, try re-connecting!");
-                Utils.sleep(3000);
-                return device.getCurrentPackageName();
-            } else {
-                throw new IllegalStateException("Couldn't retrieve package name!", e);
+
+        String packageName = null;
+
+        for (int numberOfRetries = 0; numberOfRetries <= UiAutomatorDisconnectedRetries
+                && packageName == null; numberOfRetries++) {
+
+            try {
+                packageName = device.getCurrentPackageName();
+            } catch (IllegalStateException e) {
+                if (e.getMessage() != null && e.getMessage().equals(UiAutomatorDisconnectedMessage)) {
+                    MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+                    Utils.sleep(3000);
+                } else {
+                    throw new IllegalStateException("Couldn't retrieve package name!", e);
+                }
             }
         }
+
+        return packageName;
     }
 
     /**
