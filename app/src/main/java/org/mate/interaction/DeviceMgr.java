@@ -1,6 +1,7 @@
 package org.mate.interaction;
 
 import android.app.Instrumentation;
+import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -741,6 +743,25 @@ public class DeviceMgr {
     }
 
     /**
+     * Checks whether the soft keyboard is opened or not.
+     *
+     * @return Returns {@code true} if the soft keyboard is opened, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean isKeyboardOpened() {
+
+        // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+        UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+
+        for (AccessibilityWindowInfo window : uiAutomation.getWindows()) {
+            if (window.getType() == AccessibilityWindowInfo.TYPE_INPUT_METHOD) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Executes a widget action, e.g. a click on a certain widget.
      *
      * @param action The action to be executed.
@@ -927,6 +948,11 @@ public class DeviceMgr {
 
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText("");
+
+                // we need to close the soft keyboard, but only if it is present
+                if (isKeyboardOpened()) {
+                    device.pressBack();
+                }
             } catch (StaleObjectException e) {
                 MATE.log_warn("Stale UiObject2!");
                 e.printStackTrace();
@@ -1103,6 +1129,11 @@ public class DeviceMgr {
 
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText(textData);
+
+                // we need to close the soft keyboard, but only if it is present
+                if (isKeyboardOpened()) {
+                    device.pressBack();
+                }
             } catch (StaleObjectException e) {
                 MATE.log_warn("Stale UiObject2!");
                 e.printStackTrace();
@@ -1138,6 +1169,11 @@ public class DeviceMgr {
                 MATE.log_warn("Stale UiObject2!");
                 e.printStackTrace();
                 MATE.log_warn("Couldn't edit widget: " + widget);
+            } finally {
+                // we need to close the soft keyboard, but only if it is present
+                if (isKeyboardOpened()) {
+                    device.pressBack();
+                }
             }
         } else {
             MATE.log_warn("Couldn't edit widget: " + widget);
