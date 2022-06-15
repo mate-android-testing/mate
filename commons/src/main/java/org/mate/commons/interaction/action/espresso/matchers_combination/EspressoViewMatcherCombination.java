@@ -101,13 +101,16 @@ public class EspressoViewMatcherCombination {
         // traverse all nodes in the tree starting from the target node
         EspressoViewTreeIterator treeIteratorForTargetNode = viewTree.getTreeIteratorForTargetNode(targetNode);
         for (EspressoViewTreeNodeWithPath espressoViewTreeNodeWithPath : treeIteratorForTargetNode) {
+            EspressoViewTreeNode nodeAfterPath = espressoViewTreeNodeWithPath.getNode();
             PathInTree pathFromTarget = espressoViewTreeNodeWithPath.getPathFromTarget();
 
             for (EspressoViewMatcherType type : BASE_MATCHER_TYPES_FOR_COMBINATION) {
-                matcherCombination.addMatcher(new MatcherForPath(pathFromTarget, type));
-                if (matcherCombination.isUnique()) {
-                    uniqueMatcherFound = true;
-                    break;
+                if (type.isValidForEspressoViewTreeNode(nodeAfterPath)) {
+                    matcherCombination.addMatcher(new MatcherForPath(pathFromTarget, type));
+                    if (matcherCombination.isUnique()) {
+                        uniqueMatcherFound = true;
+                        break;
+                    }
                 }
             }
 
@@ -267,23 +270,28 @@ public class EspressoViewMatcherCombination {
             return;
         }
 
+        if (!matcher.getType().isValidForEspressoViewTreeNode(nodeAfterPath)) {
+            hash.append("-");
+            return;
+        }
+
         EspressoView espressoViewAfterPath = nodeAfterPath.getEspressoView();
 
         switch (matcher.getType()) {
-            case WITH_RESOURCE_NAME:
-                hash.append(espressoViewAfterPath.getResourceName());
-                break;
             case WITH_ID:
                 hash.append(espressoViewAfterPath.getId());
+                break;
+            case WITH_CLASS_NAME:
+                hash.append(espressoViewAfterPath.getClassName());
+                break;
+            case WITH_RESOURCE_NAME:
+                hash.append(espressoViewAfterPath.getResourceName());
                 break;
             case WITH_TEXT:
                 hash.append(espressoViewAfterPath.getText());
                 break;
             case WITH_CONTENT_DESCRIPTION:
                 hash.append(espressoViewAfterPath.getContentDescription());
-                break;
-            case WITH_CLASS_NAME:
-                hash.append(espressoViewAfterPath.getClassName());
                 break;
             default:
                 throw new IllegalStateException(String.format("Hash update not implemented for " +
