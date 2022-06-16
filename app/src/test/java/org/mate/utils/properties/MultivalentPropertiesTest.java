@@ -16,7 +16,7 @@ public class MultivalentPropertiesTest {
 
     @Test
     public void testProperties() {
-        String functions = "{NUMBER_OF_ACTIVITIES, BRANCH_MULTI_OBJECTIVE, METHOD_COVERAGE, NOVELTY}";
+        String functions = "NUMBER_OF_ACTIVITIES, BRANCH_MULTI_OBJECTIVE, METHOD_COVERAGE, NOVELTY";
         Map<String, String> map = new HashMap<>();
         map.put("FITNESS_FUNCTIONS", functions);
 

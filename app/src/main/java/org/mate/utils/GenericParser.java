@@ -24,6 +24,27 @@ public class GenericParser {
 
     @SuppressWarnings("unchecked")
     public static <T> T parse(Class<T> clazz, String s) throws Exception {
+        if (clazz.isArray()) {
+            Class<?> clazzOfArray = clazz.getComponentType();
+
+            s = s.replace(" ", "");
+            String[] sElements = s.split(",");
+            Object[] elements = new Object[sElements.length];
+
+            for (int i = 0; i < sElements.length; i++) {
+                assert clazzOfArray != null;
+
+                elements[i] = parseElement(clazzOfArray, sElements[i]);
+            }
+
+            return (T) elements;
+        } else {
+            return parseElement(clazz, s);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T parseElement(Class<T> clazz, String s) throws Exception {
         if (clazz == String.class) {
             return (T) s;
         }
@@ -57,6 +78,5 @@ public class GenericParser {
         }
         throw new UnsupportedOperationException(
                 "Parsing of class " + boxedClass.getCanonicalName() + " is not implemented yet.");
-
     }
 }

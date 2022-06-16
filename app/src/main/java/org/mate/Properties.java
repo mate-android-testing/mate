@@ -17,17 +17,11 @@ import org.mate.utils.testcase.OptimisationStrategy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Properties {
-
-    /**
-     * Separator of lists as a string
-     */
-    public static final String SEPARATOR = ";";
 
     // the timeout in minutes
     public static int TIMEOUT() { return propertyOr(5); }
@@ -166,24 +160,6 @@ public class Properties {
     public static FitnessFunction[] FITNESS_FUNCTIONS() {
         return propertyOr(null);
     }
-
-    /*public static FitnessFunction[] FITNESS_FUNCTIONS() {
-        FitnessFunction[] functions = null;
-        String functionsString = propertyOr(null);
-
-        if (functionsString != null) {
-            String[] separateFunctions = functionsString.split(SEPARATOR);
-            List<FitnessFunction> functionsDummy = new ArrayList<>();
-
-            for (String element : separateFunctions) {
-                functionsDummy.add(FitnessFunction.valueOf(element));
-            }
-
-            functions = functionsDummy.size() == 0 ? null : (FitnessFunction[]) functionsDummy.toArray();
-        }
-
-        return functions;
-    }*/
 
     /**
      * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTION()}
