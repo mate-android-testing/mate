@@ -139,6 +139,7 @@ public class AppScreen {
             }
         }
 
+        // NOTE: We could also retrieve the package name via the root node!
         return packageName;
     }
 
