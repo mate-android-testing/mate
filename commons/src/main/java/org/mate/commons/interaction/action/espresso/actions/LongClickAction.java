@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Long click Espresso action.
+ */
 public class LongClickAction extends EspressoViewAction {
     public LongClickAction() {
         super(EspressoViewActionType.LONG_CLICK);

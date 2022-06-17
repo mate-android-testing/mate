@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Swipe left Espresso action.
+ */
 public class SwipeLeftAction extends EspressoViewAction {
     public SwipeLeftAction() {
         super(EspressoViewActionType.SWIPE_LEFT);

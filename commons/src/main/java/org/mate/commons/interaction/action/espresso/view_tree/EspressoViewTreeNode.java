@@ -10,17 +10,34 @@ import org.mate.commons.interaction.action.espresso.EspressoView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A node in an EspressoViewTree.
+ * I.e., a node that represents a view in the UI Hierarchy.
+ */
 public class EspressoViewTreeNode {
-    private EspressoView espressoView;
-    private EspressoViewTreeNode parent;
-    private List<EspressoViewTreeNode> children = new ArrayList<>();
+
+    /**
+     * The EspressoView contained in this node.
+     */
+    private final EspressoView espressoView;
+
+    /**
+     * The parent node of this node.
+     */
+    private @Nullable
+    final EspressoViewTreeNode parent;
+
+    /**
+     * The children nodes of this node.
+     */
+    private final List<EspressoViewTreeNode> children = new ArrayList<>();
 
     public EspressoViewTreeNode(View espressoView, String activityName) {
         this(espressoView, activityName, null);
     }
 
     public EspressoViewTreeNode(View espressoView, String activityName,
-                                EspressoViewTreeNode parent) {
+                                @Nullable EspressoViewTreeNode parent) {
         this.espressoView = new EspressoView(espressoView, activityName);
         this.parent = parent;
 
@@ -36,14 +53,30 @@ public class EspressoViewTreeNode {
         }
     }
 
+    /**
+     * @return the EspressoView contained in this node.
+     */
+    public EspressoView getEspressoView() {
+        return espressoView;
+    }
+
+    /**
+     * @return a boolean indicating whether this node has a parent or not.
+     */
     public boolean hasParent() {
         return parent != null;
     }
 
-    public EspressoViewTreeNode getParent() {
+    /**
+     * @return the parent node of this node.
+     */
+    public @Nullable EspressoViewTreeNode getParent() {
         return parent;
     }
 
+    /**
+     * @return the children nodes of this node.
+     */
     public List<EspressoViewTreeNode> getChildren() {
         return children;
     }
@@ -74,7 +107,7 @@ public class EspressoViewTreeNode {
     }
 
     /**
-     * Return the nodes "below" us in the tree (in preorder).
+     * @return the nodes "below" this node in the tree (in preorder).
      */
     public List<EspressoViewTreeNode> getAllNodesInSubtree() {
         List<EspressoViewTreeNode> nodes = new ArrayList<>();
@@ -88,9 +121,5 @@ public class EspressoViewTreeNode {
         }
 
         return nodes;
-    }
-
-    public EspressoView getEspressoView() {
-        return espressoView;
     }
 }

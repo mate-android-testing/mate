@@ -12,8 +12,15 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Espresso Matcher for targeting the views that have a certain resource name.
+ */
 public class WithResourceNameMatcher extends EspressoViewMatcher {
-    private String resourceName;
+
+    /**
+     * The resource name to match against.
+     */
+    private final String resourceName;
 
     public WithResourceNameMatcher(String resourceName) {
         super(EspressoViewMatcherType.WITH_RESOURCE_NAME);

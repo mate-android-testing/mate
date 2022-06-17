@@ -4,31 +4,36 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.test.espresso.ViewAction;
 
-import org.mate.commons.utils.CodeProducer;
+import org.mate.commons.utils.AbstractCodeProducer;
 
-import java.util.Set;
+/**
+ * Represents an actual Espresso's ViewAction.
+ */
+public abstract class EspressoViewAction extends AbstractCodeProducer implements Parcelable {
 
-public abstract class EspressoViewAction extends CodeProducer implements Parcelable {
+    /**
+     * The type of Espresso ViewAction being represented by this instance.
+     */
     private final EspressoViewActionType type;
 
     public EspressoViewAction(EspressoViewActionType type) {
         this.type = type;
     }
 
+    /**
+     * @return the type of Espresso ViewAction being represented by this instance.
+     */
     public EspressoViewActionType getType() {
         return type;
     }
 
     /**
-     * Get actual Espresso's ViewAction instance represented by this EspressoViewAction
+     * Get the actual Espresso's ViewAction instance represented by this EspressoViewAction.
      */
     public abstract ViewAction getViewAction();
-
-    public abstract Set<String> getNeededClassImports();
-
-    public abstract Set<String> getNeededStaticImports();
 
     /**
      * Returns a boolean indicating whether this EspressoViewAction can be performed on the given
@@ -51,6 +56,7 @@ public abstract class EspressoViewAction extends CodeProducer implements Parcela
      */
     public abstract boolean isValidForEnabledView(View view);
 
+    @NonNull
     @Override
     public String toString() {
         return this.getCode();

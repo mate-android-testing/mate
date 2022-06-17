@@ -2,8 +2,12 @@ package org.mate.commons.interaction.action.espresso.matchers;
 
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTreeNode;
 
+/**
+ * The type of Espresso ViewMatchers available in MATE.
+ */
 public enum EspressoViewMatcherType {
-    // Base matchers
+
+    // Base matchers: they do NOT use another matchers, and can be used by themselves.
     IS_ROOT,
     WITH_CLASS_NAME,
     WITH_CONTENT_DESCRIPTION,
@@ -11,7 +15,8 @@ public enum EspressoViewMatcherType {
     WITH_TEXT,
     WITH_HINT,
     WITH_RESOURCE_NAME,
-    // Recursive matchers
+
+    // Recursive matchers: they use another matchers inside, and can NOT be used by themselves.
     ALL_OF,
     ANY_OF,
     HAS_DESCENDANT,
@@ -20,6 +25,14 @@ public enum EspressoViewMatcherType {
     WITH_PARENT,
     ;
 
+    /**
+     * Returns a boolean indicating whether a certain type of ViewMatcher can be used or not for
+     * an Espresso node in the View tree.
+     * E.g., we can not use the WithText ViewMatcher for a View with null text.
+     *
+     * @param node in Espresso View tree.
+     * @return a boolean
+     */
     public boolean isValidForEspressoViewTreeNode(EspressoViewTreeNode node) {
         if (this == WITH_TEXT) {
             return node.getEspressoView().getText() != null;

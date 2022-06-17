@@ -12,8 +12,15 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Espresso Matcher for targeting the views that have a certain content description.
+ */
 public class WithContentDescriptionMatcher extends EspressoViewMatcher {
-    private String contentDescription;
+
+    /**
+     * The content description to match against.
+     */
+    private final String contentDescription;
 
     public WithContentDescriptionMatcher(String contentDescription) {
         super(EspressoViewMatcherType.WITH_CONTENT_DESCRIPTION);

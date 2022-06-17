@@ -13,8 +13,15 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Espresso Matcher for targeting the views that have a certain Class name.
+ */
 public class WithClassNameMatcher extends EspressoViewMatcher {
-    private String className;
+
+    /**
+     * The Class name to match against.
+     */
+    private final String className;
 
     public WithClassNameMatcher(String className) {
         super(EspressoViewMatcherType.WITH_CLASS_NAME);

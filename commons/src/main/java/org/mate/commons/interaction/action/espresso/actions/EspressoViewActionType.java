@@ -1,5 +1,8 @@
 package org.mate.commons.interaction.action.espresso.actions;
 
+/**
+ * The type of Espresso ViewActions available in MATE.
+ */
 public enum EspressoViewActionType {
     CLICK,
     DOUBLE_CLICK,

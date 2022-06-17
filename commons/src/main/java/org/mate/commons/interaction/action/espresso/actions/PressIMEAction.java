@@ -12,6 +12,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Press IME key Espresso action.
+ */
 public class PressIMEAction extends EspressoViewAction {
     public PressIMEAction() {
         super(EspressoViewActionType.PRESS_IME);

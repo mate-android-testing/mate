@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.view.View;
 
 import org.hamcrest.Matcher;
-import org.mate.commons.utils.CodeProducer;
 import org.mate.commons.interaction.action.espresso.matchers.base.IsRootMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithClassNameMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithContentDescriptionMatcher;
@@ -19,25 +18,33 @@ import org.mate.commons.interaction.action.espresso.matchers.recursive.HasDescen
 import org.mate.commons.interaction.action.espresso.matchers.recursive.IsDescendantOfAMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.recursive.WithChildMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.recursive.WithParentMatcher;
+import org.mate.commons.utils.AbstractCodeProducer;
 
-import java.util.Set;
+/**
+ * Represents an actual Espresso's ViewMatcher.
+ */
+public abstract class EspressoViewMatcher extends AbstractCodeProducer implements Parcelable {
 
-public abstract class EspressoViewMatcher extends CodeProducer implements Parcelable {
-    private EspressoViewMatcherType type;
+    /**
+     * The type of Espresso ViewMatcher being represented by this instance.
+     */
+    private final EspressoViewMatcherType type;
 
     public EspressoViewMatcher(EspressoViewMatcherType type) {
         this.type = type;
     }
 
+    /**
+     * @return the type of Espresso ViewMatcher being represented by this instance.
+     */
     public EspressoViewMatcherType getType() {
         return type;
     }
 
+    /**
+     * Get the actual Espresso's ViewMatcher instance represented by this EspressoViewMatcher.
+     */
     public abstract Matcher<View> getViewMatcher();
-
-    public abstract Set<String> getNeededClassImports();
-
-    public abstract Set<String> getNeededStaticImports();
 
     @Override
     public int describeContents() {

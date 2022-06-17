@@ -12,8 +12,15 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Espresso Matcher for targeting the views that have a certain hint.
+ */
 public class WithHintMatcher extends EspressoViewMatcher {
-    private String hint;
+
+    /**
+     * The hint to match against.
+     */
+    private final String hint;
 
     public WithHintMatcher(String hint) {
         super(EspressoViewMatcherType.WITH_HINT);

@@ -7,7 +7,7 @@ import org.mate.commons.interaction.action.espresso.matchers.base.WithContentDes
 import org.mate.commons.interaction.action.espresso.matchers.base.WithIdMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithResourceNameMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.base.WithTextMatcher;
-import org.mate.commons.interaction.action.espresso.matchers_combination.MatcherForPath;
+import org.mate.commons.interaction.action.espresso.matchers_combination.RelativeMatcher;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTreeNode;
 import org.mate.commons.interaction.action.espresso.view_tree.PathStep;
 import org.mate.commons.interaction.action.espresso.view_tree.PathStepType;
@@ -15,27 +15,44 @@ import org.mate.commons.interaction.action.espresso.view_tree.PathStepType;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
+/**
+ * This class represents the Espresso ViewMatchers that are recursive, i.e., that use another
+ * matchers inside.
+ * They can NOT be used by themselves. They impose more than one constraint or they impose
+ * constraints on other parts of the UI hierarchy (e.g., on the children of a View).
+ */
+public abstract class RecursiveMatcher extends EspressoViewMatcher {
+
+    /**
+     * The recursive matchers.
+     */
     protected List<EspressoViewMatcher> matchers;
 
-    public MultipleRecursiveMatcher(EspressoViewMatcherType type) {
+    public RecursiveMatcher(EspressoViewMatcherType type) {
         super(type);
     }
 
+    /**
+     * @return the recursive matchers.
+     */
     public List<EspressoViewMatcher> getMatchers() {
         return Collections.unmodifiableList(matchers);
     }
 
+    /**
+     * Add a matcher to this recursive matcher.
+     * @param matcher the matcher to add
+     */
     public void addMatcher(EspressoViewMatcher matcher) {
         matchers.add(matcher);
     }
 
-    public void addMatcherForPathInTree(MatcherForPath matcherForPath,
+    public void addMatcherForPathInTree(RelativeMatcher relativeMatcher,
                                         EspressoViewTreeNode node) {
-        if (matcherForPath.getPath().isEmpty()) {
+        if (relativeMatcher.getPath().isEmpty()) {
             EspressoViewMatcher newMatcher = null;
 
-            switch (matcherForPath.getType()) {
+            switch (relativeMatcher.getType()) {
                 case WITH_RESOURCE_NAME:
                     newMatcher = new WithResourceNameMatcher(node.getEspressoView().getResourceName());
                     break;
@@ -55,7 +72,7 @@ public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
                     break;
                 default:
                     throw new IllegalStateException(String.format("Adding matcher in tree not " +
-                            "implemented for matcher type: %s", matcherForPath.getType()));
+                            "implemented for matcher type: %s", relativeMatcher.getType()));
             }
 
             addMatcher(newMatcher);
@@ -66,7 +83,7 @@ public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
         // If the path is not empty, it means that we need to keep traversing the nested
         // Matchers, while at the same time traversing the view tree.
 
-        PathStep nextStepInPath = matcherForPath.getPath().getHead();
+        PathStep nextStepInPath = relativeMatcher.getPath().getHead();
         EspressoViewTreeNode nodeAfterStep = nextStepInPath.moveFromNode(node);
 
         if (nextStepInPath.getType() == PathStepType.MOVE_TO_PARENT) {
@@ -86,9 +103,9 @@ public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
 
             matchers.add(withParentMatcher);
 
-            withParentMatcher.addMatcherForPathInTree(new MatcherForPath(
-                    matcherForPath.getPath().getTail(),
-                    matcherForPath.getType()), nodeAfterStep);
+            withParentMatcher.addMatcherForPathInTree(new RelativeMatcher(
+                    relativeMatcher.getPath().getTail(),
+                    relativeMatcher.getType()), nodeAfterStep);
         } else {
             // Going "down" one level in the hierarchy tree
             // We need to use a WithChild matcher, but first we need to check that there isn't
@@ -106,9 +123,9 @@ public abstract class MultipleRecursiveMatcher extends EspressoViewMatcher {
 
             matchers.add(withChildMatcher);
 
-            withChildMatcher.addMatcherForPathInTree(new MatcherForPath(
-                    matcherForPath.getPath().getTail(),
-                    matcherForPath.getType()), nodeAfterStep);
+            withChildMatcher.addMatcherForPathInTree(new RelativeMatcher(
+                    relativeMatcher.getPath().getTail(),
+                    relativeMatcher.getType()), nodeAfterStep);
         }
 
     }

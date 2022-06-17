@@ -1,6 +1,5 @@
 package org.mate.utils.testcase.writer;
 
-import org.mate.Registry;
 import org.mate.model.TestCase;
 
 import java.io.File;
@@ -9,9 +8,14 @@ import java.io.IOException;
 import java.io.Writer;
 
 public abstract class TestCaseWriter {
-    // tracks the number of written test cases
+    /**
+     * Tracks the number of written test cases, to avoid overlapping file names.
+     */
     protected static int writeCounter = 0;
 
+    /**
+     * The test case to write out.
+     */
     protected TestCase testCase;
 
     public TestCaseWriter(TestCase testCase) throws IllegalArgumentException {

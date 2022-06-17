@@ -11,6 +11,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Menu key Espresso action.
+ */
 public class MenuAction extends EspressoViewAction {
     public MenuAction() {
         super(EspressoViewActionType.MENU);

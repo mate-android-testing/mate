@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Swipe down Espresso action.
+ */
 public class SwipeDownAction extends EspressoViewAction {
     public SwipeDownAction() {
         super(EspressoViewActionType.SWIPE_DOWN);

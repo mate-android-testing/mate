@@ -12,17 +12,31 @@ import org.hamcrest.Matcher;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.espresso.actions.EspressoViewAction;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
+import org.mate.commons.utils.CodeProducer;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An Espresso action is composed of a ViewMatcher (that tells Espresso which is the target view)
- * and a ViewAction (that tells Espresso what action to perform on the target view).
+ * An Espresso action is an action that will be executed using the Espresso testing framework.
+ * It is composed of a ViewMatcher (that tells Espresso which is the target view) and a
+ * ViewAction (that tells Espresso what action to perform on the target view).
+ *
+ * Note: do not confuse this class (EspressoAction) with the EspressoViewAction class.
+ * The latter is used for representing the actual Espresso ViewAction instances (e.g., click())
+ * and can not be used without having an appropriate ViewMatcher (e.g., on which view to perform
+ * the click).
  */
-public class EspressoAction extends Action {
+public class EspressoAction extends Action implements CodeProducer {
 
+    /**
+     * The actual action to perform on the target view (e.g., click, long click, etc.)
+     */
     private EspressoViewAction espressoViewAction;
+
+    /**
+     * The selector to indicate Espresso the target view.
+     */
     private EspressoViewMatcher espressoViewMatcher;
 
     public EspressoAction(EspressoViewAction espressoViewAction,
@@ -31,6 +45,12 @@ public class EspressoAction extends Action {
         this.espressoViewMatcher = espressoViewMatcher;
     }
 
+    /**
+     * Executes this Espresso action using the Espresso testing framework.
+     * Exceptions are cached so that they do not bubble up and crash the Representation Layer
+     * module.
+     * @return whether the action was executed successfully or not.
+     */
     public boolean execute() {
         try {
             Matcher<View> viewMatcher = espressoViewMatcher.getViewMatcher();
@@ -44,6 +64,7 @@ public class EspressoAction extends Action {
         return false;
     }
 
+    @Override
     public String getCode() {
         String viewMatcherCode = espressoViewMatcher.getCode();
         String viewActionCode = espressoViewAction.getCode();
@@ -52,6 +73,7 @@ public class EspressoAction extends Action {
         return code;
     }
 
+    @Override
     public Set<String> getNeededClassImports() {
         Set<String> imports = new HashSet<>();
 
@@ -61,6 +83,7 @@ public class EspressoAction extends Action {
         return imports;
     }
 
+    @Override
     public Set<String> getNeededStaticImports() {
         Set<String> imports = new HashSet<>();
         imports.add("androidx.test.espresso.Espresso.onView");

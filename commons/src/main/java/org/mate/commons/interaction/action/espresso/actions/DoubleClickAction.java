@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Double click Espresso action.
+ */
 public class DoubleClickAction extends EspressoViewAction {
     public DoubleClickAction() {
         super(EspressoViewActionType.DOUBLE_CLICK);

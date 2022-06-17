@@ -14,8 +14,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class HasDescendantMatcher extends MultipleRecursiveMatcher {
+/**
+ * Implements an Espresso Matcher for targeting the views that have a descendant view matching
+ * ALL matchers in a list.
+ * Note that the descendant view may not be a direct descendant of the target view. E.g., it may
+ * be a children of the children of the target view.
+ */
+public class HasDescendantMatcher extends RecursiveMatcher {
 
+    /**
+     * Auxiliary matcher to group all conditions.
+     */
     private AllOfMatcher allOfMatcher;
 
     public HasDescendantMatcher() {

@@ -14,8 +14,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WithChildMatcher extends MultipleRecursiveMatcher {
+/**
+ * Implements an Espresso Matcher for targeting the views that have a direct descendant (children)
+ * view matching ALL matchers in a list.
+ */
+public class WithChildMatcher extends RecursiveMatcher {
 
+    /**
+     * Auxiliary matcher to group all conditions.
+     */
     private AllOfMatcher allOfMatcher;
 
     public WithChildMatcher() {

@@ -129,6 +129,10 @@ public class TestCase {
             TestCaseSerializer.serializeTestCase(this);
 
             try {
+                // Try to dump this test case as an Espresso test case.
+                // If this test case is not composed entirely of Espresso actions (e.g., it uses
+                // UiActions), then the EspressoTestCaseWriter throws an IllegalArgumentException
+                // and does nothing.
                 EspressoTestCaseWriter espressoTestWriter = new EspressoTestCaseWriter(this);
                 boolean success = espressoTestWriter.writeToDefaultFolder();
                 if (!success) {

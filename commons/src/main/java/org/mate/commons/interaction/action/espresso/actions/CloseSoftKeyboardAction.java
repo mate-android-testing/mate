@@ -11,6 +11,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Close soft keyboard Espresso action.
+ */
 public class CloseSoftKeyboardAction extends EspressoViewAction {
     public CloseSoftKeyboardAction() {
         super(EspressoViewActionType.CLOSE_SOFT_KEYBOARD);

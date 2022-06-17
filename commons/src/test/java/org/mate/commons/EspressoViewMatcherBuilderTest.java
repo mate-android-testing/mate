@@ -11,8 +11,7 @@ import android.widget.TextView;
 import org.junit.Test;
 import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher;
 import org.mate.commons.interaction.action.espresso.matchers.recursive.AllOfMatcher;
-import org.mate.commons.interaction.action.espresso.matchers_combination.EspressoViewMatcherBuilder;
-import org.mate.commons.interaction.action.espresso.matchers_combination.EspressoViewMatcherCombination;
+import org.mate.commons.interaction.action.espresso.matchers_combination.RelativeMatcherCombination;
 import org.mate.commons.interaction.action.espresso.view_tree.EspressoViewTree;
 import org.mate.commons.mock.MockEditText;
 import org.mate.commons.mock.MockTextView;
@@ -25,18 +24,16 @@ public class EspressoViewMatcherBuilderTest {
         TextView tv2 = new MockTextView().withId(42).getView();
         ViewGroup vg = new MockViewGroup().withChild(tv1).withChild(tv2).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg);
+        EspressoViewTree viewTree = new EspressoViewTree(vg, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(tv1), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertEquals("withId(32)", espressoViewMatcher.getCode());
     }
@@ -47,18 +44,16 @@ public class EspressoViewMatcherBuilderTest {
         TextView tv2 = new MockTextView().withId(32).withText("Bye").getView();
         ViewGroup vg = new MockViewGroup().withChild(tv1).withChild(tv2).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg);
+        EspressoViewTree viewTree = new EspressoViewTree(vg, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(tv1), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertEquals("withText(\"Hi\")", espressoViewMatcher.getCode());
     }
@@ -69,18 +64,16 @@ public class EspressoViewMatcherBuilderTest {
         TextView tv2 = new MockTextView().withId(32).withContentDescription("Bye").getView();
         ViewGroup vg = new MockViewGroup().withChild(tv1).withChild(tv2).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg);
+        EspressoViewTree viewTree = new EspressoViewTree(vg, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(tv1), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertEquals("withContentDescription(\"Hi\")", espressoViewMatcher.getCode());
     }
@@ -91,18 +84,16 @@ public class EspressoViewMatcherBuilderTest {
         EditText et = new MockEditText().withId(32).getView();
         ViewGroup vg = new MockViewGroup().withChild(tv).withChild(et).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg);
+        EspressoViewTree viewTree = new EspressoViewTree(vg, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(tv), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertTrue(espressoViewMatcher.getCode().startsWith("withClassName(equalTo(\"android.widget.TextView"));
     }
@@ -117,18 +108,16 @@ public class EspressoViewMatcherBuilderTest {
 
         ViewGroup vg3 = new MockViewGroup().withChild(vg1).withChild(vg2).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg3);
+        EspressoViewTree viewTree = new EspressoViewTree(vg3, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(tv1), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertEquals("withParent(withId(32))", espressoViewMatcher.getCode());
     }
@@ -143,18 +132,16 @@ public class EspressoViewMatcherBuilderTest {
 
         ViewGroup vg3 = new MockViewGroup().withChild(vg1).withChild(vg2).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg3);
+        EspressoViewTree viewTree = new EspressoViewTree(vg3, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(vg1), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertEquals("withChild(withId(32))", espressoViewMatcher.getCode());
     }
@@ -171,18 +158,16 @@ public class EspressoViewMatcherBuilderTest {
 
         ViewGroup vg3 = new MockViewGroup().withTag("VG3").withChild(vg1).withChild(vg2).getView();
 
-        EspressoViewTree viewTree = new EspressoViewTree(vg3);
+        EspressoViewTree viewTree = new EspressoViewTree(vg3, "com.activity.name");
 
-        EspressoViewMatcherCombination matcherCombination =
-                EspressoViewMatcherCombination.buildUniqueCombination(
+        RelativeMatcherCombination matcherCombination =
+                RelativeMatcherCombination.buildUnequivocalCombination(
                         viewTree.findNodeForView(tv1), viewTree);
 
         assertNotNull(matcherCombination);
 
         EspressoViewMatcher espressoViewMatcher =
-                EspressoViewMatcherBuilder.addMatcherCombination(
-                        matcherCombination.getMinimalCombination())
-                        .build();
+                matcherCombination.getMinimalCombination().getEspressoViewMatcher();
 
         assertTrue(espressoViewMatcher instanceof AllOfMatcher);
         assertEquals(2, ((AllOfMatcher) espressoViewMatcher).getMatchers().size());

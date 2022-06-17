@@ -14,7 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AllOfMatcher extends MultipleRecursiveMatcher {
+/**
+ * Implements an Espresso Matcher for targeting the views that match against ALL matchers in a list.
+ */
+public class AllOfMatcher extends RecursiveMatcher {
 
     public AllOfMatcher() {
         this(new ArrayList<>());
@@ -77,6 +80,8 @@ public class AllOfMatcher extends MultipleRecursiveMatcher {
         HashSet<String> imports = new HashSet<>();
 
         if (matchers.size() > 1) {
+            // if this recursive matcher is being used for just one matcher, we will delete the
+            // intermediate matcher all together, and thus we won't need the import.
             imports.add("org.hamcrest.Matchers.allOf");
         }
 

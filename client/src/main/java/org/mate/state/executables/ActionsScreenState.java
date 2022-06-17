@@ -100,11 +100,9 @@ public class ActionsScreenState extends AbstractScreenState {
     public List<EspressoAction> getEspressoActions() {
         if (espressoActions == null) {
             try {
-                MATELog.log_debug("AppScreen: " + activityName);
                 this.espressoActions = MATEService.getRepresentationLayer().getCurrentScreenEspressoActions();
-                MATELog.log_debug("Number of Espresso actions: " + espressoActions.size());
             } catch (RemoteException | AUTCrashException e) {
-                MATELog.log_warn("Using AppScreen after AUT has crashed");
+                MATELog.log_warn("Unable to fetch Espresso actions after AUT has crashed");
                 this.espressoActions = new ArrayList<>();
             }
         }

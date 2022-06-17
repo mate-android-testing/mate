@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Scroll-to Espresso action.
+ */
 public class ScrollToAction extends EspressoViewAction {
     public ScrollToAction() {
         super(EspressoViewActionType.SCROLL_TO);

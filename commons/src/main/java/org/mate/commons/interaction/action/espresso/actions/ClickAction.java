@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Click Espresso action.
+ */
 public class ClickAction extends EspressoViewAction {
     public ClickAction() {
         super(EspressoViewActionType.CLICK);

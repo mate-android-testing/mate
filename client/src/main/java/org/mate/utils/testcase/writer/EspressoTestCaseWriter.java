@@ -7,6 +7,9 @@ import org.mate.model.TestCase;
 
 import java.io.File;
 
+/**
+ * TestCaseWriter for Espresso test cases (i.e., composed only by Espresso actions).
+ */
 public class EspressoTestCaseWriter extends TestCaseWriter {
 
     public EspressoTestCaseWriter(TestCase testCase) throws IllegalArgumentException {

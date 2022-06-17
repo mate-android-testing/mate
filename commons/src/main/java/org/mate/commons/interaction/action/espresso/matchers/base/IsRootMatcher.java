@@ -12,6 +12,9 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Espresso Matcher for targeting the views that are at the root of the UI hierarchy.
+ */
 public class IsRootMatcher extends EspressoViewMatcher {
 
     public IsRootMatcher() {

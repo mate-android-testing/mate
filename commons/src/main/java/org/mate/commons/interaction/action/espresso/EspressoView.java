@@ -1,9 +1,7 @@
 package org.mate.commons.interaction.action.espresso;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -18,25 +16,40 @@ import java.util.UUID;
  * It provides useful information for building Espresso ViewMatchers and ViewActions.
  */
 public class EspressoView {
-    // An auto-generated random UUID, used to compare different instances of EspressoView.
-    // Note that this value will be different for different instances constructed with the same
-    // View.
+
+    /**
+     * An auto-generated random UUID, used to compare different instances of EspressoView.
+     * Note that this value will be different for different instances constructed with the same
+     * View.
+     */
     private final UUID randomUUID;
 
-    private View view;
-    private String activityName;
+    /**
+     * The View instance that we are wrapping.
+     */
+    private final View view;
+
+    /**
+     * The Activity name in which this View was found.
+     */
+    private final String activityName;
 
     public EspressoView(View view, String activityName) {
         this.randomUUID = UUID.randomUUID();
-
         this.view = view;
         this.activityName = activityName;
     }
 
+    /**
+     * @return the Activity name in which the View was found.
+     */
     public String getActivity() {
         return activityName;
     }
 
+    /**
+     * @return The View instance that we are wrapping.
+     */
     public View getView() {
         return view;
     }
@@ -55,14 +68,23 @@ public class EspressoView {
         return Objects.hash(randomUUID);
     }
 
+    /**
+     * @return the View's ID (a.k.a., resource ID) if it has one, -1 otherwise.
+     */
     public Integer getId() {
         return view.getId();
     }
 
+    /**
+     * @return the View's class name.
+     */
     public String getClassName() {
         return view.getClass().getName();
     }
 
+    /**
+     * @return the View's content description if it has one, null otherwise.
+     */
     public @Nullable
     String getContentDescription() {
         CharSequence contentDescription = view.getContentDescription();
@@ -73,6 +95,9 @@ public class EspressoView {
         return null;
     }
 
+    /**
+     * @return the View's text if it has one, null otherwise.
+     */
     public @Nullable String getText() {
         if (view instanceof TextView) {
             CharSequence text = ((TextView) view).getText();
@@ -85,7 +110,8 @@ public class EspressoView {
     }
 
     /**
-     * Method implementation taken from of Espresso's WithResourceNameMatcher class.
+     * This method's implementation was taken from of Espresso's WithResourceNameMatcher class.
+     * @return the View's resource name if it has one, null otherwise.
      */
     public @Nullable String getResourceName() {
         int id = view.getId();
@@ -115,8 +141,8 @@ public class EspressoView {
     }
 
     /**
-     * Returns a boolean indicating whether this view is an Android view (e.g., created by the
-     * OS) or not.
+     * @return a boolean indicating whether the wrapped view is an Android view (e.g., created by
+     * the OS) or not.
      */
     public boolean isAndroidView() {
         String resourceName = getResourceName();
@@ -130,7 +156,8 @@ public class EspressoView {
     }
 
     /**
-     * Method implementation taken from Espresso's ViewMatchers#safeGetResourceEntryName method.
+     * This method's implementation was taken from Espresso's ViewMatchers#safeGetResourceEntryName
+     * method.
      *
      * Get the resource entry name given an integer identifier in a safe manner. This means:
      *

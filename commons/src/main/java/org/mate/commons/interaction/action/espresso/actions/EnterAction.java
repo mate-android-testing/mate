@@ -12,6 +12,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Enter key Espresso action.
+ */
 public class EnterAction extends EspressoViewAction {
     public EnterAction() {
         super(EspressoViewActionType.ENTER);

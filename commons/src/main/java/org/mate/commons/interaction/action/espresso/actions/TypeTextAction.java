@@ -10,7 +10,14 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Type text Espresso action.
+ */
 public class TypeTextAction extends EspressoViewAction {
+
+    /**
+     * The string to be typed by this action.
+     */
     private String stringToBeTyped;
 
     public TypeTextAction(String stringToBeTyped) {
@@ -18,6 +25,10 @@ public class TypeTextAction extends EspressoViewAction {
         setText(stringToBeTyped);
     }
 
+    /**
+     * Saves the string to be typed by this action.
+     * @param stringToBeTyped a string
+     */
     public void setText(String stringToBeTyped) {
         this.stringToBeTyped = stringToBeTyped;
 

@@ -8,27 +8,26 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * Class to iterate the EspressoViewTree using a bread-first traverse that starts at the target
- * view.
+ * Class to iterate an EspressoViewTree using a bread-first traverse that starts at a certain view.
  */
-public class EspressoViewTreeIterator implements Iterable<EspressoViewTreeNodeWithPath> {
+public class EspressoViewTreeIterator implements Iterable<PathWithNodes> {
 
-    // Starting view
-    private EspressoViewTreeNode targetNode;
+    /**
+     * BFS frontier: unvisited nodes.
+     */
+    private Queue<PathWithNodes> frontier;
 
-    // BFS frontier (views unvisited)
-    private Queue<EspressoViewTreeNodeWithPath> frontier;
-
-    // Views already visited
-    // TODO: check that this HashSet works correctly with the EspressoView class
+    /**
+     * Nodes already visited.
+     * TODO (Ivan): check that this HashSet works correctly with the EspressoViewTreeNode class
+     */
     private HashSet<EspressoViewTreeNode> visited = new HashSet<>();
 
-    public EspressoViewTreeIterator(EspressoViewTreeNode targetNode) {
-        this.targetNode = targetNode;
+    public EspressoViewTreeIterator(EspressoViewTreeNode startingNode) {
         this.frontier = new LinkedList<>();
 
-        if (targetNode != null) {
-            this.frontier.add(EspressoViewTreeNodeWithPath.buildWithEmptyPath(targetNode));
+        if (startingNode != null) {
+            this.frontier.add(PathWithNodes.buildWithEmptyPath(startingNode));
         }
     }
 
@@ -39,25 +38,25 @@ public class EspressoViewTreeIterator implements Iterable<EspressoViewTreeNodeWi
 
     @NonNull
     @Override
-    public Iterator<EspressoViewTreeNodeWithPath> iterator() {
-        return new Iterator<EspressoViewTreeNodeWithPath>() {
+    public Iterator<PathWithNodes> iterator() {
+        return new Iterator<PathWithNodes>() {
             @Override
             public boolean hasNext() {
                 return frontier.size() > 0;
             }
 
             @Override
-            public EspressoViewTreeNodeWithPath next() {
+            public PathWithNodes next() {
                 // pop an item from the frontier
-                EspressoViewTreeNodeWithPath item = frontier.remove();
+                PathWithNodes item = frontier.remove();
 
                 // mark it as visited
-                visited.add(item.getNode());
+                visited.add(item.getEndingNode());
 
-                // add parent and children of the item to the frontier, but only if they were
-                // not visited before.
-                for (EspressoViewTreeNodeWithPath other : item.getNeighbors()) {
-                    if (!visited.contains(other.getNode())) {
+                // add parent and children of the item to the frontier, but only if they were not
+                // visited before.
+                for (PathWithNodes other : item.getEndingNodeNeighbors()) {
+                    if (!visited.contains(other.getEndingNode())) {
                         frontier.add(other);
                     }
                 }

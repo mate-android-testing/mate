@@ -10,6 +10,9 @@ import androidx.test.espresso.ViewAction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a Clear text Espresso action.
+ */
 public class ClearTextAction extends EspressoViewAction {
     public ClearTextAction() {
         super(EspressoViewActionType.CLEAR_TEXT);

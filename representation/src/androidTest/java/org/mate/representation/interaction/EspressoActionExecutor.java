@@ -29,7 +29,7 @@ public class EspressoActionExecutor extends ActionExecutor {
     }
 
     /**
-     * Executes a widget action, e.g. a click on a certain widget.
+     * Executes an Espresso action.
      *
      * @param action The action to be executed.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.

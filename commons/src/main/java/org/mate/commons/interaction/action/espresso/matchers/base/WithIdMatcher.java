@@ -12,8 +12,15 @@ import org.mate.commons.interaction.action.espresso.matchers.EspressoViewMatcher
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements an Espresso Matcher for targeting the views that have a certain ID.
+ */
 public class WithIdMatcher extends EspressoViewMatcher {
-    private int id;
+
+    /**
+     * The ID to match against.
+     */
+    private final int id;
 
     public WithIdMatcher(int id) {
         super(EspressoViewMatcherType.WITH_ID);
