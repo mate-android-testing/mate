@@ -1,10 +1,14 @@
 package org.mate.representation.state.espresso;
 
 import org.mate.commons.interaction.action.espresso.EspressoView;
+import org.mate.commons.interaction.action.espresso.actions.BackAction;
 import org.mate.commons.interaction.action.espresso.actions.ClearTextAction;
 import org.mate.commons.interaction.action.espresso.actions.ClickAction;
+import org.mate.commons.interaction.action.espresso.actions.CloseSoftKeyboardAction;
+import org.mate.commons.interaction.action.espresso.actions.EnterAction;
 import org.mate.commons.interaction.action.espresso.actions.EspressoViewAction;
 import org.mate.commons.interaction.action.espresso.actions.LongClickAction;
+import org.mate.commons.interaction.action.espresso.actions.MenuAction;
 import org.mate.commons.interaction.action.espresso.actions.PressIMEAction;
 import org.mate.commons.interaction.action.espresso.actions.ScrollToAction;
 import org.mate.commons.interaction.action.espresso.actions.SwipeDownAction;
@@ -43,11 +47,15 @@ public class EspressoViewActionsParser {
         // etc). To determine if an action is valid for a View, we check that the later matches the
         // constraints imposed by the actual Espresso's ViewAction.
         EspressoViewAction[] possibleActions = {
+            new BackAction(),
             new ClearTextAction(),
             new ClickAction(),
+            new CloseSoftKeyboardAction(),
             // Double click actions are disabled for now, since they tend to lead to flaky tests
             // new DoubleClickAction(),
+            new EnterAction(),
             new LongClickAction(),
+            new MenuAction(),
             new PressIMEAction(),
             new ScrollToAction(),
             new SwipeDownAction(),
