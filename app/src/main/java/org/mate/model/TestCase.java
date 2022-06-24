@@ -7,24 +7,20 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.genetic.chromosome.Chromosome;
-import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
-import org.mate.utils.FitnessUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
-import org.mate.utils.Utils;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -159,7 +155,7 @@ public class TestCase {
         }
 
         Chromosome<TestCase> chromosome = new Chromosome<>(this);
-        MATE.log(nickName + " Testcase fitness: " + Registry.getEnvironmentManager().getCallTreeDistance(chromosome));
+        MATE.log(nickName + " Testcase fitness: " + new CrashDistance().getFitness(chromosome));
         MATE.log(nickName + " Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
         MATE.log(nickName + " Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
 

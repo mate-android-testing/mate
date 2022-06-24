@@ -4,9 +4,9 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.crash_reproduction.heuristic.RandomCrashReproduction;
 import org.mate.exploration.Algorithm;
-import org.mate.exploration.genetic.fitness.CallTreeDistance;
 
 import java.util.Collections;
 
@@ -18,7 +18,7 @@ public class ExecuteMATERandomCrashReproduction {
         MATE.log_acc("Starting random crash reproduction ...");
         MATE mate = new MATE();
 
-        Algorithm randomCrashReproduction = new RandomCrashReproduction(Collections.singletonList(new CallTreeDistance<>()));
+        Algorithm randomCrashReproduction = new RandomCrashReproduction(Collections.singletonList(new CrashDistance()));
 
         mate.testApp(randomCrashReproduction);
     }

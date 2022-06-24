@@ -5,11 +5,13 @@ import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class CrashReproduction implements Algorithm {
     private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
@@ -44,6 +46,11 @@ public abstract class CrashReproduction implements Algorithm {
             if (testCaseIChromosome.getValue().reachedTarget(targetStackTrace)) {
                 MATE.log("Was able to reproduce crash with " + testCaseIChromosome.getValue().getId() + "!");
                 Registry.getEnvironmentManager().setChromosome(testCaseIChromosome);
+                MATE.log("Actions necessary: [" + testCaseIChromosome.getValue().getEventSequence().stream().map(Action::toString).collect(Collectors.joining(", ")) + "]");
+
+                for (int i = 0; i < testCaseIChromosome.getValue().getEventSequence().size(); i++) {
+                    MATE.log("  " + i + ". " + testCaseIChromosome.getValue().getEventSequence().get(i).toString());
+                }
                 return true;
             }
         }
