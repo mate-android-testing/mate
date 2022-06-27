@@ -1,6 +1,5 @@
 package org.mate.state.equivalence.checks;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
@@ -27,30 +26,19 @@ public class CosineSimilarity implements IStateEquivalence {
         Objects.requireNonNull(first, "First screen state must be not null!");
         Objects.requireNonNull(second, "Second screen state must be not null!");
 
-        MATE.log_acc("First state: " + first);
-        MATE.log_acc("Second state: " + second);
-
-        // the feature vectors
         Map<String, Integer> firstVector = extractFeatureVector(first);
         Map<String, Integer> secondVector = extractFeatureVector(second);
-
-        MATE.log_acc("First Feature Vector: " + firstVector.size());
-        MATE.log_acc("Second Feature Vector: " + secondVector.size());
 
         double cosineSimilarityCoefficient;
         Set<String> keys
                 = Stream.concat(firstVector.keySet().stream(), secondVector.keySet().stream())
                 .collect(Collectors.toSet());
 
-        MATE.log_acc("Keys: " + keys.size());
-
         /*
         * The formula for computing the number of equal features can be simplified by looking at
         * the distinct keys.
          */
         int numberOfEqualFeatures = firstVector.size() + secondVector.size() - keys.size();
-
-        MATE.log_acc("Number of equal features: " + numberOfEqualFeatures);
 
         /*
         * The original formula can be simplified as follows. Since all entries in the feature
@@ -62,7 +50,6 @@ public class CosineSimilarity implements IStateEquivalence {
         cosineSimilarityCoefficient = numberOfEqualFeatures /
                 (Math.sqrt(firstVector.size()) * Math.sqrt(secondVector.size()));
 
-        MATE.log_acc("Cosine similarity coefficient: " + cosineSimilarityCoefficient);
         return cosineSimilarityCoefficient >= Properties.COSINE_SIMILARITY_THRESHOLD();
     }
 
@@ -85,8 +72,6 @@ public class CosineSimilarity implements IStateEquivalence {
              * Thus, we prefer the text attribute if the content description is empty.
              */
             String text = widget.getContentDesc().isEmpty() ? widget.getText() : widget.getContentDesc();
-            MATE.log_acc("Text: " + widget.getText());
-            MATE.log_acc("Content Description: " + widget.getContentDesc());
 
             String key = String.format("%s@%s@%s", widget.getClazz(), widget.getDepth(), text);
             featureVector.put(key, 1);
