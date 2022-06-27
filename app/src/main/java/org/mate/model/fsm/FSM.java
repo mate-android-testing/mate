@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class FSM {
 
     /**
-     * The root state.
+     * The (virtual) root state.
      */
     private final State root;
 
@@ -155,8 +155,10 @@ public class FSM {
                 = StateEquivalenceFactory.getStateEquivalenceCheck(STATE_EQUIVALENCE_LEVEL);
 
         for (State state : states) {
-            if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
-                return state;
+            if (state != root) { // skip the virtual root state
+                if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
+                    return state;
+                }
             }
         }
 

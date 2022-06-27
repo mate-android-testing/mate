@@ -62,6 +62,15 @@ public class Properties {
     }
 
     /**
+     * Returns the specified cosine similarity coefficient.
+     *
+     * @return Returns the cosine similarity threshold.
+     */
+    public static float COSINE_SIMILARITY_THRESHOLD() {
+        return propertyOr(0.95f);
+    }
+
+    /**
      * Whether the surrogate model should be used or not.
      *
      * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
