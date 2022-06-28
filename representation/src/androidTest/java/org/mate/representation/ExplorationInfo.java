@@ -11,7 +11,7 @@ import org.mate.commons.state.executable.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;
-import org.mate.representation.test.BuildConfig;
+import org.mate.commons.utils.Utils;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
@@ -54,6 +54,16 @@ public class ExplorationInfo {
      * Which StateEquivalenceLevel to use when creating Widgets during exploration.
      */
     private StateEquivalenceLevel stateEquivalenceLevel;
+
+    /**
+     * The maximal number of retries (app screen information) when the ui automator is disconnected.
+     */
+    private static final int UiAutomatorDisconnectedRetries = 3;
+
+    /**
+     * The error message when the ui automator is disconnected.
+     */
+    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
 
     private ExplorationInfo() {}
 
@@ -135,11 +145,30 @@ public class ExplorationInfo {
     }
 
     /**
-     * @return the name of the currently visible package (might be different than the AUT's
-     * package name).
+     * Retrieves the current package name via the {@link androidx.test.uiautomator.UiDevice}.
+     *
+     * @return Returns the current package name associated with the app screen.
      */
     public String getCurrentPackageName() {
-        return DeviceInfo.getInstance().getUiDevice().getCurrentPackageName();
+
+        String packageName = null;
+
+        for (int numberOfRetries = 0; numberOfRetries <= UiAutomatorDisconnectedRetries
+                && packageName == null; numberOfRetries++) {
+
+            try {
+                packageName = DeviceInfo.getInstance().getUiDevice().getCurrentPackageName();
+            } catch (IllegalStateException e) {
+                if (e.getMessage() != null && e.getMessage().equals(UiAutomatorDisconnectedMessage)) {
+                    MATELog.log_acc("UIAutomator disconnected, try re-connecting!");
+                    Utils.sleep(3000);
+                } else {
+                    throw new IllegalStateException("Couldn't retrieve package name!", e);
+                }
+            }
+        }
+
+        return packageName;
     }
 
     /**
