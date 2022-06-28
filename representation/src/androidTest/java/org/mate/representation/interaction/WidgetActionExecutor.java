@@ -67,7 +67,7 @@ public class WidgetActionExecutor extends ActionExecutor {
             case TYPE_SPECIFIC_TEXT:
                 success = handleEdit(selectedWidget);
                 break;
-            case CLEAR_WIDGET:
+            case CLEAR_TEXT:
                 // TODO: Do we actually need this action?
                 //  A 'type text' action overwrites the previous text anyways.
                 success = handleClear(selectedWidget);

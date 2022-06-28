@@ -52,7 +52,7 @@ public final class TestCaseStatistics {
         Map<String, Integer> widgetActions = new HashMap<>();
 
         EnumSet<ActionType> widgetRelatedActions = EnumSet.of(ActionType.CLICK, ActionType.LONG_CLICK,
-                ActionType.CLEAR_WIDGET, ActionType.TYPE_TEXT);
+                ActionType.CLEAR_TEXT, ActionType.TYPE_TEXT);
 
         // track the number of unrelated widget actions
         int widgetUnrelatedActions = 0;
