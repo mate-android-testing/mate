@@ -1,6 +1,7 @@
 package org.mate.state.equivalence;
 
 import org.mate.state.equivalence.checks.ActivityNameEquivalence;
+import org.mate.state.equivalence.checks.CosineSimilarity;
 import org.mate.state.equivalence.checks.PackageNameEquivalence;
 import org.mate.state.equivalence.checks.WidgetEquivalence;
 import org.mate.state.equivalence.checks.WidgetWithAttributesEquivalence;
@@ -27,6 +28,8 @@ public class StateEquivalenceFactory {
                 return new WidgetEquivalence();
             case WIDGET_WITH_ATTRIBUTES:
                 return new WidgetWithAttributesEquivalence();
+            case COSINE_SIMILARITY:
+                return new CosineSimilarity();
             default:
                 throw new UnsupportedOperationException("Unsupported state equivalence level: " + level);
         }

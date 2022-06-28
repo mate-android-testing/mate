@@ -332,6 +332,15 @@ public class Widget {
     }
 
     /**
+     * Returns the depth of the widget in the ui hierarchy.
+     *
+     * @return Returns the widgets' depth in the ui hierarchy.
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
      * Returns the siblings of this widget. If there are no siblings, an empty list is returned.
      *
      * @return Returns the siblings of the widget.
