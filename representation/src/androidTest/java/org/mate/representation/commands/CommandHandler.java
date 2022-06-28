@@ -7,7 +7,7 @@ import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ui.Widget;
-import org.mate.commons.state.executable.StateEquivalenceLevel;
+import org.mate.commons.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.representation.DeviceInfo;
 import org.mate.representation.DynamicTest;

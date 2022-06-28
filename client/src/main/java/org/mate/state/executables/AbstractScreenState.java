@@ -1,6 +1,5 @@
 package org.mate.state.executables;
 
-import org.mate.Properties;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 
@@ -41,7 +40,7 @@ public abstract class AbstractScreenState implements IScreenState {
      * @param activityName The activity name that corresponds to the screen state.
      * @param widgets The list of widgets part of the screen state.
      */
-    public AbstractScreenState(String packageName, String activityName, List<Widget> widgets){
+    public AbstractScreenState(String packageName, String activityName, List<Widget> widgets) {
         this.widgets = widgets;
         this.packageName = packageName;
         this.activityName = activityName;
@@ -73,7 +72,7 @@ public abstract class AbstractScreenState implements IScreenState {
      * @return Returns the associated widgets of the screen state.
      */
     @Override
-    public List<Widget> getWidgets(){
+    public List<Widget> getWidgets() {
         return Collections.unmodifiableList(widgets);
     }
 
@@ -102,7 +101,7 @@ public abstract class AbstractScreenState implements IScreenState {
      *
      * @param o The other screen state to compare against.
      * @return Returns {@code true} if both screen states are equal,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     @Override
     public boolean equals(Object o) {
@@ -112,22 +111,9 @@ public abstract class AbstractScreenState implements IScreenState {
             return false;
         } else {
             AbstractScreenState other = (AbstractScreenState) o;
-
-            switch (Properties.STATE_EQUIVALENCE_LEVEL()) {
-                case PACKAGE_NAME:
-                    return Objects.equals(this.packageName, other.packageName);
-                case ACTIVITY_NAME:
-                    return Objects.equals(this.packageName, other.packageName)
-                            && Objects.equals(this.activityName, other.activityName);
-                case WIDGET:
-                case WIDGET_WITH_ATTRIBUTES:
-                    return Objects.equals(activityName, other.activityName) &&
-                            Objects.equals(packageName, other.packageName) &&
-                            Objects.equals(widgets, other.widgets);
-                default:
-                    throw new UnsupportedOperationException("State equivalence level "
-                        + Properties.STATE_EQUIVALENCE_LEVEL() + " not yet supported!");
-            }
+            return Objects.equals(this.packageName, other.packageName)
+                    && Objects.equals(this.activityName, other.activityName)
+                    && Objects.equals(widgets, other.widgets);
         }
     }
 
@@ -138,18 +124,7 @@ public abstract class AbstractScreenState implements IScreenState {
      */
     @Override
     public int hashCode() {
-        switch (Properties.STATE_EQUIVALENCE_LEVEL()) {
-            case PACKAGE_NAME:
-                return Objects.hash(packageName);
-            case ACTIVITY_NAME:
-                return Objects.hash(packageName, activityName);
-            case WIDGET:
-            case WIDGET_WITH_ATTRIBUTES:
-                return Objects.hash(activityName, packageName, widgets);
-            default:
-                throw new UnsupportedOperationException("State equivalence level "
-                        + Properties.STATE_EQUIVALENCE_LEVEL() + " not yet supported!");
-        }
+        return Objects.hash(activityName, packageName, widgets);
     }
 
     /**

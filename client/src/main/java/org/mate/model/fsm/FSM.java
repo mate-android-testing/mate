@@ -2,9 +2,13 @@ package org.mate.model.fsm;
 
 import android.support.annotation.NonNull;
 
+import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
+import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceFactory;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -57,6 +61,13 @@ public class FSM {
      * The current state in the FSM.
      */
     private State currentState;
+
+    /**
+     * The current state equivalence level that defines how two {@link State}s are compared for
+     * equality. Depending on the state equivalence level, the FSM may contain more or less states.
+     */
+    private static final StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL
+            = Properties.STATE_EQUIVALENCE_LEVEL();
 
     /**
      * Creates a new finite state machine with an initial start state.
@@ -141,8 +152,11 @@ public class FSM {
      */
     public State getState(IScreenState screenState) {
 
+        IStateEquivalence stateEquivalence
+                = StateEquivalenceFactory.getStateEquivalenceCheck(STATE_EQUIVALENCE_LEVEL);
+
         for (State state : states) {
-            if (state.getScreenState().equals(screenState)) {
+            if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
                 return state;
             }
         }

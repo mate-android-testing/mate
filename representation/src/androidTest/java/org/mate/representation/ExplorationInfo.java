@@ -7,7 +7,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import org.mate.commons.state.executable.StateEquivalenceLevel;
+import org.mate.commons.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;

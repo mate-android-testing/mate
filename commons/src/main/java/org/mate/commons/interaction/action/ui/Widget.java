@@ -8,7 +8,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.commons.state.executable.StateEquivalenceLevel;
+import org.mate.commons.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 
 import java.util.ArrayList;
@@ -1051,22 +1051,11 @@ public class Widget implements Parcelable {
             return false;
         } else {
             Widget other = (Widget) o;
-
-            if (stateEquivalenceLevel == StateEquivalenceLevel.WIDGET_WITH_ATTRIBUTES) {
-                return getId().equals(other.getId())
-                        && getX1() == other.getX1() &&
-                        getX2() == other.getX2() &&
-                        getY1() == other.getY1() &&
-                        getY2() == other.getY2() &&
-                        Objects.equals(getText(), other.getText()) &&
-                        Objects.equals(getContentDesc(), other.getContentDesc());
-            } else {
-                return getId().equals(other.getId())
-                        && getX1() == other.getX1() &&
-                        getX2() == other.getX2() &&
-                        getY1() == other.getY1() &&
-                        getY2() == other.getY2();
-            }
+            return getId().equals(other.getId())
+                    && getX1() == other.getX1() &&
+                    getX2() == other.getX2() &&
+                    getY1() == other.getY1() &&
+                    getY2() == other.getY2();
         }
     }
 
@@ -1077,23 +1066,12 @@ public class Widget implements Parcelable {
      */
     @Override
     public int hashCode() {
-        if (stateEquivalenceLevel == StateEquivalenceLevel.WIDGET_WITH_ATTRIBUTES) {
-            return Objects.hash(
-                    getId(),
-                    getX1(),
-                    getX2(),
-                    getY1(),
-                    getY2(),
-                    getText(),
-                    getContentDesc());
-        } else {
-            return Objects.hash(
-                    getId(),
-                    getX1(),
-                    getX2(),
-                    getY1(),
-                    getY2());
-        }
+        return Objects.hash(
+                getId(),
+                getX1(),
+                getX2(),
+                getY1(),
+                getY2());
     }
 
     /**
