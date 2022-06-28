@@ -160,6 +160,15 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
+    public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions) {
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("fitness_functions", fitnessFunctions);
+        }
+        return this;
+    }
+
     /**
      * Specifies the fitness function of the genetic algorithm.
      *

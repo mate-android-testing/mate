@@ -23,6 +23,9 @@ public class ExecuteMATESapienz {
 
         MATE mate = new MATE();
 
+        FitnessFunction[] functions = new FitnessFunction[] {FitnessFunction.BRANCH_COVERAGE,
+                FitnessFunction.BRANCH_DISTANCE, FitnessFunction.NUMBER_OF_CRASHES, FitnessFunction.TEST_LENGTH};
+
         final IGeneticAlgorithm sapienz =
                 new GeneticAlgorithmBuilder()
                         .withAlgorithm(Algorithm.SAPIENZ)
@@ -33,6 +36,7 @@ public class ExecuteMATESapienz {
                         .withFitnessFunction(FitnessFunction.BRANCH_COVERAGE)
                         .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
                         .withFitnessFunction(FitnessFunction.TEST_LENGTH)
+                        //.withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                         .withTerminationCondition(Properties.TERMINATION_CONDITION())
                         .withPopulationSize(Properties.POPULATION_SIZE())
                         .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
