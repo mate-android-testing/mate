@@ -12,6 +12,8 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
@@ -19,6 +21,7 @@ import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +48,7 @@ public class PIPE implements IDistributionModel {
     private final double pEl;
     private final double pMutation;
     private final double mutationRate;
-    private final Tree<PIPETreeNodeContent> probabilityTree = new Tree<>(initializeNode(Registry.getUiAbstractionLayer().getLastScreenState()));
+    private final Tree<PIPETreeNodeContent> probabilityTree = new Tree<>(initializeNode(Collections.emptyList(), Registry.getUiAbstractionLayer().getLastScreenState()));
 
     private IChromosome<TestCase> elitist;
 
@@ -92,22 +95,58 @@ public class PIPE implements IDistributionModel {
         pptPruning();
     }
 
-    private PIPETreeNodeContent initializeNode(IScreenState state) {
+    private PIPETreeNodeContent initializeNode(List<Action> prevActions, IScreenState state) {
         Map<Action, Double> probabilities = new HashMap<>();
         Set<Action> promisingActions = new HashSet<>(Registry.getUiAbstractionLayer().getPromisingActions(state));
 
         // The PIPE paper differentiates between terminals and functions, which is why they define
         // a probability P_T for picking a terminal.
         // We differentiate between promising actions and normal ones
-        double l = state.getActions().size();
 
         // P_j(I) = P_T / l, where I elem promising actions
         // P_j(I) = (1 - P_T) / l, where I not elem promising actions
+        double weightSum = 0;
         for (Action action : state.getActions()) {
-            probabilities.put(action, promisingActions.contains(action) ? pPromisingAction / l : (1 - pPromisingAction) / l);
+            double weight = getActionWeight(prevActions, (UIAction) action);
+            weightSum += weight;
+            probabilities.put(action, weight);
+        }
+
+        for (Map.Entry<Action, Double> entry : probabilities.entrySet()) {
+            entry.setValue((promisingActions.contains(entry.getKey()) ? pPromisingAction : (1 - pPromisingAction)) * entry.getValue() / weightSum);
         }
 
         return new PIPETreeNodeContent(state, probabilities);
+    }
+
+    private double getActionWeight(List<Action> prevActions, UIAction action) {
+        // the weight depends on the action type
+        double eventTypeWeight;
+        switch (action.getActionType()) {
+            case SWIPE_UP:
+            case SWIPE_DOWN:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+            case BACK:
+                eventTypeWeight = 0.5;
+                break;
+            case MENU:
+                eventTypeWeight = 2;
+                break;
+            default:
+                eventTypeWeight = 1;
+                break;
+        }
+
+        int unvisitedChildren = 0;
+
+        // add 1 to not divide by zero
+        long executionFrequency = prevActions.stream().filter(a -> a.equals(action)).count() + 1;
+
+        double alpha = 1;
+        double beta = 0.3;
+        double gamma = 1.5;
+        return ((alpha * eventTypeWeight) + (beta * unvisitedChildren)) / (gamma * executionFrequency);
     }
 
     @Override
@@ -132,7 +171,7 @@ public class PIPE implements IDistributionModel {
                 state.getContent().updateActionToNextState(action, currentScreenState);
                 TreeNode<PIPETreeNodeContent> finalState = state;
                 state = state.getChild(s -> s.state.equals(currentScreenState))
-                        .orElseGet(() -> finalState.addChild(initializeNode(currentScreenState)));
+                        .orElseGet(() -> finalState.addChild(initializeNode(testCase.getEventSequence(), currentScreenState)));
             }
         } finally {
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
