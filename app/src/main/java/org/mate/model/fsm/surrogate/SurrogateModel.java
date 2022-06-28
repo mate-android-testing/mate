@@ -90,6 +90,11 @@ public class SurrogateModel extends FSMModel {
     private final List<SurrogateTransition> executedTransitions = new ArrayList<>();
 
     /**
+     * Whether the last test case could be predicted or not.
+     */
+    private boolean predictedLastTestCase = false;
+
+    /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
      *
      * @param rootState The root state of the FSM.
@@ -118,6 +123,16 @@ public class SurrogateModel extends FSMModel {
         * would never return in prediction mode.
          */
         inPrediction = true;
+    }
+
+    /**
+     * Whether the last test case could be predicted or not.
+     *
+     * @return Returns {@code true} if the last test case could be predicted, otherwise {@code false}
+     *          is returned.
+     */
+    public boolean hasPredictedLastTestCase() {
+        return predictedLastTestCase;
     }
 
     /**
@@ -303,7 +318,7 @@ public class SurrogateModel extends FSMModel {
      * @return Returns {@code true} if all actions of a test case could be predicted, otherwise
      *         {@code false} is returned.
      */
-    public boolean hasPredictedEveryAction() {
+    private boolean hasPredictedEveryAction() {
         /*
          * The second condition is mandatory in order to distinguish the initial state of the
          * surrogate model from any other state. Without this condition, the very first restart of
@@ -409,6 +424,9 @@ public class SurrogateModel extends FSMModel {
 
         if (hasPredictedEveryAction()) {
             MATE.log("Predicted every action!");
+            predictedLastTestCase = true;
+        } else {
+            predictedLastTestCase = false;
         }
 
         /*
