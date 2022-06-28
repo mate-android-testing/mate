@@ -30,7 +30,7 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
      * chromosome factory.
      */
     public PrimitiveTestCaseMergeCrossOverFunction() {
-        executeActions = false;
+        executeActions = true;
     }
 
     /**
