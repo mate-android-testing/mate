@@ -129,10 +129,10 @@ public class UIAbstractionLayer {
         int retryCount = 0;
 
         /*
-        * FIXME: The UIAutomator bug seems to be unresolvable right now.
-        *  We have tried to restart the ADB server, but afterwards the
-        *   connection is still broken. Fortunately, this bug seems to appear
-        *   very rarely recently.
+         * FIXME: The UIAutomator bug seems to be unresolvable right now.
+         *  We have tried to restart the ADB server, but afterwards the
+         *   connection is still broken. Fortunately, this bug seems to appear
+         *   very rarely recently.
          */
         while (retry) {
             retry = false;
@@ -177,8 +177,8 @@ public class UIAbstractionLayer {
                     return actionResult;
                 } else {
                     /*
-                    * The surrogate model couldn't successfully predict the action, thus we need to
-                    * return to the last check point and execute all cached actions.
+                     * The surrogate model couldn't successfully predict the action, thus we need to
+                     * return to the last check point and execute all cached actions.
                      */
                     surrogateModel.setInPrediction(false);
                     lastScreenState = surrogateModel.goToLastCheckPointState();
@@ -187,18 +187,18 @@ public class UIAbstractionLayer {
                     surrogateModel.setInPrediction(true);
 
                     // If a cached action closes the AUT, we abort the action execution here.
-                    if(result != SUCCESS && result != null) {
+                    if (result != SUCCESS && result != null) {
                         return result;
                     }
                 }
             }
 
             /*
-            * Since the execution of cached actions may lead to a different screen state than
-            * expected, the given action might be not applicable anymore. In such a case, we pick
-            * a random action that is applicable on the current screen.
+             * Since the execution of cached actions may lead to a different screen state than
+             * expected, the given action might be not applicable anymore. In such a case, we pick
+             * a random action that is applicable on the current screen.
              */
-            if(!getExecutableActions().contains(action)) {
+            if (!getExecutableActions().contains(action)) {
                 MATELog.log_warn("Can't apply given action on current screen! Select random action.");
                 action = Randomness.randomElement(getExecutableActions());
             }
@@ -210,8 +210,8 @@ public class UIAbstractionLayer {
 
             MATELog.log_acc("CRASH MESSAGE " + e.getMessage());
             /*
-            * Pressing the home button is not possible here.
-            * Since the AUT has crashed, the representation layer is disconnected.
+             * Pressing the home button is not possible here.
+             * Since the AUT has crashed, the representation layer is disconnected.
              */
             // deviceMgr.pressHome();
 
@@ -219,7 +219,7 @@ public class UIAbstractionLayer {
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
 
-            if(Properties.SURROGATE_MODEL()) {
+            if (Properties.SURROGATE_MODEL()) {
                 SurrogateModel surrogateModel = (SurrogateModel) guiModel;
                 Set<String> traces = deviceMgr.getTraces();
                 surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
@@ -258,7 +258,7 @@ public class UIAbstractionLayer {
         // update gui model
         state = toRecordedScreenState(state);
 
-        if(Properties.SURROGATE_MODEL()) {
+        if (Properties.SURROGATE_MODEL()) {
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             Set<String> traces = deviceMgr.getTraces();
             surrogateModel.update(lastScreenState, state, action, result, traces);
@@ -276,7 +276,7 @@ public class UIAbstractionLayer {
      *
      * @param actions The list of actions to be executed, might be empty.
      * @return Returns the action result associated with the last executed action or {@code null}
-     *          if no cached action was executed at all.
+     *         if no cached action was executed at all.
      */
     private ActionResult executeCachedActions(final List<Action> actions) throws AUTCrashException {
 
@@ -284,9 +284,9 @@ public class UIAbstractionLayer {
 
         ActionResult result = null;
 
-        for(Action action : actions) {
+        for (Action action : actions) {
             result = executeActionUnsafe(action);
-            if(result != SUCCESS) {
+            if (result != SUCCESS) {
                 return result;
             }
         }
@@ -386,9 +386,9 @@ public class UIAbstractionLayer {
     private boolean handleProgressBar(IScreenState screenState) {
 
         /*
-        * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
-        *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
-        *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
+         * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
+         *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
+         *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
          */
 
         // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
@@ -475,15 +475,15 @@ public class UIAbstractionLayer {
                 if (action.getActionType() == ActionType.CLICK
                         // API 25, 28:
                         && (widget.getResourceID()
-                                .equals("com.android.packageinstaller:id/permission_allow_button")
-                            // API: 29
-                            || widget.getResourceID().equals(
-                                    "com.android.permissioncontroller:id/permission_allow_button")
-                            || widget.getResourceID().equals(
-                                    "com.android.packageinstaller:id/continue_button")
-                            || widget.getText().equalsIgnoreCase("continue")
-                            // API 25, 28, 29:
-                            || widget.getText().equalsIgnoreCase("allow"))) {
+                        .equals("com.android.packageinstaller:id/permission_allow_button")
+                        // API: 29
+                        || widget.getResourceID().equals(
+                        "com.android.permissioncontroller:id/permission_allow_button")
+                        || widget.getResourceID().equals(
+                        "com.android.packageinstaller:id/continue_button")
+                        || widget.getText().equalsIgnoreCase("continue")
+                        // API 25, 28, 29:
+                        || widget.getText().equalsIgnoreCase("allow"))) {
                     try {
                         deviceMgr.executeAction(action);
                         return true;
@@ -495,10 +495,10 @@ public class UIAbstractionLayer {
             }
 
             /*
-            * In rare circumstances it can happen that the 'ALLOW' button is not discovered for yet
-            * unknown reasons. The discovered widgets on the current screen point to the permission
-            * dialog, but none of the buttons have the desired resource id. The only reasonable
-            * option seems to re-fetch the screen state and hope that the problem is gone.
+             * In rare circumstances it can happen that the 'ALLOW' button is not discovered for yet
+             * unknown reasons. The discovered widgets on the current screen point to the permission
+             * dialog, but none of the buttons have the desired resource id. The only reasonable
+             * option seems to re-fetch the screen state and hope that the problem is gone.
              */
             MATELog.log_warn("Couldn't find any applicable action on permission dialog!");
             return true;
@@ -565,11 +565,12 @@ public class UIAbstractionLayer {
         if (Properties.SURROGATE_MODEL()) {
             // If the surrogate model was able to predict every action, we can avoid the reset.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            if (surrogateModel.hasPredictedEveryAction()) {
+            if (surrogateModel.hasPredictedLastTestCase()) {
+                MATELog.log("Skip reset!");
                 // reset screen state
                 lastScreenState = toRecordedScreenState(clearScreen());
                 guiModel.addRootState(lastScreenState);
-                surrogateModel.reset(lastScreenState);
+                surrogateModel.goToState(lastScreenState);
                 return;
             }
         }
@@ -591,13 +592,17 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         Utils.sleep(2000);
 
+        /*
+         * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+         * possible root states.
+         */
         lastScreenState = toRecordedScreenState(clearScreen());
         guiModel.addRootState(lastScreenState);
 
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            surrogateModel.reset(lastScreenState);
+            surrogateModel.goToState(lastScreenState);
         }
     }
 
@@ -608,8 +613,18 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         Utils.sleep(2000);
 
+        /*
+         * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+         * possible root states.
+         */
         lastScreenState = toRecordedScreenState(clearScreen());
         guiModel.addRootState(lastScreenState);
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.goToState(lastScreenState);
+        }
     }
 
     /**
@@ -635,9 +650,9 @@ public class UIAbstractionLayer {
             if (recordedScreenState.equals(screenState)) {
                 MATELog.log_debug("Using cached screen state!");
                 /*
-                * NOTE: We should only return the cached screen state if we can ensure
-                * that equals() actually compares the widgets. Otherwise, we can end up with
-                * widget actions that are not applicable on the current screen.
+                 * NOTE: We should only return the cached screen state if we can ensure
+                 * that equals() actually compares the widgets. Otherwise, we can end up with
+                 * widget actions that are not applicable on the current screen.
                  */
                 return recordedScreenState;
             }
@@ -651,7 +666,7 @@ public class UIAbstractionLayer {
      * Checks whether the last action lead to a new screen state.
      *
      * @return Returns {@code} if a new screen state has been reached,
-     *          otherwise {@code} false is returned.
+     *         otherwise {@code} false is returned.
      */
     public boolean reachedNewState() {
         return guiModel.reachedNewState();
@@ -699,7 +714,7 @@ public class UIAbstractionLayer {
      *
      * @param screenState The given screen state.
      * @return Returns {@code true} if the transition to the screen state was successful, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean moveToState(final IScreenState screenState) {
         return guiWalker.goToState(screenState);
@@ -710,7 +725,7 @@ public class UIAbstractionLayer {
      *
      * @param screenStateId The screen state id.
      * @return Returns {@code true} if the transition to the screen state was successful, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean moveToState(String screenStateId) {
         return guiWalker.goToState(screenStateId);
@@ -720,7 +735,7 @@ public class UIAbstractionLayer {
      * Launches the main activity of the AUT.
      *
      * @return Returns {@code true} if the transition to the screen state was successful, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean moveToMainActivity() {
         return guiWalker.goToMainActivity();
@@ -731,7 +746,7 @@ public class UIAbstractionLayer {
      *
      * @param activity The activity that should be launched.
      * @return Returns {@code true} if the transition to the given activity was successful, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean moveToActivity(String activity) {
         return guiWalker.goToActivity(activity);

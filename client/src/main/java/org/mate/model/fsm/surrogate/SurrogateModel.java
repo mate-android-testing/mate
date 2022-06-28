@@ -90,6 +90,11 @@ public class SurrogateModel extends FSMModel {
     private final List<SurrogateTransition> executedTransitions = new ArrayList<>();
 
     /**
+     * Whether the last test case could be predicted or not.
+     */
+    private boolean predictedLastTestCase = false;
+
+    /**
      * Creates a new surrogate model with an initial root state in underlying FSM.
      *
      * @param rootState The root state of the FSM.
@@ -101,9 +106,10 @@ public class SurrogateModel extends FSMModel {
     }
 
     /**
-     * Resets the surrogate model. This should be called at the end of each test case.
+     * Resets the surrogate model. This should be called after each test case or more specifically
+     * after {@link org.mate.interaction.UIAbstractionLayer#storeTraces(Set)}.
      */
-    public void reset(IScreenState screenState) {
+    private void reset() {
 
         executedTraces.clear();
         predictedTraces.clear();
@@ -112,8 +118,11 @@ public class SurrogateModel extends FSMModel {
         numberOfNonPredictedActions = 0;
         numberOfPredictedActions = 0;
 
-        // we need to bring the FSM in the correct state again
-        goToState(screenState);
+        /*
+         * If during the execution of the cached actions an exception occurs, the surrogate model
+         * would never return in prediction mode.
+         */
+        inPrediction = true;
     }
 
     /**
@@ -121,7 +130,7 @@ public class SurrogateModel extends FSMModel {
      *
      * @param screenState The current screen state.
      */
-    private void goToState(IScreenState screenState) {
+    public void goToState(IScreenState screenState) {
         State state = fsm.getState(screenState);
         fsm.goToState(state);
         checkPointState = fsm.getCurrentState();
@@ -299,13 +308,23 @@ public class SurrogateModel extends FSMModel {
      * @return Returns {@code true} if all actions of a test case could be predicted, otherwise
      *         {@code false} is returned.
      */
-    public boolean hasPredictedEveryAction() {
+    private boolean hasPredictedEveryAction() {
         /*
          * The second condition is mandatory in order to distinguish the initial state of the
          * surrogate model from any other state. Without this condition, the very first restart of
          * the AUT wouldn't be executed for instance.
          */
         return numberOfNonPredictedActions == 0 && numberOfPredictedActions > 0;
+    }
+
+    /**
+     * Whether the last test case could be predicted or not.
+     *
+     * @return Returns {@code true} if the last test case could be predicted, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean hasPredictedLastTestCase() {
+        return predictedLastTestCase;
     }
 
     /**
@@ -405,6 +424,9 @@ public class SurrogateModel extends FSMModel {
 
         if (hasPredictedEveryAction()) {
             MATELog.log("Predicted every action!");
+            predictedLastTestCase = true;
+        } else {
+            predictedLastTestCase = false;
         }
 
         /*
@@ -416,6 +438,9 @@ public class SurrogateModel extends FSMModel {
          * but we should be aware of this issue.
          */
         Registry.getUiAbstractionLayer().storeTraces(getTraces());
+
+        // reset the surrogate model
+        reset();
     }
 
     /**
