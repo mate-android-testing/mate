@@ -8,7 +8,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import org.mate.commons.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 
 import java.util.ArrayList;
@@ -76,11 +75,6 @@ public class Widget implements Parcelable {
      * The activity name.
      */
     private final String activity;
-
-    /**
-     * The state equivalence level to use when comparing this Widget against others.
-     */
-    private final StateEquivalenceLevel stateEquivalenceLevel;
 
     /**
      * The package name the widget is referring to.
@@ -164,11 +158,10 @@ public class Widget implements Parcelable {
      * @param localIndex A local index for the widget's children.
      */
     public Widget(Widget parent, AccessibilityNodeInfo node, String activity,
-                  int depth, int index, int localIndex, StateEquivalenceLevel stateEquivalenceLevel) {
+                  int depth, int index, int localIndex) {
 
         this.parent = parent;
         this.activity = activity;
-        this.stateEquivalenceLevel = stateEquivalenceLevel;
         this.packageName = Objects.toString(node.getPackageName(), activity.split("/")[0]);
         this.resourceID = Objects.toString(node.getViewIdResourceName(), "");
         this.clazz = Objects.toString(node.getClassName(), "");
@@ -1101,7 +1094,6 @@ public class Widget implements Parcelable {
         dest.writeInt(this.localIndex);
         dest.writeInt(this.depth);
         dest.writeString(this.activity);
-        dest.writeInt(this.stateEquivalenceLevel == null ? -1 : this.stateEquivalenceLevel.ordinal());
         dest.writeString(this.packageName);
         dest.writeParcelable(this.bounds, flags);
         dest.writeInt(this.X);
@@ -1157,7 +1149,6 @@ public class Widget implements Parcelable {
         this.depth = in.readInt();
         this.activity = in.readString();
         int tmpStateEquivalenceLevel = in.readInt();
-        this.stateEquivalenceLevel = tmpStateEquivalenceLevel == -1 ? null : StateEquivalenceLevel.values()[tmpStateEquivalenceLevel];
         this.packageName = in.readString();
         this.bounds = in.readParcelable(Rect.class.getClassLoader());
         this.X = in.readInt();
