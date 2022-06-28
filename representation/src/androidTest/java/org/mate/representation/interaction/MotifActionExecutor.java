@@ -33,6 +33,7 @@ public class MotifActionExecutor extends ActionExecutor {
      * Executes a given action.
      *
      * @param action The action to be executed.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
     @Override
@@ -44,6 +45,7 @@ public class MotifActionExecutor extends ActionExecutor {
      * Executes the given motif action.
      *
      * @param action The given motif action.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      * @throws AUTCrashException If the app crashes.
      */
     private boolean executeAction(MotifAction action) throws AUTCrashException {
@@ -71,6 +73,7 @@ public class MotifActionExecutor extends ActionExecutor {
      * Executes the motif action 'fill form and click submit' as used in the Sapienz paper.
      *
      * @param action The given motif action.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     private boolean handleFillFormAndSubmit(MotifAction action) {
 
@@ -97,7 +100,7 @@ public class MotifActionExecutor extends ActionExecutor {
                 for (int i = 0; i < primitiveActions.size(); i++) {
                     PrimitiveAction primitiveAction = (PrimitiveAction) primitiveActions.get(i);
                     if (i < primitiveActions.size() - 1) {
-                        primitiveActionExecutor.handleEdit(primitiveAction);
+                        primitiveActionExecutor.handleEdit(primitiveAction, false);
                     } else {
                         // the last primitive action represents the click on the submit button
                         primitiveActionExecutor.handleClick(primitiveAction);
@@ -139,7 +142,7 @@ public class MotifActionExecutor extends ActionExecutor {
                     inputFields.stream().forEach(widget -> {
                         PrimitiveAction typeText = new PrimitiveAction(widget.getX(), widget.getY(),
                                 ActionType.TYPE_TEXT, currentActivity);
-                        primitiveActionExecutor.handleEdit(typeText);
+                        primitiveActionExecutor.handleEdit(typeText, false);
                         uiActions.add(typeText);
                     });
 
@@ -164,6 +167,7 @@ public class MotifActionExecutor extends ActionExecutor {
      *
      * @param spinnerWidget The selected spinner.
      * @param selectedWidget The currently selected entry of nested the drop-down menu.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     private boolean handleSpinnerScrolling(Widget spinnerWidget, Widget selectedWidget) {
 
@@ -221,6 +225,7 @@ public class MotifActionExecutor extends ActionExecutor {
      * drop-down menu.
      *
      * @param action The given motif action.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     private boolean handleSpinnerScrolling(MotifAction action) {
 
