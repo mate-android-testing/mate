@@ -52,7 +52,7 @@ public class CGA extends RepresentationBasedModel {
         }
 
         while (worstTestCase.hasNext()) {
-            TestCaseModelIterator.NodeWithPickedAction node = bestTestCase.next();
+            TestCaseModelIterator.NodeWithPickedAction node = worstTestCase.next();
             probabilityMapToUpdates.computeIfAbsent(node.getActionProbabilities(), a -> Pair.create(new LinkedList<>(), new LinkedList<>()))
                     .second.add(node.action);
         }
