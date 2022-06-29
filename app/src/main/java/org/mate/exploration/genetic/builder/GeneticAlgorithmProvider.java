@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.builder;
 
+import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.MIO;
 import org.mate.exploration.genetic.algorithm.MOSA;
@@ -787,6 +788,8 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
             case BRANCH_DISTANCE:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
+            case CRASH_DISTANCE:
+                return (IFitnessFunction<T>) new CrashDistance();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
                 return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
             case BASIC_BLOCK_MULTI_OBJECTIVE:
@@ -1134,6 +1137,8 @@ public class GeneticAlgorithmProvider {
             return new BranchCoverageFitnessFunction<>();
         } else if (fitnessFunction == FitnessFunction.BRANCH_DISTANCE) {
             return new BranchDistanceFitnessFunction<>();
+        } else if (fitnessFunction == FitnessFunction.CRASH_DISTANCE) {
+            return (IFitnessFunction<T>) new CrashDistance();
         } else if (fitnessFunction == FitnessFunction.LINE_COVERAGE) {
             return new LineCoverageFitnessFunction<>();
         } else if (fitnessFunction == FitnessFunction.METHOD_COVERAGE) {
