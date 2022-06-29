@@ -63,8 +63,8 @@ public class CGA extends RepresentationBasedModel {
             List<Action> bestActions = entry.getValue().first;
             List<Action> worstActions = entry.getValue().second;
             Set<Action> worstAndBestActions = intersection(entry.getValue().first, entry.getValue().second);
-            entry.getValue().first.removeAll(bestActions);
-            entry.getValue().second.removeAll(worstActions);
+            entry.getValue().first.removeAll(worstAndBestActions);
+            entry.getValue().second.removeAll(worstAndBestActions);
 
             for (Action bestAction : bestActions) {
                 probabilities.put(bestAction, probabilities.get(bestAction) + lambda * bestFitness);
