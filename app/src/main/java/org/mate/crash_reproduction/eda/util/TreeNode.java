@@ -56,11 +56,11 @@ public class TreeNode<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TreeNode<?> treeNode = (TreeNode<?>) o;
-        return Objects.equals(children, treeNode.children);
+        return Objects.equals(content, treeNode.content) && Objects.equals(parent, treeNode.parent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(children);
+        return Objects.hash(content, parent);
     }
 }
