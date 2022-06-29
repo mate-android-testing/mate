@@ -5,6 +5,7 @@ import org.mate.Registry;
 import org.mate.crash_reproduction.eda.IDistributionModel;
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
 import org.mate.crash_reproduction.eda.representation.ModelRepresentationIterator;
+import org.mate.crash_reproduction.eda.util.ProbabilityUtil;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
@@ -31,7 +32,7 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
         try {
             ModelRepresentationIterator iterator = modelRepresentation.getIterator();
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
-                Action action = Randomness.randomIndexWithProbabilities(iterator.getActionProbabilities());
+                Action action = Randomness.randomIndexWithProbabilities(ProbabilityUtil.weightsToProbability(iterator.getActionProbabilities()));
 
                 if (!testCase.updateTestCase(action, actionsCount)) {
                     return chromosome;
