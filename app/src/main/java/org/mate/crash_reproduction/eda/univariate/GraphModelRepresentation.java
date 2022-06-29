@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class GraphModelRepresentation<ExtraInfo> implements ModelRepresentation {
+public class GraphModelRepresentation<ExtraInfo> implements IModelRepresentation {
     private final BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNode;
     private final ExtraInfoGetter<ExtraInfo> extraInfoExtraInfoGetter;
 
@@ -33,6 +33,11 @@ public class GraphModelRepresentation<ExtraInfo> implements ModelRepresentation 
         IScreenState rootState = Registry.getUiAbstractionLayer().getLastScreenState();
         root = new Node(rootState, extraInfoExtraInfoGetter.get(null, rootState));
         probabilities.put(root, initializeNode.apply(Collections.emptyList(), root.state));
+    }
+
+    @Override
+    public void resetProbabilities() {
+        probabilities.clear();
     }
 
     @Override

@@ -31,11 +31,11 @@ public class PIPE implements IDistributionModel {
     private final double pEl;
     private final double pMutation;
     private final double mutationRate;
-    private final ModelRepresentation modelRepresentation;
+    private final IModelRepresentation modelRepresentation;
 
     private IChromosome<TestCase> elitist;
 
-    public PIPE(ModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction, double learningRate, double epsilon, double clr, double pEl, double pMutation, double mutationRate) {
+    public PIPE(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction, double learningRate, double epsilon, double clr, double pEl, double pMutation, double mutationRate) {
         this.modelRepresentation = modelRepresentation;
         if (fitnessFunction.isMaximizing()) {
             throw new IllegalArgumentException("PIPE needs a minimizing fitness function!");

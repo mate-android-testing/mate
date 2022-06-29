@@ -3,7 +3,6 @@ package org.mate.crash_reproduction.eda.univariate;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.crash_reproduction.eda.IDistributionModel;
-import org.mate.crash_reproduction.eda.util.StateActionTree;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
@@ -13,13 +12,11 @@ import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.function.BiFunction;
-
 public abstract class VectorBasedDistributionModel<T extends Number> implements IDistributionModel {
-    protected final StateActionTree<T> stateActionTree;
+    protected final IModelRepresentation modelRepresentation;
 
-    protected VectorBasedDistributionModel(BiFunction<IScreenState, Action, T> defaultWeightFunction, T minWeight) {
-        stateActionTree = new StateActionTree<>(defaultWeightFunction, minWeight);
+    protected VectorBasedDistributionModel(IModelRepresentation modelRepresentation) {
+        this.modelRepresentation = modelRepresentation;
     }
 
     @Override
@@ -30,16 +27,16 @@ public abstract class VectorBasedDistributionModel<T extends Number> implements 
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            IScreenState state = Registry.getUiAbstractionLayer().getLastScreenState();
+            ModelRepresentationIterator iterator = modelRepresentation.getIterator();
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
-                Action action = Randomness.randomIndexWithProbabilities(stateActionTree.getActionProbabilitiesForState(actionsCount, state));
+                Action action = Randomness.randomIndexWithProbabilities(iterator.getActionProbabilities());
 
                 if (!testCase.updateTestCase(action, actionsCount)) {
                     return chromosome;
                 }
 
-                state = Registry.getUiAbstractionLayer().getLastScreenState();
-                stateActionTree.updateActionTarget(action, state);
+                IScreenState state = Registry.getUiAbstractionLayer().getLastScreenState();
+                iterator.updatePositionImmutable(state);
             }
         } finally {
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
@@ -52,6 +49,6 @@ public abstract class VectorBasedDistributionModel<T extends Number> implements 
 
     @Override
     public String toString() {
-        return stateActionTree.toString();
+        return modelRepresentation.toString();
     }
 }

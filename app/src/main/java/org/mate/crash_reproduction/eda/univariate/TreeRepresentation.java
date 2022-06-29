@@ -20,13 +20,18 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
-public class TreeRepresentation implements ModelRepresentation {
+public class TreeRepresentation implements IModelRepresentation {
     private final BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNode;
-    private final Tree<TreeNodeContent> probabilityTree;
+    private Tree<TreeNodeContent> probabilityTree;
 
     public TreeRepresentation(BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNode) {
         this.initializeNode = initializeNode;
         this.probabilityTree = new Tree<>(initializeNode(Collections.emptyList(), Registry.getUiAbstractionLayer().getLastScreenState()));
+    }
+
+    @Override
+    public void resetProbabilities() {
+        probabilityTree = new Tree<>(probabilityTree.getRoot().getContent());
     }
 
     @Override

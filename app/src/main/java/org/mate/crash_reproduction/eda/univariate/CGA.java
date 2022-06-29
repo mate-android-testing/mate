@@ -1,7 +1,7 @@
 package org.mate.crash_reproduction.eda.univariate;
 
-import org.mate.Properties;
-import org.mate.Registry;
+import android.util.Pair;
+
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
@@ -9,15 +9,20 @@ import org.mate.model.TestCase;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CGA extends VectorBasedDistributionModel<Double> {
     private final double lambda = 1D;
     private final IFitnessFunction<TestCase> fitnessFunction;
 
-    public CGA(IFitnessFunction<TestCase> fitnessFunction) {
-        super((state, action) -> Registry.getUiAbstractionLayer().getPromisingActions(state).contains(action) ? 1D : 1D, 0.000001);
+    public CGA(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction) {
+        super(modelRepresentation);
         this.fitnessFunction = fitnessFunction;
     }
 
@@ -33,23 +38,56 @@ public class CGA extends VectorBasedDistributionModel<Double> {
         double bestFitness = getMaximisingFitness(bestChromosome);
         double worstFitness = getMaximisingFitness(worstChromosome);
 
-        List<Action> bestActions = bestChromosome.getValue().getEventSequence();
-        List<Action> worstActions = worstChromosome.getValue().getEventSequence();
+        TestCaseModelIterator bestTestCase = new TestCaseModelIterator(modelRepresentation.getIterator(), bestChromosome.getValue());
+        TestCaseModelIterator worstTestCase = new TestCaseModelIterator(modelRepresentation.getIterator(), worstChromosome.getValue());
 
-        for (int i = 0; i < Properties.MAX_NUMBER_EVENTS(); i++) {
-            if (i < bestActions.size() && i < worstActions.size() && bestActions.get(i).equals(worstActions.get(i))) {
-                // Action is both in worst and best sequence
-                stateActionTree.updateWeightOfAction(i, bestActions.get(i), weight -> weight + lambda * (bestFitness - worstFitness));
-            } else {
-                if (i < bestActions.size()) {
-                    stateActionTree.updateWeightOfAction(i, bestActions.get(i), weight -> weight + lambda * bestFitness);
-                }
+        Map<Map<Action, Double>, Pair<List<Action>, List<Action>>> probabilityMapToUpdates = new IdentityHashMap<>();
 
-                if (i < worstActions.size()) {
-                    stateActionTree.updateWeightOfAction(i, worstActions.get(i), weight -> weight - lambda * (1 - worstFitness));
-                }
+        while (bestTestCase.hasNext()) {
+            TestCaseModelIterator.NodeWithPickedAction node = bestTestCase.next();
+            probabilityMapToUpdates.computeIfAbsent(node.getActionProbabilities(), a -> Pair.create(new LinkedList<>(), new LinkedList<>()))
+                    .first.add(node.action);
+        }
+
+        while (worstTestCase.hasNext()) {
+            TestCaseModelIterator.NodeWithPickedAction node = bestTestCase.next();
+            probabilityMapToUpdates.computeIfAbsent(node.getActionProbabilities(), a -> Pair.create(new LinkedList<>(), new LinkedList<>()))
+                    .second.add(node.action);
+        }
+
+        for (Map.Entry<Map<Action, Double>, Pair<List<Action>, List<Action>>> entry : probabilityMapToUpdates.entrySet()) {
+            Map<Action, Double> probabilities = entry.getKey();
+
+            List<Action> bestActions = entry.getValue().first;
+            List<Action> worstActions = entry.getValue().second;
+            Set<Action> worstAndBestActions = intersection(entry.getValue().first, entry.getValue().second);
+            entry.getValue().first.removeAll(bestActions);
+            entry.getValue().second.removeAll(worstActions);
+
+            for (Action bestAction : bestActions) {
+                probabilities.put(bestAction, probabilities.get(bestAction) + lambda * bestFitness);
+            }
+
+            for (Action worstAction : worstActions) {
+                probabilities.put(worstAction, probabilities.get(worstAction) - lambda * (1 - worstFitness));
+            }
+
+            for (Action worstAndBestAction : worstAndBestActions) {
+                probabilities.put(worstAndBestAction, probabilities.get(worstAndBestAction) + lambda * (bestFitness - worstFitness));
             }
         }
+    }
+
+    private <T> Set<T> intersection(Collection<T> c1, Collection<T> c2) {
+        Set<T> intersection = new HashSet<>();
+
+        for (T elem : c1) {
+            if (c2.contains(elem)) {
+                intersection.add(elem);
+            }
+        }
+
+        return intersection;
     }
 
     private double getMaximisingFitness(IChromosome<TestCase> chromosome) {
