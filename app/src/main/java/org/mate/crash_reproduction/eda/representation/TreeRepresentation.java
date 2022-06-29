@@ -117,10 +117,44 @@ public class TreeRepresentation implements IModelRepresentation {
         List<Pair<TreeNode<TreeNodeContent>, TreeNode<TreeNodeContent>>> mostLikelyPath = getMostLikelyPath();
         BiPredicate<TreeNode<TreeNodeContent>, TreeNode<TreeNodeContent>> isOnMostLikelyPath = (source, target) -> mostLikelyPath.stream().anyMatch(edge -> edge.first == source && edge.second == target);
 
+        BiFunction<TreeNodeContent, Action, String> printActionProb = (node, action) -> {
+            Double prob = node.actionProbabilities.get(action);
+
+            String label = action.toShortString() + ": " + prob;
+
+            if (node.getActionWithBiggestProb().equals(action)) {
+                label = "<B>" + label + "</B>";
+            }
+
+            return label;
+        };
+
         return probabilityTree.toDot(
                 p -> p.state.getId(),
-                p -> DotGraphUtil.toDotNodeAttributeLookup(p.state, p.actionProbabilities),
-                (source, target) -> DotGraphUtil.toDotEdgeAttributeLookup(source.getContent().actionProbabilities, target.getContent().state, isOnMostLikelyPath.test(source, target))
+                p -> new HashMap<String, String>() {{
+                    put("image", "\"results/pictures/" + Registry.getPackageName() + "/" + p.state.getId() + ".png\"");
+                    put("imagescale", "true");
+                    put("imagepos", "tc");
+                    put("labelloc", "b");
+                    put("height", "6");
+                    put("fixedsize", "true");
+                    put("shape", "square");
+                    put("xlabel", "<" + p.actionProbabilities.keySet().stream()
+                            .filter(a -> !p.actionToNextState.containsKey(a))
+                            .map(a -> printActionProb.apply(p, a))
+                            .collect(Collectors.joining("<BR/>")) + ">"
+                    );
+                }},
+                (source, target) -> new HashMap<String, String>() {{
+                    put("label", "<" + source.getContent().actionToNextState.entrySet().stream()
+                            .filter(e -> e.getValue().equals(target.getContent().state))
+                            .map(e -> printActionProb.apply(source.getContent(), e.getKey()))
+                            .collect(Collectors.joining("<BR/>")) + ">");
+
+                    if (isOnMostLikelyPath.test(source, target)) {
+                        put("color", "red");
+                    }
+                }}
         );
     }
 }
