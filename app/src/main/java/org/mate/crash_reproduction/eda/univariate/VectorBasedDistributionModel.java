@@ -1,0 +1,57 @@
+package org.mate.crash_reproduction.eda.univariate;
+
+import org.mate.Properties;
+import org.mate.Registry;
+import org.mate.crash_reproduction.eda.IDistributionModel;
+import org.mate.crash_reproduction.eda.util.StateActionTree;
+import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.interaction.action.Action;
+import org.mate.model.TestCase;
+import org.mate.state.IScreenState;
+import org.mate.utils.FitnessUtils;
+import org.mate.utils.Randomness;
+import org.mate.utils.coverage.CoverageUtils;
+
+import java.util.function.BiFunction;
+
+public abstract class VectorBasedDistributionModel<T extends Number> implements IDistributionModel {
+    protected final StateActionTree<T> stateActionTree;
+
+    protected VectorBasedDistributionModel(BiFunction<IScreenState, Action, T> defaultWeightFunction, T minWeight) {
+        stateActionTree = new StateActionTree<>(defaultWeightFunction, minWeight);
+    }
+
+    @Override
+    public IChromosome<TestCase> createChromosome() {
+        Registry.getUiAbstractionLayer().resetApp();
+
+        TestCase testCase = TestCase.newInitializedTestCase();
+        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
+
+        try {
+            IScreenState state = Registry.getUiAbstractionLayer().getLastScreenState();
+            for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
+                Action action = Randomness.randomIndexWithProbabilities(stateActionTree.getActionProbabilitiesForState(actionsCount, state));
+
+                if (!testCase.updateTestCase(action, actionsCount)) {
+                    return chromosome;
+                }
+
+                state = Registry.getUiAbstractionLayer().getLastScreenState();
+                stateActionTree.updateActionTarget(action, state);
+            }
+        } finally {
+            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
+            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+            CoverageUtils.logChromosomeCoverage(chromosome);
+            testCase.finish();
+        }
+        return chromosome;
+    }
+
+    @Override
+    public String toString() {
+        return stateActionTree.toString();
+    }
+}
