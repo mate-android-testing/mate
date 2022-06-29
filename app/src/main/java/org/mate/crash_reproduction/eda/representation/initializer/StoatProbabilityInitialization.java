@@ -1,4 +1,4 @@
-package org.mate.crash_reproduction.eda.univariate;
+package org.mate.crash_reproduction.eda.representation.initializer;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;

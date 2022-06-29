@@ -1,22 +1,13 @@
 package org.mate.crash_reproduction.eda;
 
 import org.mate.crash_reproduction.eda.univariate.CGA;
-import org.mate.crash_reproduction.eda.univariate.GraphModelRepresentation;
-import org.mate.crash_reproduction.eda.univariate.IModelRepresentation;
+import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
 import org.mate.crash_reproduction.eda.univariate.PIPE;
-import org.mate.crash_reproduction.eda.univariate.StoatProbabilityInitialization;
-import org.mate.crash_reproduction.eda.univariate.TreeRepresentation;
 import org.mate.crash_reproduction.eda.univariate.UMDA;
 import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
-import org.mate.interaction.action.Action;
-import org.mate.state.IScreenState;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public enum DistributionModel {
     PIPE {

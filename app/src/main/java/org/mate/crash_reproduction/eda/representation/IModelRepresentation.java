@@ -1,4 +1,4 @@
-package org.mate.crash_reproduction.eda.univariate;
+package org.mate.crash_reproduction.eda.representation;
 
 public interface IModelRepresentation {
     ModelRepresentationIterator getIterator();

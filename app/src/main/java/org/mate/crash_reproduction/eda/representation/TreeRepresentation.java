@@ -1,4 +1,4 @@
-package org.mate.crash_reproduction.eda.univariate;
+package org.mate.crash_reproduction.eda.representation;
 
 import android.util.Pair;
 
@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 public class TreeRepresentation implements IModelRepresentation {
     private final BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNode;

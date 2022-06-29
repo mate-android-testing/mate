@@ -1,4 +1,4 @@
-package org.mate.crash_reproduction.eda.univariate;
+package org.mate.crash_reproduction.eda.representation;
 
 import org.mate.Registry;
 import org.mate.crash_reproduction.eda.util.DotGraphUtil;

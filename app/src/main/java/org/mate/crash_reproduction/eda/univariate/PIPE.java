@@ -4,6 +4,9 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.crash_reproduction.eda.IDistributionModel;
+import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
+import org.mate.crash_reproduction.eda.representation.ModelRepresentationIterator;
+import org.mate.crash_reproduction.eda.representation.TestCaseModelIterator;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -23,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * Organizes variables in tree and updates similar to PBIL
  */
-public class PIPE implements IDistributionModel {
+public class PIPE extends RepresentationBasedModel {
     private final IFitnessFunction<TestCase> fitnessFunction;
     private final double learningRate;
     private final double epsilon;
@@ -31,12 +34,11 @@ public class PIPE implements IDistributionModel {
     private final double pEl;
     private final double pMutation;
     private final double mutationRate;
-    private final IModelRepresentation modelRepresentation;
 
     private IChromosome<TestCase> elitist;
 
     public PIPE(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction, double learningRate, double epsilon, double clr, double pEl, double pMutation, double mutationRate) {
-        this.modelRepresentation = modelRepresentation;
+        super(modelRepresentation);
         if (fitnessFunction.isMaximizing()) {
             throw new IllegalArgumentException("PIPE needs a minimizing fitness function!");
         }
@@ -76,36 +78,6 @@ public class PIPE implements IDistributionModel {
 //        adaptPPTAwayFrom(worst, best); // Added by me
         pptMutation(best);
         pptPruning();
-    }
-
-    @Override
-    public IChromosome<TestCase> createChromosome() {
-        Registry.getUiAbstractionLayer().resetApp();
-
-        TestCase testCase = TestCase.newInitializedTestCase();
-        testCase.setNickName("PIPE");
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
-
-        try {
-            ModelRepresentationIterator representationIterator = modelRepresentation.getIterator();
-
-            for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
-                Action action = Randomness.randomIndexWithProbabilities(representationIterator.getActionProbabilities());
-
-                if (!testCase.updateTestCase(action, actionsCount)) {
-                    return chromosome;
-                }
-
-                IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
-                representationIterator.updatePosition(testCase, action, currentScreenState);
-            }
-        } finally {
-            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
-            CoverageUtils.logChromosomeCoverage(chromosome);
-            testCase.finish();
-        }
-        return chromosome;
     }
 
     // ================== (3) Learning from Population =========================

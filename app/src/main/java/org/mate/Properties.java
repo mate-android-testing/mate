@@ -1,7 +1,7 @@
 package org.mate;
 
 import org.mate.crash_reproduction.eda.DistributionModel;
-import org.mate.crash_reproduction.eda.univariate.ModelRepresentation;
+import org.mate.crash_reproduction.eda.representation.ModelRepresentation;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;

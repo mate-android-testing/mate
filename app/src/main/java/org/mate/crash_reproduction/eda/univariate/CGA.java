@@ -2,6 +2,8 @@ package org.mate.crash_reproduction.eda.univariate;
 
 import android.util.Pair;
 
+import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
+import org.mate.crash_reproduction.eda.representation.TestCaseModelIterator;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
@@ -17,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class CGA extends VectorBasedDistributionModel<Double> {
+public class CGA extends RepresentationBasedModel {
     private final double lambda = 1D;
     private final IFitnessFunction<TestCase> fitnessFunction;
 

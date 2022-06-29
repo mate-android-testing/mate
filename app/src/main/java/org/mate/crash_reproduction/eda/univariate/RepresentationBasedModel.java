@@ -3,6 +3,8 @@ package org.mate.crash_reproduction.eda.univariate;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.crash_reproduction.eda.IDistributionModel;
+import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
+import org.mate.crash_reproduction.eda.representation.ModelRepresentationIterator;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
@@ -12,10 +14,10 @@ import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
-public abstract class VectorBasedDistributionModel<T extends Number> implements IDistributionModel {
+public abstract class RepresentationBasedModel implements IDistributionModel {
     protected final IModelRepresentation modelRepresentation;
 
-    protected VectorBasedDistributionModel(IModelRepresentation modelRepresentation) {
+    protected RepresentationBasedModel(IModelRepresentation modelRepresentation) {
         this.modelRepresentation = modelRepresentation;
     }
 
@@ -36,7 +38,7 @@ public abstract class VectorBasedDistributionModel<T extends Number> implements 
                 }
 
                 IScreenState state = Registry.getUiAbstractionLayer().getLastScreenState();
-                iterator.updatePositionImmutable(state);
+                iterator.updatePosition(testCase, action, state);
             }
         } finally {
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);

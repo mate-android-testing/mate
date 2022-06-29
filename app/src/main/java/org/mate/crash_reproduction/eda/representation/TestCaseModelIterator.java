@@ -1,4 +1,4 @@
-package org.mate.crash_reproduction.eda.univariate;
+package org.mate.crash_reproduction.eda.representation;
 
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
