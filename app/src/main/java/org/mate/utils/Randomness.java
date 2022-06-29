@@ -37,7 +37,7 @@ public class Randomness {
 
         double sum = 0;
         int index = 0;
-        while (sum < randomNumber) {
+        while (sum < randomNumber && index < sortedProbabilities.size()) {
             sum += sortedProbabilities.get(index).getValue();
             index++;
         }
