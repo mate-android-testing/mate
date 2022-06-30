@@ -1,7 +1,5 @@
 package org.mate.representation.state.widget;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 import android.os.Build;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -20,6 +18,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Auxiliary class to parse the widgets in the current screen.
@@ -108,7 +108,7 @@ public class WidgetScreenParser {
                 + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
         MATELog.log_debug("Node class: " + node.getClassName());
 
-        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex, ExplorationInfo.getInstance().getStateEquivalenceLevel());
+        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
         widgets.add(widget);
 
         if (widget.isEditable()) {
