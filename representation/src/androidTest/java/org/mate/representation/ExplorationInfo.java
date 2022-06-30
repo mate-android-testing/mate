@@ -7,11 +7,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import org.mate.commons.state.executable.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;
-import org.mate.representation.test.BuildConfig;
+import org.mate.commons.utils.Utils;
 import org.mate.representation.util.MATERepLog;
 
 import java.io.IOException;
@@ -51,9 +50,14 @@ public class ExplorationInfo {
     private boolean widgetBasedActions = false;
 
     /**
-     * Which StateEquivalenceLevel to use when creating Widgets during exploration.
+     * The maximum number of retries to attempt when the UI Automator is disconnected.
      */
-    private StateEquivalenceLevel stateEquivalenceLevel;
+    public static final int UiAutomatorDisconnectedRetries = 3;
+
+    /**
+     * The error message when the ui automator is disconnected.
+     */
+    public static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
 
     private ExplorationInfo() {}
 
@@ -120,26 +124,30 @@ public class ExplorationInfo {
     }
 
     /**
-     * Sets the StateEquivalenceLevel to use when creating Widgets.
-     * @param level
-     */
-    public void setStateEquivalenceLevel(StateEquivalenceLevel level) {
-        this.stateEquivalenceLevel = level;
-    }
-
-    /**
-     * @return the StateEquivalenceLevel to use when creating Widgets.
-     */
-    public StateEquivalenceLevel getStateEquivalenceLevel() {
-        return stateEquivalenceLevel;
-    }
-
-    /**
-     * @return the name of the currently visible package (might be different than the AUT's
-     * package name).
+     * Retrieves the current package name via the {@link androidx.test.uiautomator.UiDevice}.
+     *
+     * @return Returns the current package name associated with the app screen.
      */
     public String getCurrentPackageName() {
-        return DeviceInfo.getInstance().getUiDevice().getCurrentPackageName();
+
+        String packageName = null;
+
+        for (int numberOfRetries = 0; numberOfRetries <= UiAutomatorDisconnectedRetries
+                && packageName == null; numberOfRetries++) {
+
+            try {
+                packageName = DeviceInfo.getInstance().getUiDevice().getCurrentPackageName();
+            } catch (IllegalStateException e) {
+                if (e.getMessage() != null && e.getMessage().equals(UiAutomatorDisconnectedMessage)) {
+                    MATELog.log_acc("UIAutomator disconnected, try re-connecting!");
+                    Utils.sleep(3000);
+                } else {
+                    throw new IllegalStateException("Couldn't retrieve package name!", e);
+                }
+            }
+        }
+
+        return packageName;
     }
 
     /**

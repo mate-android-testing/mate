@@ -30,9 +30,7 @@ import org.mate.commons.utils.Utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -151,8 +149,6 @@ public class MATEService extends Service implements IBinder.DeathRecipient {
             // have launched the representation layer. This is to avoid using the same seed each
             // time we reset exploration, causing it to execute always the same actions.
             representationLayer.setRandomSeed(Properties.RANDOM_SEED() + representationLayerLaunches);
-
-            representationLayer.setStateEquivalenceLevel(Properties.STATE_EQUIVALENCE_LEVEL());
 
             if (Registry.isReplayMode()) {
                 representationLayer.setReplayMode();

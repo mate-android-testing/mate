@@ -1,7 +1,5 @@
 package org.mate.representation.state.widget;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 import android.os.Build;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -20,6 +18,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Auxiliary class to parse the widgets in the current screen.
@@ -66,10 +66,27 @@ public class WidgetScreenParser {
      * This is done by inspecting the UI hierarchy from the root view in the active window.
      */
     public void parseWidgets() {
-        AccessibilityNodeInfo rootNode =
-                getInstrumentation().getUiAutomation().getRootInActiveWindow();
+
+        AccessibilityNodeInfo rootNode = getRootNode();
 
         if (rootNode == null) {
+            throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
+        }
+
+        parseWidgets(rootNode, null, 0, 0, 0);
+    }
+
+    /**
+     * Retrieves the root node in the ui hierarchy via the {@link android.app.UiAutomation}.
+     *
+     * @return Returns the root node in the ui hierarchy.
+     */
+    private AccessibilityNodeInfo getRootNode() {
+
+        AccessibilityNodeInfo rootNode = getInstrumentation().getUiAutomation().getRootInActiveWindow();
+
+        for (int numberOfRetries = 0; numberOfRetries < ExplorationInfo.UiAutomatorDisconnectedRetries
+                && rootNode == null; numberOfRetries++) {
 
             /*
              * It can happen that the device is in an unstable state and hence the UIAutomator
@@ -77,18 +94,13 @@ public class WidgetScreenParser {
              * re-connect.
              */
             MATELog.log_acc("UIAutomator disconnected, try re-connecting!");
-            Utils.sleep(1000);
+            Utils.sleep(3000);
 
             // try to reconnect
-            rootNode = getInstrumentation()
-                    .getUiAutomation().getRootInActiveWindow();
-
-            if (rootNode == null) {
-                throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
-            }
+            rootNode = getInstrumentation().getUiAutomation().getRootInActiveWindow();
         }
 
-        parseWidgets(rootNode, null, 0, 0, 0);
+        return rootNode;
     }
 
     /**
@@ -108,7 +120,7 @@ public class WidgetScreenParser {
                 + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
         MATELog.log_debug("Node class: " + node.getClassName());
 
-        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex, ExplorationInfo.getInstance().getStateEquivalenceLevel());
+        Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
         widgets.add(widget);
 
         if (widget.isEditable()) {
