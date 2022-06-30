@@ -1,6 +1,5 @@
 package org.mate.state.equivalence;
 
-import org.mate.commons.state.equivalence.StateEquivalenceLevel;
 import org.mate.state.equivalence.checks.ActivityNameEquivalence;
 import org.mate.state.equivalence.checks.PackageNameEquivalence;
 import org.mate.state.equivalence.checks.WidgetEquivalence;

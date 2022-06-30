@@ -1,6 +1,6 @@
 package org.mate;
 
-import org.mate.commons.state.equivalence.StateEquivalenceLevel;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;

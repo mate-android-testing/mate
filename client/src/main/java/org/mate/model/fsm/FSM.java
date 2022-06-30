@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;
-import org.mate.commons.state.equivalence.StateEquivalenceLevel;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
 import org.mate.state.equivalence.IStateEquivalence;

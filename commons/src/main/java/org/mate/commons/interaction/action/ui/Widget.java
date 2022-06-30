@@ -1148,7 +1148,6 @@ public class Widget implements Parcelable {
         this.localIndex = in.readInt();
         this.depth = in.readInt();
         this.activity = in.readString();
-        int tmpStateEquivalenceLevel = in.readInt();
         this.packageName = in.readString();
         this.bounds = in.readParcelable(Rect.class.getClassLoader());
         this.X = in.readInt();

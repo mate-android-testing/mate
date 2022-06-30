@@ -2,13 +2,14 @@ package org.mate.state.equivalence.checks;
 
 import org.mate.state.IScreenState;
 import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.Objects;
 
 /**
  * Compares two {@link IScreenState}s for equality based on the number of widgets and its positions.
  * This corresponds to the equivalence level
- * {@link org.mate.commons.state.equivalence.StateEquivalenceLevel#WIDGET}.
+ * {@link StateEquivalenceLevel#WIDGET}.
  */
 public class WidgetEquivalence implements IStateEquivalence {
 

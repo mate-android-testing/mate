@@ -3,6 +3,7 @@ package org.mate.state.equivalence.checks;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.state.IScreenState;
 import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import java.util.Objects;
 /**
  * Compares two {@link IScreenState}s for equality based on the widgets including text and content
  * description. This corresponds to the equivalence level
- * {@link org.mate.commons.state.equivalence.StateEquivalenceLevel#WIDGET_WITH_ATTRIBUTES}.
+ * {@link StateEquivalenceLevel#WIDGET_WITH_ATTRIBUTES}.
  */
 public class WidgetWithAttributesEquivalence implements IStateEquivalence {
 

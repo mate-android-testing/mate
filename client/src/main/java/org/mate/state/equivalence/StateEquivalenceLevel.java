@@ -1,12 +1,9 @@
-package org.mate.commons.state.equivalence;
-
-import android.os.Parcel;
-import android.os.Parcelable;
+package org.mate.state.equivalence;
 
 /**
  * Defines the various supported abstractions used in the screen states equality comparison.
  */
-public enum StateEquivalenceLevel implements Parcelable {
+public enum StateEquivalenceLevel {
 
     /**
      * Two screen states are equal if they share the same package name. This is the weakest
@@ -33,27 +30,4 @@ public enum StateEquivalenceLevel implements Parcelable {
      * considered as well.
      */
     WIDGET_WITH_ATTRIBUTES;
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.ordinal());
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<StateEquivalenceLevel> CREATOR = new Creator<StateEquivalenceLevel>() {
-        @Override
-        public StateEquivalenceLevel createFromParcel(Parcel in) {
-            int ordinal = in.readInt();
-            return StateEquivalenceLevel.values()[ordinal];
-        }
-
-        @Override
-        public StateEquivalenceLevel[] newArray(int size) {
-            return new StateEquivalenceLevel[size];
-        }
-    };
 }

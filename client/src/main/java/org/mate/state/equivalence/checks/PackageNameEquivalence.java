@@ -2,12 +2,13 @@ package org.mate.state.equivalence.checks;
 
 import org.mate.state.IScreenState;
 import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.Objects;
 
 /**
  * Compares two {@link IScreenState}s for equality based on the package name. This corresponds to
- * the equivalence level {@link org.mate.commons.state.equivalence.StateEquivalenceLevel#PACKAGE_NAME}.
+ * the equivalence level {@link StateEquivalenceLevel#PACKAGE_NAME}.
  */
 public class PackageNameEquivalence implements IStateEquivalence {
 
