@@ -50,11 +50,6 @@ public class ExplorationInfo {
     private boolean widgetBasedActions = false;
 
     /**
-     * Which StateEquivalenceLevel to use when creating Widgets during exploration.
-     */
-    private StateEquivalenceLevel stateEquivalenceLevel;
-
-    /**
      * The maximum number of retries to attempt when the UI Automator is disconnected.
      */
     public static final int UiAutomatorDisconnectedRetries = 3;
