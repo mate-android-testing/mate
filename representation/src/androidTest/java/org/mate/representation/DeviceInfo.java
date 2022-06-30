@@ -1,8 +1,10 @@
 package org.mate.representation;
 
 import android.app.Instrumentation;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.os.Build;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
@@ -210,4 +212,24 @@ public class DeviceInfo {
     public String getTargetPackageFilesDir() {
         return getAUTContext().getFilesDir().getAbsolutePath();
     }
+
+    /**
+     * Checks whether the soft keyboard is opened or not.
+     *
+     * @return Returns {@code true} if the soft keyboard is opened, otherwise {@code false} is
+     *         returned.
+     */
+    public boolean isKeyboardOpened() {
+
+        // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+        UiAutomation uiAutomation = instrumentation.getUiAutomation();
+
+        for (AccessibilityWindowInfo window : uiAutomation.getWindows()) {
+            if (window.getType() == AccessibilityWindowInfo.TYPE_INPUT_METHOD) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

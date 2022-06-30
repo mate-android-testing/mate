@@ -11,6 +11,7 @@ import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
 import org.mate.commons.utils.MATELog;
+import org.mate.representation.DeviceInfo;
 import org.mate.representation.ExplorationInfo;
 import org.mate.representation.input_generation.TextDataGenerator;
 
@@ -35,6 +36,7 @@ public class WidgetActionExecutor extends ActionExecutor {
      * Executes a given action.
      *
      * @param action The action to be executed.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
     @Override
@@ -46,6 +48,7 @@ public class WidgetActionExecutor extends ActionExecutor {
      * Executes a widget action, e.g. a click on a certain widget.
      *
      * @param action The action to be executed.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
     private boolean executeAction(WidgetAction action) throws AUTCrashException {
@@ -62,14 +65,10 @@ public class WidgetActionExecutor extends ActionExecutor {
                 success = handleLongClick(selectedWidget);
                 break;
             case TYPE_TEXT:
-                success = handleEdit(selectedWidget);
-                break;
             case TYPE_SPECIFIC_TEXT:
                 success = handleEdit(selectedWidget);
                 break;
-            case CLEAR_WIDGET:
-                // TODO: Do we actually need this action?
-                //  A 'type text' action overwrites the previous text anyways.
+            case CLEAR_TEXT:
                 success = handleClear(selectedWidget);
                 break;
             case SWIPE_DOWN:
@@ -90,6 +89,7 @@ public class WidgetActionExecutor extends ActionExecutor {
      * Executes a click on the given widget.
      *
      * @param widget The widget on which a click should be performed.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     public boolean handleClick(Widget widget) {
         return device.click(widget.getX(), widget.getY());
@@ -99,17 +99,34 @@ public class WidgetActionExecutor extends ActionExecutor {
      * Clears the widget's text.
      *
      * @param widget The widget whose input should be cleared.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     private boolean handleClear(Widget widget) {
-        UiObject2 obj = findObject(widget);
-        if (obj != null) {
-            obj.setText("");
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText("");
-            return true;
-        }
 
-        return false;
+        UiObject2 uiObject = findObject(widget);
+
+        if (uiObject != null) {
+
+            try {
+                uiObject.setText("");
+
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText("");
+
+                // we need to close the soft keyboard, but only if it is present
+                if (DeviceInfo.getInstance().isKeyboardOpened()) {
+                    device.pressBack();
+                }
+
+                return true;
+            } catch (StaleObjectException e) {
+                MATELog.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                return handleEditFallback(widget, "");
+            }
+        } else {
+            return handleEditFallback(widget, "");
+        }
     }
 
     /**
@@ -117,6 +134,7 @@ public class WidgetActionExecutor extends ActionExecutor {
      *
      * @param widget The widget at which position the swipe should be performed.
      * @param direction The direction of the swipe, e.g. swipe to the left.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     private boolean handleSwipe(Widget widget, ActionType direction) {
 
@@ -170,16 +188,27 @@ public class WidgetActionExecutor extends ActionExecutor {
      * Performs a long click on the given widget.
      *
      * @param widget The widget on which a long click should be applied.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     private boolean handleLongClick(Widget widget) {
+
         // TODO: consider https://stackoverflow.com/questions/21432561/how-to-achieve-long-click-in-uiautomator
         UiObject2 obj = findObject(widget);
-        int X = widget.getX();
-        int Y = widget.getY();
-        if (obj != null) {
-            X = obj.getVisibleBounds().centerX();
-            Y = obj.getVisibleBounds().centerY();
+
+        int X = 0, Y = 0;
+
+        try {
+            if (obj != null) {
+                X = obj.getVisibleBounds().centerX();
+                Y = obj.getVisibleBounds().centerY();
+            }
+        } catch (StaleObjectException e) {
+            MATELog.log_warn("Stale UiObject2!");
+            e.printStackTrace();
+            X = widget.getX();
+            Y = widget.getY();
         }
+
         return device.swipe(X, Y, X, Y, 120);
     }
 
@@ -187,6 +216,7 @@ public class WidgetActionExecutor extends ActionExecutor {
      * Handles the insertion of a text in the given editable widget.
      *
      * @param widget The editable widget.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
      */
     public boolean handleEdit(Widget widget) {
 
@@ -207,78 +237,116 @@ public class WidgetActionExecutor extends ActionExecutor {
 
         if (uiObject != null) {
 
-            uiObject.setText(textData);
-
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText(textData);
-        } else {
-            // try to click on the widget, which in turn should get focused
-            device.click(widget.getX(), widget.getY());
-            UiObject2 obj = device.findObject(By.focused(true));
-            if (obj != null) {
-                obj.setText(textData);
+            try {
+                uiObject.setText(textData);
 
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText(textData);
 
-                // we need to close the soft keyboard, but only if it is present, see:
-                // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-                device.pressBack();
-            } else {
-                MATELog.log("  ********* obj " + widget.getId() + "  not found");
-                return false;
-            }
-        }
+                // we need to close the soft keyboard, but only if it is present
+                if (DeviceInfo.getInstance().isKeyboardOpened()) {
+                    device.pressBack();
+                }
 
-        return true;
+                return true;
+            } catch (StaleObjectException e) {
+                MATELog.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                return handleEditFallback(widget, textData);
+            }
+        } else {
+            return handleEditFallback(widget, textData);
+        }
     }
 
     /**
-     * Tries to return a ui object matching the given widget. This is a
-     * best effort approach.
+     * Provides a fallback mechanism for editing a text field.
+     *
+     * @param widget The text field widget.
+     * @param textData The text to be inserted.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false} is returned.
+     */
+    private boolean handleEditFallback(Widget widget, String textData) {
+
+        // try to click on the widget, which in turn should get focused
+        device.click(widget.getX(), widget.getY());
+        UiObject2 obj = device.findObject(By.focused(true));
+        if (obj != null) {
+            try {
+                obj.setText(textData);
+
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText(textData);
+                return true;
+            } catch (StaleObjectException e) {
+                MATELog.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                MATELog.log_warn("Couldn't edit widget: " + widget);
+            } finally {
+                // we need to close the soft keyboard, but only if it is present
+                if (DeviceInfo.getInstance().isKeyboardOpened()) {
+                    device.pressBack();
+                }
+            }
+        } else {
+            MATELog.log_warn("Couldn't edit widget: " + widget);
+        }
+        return false;
+    }
+
+    /**
+     * Tries to return a ui object matching the given widget. This is a best effort approach.
      *
      * @param widget The widget whose ui object should be looked up.
-     * @return Returns the corresponding ui object or {@code null} if no
-     *         such ui object could be found.
+     * @return Returns the corresponding ui object or {@code null} if no such ui object could be
+     *         found or the ui object got be stale in the meantime.
      */
     public UiObject2 findObject(Widget widget) {
 
-        // retrieve all ui objects that match the given widget resource id
-        List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+        try {
 
-        if (objs != null) {
-            if (objs.size() == 1) {
-                return objs.get(0);
-            } else {
-                /*
-                 * It can happen that multiple widgets share the same resource id,
-                 * thus we need to compare on the text attribute.
-                 */
-                for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
-                        return uiObject2;
+            // retrieve all ui objects that match the given widget resource id
+            List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+
+            if (objs != null) {
+                if (objs.size() == 1) {
+                    return objs.get(0);
+                } else {
+                    /*
+                     * It can happen that multiple widgets share the same resource id,
+                     * thus we need to compare on the text attribute.
+                     */
+                    for (UiObject2 uiObject2 : objs) {
+                        if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
+                            return uiObject2;
+                    }
                 }
             }
-        }
 
-        // if no match for id, try to find the object by text match
-        objs = device.findObjects(By.text(widget.getText()));
+            // if no match for id, try to find the object by text match
+            objs = device.findObjects(By.text(widget.getText()));
 
-        if (objs != null) {
-            if (objs.size() == 1) {
-                return objs.get(0);
-            } else {
-                // try to match by content description or widget boundary
-                for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getContentDescription() != null
-                            && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
-                            (uiObject2.getVisibleBounds() != null
-                                    && uiObject2.getVisibleBounds().centerX() == widget.getX()
-                                    && uiObject2.getVisibleBounds().centerY() == widget.getY()))
-                        return uiObject2;
+            if (objs != null) {
+                if (objs.size() == 1) {
+                    return objs.get(0);
+                } else {
+                    // try to match by content description or widget boundary
+                    for (UiObject2 uiObject2 : objs) {
+                        if (uiObject2.getContentDescription() != null
+                                && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
+                                (uiObject2.getVisibleBounds() != null
+                                        && uiObject2.getVisibleBounds().centerX() == widget.getX()
+                                        && uiObject2.getVisibleBounds().centerY() == widget.getY()))
+                            return uiObject2;
+                    }
                 }
             }
+
+        } catch (StaleObjectException e) {
+            MATELog.log_warn("Stale UiObject2!");
+            e.printStackTrace();
         }
+
         return null;
     }
 }

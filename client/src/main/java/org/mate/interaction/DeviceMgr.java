@@ -374,7 +374,6 @@ public class DeviceMgr {
      * Reads the traces from the external memory and deletes afterwards the info and traces file.
      *
      * @return Returns the set of traces.
-     *
      */
     public Set<String> getTraces() {
 

@@ -11,7 +11,7 @@ public enum ActionType {
     SWIPE_RIGHT,
     BACK,
     MENU,
-    CLEAR_WIDGET,
+    CLEAR_TEXT,
     MANUAL_ACTION,
     TOGGLE_ROTATION,
     HOME,

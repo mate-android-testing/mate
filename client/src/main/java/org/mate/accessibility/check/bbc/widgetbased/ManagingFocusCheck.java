@@ -2,13 +2,13 @@ package org.mate.accessibility.check.bbc.widgetbased;
 
 import org.mate.Registry;
 import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.accessibility.check.IWidgetAccessibilityCheck;
-import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateFactory;
+import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.interaction.action.ui.WidgetAction;
+import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
 
 public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
@@ -46,7 +46,7 @@ public class ManagingFocusCheck implements IWidgetAccessibilityCheck {
 
                         if (widget.getText().equals(widget.getHint())|| widget.getText().equals(widget.getContentDesc())){
                             //MATE.log("MUST CLEAR");
-                            WidgetAction clearField = new WidgetAction(wd,ActionType.CLEAR_WIDGET);
+                            WidgetAction clearField = new WidgetAction(wd,ActionType.CLEAR_TEXT);
                             Registry.getUiAbstractionLayer().executeAction(clearField);
                         }
                         else{
