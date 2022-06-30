@@ -7,7 +7,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import org.mate.commons.state.executable.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.MersenneTwister;
 import org.mate.commons.utils.Randomness;
@@ -127,21 +126,6 @@ public class ExplorationInfo {
      */
     public boolean useWidgetBasedActions() {
         return widgetBasedActions;
-    }
-
-    /**
-     * Sets the StateEquivalenceLevel to use when creating Widgets.
-     * @param level
-     */
-    public void setStateEquivalenceLevel(StateEquivalenceLevel level) {
-        this.stateEquivalenceLevel = level;
-    }
-
-    /**
-     * @return the StateEquivalenceLevel to use when creating Widgets.
-     */
-    public StateEquivalenceLevel getStateEquivalenceLevel() {
-        return stateEquivalenceLevel;
     }
 
     /**
