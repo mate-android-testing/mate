@@ -58,12 +58,12 @@ public class ExplorationInfo {
     /**
      * The maximum number of retries to attempt when the UI Automator is disconnected.
      */
-    private static final int UiAutomatorDisconnectedRetries = 3;
+    public static final int UiAutomatorDisconnectedRetries = 3;
 
     /**
      * The error message when the ui automator is disconnected.
      */
-    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
+    public static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
 
     private ExplorationInfo() {}
 

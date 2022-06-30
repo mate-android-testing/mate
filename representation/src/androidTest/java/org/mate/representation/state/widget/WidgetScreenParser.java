@@ -47,11 +47,6 @@ public class WidgetScreenParser {
      */
     private final UiDevice device;
 
-    /**
-     * The maximal number of retries (app screen information) when the ui automator is disconnected.
-     */
-    private static final int UiAutomatorDisconnectedRetries = 3;
-
     public WidgetScreenParser() {
         this.widgets = new ArrayList<>();
         this.activityName = ExplorationInfo.getInstance().getCurrentActivityName();
@@ -90,7 +85,7 @@ public class WidgetScreenParser {
 
         AccessibilityNodeInfo rootNode = getInstrumentation().getUiAutomation().getRootInActiveWindow();
 
-        for (int numberOfRetries = 0; numberOfRetries < UiAutomatorDisconnectedRetries
+        for (int numberOfRetries = 0; numberOfRetries < ExplorationInfo.UiAutomatorDisconnectedRetries
                 && rootNode == null; numberOfRetries++) {
 
             /*
