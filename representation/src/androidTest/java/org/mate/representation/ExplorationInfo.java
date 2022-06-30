@@ -56,7 +56,7 @@ public class ExplorationInfo {
     private StateEquivalenceLevel stateEquivalenceLevel;
 
     /**
-     * The maximal number of retries (app screen information) when the ui automator is disconnected.
+     * The maximum number of retries to attempt when the UI Automator is disconnected.
      */
     private static final int UiAutomatorDisconnectedRetries = 3;
 
