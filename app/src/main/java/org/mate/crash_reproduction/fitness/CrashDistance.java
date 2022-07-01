@@ -1,5 +1,6 @@
 package org.mate.crash_reproduction.fitness;
 
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.CallTreeDistance;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -7,9 +8,11 @@ import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.model.TestCase;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CrashDistance implements IFitnessFunction<TestCase> {
+    private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
     private final Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions = new HashMap<IFitnessFunction<TestCase>, Double>(){{
 //        put(new BankdroidFitnessFunction(), 1D);
 
@@ -31,6 +34,10 @@ public class CrashDistance implements IFitnessFunction<TestCase> {
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
+        if (chromosome.getValue().reachedTarget(targetStackTrace)) {
+            return 0;
+        }
+
         double weightSum = 0;
         double weightedFitness = 0;
 
