@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -971,6 +972,17 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return extractCoverage(response);
+    }
+
+    public <T> T askUserToPick(List<T> options, Function<T, String> toString) {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/let_user_pick")
+                .withParameter("options", String.valueOf(options.size()));
+
+        for (int i = 0; i < options.size(); i++) {
+            messageBuilder.withParameter("option_" + i, toString.apply(options.get(i)));
+        }
+
+        return options.get(Integer.parseInt(sendMessage(messageBuilder.build()).getParameter("picked_option")));
     }
 
     /**
