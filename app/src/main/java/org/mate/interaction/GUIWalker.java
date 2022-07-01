@@ -3,6 +3,8 @@ package org.mate.interaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.support.test.uiautomator.UiDevice;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -17,6 +19,7 @@ import org.mate.utils.Randomness;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.IntentFilterDescription;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -383,16 +386,35 @@ public class GUIWalker {
      *         is returned.
      */
     public boolean goToMainActivity() {
-        Context context = getContext();
-        final Intent intent = context.getPackageManager()
-                .getLaunchIntentForPackage(Registry.getPackageName());
-        try {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
+
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.R) {
+            /*
+             * There is a new security restriction on API level 30 that doesn't allow MATE anymore to
+             * start the AUT. We need to resort to monkey to restart the AUT, see:
+             * https://stackoverflow.com/questions/65206233/android-cant-start-an-activity-with-am-start-when-running-as-user-on-androi
+             */
+            try {
+                UiDevice device = Registry.getDeviceMgr().getDevice();
+                device.executeShellCommand("monkey -p " + Registry.getPackageName() + " 1");
+                // Alternatively:
+                // device.executeShellCommand("am start -n " + packageName + "/"
+                //       + Registry.getMainActivity());
+            } catch (IOException e) {
+                e.printStackTrace();
+                MATE.log_warn("Restarting app failed!");
+            }
+        } else {
+            Context context = getContext();
+            final Intent intent = context.getPackageManager()
+                    .getLaunchIntentForPackage(Registry.getPackageName());
+            try {
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            } catch (Exception e) {
+                e.printStackTrace();
+                MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
+            }
+            context.startActivity(intent);
         }
-        context.startActivity(intent);
         return uiAbstractionLayer.getCurrentActivity().equals(mainActivity);
     }
 }
