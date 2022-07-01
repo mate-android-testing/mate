@@ -40,8 +40,9 @@ public class EndsOnTarget implements IFitnessFunction<TestCase> {
         }
 
         // Ideally the testcase ends on the target
+        double totalActions = chromosome.getValue().getEventSequence().size();
         return reachedTarget
-                ? actionsAfterTarget / chromosome.getValue().getEventSequence().size()
+                ? totalActions == 0 ? 0 : actionsAfterTarget / totalActions
                 : 1; // did not even reach target
     }
 }
