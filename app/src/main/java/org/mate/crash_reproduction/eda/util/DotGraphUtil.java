@@ -95,7 +95,7 @@ public class DotGraphUtil {
         return stringJoiner.toString();
     }
 
-    private static String getAttributeString(Map<String, String> attributes) {
+    public static String getAttributeString(Map<String, String> attributes) {
         if (attributes == null) {
             return "";
         } else {
