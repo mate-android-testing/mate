@@ -32,7 +32,8 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
         try {
             ModelRepresentationIterator iterator = modelRepresentation.getIterator();
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
-                Action action = Randomness.randomIndexWithProbabilities(ProbabilityUtil.weightsToProbability(iterator.getActionProbabilities()));
+                // TODO add back ProbabilityUtil.weightsToProbabilities
+                Action action = Randomness.randomIndexWithProbabilities(iterator.getActionProbabilities());
 
                 if (!testCase.updateTestCase(action, actionsCount)) {
                     return chromosome;

@@ -41,7 +41,7 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
             entry.setValue((promisingActions.contains(entry.getKey()) ? pPromisingAction : (1 - pPromisingAction)) * entry.getValue() / weightSum);
         }
 
-        return probabilities;
+        return probabilities; // TODO fix
     }
 
     private double getActionWeight(List<Action> prevActions, UIAction action) {
