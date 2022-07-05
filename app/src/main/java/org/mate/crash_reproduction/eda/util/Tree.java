@@ -43,7 +43,7 @@ public class Tree<T> {
         StringJoiner stringJoiner = new StringJoiner("\n");
         stringJoiner.add("digraph D {");
 
-        Function<TreeNode<T>, String> nodeToEscapedLabel = n -> '"' + nodeLabel.apply(n.getContent()) + " " + n.getParentList().map(p -> "" + n.getContent().hashCode()).collect(Collectors.joining(",")) + '"';
+        Function<TreeNode<T>, String> nodeToEscapedLabel = n -> '"' + nodeLabel.apply(n.getContent()) + " " + n.getParentList().map(p -> nodeLabel.apply(p.getContent())).collect(Collectors.joining(",")) + '"';
         Function<Map<String, String>, String> attributesToString = attributes -> attributes == null || attributes.isEmpty() ? ""
                 : " [" + attributes.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", ")) + "]";
 
