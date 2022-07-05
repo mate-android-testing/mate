@@ -10,9 +10,9 @@ import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AskUserExploration implements Algorithm {
-    private final IFitnessFunction<TestCase> fitnessFunction = new CrashDistance();
+    private final CrashDistance fitnessFunction = new CrashDistance();
     private int chromosomeCounter = 0;
 
     @Override
@@ -130,6 +130,7 @@ public class AskUserExploration implements Algorithm {
         Iterator<Action> actionIterator = chromosome.getValue().getEventSequence().iterator();
         ExplorationStep prevStep = null;
         double prevFitness = fitnessFunction.isMaximizing() ? 0 : 1;
+        Map<String, Double> prevFitnessVector = null;
         for (ExplorationStep step : steps) {
             // Print step
             Map<String, String> attributes = new HashMap<>();
@@ -140,21 +141,33 @@ public class AskUserExploration implements Algorithm {
             attributes.put("height", "6");
             attributes.put("fixedsize", "true");
             attributes.put("shape", "square");
-            attributes.put("xlabel", "<" + step.state.getId() + "<BR/>Fitness: " + step.fitness + " " + describeFitnessChange(prevFitness, step.fitness) + ">");
+            Map<String, Double> finalPrevFitnessVector = prevFitnessVector;
+            attributes.put("xlabel", "<" + step.state.getId() + " on " + step.state.getActivityName()
+                    + "<BR/><B>Fitness: " + step.fitness + " " + describeFitnessChange(prevFitness, step.fitness) + "</B><BR/>"
+                    + step.fitnessVector.entrySet().stream().map(e -> {
+                        String suffix = finalPrevFitnessVector == null ? "" : describeFitnessChange(finalPrevFitnessVector.get(e.getKey()), e.getValue());
+                        return e.getKey() + ": " + e.getValue() + " " + suffix;
+                    }).collect(Collectors.joining("<BR/>"))
+                    + ">");
             graph.add(String.format("%s [%s]", step.nodeId, DotGraphUtil.getAttributeString(attributes)));
 
             // Print edge
             if (prevStep != null) {
-                graph.add(String.format("%s -> %s [label=\"%s\"]", prevStep.nodeId, step.nodeId, actionIterator.next().toShortString()));
+                graph.add(String.format("%s -> %s [label=\"%s\"]", prevStep.nodeId, step.nodeId, printAction(actionIterator.next())));
             }
 
             prevStep = step;
             prevFitness = step.fitness;
+            prevFitnessVector = step.fitnessVector;
         }
 
         graph.add("}");
 
         return graph.toString();
+    }
+
+    private String printAction(Action action) {
+        return action.toString();
     }
 
     private String describeFitnessChange(double prevFitness, double curFitness) {
@@ -163,7 +176,7 @@ public class AskUserExploration implements Algorithm {
         } else if (curFitness > prevFitness) {
             return "\uD83E\uDC55"; // higher
         } else {
-            return "\uD83E\uDC52"; // same
+            return ""; // same
         }
     }
 
@@ -174,19 +187,27 @@ public class AskUserExploration implements Algorithm {
 
         String nodeId = "exp_" + chromosomeCounter + "_step_" + chromosome.getValue().getEventSequence().size();
         Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), nodeId);
+        List<Widget> widgets = Registry.getUiAbstractionLayer().getPromisingActions(Registry.getUiAbstractionLayer().getLastScreenState()).stream().map(WidgetAction::getWidget).collect(Collectors.toList());
 
-        return new ExplorationStep(Registry.getUiAbstractionLayer().getLastScreenState(), nodeId, fitness);
+        if (!widgets.isEmpty()) {
+            Registry.getEnvironmentManager().markOnImage(widgets, nodeId);
+        }
+
+        return new ExplorationStep(Registry.getUiAbstractionLayer().getLastScreenState(), nodeId, fitness,
+                fitnessFunction.getWeightedFitnessFunctions().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> e.getKey().getNormalizedFitness(chromosome))));
     }
 
     private static class ExplorationStep {
         private final IScreenState state;
         private final String nodeId;
         private final double fitness;
+        private final Map<String, Double> fitnessVector;
 
-        private ExplorationStep(IScreenState state, String nodeId, double fitness) {
+        private ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector) {
             this.state = state;
             this.nodeId = nodeId;
             this.fitness = fitness;
+            this.fitnessVector = fitnessVector;
         }
     }
 }

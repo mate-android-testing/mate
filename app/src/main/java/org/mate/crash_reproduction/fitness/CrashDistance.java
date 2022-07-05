@@ -54,4 +54,8 @@ public class CrashDistance implements IFitnessFunction<TestCase> {
 
         return weightedFitness / weightSum;
     }
+
+    public Map<IFitnessFunction<TestCase>, Double> getWeightedFitnessFunctions() {
+        return weightedFitnessFunctions;
+    }
 }
