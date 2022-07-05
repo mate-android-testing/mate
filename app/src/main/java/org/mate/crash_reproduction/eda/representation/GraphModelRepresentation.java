@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -108,25 +109,53 @@ public class GraphModelRepresentation<ExtraInfo> implements IModelRepresentation
 
     @Override
     public String toString() {
-        Function<Node, String> nodeToString = n -> n.state.getId() + "(" + (n.extraInfo == null ? null : n.extraInfo.toString()) + ")";
+        Function<Node, String> nodeToString = n -> '"' + n.state.getId() + "(" + (n.extraInfo == null ? null : n.extraInfo.toString()) + ")\"";
         List<Edge> bestPath = bestPath();
-        Map<String, Set<String>> edges = new HashMap<>();
-        Map<String, Map<String, String>> nodeAttributeLookup = new HashMap<>();
-        Map<String, Map<String, Map<String, String>>> edgeAttributeLookup = new HashMap<>();
+
+        Map<Node, Map<Action, Node>> edgeMap = new HashMap<>();
 
         for (Edge edge : this.edges) {
-            edges.computeIfAbsent(nodeToString.apply(edge.source), a -> new HashSet<>()).add(nodeToString.apply(edge.target));
-            Map<String, String> edgeAttributes = DotGraphUtil.toDotEdgeAttributeLookup(probabilities.get(edge.source), edge.target.state,
-                    bestPath.stream().anyMatch(e -> e.source.equals(edge.source) && e.target.equals(edge.target)));
-            edgeAttributeLookup.computeIfAbsent(nodeToString.apply(edge.source), a -> new HashMap<>())
-                    .put(nodeToString.apply(edge.target), edgeAttributes);
+            edgeMap.computeIfAbsent(edge.source, e -> new HashMap<>())
+                    .put(edge.action, edge.target);
         }
 
-        for (Map.Entry<Node, Map<Action, Double>> entry : probabilities.entrySet()) {
-            nodeAttributeLookup.put(nodeToString.apply(entry.getKey()), DotGraphUtil.toDotNodeAttributeLookup(entry.getKey().state, entry.getValue()));
+        StringJoiner graph = new StringJoiner("\n");
+        graph.add("digraph D {");
+
+        for (Map.Entry<Node, Map<Action, Node>> node : edgeMap.entrySet()) {
+            Node source = node.getKey();
+            Map<Action, Double> actionProbabilities = probabilities.get(source);
+            Map<Action, Node> nodeEdges = node.getValue();
+            Set<Map.Entry<Action, Double>> missingEdges = new HashSet<>();
+            Map<Node, Set<Map.Entry<Action, Double>>> targetMap = new HashMap<>();
+
+            for (Map.Entry<Action, Double> actionProbability : actionProbabilities.entrySet()) {
+                Node target = nodeEdges.get(actionProbability.getKey());
+
+                if (target == null) {
+                    missingEdges.add(actionProbability);
+                } else {
+                    targetMap.computeIfAbsent(target, a -> new HashSet<>()).add(actionProbability);
+                }
+            }
+            Map<String, String> nodeAttributes = DotGraphUtil.toDotNodeAttributeLookup(source.state, missingEdges, actionProbabilities);
+
+            graph.add(nodeToString.apply(source) + " [" + DotGraphUtil.getAttributeString(nodeAttributes) + "]");
+
+            for (Map.Entry<Node, Set<Map.Entry<Action, Double>>> targetEntry : targetMap.entrySet()) {
+                Node target = targetEntry.getKey();
+                Set<Map.Entry<Action, Double>> incomingEdges = targetEntry.getValue();
+
+                boolean edgeOnBestPath = bestPath.stream().anyMatch(e -> e.source.equals(source) && e.target.equals(target));
+                Map<String, String> edgeAttributes = DotGraphUtil.toDotEdgeAttributeLookup(actionProbabilities, incomingEdges, edgeOnBestPath);
+
+                graph.add(nodeToString.apply(source) + " -> " + nodeToString.apply(target) + " [" + DotGraphUtil.getAttributeString(edgeAttributes) + "]");
+            }
         }
 
-        return DotGraphUtil.toDotGraph(edges, nodeAttributeLookup, edgeAttributeLookup);
+        graph.add("}");
+
+        return graph.toString();
     }
 
     private class Node {
