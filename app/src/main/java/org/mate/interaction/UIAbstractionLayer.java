@@ -1,12 +1,16 @@
 package org.mate.interaction;
 
+import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
+import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
+import static org.mate.interaction.action.ActionResult.SUCCESS;
+import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
+
 import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
 import org.mate.Registry;
-import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
@@ -31,12 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.interaction.action.ActionResult.SUCCESS;
-import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
 /**
  * TODO: make singleton
@@ -307,6 +305,12 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for media picker
+                if (handleMediaPicker(screenState)) {
+                    change = true;
+                    continue;
+                }
+
             } catch (Exception e) {
                 if (e instanceof IllegalStateException
                         && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
@@ -332,6 +336,16 @@ public class UIAbstractionLayer {
         if (screenState.getPackageName().equals("com.google.android.gms")) {
             MATE.log("Detected Google SignIn Dialog!");
             deviceMgr.pressBack();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean handleMediaPicker(IScreenState screenState) {
+        if (screenState.getPackageName().equals("com.android.providers.media")) {
+            MATE.log("Detected media picker!");
+            deviceMgr.pressBack(); // TODO maybe better to select 'Ok'?
             return true;
         } else {
             return false;
