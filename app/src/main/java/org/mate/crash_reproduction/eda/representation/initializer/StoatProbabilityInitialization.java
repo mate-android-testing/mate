@@ -5,12 +5,17 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.state.IScreenState;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
 public class StoatProbabilityInitialization implements BiFunction<List<Action>, IScreenState, Map<Action, Double>> {
     private final double pPromisingAction;
@@ -30,18 +35,33 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
 
         // P_j(I) = P_T / l, where I elem promising actions
         // P_j(I) = (1 - P_T) / l, where I not elem promising actions
-        double weightSum = 0;
         for (Action action : state.getActions()) {
-            double weight = getActionWeight(prevActions, (UIAction) action);
-            weightSum += weight;
+            double weight = getActionWeight(prevActions, (UIAction) action) *
+                    (promisingActions.contains(action) ? pPromisingAction : (1 - pPromisingAction));
             probabilities.put(action, weight);
         }
 
-        for (Map.Entry<Action, Double> entry : probabilities.entrySet()) {
-            entry.setValue((promisingActions.contains(entry.getKey()) ? pPromisingAction : (1 - pPromisingAction)) * entry.getValue() / weightSum);
+        return fixed(probabilities, 0.7);
+    }
+
+    private <T> Map<T, Double> fixed(Map<T, Double> weights, double maxProb) {
+        ToDoubleFunction<Map.Entry<T, Double>> toDoubleFunction = Map.Entry::getValue;
+
+        Map<T, Double> probabilities = new HashMap<>();
+        Queue<T> sortedEntries = weights.entrySet().stream()
+                .sorted(Comparator.comparingDouble(toDoubleFunction).reversed())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        double leftToGive = 1;
+        while (!sortedEntries.isEmpty()) {
+            double prob = leftToGive * maxProb;
+            probabilities.put(sortedEntries.poll(), prob);
+
+            leftToGive -= prob;
         }
 
-        return probabilities; // TODO fix
+        return probabilities;
     }
 
     private double getActionWeight(List<Action> prevActions, UIAction action) {
@@ -53,7 +73,7 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
             case DPAD_LEFT:
             case DPAD_RIGHT:
             case DPAD_CENTER:
-                eventTypeWeight = 0.25;
+                eventTypeWeight = 0.1;
                 break;
             case SWIPE_UP:
             case SWIPE_DOWN:
