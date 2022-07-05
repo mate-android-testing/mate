@@ -2,7 +2,6 @@ package org.mate.crash_reproduction.fitness;
 
 import android.util.Pair;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -19,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class BankdroidFitnessFunction implements IFitnessFunction<TestCase> {
     private final static Predicate<TestCase> RIGHT_ACTIVITY = t -> t.getVisitedActivities().contains("com.liato.bankdroid.BankEditActivity");
@@ -48,14 +46,14 @@ public class BankdroidFitnessFunction implements IFitnessFunction<TestCase> {
     private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
     private final Predicate<TestCase> REACHED_CRASH = t -> t.reachedTarget(targetStackTrace);
 
-    private final List<Pair<Predicate<TestCase>, String>> barriers = new LinkedList<Pair<Predicate<TestCase>, String>>() {{
+    private final BarrierFitnessFunction<TestCase> barrierFitnessFunction = new BarrierFitnessFunction<>(new LinkedList<Pair<Predicate<TestCase>, String>>() {{
         add(Pair.create(OPENED_MENU, "Opened menu"));
         add(Pair.create(RIGHT_ACTIVITY, "Right activity"));
         add(Pair.create(OPENED_BANK_SELECTION, "Opened bank selection"));
         add(Pair.create(RIGHT_STATE, "Right state"));
         add(Pair.create(RIGHT_STATE.and(RIGHT_MOTIF_ACTION.or(RIGHT_ACTION_SEQUENCE)), "Right actions"));
         add(Pair.create(REACHED_CRASH, "Reached crash"));
-    }};
+    }});
 
     @Override
     public double getFitness(IChromosome<TestCase> chromosome) {
@@ -69,18 +67,9 @@ public class BankdroidFitnessFunction implements IFitnessFunction<TestCase> {
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        return 0.6 * getBarrierFitness(chromosome)
+        return 0.6 * barrierFitnessFunction.getNormalizedFitness(chromosome)
                 + 0.2 * getNumOfActionsOnTarget(chromosome)
                 + 0.2 * getNumActionsAfterTarget(chromosome);
-    }
-
-    private double getBarrierFitness(IChromosome<TestCase> chromosome) {
-        double total = barriers.size();
-        List<Pair<?, String>> passedPairs = barriers.stream().filter(p -> p.first.test(chromosome.getValue())).collect(Collectors.toList());
-        MATE.log("Testcase fitness: [" + passedPairs.stream().map(p -> p.second).collect(Collectors.joining(", ")) + "]");
-        double passed = passedPairs.size();
-        double missing = total - passed;
-        return missing / total;
     }
 
     private double getNumOfActionsOnTarget(IChromosome<TestCase> chromosome) {
