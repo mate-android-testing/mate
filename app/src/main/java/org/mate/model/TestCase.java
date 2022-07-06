@@ -505,7 +505,12 @@ public class TestCase {
         }
 
         // Ignore internal implementation differences
-        noMatch.removeIf(line -> line.contains("at dalvik.") || line.contains("at java."));
+        noMatch.removeIf(line -> line.contains("at dalvik.")
+                || line.contains("at java.")
+                || line.contains("at android.os")
+                || line.contains("at android.widget")
+                || line.contains("at com.android.internal.")
+        );
 
         return noMatch.size() <= 1;
     }
