@@ -1,9 +1,6 @@
 package org.mate.state.executables;
 
 import org.mate.MATE;
-import org.mate.Registry;
-import org.mate.accessibility.AccessibilityViolation;
-import org.mate.accessibility.check.bbc.AccessibilityViolationType;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
@@ -305,6 +302,10 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isCheckable()) {
                 // we check a widget by clicking on it
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+            }
+
+            if (widget.isLongClickable()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK, id));
             }
 
             /*
