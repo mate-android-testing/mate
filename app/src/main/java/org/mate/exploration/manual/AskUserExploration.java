@@ -184,7 +184,7 @@ public class AskUserExploration implements Algorithm {
                 "    ab = AnnotationBbox(im, (x, 0), xybox=(0, -320), frameon=False,\n" +
                 "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
                 "    ax.add_artist(ab)\n" +
-                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=20)), (x, 0), xybox=(0, -650), frameon=False,\n" +
+                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=25)), (x, 0), xybox=(0, -650), frameon=False,\n" +
                 "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
                 "    ax.add_artist(ab)\n" +
                 "\n" +
