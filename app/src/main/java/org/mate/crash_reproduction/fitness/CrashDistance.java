@@ -4,7 +4,6 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.CallTreeDistance;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.model.TestCase;
 
 import java.util.HashMap;
@@ -19,7 +18,6 @@ public class CrashDistance implements IFitnessFunction<TestCase> {
         put(new CallTreeDistance<>(), 6D);
         put(new ReachedTarget(), 3D);
         put(new EndsOnTarget(), 2D);
-        put(new LineCoverageFitnessFunction<>(), 1D);
     }};
 
     @Override
