@@ -161,11 +161,25 @@ public class GeneticAlgorithmBuilder {
     }
 
     public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions) {
+        int counter = 0;
+
+        for (int i = 0; i < fitnessFunctions.length; i++) {
+            if (fitnessFunctions[i] != null) {
+                String key = "";
+
+                counter++;
+                key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, counter);
+                properties.setProperty(key, fitnessFunctions[i].name());
+            }
+        }
+
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, String.valueOf(fitnessFunctions.length));
 
         // TODO: Remove once all properties are enforced via the mate.properties file!
         if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             org.mate.Properties.setProperty("fitness_functions", fitnessFunctions);
         }
+
         return this;
     }
 
