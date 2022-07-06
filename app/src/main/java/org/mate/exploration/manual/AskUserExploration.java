@@ -68,6 +68,7 @@ public class AskUserExploration implements Algorithm {
         } finally {
             testCase.finish();
             Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".dot", toDot(explorationSteps, chromosome));
+            Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode(explorationSteps));
         }
         return chromosome;
     }
@@ -164,6 +165,43 @@ public class AskUserExploration implements Algorithm {
         graph.add("}");
 
         return graph.toString();
+    }
+
+    private String toMatPlotLibCode(List<ExplorationStep> steps) {
+        String states = "[" + steps.stream().map(s -> '"' + s.nodeId + '"').collect(Collectors.joining(",")) + "]";
+        String fitnessValues = "[" + steps.stream().map(s -> String.valueOf(s.fitness)).collect(Collectors.joining(",")) + "]";
+        String imageLabelLookup = "{" + steps.stream().map(s -> '"' + s.nodeId + "\":\"" + s.state.getId() + '"').collect(Collectors.joining(", ")) + "}";
+
+        return "import matplotlib.pyplot as plt\n" +
+                "from matplotlib.offsetbox import OffsetImage, AnnotationBbox, TextArea\n" +
+                "\n" +
+                "lookup = " + imageLabelLookup + "\n" +
+                "def offset_image(x, ax):\n" +
+                "    img = plt.imread(f'pictures/" + Registry.getPackageName() + "/{x}.png')\n" +
+                "    im = OffsetImage(img, zoom=0.3)\n" +
+                "    im.label = lookup[x]\n" +
+                "    im.image.axes = ax\n" +
+                "    ab = AnnotationBbox(im, (x, 0), xybox=(0, -320), frameon=False,\n" +
+                "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
+                "    ax.add_artist(ab)\n" +
+                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=20)), (x, 0), xybox=(0, -650), frameon=False,\n" +
+                "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
+                "    ax.add_artist(ab)\n" +
+                "\n" +
+                "x_values = " + states + "\n" +
+                "y_values = " + fitnessValues + "\n" +
+                "\n" +
+                "plt.plot(x_values, y_values, linewidth=4)\n" +
+                "plt.gca().set_ylim([0, 1])\n" +
+                "plt.gca().tick_params(axis='y', labelsize=20)\n" +
+                "\n" +
+                "for i, (x, y) in enumerate(zip(x_values, y_values)):\n" +
+                "    offset_image(x, ax=plt.gca())\n" +
+                "\n" +
+                "fig = plt.gcf()\n" +
+                "fig.set_size_inches(len(x_values) * 5, 5.5)\n" +
+                "plt.tight_layout()\n" +
+                "plt.savefig('exp_" + chromosomeCounter + "_graph" + ".png', bbox_inches=\"tight\")\n";
     }
 
     private String printAction(Action action) {
