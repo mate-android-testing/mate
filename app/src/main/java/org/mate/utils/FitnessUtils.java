@@ -61,7 +61,7 @@ public class FitnessUtils {
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE,
                 FitnessFunction.METHOD_COVERAGE,
                 FitnessFunction.NOVELTY,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
+                FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE, FitnessFunction.BRANCH_MULTI_OBJECTIVE);
 
