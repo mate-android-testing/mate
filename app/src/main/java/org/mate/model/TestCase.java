@@ -509,6 +509,7 @@ public class TestCase {
                 || line.contains("at java.")
                 || line.contains("at android.os")
                 || line.contains("at android.widget")
+                || line.contains("at android.support")
                 || line.contains("at com.android.internal.")
         );
 
