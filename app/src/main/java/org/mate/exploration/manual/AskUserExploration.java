@@ -170,12 +170,18 @@ public class AskUserExploration implements Algorithm {
     private String toMatPlotLibCode(List<ExplorationStep> steps) {
         String states = "[" + steps.stream().map(s -> '"' + s.nodeId + '"').collect(Collectors.joining(",")) + "]";
         String fitnessValues = "[" + steps.stream().map(s -> String.valueOf(s.fitness)).collect(Collectors.joining(",")) + "]";
-        String imageLabelLookup = "{" + steps.stream().map(s -> '"' + s.nodeId + "\":\"" + s.state.getId() + '"').collect(Collectors.joining(", ")) + "}";
+        String imageLabelLookup = "{" + steps.stream()
+                .map(s -> '"' + s.nodeId + "\":\"\"\"" + s.state.getId() + " Fitness: " + String.format("%,.2f", s.fitness) + "\n" + s.fitnessVector.entrySet().stream().map(e -> e.getKey() + ": " + String.format("%,.2f", e.getValue())).collect(Collectors.joining("\n")) + "\"\"\"")
+                .collect(Collectors.joining(", ")) + "}";
 
         return "import matplotlib.pyplot as plt\n" +
                 "from matplotlib.offsetbox import OffsetImage, AnnotationBbox, TextArea\n" +
                 "\n" +
                 "lookup = " + imageLabelLookup + "\n" +
+                "def estimate_height(label):\n" +
+                "    num_lines = label.count('\\n')\n" +
+                "    return num_lines * 20\n" +
+                "\n" +
                 "def offset_image(x, ax):\n" +
                 "    img = plt.imread(f'pictures/" + Registry.getPackageName() + "/{x}.png')\n" +
                 "    im = OffsetImage(img, zoom=0.3)\n" +
@@ -184,7 +190,7 @@ public class AskUserExploration implements Algorithm {
                 "    ab = AnnotationBbox(im, (x, 0), xybox=(0, -320), frameon=False,\n" +
                 "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
                 "    ax.add_artist(ab)\n" +
-                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=25)), (x, 0), xybox=(0, -650), frameon=False,\n" +
+                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=22)), (x, 0), xybox=(0, -600 - estimate_height(lookup[x])), frameon=False,\n" +
                 "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
                 "    ax.add_artist(ab)\n" +
                 "\n" +
@@ -199,7 +205,8 @@ public class AskUserExploration implements Algorithm {
                 "    offset_image(x, ax=plt.gca())\n" +
                 "\n" +
                 "fig = plt.gcf()\n" +
-                "fig.set_size_inches(len(x_values) * 5, 5.5)\n" +
+                "max_label_height = max(map(estimate_height, lookup.values()))\n" +
+                "fig.set_size_inches(len(x_values) * 5, 6 + max_label_height / 100)\n" +
                 "plt.tight_layout()\n" +
                 "plt.savefig('exp_" + chromosomeCounter + "_graph" + ".png', bbox_inches=\"tight\")\n";
     }
