@@ -1,5 +1,6 @@
 package org.mate.crash_reproduction.eda.representation;
 
+import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
@@ -24,7 +25,7 @@ public class TestCaseModelIterator implements Iterator<TestCaseModelIterator.Nod
 
         // This skips the root node
         if (!stateIterator.next().equals(representationIterator.getState())) {
-            throw new IllegalStateException("Testcase does not start at root...");
+            MATE.log_warn("Testcase does not start at root...");
         }
     }
 
