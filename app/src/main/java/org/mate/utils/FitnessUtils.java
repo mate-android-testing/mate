@@ -11,6 +11,7 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.coverage.Coverage;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -64,13 +65,7 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE, FitnessFunction.BRANCH_MULTI_OBJECTIVE);
 
-        if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome, null);
-        }
-
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-        }
+        storeTestSuite(fitnessFunctions, chromosome, null);
     }
 
     /**
@@ -89,12 +84,30 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
-        if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome, testCase.getId());
-        }
+        storeTestSuite(fitnessFunctions, chromosome, testCase.getId());
+    }
 
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+    private static <T> void storeTestSuite(EnumSet<FitnessFunction> fitnessFunctions,
+                                 IChromosome<T> chromosome, String testCaseId) {
+
+        FitnessFunction[] usedFitnessFunctions = Properties.FITNESS_FUNCTIONS();
+
+        if (usedFitnessFunctions == null) {
+            if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
+                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
+            }
+
+            if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
+                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+            }
+        } else {
+            if (Arrays.stream(usedFitnessFunctions).anyMatch(fitnessFunctions::contains)) {
+                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
+            }
+
+            if (Arrays.stream(usedFitnessFunctions).anyMatch(function -> function == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
+                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
+            }
         }
     }
 
