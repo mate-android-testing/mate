@@ -55,17 +55,7 @@ public class FitnessUtils {
      * @param chromosome The given test case.
      */
     public static void storeTestCaseChromosomeFitness(IChromosome<TestCase> chromosome) {
-
-        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE,
-                FitnessFunction.METHOD_COVERAGE,
-                FitnessFunction.NOVELTY,
-                FitnessFunction.LINE_PERCENTAGE_COVERAGE,
-                FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
-                FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE, FitnessFunction.BRANCH_MULTI_OBJECTIVE);
-
-        storeTestSuite(fitnessFunctions, chromosome, null);
+        storeTestSuite(chromosome, null);
     }
 
     /**
@@ -76,19 +66,16 @@ public class FitnessUtils {
      * @param testCase The test case within the test suite.
      */
     public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, TestCase testCase) {
+        storeTestSuite(chromosome, testCase.getId());
+    }
 
+    private static <T> void storeTestSuite(IChromosome<T> chromosome, String testCaseId) {
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
-
-        storeTestSuite(fitnessFunctions, chromosome, testCase.getId());
-    }
-
-    private static <T> void storeTestSuite(EnumSet<FitnessFunction> fitnessFunctions,
-                                 IChromosome<T> chromosome, String testCaseId) {
 
         FitnessFunction[] usedFitnessFunctions = Properties.FITNESS_FUNCTIONS();
 
@@ -105,7 +92,8 @@ public class FitnessUtils {
                 Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
             }
 
-            if (Arrays.stream(usedFitnessFunctions).anyMatch(function -> function == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
+            if (Arrays.stream(usedFitnessFunctions).anyMatch(
+                    function -> function == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         }
