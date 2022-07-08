@@ -18,6 +18,8 @@ public class CrashDistance implements IFitnessFunction<TestCase> {
         put(new CallTreeDistance<>(), 6D);
         put(new ReachedTarget(), 3D);
         put(new EndsOnTarget(), 2D);
+        put(new ExecutesPromisingAction(), 2D);
+        put(new LessNOOP(), 2D);
     }};
 
     @Override
