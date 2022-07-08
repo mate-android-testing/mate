@@ -79,7 +79,6 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
             case SWIPE_DOWN:
             case SWIPE_LEFT:
             case SWIPE_RIGHT:
-            case BACK:
                 eventTypeWeight = 0.5;
                 break;
             case MENU:
@@ -88,6 +87,9 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
             default:
                 eventTypeWeight = 1;
                 break;
+        }
+        if (action.getActionType() == ActionType.BACK && action.getActivityName().equals(Registry.getMainActivity())) {
+            eventTypeWeight = 0.1;
         }
 
         int unvisitedChildren = 0;
