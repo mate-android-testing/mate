@@ -2,6 +2,7 @@ package org.mate.crash_reproduction.eda.representation.initializer;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.state.IScreenState;
 
