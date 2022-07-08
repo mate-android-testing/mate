@@ -232,6 +232,7 @@ public class AskUserExploration implements Algorithm {
 
         String nodeId = "exp_" + chromosomeCounter + "_step_" + chromosome.getValue().getEventSequence().size();
         Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), nodeId);
+        Registry.getEnvironmentManager().drawCallTree(nodeId + "_graph", chromosome);
         List<Widget> widgets = Registry.getUiAbstractionLayer().getPromisingActions(Registry.getUiAbstractionLayer().getLastScreenState()).stream().map(WidgetAction::getWidget).collect(Collectors.toList());
 
         if (!widgets.isEmpty()) {
