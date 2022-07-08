@@ -566,6 +566,14 @@ public class EnvironmentManager {
         sendMessage(messageBuilder.build());
     }
 
+    public <T> void drawCallTree(String id, IChromosome<T> chromosome) {
+        sendMessage(new Message.MessageBuilder("/graph/callTree/draw")
+                .withParameter("id", id)
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", getChromosomeId(chromosome))
+                .build());
+    }
+
     /**
      * Requests the list of branches of the AUT. Each branch typically represents a testing target
      * into the context of MIO/MOSA.
