@@ -350,11 +350,7 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
-                // check for presence of progress bar
-                if (handleProgressBar(screenState)) {
-                    change = true;
-                    continue;
-                }
+                // TODO: handle progress bar
 
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
@@ -389,7 +385,14 @@ public class UIAbstractionLayer {
      * @param screenState The current screen.
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
+    @SuppressWarnings("unused")
     private boolean handleProgressBar(IScreenState screenState) {
+
+        /*
+        * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
+        *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
+        *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
+         */
 
         // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
 
@@ -477,9 +480,9 @@ public class UIAbstractionLayer {
                                     "com.android.permissioncontroller:id/permission_allow_button")
                             || widget.getResourceID().equals(
                                     "com.android.packageinstaller:id/continue_button")
-                            || widget.getText().toLowerCase().equals("continue")
+                            || widget.getText().equalsIgnoreCase("continue")
                             // API 25, 28, 29:
-                            || widget.getText().toLowerCase().equals("allow"))) {
+                            || widget.getText().equalsIgnoreCase("allow"))) {
                     try {
                         deviceMgr.executeAction(action);
                         return true;
@@ -561,8 +564,12 @@ public class UIAbstractionLayer {
         if (Properties.SURROGATE_MODEL()) {
             // If the surrogate model was able to predict every action, we can avoid the reset.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            if (surrogateModel.hasPredictedEveryAction()) {
-                surrogateModel.reset(lastScreenState);
+            if (surrogateModel.hasPredictedLastTestCase()) {
+                MATE.log("Skip reset!");
+                // reset screen state
+                lastScreenState = toRecordedScreenState(clearScreen());
+                guiModel.addRootState(lastScreenState);
+                surrogateModel.goToState(lastScreenState);
                 return;
             }
         }
@@ -584,17 +591,16 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
 
         /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
+        * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+        * possible root states.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRootState(lastScreenState);
 
         if (Properties.SURROGATE_MODEL()) {
             // We need to move the FSM back in the correct state.
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
-            surrogateModel.reset(lastScreenState);
+            surrogateModel.goToState(lastScreenState);
         }
     }
 
@@ -606,12 +612,17 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
 
         /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
+         * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+         * possible root states.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRootState(lastScreenState);
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.goToState(lastScreenState);
+        }
     }
 
     /**

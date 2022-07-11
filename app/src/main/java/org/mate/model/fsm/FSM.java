@@ -3,8 +3,12 @@ package org.mate.model.fsm;
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
+import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceFactory;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -24,7 +28,7 @@ import java.util.stream.Collectors;
 public class FSM {
 
     /**
-     * The root state.
+     * The (virtual) root state.
      */
     private final State root;
 
@@ -57,6 +61,13 @@ public class FSM {
      * The current state in the FSM.
      */
     private State currentState;
+
+    /**
+     * The current state equivalence level that defines how two {@link State}s are compared for
+     * equality. Depending on the state equivalence level, the FSM may contain more or less states.
+     */
+    private static final StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL
+            = Properties.STATE_EQUIVALENCE_LEVEL();
 
     /**
      * Creates a new finite state machine with an initial start state.
@@ -132,18 +143,22 @@ public class FSM {
     }
 
     /**
-     * Converts the given screen state into a state used by the FSM.
-     * Returns a cached version of this state or a new state if the given
-     * screen state is new.
+     * Converts the given screen state into a state used by the FSM. Returns a cached version of
+     * this state or a new state if the given screen state is new.
      *
      * @param screenState The given screen state.
      * @return Returns a FSM state corresponding to the given screen state.
      */
     public State getState(IScreenState screenState) {
 
+        IStateEquivalence stateEquivalence
+                = StateEquivalenceFactory.getStateEquivalenceCheck(STATE_EQUIVALENCE_LEVEL);
+
         for (State state : states) {
-            if (state.getScreenState().equals(screenState)) {
-                return state;
+            if (state != root) { // skip the virtual root state
+                if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
+                    return state;
+                }
             }
         }
 
@@ -154,7 +169,7 @@ public class FSM {
      * Whether the last transition lead to a new state.
      *
      * @return Returns {@code} if a new state has been reached,
-     *          otherwise {@code} false is returned.
+     *         otherwise {@code} false is returned.
      */
     public boolean reachedNewState() {
         return reachedNewState;
@@ -240,7 +255,7 @@ public class FSM {
      * @param source The source state.
      * @param target The target state.
      * @return Returns any transition between the given source and target state if such transition
-     *          exists.
+     *         exists.
      */
     private Optional<Transition> getAnyTransition(State source, State target) {
         return transitions.stream()
@@ -277,7 +292,7 @@ public class FSM {
     }
 
     /**
-     * Returns the root state of the FSM.
+     * Returns the (virtual) root state of the FSM.
      *
      * @return Returns the root state.
      */
@@ -344,7 +359,7 @@ public class FSM {
     }
 
     /**
-     *  Returns a simple text representation of the FSM.
+     * Returns a simple text representation of the FSM.
      *
      * @return Returns a simple string representation of the FSM.
      */

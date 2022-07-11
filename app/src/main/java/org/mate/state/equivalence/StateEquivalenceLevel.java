@@ -1,4 +1,6 @@
-package org.mate.state.executables;
+package org.mate.state.equivalence;
+
+import org.mate.Properties;
 
 /**
  * Defines the various supported abstractions used in the {@link org.mate.state.IScreenState}
@@ -31,5 +33,11 @@ public enum StateEquivalenceLevel {
      * activity and contain the same widgets, where the content description and the text within a
      * text field of a widget are considered as well.
      */
-    WIDGET_WITH_ATTRIBUTES;
+    WIDGET_WITH_ATTRIBUTES,
+
+    /**
+     * Two {@link org.mate.state.IScreenState}s are equal if the cosine similarity coefficient is
+     * above the specified {@link Properties#COSINE_SIMILARITY_THRESHOLD()}.
+     */
+    COSINE_SIMILARITY;
 }

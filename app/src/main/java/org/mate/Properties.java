@@ -9,7 +9,7 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
-import org.mate.state.executables.StateEquivalenceLevel;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -62,6 +62,15 @@ public class Properties {
      */
     public static StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL() {
         return propertyOr(StateEquivalenceLevel.WIDGET);
+    }
+
+    /**
+     * Returns the specified cosine similarity coefficient.
+     *
+     * @return Returns the cosine similarity threshold.
+     */
+    public static float COSINE_SIMILARITY_THRESHOLD() {
+        return propertyOr(0.95f);
     }
 
     /**
