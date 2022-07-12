@@ -68,7 +68,7 @@ public class AskUserExploration implements Algorithm {
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         for (int i = 0; i < actions.size(); i++) {
-            if (!testCase.updateTestCase(actions.get(i), i) && (i+1) < actions.size()) {
+            if (!testCase.updateTestCase(getClosestCurrentAction(actions.get(i)), i) && (i+1) < actions.size()) {
                 throw new IllegalStateException("App crashed, but there this were " + (actions.size() - i) + " actions left!");
             }
         }
@@ -146,6 +146,29 @@ public class AskUserExploration implements Algorithm {
             return ((WidgetAction) action).getWidget().getTokens();
         } else {
             return Stream.empty();
+        }
+    }
+
+    private Action getClosestCurrentAction(Action expectedAction) {
+        if (Registry.getUiAbstractionLayer().getExecutableActions().contains(expectedAction)) {
+            return expectedAction;
+        } else if (expectedAction instanceof WidgetAction) {
+            // Exact match not possible -> look for closest action
+            WidgetAction expectedWidgetAction = (WidgetAction) expectedAction;
+            List<Action> matching = Registry.getUiAbstractionLayer().getExecutableActions().stream()
+                    .filter(availableAction -> availableAction instanceof WidgetAction)
+                    .map(a -> (WidgetAction) a)
+                    .filter(availableAction -> availableAction.getActionType().equals(expectedWidgetAction.getActionType())
+                            && availableAction.getWidget().getId().equals(expectedWidgetAction.getWidget().getId()))
+                    .collect(Collectors.toList());
+
+            if (matching.size() == 1) {
+                return matching.get(0);
+            } else {
+                throw new IllegalStateException();
+            }
+        } else {
+            throw new IllegalStateException();
         }
     }
 
