@@ -1,7 +1,6 @@
 package org.mate.exploration.manual;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import org.mate.Properties;
 import org.mate.Registry;
@@ -16,6 +15,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.utils.Either;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
 
@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -80,6 +81,14 @@ public class AskUserExploration implements Algorithm {
     }
 
     private Chromosome<TestCase> createTemplateChromosome() {
+        Optional<Chromosome<TestCase>> template;
+        do {
+            template = createTemplateChromosomeUnsafe();
+        } while (!template.isPresent());
+        return template.get();
+    }
+
+    private Optional<Chromosome<TestCase>> createTemplateChromosomeUnsafe() {
         Registry.getUiAbstractionLayer().resetApp();
 
         TestCase testCase = TestCase.newInitializedTestCase();
@@ -87,17 +96,21 @@ public class AskUserExploration implements Algorithm {
 
         try {
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
-                Optional<Action> action = askUserToPickAction();
+                Either<Action, ExplorationCommand> actionOrCommand = askUserToPickAction();
                 boolean stop;
 
-                if (action.isPresent()) {
-                    stop = !testCase.updateTestCase(action.get(), actionsCount);
+                if (actionOrCommand.hasLeft()) {
+                    stop = !testCase.updateTestCase(actionOrCommand.getLeft(), actionsCount);
                 } else {
-                    stop = true;
+                    switch (actionOrCommand.getRight()) {
+                        case STOP: stop = true; break;
+                        case RESET: return Optional.empty();
+                        default: throw new IllegalArgumentException("Unknown command: " + actionOrCommand.getRight().description);
+                    }
                 }
 
                 if (stop) {
-                    return chromosome;
+                    return Optional.of(chromosome);
                 }
             }
         } finally {
@@ -105,42 +118,20 @@ public class AskUserExploration implements Algorithm {
             CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
             testCase.finish();
         }
-        return chromosome;
+        return Optional.of(chromosome);
     }
 
-    private Optional<Action> askUserToPickAction() {
+    private Either<Action, ExplorationCommand> askUserToPickAction() {
         List<Action> availableActions = new LinkedList<>(Registry.getUiAbstractionLayer().getExecutableActions());
-        Action stopExplorationAction = new Action() {
-            @NonNull
-            @Override
-            public String toString() {
-                return "Stop exploration";
-            }
-
-            @NonNull
-            @Override
-            public String toShortString() {
-                return toString();
-            }
-
-            @Override
-            public int hashCode() {
-                return 0;
-            }
-
-            @Override
-            public boolean equals(@Nullable Object o) {
-                return o == this;
-            }
-        };
-        availableActions.add(0, stopExplorationAction);
+        availableActions.add(0, new ExplorationCommandAction(ExplorationCommand.STOP));
+        availableActions.add(1, new ExplorationCommandAction(ExplorationCommand.RESET));
 
         Action pickedAction = Registry.getEnvironmentManager().askUserToPick(availableActions, this::prettyPrintAction);
 
-        if (pickedAction == stopExplorationAction) {
-            return Optional.empty();
+        if (pickedAction instanceof ExplorationCommandAction) {
+            return Either.right(((ExplorationCommandAction) pickedAction).command);
         } else {
-            return Optional.of(pickedAction);
+            return Either.left(pickedAction);
         }
     }
 
@@ -287,6 +278,50 @@ public class AskUserExploration implements Algorithm {
             this.nodeId = nodeId;
             this.fitness = fitness;
             this.fitnessVector = fitnessVector;
+        }
+    }
+
+    private enum ExplorationCommand {
+        STOP("Stop exploration"),
+        RESET("Reset exploration");
+
+        private final String description;
+
+        ExplorationCommand(String description) {
+            this.description = description;
+        }
+    }
+
+    private static class ExplorationCommandAction extends Action {
+        private final ExplorationCommand command;
+
+        private ExplorationCommandAction(ExplorationCommand command) {
+            this.command = command;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return command.description;
+        }
+
+        @NonNull
+        @Override
+        public String toShortString() {
+            return toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ExplorationCommandAction that = (ExplorationCommandAction) o;
+            return command == that.command;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(command);
         }
     }
 }
