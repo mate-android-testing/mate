@@ -110,31 +110,35 @@ public class IntentProvider {
 
         for (ComponentDescription component : components) {
 
-            // track which intent filters need to be removed from the component
-            List<IntentFilterDescription> systemEventFilters = new ArrayList<>();
-
             if (component.isBroadcastReceiver()) {
+
+                // assume that we deal with a system event receiver
+                ComponentDescription systemEventReceiver =
+                        new ComponentDescription(component.getFullyQualifiedName(),
+                                ComponentType.BROADCAST_RECEIVER);
+
+                // track which intent filters need to be removed from the original component later
+                List<IntentFilterDescription> systemEventFilters = new ArrayList<>();
 
                 // collect the intent filters that describe system events
                 for (IntentFilterDescription intentFilter : component.getIntentFilters()) {
 
                     if (describesSystemEvent(systemEvents, intentFilter)) {
 
-                        // TODO: merge system event receivers referring to the same component
-
-                        // track a system event receiver as a separate component
-                        ComponentDescription systemEventReceiver =
-                                new ComponentDescription(component.getFullyQualifiedName(),
-                                        ComponentType.BROADCAST_RECEIVER);
                         systemEventReceiver.addIntentFilter(intentFilter);
-                        systemEventReceivers.add(systemEventReceiver);
 
-                        // intent filter needs to be removed from component
+                        // intent filter needs to be removed from original component afterwards
                         systemEventFilters.add(intentFilter);
                     }
                 }
 
-                component.removeIntentFilters(systemEventFilters);
+                // if we added an intent filter, the receiver is really a system event receiver
+                if (!systemEventFilters.isEmpty()) {
+                    systemEventReceivers.add(systemEventReceiver);
+
+                    // remove the system event filters from the original component
+                    component.removeIntentFilters(systemEventFilters);
+                }
 
                 if (!component.hasIntentFilter()) {
                     /*
