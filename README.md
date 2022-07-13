@@ -10,7 +10,7 @@ instrumentation tests themselves. The repository containing the MATE server can 
 
 We have tested MATE on the following devices:
 
-* Nexus 5 (API 25 & 28 & 29)
+* Nexus 5 (API 25 & 28 & 29 & 30)
 * Pixel C (API 25 & 28 & 29)
 * Pixel XL (API 25 & 28 & 29)
 

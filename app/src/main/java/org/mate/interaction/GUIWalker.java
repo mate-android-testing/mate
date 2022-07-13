@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static android.support.test.InstrumentationRegistry.getContext;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 
 /**
@@ -383,7 +382,7 @@ public class GUIWalker {
      *         is returned.
      */
     public boolean goToMainActivity() {
-        Context context = getContext();
+        Context context = getTargetContext();
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(Registry.getPackageName());
         try {

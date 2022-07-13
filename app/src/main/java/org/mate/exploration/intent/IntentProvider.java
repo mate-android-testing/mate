@@ -63,6 +63,11 @@ public class IntentProvider {
         systemEventActions = SystemActionParser.parseSystemEventActions();
         systemEventReceivers = extractSystemEventReceivers(components, systemEventActions);
 
+        /*
+        * TODO: We may need to derive the dynamic receivers before the system event receivers,
+        *  since extractSystemEventReceivers() potentially removes components, see the inline
+        *  comments!
+         */
         dynamicReceivers = components.stream()
                 .filter(ComponentDescription::isDynamicReceiver)
                 // only receivers that define at least one intent filter are exported by default
@@ -110,32 +115,51 @@ public class IntentProvider {
 
         for (ComponentDescription component : components) {
 
-            // track which intent filters need to be removed from the component
-            List<IntentFilterDescription> systemEventFilters = new ArrayList<>();
-
             if (component.isBroadcastReceiver()) {
+
+                // assume that we deal with a system event receiver
+                ComponentDescription systemEventReceiver =
+                        new ComponentDescription(component.getFullyQualifiedName(),
+                                ComponentType.BROADCAST_RECEIVER);
+
+                // track which intent filters need to be removed from the original component later
+                List<IntentFilterDescription> systemEventFilters = new ArrayList<>();
 
                 // collect the intent filters that describe system events
                 for (IntentFilterDescription intentFilter : component.getIntentFilters()) {
 
+                    /*
+                    * TODO: If an intent filter contains multiple actions (which might be the case
+                    *  for dynamic receivers, since those can only define a single filter), the
+                    *  most correct option would be to split the intent filter into multiple filters
+                    *  separating the actions from system event actions. Right now, we remove the
+                    *  complete intent filter from the original component, which might contain a
+                    *  mixture of system and intent-based actions.
+                     */
                     if (describesSystemEvent(systemEvents, intentFilter)) {
 
-                        // TODO: merge system event receivers referring to the same component
-
-                        // track a system event receiver as a separate component
-                        ComponentDescription systemEventReceiver =
-                                new ComponentDescription(component.getFullyQualifiedName(),
-                                        ComponentType.BROADCAST_RECEIVER);
                         systemEventReceiver.addIntentFilter(intentFilter);
-                        systemEventReceivers.add(systemEventReceiver);
 
-                        // intent filter needs to be removed from component
+                        // intent filter needs to be removed from original component afterwards
                         systemEventFilters.add(intentFilter);
                     }
                 }
 
-                component.removeIntentFilters(systemEventFilters);
+                // if we added an intent filter, the receiver is really a system event receiver
+                if (!systemEventFilters.isEmpty()) {
+                    systemEventReceivers.add(systemEventReceiver);
 
+                    // remove the system event filters from the original component
+                    component.removeIntentFilters(systemEventFilters);
+                }
+
+                /*
+                * TODO: Only remove the receiver if really all actions contained in the intent
+                *  filter(s) describe system events, see the above comment. Right now, we remove
+                *  the receiver if at least a single action per intent filter refers to a system
+                *  event. Hence, we may drop a (dynamic) receiver at this point, which might react
+                *  to both kinds of actions.
+                 */
                 if (!component.hasIntentFilter()) {
                     /*
                      * If a broadcast receiver solely reacts to system events, we can't trigger it with
@@ -260,11 +284,12 @@ public class IntentProvider {
             ComponentDescription component = Randomness.randomElement(dynamicReceivers);
             IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
 
-            // TODO: The distinction should be useless, since dynamic system receivers are considered
-            //  system receivers and handled separately.
-
             // we need to distinguish between a dynamic system receiver and dynamic receiver
             if (describesSystemEvent(systemEventActions, intentFilter)) {
+                /*
+                 * TODO: If the randomly selected action actually refers to a system event, we
+                 *  require a system action only, otherwise this is a regular intent-based action.
+                 */
                 String action = Randomness.randomElement(intentFilter.getActions());
                 SystemAction systemAction = new SystemAction(component, intentFilter, action);
                 systemAction.markAsDynamic();
