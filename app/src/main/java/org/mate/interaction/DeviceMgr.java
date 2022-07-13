@@ -1355,35 +1355,18 @@ public class DeviceMgr {
      */
     public void restartApp() {
         MATE.log("Restarting app");
-
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.R) {
-            /*
-            * There is a new security restriction on API level 30 that doesn't allow MATE anymore to
-            * start the AUT. We need to resort to monkey to restart the AUT, see:
-            * https://stackoverflow.com/questions/65206233/android-cant-start-an-activity-with-am-start-when-running-as-user-on-androi
-             */
-            try {
-                device.executeShellCommand("monkey -p " + packageName + " 1");
-                // Alternatively:
-                // device.executeShellCommand("am start -n " + packageName + "/"
-                //       + Registry.getMainActivity());
-            } catch (IOException e) {
-                MATE.log_warn("Restarting app failed!");
-                e.printStackTrace();
-            }
-        } else {
-            Context context = getContext();
-            final Intent intent = context.getPackageManager()
-                    .getLaunchIntentForPackage(packageName);
-            // Clear out any previous instances
-            try {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            } catch (Exception e) {
-                MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
-                e.printStackTrace();
-            }
-            context.startActivity(intent);
+        // Launch the app
+        Context context = getContext();
+        final Intent intent = context.getPackageManager()
+                .getLaunchIntentForPackage(packageName);
+        // Clear out any previous instances
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MATE.log("EXCEPTION CLEARING ACTIVITY FLAG");
         }
+        context.startActivity(intent);
     }
 
     /**
@@ -1414,8 +1397,6 @@ public class DeviceMgr {
                 return convertClassName(getCurrentActivityAPI28());
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
                 return convertClassName(getCurrentActivityAPI29());
-            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.R) {
-                return convertClassName(getCurrentActivityAPI30());
             } else {
                 // fall back mechanism (slow)
                 return convertClassName(Registry.getEnvironmentManager().getCurrentActivityName());
@@ -1455,16 +1436,6 @@ public class DeviceMgr {
      * @return Returns the current activity name.
      */
     private String getCurrentActivityAPI29() throws IOException {
-        String output = device.executeShellCommand("dumpsys activity activities");
-        return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
-    }
-
-    /**
-     * Returns the name of the current activity on an emulator running API 30.
-     *
-     * @return Returns the current activity name.
-     */
-    private String getCurrentActivityAPI30() throws IOException {
         String output = device.executeShellCommand("dumpsys activity activities");
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
