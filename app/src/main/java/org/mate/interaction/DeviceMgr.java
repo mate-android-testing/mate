@@ -599,6 +599,10 @@ public class DeviceMgr {
         try {
             switch (action.getComponentType()) {
                 case ACTIVITY:
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        // https://stackoverflow.com/a/57490942/6110448
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
                     InstrumentationRegistry.getTargetContext().startActivity(intent);
                     break;
                 case SERVICE:
