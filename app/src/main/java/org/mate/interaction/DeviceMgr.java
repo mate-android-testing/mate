@@ -611,7 +611,7 @@ public class DeviceMgr {
                     throw new UnsupportedOperationException("Component type not supported yet!");
             }
         } catch (Exception e) {
-            final String msg = "Calling startActivity() from outside of an Activity  context " +
+            final String msg = "Calling startActivity() from outside of an Activity context " +
                     "requires the FLAG_ACTIVITY_NEW_TASK flag.";
             if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
                 MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
