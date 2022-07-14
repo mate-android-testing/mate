@@ -13,13 +13,7 @@ import java.util.Map;
 public class CrashDistance implements IFitnessFunction<TestCase> {
     private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
     private final Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions = new HashMap<IFitnessFunction<TestCase>, Double>(){{
-//        put(new BankdroidFitnessFunction(), 1D);
-
         put(new CallTreeDistance<>(), 6D);
-        put(new ReachedTarget(), 3D);
-        put(new EndsOnTarget(), 2D);
-        put(new ExecutesPromisingAction(), 2D);
-        put(new LessNOOP(), 2D);
     }};
 
     @Override
