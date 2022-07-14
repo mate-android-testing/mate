@@ -4,11 +4,11 @@ import android.support.annotation.NonNull;
 
 import org.mate.Properties;
 import org.mate.commons.interaction.action.Action;
-import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.commons.utils.MATELog;
 import org.mate.state.IScreenState;
 import org.mate.state.equivalence.IStateEquivalence;
 import org.mate.state.equivalence.StateEquivalenceFactory;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class FSM {
 
     /**
-     * The root state.
+     * The (virtual) root state.
      */
     private final State root;
 
@@ -156,8 +156,10 @@ public class FSM {
                 = StateEquivalenceFactory.getStateEquivalenceCheck(STATE_EQUIVALENCE_LEVEL);
 
         for (State state : states) {
-            if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
-                return state;
+            if (state != root) { // skip the virtual root state
+                if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
+                    return state;
+                }
             }
         }
 

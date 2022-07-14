@@ -29,5 +29,11 @@ public enum StateEquivalenceLevel {
      * same widgets, where the content description and the text within a text field of a widget are
      * considered as well.
      */
-    WIDGET_WITH_ATTRIBUTES;
+    WIDGET_WITH_ATTRIBUTES,
+
+    /**
+     * Two screen states are equal if the cosine similarity coefficient is above the specified
+     * cosine similarity threshold.
+     */
+    COSINE_SIMILARITY;
 }
