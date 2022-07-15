@@ -1,8 +1,8 @@
 package org.mate.commons.interaction.action.ui;
 
 import android.os.Parcel;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.utils.Randomness;

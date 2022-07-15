@@ -1,6 +1,7 @@
 package org.mate.representation.interaction;
 
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.interaction.action.intent.SystemAction;
 import org.mate.commons.interaction.action.ui.MotifAction;
@@ -25,6 +26,8 @@ public class ActionExecutorFactory {
             return new MotifActionExecutor();
         } else if (action instanceof UIAction) {
             return new UiActionExecutor();
+        } else if (action instanceof EspressoAction) {
+            return new EspressoActionExecutor();
         } else {
             throw new UnsupportedOperationException("Actions class "
                     + action.getClass().getSimpleName() + " not yet supported");

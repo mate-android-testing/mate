@@ -78,9 +78,9 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                 if (i < cutPoint) {
                     newAction = (UIAction) chromosome.getValue().getActionSequence().get(i);
                 } else {
-                    newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+                    newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableUiActions());
                 }
-                if (!uiAbstractionLayer.getExecutableActions().contains(newAction)
+                if (!uiAbstractionLayer.getExecutableUiActions().contains(newAction)
                         || !mutant.updateTestCase(newAction, i)) {
                     break;
                 }

@@ -51,7 +51,7 @@ public class AndroidListBasedEqualWeightedDecisionBiasedMapping extends AndroidL
      */
     @Override
     protected Action selectAction() {
-        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        List<UIAction> executableActions = uiAbstractionLayer.getExecutableUiActions();
         int lowBound = 0;
         int highBound = executableActions.size() - 1;
         while (lowBound != highBound) {

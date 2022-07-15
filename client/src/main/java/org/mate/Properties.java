@@ -93,15 +93,22 @@ public class Properties {
         return propertyOr(OptimisationStrategy.NO_OPTIMISATION);
     }
 
-    /*
-    * Whether to record stats about test cases or not.
+    /**
+     * Whether additional stats about a test case should be recorded/logged.
+     *
+     * @return Returns {@code true} if additional stats should be recorded/logged, otherwise
+     *         {@code false} is returned.
      */
     public static boolean RECORD_TEST_CASE_STATS() {
         return propertyOr(false);
     }
 
-    /*
-    * Whether to serialize a test case. Default: off.
+    /**
+     * Whether a {@link org.mate.model.TestCase} should be serialized to a XML representation
+     * using the XStream library.
+     *
+     * @return Returns {@code true} if a test case should be serialized to XML, otherwise
+     *         {@code false} is returned.
      */
     public static boolean RECORD_TEST_CASE() {
         return propertyOr(false);

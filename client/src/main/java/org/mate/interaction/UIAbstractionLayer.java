@@ -6,6 +6,7 @@ import org.mate.Properties;
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.ActionType;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
@@ -113,8 +114,17 @@ public class UIAbstractionLayer {
      *
      * @return Returns the list of executable widget actions.
      */
-    public List<UIAction> getExecutableActions() {
+    public List<UIAction> getExecutableUiActions() {
         return getLastScreenState().getActions();
+    }
+
+    /**
+     * Returns the list of executable Espresso actions on the current screen.
+     *
+     * @return Returns the list of executable Espresso actions.
+     */
+    public List<EspressoAction> getExecutableEspressoActions() {
+        return getLastScreenState().getEspressoActions();
     }
 
     /**
@@ -198,14 +208,25 @@ public class UIAbstractionLayer {
              * expected, the given action might be not applicable anymore. In such a case, we pick
              * a random action that is applicable on the current screen.
              */
-            if (!getExecutableActions().contains(action)) {
-                MATELog.log_warn("Can't apply given action on current screen! Select random action.");
-                action = Randomness.randomElement(getExecutableActions());
+            if (action instanceof EspressoAction) {
+                if (!getExecutableEspressoActions().contains(action)) {
+                    MATELog.log_warn("Can't apply given action on current screen! Select random " +
+                            "Espresso action.");
+                    action = Randomness.randomElement(getExecutableEspressoActions());
+                }
+            } else {
+                if (!getExecutableUiActions().contains(action)) {
+                    MATELog.log_warn("Can't apply given action on current screen! Select random " +
+                            "UI action.");
+                    action = Randomness.randomElement(getExecutableUiActions());
+                }
             }
         }
 
+        boolean actionExecutionSuccessful = false;
+
         try {
-            deviceMgr.executeAction(action);
+            actionExecutionSuccessful = deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
 
             MATELog.log_acc("CRASH MESSAGE " + e.getMessage());
@@ -248,11 +269,15 @@ public class UIAbstractionLayer {
 
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
-        if (!currentPackageName.equals(this.packageName)) {
-            MATELog.log("current package different from app package: " + currentPackageName);
-            result = SUCCESS_OUTBOUND;
+        if (actionExecutionSuccessful) {
+            if (!currentPackageName.equals(this.packageName)) {
+                MATELog.log("current package different from app package: " + currentPackageName);
+                result = SUCCESS_OUTBOUND;
+            } else {
+                result = SUCCESS;
+            }
         } else {
-            result = SUCCESS;
+            result = FAILURE_UNKNOWN;
         }
 
         // update gui model

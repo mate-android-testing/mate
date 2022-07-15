@@ -67,6 +67,16 @@ public class DeviceInfo {
     }
 
     /**
+     * Get the instantiated Instrumentation class.
+     * This class allows to monitor all the interaction that the system has with the application.
+     *
+     * @return the instance of Instrumentation provided by the InstrumentationRegistry.
+     */
+    public Instrumentation getInstrumentation() {
+        return instrumentation;
+    }
+
+    /**
      * Get the UiDevice to get access to state information about the device.
      * This class can also be used to simulate user actions on the device.
      *
@@ -232,4 +242,13 @@ public class DeviceInfo {
         return false;
     }
 
+    /**
+     * Disable animations in the device.
+     * Using adb commands listed here: https://stackoverflow.com/a/44962044/2271834
+     */
+    public void disableAnimations() {
+        this.executeShellCommand("settings put global window_animation_scale 0");
+        this.executeShellCommand("settings put global transition_animation_scale 0");
+        this.executeShellCommand("settings put global animator_duration_scale 0");
+    }
 }

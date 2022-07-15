@@ -1,6 +1,6 @@
 package org.mate.model.fsm.surrogate;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.ActionResult;

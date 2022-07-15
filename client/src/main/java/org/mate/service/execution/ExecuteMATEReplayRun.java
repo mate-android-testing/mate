@@ -128,7 +128,7 @@ public class ExecuteMATEReplayRun {
             // check whether the UI action is applicable on the current state
             if ((nextAction instanceof WidgetAction || (nextAction instanceof MotifAction
                     && Properties.WIDGET_BASED_ACTIONS()))
-                    && !Registry.getUiAbstractionLayer().getExecutableActions().contains(nextAction)) {
+                    && !Registry.getUiAbstractionLayer().getExecutableUiActions().contains(nextAction)) {
 
                 // try to repair UI action
                 Action repairedAction = repairUIAction(nextAction);
@@ -163,7 +163,7 @@ public class ExecuteMATEReplayRun {
         // TODO: provide appropriate repair mechanism!
 
         // log information about selected and available actions
-        if (a instanceof WidgetAction && !Registry.getUiAbstractionLayer().getExecutableActions().contains(a)) {
+        if (a instanceof WidgetAction && !Registry.getUiAbstractionLayer().getExecutableUiActions().contains(a)) {
 
             WidgetAction selectedAction = (WidgetAction) a;
 
@@ -178,7 +178,7 @@ public class ExecuteMATEReplayRun {
             MATELog.log("------------------------------------------");
             MATELog.log("Applicable widget actions with same action type: ");
 
-            for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
+            for (Action action : Registry.getUiAbstractionLayer().getExecutableUiActions()) {
 
                 if (action instanceof WidgetAction) {
                     if (((WidgetAction) action).getActionType() == selectedAction.getActionType()) {
@@ -194,7 +194,7 @@ public class ExecuteMATEReplayRun {
                 }
             }
         } else if (a instanceof MotifAction && Properties.WIDGET_BASED_ACTIONS()
-                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(a)) {
+                && !Registry.getUiAbstractionLayer().getExecutableUiActions().contains(a)) {
 
             MotifAction selectedAction = (MotifAction) a;
 
@@ -207,7 +207,7 @@ public class ExecuteMATEReplayRun {
             MATELog.log("------------------------------------------");
             MATELog.log("Applicable motif actions with same action type: ");
 
-            for (Action action : Registry.getUiAbstractionLayer().getExecutableActions()) {
+            for (Action action : Registry.getUiAbstractionLayer().getExecutableUiActions()) {
 
                 if (action instanceof MotifAction) {
                     MotifAction motifAction = (MotifAction) action;

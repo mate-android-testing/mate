@@ -1,6 +1,6 @@
 package org.mate.model;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.mate.Properties;
 import org.mate.Registry;
@@ -16,7 +16,10 @@ import org.mate.utils.ListUtils;
 import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
+import org.mate.utils.testcase.writer.EspressoTestCaseWriter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -124,6 +127,28 @@ public class TestCase {
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
             TestCaseSerializer.serializeTestCase(this);
+
+            try {
+                // Try to dump this test case as an Espresso test case.
+                // If this test case is not composed entirely of Espresso actions (e.g., it uses
+                // UiActions), then the EspressoTestCaseWriter throws an IllegalArgumentException
+                // and does nothing.
+                EspressoTestCaseWriter espressoTestWriter = new EspressoTestCaseWriter(this);
+                boolean success = espressoTestWriter.writeToDefaultFolder();
+                if (!success) {
+                    MATELog.log_warn("Unable to write Espresso test case to internal storage");
+                }
+            } catch (IllegalArgumentException e) {
+                // do nothing, EspressoTestCaseWriter is not suitable for this test case.
+            } catch (Exception e) {
+                MATELog.log_warn("An exception happened while writing Espresso test case to " +
+                        "internal storage: " + e.getMessage());
+
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                MATELog.log_warn(sw.toString());
+            }
         }
 
         // record stats about a test case, in particular about intent based actions
@@ -315,7 +340,7 @@ public class TestCase {
         for (Action action0 : testCase.actionSequence) {
             if (count < finalSize) {
                 if (!(action0 instanceof WidgetAction)
-                        || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
+                        || Registry.getUiAbstractionLayer().getExecutableUiActions().contains(action0)) {
                     if (!resultingTc.updateTestCase(action0, count)) {
                         return resultingTc;
                     }
@@ -330,7 +355,8 @@ public class TestCase {
         for (; count < finalSize; count++) {
             Action action;
             if (Properties.WIDGET_BASED_ACTIONS()) {
-                action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
+                action =
+                        Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableUiActions());
             } else {
                 action = PrimitiveAction.randomAction(
                             Registry.getUiAbstractionLayer().getCurrentActivity(),
@@ -377,7 +403,7 @@ public class TestCase {
     public boolean updateTestCase(Action action, int actionID) {
 
         if (action instanceof WidgetAction
-                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+                && !Registry.getUiAbstractionLayer().getExecutableUiActions().contains(action)) {
             throw new IllegalStateException("Action not applicable to current state!");
         }
 

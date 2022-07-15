@@ -6,6 +6,7 @@ import android.os.RemoteException;
 import org.mate.commons.IMATEServiceInterface;
 import org.mate.commons.IRepresentationLayerInterface;
 import org.mate.commons.interaction.action.Action;
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.Widget;
 import org.mate.commons.utils.MATELog;
 import org.mate.representation.DeviceInfo;
@@ -13,11 +14,13 @@ import org.mate.representation.DynamicTest;
 import org.mate.representation.ExplorationInfo;
 import org.mate.representation.interaction.ActionExecutor;
 import org.mate.representation.interaction.ActionExecutorFactory;
+import org.mate.representation.state.espresso.EspressoScreenParser;
 import org.mate.representation.state.widget.WidgetScreenParser;
 import org.mate.representation.test.BuildConfig;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -72,6 +75,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
     }
 
     @Override
+    public void disableAnimations() throws RemoteException {
+        DeviceInfo.getInstance().disableAnimations();
+    }
+
+    @Override
     public boolean isCrashDialogPresent() throws RemoteException {
         return DeviceInfo.getInstance().isCrashDialogPresent();
     }
@@ -117,8 +125,8 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
         ActionExecutor executor = ActionExecutorFactory.getExecutor(action);
 
         try {
-            executor.perform(action);
-            return true;
+            boolean success = executor.perform(action);
+            return success;
         } catch (Exception e) {
             MATELog.log_error(
                     "An exception occurred executing action on representation layer: " +
@@ -147,6 +155,11 @@ public class CommandHandler extends IRepresentationLayerInterface.Stub {
 
             throw e;
         }
+    }
+
+    @Override
+    public List<EspressoAction> getCurrentScreenEspressoActions() throws RemoteException {
+        return new EspressoScreenParser().getActions();
     }
 
     @Override

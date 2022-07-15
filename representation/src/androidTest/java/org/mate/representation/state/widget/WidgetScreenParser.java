@@ -22,7 +22,7 @@ import java.util.Objects;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
- * Auxiliary class to parse the widgets in the current screen.
+ * Parses the widgets on the current screen.
  */
 public class WidgetScreenParser {
 
@@ -62,7 +62,7 @@ public class WidgetScreenParser {
     }
 
     /**
-     * Parse the widgets in the current screen.
+     * Parse the widgets on the current screen.
      * This is done by inspecting the UI hierarchy from the root view in the active window.
      */
     public void parseWidgets() {

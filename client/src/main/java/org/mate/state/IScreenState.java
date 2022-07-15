@@ -1,5 +1,6 @@
 package org.mate.state;
 
+import org.mate.commons.interaction.action.espresso.EspressoAction;
 import org.mate.commons.interaction.action.ui.MotifAction;
 import org.mate.commons.interaction.action.ui.UIAction;
 import org.mate.commons.interaction.action.ui.Widget;
@@ -20,6 +21,7 @@ public interface IScreenState {
     List<UIAction> getActions();
     List<WidgetAction> getWidgetActions();
     List<MotifAction> getMotifActions();
+    List<EspressoAction> getEspressoActions();
     String getActivityName();
     String getPackageName();
     ScreenStateType getType();
