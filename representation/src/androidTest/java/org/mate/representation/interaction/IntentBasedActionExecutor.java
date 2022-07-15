@@ -1,14 +1,15 @@
 package org.mate.representation.interaction;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 import android.content.Intent;
+import android.os.Build;
 
 import org.mate.commons.exceptions.AUTCrashException;
 import org.mate.commons.interaction.action.Action;
 import org.mate.commons.interaction.action.intent.IntentBasedAction;
 import org.mate.commons.utils.MATELog;
 import org.mate.commons.utils.manifest.element.ComponentType;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * ActionExecutor class for IntentBased actions.
@@ -39,6 +40,10 @@ public class IntentBasedActionExecutor extends ActionExecutor {
         try {
             switch (action.getComponentType()) {
                 case ACTIVITY:
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        // https://stackoverflow.com/a/57490942/6110448
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
                     targetContext.startActivity(intent);
                     break;
                 case SERVICE:
@@ -53,7 +58,7 @@ public class IntentBasedActionExecutor extends ActionExecutor {
 
             return true;
         } catch (Exception e) {
-            final String msg = "Calling startActivity() from outside of an Activity  context " +
+            final String msg = "Calling startActivity() from outside of an Activity context " +
                     "requires the FLAG_ACTIVITY_NEW_TASK flag.";
             if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
                 MATELog.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
