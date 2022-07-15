@@ -18,13 +18,12 @@ The repository containing the MATE server can be found
 
 We have tested MATE on the following devices:
 
-* Nexus 5 (API 25 & 28 & 29)
+* Nexus 5 (API 25 & 28 & 29 & 30)
 * Pixel C (API 25 & 28 & 29)
 * Pixel XL (API 25 & 28 & 29)
 
-You have to employ on the emulator a *x86* image that is not provided by *Google*, i.e. don't use
-neither a *Google Play* nor a *Google API* image. This is due to recent changes that otherwise lead
-to permission issues.
+You have to employ on th emulator either a *x86* image or a *Google API* image, but not a
+*Google Play* image. This is due to recent changes that otherwise lead to permission issues.
 
 ## How to run MATE
 
