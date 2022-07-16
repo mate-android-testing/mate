@@ -35,18 +35,11 @@ public class TestCase {
      * The states (ids) in the order they were visited.
      */
     private final List<String> stateSequence;
-    private final Set<String> visitedActivities;
-
-    /**
-     * The set of visited screen states (ids).
-     */
-    private final Set<String> visitedStates;
 
     /**
      * The actions that has been executed by this test case.
      */
     private final List<Action> actionSequence;
-    private final List<Action> eventSequence;
 
     /**
      * The visited activities in the order they appeared.
@@ -379,7 +372,6 @@ public class TestCase {
      *         or left the AUT, otherwise {@code false} is returned.
      */
     public boolean updateTestCase(Action action, int actionID) {
-        ActionResult actionResult = updateTestCaseGetResult(action, actionID);
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
