@@ -10,15 +10,39 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Provides utility functions that involve some kind of randomness, e.g. retrieving a random element
+ * from a list or set.
+ */
 public class Randomness {
+
+    /**
+     * Retrieves the random number generator.
+     *
+     * @return Returns the random number generator.
+     */
     public static Random getRnd() {
         return Registry.getRandom();
     }
 
+    /**
+     * Returns a random element from the given list. The list must be not empty.
+     *
+     * @param list The input list.
+     * @param <T> The type of the list elements.
+     * @return Returns a random element from the given list.
+     */
     public static <T> T randomElement(List<T> list) {
         return list.get(getRnd().nextInt(list.size()));
     }
 
+    /**
+     * Returns a random index from the given list. The list must be not empty.
+     *
+     * @param list The input list.
+     * @param <T> The type of the list elements.
+     * @return Returns a random index from the given list.
+     */
     public static <T> int randomIndex(List<T> list) {
         return getRnd().nextInt(list.size());
     }
@@ -104,11 +128,36 @@ public class Randomness {
         return ThreadLocalRandom.current().nextDouble(min, max);
     }
 
+    /**
+     * Returns a random int in [0,range).
+     *
+     * @param range The maximal value (exclusive).
+     * @return Returns a random int in [0,range).
+     */
     public static int getInRangeStd(int range) {
+
+        if (range <= 0) {
+            throw new IllegalArgumentException("Range must be greater than zero!");
+        }
+
         return getInRangeStd(range, 2.0/15.0 * range);
     }
 
+    /**
+     * Returns a random int in [0,range).
+     *
+     * @param range The maximal value (exclusive).
+     * @param std The standard deviation.
+     * @return Returns a random int in [0,range).
+     */
     public static int getInRangeStd(int range, double std) {
+
+        if (range <= 0) {
+            throw new IllegalArgumentException("Range must be greater than zero!");
+        } else if (std < 0) {
+            throw new IllegalArgumentException("Standard deviation must be not negative!");
+        }
+
         int x;
         do {
             x = (int) Math.round(getRnd().nextGaussian() * std + (range - 1) / 2.0);
@@ -116,7 +165,14 @@ public class Randomness {
         return x;
     }
 
+    /**
+     * Shuffles the given list in place.
+     *
+     * @param list The input list to be shuffled.
+     * @param <T> The type of the list elements.
+     */
     public static <T> void shuffleList(List<T> list) {
+
         List<T> pickList = new ArrayList<>(list);
         list.clear();
         int size = pickList.size();

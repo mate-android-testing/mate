@@ -51,7 +51,7 @@ public final class CoverageUtils {
          */
         Set<String> visitedActivitiesOfTestCases = new HashSet<>();
         for (TestCase testCase : testCases) {
-            visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivities());
+            visitedActivitiesOfTestCases.addAll(testCase.getVisitedActivitiesOfApp());
         }
 
         if (visitedActivities.containsKey(targetChromosome)) {
@@ -81,7 +81,7 @@ public final class CoverageUtils {
      */
     private static Set<String> getActivities() {
         if (activities == null) {
-            activities = new HashSet<>(Registry.getUiAbstractionLayer().getActivityNames());
+            activities = new HashSet<>(Registry.getUiAbstractionLayer().getActivities());
         }
 
         if (activities.size() == 0) {
@@ -100,7 +100,7 @@ public final class CoverageUtils {
     public static void storeTestCaseChromosomeCoverage(IChromosome<TestCase> chromosome) {
 
         // store data about activity coverage in any case
-        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
+        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
 
         switch (Properties.COVERAGE()) {
             case BRANCH_COVERAGE:
@@ -115,6 +115,21 @@ public final class CoverageUtils {
             default:
                 break;
         }
+    }
+
+    /**
+     * Updates the activity coverage for the given test case chromosome. This is only necessary for
+     * activities that have been discovered through an action not belonging to the test case.
+     *
+     * @param chromosome The test case chromosome.
+     * @param activity The activity that has been visited.
+     */
+    public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
+                                                                String activity) {
+
+        Set<String> visited = visitedActivities.getOrDefault(chromosome, new HashSet<>());
+        visited.add(activity);
+        visitedActivities.put(chromosome, visited);
     }
 
     /**
@@ -133,7 +148,7 @@ public final class CoverageUtils {
          * coverage of the individual test cases, one has to iterate over the
          * test cases manually.
          */
-        Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivities();
+        Set<String> visitedActivitiesByTestCase = testCase.getVisitedActivitiesOfApp();
 
         // merge with already visited activities of other test cases in the test suite
         if (visitedActivities.containsKey(chromosome)) {
@@ -205,22 +220,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-
-                // log activity coverage in any case
-                MATE.log("Activity coverage of chromosome "
-                        + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
-
-                MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
-                        + Registry.getEnvironmentManager().getCoverage(
-                        Properties.COVERAGE(), chromosome));
-
-                if (chromosome.getValue() instanceof TestSuite) {
-                    for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                        MATE.log("Coverage of individual chromosome " + testCase + ": "
-                                + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
-                    }
-                }
-                break;
             case ALL_COVERAGE:
 
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager().getCoverage(
@@ -240,6 +239,10 @@ public final class CoverageUtils {
                 break;
             default:
                 break;
+        }
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            MATE.log_acc("Intermediate coverage: " + getCombinedCoverage(Properties.COVERAGE()));
         }
     }
 
@@ -278,7 +281,9 @@ public final class CoverageUtils {
 
             MATE.log_acc("Total visited activities: ");
             for (String activity : visitedActivitiesTotal) {
-                MATE.log_acc(activity);
+                if (Registry.getUiAbstractionLayer().getActivities().contains(activity)) {
+                    MATE.log_acc(activity);
+                }
             }
         }
     }
@@ -301,7 +306,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager().getCombinedCoverage(coverage, null);
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCombinedCoverage(coverage, null);
@@ -349,7 +353,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
-                return Registry.getEnvironmentManager().getCombinedCoverage(coverage, chromosomes);
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCombinedCoverage(coverage, chromosomes);
@@ -377,7 +380,6 @@ public final class CoverageUtils {
                 throw new IllegalStateException("No visited activities for chromosome "
                         + chromosome + "!");
             }
-
             visitedActivitiesTotal.addAll(visitedActivities.get(chromosome));
         }
 
@@ -409,8 +411,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
@@ -428,7 +428,7 @@ public final class CoverageUtils {
      * @return Returns the activity coverage of the given test case.
      */
     private static double getActivityCoverage(TestCase testCase) {
-        return (double) testCase.getVisitedActivities().size() / getActivities().size() * 100;
+        return (double) testCase.getVisitedActivitiesOfApp().size() / getActivities().size() * 100;
     }
 
     /**
@@ -451,7 +451,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager().getCoverage(coverage, chromosome);
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCoverage(coverage, chromosome);

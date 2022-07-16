@@ -218,6 +218,7 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isEditTextType()) {
                 MATE.log_debug("Widget is an edit text instance!");
                 widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
 
                /*
                * TODO: Use static analysis to detect whether an onclick handler is registered.
@@ -248,11 +249,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 MATE.log_debug("Widget is a spinner instance!");
 
                 /*
-                * TODO: Add a proper scrolling action. Right now we simply
-                *  click on the spinner, which in turn opens a list view,
-                *  on which we can click again. However, the better option would
-                *  be some sort of motif gene that does this two step operation
-                *  in one step.
+                * Although there is a proper motif action for spinner widgets in the meantime, we
+                * keep the click action as kind of fallback mechanism and when motif actions
+                * shouldn't be allowed.
+                * 
                  */
 
                 if (widget.isClickable()) {
@@ -356,6 +356,7 @@ public class ActionsScreenState extends AbstractScreenState {
         List<WidgetAction> spinnerClickActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isClickable()
                         && widgetAction.getWidget().isSpinnerType())
+                .filter(widgetAction -> widgetAction.getWidget().hasChildren())
                 .collect(Collectors.toList());
 
         spinnerClickActions.stream().forEach(spinnerClickAction -> {
@@ -483,11 +484,13 @@ public class ActionsScreenState extends AbstractScreenState {
         // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
         // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
         uiActions.add(new UIAction(ActionType.DELETE, activityName));
+        /*
         uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
+         */
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
     }

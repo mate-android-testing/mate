@@ -9,6 +9,7 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -51,6 +52,31 @@ public class Properties {
         return propertyOr(3);
     }
 
+    /**
+     * Defines the equivalence check for two screen states.
+     *
+     * @return Returns the selected state equivalence check.
+     */
+    public static StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL() {
+        return propertyOr(StateEquivalenceLevel.WIDGET);
+    }
+
+    /**
+     * Returns the specified cosine similarity coefficient.
+     *
+     * @return Returns the cosine similarity threshold.
+     */
+    public static float COSINE_SIMILARITY_THRESHOLD() {
+        return propertyOr(0.95f);
+    }
+
+    /**
+     * Whether the surrogate model should be used or not.
+     *
+     * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
+     *          is returned.
+     */
+    public static boolean SURROGATE_MODEL() { return propertyOr(false); }
 
     /*
     * Intent fuzzing related properties.
@@ -110,13 +136,14 @@ public class Properties {
         return propertyOr(null);
     }
 
-
     /*
      * Genetic Algorithm properties
      */
     public static int POPULATION_SIZE() {
         return propertyOr(20);
     }
+
+    public static int BIG_POPULATION_SIZE() { return propertyOr(40); }
 
     public static int NUMBER_TESTCASES() {
         return propertyOr(2);
@@ -181,6 +208,15 @@ public class Properties {
     /*
      * Begin Greybox Fuzzing properties
      */
+
+    /**
+     * The coverage type that should steer the exploration.
+     *
+     * @return Returns the coverage type that steers the exploration, defaults to activity coverage.
+     */
+    public static Coverage GREY_BOX_COVERAGE_CRITERION() {
+        return propertyOr(Coverage.ACTIVITY_COVERAGE);
+    }
 
     /**
      * The initial size of the seed corpus S.
@@ -271,12 +307,10 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /**
-     * Added by stockinger on 28/09/2020
+    /*
+    * Begin GE properties
      */
-    public static int BIG_POPULATION_SIZE() { return propertyOr(100); }
 
-    // grammatical evolution properties
     public static int GE_SEQUENCE_LENGTH() {
         return propertyOr(100);
     }
@@ -288,6 +322,10 @@ public class Properties {
     public static int GE_MUTATION_COUNT() {
         return propertyOr(3);
     }
+
+    /*
+    * End GE properties
+     */
 
     /**
      * Novelty Search - Defines the novelty threshold. A value of 0 indicates that every
@@ -311,6 +349,128 @@ public class Properties {
      * @return Returns the number of nearest neighbours k.
      */
     public static int NEAREST_NEIGHBOURS() { return propertyOr(3); }
+
+    /**
+     * Controls whether quick launch is enabled or disabled.
+     *
+     * @return Returns {@code true} if quick launch is enabled, otherwise {@code false} is returned.
+     */
+    public static boolean QUICK_LAUNCH() { return propertyOr(true); }
+
+    /*
+     * Begin AimDroid properties
+     */
+
+    /**
+     * The epsilon used in the epsilon greedy learning policy.
+     *
+     * @return Returns the epsilon used in the learning policy.
+     */
+    public static double EPSILON() { return propertyOr(0.1d);}
+
+    /**
+     * The alpha used in the SARSA equation.
+     *
+     * @return Returns the alpha used in the SARSA equation.
+     */
+    public static double ALPHA() { return propertyOr(0.8d); }
+
+    /**
+     * The gamma used in the SARSA equation.
+     *
+     * @return Returns the gamma used in the SARSA equation.
+     */
+    public static double GAMMA() { return propertyOr(0.8d); }
+
+    /**
+     * The minL constant used in the bound method (the minimal number of actions).
+     *
+     * @return Returns the minL constant.
+     */
+    public static int MIN_L() { return propertyOr(20); }
+
+    /**
+     * The maxL constant used in the bound method (the maximal number of actions).
+     *
+     * @return Returns the maxL constant.
+     */
+    public static int MAX_L() { return propertyOr(50); }
+
+    /*
+     * End AimDroid properties
+     */
+
+    /*
+     * Begin AutoBlackTest properties
+     */
+
+    /**
+     * The epsilon used in the epsilon greedy learning policy.
+     *
+     * @return Returns the epsilon used in the greedy learning policy.
+     */
+    public static float ABT_EPSILON() { return propertyOr(0.8f); }
+
+    /**
+     * The static discount factor used in equation (1).
+     *
+     * @return Returns the static discount factor.
+     */
+    public static float ABT_DISCOUNT_FACTOR() { return propertyOr(0.9f); }
+
+    /**
+     * The maximal number of episodes (testcases).
+     *
+     * @return Returns the maximal number of episodes.
+     */
+    public static int ABT_MAX_NUM_OF_EPISODES() { return propertyOr(100); }
+
+    /**
+     * The maximal length of an episode (a test case).
+     *
+     * @return Returns the maximal episode length.
+     */
+    public static int ABT_MAX_EPISODE_LENGTH() { return propertyOr(50); }
+
+    /*
+     * End AutoBlackTest properties
+     */
+
+    /*
+    * Begin AutoDroid properties
+     */
+
+    /**
+     * The probability for pressing the home button.
+     *
+     * @return Returns the probability for selecting the home button.
+     */
+    public static float P_HOME_BUTTON() { return propertyOr(0.05f); }
+
+    /**
+     * The initial q-value for a new action.
+     *
+     * @return Returns the initial q-value for a new action.
+     */
+    public static float INITIAL_Q_VALUE() { return propertyOr(500f); }
+
+    /**
+     * The maximal number of episodes (testcases).
+     *
+     * @return Returns the maximal number of episodes.
+     */
+    public static int MAX_NUM_OF_EPISODES() { return propertyOr(100); }
+
+    /**
+     * The maximal length of an episode (a test case).
+     *
+     * @return Returns the maximal episode length.
+     */
+    public static int MAX_EPISODE_LENGTH() { return propertyOr(50); }
+
+    /*
+     * End AutoDroid properties
+     */
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
@@ -370,14 +530,14 @@ public class Properties {
                             property.getValue());
                     store.put(key, parsedObj);
                 } catch (Exception e) {
-                    MATE.log(
+                    MATE.log_acc(
                             "Failure while trying to parse \""
                                     + property.getValue()
                                     + "\" as instance of class "
                                     + propertiesInfo.get(key).getCanonicalName());
                 }
             } else {
-                MATE.log("Unknown property with key: " + property.getKey());
+                MATE.log_acc("Unknown property with key: " + property.getKey());
             }
         }
     }

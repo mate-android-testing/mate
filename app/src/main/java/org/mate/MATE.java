@@ -1,5 +1,6 @@
 package org.mate;
 
+import android.os.Debug;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
@@ -13,6 +14,9 @@ import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
+import org.mate.utils.manifest.Manifest;
+import org.mate.utils.manifest.ManifestParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -26,6 +30,16 @@ public class MATE implements AutoCloseable {
 
     // TODO: make singleton
     public MATE() {
+
+        // check whether we would like to debug the execution
+        boolean waitForDebugger = Boolean.parseBoolean(InstrumentationRegistry.getArguments()
+                .getString("wait-for-debugger"));
+
+        if (waitForDebugger) {
+            // attach the debugger via Run -> 'Attach Debugger to Android Process' -> 'org.mate'
+            MATE.log_acc("Waiting for debugger...");
+            Debug.waitForDebugger();
+        }
 
         // should resolve android.os.FileUriExposedException
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
@@ -66,6 +80,16 @@ public class MATE implements AutoCloseable {
         Registry.registerPackageName(InstrumentationRegistry.getArguments().getString("packageName"));
         MATE.log_acc("Package name: " + Registry.getPackageName());
 
+        try {
+            Manifest manifest = ManifestParser.parseManifest(Registry.getPackageName());
+            Registry.registerManifest(manifest);
+            Registry.registerMainActivity(manifest.getMainActivity());
+        } catch (XmlPullParserException | IOException e) {
+            throw new IllegalStateException("Couldn't parse AndroidManifest.xml!", e);
+        }
+
+        MATE.log_acc("Main activity: " + Registry.getMainActivity());
+
         final UiDevice device = UiDevice.getInstance(getInstrumentation());
         final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
@@ -102,7 +126,7 @@ public class MATE implements AutoCloseable {
     public void testApp(final Algorithm algorithm) {
 
         MATE.log_acc("Activities:");
-        for (String activity : Registry.getUiAbstractionLayer().getActivityNames()) {
+        for (String activity : Registry.getUiAbstractionLayer().getActivities()) {
             MATE.log_acc("\t" + activity);
         }
 
@@ -167,4 +191,5 @@ public class MATE implements AutoCloseable {
     public static void log_error(String msg) {
         Log.e("error", msg);
     }
+
 }

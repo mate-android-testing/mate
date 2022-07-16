@@ -16,11 +16,11 @@ public class State {
         this.screenState = screenState;
     }
 
-    int getId() {
+    public int getId() {
         return id;
     }
 
-    IScreenState getScreenState() {
+    public IScreenState getScreenState() {
         return screenState;
     }
 
@@ -44,6 +44,6 @@ public class State {
     @NonNull
     @Override
     public String toString() {
-        return "s" + id + " [" + screenState.getActivityName() + "]";
+        return "S" + id + " [" + screenState.getActivityName() + "]";
     }
 }

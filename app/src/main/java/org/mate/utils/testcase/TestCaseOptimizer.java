@@ -3,11 +3,11 @@ package org.mate.utils.testcase;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentType;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
+import org.mate.utils.manifest.element.ComponentType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +66,7 @@ public final class TestCaseOptimizer {
     private static TestCase removeAllIntentBasedActions(TestCase testCase) {
 
         List<Action> toBeRemoved = new ArrayList<>();
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         for (Action action : actions) {
             if (action instanceof IntentBasedAction || action instanceof SystemAction) {
@@ -93,11 +93,11 @@ public final class TestCaseOptimizer {
 
         List<Action> toBeRemoved = new ArrayList<>();
 
-        for (int i = 0; i < testCase.getEventSequence().size() - 1; i++) {
-            toBeRemoved.add(testCase.getEventSequence().get(i));
+        for (int i = 0; i < testCase.getActionSequence().size() - 1; i++) {
+            toBeRemoved.add(testCase.getActionSequence().get(i));
         }
 
-        testCase.getEventSequence().removeAll(toBeRemoved);
+        testCase.getActionSequence().removeAll(toBeRemoved);
         return testCase;
     }
 
@@ -111,16 +111,16 @@ public final class TestCaseOptimizer {
      */
     private static TestCase removeAllActionsBeforeLastActivityTransition(TestCase testCase) {
 
-        if (testCase.getEventSequence().isEmpty()) {
+        if (testCase.getActionSequence().isEmpty()) {
             // no actions -> no activity transitions
             return testCase;
         }
 
         List<Action> toBeRemoved = new ArrayList<>();
-        List<Action> actions = new ArrayList<>(testCase.getEventSequence());
+        List<Action> actions = new ArrayList<>(testCase.getActionSequence());
 
         // traverse backwards until we reach a different activity
-        int index = testCase.getEventSequence().size() - 1;
+        int index = testCase.getActionSequence().size() - 1;
         String activity = testCase.getActivityAfterAction(index);
         index--;
 
@@ -139,7 +139,7 @@ public final class TestCaseOptimizer {
             toBeRemoved.add(actions.get(i));
         }
 
-        testCase.getEventSequence().removeAll(toBeRemoved);
+        testCase.getActionSequence().removeAll(toBeRemoved);
         return testCase;
     }
 
@@ -155,7 +155,7 @@ public final class TestCaseOptimizer {
     private static TestCase removeAllNonActivityRelatedActions(TestCase testCase) {
 
         List<Action> toBeRemoved = new ArrayList<>();
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         for (Action action : actions) {
             if (action instanceof UIAction) {
@@ -183,7 +183,7 @@ public final class TestCaseOptimizer {
     private static TestCase removeAllUIActions(TestCase testCase) {
 
         List<Action> toBeRemoved = new ArrayList<>();
-        List<Action> actions = testCase.getEventSequence();
+        List<Action> actions = testCase.getActionSequence();
 
         for (Action action : actions) {
             if (action instanceof UIAction) {
@@ -208,7 +208,7 @@ public final class TestCaseOptimizer {
 
         MATE.log("Optimising TestCase!");
 
-        List<Action> actions = new ArrayList<>(testCase.getEventSequence());
+        List<Action> actions = new ArrayList<>(testCase.getActionSequence());
         Collections.reverse(actions);
 
         List<Action> toBeRemoved = new ArrayList<>(n);
@@ -230,7 +230,7 @@ public final class TestCaseOptimizer {
         MATE.log("Removed from TestCase " + ctr + " " + actionType.getName() + "!");
 
         // remove the actions from the test case
-        testCase.getEventSequence().removeAll(toBeRemoved);
+        testCase.getActionSequence().removeAll(toBeRemoved);
         return testCase;
     }
 
@@ -242,7 +242,7 @@ public final class TestCaseOptimizer {
      * @return Returns the test case without the action at the given index.
      */
     private static TestCase removeActionAtIndex(TestCase testCase, int index) {
-        testCase.getEventSequence().remove(index);
+        testCase.getActionSequence().remove(index);
         return testCase;
     }
 
@@ -254,8 +254,8 @@ public final class TestCaseOptimizer {
      */
     private static TestCase removeLastAction(TestCase testCase) {
 
-        int lastIndex = testCase.getEventSequence().size() - 1;
-        testCase.getEventSequence().remove(lastIndex);
+        int lastIndex = testCase.getActionSequence().size() - 1;
+        testCase.getActionSequence().remove(lastIndex);
         return testCase;
     }
 
@@ -269,8 +269,8 @@ public final class TestCaseOptimizer {
      */
     private static boolean isLastActionOfGivenType(TestCase testCase, Class type) {
 
-        int lastIndex = testCase.getEventSequence().size() - 1;
-        return testCase.getEventSequence().get(lastIndex).getClass().equals(type);
+        int lastIndex = testCase.getActionSequence().size() - 1;
+        return testCase.getActionSequence().get(lastIndex).getClass().equals(type);
     }
 
 

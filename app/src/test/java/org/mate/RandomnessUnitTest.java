@@ -1,16 +1,22 @@
 package org.mate;
 
 import org.junit.Test;
+import org.mate.utils.MersenneTwister;
 import org.mate.utils.Randomness;
-import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class RandomnessUnitTest {
+    
     @Test
-    public void shuffleTest() throws Exception {
+    public void shuffleTest() {
+
+        Registry.registerRandom(new MersenneTwister());
+
         List<Integer> a = new ArrayList<>();
         a.add(1);
         a.add(2);

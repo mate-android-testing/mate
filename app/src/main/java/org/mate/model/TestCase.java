@@ -6,21 +6,22 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.ListUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
+import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
+import java.util.stream.Collectors;
 
 public class TestCase {
 
@@ -31,8 +32,9 @@ public class TestCase {
     private String id;
 
     /**
-     * The set of visited activities.
+     * The states (ids) in the order they were visited.
      */
+    private final List<String> stateSequence;
     private final Set<String> visitedActivities;
 
     /**
@@ -43,6 +45,7 @@ public class TestCase {
     /**
      * The actions that has been executed by this test case.
      */
+    private final List<Action> actionSequence;
     private final List<Action> eventSequence;
 
     /**
@@ -65,7 +68,7 @@ public class TestCase {
      * The stack trace that has been triggered by a potential crash.
      * Only recorded when {@link org.mate.Properties#RECORD_STACK_TRACE()} is defined.
      */
-    private String crashStackTrace = null;
+    private StackTrace crashStackTrace = null;
 
     /**
      * Should be used for the creation of dummy test cases.
@@ -75,9 +78,8 @@ public class TestCase {
     private TestCase() {
         setId("dummy");
         crashDetected = false;
-        visitedActivities = new HashSet<>();
-        visitedStates = new HashSet<>();
-        eventSequence = new ArrayList<>();
+        stateSequence = new ArrayList<>();
+        actionSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
     }
 
@@ -90,17 +92,25 @@ public class TestCase {
         MATE.log("Initialising new test case!");
         setId(id);
         crashDetected = false;
-        visitedActivities = new HashSet<>();
-        visitedStates = new HashSet<>();
-        eventSequence = new ArrayList<>();
+        stateSequence = new ArrayList<>();
+        actionSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
+
+        /*
+        * In rare circumstances, test cases without any action are created. This, however, means
+        * that updateTestCase() was never called, thus the state and activity sequence is empty,
+        * which in turn may falsify activity coverage and the gui model.
+         */
+        IScreenState lastScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
+        stateSequence.add(lastScreenState.getId());
+        activitySequence.add(lastScreenState.getActivityName());
     }
 
     /**
      * Checks whether this is a dummy test case.
      *
      * @return Returns {@code true} when this test case is a dummy test case,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isDummy() {
         return getId().equals("dummy");
@@ -116,7 +126,7 @@ public class TestCase {
     public void finish() {
         MATE.log("Finishing test case!");
 
-        MATE.log("Found crash: " + getCrashDetected());
+        MATE.log("Found crash: " + hasCrashDetected());
 
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
@@ -133,6 +143,7 @@ public class TestCase {
 
     /**
      * Returns the activity name before the execution of the given action.
+     *
      * @param actionIndex The action index.
      * @return Returns the activity in foreground before the given action was executed.
      */
@@ -202,48 +213,41 @@ public class TestCase {
     }
 
     /**
-     * Adds a new action to the list of executed actions.
+     * Returns the set of visited activities. This includes activities not belonging to the AUT.
      *
-     * @param event The action to be added.
-     */
-    public void addEvent(Action event) {
-        this.eventSequence.add(event);
-    }
-
-    /**
-     * Updates the set of visited activities.
-     *
-     * @param activity A new activity to be added.
-     */
-    public void updateVisitedActivities(String activity) {
-        this.visitedActivities.add(activity);
-    }
-
-    /**
-     * Returns the set of visited activities.
-     *
-     * @return Returns the visited activities.
+     * @return Returns the set of visited activities.
      */
     public Set<String> getVisitedActivities() {
-        return visitedActivities;
+        return ListUtils.toSet(activitySequence);
     }
 
     /**
-     * Updates the visited states with a new screen state.
+     * Returns the set of visited activities belonging to the AUT.
      *
-     * @param GUIState The new screen state.
+     * @return Returns the set of visited activities.
      */
-    public void updateVisitedStates(IScreenState GUIState) {
-        this.visitedStates.add(GUIState.getId());
+    public Set<String> getVisitedActivitiesOfApp() {
+        return getVisitedActivities().stream()
+                .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
+                .collect(Collectors.toSet());
     }
 
     /**
-     * Returns the visited screen states, actually the screen state ids.
+     * Returns the visited screen state sequence, actually the screen state ids.
      *
-     * @return Returns the visited states.
+     * @return Returns the visited state sequence.
+     */
+    public List<String> getStateSequence() {
+        return stateSequence;
+    }
+
+    /**
+     * Returns the set of visited states, actually the screen state ids.
+     *
+     * @return Returns the set of visited states.
      */
     public Set<String> getVisitedStates() {
-        return visitedStates;
+        return ListUtils.toSet(stateSequence);
     }
 
     /**
@@ -251,17 +255,17 @@ public class TestCase {
      *
      * @return Returns the action sequence.
      */
-    public List<Action> getEventSequence() {
-        return this.eventSequence;
+    public List<Action> getActionSequence() {
+        return this.actionSequence;
     }
 
     /**
      * Checks whether the test case caused a crash.
      *
      * @return Returns {@code true} if the test case caused a crash,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
-    public boolean getCrashDetected() {
+    public boolean hasCrashDetected() {
         return this.crashDetected;
     }
 
@@ -276,10 +280,10 @@ public class TestCase {
      * Returns the stack trace triggered by a crash of the test case.
      *
      * @return Returns the stack trace caused by the test case;
-     *          this should be typically the last action.
+     *         this should be typically the last action.
      */
     @SuppressWarnings("unused")
-    public String getCrashStackTrace() {
+    public StackTrace getCrashStackTrace() {
         if (Properties.RECORD_STACK_TRACE()) {
             return crashStackTrace;
         } else {
@@ -308,46 +312,41 @@ public class TestCase {
         Registry.getUiAbstractionLayer().resetApp();
         TestCase resultingTc = newInitializedTestCase();
 
-        int finalSize = testCase.eventSequence.size();
+        int finalSize = testCase.actionSequence.size();
 
         if (testCase.desiredSize.hasValue()) {
             finalSize = testCase.desiredSize.getValue();
         }
 
-        try {
-            int count = 0;
-            for (Action action0 : testCase.eventSequence) {
-                if (count < finalSize) {
-                    if (!(action0 instanceof WidgetAction)
-                            || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
-                        if (!resultingTc.updateTestCase(action0, count)) {
-                            return resultingTc;
-                        }
-                        count++;
-                    } else {
-                        break;
+        int count = 0;
+        for (Action action0 : testCase.actionSequence) {
+            if (count < finalSize) {
+                if (!(action0 instanceof WidgetAction)
+                        || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
+                    if (!resultingTc.updateTestCase(action0, count)) {
+                        return resultingTc;
                     }
+                    count++;
                 } else {
-                    return resultingTc;
+                    break;
                 }
+            } else {
+                return resultingTc;
             }
-            for (; count < finalSize; count++) {
-                Action action;
-                if (Properties.WIDGET_BASED_ACTIONS()) {
-                    action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
-                } else {
-                    action = PrimitiveAction.randomAction();
-                }
-                if (!resultingTc.updateTestCase(action, count)) {
-                    return resultingTc;
-                }
-            }
-
-            return resultingTc;
-        } finally {
-            // serialize test case, record test case stats, etc.
-            resultingTc.finish();
         }
+        for (; count < finalSize; count++) {
+            Action action;
+            if (Properties.WIDGET_BASED_ACTIONS()) {
+                action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
+            } else {
+                action = PrimitiveAction.randomAction();
+            }
+            if (!resultingTc.updateTestCase(action, count)) {
+                return resultingTc;
+            }
+        }
+
+        return resultingTc;
     }
 
     /**
@@ -368,9 +367,7 @@ public class TestCase {
      * @return Returns a new test case with a random id.
      */
     public static TestCase newInitializedTestCase() {
-        TestCase tc = new TestCase(UUID.randomUUID().toString());
-        tc.updateTestCase("init");
-        return tc;
+        return new TestCase(UUID.randomUUID().toString());
     }
 
     /**
@@ -379,80 +376,59 @@ public class TestCase {
      * @param action The action to be executed.
      * @param actionID The id of the action.
      * @return Returns {@code true} if the given action didn't cause a crash of the app
-     *          or left the AUT, otherwise {@code false} is returned.
+     *         or left the AUT, otherwise {@code false} is returned.
      */
     public boolean updateTestCase(Action action, int actionID) {
         ActionResult actionResult = updateTestCaseGetResult(action, actionID);
 
+        if (action instanceof WidgetAction
+                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+            throw new IllegalStateException("Action not applicable to current state!");
+        }
+
+        IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
+
+        // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
+        if (!Properties.SURROGATE_MODEL()) {
+            MATE.log("executing action " + actionID + ": " + action);
+        }
+
+        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+
+        // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
+        if (!Properties.SURROGATE_MODEL()) {
+
+            IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
+
+            // track the activity and state transition of each action
+            String activityBeforeAction = oldState.getActivityName();
+            String activityAfterAction = newState.getActivityName();
+            String newStateID = newState.getId();
+
+            actionSequence.add(action);
+            activitySequence.add(activityAfterAction);
+            stateSequence.add(newStateID);
+
+            MATE.log("executed action " + actionID + ": " + action);
+            MATE.log("Activity Transition for action " + actionID
+                    + ":" + activityBeforeAction + "->" + activityAfterAction);
+        }
+
         switch (actionResult) {
             case SUCCESS:
-            case SUCCESS_NEW_STATE:
                 return true;
             case FAILURE_APP_CRASH:
+                setCrashDetected();
+                if (Properties.RECORD_STACK_TRACE()) {
+                    crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
+                }
             case SUCCESS_OUTBOUND:
+                return false;
             case FAILURE_UNKNOWN:
             case FAILURE_EMULATOR_CRASH:
                 return false;
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
-    }
-
-    public ActionResult updateTestCaseGetResult(Action action, int actionID) {
-        if (action instanceof WidgetAction
-                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
-            throw new IllegalStateException("Action not applicable to current state!");
-        }
-
-        String activityBeforeAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
-        MATE.log("executing action " + actionID + ": " + action);
-
-        addEvent(action);
-        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
-
-        // track the activity transitions of each action
-        String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
-
-        if (actionID == 0) {
-            activitySequence.add(activityBeforeAction);
-            activitySequence.add(activityAfterAction);
-        } else {
-            activitySequence.add(activityAfterAction);
-        }
-
-        MATE.log("executed action " + actionID + ": " + action);
-        MATE.log("Activity Transition for action " + actionID
-                + ":" + activityBeforeAction + "->" + activityAfterAction);
-
-        switch (actionResult) {
-            case SUCCESS:
-            case SUCCESS_NEW_STATE:
-                updateTestCase(String.valueOf(actionID));
-                break;
-            case FAILURE_APP_CRASH:
-                setCrashDetected();
-                if (Properties.RECORD_STACK_TRACE()) {
-                    crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
-                }
-                break;
-            case SUCCESS_OUTBOUND:
-            case FAILURE_UNKNOWN:
-            case FAILURE_EMULATOR_CRASH:
-                break;
-            default:
-                throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
-        }
-        return actionResult;
-    }
-
-    /**
-     * Updates the test case with the given event.
-     *
-     * @param event A new event, e.g. the action id.
-     */
-    private void updateTestCase(String event) {
-        IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
-        updateVisitedStates(currentScreenState);
-        updateVisitedActivities(currentScreenState.getActivityName());
     }
 }

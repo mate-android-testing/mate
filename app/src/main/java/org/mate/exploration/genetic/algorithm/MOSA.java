@@ -163,7 +163,7 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
         currentGenerationNumber++; // line 18
 
-        // TODO: Remove! This just tries to keep the cache size reasonable by dropping unused chromosomes.
+        // clean the cache from time to time, otherwise we end up with an OOM error for large apps
         FitnessUtils.cleanCache(chromosomes);
     }
 
@@ -302,11 +302,11 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
     private int getChromosomeLength(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+            return ((TestCase) chromosome.getValue()).getActionSequence().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             int length = 0;
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                length += testCase.getEventSequence().size();
+                length += testCase.getActionSequence().size();
             }
             return length;
         } else {

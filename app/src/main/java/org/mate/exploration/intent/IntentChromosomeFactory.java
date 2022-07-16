@@ -1,17 +1,18 @@
 package org.mate.exploration.intent;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.intent.ComponentDescription;
-import org.mate.interaction.action.intent.ComponentType;
-import org.mate.interaction.action.intent.IntentProvider;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.coverage.CoverageUtils;
+import org.mate.utils.manifest.element.ComponentDescription;
+import org.mate.utils.manifest.element.ComponentType;
 
 /**
  * Provides a chromosome factory that produces {@link TestCase}s consisting of a combination of
@@ -80,6 +81,12 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private void determineRelativeComponentAmount() {
 
+        /*
+        * TODO: Fix the relative component type computation. The problem is that broadcast receivers
+        *  can be a mixture of usual, dynamic and system event receivers, whereas a system event
+        *  receiver can be as well dynamic in nature. Moreover, a system event receiver shows up
+        *  multiple times in the list of system event receivers, one entry for each intent filter.
+         */
         int numberOfComponents = intentProvider.getComponents().size()
                 + intentProvider.getSystemEventReceivers().size() + intentProvider.getDynamicReceivers().size();
 
@@ -151,7 +158,13 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
             }
         } finally {
-            // store coverage, serialize, record stats about test case if desired
+
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                  * If we deal with a test suite execution, the storing of coverage
@@ -161,6 +174,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;

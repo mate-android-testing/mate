@@ -23,11 +23,11 @@ public class ActivityFitnessFunction<T> implements IFitnessFunction<T> {
     @Override
     public double getFitness(IChromosome<T> chromosome) {
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getVisitedActivities().size();
+            return ((TestCase) chromosome.getValue()).getVisitedActivitiesOfApp().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             Set<String> coveredActivities = new HashSet<>();
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                coveredActivities.addAll(testCase.getVisitedActivities());
+                coveredActivities.addAll(testCase.getVisitedActivitiesOfApp());
             }
             return coveredActivities.size();
         } else {
@@ -56,7 +56,7 @@ public class ActivityFitnessFunction<T> implements IFitnessFunction<T> {
      */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        List<String> activities = Registry.getUiAbstractionLayer().getActivityNames();
+        List<String> activities = Registry.getUiAbstractionLayer().getActivities();
         return getFitness(chromosome) / activities.size();
     }
 }

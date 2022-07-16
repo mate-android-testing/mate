@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import org.mate.interaction.action.Action;
+import org.mate.utils.manifest.element.ComponentDescription;
+import org.mate.utils.manifest.element.ComponentType;
+import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.Objects;
 import java.util.Set;

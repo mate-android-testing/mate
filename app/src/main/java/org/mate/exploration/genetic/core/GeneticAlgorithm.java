@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
@@ -228,10 +229,28 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     /**
      * Logs the fitness of the current population.
+     *
+     * @param <S> The genotype generic type.
      */
-    protected void logCurrentFitness() {
+    protected <S> void logCurrentFitness() {
 
-        if (population.size() <= 10) {
+        if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
+            /*
+            * We need to force the evaluation of all chromosomes such that the fitness and coverage
+            * data are produced.
+             */
+            for (int i = 0; i < fitnessFunctions.size(); i++) {
+                MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
+                MATE.log_acc("Fitness function " + (i + 1) + ":");
+                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                for (int j = 0; j < population.size(); j++) {
+                    IChromosome<T> chromosome = population.get(j);
+                    MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));
+                }
+            }
+        }
+
+        if (population.size() <= 10 && Properties.FITNESS_FUNCTION() != FitnessFunction.GENO_TO_PHENO_TYPE) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
@@ -249,15 +268,25 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
             MATE.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
 
-            if (population.size() <= 10
-                    /*
-                    * TODO: We need a way to access the phenotype here, otherwise it tries to
-                    *  use the genotype, which results in a crash.
-                     */
-                    && Properties.FITNESS_FUNCTION() != FitnessFunction.GENO_TO_PHENO_TYPE) {
+            if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
+
+                GenotypePhenotypeMappedFitnessFunction<S, T> fitnessFunction
+                        = (GenotypePhenotypeMappedFitnessFunction<S, T>) fitnessFunctions.get(0);
+
+                List<IChromosome<T>> phenotypePopulation = new ArrayList<>();
+
+                for (IChromosome<T> chromosome : population) {
+                    // TODO: Fix this mismatch between the type variables!
+                    phenotypePopulation.add(fitnessFunction.getPhenoType((IChromosome<S>) chromosome));
+                }
+
+                MATE.log_acc("Combined coverage of current population: "
+                        + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), phenotypePopulation));
+            } else {
                 MATE.log_acc("Combined coverage of current population: "
                         + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }

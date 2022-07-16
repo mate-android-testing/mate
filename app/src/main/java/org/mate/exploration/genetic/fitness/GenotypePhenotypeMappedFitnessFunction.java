@@ -69,4 +69,14 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     public double getNormalizedFitness(IChromosome<S> genotypeChromosome) {
         return phenotypeFitnessFunction.getNormalizedFitness(genotypePhenotypeMapping.map(genotypeChromosome));
     }
+
+    /**
+     * Returns the phenotype for the given genotype chromosome.
+     *
+     * @param genotypeChromosome The given genotype chromosome.
+     * @return Returns the genotype chromosome.
+     */
+    public IChromosome<T> getPhenoType(IChromosome<S> genotypeChromosome) {
+        return genotypePhenotypeMapping.map(genotypeChromosome);
+    }
 }

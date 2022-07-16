@@ -13,8 +13,7 @@ import org.mate.utils.Utils;
 public class ScreenStateFactory {
 
     /**
-     * Indicates how many retrials are allowed when fetching
-     * the current screen state.
+     * Indicates how many retrials are allowed when fetching the current screen state.
      */
     private static final int MAX_NUMBER_OF_RETRIES = 3;
 

@@ -293,7 +293,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             updateParameters();
         }
 
-        // TODO: Remove! This just tries to keep the cache size reasonable by dropping unused chromosomes.
+        // clean the cache from time to time, otherwise we end up with an OOM error for large apps
         List<IChromosome<T>> activeChromosomes = new ArrayList<>();
         for (List<ChromosomeFitnessTuple> tuples : archive.values()) {
             for (ChromosomeFitnessTuple tuple : tuples) {
@@ -676,8 +676,8 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> snd = o2.chromosome;
 
             if (fst.getValue() instanceof TestCase) {
-                return ((TestCase) snd.getValue()).getEventSequence().size()
-                        - ((TestCase) fst.getValue()).getEventSequence().size();
+                return ((TestCase) snd.getValue()).getActionSequence().size()
+                        - ((TestCase) fst.getValue()).getActionSequence().size();
             } else if (fst.getValue() instanceof TestSuite) {
                 return ((TestSuite) snd.getValue()).getTestCases().size()
                         - ((TestSuite) fst.getValue()).getTestCases().size();
@@ -717,7 +717,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             int size = -1;
 
             if (chromosome.getValue() instanceof TestCase) {
-                size = ((TestCase) chromosome.getValue()).getEventSequence().size();
+                size = ((TestCase) chromosome.getValue()).getActionSequence().size();
             } else if (chromosome.getValue() instanceof TestSuite) {
                 size = ((TestSuite) chromosome.getValue()).getTestCases().size();
             }

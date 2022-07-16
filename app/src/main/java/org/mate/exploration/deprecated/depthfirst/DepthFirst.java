@@ -72,7 +72,8 @@ public class DepthFirst {
             WidgetAction action = executableActions.get(i);
 
             //reaches the screen node/state being explored (backtrack)
-            stateFound = deviceMgr.goToState(guiModel,selectedStateId);
+            // stateFound = deviceMgr.goToState(guiModel,selectedStateId);
+            stateFound = false;
 
 
             //if the app is in the screen node/state being explored
@@ -109,9 +110,6 @@ public class DepthFirst {
                     IScreenState state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     long timeToWait = waitForProgressBar(state);
-                    if (timeToWait>300)
-                        timeToWait+=2000;
-                    action.setTimeToWait(timeToWait);
                     state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
                     MATE.log("\n\nnumber of actions (new state?): " + state.getActions().size()+"\n\n");

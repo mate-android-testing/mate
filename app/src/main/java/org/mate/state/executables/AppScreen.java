@@ -11,7 +11,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
 import org.mate.interaction.DeviceMgr;
-import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.utils.Utils;
 
@@ -55,6 +54,16 @@ public class AppScreen {
     private final UiDevice device;
 
     /**
+     * The maximal number of retries (app screen information) when the ui automator is disconnected.
+     */
+    private static final int UiAutomatorDisconnectedRetries = 3;
+
+    /**
+     * The error message when the ui automator is disconnected.
+     */
+    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
+
+    /**
      * Creates a new app screen containing the widgets on it.
      */
     public AppScreen(DeviceMgr deviceMgr) {
@@ -63,17 +72,32 @@ public class AppScreen {
 
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
+        this.packageName = getCurrentPackageName();
 
-        if (activityName.equals(EnvironmentManager.ACTIVITY_UNKNOWN)) {
-            this.packageName = device.getCurrentPackageName();
-        } else {
-            this.packageName = activityName.split("/")[0];
+        final AccessibilityNodeInfo rootNode = getRootNode();
+
+        if (rootNode == null) {
+            throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
         }
+
+        // retrieve widgets from current screen
+        MATE.log_debug("AppScreen: " + activityName);
+        parseWidgets(rootNode, null, 0, 0, 0);
+        MATE.log_debug("Number of widgets: " + widgets.size());
+    }
+
+    /**
+     * Retrieves the root node in the ui hierarchy via the {@link android.app.UiAutomation}.
+     *
+     * @return Returns the root node in the ui hierarchy.
+     */
+    private AccessibilityNodeInfo getRootNode() {
 
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().getRootInActiveWindow();
 
-        if (rootNode == null) {
+        for (int numberOfRetries = 0; numberOfRetries < UiAutomatorDisconnectedRetries
+                && rootNode == null; numberOfRetries++) {
 
             /*
              * It can happen that the device is in an unstable state and hence the UIAutomator
@@ -81,21 +105,42 @@ public class AppScreen {
              * re-connect.
              */
             MATE.log_acc("UIAutomator disconnected, try re-connecting!");
-            Utils.sleep(1000);
+            Utils.sleep(3000);
 
             // try to reconnect
             rootNode = InstrumentationRegistry.getInstrumentation()
                     .getUiAutomation().getRootInActiveWindow();
+        }
 
-            if (rootNode == null) {
-                throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
+        return rootNode;
+    }
+
+    /**
+     * Retrieves the current package name via the {@link UiDevice}.
+     *
+     * @return Returns the current package name associated with the app screen.
+     */
+    private String getCurrentPackageName() {
+
+        String packageName = null;
+
+        for (int numberOfRetries = 0; numberOfRetries <= UiAutomatorDisconnectedRetries
+                && packageName == null; numberOfRetries++) {
+
+            try {
+                packageName = device.getCurrentPackageName();
+            } catch (IllegalStateException e) {
+                if (e.getMessage() != null && e.getMessage().equals(UiAutomatorDisconnectedMessage)) {
+                    MATE.log_acc("UIAutomator disconnected, try re-connecting!");
+                    Utils.sleep(3000);
+                } else {
+                    throw new IllegalStateException("Couldn't retrieve package name!", e);
+                }
             }
         }
 
-        // retrieve widgets from current screen
-        MATE.log_debug("AppScreen: " + activityName);
-        parseWidgets(rootNode, null, 0, 0, 0);
-        MATE.log_debug("Number of widgets: " + widgets.size());
+        // NOTE: We could also retrieve the package name via the root node!
+        return packageName;
     }
 
     /**
