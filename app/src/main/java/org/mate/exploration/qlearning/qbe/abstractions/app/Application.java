@@ -2,11 +2,10 @@ package org.mate.exploration.qlearning.qbe.abstractions.app;
 
 import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
+import org.mate.interaction.action.ActionResult;
 import org.mate.utils.Pair;
 
 import java.util.Optional;
-
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 /**
  * Defines the interface for an application in the context of QBE.

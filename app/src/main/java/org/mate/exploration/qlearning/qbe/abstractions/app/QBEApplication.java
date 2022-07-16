@@ -4,6 +4,7 @@ import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
 import org.mate.exploration.qlearning.qbe.abstractions.state.QBEState;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.interaction.action.ActionResult;
 import org.mate.model.TestCase;
 import org.mate.utils.Pair;
 import org.mate.utils.coverage.CoverageUtils;
@@ -11,9 +12,8 @@ import org.mate.utils.coverage.CoverageUtils;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult.SUCCESS_NEW_STATE;
+import static org.mate.interaction.action.ActionResult.SUCCESS;
+import static org.mate.interaction.action.ActionResult.SUCCESS_NEW_STATE;
 
 /**
  * Provides the necessary functionality to interact with the AUT, e.g. executing an action and

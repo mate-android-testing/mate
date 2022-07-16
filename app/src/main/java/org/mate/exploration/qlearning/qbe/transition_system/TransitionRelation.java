@@ -2,10 +2,9 @@ package org.mate.exploration.qlearning.qbe.transition_system;
 
 import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
+import org.mate.interaction.action.ActionResult;
 
 import java.util.Objects;
-
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 /**
  * Defines a transition in the Extended Labeled Transition System (ELTS), i.e. a connection from

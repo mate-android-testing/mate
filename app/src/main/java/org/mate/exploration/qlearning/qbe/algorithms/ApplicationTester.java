@@ -7,6 +7,7 @@ import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.transition_system.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystem;
+import org.mate.interaction.action.ActionResult;
 import org.mate.utils.Pair;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
-import static org.mate.interaction.UIAbstractionLayer.ActionResult;
 
 public final class ApplicationTester<S extends State<A>, A extends Action> extends AbstractTester<S, A> {
 

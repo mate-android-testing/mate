@@ -368,10 +368,9 @@ public class TestCase {
      *
      * @param action The action to be executed.
      * @param actionID The id of the action.
-     * @return Returns {@code true} if the given action didn't cause a crash of the app
-     *         or left the AUT, otherwise {@code false} is returned.
+     * @return Returns the action result.
      */
-    public boolean updateTestCase(Action action, int actionID) {
+    public ActionResult updateTestCaseGetResult(Action action, int actionID) {
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
@@ -407,20 +406,50 @@ public class TestCase {
         }
 
         switch (actionResult) {
-            case SUCCESS:
-                return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
                 if (Properties.RECORD_STACK_TRACE()) {
                     crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
                 }
+                break;
+            case SUCCESS:
+            case SUCCESS_NEW_STATE:
             case SUCCESS_OUTBOUND:
-                return false;
+            case FAILURE_UNKNOWN:
+            case FAILURE_EMULATOR_CRASH:
+                break;
+            default:
+                throw new UnsupportedOperationException("Encountered an unknown action result. " +
+                        "Cannot continue.");
+        }
+
+        return actionResult;
+    }
+
+    /**
+     * Executes the given action and updates the test case accordingly.
+     *
+     * @param action The action to be executed.
+     * @param actionID The id of the action.
+     * @return Returns {@code true} if the given action didn't cause a crash of the app
+     *         or left the AUT, otherwise {@code false} is returned.
+     */
+    public boolean updateTestCase(Action action, int actionID) {
+
+        ActionResult actionResult = updateTestCaseGetResult(action, actionID);
+
+        switch (actionResult) {
+            case SUCCESS:
+            case SUCCESS_NEW_STATE:
+                return true;
+            case FAILURE_APP_CRASH:
+            case SUCCESS_OUTBOUND:
             case FAILURE_UNKNOWN:
             case FAILURE_EMULATOR_CRASH:
                 return false;
             default:
-                throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
+                throw new UnsupportedOperationException("Encountered an unknown action result. " +
+                        "Cannot continue.");
         }
     }
 }

@@ -34,7 +34,7 @@ public final class QBEAbstractAction implements QMatrix.AbstractActions<QBEActio
             case DPAD_RIGHT:
             case DPAD_CENTER:
                 return 5;
-            case CLEAR_WIDGET:
+            case CLEAR_TEXT:
             case MANUAL_ACTION:
             case TOGGLE_ROTATION:
             case HOME:

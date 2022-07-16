@@ -5,7 +5,7 @@ import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.app.Application;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
-import org.mate.interaction.UIAbstractionLayer;
+import org.mate.interaction.action.ActionResult;
 import org.mate.utils.Pair;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ public final class SimpleTester<S extends State<A>, A extends Action> extends Ab
                 noTerminalState = chosenAction.isPresent();
 
                 if (noTerminalState) {
-                    final Pair<Optional<S>, UIAbstractionLayer.ActionResult> result
+                    final Pair<Optional<S>, ActionResult> result
                             = app.executeAction(chosenAction.get());
                     final Optional<S> nextState = result.first;
                     noCrash = nextState.isPresent();
