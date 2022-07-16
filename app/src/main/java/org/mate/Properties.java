@@ -78,6 +78,14 @@ public class Properties {
      */
     public static boolean SURROGATE_MODEL() { return propertyOr(false); }
 
+    /**
+     * Whether the QBE model should be used or not.
+     *
+     * @return Returns {@code true} if the QBE model should be used, otherwise {@code false}
+     *          is returned.
+     */
+    public static boolean QBE_MODEL() { return propertyOr(false); }
+
     /*
     * Intent fuzzing related properties.
      */

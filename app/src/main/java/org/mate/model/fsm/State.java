@@ -11,7 +11,7 @@ public class State {
     private final int id;
     private final IScreenState screenState;
 
-    State(int id, IScreenState screenState) {
+    protected State(int id, IScreenState screenState) {
         this.id = id;
         this.screenState = screenState;
     }

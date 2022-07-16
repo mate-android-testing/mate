@@ -17,6 +17,7 @@ import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
+import org.mate.model.fsm.qbe.QBEModel;
 import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
@@ -102,6 +103,8 @@ public class UIAbstractionLayer {
         lastScreenStateNumber++;
         if (Properties.SURROGATE_MODEL()) {
             guiModel = new SurrogateModel(lastScreenState, packageName);
+        } else if (Properties.QBE_MODEL()) {
+            guiModel = new QBEModel(lastScreenState, packageName);
         } else {
             guiModel = new FSMModel(lastScreenState, packageName);
         }
@@ -222,10 +225,13 @@ public class UIAbstractionLayer {
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
 
-            if(Properties.SURROGATE_MODEL()) {
+            if (Properties.SURROGATE_MODEL()) {
                 SurrogateModel surrogateModel = (SurrogateModel) guiModel;
                 Set<String> traces = deviceMgr.getTraces();
                 surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+            } else if (Properties.QBE_MODEL()) {
+                QBEModel qbeModel = (QBEModel) guiModel;
+                qbeModel.update(lastScreenState, state, action, FAILURE_APP_CRASH);
             } else {
                 guiModel.update(lastScreenState, state, action);
             }
@@ -261,10 +267,13 @@ public class UIAbstractionLayer {
         // update gui model
         state = toRecordedScreenState(state);
 
-        if(Properties.SURROGATE_MODEL()) {
+        if (Properties.SURROGATE_MODEL()) {
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             Set<String> traces = deviceMgr.getTraces();
             surrogateModel.update(lastScreenState, state, action, result, traces);
+        } else if (Properties.QBE_MODEL()) {
+            QBEModel qbeModel = (QBEModel) guiModel;
+            qbeModel.update(lastScreenState, state, action, result);
         } else {
             guiModel.update(lastScreenState, state, action);
         }
