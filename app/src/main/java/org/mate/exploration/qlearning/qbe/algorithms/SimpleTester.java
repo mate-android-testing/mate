@@ -29,28 +29,28 @@ public final class SimpleTester<S extends State<A>, A extends Action> extends Ab
             app.reset();
             S currentState = app.getCurrentState();
 
-            boolean noTerminalState;
-            boolean noCrash = true;
+            boolean reachedTerminalState = false;
+            boolean discoveredCrash = false;
             int testcaseLength = 0;
 
-            do {
-                final Optional<A> chosenAction = explorationStrategy.chooseAction(currentState);
-                MATE.log_debug("Choose action:" + chosenAction);
-                noTerminalState = chosenAction.isPresent();
+            while (!reachedTerminalState && !discoveredCrash
+                    && testcaseLength < maximumNumberOfActionPerTestCase
+                    && !reachedTimeout(startTime)) {
 
-                if (noTerminalState) {
-                    final Pair<Optional<S>, ActionResult> result
-                            = app.executeAction(chosenAction.get());
+                final Optional<A> chosenAction = explorationStrategy.chooseAction(currentState);
+                MATE.log_debug("Choose action: " + chosenAction);
+                reachedTerminalState = !chosenAction.isPresent();
+
+                if (!reachedTerminalState) {
+                    final Pair<Optional<S>, ActionResult> result = app.executeAction(chosenAction.get());
                     final Optional<S> nextState = result.first;
-                    noCrash = nextState.isPresent();
+                    discoveredCrash = !nextState.isPresent();
                     ++testcaseLength;
-                    if (noCrash) {
+                    if (!discoveredCrash) {
                         currentState = nextState.get();
                     }
                 }
-            } while (noTerminalState && noCrash
-                    && testcaseLength < maximumNumberOfActionPerTestCase && !reachedTimeout(startTime));
+            }
         }
     }
-
 }
