@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public class State {
 
-    private final int id;
-    private final IScreenState screenState;
+    protected final int id;
+    protected final IScreenState screenState;
 
     protected State(int id, IScreenState screenState) {
         this.id = id;
