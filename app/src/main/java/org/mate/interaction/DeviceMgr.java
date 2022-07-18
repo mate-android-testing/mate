@@ -66,8 +66,8 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.support.test.InstrumentationRegistry.getContext;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
@@ -599,6 +599,10 @@ public class DeviceMgr {
         try {
             switch (action.getComponentType()) {
                 case ACTIVITY:
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        // https://stackoverflow.com/a/57490942/6110448
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
                     InstrumentationRegistry.getTargetContext().startActivity(intent);
                     break;
                 case SERVICE:
@@ -611,7 +615,7 @@ public class DeviceMgr {
                     throw new UnsupportedOperationException("Component type not supported yet!");
             }
         } catch (Exception e) {
-            final String msg = "Calling startActivity() from outside of an Activity  context " +
+            final String msg = "Calling startActivity() from outside of an Activity context " +
                     "requires the FLAG_ACTIVITY_NEW_TASK flag.";
             if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
                 MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
@@ -1352,7 +1356,7 @@ public class DeviceMgr {
     public void restartApp() {
         MATE.log("Restarting app");
         // Launch the app
-        Context context = getContext();
+        Context context = getTargetContext();
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(packageName);
         // Clear out any previous instances
