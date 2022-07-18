@@ -25,7 +25,8 @@ public class EspressoDependencyBuilder {
     /**
      * The singleton pattern implies a private constructor.
      */
-    private EspressoDependencyBuilder() {}
+    private EspressoDependencyBuilder() {
+    }
 
     /**
      * Gets the singleton instance.
@@ -53,7 +54,8 @@ public class EspressoDependencyBuilder {
     }
 
     /**
-     * Retrieves the espresso dependencies in an ordered fashion.
+     * Retrieves the espresso dependencies in an ordered fashion. Inserts new lines ({@code null})
+     * to visually group similar imports together.
      *
      * @return Returns the ordered espresso dependencies.
      */
@@ -62,19 +64,19 @@ public class EspressoDependencyBuilder {
         List<EspressoDependency> dependencies = new ArrayList<>(this.dependencies);
         Collections.sort(dependencies, new DependencyComparator());
 
-        // TODO: Make this code more understandable, I suppose it is inserting new lines after each group of imports
         List<EspressoDependency> orderedDependencies = new ArrayList<>();
 
         String prevPrefix = null;
-        boolean prevStatic = true;
+        boolean prevStatic = false;
 
         for (int i = 0; i < dependencies.size(); i++) {
 
-            if (isLineBreak(dependencies, prevPrefix, prevStatic, i)) {
+            if (requiresEmptyLine(dependencies.get(i), prevPrefix, prevStatic)) {
                 orderedDependencies.add(null);
             }
 
             orderedDependencies.add(dependencies.get(i));
+
             prevPrefix = dependencies.get(i).getFullQualifiedName().split("\\.")[0];
             prevStatic = dependencies.get(i).isStaticDependency();
         }
@@ -82,11 +84,23 @@ public class EspressoDependencyBuilder {
         return orderedDependencies;
     }
 
-    private boolean isLineBreak(List<EspressoDependency> dependencyList, String prevPrefix,
-                                boolean prevStatic, int i) {
+    /**
+     * Determines whether an empty line should be inserted before the next dependency. This is
+     * necessary when the next dependency doesn't start with the same prefix as the previous
+     * dependency, or when the non-static imports start.
+     *
+     * @param dependency The next dependency.
+     * @param prevPrefix The prefix of the previous dependency.
+     * @param prevStatic Whether the previous dependency was static or not.
+     * @return Returns {@code true} if an empty line should be inserted, otherwise {code false} is
+     *         returned.
+     */
+    private boolean requiresEmptyLine(EspressoDependency dependency, String prevPrefix, boolean prevStatic) {
         return (prevPrefix != null
-                && !prevPrefix.equals(dependencyList.get(i).getFullQualifiedName().split("\\.")[0]))
-                || (prevStatic && !dependencyList.get(i).isStaticDependency());
+                // insert a line break if the previous dependency doesn't start with the same prefix
+                && !prevPrefix.equals(dependency.getFullQualifiedName().split("\\.")[0]))
+                // between a static and a non-static dependency a line break is necessary
+                || (prevStatic && !dependency.isStaticDependency());
     }
 
     /**
