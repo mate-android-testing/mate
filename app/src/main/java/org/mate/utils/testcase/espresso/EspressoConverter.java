@@ -4,11 +4,14 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.model.TestCase;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
+/**
+ * Converts a {@link TestCase} into an espresso test and writes the resulting espresso test into
+ * the internal storage of MATE.
+ */
 public final class EspressoConverter {
 
     /**
@@ -18,7 +21,6 @@ public final class EspressoConverter {
 
     /**
      * The package name where the tests reside in.
-     * TODO: Use package name of AUT???
      */
     private static final String PACKAGE_NAME = "org.mate.espresso.tests";
 
@@ -50,16 +52,15 @@ public final class EspressoConverter {
             MATE.log("Creating espresso tests folder succeeded: " + espressoTestsDir.mkdir());
         }
 
-        final String espressoTestName = "TestCase" + testCaseCounter + ".java";
-        File espressoTest = new File(espressoTestsDir, espressoTestName);
+        final String espressoTestName = "Test" + testCaseCounter + ".java";
+        File espressoTestFile = new File(espressoTestsDir, espressoTestName);
+        String espressoTest = new EspressoTestBuilder(testCase, testCaseCounter, PACKAGE_NAME).build();
 
-        StringBuilder espressoTestBuilder = generateEspressoTest(testCase);
-
-        boolean success = writeEspressoTest(espressoTest, espressoTestBuilder);
+        boolean success = writeEspressoTest(espressoTestFile, espressoTest);
 
         if (!success) {
             // re-try a second time
-            success = writeEspressoTest(espressoTest, espressoTestBuilder);
+            success = writeEspressoTest(espressoTestFile, espressoTest);
 
             if (!success) {
                 throw new IllegalStateException("Converting TestCase " + testCaseCounter + " failed!");
@@ -83,15 +84,17 @@ public final class EspressoConverter {
         testCaseCounter++;
     }
 
-    private static StringBuilder generateEspressoTest(final TestCase testCase) {
-        final StringBuilder espressoTestBuilder = new StringBuilder();
-        return espressoTestBuilder;
-    }
+    /**
+     * Writes the given espresso test to the given file.
+     *
+     * @param espressoTestFile The output file of the espresso test.
+     * @param espressoTest The espresso test that should be written to file.
+     * @return Returns {@code true} if writing succeeded, otherwise {@code false} is returned.
+     */
+    private static boolean writeEspressoTest(File espressoTestFile, String espressoTest) {
 
-    private static boolean writeEspressoTest(File espressoTest, StringBuilder espressoTestBuilder) {
-
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(espressoTest))) {
-            bufferedWriter.append(espressoTestBuilder);
+        try (PrintWriter printWriter = new PrintWriter(espressoTestFile)) {
+            printWriter.print(espressoTest);
             return true;
         } catch (IOException e) {
             MATE.log_warn("Couldn't write espresso test!");
