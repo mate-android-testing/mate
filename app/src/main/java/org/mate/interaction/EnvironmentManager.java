@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -515,10 +516,35 @@ public class EnvironmentManager {
         return new HashSet<>(Arrays.asList(targets.split(",")));
     }
 
+    public void logReachedTargets(IChromosome<?> chromosome) {
+        Message response = sendMessage(new Message.MessageBuilder("/graph/reached_targets")
+                .withParameter("chromosome", getChromosomeId(chromosome))
+                .withParameter("packageName", Registry.getPackageName())
+                .build());
+
+        logMap(response, "reachedTargetComponents");
+        logMap(response, "reachedTargetMethods");
+        logMap(response, "reachedTargetLines");
+    }
+
+    private void logMap(Message response, String mapName) {
+        int entries = Integer.parseInt(response.getParameter(mapName + ".size"));
+
+        StringJoiner map = new StringJoiner(", ");
+
+        for (int i = 0; i < entries; i++) {
+            String key = response.getParameter(mapName + ".k" + i);
+            String value = response.getParameter(mapName + ".v" + i);
+            map.add(key + "=" + value);
+        }
+
+        MATE.log(mapName + "{" + map + "}");
+    }
+
     private Set<String> tokens = null;
     public Set<String> getStackTraceTokens() {
         if (emulator == null) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
         if (tokens == null) {

@@ -158,7 +158,7 @@ public class TestCase {
         MATE.log(nickName + " Testcase fitness: " + new CrashDistance().getFitness(chromosome));
         MATE.log(nickName + " Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
         MATE.log(nickName + " Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
-
+        Registry.getEnvironmentManager().logReachedTargets(chromosome);
         // TODO: log the test case actions in a proper format
     }
 
