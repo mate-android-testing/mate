@@ -167,9 +167,10 @@ public class GeneticAlgorithmBuilder {
             if (fitnessFunctions[i] != null) {
                 String key = "";
 
-                counter++;
                 key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, counter);
                 properties.setProperty(key, fitnessFunctions[i].name());
+
+                counter++;
             }
         }
 
