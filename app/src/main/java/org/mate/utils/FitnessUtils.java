@@ -88,8 +88,10 @@ public class FitnessUtils {
                 LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
             }
         } else {
-            if (Arrays.stream(usedFitnessFunctions).anyMatch(fitnessFunctions::contains)) {
-                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
+            for (FitnessFunction fitness : usedFitnessFunctions) {
+                if (fitnessFunctions.contains(fitness)) {
+                    Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
+                }
             }
 
             if (Arrays.stream(usedFitnessFunctions).anyMatch(
