@@ -19,6 +19,8 @@ public class ExecuteMATEEDA {
         MATE.log_acc("Starting EDA strategy ...");
         MATE mate = new MATE();
 
+        // Resetting app to make sure the root state is the same as when starting a testcase
+        Registry.getUiAbstractionLayer().resetApp();
 
         EstimationOfDistribution estimationOfDistribution = new EstimationOfDistribution(
                 Collections.singletonList(new CrashDistance()),
