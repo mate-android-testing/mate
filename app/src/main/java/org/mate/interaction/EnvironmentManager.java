@@ -517,10 +517,20 @@ public class EnvironmentManager {
     }
 
     public void logReachedTargets(IChromosome<?> chromosome) {
-        Message response = sendMessage(new Message.MessageBuilder("/graph/reached_targets")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/reached_targets")
                 .withParameter("chromosome", getChromosomeId(chromosome))
-                .withParameter("packageName", Registry.getPackageName())
-                .build());
+                .withParameter("packageName", Registry.getPackageName());
+
+        if (chromosome.getValue() instanceof TestCase) {
+            TestCase testCase = (TestCase) chromosome.getValue();
+
+            if (testCase.hasCrashDetected()) {
+                messageBuilder.withParameter("stackTrace", testCase.getCrashStackTrace().getMethodCalls().stream()
+                        .collect(Collectors.joining("\n")));
+            }
+        }
+
+        Message response = sendMessage(messageBuilder.build());
 
         logMap(response, "reachedTargetComponents");
         logMap(response, "reachedTargetMethods");
