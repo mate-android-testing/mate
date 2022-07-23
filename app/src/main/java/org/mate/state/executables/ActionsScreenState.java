@@ -490,11 +490,13 @@ public class ActionsScreenState extends AbstractScreenState {
         // uiActions.add(new UIAction(ActionType.SLEEP, activityName, fragmentNames, id));
         // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName, fragmentNames, id));
         uiActions.add(new UIAction(ActionType.DELETE, activityName, fragmentNames, id));
+        /*
         uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName, fragmentNames, id));
         uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName, fragmentNames, id));
         uiActions.add(new UIAction(ActionType.DPAD_UP, activityName, fragmentNames, id));
         uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName, fragmentNames, id));
         uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName, fragmentNames, id));
+         */
         uiActions.add(new UIAction(ActionType.ENTER, activityName, fragmentNames, id));
         return uiActions;
     }
