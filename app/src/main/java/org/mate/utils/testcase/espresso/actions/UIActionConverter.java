@@ -42,7 +42,9 @@ public class UIActionConverter extends ActionConverter {
      */
     @Override
     public String convert() {
+        // certain ui actions can't be translated to native espresso actions
         if (NON_TRANSLATABLE_ACTIONS.contains(actionType)) {
+            // we fall back to the help of the UiAutomator
             buildPerform();
             buildComment();
             return builder.toString();
