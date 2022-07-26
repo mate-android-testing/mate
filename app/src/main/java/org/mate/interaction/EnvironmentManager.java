@@ -474,6 +474,15 @@ public class EnvironmentManager {
         return Double.parseDouble(sendMessage(new Message.MessageBuilder("/graph/call_tree_distance").withParameter("chromosome", chromosomeId).withParameter("packageName", Registry.getPackageName()).build()).getParameter("distance"));
     }
 
+    public double getMergedBasicBlockDistance(IChromosome<?> chromosome) {
+        return Double.parseDouble(
+                sendMessage(new Message.MessageBuilder("/graph/basic_block_distance")
+                        .withParameter("chromosome", getChromosomeId(chromosome))
+                        .withParameter("packageName", Registry.getPackageName())
+                        .build()
+                ).getParameter("mergedNormalizedDistance"));
+    }
+
     /**
      * Initialises a graph.
      */
