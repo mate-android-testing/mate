@@ -2,8 +2,8 @@ package org.mate.crash_reproduction.eda.representation.initializer;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
+import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 
 import java.util.Comparator;
@@ -37,35 +37,52 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
         // P_j(I) = P_T / l, where I elem promising actions
         // P_j(I) = (1 - P_T) / l, where I not elem promising actions
         for (Action action : state.getActions()) {
-            double weight = getActionWeight(prevActions, (UIAction) action) *
+            double weight = getActionWeight(prevActions, state, (UIAction) action) *
                     (promisingActions.contains(action) ? pPromisingAction : (1 - pPromisingAction));
             probabilities.put(action, weight);
         }
 
-        return fixed(probabilities, 0.7);
+        return fixed(probabilities, 0.5);
     }
 
     private <T> Map<T, Double> fixed(Map<T, Double> weights, double maxProb) {
-        ToDoubleFunction<Map.Entry<T, Double>> toDoubleFunction = Map.Entry::getValue;
-
         Map<T, Double> probabilities = new HashMap<>();
-        Queue<T> sortedEntries = weights.entrySet().stream()
-                .sorted(Comparator.comparingDouble(toDoubleFunction).reversed())
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toCollection(LinkedList::new));
+        Queue<Set<T>> sortedEntries = getFronts(weights);
 
         double leftToGive = 1;
         while (!sortedEntries.isEmpty()) {
-            double prob = leftToGive * maxProb;
-            probabilities.put(sortedEntries.poll(), prob);
+            Set<T> entries = sortedEntries.poll();
 
-            leftToGive -= prob;
+            double prob = 0;
+
+            for (int i = 0; i < entries.size(); i++) {
+                double p = leftToGive * maxProb;
+                leftToGive -= p;
+                prob += p;
+            }
+
+            double probPerEntry = prob / entries.size();
+            for (T entry : entries) {
+                probabilities.put(entry, probPerEntry);
+            }
         }
 
         return probabilities;
     }
 
-    private double getActionWeight(List<Action> prevActions, UIAction action) {
+    private <T> Queue<Set<T>> getFronts(Map<T, Double> weights) {
+        Map<Double, Set<T>> inverted = new HashMap<>();
+        weights.forEach((key, value) -> inverted.computeIfAbsent(value, a -> new HashSet<>()).add(key));
+
+        ToDoubleFunction<Map.Entry<Double, Set<T>>> toDoubleFunction = Map.Entry::getKey;
+
+        return inverted.entrySet().stream()
+                .sorted(Comparator.comparingDouble(toDoubleFunction).reversed())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    private double getActionWeight(List<Action> prevActions, IScreenState state, UIAction action) {
         // the weight depends on the action type
         double eventTypeWeight;
         switch (action.getActionType()) {
@@ -80,16 +97,21 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
             case SWIPE_DOWN:
             case SWIPE_LEFT:
             case SWIPE_RIGHT:
+            case DELETE:
+            case SEARCH:
                 eventTypeWeight = 0.5;
                 break;
             case MENU:
                 eventTypeWeight = 2;
                 break;
+            case CLICK:
+                eventTypeWeight = 1.5;
+                break;
             default:
                 eventTypeWeight = 1;
                 break;
         }
-        if (action.getActionType() == ActionType.BACK && action.getActivityName().equals(Registry.getMainActivity())) {
+        if (actionForcesTestToFinish(state, action)) {
             eventTypeWeight = 0.1;
         }
 
@@ -102,5 +124,13 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
         double beta = 0.3;
         double gamma = 1.5;
         return ((alpha * eventTypeWeight) + (beta * unvisitedChildren)) / (gamma * executionFrequency);
+    }
+
+    private boolean actionForcesTestToFinish(IScreenState state, Action action) {
+        IGUIModel iguiModel = Registry.getUiAbstractionLayer().getGuiModel();
+        return iguiModel.getEdges(action).stream()
+                .anyMatch(edge -> edge.getSource().equals(state)
+                        && !edge.getTarget().getPackageName().equals(Registry.getPackageName()) // action leads outside the app
+                );
     }
 }
