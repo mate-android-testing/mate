@@ -2,7 +2,14 @@ package org.mate.utils.testcase.espresso;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
+import org.mate.utils.testcase.espresso.actions.ActionConverter;
+import org.mate.utils.testcase.espresso.actions.MotifActionConverter;
+import org.mate.utils.testcase.espresso.actions.UIActionConverter;
+import org.mate.utils.testcase.espresso.actions.WidgetActionConverter;
 
 import static org.mate.utils.testcase.espresso.EspressoDependency.ANDROID_JUNIT_4;
 import static org.mate.utils.testcase.espresso.EspressoDependency.LARGE_TEST;
@@ -105,6 +112,26 @@ public class EspressoTestBuilder {
      */
     private void buildStatements(Action action) {
 
+        ActionConverter actionConverter;
+
+        if (action instanceof WidgetAction) {
+            actionConverter = new WidgetActionConverter((WidgetAction) action);
+        } else if (action instanceof MotifAction) {
+            actionConverter = new MotifActionConverter((MotifAction) action);
+        } else if (action instanceof UIAction) {
+                actionConverter = new UIActionConverter((UIAction) action);
+        } else {
+            throw new UnsupportedOperationException("Action " + action.getClass() + " not yet supported!");
+        }
+
+        buildLine(2, actionConverter.convert());
+
+        /*
+        List<String> statements = new ArrayList<>(actionConverter.getStatements());
+        for (String statement : statements) {
+            buildLine(2, statement);
+        }
+         */
     }
 
     /**
