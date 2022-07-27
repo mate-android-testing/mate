@@ -252,7 +252,10 @@ public class WidgetActionConverter extends ActionConverter {
         builder.append(ALL_OF).append("(");
         buildCoordinatesMatcher();
         buildClassMatcher();
-        buildTextMatcher(false);
+        if (isNonEmptyTextView()) {
+            builder.append(", ");
+            buildTextMatcher(false);
+        }
         builder.append(")");
     }
 
