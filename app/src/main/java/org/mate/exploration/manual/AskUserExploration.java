@@ -49,26 +49,43 @@ public class AskUserExploration implements Algorithm {
         List<ExplorationStep> explorationSteps = new LinkedList<>();
         List<Action> currentActions = new LinkedList<>();
 
-        IChromosome<TestCase> chromosome = createChromosome(currentActions);
+        IChromosome<TestCase> chromosome = retryCreatingChromosome(currentActions, 3);
         explorationSteps.add(createStep(chromosome));
 
         for (Action action : template.getValue().getEventSequence()) {
             currentActions.add(action);
-            chromosome = createChromosome(currentActions);
+            chromosome = retryCreatingChromosome(currentActions, 3);
             explorationSteps.add(createStep(chromosome));
         }
 
         return explorationSteps;
     }
 
-    private IChromosome<TestCase> createChromosome(List<Action> actions) {
+    private IChromosome<TestCase> retryCreatingChromosome(List<Action> actions, int maxTries) {
+        Optional<IChromosome<TestCase>> chromosome;
+        int tries = 0;
+
+        do {
+            tries++;
+            chromosome = createChromosome(actions);
+        } while (!chromosome.isPresent() && tries < maxTries);
+
+        return chromosome
+                .orElseThrow(() -> new IllegalStateException("Was not able to create chromosome after " + maxTries + " tries"));
+    }
+
+    private Optional<IChromosome<TestCase>> createChromosome(List<Action> actions) {
         Registry.getUiAbstractionLayer().resetApp();
 
         TestCase testCase = TestCase.newInitializedTestCase();
         Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         for (int i = 0; i < actions.size(); i++) {
-            if (!testCase.updateTestCase(getClosestCurrentAction(actions.get(i)), i) && (i+1) < actions.size()) {
+            Optional<Action> closestAction = getClosestCurrentAction(actions.get(i));
+
+            if (!closestAction.isPresent()) {
+                return Optional.empty(); // Reached wrong state
+            } else if (!testCase.updateTestCase(closestAction.get(), i) && (i+1) < actions.size()) {
                 throw new IllegalStateException("App crashed, but there this were " + (actions.size() - i) + " actions left!");
             }
         }
@@ -77,7 +94,7 @@ public class AskUserExploration implements Algorithm {
         CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
         testCase.finish();
 
-        return chromosome;
+        return Optional.of(chromosome);
     }
 
     private Chromosome<TestCase> createTemplateChromosome() {
@@ -149,9 +166,9 @@ public class AskUserExploration implements Algorithm {
         }
     }
 
-    private Action getClosestCurrentAction(Action expectedAction) {
+    private Optional<Action> getClosestCurrentAction(Action expectedAction) {
         if (Registry.getUiAbstractionLayer().getExecutableActions().contains(expectedAction)) {
-            return expectedAction;
+            return Optional.of(expectedAction);
         } else if (expectedAction instanceof WidgetAction) {
             // Exact match not possible -> look for closest action
             WidgetAction expectedWidgetAction = (WidgetAction) expectedAction;
@@ -163,13 +180,11 @@ public class AskUserExploration implements Algorithm {
                     .collect(Collectors.toList());
 
             if (matching.size() == 1) {
-                return matching.get(0);
-            } else {
-                throw new IllegalStateException();
+                return Optional.of(matching.get(0));
             }
-        } else {
-            throw new IllegalStateException();
         }
+
+        return Optional.empty();
     }
 
     private String toDot(List<ExplorationStep> steps, List<Action> actions) {
