@@ -67,8 +67,7 @@ public class EnvironmentManager {
     }
 
     /**
-     * Initialises a new environment manager communicating with
-     * the MATE server on the given port.
+     * Initialises a new environment manager communicating with the MATE server on the given port.
      *
      * @param port The MATE server port.
      * @throws IOException If no connection could be established with the MATE server.
@@ -76,6 +75,7 @@ public class EnvironmentManager {
     public EnvironmentManager(int port) throws IOException {
         active = true;
         server = new Socket(DEFAULT_SERVER_IP, port);
+        server.setSoTimeout(0);
         messageParser = new Parser(server.getInputStream());
     }
 
