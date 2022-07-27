@@ -11,6 +11,9 @@ import org.mate.utils.testcase.espresso.actions.MotifActionConverter;
 import org.mate.utils.testcase.espresso.actions.UIActionConverter;
 import org.mate.utils.testcase.espresso.actions.WidgetActionConverter;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.mate.utils.testcase.espresso.EspressoDependency.ANDROID_JUNIT_4;
 import static org.mate.utils.testcase.espresso.EspressoDependency.LARGE_TEST;
 import static org.mate.utils.testcase.espresso.EspressoDependency.RUN_WITH;
@@ -124,14 +127,7 @@ public class EspressoTestBuilder {
             throw new UnsupportedOperationException("Action " + action.getClass() + " not yet supported!");
         }
 
-        buildLine(2, actionConverter.convert());
-
-        /*
-        List<String> statements = new ArrayList<>(actionConverter.getStatements());
-        for (String statement : statements) {
-            buildLine(2, statement);
-        }
-         */
+        buildLines(2, Arrays.asList(actionConverter.convert().split(System.lineSeparator())));
     }
 
     /**
@@ -193,6 +189,18 @@ public class EspressoTestBuilder {
     private void emptyLines(int count) {
         for (int i = 0; i < count; i++) {
             builder.append(NEW_LINE);
+        }
+    }
+
+    /**
+     * Appends the given {@code lines} intended by {@code tabs}.
+     *
+     * @param tabs The number of tabs.
+     * @param lines The lines that should be inserted.
+     */
+    private void buildLines(int tabs, List<String> lines) {
+        for (String line : lines) {
+            buildLine(tabs, line);
         }
     }
 
