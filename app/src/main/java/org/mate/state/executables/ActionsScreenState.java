@@ -386,6 +386,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<WidgetAction> textInsertActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
+                .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
                 .collect(Collectors.toList());
 
         List<WidgetAction> clickableButtonActions = widgetActions.stream()
