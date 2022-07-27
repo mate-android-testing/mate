@@ -46,7 +46,7 @@ public abstract class ActionConverter {
      * Builds a comment.
      */
     protected void buildComment() {
-        builder.append("// ");
+        builder.append(" // ");
     }
 
     /**
