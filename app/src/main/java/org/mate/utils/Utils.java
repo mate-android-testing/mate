@@ -1,5 +1,7 @@
 package org.mate.utils;
 
+import org.mate.MATE;
+
 /**
  * A collection of utility functions.
  */
@@ -18,7 +20,8 @@ public class Utils {
         try {
             Thread.sleep(time);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            MATE.log_warn("Interrupt: " + e.getMessage());
+            throw new MateInterruptedException(e);
         }
     }
 }

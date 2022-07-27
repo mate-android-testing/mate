@@ -35,6 +35,7 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
@@ -1655,6 +1656,9 @@ public class DeviceMgr {
         File sdCard = Environment.getExternalStorageDirectory();
         File infoFile = new File(sdCard, "info.txt");
 
+        // Check for thread interruption.
+        Utils.sleep(1);
+
         /*
          * If the AUT has been crashed, the uncaught exception handler takes over and produces both
          * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
@@ -1670,9 +1674,28 @@ public class DeviceMgr {
          * We need to wait until the info.txt file is generated, once it is there, we know that all
          * traces have been dumped.
          */
+        MateInterruptedException interrupted = null;
         while (!infoFile.exists()) {
             MATE.log_debug("Waiting for info.txt...");
-            Utils.sleep(200);
+            try {
+                Utils.sleep(200);
+            } catch (MateInterruptedException e) {
+                /*
+                 * We might get a timeout (signaled through an interrupt) while waiting for the
+                 * traces to be written. In that case we still want to wait for the Tracer to write
+                 * its traces.
+                 */
+                interrupted = e;
+            }
+        }
+
+        /*
+         * Re-throw the interrupt exception caught while waiting for the Tracer to finish dumping
+         * its traces. This is done before reading and deleting the traces.txt file, so that the
+         * traces won't be lost.
+         */
+        if (interrupted != null) {
+            throw interrupted;
         }
 
         File traceFile = new File(sdCard, "traces.txt");
