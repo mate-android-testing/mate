@@ -1184,6 +1184,15 @@ public class EnvironmentManager {
         sendMessage(new Message.MessageBuilder("/utility/write_file").withParameter("fileName", fileName).withParameter("content", content).build());
     }
 
+    public void writeTraceDiffToFile(String fileName, List<IChromosome<TestCase>> chromosomes) {
+        sendMessage(new Message.MessageBuilder("/utility/write_traces_diff_file")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("fileName", fileName)
+                .withParameter("chromosomes", chromosomes.stream().map(this::getChromosomeId).collect(Collectors.joining("+")))
+                .build()
+        );
+    }
+
     /**
      * Extracts the last stack trace from the logcat.
      *

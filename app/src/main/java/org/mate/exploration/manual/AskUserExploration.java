@@ -41,6 +41,7 @@ public class AskUserExploration implements Algorithm {
             List<ExplorationStep> explorationSteps = getExplorationSteps(template);
             Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".dot", toDot(explorationSteps, template.getValue().getEventSequence()));
             Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode(explorationSteps));
+            Registry.getEnvironmentManager().writeTraceDiffToFile("exp_" + chromosomeCounter + "_traces_diff.txt", explorationSteps.stream().map(e -> e.chromosome).collect(Collectors.toList()));
             chromosomeCounter++;
         }
     }
@@ -302,7 +303,7 @@ public class AskUserExploration implements Algorithm {
         }
 
         return new ExplorationStep(Registry.getUiAbstractionLayer().getLastScreenState(), nodeId, fitness,
-                fitnessFunction.getWeightedFitnessFunctions().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> e.getKey().getNormalizedFitness(chromosome))));
+                fitnessFunction.getWeightedFitnessFunctions().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> e.getKey().getNormalizedFitness(chromosome))), chromosome);
     }
 
     private static class ExplorationStep {
@@ -310,12 +311,14 @@ public class AskUserExploration implements Algorithm {
         private final String nodeId;
         private final double fitness;
         private final Map<String, Double> fitnessVector;
+        private final IChromosome<TestCase> chromosome;
 
-        private ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector) {
+        private ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector, IChromosome<TestCase> chromosome) {
             this.state = state;
             this.nodeId = nodeId;
             this.fitness = fitness;
             this.fitnessVector = fitnessVector;
+            this.chromosome = chromosome;
         }
     }
 
