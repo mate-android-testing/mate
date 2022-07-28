@@ -14,6 +14,12 @@ public enum ModelRepresentation {
             return new TreeRepresentation(initializer);
         }
     },
+    REDUCED_TREE {
+        @Override
+        public IModelRepresentation get(BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializer) {
+            return new NewStateRepresentationWrapper(TREE.get(initializer));
+        }
+    },
     GRAPH {
         @Override
         public IModelRepresentation get(BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializer) {
