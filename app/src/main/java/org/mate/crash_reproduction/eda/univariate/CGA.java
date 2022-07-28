@@ -3,7 +3,8 @@ package org.mate.crash_reproduction.eda.univariate;
 import android.util.Pair;
 
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
-import org.mate.crash_reproduction.eda.representation.TestCaseModelIterator;
+import org.mate.crash_reproduction.eda.representation.NodeWithPickedAction;
+import org.mate.crash_reproduction.eda.util.ProbabilityUtil;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,19 +42,19 @@ public class CGA extends RepresentationBasedModel {
         double bestFitness = getMaximisingFitness(bestChromosome);
         double worstFitness = getMaximisingFitness(worstChromosome);
 
-        TestCaseModelIterator bestTestCase = new TestCaseModelIterator(modelRepresentation.getIterator(), bestChromosome.getValue());
-        TestCaseModelIterator worstTestCase = new TestCaseModelIterator(modelRepresentation.getIterator(), worstChromosome.getValue());
+        Iterator<NodeWithPickedAction> bestTestCase = modelRepresentation.getTestcaseIterator(bestChromosome.getValue());
+        Iterator<NodeWithPickedAction> worstTestCase = modelRepresentation.getTestcaseIterator(worstChromosome.getValue());
 
         Map<Map<Action, Double>, Pair<List<Action>, List<Action>>> probabilityMapToUpdates = new IdentityHashMap<>();
 
         while (bestTestCase.hasNext()) {
-            TestCaseModelIterator.NodeWithPickedAction node = bestTestCase.next();
+            NodeWithPickedAction node = bestTestCase.next();
             probabilityMapToUpdates.computeIfAbsent(node.getActionProbabilities(), a -> Pair.create(new LinkedList<>(), new LinkedList<>()))
                     .first.add(node.action);
         }
 
         while (worstTestCase.hasNext()) {
-            TestCaseModelIterator.NodeWithPickedAction node = worstTestCase.next();
+            NodeWithPickedAction node = worstTestCase.next();
             probabilityMapToUpdates.computeIfAbsent(node.getActionProbabilities(), a -> Pair.create(new LinkedList<>(), new LinkedList<>()))
                     .second.add(node.action);
         }

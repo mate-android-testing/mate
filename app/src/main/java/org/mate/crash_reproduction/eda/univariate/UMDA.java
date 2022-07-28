@@ -1,13 +1,14 @@
 package org.mate.crash_reproduction.eda.univariate;
 
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
-import org.mate.crash_reproduction.eda.representation.TestCaseModelIterator;
+import org.mate.crash_reproduction.eda.representation.NodeWithPickedAction;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.model.TestCase;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,10 +28,10 @@ public class UMDA extends RepresentationBasedModel {
         List<IChromosome<TestCase>> selection = selectionFunction.select(new LinkedList<>(population), fitnessFunctions);
 
         for (IChromosome<TestCase> testCase : selection) {
-            TestCaseModelIterator testCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), testCase.getValue());
+            Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(testCase.getValue());
 
             while (testCaseModelIterator.hasNext()) {
-                TestCaseModelIterator.NodeWithPickedAction node = testCaseModelIterator.next();
+                NodeWithPickedAction node = testCaseModelIterator.next();
 
                 node.putProbabilityOfAction(node.getProbabilityOfAction() + 1);
             }

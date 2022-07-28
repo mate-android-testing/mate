@@ -1,24 +1,17 @@
 package org.mate.crash_reproduction.eda.univariate;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
-import org.mate.crash_reproduction.eda.IDistributionModel;
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
-import org.mate.crash_reproduction.eda.representation.ModelRepresentationIterator;
-import org.mate.crash_reproduction.eda.representation.TestCaseModelIterator;
-import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.crash_reproduction.eda.representation.NodeWithPickedAction;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
-import org.mate.state.IScreenState;
-import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
-import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,10 +87,10 @@ public class PIPE extends RepresentationBasedModel {
     private double probability(TestCase testCase) {
         // PIPE paper 4.1
         double probProduct = 1;
-        TestCaseModelIterator testCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), testCase);
+        Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(testCase);
 
         while (testCaseModelIterator.hasNext()) {
-            TestCaseModelIterator.NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
+            NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
 
             probProduct *= nodeWithPickedAction.getProbabilityOfAction();
         }
@@ -127,10 +120,10 @@ public class PIPE extends RepresentationBasedModel {
         double pTarget = targetProbability(bestTestcase);
 
         while (probability(bestTestcase.getValue()) < pTarget) {
-            TestCaseModelIterator testCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), bestTestcase.getValue());
+            Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(bestTestcase.getValue());
 
             while (testCaseModelIterator.hasNext()) {
-                TestCaseModelIterator.NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
+                NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
 
                 double probBefore = nodeWithPickedAction.getProbabilityOfAction();
                 nodeWithPickedAction.putProbabilityOfAction(probBefore + clr * learningRate * (1 - probBefore));
@@ -142,11 +135,11 @@ public class PIPE extends RepresentationBasedModel {
         double pTarget = worseTargetProbability(worstTestcase);
 
         while (probability(worstTestcase.getValue()) > pTarget) {
-            TestCaseModelIterator testCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), worstTestcase.getValue());
-            TestCaseModelIterator bestTestCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), best.getValue());
+            Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(worstTestcase.getValue());
+            Iterator<NodeWithPickedAction> bestTestCaseModelIterator = modelRepresentation.getTestcaseIterator(best.getValue());
 
             while (testCaseModelIterator.hasNext()) {
-                TestCaseModelIterator.NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
+                NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
 
                 // ignore common prefix
                 if (!bestTestCaseModelIterator.hasNext() || !bestTestCaseModelIterator.next().equals(nodeWithPickedAction)) {
@@ -158,10 +151,10 @@ public class PIPE extends RepresentationBasedModel {
     }
 
     private void renormalizeOthers(TestCase bestTestcase) {
-        TestCaseModelIterator testCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), bestTestcase);
+        Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(bestTestcase);
 
         while (testCaseModelIterator.hasNext()) {
-            TestCaseModelIterator.NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
+            NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
             double probBest = nodeWithPickedAction.getProbabilityOfAction();
             double sum = nodeWithPickedAction.getActionProbabilities().values().stream().mapToDouble(d -> d).sum();
 
@@ -183,10 +176,10 @@ public class PIPE extends RepresentationBasedModel {
             int z = 1;
             double pMP = pMutation / (z * Math.sqrt(bestTestcase.getValue().getEventSequence().size()));
 
-            TestCaseModelIterator testCaseModelIterator = new TestCaseModelIterator(modelRepresentation.getIterator(), bestTestcase.getValue());
+            Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(bestTestcase.getValue());
 
             while (testCaseModelIterator.hasNext()) {
-                TestCaseModelIterator.NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
+                NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
 
                 for (Map.Entry<Action, Double> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
                     if (Randomness.getRnd().nextDouble() < pMP) {
