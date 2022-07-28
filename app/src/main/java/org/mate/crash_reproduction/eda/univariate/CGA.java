@@ -73,12 +73,17 @@ public class CGA extends RepresentationBasedModel {
             }
 
             for (Action worstAction : worstActions) {
-                probabilities.put(worstAction, probabilities.get(worstAction) - lambda * (1 - worstFitness));
+                double prevProb = probabilities.get(worstAction);
+                probabilities.put(worstAction, prevProb * (1 - worstFitness));
             }
 
             for (Action worstAndBestAction : worstAndBestActions) {
                 probabilities.put(worstAndBestAction, probabilities.get(worstAndBestAction) + lambda * (bestFitness - worstFitness));
             }
+
+            Map<Action, Double> normalized = ProbabilityUtil.weightsToProbability(probabilities);
+            probabilities.clear();
+            probabilities.putAll(normalized);
         }
     }
 
