@@ -11,12 +11,12 @@ import java.util.NoSuchElementException;
 /**
  * Walks through the model tree like the testcase has before
  */
-public class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
+class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     private final ModelRepresentationIterator representationIterator;
     private final Iterator<Action> actionIterator;
     private final Iterator<IScreenState> stateIterator;
 
-    public TestCaseModelIterator(ModelRepresentationIterator representationIterator, TestCase testCase) {
+    TestCaseModelIterator(ModelRepresentationIterator representationIterator, TestCase testCase) {
         this.representationIterator = representationIterator;
         this.actionIterator = testCase.getEventSequence().iterator();
         this.stateIterator = testCase.getStateSequence().iterator();
