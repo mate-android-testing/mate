@@ -3,7 +3,6 @@ package org.mate.crash_reproduction.eda.representation;
 import android.util.Pair;
 
 import org.mate.Registry;
-import org.mate.crash_reproduction.eda.util.DotGraphUtil;
 import org.mate.crash_reproduction.eda.util.Tree;
 import org.mate.crash_reproduction.eda.util.TreeNode;
 import org.mate.interaction.action.Action;
@@ -117,6 +116,10 @@ public class TreeRepresentation implements IModelRepresentation {
         List<Pair<TreeNode<TreeNodeContent>, TreeNode<TreeNodeContent>>> mostLikelyPath = getMostLikelyPath();
         BiPredicate<TreeNode<TreeNodeContent>, TreeNode<TreeNodeContent>> isOnMostLikelyPath = (source, target) -> mostLikelyPath.stream().anyMatch(edge -> edge.first == source && edge.second == target);
 
+        BiPredicate<TreeNodeContent, Action> keepAction = (node, action) ->
+                node.getActionWithBiggestProb().equals(action)
+                || node.actionProbabilities.getOrDefault(action, 0D) > 0.01;
+
         BiFunction<TreeNodeContent, Action, String> printActionProb = (node, action) -> {
             Double prob = node.actionProbabilities.get(action);
 
@@ -141,6 +144,7 @@ public class TreeRepresentation implements IModelRepresentation {
                     put("shape", "square");
                     put("xlabel", "<" + p.actionProbabilities.keySet().stream()
                             .filter(a -> !p.actionToNextState.containsKey(a))
+                            .filter(a -> keepAction.test(p, a))
                             .map(a -> printActionProb.apply(p, a))
                             .collect(Collectors.joining("<BR/>")) + ">"
                     );
@@ -148,6 +152,7 @@ public class TreeRepresentation implements IModelRepresentation {
                 (source, target) -> new HashMap<String, String>() {{
                     put("label", "<" + source.getContent().actionToNextState.entrySet().stream()
                             .filter(e -> e.getValue().equals(target.getContent().state))
+                            .filter(e -> keepAction.test(source.getContent(), e.getKey()))
                             .map(e -> printActionProb.apply(source.getContent(), e.getKey()))
                             .collect(Collectors.joining("<BR/>")) + ">");
 
