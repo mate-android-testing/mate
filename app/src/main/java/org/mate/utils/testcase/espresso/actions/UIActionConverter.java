@@ -89,7 +89,7 @@ public class UIActionConverter extends ActionConverter {
                         .append("(")
                         .append(KEY_EVENT).append(".")
                         .append(KeyEvent.keyCodeToString(KeyEvent.KEYCODE_ENTER))
-                        .append(");");
+                        .append("));");
                 break;
             case DELETE:
                 builder.append(".perform(")
@@ -97,7 +97,7 @@ public class UIActionConverter extends ActionConverter {
                         .append("(")
                         .append(KEY_EVENT).append(".")
                         .append(KeyEvent.keyCodeToString(KeyEvent.KEYCODE_DEL))
-                        .append(");");
+                        .append("));");
                 break;
             default:
                 throw new UnsupportedOperationException("Action type " + actionType + " not yet supported!");
