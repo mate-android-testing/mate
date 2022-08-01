@@ -217,7 +217,7 @@ public class WidgetActionConverter extends ActionConverter {
     }
 
     /**
-     * Builds a view matcher for the given resource id using the 'withIDString()' matcher.
+     * Builds a view matcher for the given resource id using the custom 'withIDString()' matcher.
      *
      * @param resourceID The non empty resource id.
      */
@@ -260,7 +260,7 @@ public class WidgetActionConverter extends ActionConverter {
     }
 
     /**
-     * Builds a view matcher based on the coordinates using 'withCoordinates()'.
+     * Builds a view matcher based on the coordinates using the custom 'withCoordinates()' matcher.
      */
     private void buildCoordinatesMatcher() {
         builder.append("withCoordinates(")
