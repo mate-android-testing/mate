@@ -156,7 +156,7 @@ public class EspressoTestBuilder {
     private void buildSetup() {
         buildLine(1, "static {");
         buildLine(2, "PACKAGE_NAME = \"" + Registry.getPackageName() + "\";");
-        buildLine(2, "START_ACTIVITY_NAME = \"" + Registry.getMainActivity() + "\";");
+        buildLine(2, "MAIN_ACTIVITY_NAME = \"" + Registry.getMainActivity() + "\";");
         buildLine(1, "}");
     }
 
