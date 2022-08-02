@@ -16,6 +16,7 @@ public class CrashDistance implements IFitnessFunction<TestCase> {
     private final Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions = new HashMap<IFitnessFunction<TestCase>, Double>(){{
         put(new CallTreeDistance<>(), 1D);
         put(new BasicBlockDistance<>(), 1D);
+        put(new ReachedRequiredConstructor(), 1D);
     }};
 
     @Override

@@ -474,6 +474,12 @@ public class EnvironmentManager {
         return Double.parseDouble(sendMessage(new Message.MessageBuilder("/graph/call_tree_distance").withParameter("chromosome", chromosomeId).withParameter("packageName", Registry.getPackageName()).build()).getParameter("distance"));
     }
 
+    public double getReachedRequiredConstructors(IChromosome<?> chromosome) {
+        String chromosomeId = getChromosomeId(chromosome);
+
+        return Double.parseDouble(sendMessage(new Message.MessageBuilder("/graph/reached_required_constructors").withParameter("chromosome", chromosomeId).withParameter("packageName", Registry.getPackageName()).build()).getParameter("reached"));
+    }
+
     public double getMergedBasicBlockDistance(IChromosome<?> chromosome) {
         return Double.parseDouble(
                 sendMessage(new Message.MessageBuilder("/graph/basic_block_distance")
