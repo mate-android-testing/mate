@@ -55,7 +55,7 @@ public class AskUserExploration implements Algorithm {
 
         for (Action action : template.getValue().getEventSequence()) {
             currentActions.add(action);
-            chromosome = retryCreatingChromosome(currentActions, 3);
+            chromosome = retryCreatingChromosome(currentActions, 6);
             explorationSteps.add(createStep(chromosome));
         }
 
