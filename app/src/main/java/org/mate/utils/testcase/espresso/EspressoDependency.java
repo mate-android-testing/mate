@@ -63,6 +63,11 @@ public enum EspressoDependency {
     PRESS_BACK(true, "android.support.test.espresso.Espresso", "pressBackUnconditionally"),
 
     /**
+     * Press menu espresso dependency.
+     */
+    PRESS_MENU(true,"android.support.test.espresso.action.ViewActions",  "pressMenuKey"),
+
+    /**
      * Press key espresso dependency.
      */
     PRESS_KEY(true, "android.support.test.espresso.action.ViewActions", "pressKey"),

@@ -11,6 +11,7 @@ import static org.mate.utils.testcase.espresso.EspressoDependency.IS_ROOT;
 import static org.mate.utils.testcase.espresso.EspressoDependency.KEY_EVENT;
 import static org.mate.utils.testcase.espresso.EspressoDependency.PRESS_BACK;
 import static org.mate.utils.testcase.espresso.EspressoDependency.PRESS_KEY;
+import static org.mate.utils.testcase.espresso.EspressoDependency.PRESS_MENU;
 
 /**
  * Converts a {@link UIAction} to an espresso action.
@@ -21,7 +22,7 @@ public class UIActionConverter extends ActionConverter {
      * The set of {@link UIAction}s that can't be natively translated to espresso actions.
      */
     private static final EnumSet<ActionType> NON_TRANSLATABLE_ACTIONS = EnumSet.of(ActionType.HOME,
-            ActionType.BACK, ActionType.TOGGLE_ROTATION, ActionType.MENU, ActionType.SEARCH);
+            ActionType.BACK, ActionType.TOGGLE_ROTATION, ActionType.SEARCH);
 
     /**
      * The action type of the {@link UIAction}.
@@ -76,7 +77,9 @@ public class UIActionConverter extends ActionConverter {
                 builder.append(PRESS_BACK).append("();");
                 break;
             case MENU:
-                builder.append("device.pressMenu();");
+                builder.append(".perform(")
+                        .append(PRESS_MENU)
+                        .append("());");
                 break;
             case TOGGLE_ROTATION:
                 builder.append("rotate();");
