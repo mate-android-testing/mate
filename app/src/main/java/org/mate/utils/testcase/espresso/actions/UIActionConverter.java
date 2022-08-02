@@ -9,6 +9,7 @@ import java.util.EnumSet;
 
 import static org.mate.utils.testcase.espresso.EspressoDependency.IS_ROOT;
 import static org.mate.utils.testcase.espresso.EspressoDependency.KEY_EVENT;
+import static org.mate.utils.testcase.espresso.EspressoDependency.PRESS_BACK;
 import static org.mate.utils.testcase.espresso.EspressoDependency.PRESS_KEY;
 
 /**
@@ -72,7 +73,7 @@ public class UIActionConverter extends ActionConverter {
                 builder.append("device.pressHome();");
                 break;
             case BACK:
-                builder.append("device.pressBack();");
+                builder.append(PRESS_BACK).append("();");
                 break;
             case MENU:
                 builder.append("device.pressMenu();");

@@ -48,11 +48,6 @@ public enum EspressoDependency {
     SWIPE_RIGHT(true, "android.support.test.espresso.action.ViewActions", "swipeRight"),
 
     /**
-     * Press back espresso dependency.
-     */
-    PRESS_BACK(true, "android.support.test.espresso.Espresso", "pressBack"),
-
-    /**
      * Clear text espresso dependency.
      */
     CLEAR_TEXT(true, "android.support.test.espresso.action.ViewActions", "clearText"),
@@ -61,6 +56,11 @@ public enum EspressoDependency {
      * Close soft keyboard espresso dependency.
      */
     CLOSE_SOFT_KEYBOARD(true, "android.support.test.espresso.action.ViewActions", "closeSoftKeyboard"),
+
+    /**
+     * Press back espresso dependency.
+     */
+    PRESS_BACK(true, "android.support.test.espresso.Espresso", "pressBackUnconditionally"),
 
     /**
      * Press key espresso dependency.
