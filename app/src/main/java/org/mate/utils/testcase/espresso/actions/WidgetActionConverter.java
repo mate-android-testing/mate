@@ -1,7 +1,5 @@
 package org.mate.utils.testcase.espresso.actions;
 
-import android.widget.TextView;
-
 import org.mate.Registry;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
@@ -160,7 +158,7 @@ public class WidgetActionConverter extends ActionConverter {
         // the text actions requires the text to insert as additional argument
         if (dependency == EspressoDependency.TYPE_TEXT) {
             builder.append("\"");
-            builder.append(widget.getText());
+            builder.append(widget.getText().replaceAll("[\\n\\r]", ""));
             builder.append("\"");
         }
 
