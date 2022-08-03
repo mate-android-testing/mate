@@ -248,7 +248,8 @@ public class WidgetActionConverter extends ActionConverter {
      * @param appendComma Whether to append a comma at the end.
      */
     private void buildTextMatcher(boolean appendComma) {
-        builder.append(WITH_TEXT).append("(\"").append(widget.getText()).append("\")");
+        String text = widget.getContentDesc().isEmpty() ? widget.getText() : widget.getContentDesc();
+        builder.append(WITH_TEXT).append("(\"").append(text).append("\")");
         if (appendComma) {
             builder.append(", ");
         }
@@ -296,11 +297,9 @@ public class WidgetActionConverter extends ActionConverter {
      * @return Returns {@code true} if the widget is a non-empty text view.
      */
     private boolean isNonEmptyTextView() {
-        // TODO: Is the class check necessary or can it be any kind of text view?
-        return widget.getClazz().equals(TextView.class.getName())
-                // TODO: Should we consider the content description attribute as well?
-                && widget.getText() != null
-                && !widget.getText().isEmpty();
+        return widget.isTextViewType()
+                && ((widget.getText() != null && !widget.getText().isEmpty())
+                || (!widget.getContentDesc().isEmpty()));
     }
 
     /**
