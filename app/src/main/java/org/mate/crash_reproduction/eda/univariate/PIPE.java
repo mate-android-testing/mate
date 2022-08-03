@@ -185,6 +185,7 @@ public class PIPE extends RepresentationBasedModel {
                     if (Randomness.getRnd().nextDouble() < pMP) {
                         double probBefore = entry.getValue();
                         // PIPE paper 4.5
+                        MATE.log("Applying mutation");
                         entry.setValue(probBefore + mutationRate * (1 - probBefore));
                     }
                 }
