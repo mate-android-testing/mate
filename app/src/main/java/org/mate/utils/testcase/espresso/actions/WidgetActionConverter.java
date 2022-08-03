@@ -180,7 +180,6 @@ public class WidgetActionConverter extends ActionConverter {
             buildWithIDString(resourceID);
         } else {
 
-            // TODO: There is no view matcher for a ImageViewer right now.
             if (isNonEmptyTextView()) {
                 // try first a view matcher solely based on the widget text
                 buildAnyOf();
