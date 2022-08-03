@@ -1,14 +1,15 @@
 package org.mate.crash_reproduction.eda.univariate;
 
+import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.crash_reproduction.eda.IDistributionModel;
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
 import org.mate.crash_reproduction.eda.representation.ModelRepresentationIterator;
-import org.mate.crash_reproduction.eda.util.ProbabilityUtil;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
@@ -34,6 +35,12 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
                 // TODO add back ProbabilityUtil.weightsToProbabilities
                 Action action = Randomness.randomIndexWithProbabilities(iterator.getActionProbabilities());
+
+                if (action instanceof WidgetAction
+                        && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+                    MATE.log_warn("Model suggests action that is not applicable in current state! Ending testcase");
+                    return chromosome;
+                }
 
                 if (!testCase.updateTestCase(action, actionsCount)) {
                     return chromosome;
