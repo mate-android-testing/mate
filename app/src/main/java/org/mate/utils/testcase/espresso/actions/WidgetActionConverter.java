@@ -11,6 +11,7 @@ import org.mate.utils.testcase.espresso.EspressoDependency;
 import java.util.EnumSet;
 
 import static org.mate.utils.testcase.espresso.EspressoDependency.ALL_OF;
+import static org.mate.utils.testcase.espresso.EspressoDependency.ANY_OF;
 import static org.mate.utils.testcase.espresso.EspressoDependency.CLEAR_TEXT;
 import static org.mate.utils.testcase.espresso.EspressoDependency.CLOSE_SOFT_KEYBOARD;
 import static org.mate.utils.testcase.espresso.EspressoDependency.SCROLL_TO;
@@ -182,7 +183,7 @@ public class WidgetActionConverter extends ActionConverter {
             // TODO: There is no view matcher for a ImageViewer right now.
             if (isNonEmptyTextView()) {
                 // try first a view matcher solely based on the widget text
-                buildOneOf();
+                buildAnyOf();
             }
 
             // use an 'allOf()' view matcher if there are multiple matchers applicable
@@ -191,7 +192,7 @@ public class WidgetActionConverter extends ActionConverter {
             }
 
             if (isNonEmptyTextView()) {
-                // close the oneOf() matcher
+                // close the anyOf() matcher
                 builder.append(")");
             }
         }
@@ -228,8 +229,17 @@ public class WidgetActionConverter extends ActionConverter {
     /**
      * Builds a view matcher for a text view using the custom 'oneOf()' matcher.
      */
+    @SuppressWarnings("unused")
     private void buildOneOf() {
         builder.append("oneOf(");
+        buildTextMatcher(true);
+    }
+
+    /**
+     * Builds a view matcher for a text view using the 'anyOf' matcher.
+     */
+    private void buildAnyOf() {
+        builder.append(ANY_OF).append("(");
         buildTextMatcher(true);
     }
 

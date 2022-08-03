@@ -83,34 +83,34 @@ public enum EspressoDependency {
     TYPE_TEXT(true, "android.support.test.espresso.action.ViewActions", "typeText"),
 
     /**
-     * Is root espresso dependency.
+     * The 'is root' view matcher.
      */
     IS_ROOT(true, "android.support.test.espresso.matcher.ViewMatchers", "isRoot"),
 
     /**
-     * With text espresso dependency.
+     * The 'with text' view matcher.
      */
     WITH_TEXT(true, "android.support.test.espresso.matcher.ViewMatchers", "withText"),
 
     /**
-     * With id espresso dependency.
+     * The 'with id' view matcher.
      */
     WITH_ID(true, "android.support.test.espresso.matcher.ViewMatchers", "withId"),
 
     /**
-     * All of espresso dependency.
+     * The 'all of' view matcher.
      */
     ALL_OF(true, "org.hamcrest.CoreMatchers", "allOf"),
 
     /**
-     * Contains string espresso dependency.
+     * The 'any of' view matcher.
      */
-    CONTAINS_STRING(true, "org.hamcrest.CoreMatchers", "containsString"),
+    ANY_OF(true, "org.hamcrest.CoreMatchers", "anyOf"),
 
     /**
-     * Espresso espresso dependency.
+     * The 'contains string' view matcher.
      */
-    ESPRESSO(false, "android.support.test.espresso", "Espresso"),
+    CONTAINS_STRING(true, "org.hamcrest.CoreMatchers", "containsString"),
 
     /**
      * '@LargeTest' annotation.
