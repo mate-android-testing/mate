@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
-import org.mate.Registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Represents an element in the ui hierarchy, i.e. a wrapper around a {@link AccessibilityNodeInfo}
@@ -259,7 +256,10 @@ public class Widget {
                 Stream.of(text, contentDesc, labeledBy, errorText, labelFor, hint),
                 children.stream().flatMap(Widget::getTokens)
         ).filter(Objects::nonNull)
-                .flatMap(s -> Arrays.stream(s.split("\\s|,|;|:|\\.")))
+                .flatMap(s -> Stream.concat(
+                        Arrays.stream(s.split("\\s|,|;|:|\\.")),
+                        Stream.of(s) // Allows exact match
+                ))
                 .map(String::trim)
                 .map(String::toLowerCase)
                 .filter(s -> !s.isEmpty())
@@ -276,7 +276,7 @@ public class Widget {
     }
 
     public boolean containsAnyToken(Set<String> tokens) {
-        return getTokens().anyMatch(t1 -> tokens.stream().anyMatch(t2 -> {
+        return getTokens().map(String::toLowerCase).anyMatch(t1 -> tokens.stream().map(String::toLowerCase).anyMatch(t2 -> {
             return t1.equals(t2)
                     || (Math.abs(t1.length() - t2.length()) == 1 && (t1.contains(t2) || t2.contains(t1))) // Off by one (catches plural)
             ;
