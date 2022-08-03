@@ -577,12 +577,17 @@ public class EnvironmentManager {
                     .withParameter("package", Registry.getPackageName());
 
             Message response = sendMessage(messageBuilder.build());
-            tokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
+            int numTokens = Integer.parseInt(response.getParameter("tokens"));
+
+            tokens = new HashSet<>();
+            for (int i = 0; i < numTokens; i++) {
+                tokens.add(response.getParameter("token_" + i));
+            }
         }
 
         MATE.log("Tokens are: " + tokens);
 
-        return tokens;
+        return Collections.unmodifiableSet(tokens);
     }
 
     private Set<String> userInputTokens = null;
