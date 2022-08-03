@@ -286,8 +286,7 @@ public class WidgetActionConverter extends ActionConverter {
      */
     private void buildClassMatcher() {
         String className = getShortClassName();
-        // TODO: Why can't we build a class matcher for an image view?
-        if (className != null && !className.equals("ImageView")) {
+        if (className != null) {
             builder.append(", ").append("withClassNameString(\"").append(className).append("\")");
         }
     }
