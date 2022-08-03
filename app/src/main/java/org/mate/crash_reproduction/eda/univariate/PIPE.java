@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,11 @@ public class PIPE extends RepresentationBasedModel {
         this.pEl = pEl;
         this.pMutation = pMutation;
         this.mutationRate = mutationRate;
+
+        MATE.log(String.format(Locale.getDefault(),
+                "Using PIPE with {learningRate: %f, epsilon: %f, clr: %f, pEL: %f, pMutation: %f, mutationRate: %f}",
+                learningRate, epsilon, clr, pEl, pMutation, mutationRate
+                ));
     }
 
     @Override

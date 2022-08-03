@@ -127,6 +127,18 @@ public class Properties {
 
     public static int MUTATION_RATE() { return propertyOr(1); }
 
+    public static double PIPE_LEARNING_RATE() { return propertyOr(0.01); }
+
+    public static double PIPE_CLR() { return propertyOr(0.1); }
+
+    public static double PIPE_PROB_ELITIST_LEARNING() { return propertyOr(0.1); }
+
+    public static double PIPE_EPSILON() { return propertyOr(0.000001); }
+
+    public static double PIPE_PROB_MUTATION() { return propertyOr(0.4); }
+
+    public static double PIPE_MUTATION_RATE() { return propertyOr(0.4); }
+
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
     public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
