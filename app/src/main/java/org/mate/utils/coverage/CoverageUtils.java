@@ -107,6 +107,15 @@ public final class CoverageUtils {
                 Properties.COVERAGE(), chromosome, null);
     }
 
+    public static void storeTestCaseActionChromosomeCoverage(IChromosome<TestCase> chromosome) {
+
+        // store data about activity coverage in any case
+        visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
+
+        Registry.getEnvironmentManager().storeCoverageData(
+                Properties.COVERAGE(), chromosome, Registry.getEnvironmentManager().getActionEntityId(chromosome));
+    }
+
     /**
      * Stores the coverage data of a single test case within a test suite.
      *

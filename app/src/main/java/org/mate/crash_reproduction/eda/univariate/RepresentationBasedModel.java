@@ -12,7 +12,6 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
-import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
@@ -32,8 +31,9 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
 
         try {
             ModelRepresentationIterator iterator = modelRepresentation.getIterator();
+            Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
+
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
-                // TODO add back ProbabilityUtil.weightsToProbabilities
                 Action action = Randomness.randomIndexWithProbabilities(iterator.getActionProbabilities());
 
                 if (action instanceof WidgetAction
@@ -42,7 +42,10 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
                     return chromosome;
                 }
 
-                if (!testCase.updateTestCase(action, actionsCount)) {
+                boolean stop = !testCase.updateTestCase(action, actionsCount);
+                Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
+
+                if (stop) {
                     return chromosome;
                 }
 
@@ -50,8 +53,8 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
                 iterator.updatePosition(testCase, action, state);
             }
         } finally {
-            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+            Registry.getEnvironmentManager().storeFitnessData(chromosome, Registry.getEnvironmentManager().getActionEntityId(chromosome));
+            CoverageUtils.storeTestCaseActionChromosomeCoverage(chromosome);
             CoverageUtils.logChromosomeCoverage(chromosome);
             testCase.finish();
         }

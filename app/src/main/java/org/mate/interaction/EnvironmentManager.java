@@ -654,10 +654,11 @@ public class EnvironmentManager {
     }
 
     public void storeActionFitnessData(IChromosome<TestCase> chromosome) {
-        String chromosomeId = getChromosomeId(chromosome);
-        int numActions = chromosome.getValue().getEventSequence().size();
+        storeFitnessData(chromosome, getActionEntityId(chromosome));
+    }
 
-        storeFitnessData(chromosome, numActions + "_" + chromosomeId);
+    public String getActionEntityId(IChromosome<TestCase> chromosome) {
+        return chromosome.getValue().getEventSequence().size() + "_" + getChromosomeId(chromosome);
     }
 
     /**
