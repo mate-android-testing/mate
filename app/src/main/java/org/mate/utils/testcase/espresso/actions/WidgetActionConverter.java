@@ -13,6 +13,7 @@ import static org.mate.utils.testcase.espresso.EspressoDependency.ANY_OF;
 import static org.mate.utils.testcase.espresso.EspressoDependency.CLEAR_TEXT;
 import static org.mate.utils.testcase.espresso.EspressoDependency.CLOSE_SOFT_KEYBOARD;
 import static org.mate.utils.testcase.espresso.EspressoDependency.SCROLL_TO;
+import static org.mate.utils.testcase.espresso.EspressoDependency.WITH_CONTENT_DESCRIPTION;
 import static org.mate.utils.testcase.espresso.EspressoDependency.WITH_TEXT;
 
 /**
@@ -241,13 +242,18 @@ public class WidgetActionConverter extends ActionConverter {
     }
 
     /**
-     * Builds a view matcher for a text view using the 'withText()' matcher.
+     * Builds a view matcher for a text view using the 'withText()/withContentDescription()' matcher.
      *
      * @param appendComma Whether to append a comma at the end.
      */
     private void buildTextMatcher(boolean appendComma) {
-        String text = widget.getContentDesc().isEmpty() ? widget.getText() : widget.getContentDesc();
-        builder.append(WITH_TEXT).append("(\"").append(text).append("\")");
+        boolean useContentDescription = !widget.getContentDesc().isEmpty();
+        if (useContentDescription) {
+            builder.append(WITH_CONTENT_DESCRIPTION)
+                    .append("(\"").append(widget.getContentDesc()).append("\")");
+        } else {
+            builder.append(WITH_TEXT).append("(\"").append(widget.getText()).append("\")");
+        }
         if (appendComma) {
             builder.append(", ");
         }

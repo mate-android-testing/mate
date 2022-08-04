@@ -93,6 +93,11 @@ public enum EspressoDependency {
     WITH_TEXT(true, "android.support.test.espresso.matcher.ViewMatchers", "withText"),
 
     /**
+     * The 'with content description' view matcher.
+     */
+    WITH_CONTENT_DESCRIPTION(true, "android.support.test.espresso.matcher.ViewMatchers", "withContentDescription"),
+
+    /**
      * The 'with id' view matcher.
      */
     WITH_ID(true, "android.support.test.espresso.matcher.ViewMatchers", "withId"),
