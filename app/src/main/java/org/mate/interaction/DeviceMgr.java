@@ -1,5 +1,11 @@
 package org.mate.interaction;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.support.test.InstrumentationRegistry.getContext;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
+import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
+
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
@@ -52,12 +58,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.support.test.InstrumentationRegistry.getContext;
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
-import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
 /**
  * The device manager is responsible for the actual execution of the various actions.
@@ -930,6 +930,9 @@ public class DeviceMgr {
             if (obj != null) {
                 X = obj.getVisibleBounds().centerX();
                 Y = obj.getVisibleBounds().centerY();
+                if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
+                    pixelsmove = (obj.getVisibleBounds().bottom - obj.getVisibleBounds().top) / 2;
+                }
             } else {
                 X = widget.getX();
                 Y = widget.getY();
