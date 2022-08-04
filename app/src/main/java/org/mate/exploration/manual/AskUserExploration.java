@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.crash_reproduction.eda.util.DotGraphUtil;
 import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -16,17 +15,12 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.Either;
-import org.mate.utils.FitnessUtils;
-import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,80 +31,27 @@ public class AskUserExploration implements Algorithm {
     @Override
     public void run() {
         while (true) {
-            Chromosome<TestCase> template = createTemplateChromosome();
-            List<ExplorationStep> explorationSteps = getExplorationSteps(template);
-            Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".dot", toDot(explorationSteps, template.getValue().getEventSequence()));
+            List<ExplorationStep> explorationSteps = getExplorationSteps();
             Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode(explorationSteps));
-            Registry.getEnvironmentManager().writeTraceDiffToFile("exp_" + chromosomeCounter + "_traces_diff.txt", explorationSteps.stream().map(e -> e.chromosome).collect(Collectors.toList()));
             chromosomeCounter++;
         }
     }
 
-    private List<ExplorationStep> getExplorationSteps(Chromosome<TestCase> template) {
+    private List<ExplorationStep> getExplorationSteps() {
+        Optional<List<ExplorationStep>> steps;
+        do {
+            steps = getExplorationStepsUnsafe();
+        } while (!steps.isPresent());
+        return steps.get();
+    }
+
+    private Optional<List<ExplorationStep>> getExplorationStepsUnsafe() {
         List<ExplorationStep> explorationSteps = new LinkedList<>();
-        List<Action> currentActions = new LinkedList<>();
+        Registry.getUiAbstractionLayer().resetApp();
 
-        IChromosome<TestCase> chromosome = retryCreatingChromosome(currentActions, 3);
+        TestCase testCase = TestCase.newInitializedTestCase();
+        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
         explorationSteps.add(createStep(chromosome));
-
-        for (Action action : template.getValue().getEventSequence()) {
-            currentActions.add(action);
-            chromosome = retryCreatingChromosome(currentActions, 6);
-            explorationSteps.add(createStep(chromosome));
-        }
-
-        return explorationSteps;
-    }
-
-    private IChromosome<TestCase> retryCreatingChromosome(List<Action> actions, int maxTries) {
-        Optional<IChromosome<TestCase>> chromosome;
-        int tries = 0;
-
-        do {
-            tries++;
-            chromosome = createChromosome(actions);
-        } while (!chromosome.isPresent() && tries < maxTries);
-
-        return chromosome
-                .orElseThrow(() -> new IllegalStateException("Was not able to create chromosome after " + maxTries + " tries"));
-    }
-
-    private Optional<IChromosome<TestCase>> createChromosome(List<Action> actions) {
-        Registry.getUiAbstractionLayer().resetApp();
-
-        TestCase testCase = TestCase.newInitializedTestCase();
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
-
-        for (int i = 0; i < actions.size(); i++) {
-            Optional<Action> closestAction = getClosestCurrentAction(actions.get(i));
-
-            if (!closestAction.isPresent()) {
-                return Optional.empty(); // Reached wrong state
-            } else if (!testCase.updateTestCase(closestAction.get(), i) && (i+1) < actions.size()) {
-                throw new IllegalStateException("App crashed, but there this were " + (actions.size() - i) + " actions left!");
-            }
-        }
-
-        FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
-        CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
-        testCase.finish();
-
-        return Optional.of(chromosome);
-    }
-
-    private Chromosome<TestCase> createTemplateChromosome() {
-        Optional<Chromosome<TestCase>> template;
-        do {
-            template = createTemplateChromosomeUnsafe();
-        } while (!template.isPresent());
-        return template.get();
-    }
-
-    private Optional<Chromosome<TestCase>> createTemplateChromosomeUnsafe() {
-        Registry.getUiAbstractionLayer().resetApp();
-
-        TestCase testCase = TestCase.newInitializedTestCase();
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
@@ -119,6 +60,7 @@ public class AskUserExploration implements Algorithm {
 
                 if (actionOrCommand.hasLeft()) {
                     stop = !testCase.updateTestCase(actionOrCommand.getLeft(), actionsCount);
+                    explorationSteps.add(createStep(chromosome));
                 } else {
                     switch (actionOrCommand.getRight()) {
                         case STOP: stop = true; break;
@@ -128,15 +70,14 @@ public class AskUserExploration implements Algorithm {
                 }
 
                 if (stop) {
-                    return Optional.of(chromosome);
+                    return Optional.of(explorationSteps);
                 }
             }
         } finally {
-            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
             testCase.finish();
         }
-        return Optional.of(chromosome);
+
+        return Optional.of(explorationSteps);
     }
 
     private Either<Action, ExplorationCommand> askUserToPickAction() {
@@ -165,71 +106,6 @@ public class AskUserExploration implements Algorithm {
         } else {
             return Stream.empty();
         }
-    }
-
-    private Optional<Action> getClosestCurrentAction(Action expectedAction) {
-        if (Registry.getUiAbstractionLayer().getExecutableActions().contains(expectedAction)) {
-            return Optional.of(expectedAction);
-        } else if (expectedAction instanceof WidgetAction) {
-            // Exact match not possible -> look for closest action
-            WidgetAction expectedWidgetAction = (WidgetAction) expectedAction;
-            List<Action> matching = Registry.getUiAbstractionLayer().getExecutableActions().stream()
-                    .filter(availableAction -> availableAction instanceof WidgetAction)
-                    .map(a -> (WidgetAction) a)
-                    .filter(availableAction -> availableAction.getActionType().equals(expectedWidgetAction.getActionType())
-                            && availableAction.getWidget().getId().equals(expectedWidgetAction.getWidget().getId()))
-                    .collect(Collectors.toList());
-
-            if (matching.size() == 1) {
-                return Optional.of(matching.get(0));
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    private String toDot(List<ExplorationStep> steps, List<Action> actions) {
-        StringJoiner graph = new StringJoiner("\n");
-
-        graph.add("digraph D {");
-
-        Iterator<Action> actionIterator = actions.iterator();
-        ExplorationStep prevStep = null;
-        double prevFitness = fitnessFunction.isMaximizing() ? 0 : 1;
-        Map<String, Double> prevFitnessVector = null;
-        for (ExplorationStep step : steps) {
-            // Print step
-            Map<String, String> attributes = new HashMap<>();
-            attributes.put("image", "\"results/pictures/" + Registry.getPackageName() + "/" + step.nodeId + ".png\"");
-            attributes.put("imagescale", "true");
-            attributes.put("imagepos", "tc");
-            attributes.put("labelloc", "b");
-            attributes.put("height", "6");
-            attributes.put("fixedsize", "true");
-            attributes.put("shape", "square");
-            Map<String, Double> finalPrevFitnessVector = prevFitnessVector;
-            attributes.put("xlabel", "<" + step.state.getId() + " on " + step.state.getActivityName()
-                    + "<BR/><B>Fitness: " + step.fitness + " " + describeFitnessChange(prevFitness, step.fitness) + "</B><BR/>"
-                    + step.fitnessVector.entrySet().stream().map(e -> {
-                        String suffix = finalPrevFitnessVector == null ? "" : describeFitnessChange(finalPrevFitnessVector.get(e.getKey()), e.getValue());
-                        return e.getKey() + ": " + e.getValue() + " " + suffix;
-                    }).collect(Collectors.joining("<BR/>"))
-                    + ">");
-            graph.add(String.format("%s [%s]", step.nodeId, DotGraphUtil.getAttributeString(attributes)));
-
-            // Print edge
-            if (prevStep != null) {
-                graph.add(String.format("%s -> %s [label=\"%s\"]", prevStep.nodeId, step.nodeId, printAction(actionIterator.next())));
-            }
-
-            prevStep = step;
-            prevFitness = step.fitness;
-            prevFitnessVector = step.fitnessVector;
-        }
-
-        graph.add("}");
-
-        return graph.toString();
     }
 
     private String toMatPlotLibCode(List<ExplorationStep> steps) {
@@ -276,21 +152,8 @@ public class AskUserExploration implements Algorithm {
                 "plt.savefig('exp_" + chromosomeCounter + "_graph" + ".png', bbox_inches=\"tight\")\n";
     }
 
-    private String printAction(Action action) {
-        return action.toString();
-    }
-
-    private String describeFitnessChange(double prevFitness, double curFitness) {
-        if (curFitness < prevFitness) {
-            return "\uD83E\uDC56"; // lower
-        } else if (curFitness > prevFitness) {
-            return "\uD83E\uDC55"; // higher
-        } else {
-            return ""; // same
-        }
-    }
-
     private ExplorationStep createStep(IChromosome<TestCase> chromosome) {
+        Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
         double fitness = fitnessFunction.getNormalizedFitness(chromosome);
 
         String nodeId = "exp_" + chromosomeCounter + "_step_" + chromosome.getValue().getEventSequence().size();

@@ -653,6 +653,13 @@ public class EnvironmentManager {
         return Arrays.asList(response.getParameter("stack_trace").split(","));
     }
 
+    public void storeActionFitnessData(IChromosome<TestCase> chromosome) {
+        String chromosomeId = getChromosomeId(chromosome);
+        int numActions = chromosome.getValue().getEventSequence().size();
+
+        storeFitnessData(chromosome, numActions + "_" + chromosomeId);
+    }
+
     /**
      * Stores the fitness data for the given chromosome.
      *
@@ -1193,15 +1200,6 @@ public class EnvironmentManager {
     public void writeFile(String fileName, String content) {
         MATE.log("Writing file " + fileName);
         sendMessage(new Message.MessageBuilder("/utility/write_file").withParameter("fileName", fileName).withParameter("content", content).build());
-    }
-
-    public void writeTraceDiffToFile(String fileName, List<IChromosome<TestCase>> chromosomes) {
-        sendMessage(new Message.MessageBuilder("/utility/write_traces_diff_file")
-                .withParameter("packageName", Registry.getPackageName())
-                .withParameter("fileName", fileName)
-                .withParameter("chromosomes", chromosomes.stream().map(this::getChromosomeId).collect(Collectors.joining("+")))
-                .build()
-        );
     }
 
     /**

@@ -5,11 +5,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ReachedRequiredConstructor implements IFitnessFunction<TestCase> {
-    private final Map<IChromosome<TestCase>, Double> cache = new HashMap<>();
 
     @Override
     public double getFitness(IChromosome<TestCase> chromosome) {
@@ -23,6 +19,6 @@ public class ReachedRequiredConstructor implements IFitnessFunction<TestCase> {
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        return cache.computeIfAbsent(chromosome, Registry.getEnvironmentManager()::getReachedRequiredConstructors);
+        return Registry.getEnvironmentManager().getReachedRequiredConstructors(chromosome);
     }
 }
