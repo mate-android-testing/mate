@@ -1498,7 +1498,16 @@ public class DeviceMgr {
      * @return Returns the stack trace of the last crash.
      */
     public StackTrace getLastCrashStackTrace() {
+        StackTrace stackTrace = getLastCrashStackTraceInternal();
 
+        if (Properties.WRITE_STACK_TRACE_FILES()) {
+            Registry.getEnvironmentManager().writeFile("crash_" + stackTrace.hashCode() + ".txt", stackTrace.getUnprocessedLines().stream().collect(Collectors.joining("\n")));
+        }
+
+        return stackTrace;
+    }
+
+    private StackTrace getLastCrashStackTraceInternal() {
         try {
             String response = device.executeShellCommand("run-as " + packageName
                     + " logcat -b crash -t 2000 AndroidRuntime:E *:S");

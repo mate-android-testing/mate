@@ -49,6 +49,8 @@ public class StackTrace {
      */
     private int pid;
 
+    private List<String> unprocessedLines;
+
     /**
      * Constructs a new stack trace by parsing the given log.
      *
@@ -79,6 +81,10 @@ public class StackTrace {
 
         // the exception type and the message are contained in the third line
         parseExceptionLine(lines[2]);
+
+        unprocessedLines = Arrays.stream(lines)
+                .skip(2) // Skip preamble lines -> only keep actual stack trace lines
+                .collect(Collectors.toList());
 
         // each line starting with 'at' describes a method call
         methodCalls = Arrays.stream(lines)
@@ -177,5 +183,9 @@ public class StackTrace {
 
     public List<String> getMethodCalls() {
         return methodCalls;
+    }
+
+    public List<String> getUnprocessedLines() {
+        return unprocessedLines;
     }
 }

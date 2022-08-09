@@ -279,6 +279,8 @@ public class Properties {
         return propertyOr(false);
     }
 
+    public static boolean WRITE_STACK_TRACE_FILES() { return propertyOr(false); }
+
     /*
     * Begin GE properties
      */
