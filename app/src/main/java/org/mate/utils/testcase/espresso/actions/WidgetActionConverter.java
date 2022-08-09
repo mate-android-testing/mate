@@ -159,6 +159,7 @@ public class WidgetActionConverter extends ActionConverter {
         // the text actions requires the text to insert as additional argument
         if (dependency == EspressoDependency.TYPE_TEXT) {
             builder.append("\"");
+            // TODO: Escape new lines and carriage returns properly instead of removing them.
             builder.append(widget.getText().replaceAll("[\\n\\r]", ""));
             builder.append("\"");
         }
