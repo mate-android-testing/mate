@@ -97,7 +97,7 @@ public class EspressoTestBuilder {
 
         // build the test method header
         buildLine(1, "@" + TEST);
-        buildLine(1, "public void test() {");
+        buildLine(1, "public void test() throws Exception {");
 
         // convert the actions to statements
         for (Action action : testCase.getActionSequence()) {
