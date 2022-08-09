@@ -21,8 +21,8 @@ public class UIActionConverter extends ActionConverter {
     /**
      * The set of {@link UIAction}s that can't be natively translated to espresso actions.
      */
-    private static final EnumSet<ActionType> NON_TRANSLATABLE_ACTIONS = EnumSet.of(ActionType.HOME,
-            ActionType.TOGGLE_ROTATION, ActionType.SEARCH);
+    private static final EnumSet<ActionType> NON_TRANSLATABLE_ACTIONS
+            = EnumSet.of(ActionType.TOGGLE_ROTATION);
 
     /**
      * The action type of the {@link UIAction}.
@@ -70,8 +70,12 @@ public class UIActionConverter extends ActionConverter {
     protected void buildPerform() {
         switch (actionType) {
             case HOME:
-                // fall back to uiautomator
-                builder.append("device.pressHome();");
+                builder.append(".perform(")
+                        .append(PRESS_KEY)
+                        .append("(")
+                        .append(KEY_EVENT).append(".")
+                        .append(KeyEvent.keyCodeToString(KeyEvent.KEYCODE_HOME))
+                        .append("));");
                 break;
             case BACK:
                 builder.append(PRESS_BACK).append("();");
@@ -86,8 +90,12 @@ public class UIActionConverter extends ActionConverter {
                 builder.append("rotate();");
                 break;
             case SEARCH:
-                // fall back to uiautomator
-                builder.append("device.pressSearch();");
+                builder.append(".perform(")
+                        .append(PRESS_KEY)
+                        .append("(")
+                        .append(KEY_EVENT).append(".")
+                        .append(KeyEvent.keyCodeToString(KeyEvent.KEYCODE_SEARCH))
+                        .append("));");
                 break;
             case ENTER:
                 builder.append(".perform(")
