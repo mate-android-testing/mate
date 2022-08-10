@@ -31,7 +31,7 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
 
         try {
             ModelRepresentationIterator iterator = modelRepresentation.getIterator();
-            Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
+            afterChromosomeChanged(chromosome);
 
             for (int actionsCount = 0; actionsCount < Properties.MAX_NUMBER_EVENTS(); actionsCount++) {
                 Action action = Randomness.randomIndexWithProbabilities(iterator.getActionProbabilities());
@@ -43,7 +43,7 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
                 }
 
                 boolean stop = !testCase.updateTestCase(action, actionsCount);
-                Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
+                afterChromosomeChanged(chromosome);
 
                 if (stop) {
                     return chromosome;
@@ -59,6 +59,10 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
             testCase.finish();
         }
         return chromosome;
+    }
+
+    protected void afterChromosomeChanged(Chromosome<TestCase> chromosome) {
+
     }
 
     @Override
