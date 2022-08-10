@@ -2,12 +2,16 @@ package org.mate.utils.testcase.espresso;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.utils.testcase.espresso.actions.ActionConverter;
+import org.mate.utils.testcase.espresso.actions.IntentBasedActionConverter;
 import org.mate.utils.testcase.espresso.actions.MotifActionConverter;
+import org.mate.utils.testcase.espresso.actions.SystemActionConverter;
 import org.mate.utils.testcase.espresso.actions.UIActionConverter;
 import org.mate.utils.testcase.espresso.actions.WidgetActionConverter;
 
@@ -122,7 +126,11 @@ public class EspressoTestBuilder {
         } else if (action instanceof MotifAction) {
             actionConverter = new MotifActionConverter((MotifAction) action);
         } else if (action instanceof UIAction) {
-                actionConverter = new UIActionConverter((UIAction) action);
+            actionConverter = new UIActionConverter((UIAction) action);
+        } else if (action instanceof SystemAction) {
+            actionConverter = new SystemActionConverter((SystemAction) action);
+        } else if (action instanceof IntentBasedAction) {
+            actionConverter = new IntentBasedActionConverter((IntentBasedAction) action);
         } else {
             throw new UnsupportedOperationException("Action " + action.getClass() + " not yet supported!");
         }
