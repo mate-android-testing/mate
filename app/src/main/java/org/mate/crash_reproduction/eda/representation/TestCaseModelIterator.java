@@ -15,6 +15,7 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     private final ModelRepresentationIterator representationIterator;
     private final Iterator<Action> actionIterator;
     private final Iterator<IScreenState> stateIterator;
+    private int returnedNodes = 0;
 
     TestCaseModelIterator(ModelRepresentationIterator representationIterator, TestCase testCase) {
         this.representationIterator = representationIterator;
@@ -39,7 +40,7 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
         }
 
         Action currentAction = actionIterator.next();
-        NodeWithPickedAction nodeWithPickedAction = new NodeWithPickedAction(representationIterator.getActionProbabilities(), currentAction);
+        NodeWithPickedAction nodeWithPickedAction = new NodeWithPickedAction(representationIterator.getActionProbabilities(), currentAction, returnedNodes);
 
         if (stateIterator.hasNext()) {
             IScreenState nextState = stateIterator.next();
@@ -47,6 +48,8 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
         } else if (actionIterator.hasNext()) {
             throw new IllegalStateException("Number of actions should at most be off by one");
         }
+
+        returnedNodes++;
 
         return nodeWithPickedAction;
     }

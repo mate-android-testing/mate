@@ -8,10 +8,12 @@ import java.util.Objects;
 public class NodeWithPickedAction {
     private final Map<Action, Double> actionProbabilities;
     public final Action action;
+    public final int actionIndex;
 
-    NodeWithPickedAction(Map<Action, Double> actionProbabilities, Action action) {
+    NodeWithPickedAction(Map<Action, Double> actionProbabilities, Action action, int actionIndex) {
         this.actionProbabilities = actionProbabilities;
         this.action = action;
+        this.actionIndex = actionIndex;
     }
 
     public double getProbabilityOfAction() {
