@@ -1,8 +1,11 @@
 package org.mate.crash_reproduction.eda.univariate;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
 import org.mate.crash_reproduction.eda.representation.NodeWithPickedAction;
+import org.mate.crash_reproduction.fitness.ActionFitnessFunctionWrapper;
+import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
@@ -12,6 +15,7 @@ import org.mate.utils.Randomness;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,7 +25,7 @@ import java.util.stream.Collectors;
  * Organizes variables in tree and updates similar to PBIL
  */
 public class PIPE extends RepresentationBasedModel {
-    private final IFitnessFunction<TestCase> fitnessFunction;
+    private final ActionFitnessFunctionWrapper fitnessFunction;
     private final double learningRate;
     private final double epsilon;
     private final double clr;
@@ -36,7 +40,7 @@ public class PIPE extends RepresentationBasedModel {
         if (fitnessFunction.isMaximizing()) {
             throw new IllegalArgumentException("PIPE needs a minimizing fitness function!");
         }
-        this.fitnessFunction = fitnessFunction;
+        this.fitnessFunction = new ActionFitnessFunctionWrapper(fitnessFunction);
         this.learningRate = learningRate;
         this.epsilon = epsilon;
         this.clr = clr;
@@ -74,7 +78,6 @@ public class PIPE extends RepresentationBasedModel {
 
         // Generation-based learning
         adaptPPTTowards(best);
-//        adaptPPTAwayFrom(worst, best); // Added by me
         pptMutation(best);
         pptPruning();
     }
@@ -85,75 +88,84 @@ public class PIPE extends RepresentationBasedModel {
         renormalizeOthers(best.getValue());
     }
 
-    private void adaptPPTAwayFrom(IChromosome<TestCase> worst, IChromosome<TestCase> best) {
-        decreaseOfWorst(worst, best);
-        renormalizeOthers(worst.getValue());
-    }
-
-    private double probability(TestCase testCase) {
+    private double probability(List<NodeWithPickedAction> nodes) {
         // PIPE paper 4.1
         double probProduct = 1;
-        Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(testCase);
 
-        while (testCaseModelIterator.hasNext()) {
-            NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
-
+        for (NodeWithPickedAction nodeWithPickedAction : nodes) {
             probProduct *= nodeWithPickedAction.getProbabilityOfAction();
         }
 
         return probProduct;
     }
 
-    private double targetProbability(IChromosome<TestCase> bestTestcase) {
+    private double betterTargetProbability(double probBestTestcase, double fitBest) {
         // PIPE paper 4.2
-        double probBestTestcase = probability(bestTestcase.getValue());
         double fitElitist = fitnessFunction.getFitness(elitist);
-        double fitBest = fitnessFunction.getFitness(bestTestcase);
 
         return probBestTestcase + (1 - probBestTestcase) * learningRate * ((epsilon + fitElitist) / (epsilon + fitBest));
     }
 
-    private double worseTargetProbability(IChromosome<TestCase> worstTestcase) {
-        double probWorstTestCase = probability(worstTestcase.getValue());
+    private double worseTargetProbability(double probTestcase, double fitness) {
         double fitElitist = fitnessFunction.getFitness(elitist);
-        double fitWorst = fitnessFunction.getFitness(worstTestcase);
 
-        return probWorstTestCase - probWorstTestCase * learningRate * ((epsilon + fitWorst) / (epsilon + fitElitist));
+        return probTestcase - probTestcase * learningRate * ((epsilon + fitness) / (epsilon + fitElitist));
     }
 
     private void increaseOfBest(IChromosome<TestCase> bestTestcase) {
         // PIPE paper 4.3
-        double pTarget = targetProbability(bestTestcase);
+        SplitTestCase splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestcase);
+        double fitness = fitnessFunction.getFitness(bestTestcase);
 
-        while (probability(bestTestcase.getValue()) < pTarget) {
-            Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(bestTestcase.getValue());
+        if (!splitTestCase.goodActions.isEmpty()) {
+            double pTarget = betterTargetProbability(probability(splitTestCase.goodActions), fitness);
 
-            while (testCaseModelIterator.hasNext()) {
-                NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
-
-                double probBefore = nodeWithPickedAction.getProbabilityOfAction();
-                nodeWithPickedAction.putProbabilityOfAction(probBefore + clr * learningRate * (1 - probBefore));
+            // Increase probability of "good" actions (i.e. actions that decrease fitness)
+            int iterations = 0;
+            while (probability(splitTestCase.goodActions) < pTarget) {
+                for (NodeWithPickedAction nodeWithPickedAction : splitTestCase.goodActions) {
+                    double probBefore = nodeWithPickedAction.getProbabilityOfAction();
+                    nodeWithPickedAction.putProbabilityOfAction(probBefore + clr * learningRate * (1 - probBefore));
+                }
+                iterations++;
             }
+            MATE.log("PIPE increaseOfBest good iterations: " + iterations);
         }
-    }
 
-    private void decreaseOfWorst(IChromosome<TestCase> worstTestcase, IChromosome<TestCase> best) {
-        double pTarget = worseTargetProbability(worstTestcase);
+        if (!splitTestCase.badActions.isEmpty()) {
+            double pTarget = worseTargetProbability(probability(splitTestCase.badActions), fitness);
 
-        while (probability(worstTestcase.getValue()) > pTarget) {
-            Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(worstTestcase.getValue());
-            Iterator<NodeWithPickedAction> bestTestCaseModelIterator = modelRepresentation.getTestcaseIterator(best.getValue());
-
-            while (testCaseModelIterator.hasNext()) {
-                NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
-
-                // ignore common prefix
-                if (!bestTestCaseModelIterator.hasNext() || !bestTestCaseModelIterator.next().equals(nodeWithPickedAction)) {
+            int iterations = 0;
+            while (probability(splitTestCase.badActions) > pTarget) {
+                // Decrease probability of "bad" actions
+                for (NodeWithPickedAction nodeWithPickedAction : splitTestCase.badActions) {
                     double probBefore = nodeWithPickedAction.getProbabilityOfAction();
                     nodeWithPickedAction.putProbabilityOfAction(probBefore - clr * learningRate * probBefore);
                 }
+                iterations++;
+            }
+            MATE.log("PIPE increaseOfBest bad iterations: " + iterations);
+        }
+    }
+
+    private SplitTestCase cutOffAfterLastFitnessEnhancement(IChromosome<TestCase> chromosome) {
+        List<NodeWithPickedAction> nodes = new LinkedList<NodeWithPickedAction>() {{
+            modelRepresentation.getTestcaseIterator(chromosome.getValue()).forEachRemaining(this::add);
+        }};
+
+        int indexOfLastFitnessDecrease = 0;
+        double prevFitness = fitnessFunction.getFitnessAfterXActions(chromosome, 0);
+
+        for (int i = 0; i < nodes.size(); i++) {
+            NodeWithPickedAction nodeWithPickedAction = nodes.get(i);
+            double fitness = fitnessFunction.getFitnessAfterXActions(chromosome, nodeWithPickedAction.actionIndex + 1);
+
+            if (prevFitness - fitness > 0.002) {
+                indexOfLastFitnessDecrease = i;
             }
         }
+
+        return new SplitTestCase(nodes.subList(0, indexOfLastFitnessDecrease), nodes.subList(indexOfLastFitnessDecrease, nodes.size()));
     }
 
     private void renormalizeOthers(TestCase bestTestcase) {
@@ -211,7 +223,23 @@ public class PIPE extends RepresentationBasedModel {
     }
     
     @Override
+    protected void afterChromosomeChanged(Chromosome<TestCase> chromosome) {
+        Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
+        fitnessFunction.recordCurrentActionFitness(chromosome);
+    }
+
+    @Override
     public String toString() {
         return modelRepresentation.toString();
+    }
+
+    private static class SplitTestCase {
+        private final List<NodeWithPickedAction> goodActions;
+        private final List<NodeWithPickedAction> badActions;
+
+        private SplitTestCase(List<NodeWithPickedAction> goodActions, List<NodeWithPickedAction> badActions) {
+            this.goodActions = goodActions;
+            this.badActions = badActions;
+        }
     }
 }
