@@ -658,7 +658,11 @@ public class EnvironmentManager {
     }
 
     public String getActionEntityId(IChromosome<TestCase> chromosome) {
-        return chromosome.getValue().getEventSequence().size() + "_" + getChromosomeId(chromosome);
+        return getActionEntityId(chromosome, chromosome.getValue().getEventSequence().size());
+    }
+
+    public String getActionEntityId(IChromosome<TestCase> chromosome, int numActions) {
+        return numActions + "_" + getChromosomeId(chromosome);
     }
 
     /**
