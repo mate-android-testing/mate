@@ -1,5 +1,6 @@
 package org.mate.crash_reproduction.fitness;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -33,7 +34,10 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     }
 
     public void recordCurrentActionFitness(IChromosome<TestCase> chromosome) {
-        actionFitnessValues.put(Registry.getEnvironmentManager().getActionEntityId(chromosome), fitnessFunction.getNormalizedFitness(chromosome));
+        double fitness = fitnessFunction.getNormalizedFitness(chromosome);
+        actionFitnessValues.put(Registry.getEnvironmentManager().getActionEntityId(chromosome), fitness);
+
+        MATE.log("Testcase fitness after " + chromosome.getValue().getEventSequence().size() + " actions is: " + fitness);
     }
 
     public double getFitnessAfterXActions(IChromosome<TestCase> testCase, int actions) {
