@@ -1380,7 +1380,7 @@ public class DeviceMgr {
         final String[] fragmentLines = fragmentActivityState
                 .split("Added Fragments:")[1]
                 .split("FragmentManager|Fragments Created Menus")[0]
-                .split("Back Stack Index:")[0] // this line is not always present
+                .split("Back Stack Index:|Back Stack:")[0] // this line is not always present
                 .split(System.lineSeparator());
 
         return Arrays.stream(fragmentLines)
