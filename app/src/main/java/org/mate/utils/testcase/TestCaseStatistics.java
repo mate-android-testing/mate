@@ -11,11 +11,13 @@ import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
+import org.mate.state.IScreenState;
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class TestCaseStatistics {
 
@@ -28,6 +30,7 @@ public final class TestCaseStatistics {
 
         MATE.log("Visited activities in order: " + testCase.getActivitySequence());
         MATE.log("Visited activities: " + testCase.getVisitedActivities());
+        MATE.log("Visited states in order: " + testCase.getStateSequence().stream().map(IScreenState::getId).collect(Collectors.joining(", ")));
 
         // intent related statistics
         if (Properties.RELATIVE_INTENT_AMOUNT() > 0.0f) {
