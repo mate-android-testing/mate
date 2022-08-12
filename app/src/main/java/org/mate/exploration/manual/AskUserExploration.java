@@ -32,7 +32,7 @@ public class AskUserExploration implements Algorithm {
     public void run() {
         while (true) {
             List<ExplorationStep> explorationSteps = getExplorationSteps();
-            Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode("exp_" + chromosomeCounter + "_graph.png", explorationSteps));
+            Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode("exp_" + chromosomeCounter + "_graph.png", explorationSteps, true));
             chromosomeCounter++;
         }
     }
@@ -108,9 +108,13 @@ public class AskUserExploration implements Algorithm {
         }
     }
 
-    public static String toMatPlotLibCode(String fileName, List<ExplorationStep> steps) {
+    public static String toMatPlotLibCode(String fileName, List<ExplorationStep> steps, boolean useNodeIdForImage) {
         String states = "[" + steps.stream().map(s -> '"' + s.nodeId + '"').collect(Collectors.joining(",")) + "]";
         String fitnessValues = "[" + steps.stream().map(s -> String.valueOf(s.fitness)).collect(Collectors.joining(",")) + "]";
+        String imageLookup = "{" + steps.stream()
+                .map(s -> '"' + s.nodeId + "\":\"" + (useNodeIdForImage ? s.nodeId : s.state.getId()) + '"')
+                .collect(Collectors.joining(", "))
+                + "}";
         String imageLabelLookup = "{" + steps.stream()
                 .map(s -> '"' + s.nodeId + "\":\"\"\"" + s.state.getId() + " Fitness: " + String.format("%,.2f", s.fitness) + "\n" + s.fitnessVector.entrySet().stream().map(e -> e.getKey() + ": " + String.format("%,.2f", e.getValue())).collect(Collectors.joining("\n")) + "\"\"\"")
                 .collect(Collectors.joining(", ")) + "}";
@@ -119,12 +123,13 @@ public class AskUserExploration implements Algorithm {
                 "from matplotlib.offsetbox import OffsetImage, AnnotationBbox, TextArea\n" +
                 "\n" +
                 "lookup = " + imageLabelLookup + "\n" +
+                "lookupImage = " + imageLookup + "\n" +
                 "def estimate_height(label):\n" +
                 "    num_lines = label.count('\\n')\n" +
                 "    return num_lines * 20\n" +
                 "\n" +
                 "def offset_image(x, ax):\n" +
-                "    img = plt.imread(f'pictures/" + Registry.getPackageName() + "/{x}.png')\n" +
+                "    img = plt.imread(f'pictures/" + Registry.getPackageName() + "/{lookupImage[x]}.png')\n" +
                 "    im = OffsetImage(img, zoom=0.3)\n" +
                 "    im.label = lookup[x]\n" +
                 "    im.image.axes = ax\n" +

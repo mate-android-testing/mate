@@ -48,7 +48,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     public void writeExplorationStepsToFile(IChromosome<TestCase> chromosome) {
         String code = AskUserExploration.toMatPlotLibCode("exp_" + chromosome.getValue().getId() + ".png", IntStream.range(0, chromosome.getValue().getStateSequence().size())
                 .mapToObj(actions -> getExplorationStep(chromosome, actions))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()), false);
 
         Registry.getEnvironmentManager().writeFile("exp_" + chromosome.getValue().getId() + ".py", code);
     }
@@ -57,7 +57,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
         IScreenState state = chromosome.getValue().getStateSequence().get(actions);
         return new AskUserExploration.ExplorationStep(
                 state,
-                state.getId(),
+                "action_" + actions,
                 getFitnessAfterXActions(chromosome, actions),
                 Collections.emptyMap()
         );

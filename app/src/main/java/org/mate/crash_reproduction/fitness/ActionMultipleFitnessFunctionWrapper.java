@@ -38,7 +38,7 @@ public class ActionMultipleFitnessFunctionWrapper extends ActionFitnessFunctionW
 
         return new AskUserExploration.ExplorationStep(
                 state,
-                state.getId(),
+                "action_" + actions,
                 getFitnessAfterXActions(chromosome, actions),
                 actionFitnessValuesPerFunction.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> Objects.requireNonNull(e.getValue().get(entityId))))
         );
