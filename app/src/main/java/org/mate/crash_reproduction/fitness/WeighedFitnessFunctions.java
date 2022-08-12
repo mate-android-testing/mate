@@ -5,8 +5,9 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 
 import java.util.Map;
+import java.util.Set;
 
-public class WeighedFitnessFunctions implements IFitnessFunction<TestCase> {
+public class WeighedFitnessFunctions implements IMultipleFitnessFunctions<TestCase> {
     private final Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions;
 
     public WeighedFitnessFunctions(Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions) {
@@ -40,6 +41,11 @@ public class WeighedFitnessFunctions implements IFitnessFunction<TestCase> {
         }
 
         return weightedFitness / weightSum;
+    }
+
+    @Override
+    public Set<IFitnessFunction<TestCase>> getInnerFitnessFunction() {
+        return weightedFitnessFunctions.keySet();
     }
 
     public Map<IFitnessFunction<TestCase>, Double> getWeightedFitnessFunctions() {

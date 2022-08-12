@@ -53,7 +53,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
         Registry.getEnvironmentManager().writeFile("exp_" + chromosome.getValue().getId() + ".py", code);
     }
 
-    private AskUserExploration.ExplorationStep getExplorationStep(IChromosome<TestCase> chromosome, int actions) {
+    protected AskUserExploration.ExplorationStep getExplorationStep(IChromosome<TestCase> chromosome, int actions) {
         IScreenState state = chromosome.getValue().getStateSequence().get(actions);
         return new AskUserExploration.ExplorationStep(
                 state,

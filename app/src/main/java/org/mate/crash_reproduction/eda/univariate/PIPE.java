@@ -5,6 +5,7 @@ import org.mate.Registry;
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
 import org.mate.crash_reproduction.eda.representation.NodeWithPickedAction;
 import org.mate.crash_reproduction.fitness.ActionFitnessFunctionWrapper;
+import org.mate.crash_reproduction.fitness.ActionMultipleFitnessFunctionWrapper;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -40,7 +41,7 @@ public class PIPE extends RepresentationBasedModel {
         if (fitnessFunction.isMaximizing()) {
             throw new IllegalArgumentException("PIPE needs a minimizing fitness function!");
         }
-        this.fitnessFunction = new ActionFitnessFunctionWrapper(fitnessFunction);
+        this.fitnessFunction = new ActionMultipleFitnessFunctionWrapper(fitnessFunction);
         this.learningRate = learningRate;
         this.epsilon = epsilon;
         this.clr = clr;
