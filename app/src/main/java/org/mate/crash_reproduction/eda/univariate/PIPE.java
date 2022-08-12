@@ -62,6 +62,7 @@ public class PIPE extends RepresentationBasedModel {
                 .collect(Collectors.toList());
 
         IChromosome<TestCase> best = sortedPopulation.get(0);
+        MATE.log("Best testcase from update is: " + best.getValue().getId());
         IChromosome<TestCase> worst = sortedPopulation.get(sortedPopulation.size() - 1);
 
         best.getValue().setNickName("Best");

@@ -67,7 +67,7 @@ public abstract class CrashReproduction implements Algorithm {
                 IFitnessFunction<TestCase> fitnessFunction = fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<TestCase> chromosome = population.get(j);
-                    MATE.log_acc("Chromosome " + (j + 1) + ": "
+                    MATE.log_acc("Chromosome " + (j + 1) + " (" + chromosome.getValue().getId() + "): "
                             + fitnessFunction.getFitness(chromosome));
                 }
             }
