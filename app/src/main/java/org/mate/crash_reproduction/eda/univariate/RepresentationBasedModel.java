@@ -45,12 +45,12 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
                 boolean stop = !testCase.updateTestCase(action, actionsCount);
                 afterChromosomeChanged(chromosome);
 
+                IScreenState state = Registry.getUiAbstractionLayer().getLastScreenState();
+                iterator.updatePosition(testCase, action, state);
+
                 if (stop) {
                     return chromosome;
                 }
-
-                IScreenState state = Registry.getUiAbstractionLayer().getLastScreenState();
-                iterator.updatePosition(testCase, action, state);
             }
         } finally {
             Registry.getEnvironmentManager().storeFitnessData(chromosome, Registry.getEnvironmentManager().getActionEntityId(chromosome));
