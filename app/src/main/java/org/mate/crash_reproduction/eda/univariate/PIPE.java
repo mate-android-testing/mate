@@ -155,7 +155,7 @@ public class PIPE extends RepresentationBasedModel {
             modelRepresentation.getTestcaseIterator(chromosome.getValue()).forEachRemaining(this::add);
         }};
 
-        int indexOfLastFitnessDecrease = 0;
+        int indexOfLastFitnessDecrease = -1;
         double prevFitness = fitnessFunction.getFitnessAfterXActions(chromosome, 0);
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -168,7 +168,7 @@ public class PIPE extends RepresentationBasedModel {
             prevFitness = fitness;
         }
 
-        return new SplitTestCase(nodes.subList(0, indexOfLastFitnessDecrease), nodes.subList(indexOfLastFitnessDecrease, nodes.size()));
+        return new SplitTestCase(nodes.subList(0, indexOfLastFitnessDecrease + 1), nodes.subList(indexOfLastFitnessDecrease + 1, nodes.size()));
     }
 
     private void renormalizeOthers(TestCase bestTestcase) {
