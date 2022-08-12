@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class PIPE extends RepresentationBasedModel {
     private final ActionFitnessFunctionWrapper fitnessFunction;
     private final double learningRate;
+    private final double negativeLearningRate;
     private final double epsilon;
     private final double clr;
     private final double pEl;
@@ -36,13 +37,14 @@ public class PIPE extends RepresentationBasedModel {
 
     private IChromosome<TestCase> elitist;
 
-    public PIPE(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction, double learningRate, double epsilon, double clr, double pEl, double pMutation, double mutationRate) {
+    public PIPE(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction, double learningRate, double negativeLearningRate, double epsilon, double clr, double pEl, double pMutation, double mutationRate) {
         super(modelRepresentation);
         if (fitnessFunction.isMaximizing()) {
             throw new IllegalArgumentException("PIPE needs a minimizing fitness function!");
         }
         this.fitnessFunction = new ActionMultipleFitnessFunctionWrapper(fitnessFunction);
         this.learningRate = learningRate;
+        this.negativeLearningRate = negativeLearningRate;
         this.epsilon = epsilon;
         this.clr = clr;
         this.pEl = pEl;
@@ -111,7 +113,7 @@ public class PIPE extends RepresentationBasedModel {
     private double worseTargetProbability(double probTestcase, double fitness) {
         double fitElitist = fitnessFunction.getFitness(elitist);
 
-        return probTestcase - probTestcase * learningRate * ((epsilon + fitness) / (epsilon + fitElitist));
+        return probTestcase - probTestcase * negativeLearningRate * ((epsilon + fitness) / (epsilon + fitElitist));
     }
 
     private void increaseOfBest(IChromosome<TestCase> bestTestcase) {
@@ -142,7 +144,7 @@ public class PIPE extends RepresentationBasedModel {
                 // Decrease probability of "bad" actions
                 for (NodeWithPickedAction nodeWithPickedAction : splitTestCase.badActions) {
                     double probBefore = nodeWithPickedAction.getProbabilityOfAction();
-                    nodeWithPickedAction.putProbabilityOfAction(probBefore - clr * learningRate * probBefore);
+                    nodeWithPickedAction.putProbabilityOfAction(probBefore - clr * negativeLearningRate * probBefore);
                 }
                 iterations++;
             }

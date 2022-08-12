@@ -130,6 +130,8 @@ public class Properties {
 
     public static double PIPE_LEARNING_RATE() { return propertyOr(0.01); }
 
+    public static double PIPE_NEGATIVE_LEARNING_RATE() { return propertyOr(0.2); }
+
     public static double PIPE_CLR() { return propertyOr(0.1); }
 
     public static double PIPE_PROB_ELITIST_LEARNING() { return propertyOr(0.1); }

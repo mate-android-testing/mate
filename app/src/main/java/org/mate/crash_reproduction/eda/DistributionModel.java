@@ -23,6 +23,7 @@ public enum DistributionModel {
             // default mutationRate 0.4
             return new PIPE(modelRepresentation, new CrashDistance(),
                     Properties.PIPE_LEARNING_RATE(),
+                    Properties.PIPE_NEGATIVE_LEARNING_RATE(),
                     Properties.PIPE_EPSILON(),
                     Properties.PIPE_CLR(),
                     Properties.PIPE_PROB_ELITIST_LEARNING(),
