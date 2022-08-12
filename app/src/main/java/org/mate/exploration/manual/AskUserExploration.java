@@ -166,7 +166,7 @@ public class AskUserExploration implements Algorithm {
         }
 
         return new ExplorationStep(Registry.getUiAbstractionLayer().getLastScreenState(), nodeId, fitness,
-                fitnessFunction.getWeightedFitnessFunctions().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> e.getKey().getNormalizedFitness(chromosome))), chromosome);
+                fitnessFunction.getWeightedFitnessFunctions().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> e.getKey().getNormalizedFitness(chromosome))));
     }
 
     private static class ExplorationStep {
@@ -174,14 +174,12 @@ public class AskUserExploration implements Algorithm {
         private final String nodeId;
         private final double fitness;
         private final Map<String, Double> fitnessVector;
-        private final IChromosome<TestCase> chromosome;
 
-        private ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector, IChromosome<TestCase> chromosome) {
+        private ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector) {
             this.state = state;
             this.nodeId = nodeId;
             this.fitness = fitness;
             this.fitnessVector = fitnessVector;
-            this.chromosome = chromosome;
         }
     }
 
