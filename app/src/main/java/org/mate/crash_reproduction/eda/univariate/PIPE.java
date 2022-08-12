@@ -165,6 +165,7 @@ public class PIPE extends RepresentationBasedModel {
             if (prevFitness - fitness > 0.002) {
                 indexOfLastFitnessDecrease = i;
             }
+            prevFitness = fitness;
         }
 
         return new SplitTestCase(nodes.subList(0, indexOfLastFitnessDecrease), nodes.subList(indexOfLastFitnessDecrease, nodes.size()));
