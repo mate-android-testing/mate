@@ -32,7 +32,7 @@ public class AskUserExploration implements Algorithm {
     public void run() {
         while (true) {
             List<ExplorationStep> explorationSteps = getExplorationSteps();
-            Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode(explorationSteps));
+            Registry.getEnvironmentManager().writeFile("exp_" + chromosomeCounter + ".py", toMatPlotLibCode("exp_" + chromosomeCounter + "_graph.png", explorationSteps));
             chromosomeCounter++;
         }
     }
@@ -108,7 +108,7 @@ public class AskUserExploration implements Algorithm {
         }
     }
 
-    private String toMatPlotLibCode(List<ExplorationStep> steps) {
+    public static String toMatPlotLibCode(String fileName, List<ExplorationStep> steps) {
         String states = "[" + steps.stream().map(s -> '"' + s.nodeId + '"').collect(Collectors.joining(",")) + "]";
         String fitnessValues = "[" + steps.stream().map(s -> String.valueOf(s.fitness)).collect(Collectors.joining(",")) + "]";
         String imageLabelLookup = "{" + steps.stream()
@@ -131,7 +131,7 @@ public class AskUserExploration implements Algorithm {
                 "    ab = AnnotationBbox(im, (x, 0), xybox=(0, -320), frameon=False,\n" +
                 "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
                 "    ax.add_artist(ab)\n" +
-                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=22)), (x, 0), xybox=(0, -600 - estimate_height(lookup[x])), frameon=False,\n" +
+                "    ab = AnnotationBbox(TextArea(lookup[x], textprops=dict(size=22)), (x, 0), xybox=(0, -650 - estimate_height(lookup[x])), frameon=False,\n" +
                 "                        xycoords='data', boxcoords=\"offset points\", pad=0)\n" +
                 "    ax.add_artist(ab)\n" +
                 "\n" +
@@ -149,7 +149,7 @@ public class AskUserExploration implements Algorithm {
                 "max_label_height = max(map(estimate_height, lookup.values()))\n" +
                 "fig.set_size_inches(len(x_values) * 5, 6 + max_label_height / 100)\n" +
                 "plt.tight_layout()\n" +
-                "plt.savefig('exp_" + chromosomeCounter + "_graph" + ".png', bbox_inches=\"tight\")\n";
+                "plt.savefig('" + fileName + "', bbox_inches=\"tight\")\n";
     }
 
     private ExplorationStep createStep(IChromosome<TestCase> chromosome) {
@@ -169,13 +169,13 @@ public class AskUserExploration implements Algorithm {
                 fitnessFunction.getWeightedFitnessFunctions().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getClass().getSimpleName(), e -> e.getKey().getNormalizedFitness(chromosome))));
     }
 
-    private static class ExplorationStep {
+    public static class ExplorationStep {
         private final IScreenState state;
         private final String nodeId;
         private final double fitness;
         private final Map<String, Double> fitnessVector;
 
-        private ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector) {
+        public ExplorationStep(IScreenState state, String nodeId, double fitness, Map<String, Double> fitnessVector) {
             this.state = state;
             this.nodeId = nodeId;
             this.fitness = fitness;

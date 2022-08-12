@@ -113,6 +113,7 @@ public class TestCase {
      */
     public TestCase(String id) {
         MATE.log("Initialising new test case!");
+        MATE.log("Testcase has the ID: " + id);
         setId(id);
         number = counter++;
         crashDetected = false;
@@ -444,11 +445,11 @@ public class TestCase {
         MATE.log("executed action " + actionID + ": " + action);
         MATE.log("Activity Transition for action " +  actionID
                 + ":" + activityBeforeAction  + "->" + activityAfterAction);
+        updateTestCase(String.valueOf(actionID));
 
         switch (actionResult) {
             case SUCCESS:
             case SUCCESS_NEW_STATE:
-                updateTestCase(String.valueOf(actionID));
                 return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
