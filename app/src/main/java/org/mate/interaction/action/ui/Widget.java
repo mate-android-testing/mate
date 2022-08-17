@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -139,7 +139,6 @@ public class Widget {
     private final boolean password;
     private final boolean clickable;
     private final boolean longClickable;
-    private final Set<String> tokens;
 
     // mutable properties
     private String hint;
@@ -251,19 +250,6 @@ public class Widget {
             labelBy = Objects.toString(lb.getViewIdResourceName(), "");
         }
         this.labeledBy = labelBy;
-
-        this.tokens = Stream.concat(
-                Stream.of(text, contentDesc, labeledBy, errorText, labelFor, hint),
-                children.stream().flatMap(Widget::getTokens)
-        ).filter(Objects::nonNull)
-                .flatMap(s -> Stream.concat(
-                        Arrays.stream(s.split("\\s|,|;|:|\\.")),
-                        Stream.of(s) // Allows exact match
-                ))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .filter(s -> !s.isEmpty())
-                .peek(a -> MATE.log("STRING DUMP: " + a)).collect(Collectors.toSet());
     }
 
     public double distanceTo(Widget other) {
@@ -284,7 +270,19 @@ public class Widget {
     }
 
     public Stream<String> getTokens() {
-        return tokens.stream();
+        return Stream.concat(
+                Stream.of(text, contentDesc, labeledBy, errorText, labelFor, hint),
+                children.stream().flatMap(Widget::getTokens)
+        ).filter(Objects::nonNull)
+                .flatMap(s -> Stream.concat(
+                        Arrays.stream(s.split("\\s|,|;|:|\\.")),
+                        Stream.of(s) // Allows exact match
+                ))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .peek(a -> MATE.log("STRING DUMP: " + a));
     }
 
     /**
