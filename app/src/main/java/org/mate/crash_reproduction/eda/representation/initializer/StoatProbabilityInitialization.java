@@ -102,6 +102,7 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
                 break;
             case MENU:
             case FILL_FORM_AND_SUBMIT:
+            case SWIPE_DOWN:
                 eventTypeWeight = 2;
                 break;
             case CLICK:
