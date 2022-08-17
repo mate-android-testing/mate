@@ -1018,6 +1018,22 @@ public class Widget {
         return password;
     }
 
+
+    public boolean isSettingsOption() {
+        return getClazz().equals("android.widget.LinearLayout")
+                && !getChildren().isEmpty()
+                && getChildren().get(0).getClazz().equals("android.widget.RelativeLayout")
+                && getChildren().get(0).getChildren().size() == 2
+                && getChildren().get(0).getChildren().get(0).getResourceID().equals("android:id/title")
+                && getChildren().get(0).getChildren().get(1).getResourceID().equals("android:id/summary")
+                ;
+    }
+
+    public boolean isSonOf(Predicate<Widget> parentMatcher) {
+        return parent != null
+                && (parentMatcher.test(parent) || parent.isSonOf(parentMatcher));
+    }
+
     @Deprecated
     public String getColor() {
         return color;

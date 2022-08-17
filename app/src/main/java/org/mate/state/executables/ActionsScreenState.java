@@ -166,6 +166,16 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
+            if (widget.isSettingsOption()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                continue;
+            }
+
+            if (widget.isSonOf(Widget::isSettingsOption)) {
+                MATE.log_debug("Ignoring children of settings option");
+                continue;
+            }
+
             /*
             * It can happen that multiple sibling widgets are completely overlapping each other.
             *  We should define only for a single widget an action.
