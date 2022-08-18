@@ -156,7 +156,10 @@ public class TestCase {
         }
 
         Chromosome<TestCase> chromosome = new Chromosome<>(this);
-        MATE.log(nickName + " Testcase fitness: " + new CrashDistance().getFitness(chromosome));
+
+        if (Properties.TARGET().equals("stack_trace")) {
+            MATE.log(nickName + " Testcase fitness: " + new CrashDistance().getFitness(chromosome));
+        }
         MATE.log(nickName + " Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
         MATE.log(nickName + " Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
         Registry.getEnvironmentManager().logReachedTargets(chromosome);

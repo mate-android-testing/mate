@@ -10,6 +10,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
@@ -27,6 +28,7 @@ import org.mate.state.ScreenStateType;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -114,33 +116,33 @@ public class UIAbstractionLayer {
         return getLastScreenState().getActions();
     }
 
-    public List<WidgetAction> getPromisingActions() {
-        return getPromisingActions(getLastScreenState());
-    }
-
     public List<WidgetAction> getPromisingActions(IScreenState state) {
-        Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
-        List<WidgetAction> widgetActions = state.getWidgetActions();
-        List<WidgetAction> actionsContainingToken = widgetActions.stream()
-                .filter(a -> a.getWidget().containsAnyToken(tokens))
-                .collect(Collectors.toList());
-        List<WidgetAction> promisingActions = new LinkedList<>();
+        if (Properties.TARGET().equals("stack_trace")) {
+            Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
+            List<WidgetAction> widgetActions = state.getWidgetActions();
+            List<WidgetAction> actionsContainingToken = widgetActions.stream()
+                    .filter(a -> a.getWidget().containsAnyToken(tokens))
+                    .collect(Collectors.toList());
+            List<WidgetAction> promisingActions = new LinkedList<>();
 
-        for (WidgetAction action : actionsContainingToken) {
-            if (action.getWidget().isTextViewType()) {
-                // Assume this is the label to an input
-                Optional<WidgetAction> closestEditText = widgetActions.stream()
-                        .filter(a -> a.getWidget().isEditTextType() || a.getWidget().isSpinnerType())
-                        .min(Comparator.comparingDouble(w -> w.getWidget().distanceTo(action.getWidget())));
+            for (WidgetAction action : actionsContainingToken) {
+                if (action.getWidget().isTextViewType()) {
+                    // Assume this is the label to an input
+                    Optional<WidgetAction> closestEditText = widgetActions.stream()
+                            .filter(a -> a.getWidget().isEditTextType() || a.getWidget().isSpinnerType())
+                            .min(Comparator.comparingDouble(w -> w.getWidget().distanceTo(action.getWidget())));
 
-                closestEditText.ifPresent(promisingActions::add);
-                promisingActions.add(action);
-            } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
-                promisingActions.add(action);
+                    closestEditText.ifPresent(promisingActions::add);
+                    promisingActions.add(action);
+                } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
+                    promisingActions.add(action);
+                }
             }
-        }
 
-        return promisingActions;
+            return promisingActions;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**

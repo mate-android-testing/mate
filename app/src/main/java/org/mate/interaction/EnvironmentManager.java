@@ -929,6 +929,9 @@ public class EnvironmentManager {
      *                     otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
+        if (coverage == Coverage.NO_COVERAGE) {
+            return;
+        }
 
         if (coverage == Coverage.BRANCH_COVERAGE || coverage == Coverage.LINE_COVERAGE
                 || coverage == Coverage.METHOD_COVERAGE
@@ -965,6 +968,9 @@ public class EnvironmentManager {
      *                   otherwise {@code null}.
      */
     public <T> void storeCoverageData(Coverage coverage, IChromosome<T> chromosome, String entityId) {
+        if (coverage == Coverage.NO_COVERAGE) {
+            return;
+        }
 
         if (entityId != null && entityId.equals("dummy")) {
             MATE.log_warn("Trying to store coverage data of dummy test case...");
