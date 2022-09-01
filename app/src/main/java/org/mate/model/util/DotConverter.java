@@ -1,6 +1,7 @@
 package org.mate.model.util;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
@@ -30,18 +31,21 @@ public final class DotConverter {
      * @param guiModel The gui model that should be converted.
      */
     public static void convert(IGUIModel guiModel) {
-
+        String dotFileName = "GUIModel" + counter + ".dot";
         File dotDir = new File(DOT_DIR);
+
         if (!dotDir.exists()) {
             MATE.log("Creating dot folder succeeded: " + dotDir.mkdir());
         }
 
-        File dotFile = new File(dotDir, "GUIModel" + counter + ".dot");
+        File dotFile = new File(dotDir, dotFileName);
 
         try (Writer fileWriter = new FileWriter(dotFile)) {
             fileWriter.write(toDOT(guiModel));
             fileWriter.flush();
             // TODO: Fetch and remove dot file from emulator!
+            Registry.getEnvironmentManager().fetchDotGraphFromDevice(DOT_DIR, dotFileName);
+            MATE.log("Fetch and remove dot file from " + dotFile.getAbsolutePath());
         } catch (IOException e) {
             throw new IllegalStateException("Couldn't save dot file!", e);
         }
