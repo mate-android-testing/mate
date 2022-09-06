@@ -2,6 +2,7 @@ package org.mate.model.util;
 
 import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
@@ -11,6 +12,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -31,25 +34,7 @@ public final class DotConverter {
      * @param guiModel The gui model that should be converted.
      */
     public static void convert(IGUIModel guiModel) {
-        String dotFileName = "GUIModel" + counter + ".dot";
-        File dotDir = new File(DOT_DIR);
-
-        if (!dotDir.exists()) {
-            MATE.log("Creating dot folder succeeded: " + dotDir.mkdir());
-        }
-
-        File dotFile = new File(dotDir, dotFileName);
-
-        try (Writer fileWriter = new FileWriter(dotFile)) {
-            fileWriter.write(toDOT(guiModel));
-            fileWriter.flush();
-            // TODO: Fetch and remove dot file from emulator!
-            Registry.getEnvironmentManager().fetchDotGraphFromDevice(DOT_DIR, dotFileName);
-            MATE.log("Fetch and remove dot file from " + dotFile.getAbsolutePath());
-        } catch (IOException e) {
-            throw new IllegalStateException("Couldn't save dot file!", e);
-        }
-        counter++;
+        convert(guiModel, null);
     }
 
     /**
@@ -60,17 +45,37 @@ public final class DotConverter {
      * @param testCase The test case that should be highlighted.
      */
     public static void convert(IGUIModel guiModel, TestCase testCase) {
-        // TODO: Highlight the given test case in the produced dot file.
-        throw new UnsupportedOperationException("Not yet supported!");
+        String dotFileName = "GUIModel" + counter + ".dot";
+        File dotDir = new File(DOT_DIR);
+
+        if (!dotDir.exists()) {
+            MATE.log("Creating dot folder succeeded: " + dotDir.mkdir());
+        }
+
+        File dotFile = new File(dotDir, dotFileName);
+
+        try (Writer fileWriter = new FileWriter(dotFile)) {
+            fileWriter.write(toDOT(guiModel, testCase));
+            fileWriter.flush();
+
+            // Fetch and remove dot file from emulator!
+            Registry.getEnvironmentManager().fetchDotGraphFromDevice(DOT_DIR, dotFileName);
+            MATE.log("Fetch and remove dot file from " + dotFile.getAbsolutePath());
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't save dot file!", e);
+        }
+        counter++;
     }
 
     /**
      * Converts a gui model to a dot file.
      *
      * @param guiModel The gui model to be converted.
+     * @param testCase The test case, that should be highlighted. If it's {@code null},
+     *                 no edge gets highlighted.
      * @return Returns the dot conform gui model.
      */
-    private static String toDOT(IGUIModel guiModel) {
+    private static String toDOT(IGUIModel guiModel, TestCase testCase) {
 
         // TODO: Shorten label of edges and avoid overlapping labels!
 
@@ -83,14 +88,26 @@ public final class DotConverter {
                     stateId, stateId));
         }
 
+        List<Action> actionList = testCase != null ? testCase.getEventSequence() : new ArrayList<>();
+
         for (Edge edge : guiModel.getEdges()) {
-            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=<%s>];\n",
+            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=<%s>",
                     edge.getSource().getId(),
                     edge.getTarget().getId(),
                     edge.getAction().toShortString()));
+
+            if (actionList.contains(edge.getAction())) {
+                builder.append(", color = red, fontcolor = red");
+            }
+
+            builder.append("];\n");
         }
 
         builder.append("}\n");
+
+        MATE.log_acc("BUILD SOME GRAPH STRING!");
+        MATE.log_acc(builder.toString());
+
         return builder.toString();
     }
 
