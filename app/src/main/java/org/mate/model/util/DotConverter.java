@@ -77,7 +77,7 @@ public final class DotConverter {
      */
     private static String toDOT(IGUIModel guiModel, TestCase testCase) {
 
-        // TODO: Shorten label of edges and avoid overlapping labels!
+        // TODO: Avoid overlapping labels!
 
         StringBuilder builder = new StringBuilder();
         builder.append("strict digraph g {\n");
@@ -91,10 +91,10 @@ public final class DotConverter {
         List<Action> actionList = testCase != null ? testCase.getEventSequence() : new ArrayList<>();
 
         for (Edge edge : guiModel.getEdges()) {
-            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=<%s>",
+            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
                     edge.getSource().getId(),
                     edge.getTarget().getId(),
-                    edge.getAction().toShortString()));
+                    edge.getAction().toDotString()));
 
             if (actionList.contains(edge.getAction())) {
                 builder.append(", color = red, fontcolor = red");

@@ -145,4 +145,15 @@ public class SystemAction extends Action {
     public String toShortString() {
         return action;
     }
+
+    /**
+     * Returns a short string representation used by the dot graph.
+     *
+     * @return Returns a short string representation.
+     */
+    @NonNull
+    @Override
+    public String toDotString() {
+        return action;
+    }
 }

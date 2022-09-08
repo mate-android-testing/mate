@@ -115,4 +115,10 @@ public class IntentBasedAction extends Action {
             return "INTENT_WITHOUT_ACTION";
         }
     }
+
+    @NonNull
+    @Override
+    public String toDotString() {
+        return toShortString();
+    }
 }
