@@ -54,7 +54,7 @@ public class EnvironmentManager {
      * test case the traces file multiple times. Otherwise, the last fetch trial overwrites
      * the traces file for the given test case with an empty file.
      */
-    private Set<String> coveredTestCases = new HashSet<>();
+    private final Set<String> coveredTestCases = new HashSet<>();
 
     /**
      * Initialises a new environment manager communicating with
