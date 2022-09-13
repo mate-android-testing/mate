@@ -17,11 +17,14 @@ import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Objective;
+import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageDTO;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -44,8 +47,9 @@ public class EnvironmentManager {
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
-    private final Socket server;
-    private final Parser messageParser;
+    private Socket server;
+    private final int port;
+    private Parser messageParser;
     private boolean active;
 
     /**
@@ -75,8 +79,46 @@ public class EnvironmentManager {
     public EnvironmentManager(int port) throws IOException {
         active = true;
         server = new Socket(DEFAULT_SERVER_IP, port);
+        this.port = port;
+
+        /*
+         * The input stream obtained from server.getInputStream() cannot be interrupted when
+         * waiting for a response from the server. We need to wrap the input stream around a
+         * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+         * will be thrown.
+         */
+        final InputStream interruptibleInputStream = Channels.newInputStream(
+                Channels.newChannel(server.getInputStream()));
+        messageParser = new Parser(interruptibleInputStream);
         server.setSoTimeout(0);
-        messageParser = new Parser(server.getInputStream());
+    }
+
+    /**
+     * Re-connects to Mate-Server if the connection has been closed.
+     *
+     * @throws IOException If the connection is closed and cannot be re-established.
+     */
+    public void reconnect() throws IOException {
+
+        Utils.sleep(1000);
+
+        if (server.isClosed()) {
+            MATE.log_debug("Re-connecting to MATE-Server.");
+            server = new Socket(DEFAULT_SERVER_IP, port);
+
+            /*
+            * The input stream obtained from server.getInputStream() cannot be interrupted when
+            * waiting for a response from the server. We need to wrap the input stream around a
+            * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+            * will be thrown.
+             */
+            final InputStream interruptibleInputStream = Channels.newInputStream(
+                    Channels.newChannel(server.getInputStream()));
+            messageParser = new Parser(interruptibleInputStream);
+            server.setSoTimeout(0);
+        } else {
+            MATE.log_debug("No need to re-connect to MATE-Server.");
+        }
     }
 
     /**

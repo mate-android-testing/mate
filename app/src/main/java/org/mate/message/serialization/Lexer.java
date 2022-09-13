@@ -1,8 +1,11 @@
 package org.mate.message.serialization;
 
+import org.mate.utils.MateInterruptedException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +71,12 @@ public class Lexer {
         while (true) {
             try {
                 nextChar = reader.read();
+            } catch(final ClosedByInterruptException e) {
+                assert Thread.interrupted(); // Clear the interrupt flag.
+                throw new MateInterruptedException(e);
             } catch (IOException e) {
-                return LexResult.failure("Lexing value failed: IO error while reading from input: " + e.getLocalizedMessage());
+                return LexResult.failure("Lexing value failed: IO error while reading from input: "
+                        + e.getLocalizedMessage());
             }
 
             if (nextChar == -1) {
