@@ -23,9 +23,11 @@ public class ExecuteMATESapienz {
 
         MATE mate = new MATE();
 
-        //FitnessFunction[] functions = new FitnessFunction[] {FitnessFunction.BRANCH_COVERAGE,
-        //        /*FitnessFunction.BRANCH_DISTANCE,*/ FitnessFunction.NUMBER_OF_CRASHES,
-        //        FitnessFunction.TEST_LENGTH};
+        FitnessFunction[] sapienzFitness = new FitnessFunction[] {
+                FitnessFunction.BRANCH_COVERAGE,
+                FitnessFunction.NUMBER_OF_CRASHES,
+                FitnessFunction.TEST_LENGTH
+        };
 
         final IGeneticAlgorithm sapienz =
                 new GeneticAlgorithmBuilder()
@@ -34,10 +36,7 @@ public class ExecuteMATESapienz {
                         .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
                         .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                         .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)
-                        //.withFitnessFunction(FitnessFunction.BRANCH_COVERAGE)
-                        //.withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
-                        //.withFitnessFunction(FitnessFunction.TEST_LENGTH)
-                        .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
+                        .withFitnessFunctions(sapienzFitness)
                         .withTerminationCondition(Properties.TERMINATION_CONDITION())
                         .withPopulationSize(Properties.POPULATION_SIZE())
                         .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
