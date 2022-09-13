@@ -431,6 +431,13 @@ public class Properties {
     public static DotConverter.Option CONVERT_GUI_TO_DOT() { return propertyOr(DotConverter.Option.NONE); }
 
     /**
+     * Determines, if the generated dot graph contains screenshots.
+     *
+     * @return {@code true}, if the dot graph should include screenshots. Otherwise {@code false}.
+     */
+    public static boolean DOT_WITH_SCREENSHOTS() {return propertyOr(false); }
+
+    /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored
      * the given default value will be returned.

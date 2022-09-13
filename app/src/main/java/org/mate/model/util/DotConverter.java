@@ -24,6 +24,12 @@ public final class DotConverter {
     // the location where dot file should be stored
     private static final String DOT_DIR = "/data/data/org.mate/gui-model";
 
+    // the location where the screenshots are stored
+    private static final String SCSH_DIR = "/screenshots";
+
+    // the location of the screenshots on the device
+    public static final String DEVICE_SCSH_DIR = "/dot";
+
     // an internal counter to enumerate the dot files
     private static int counter = 0;
 
@@ -65,6 +71,17 @@ public final class DotConverter {
             throw new IllegalStateException("Couldn't save dot file!", e);
         }
         counter++;
+    }
+
+    public static void fetchScreenshots() {
+        String targetDir = DOT_DIR + SCSH_DIR;
+        File dir = new File(targetDir);
+
+        if (!dir.exists()) {
+            MATE.log("Creating screenshot folder succeeded: " + dir.mkdir());
+        }
+
+        Registry.getEnvironmentManager().fetchScreenshots(DEVICE_SCSH_DIR, targetDir);
     }
 
     /**

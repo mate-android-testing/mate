@@ -146,6 +146,10 @@ public class MATE {
 
             if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
                 DotConverter.convert(Registry.getUiAbstractionLayer().getGuiModel());
+
+                if (Properties.DOT_WITH_SCREENSHOTS()) {
+                    DotConverter.fetchScreenshots();
+                }
             }
 
             if (Properties.GRAPH_TYPE() != null) {

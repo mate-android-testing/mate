@@ -1336,4 +1336,17 @@ public class EnvironmentManager {
 
         return success;
     }
+
+    public boolean fetchScreenshots(String sourceDir, String targetDir) {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_screenshots")
+                .withParameter("deviceId", emulator)
+                .withParameter("dirName", sourceDir)
+                .withParameter("fileName", targetDir);
+
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching screenshots from emulator succeeded: " + success);
+
+        return success;
+    }
 }
