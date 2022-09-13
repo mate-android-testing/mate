@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -31,6 +30,7 @@ public class TimeoutRun {
             MATE.log_acc("Timeout. Requesting shutdown...");
             executor.shutdownNow();
             try {
+                // We may need to wait until the tracer finished writing its traces.
                 executor.awaitTermination(30, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
                 MATE.log_acc("Unexpected exception awaiting termination of timeout run: " + e.getMessage());
