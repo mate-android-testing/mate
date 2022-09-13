@@ -6,6 +6,13 @@ package org.mate.utils;
 public final class MateInterruptedException extends RuntimeException {
 
     /**
+     * Constructs a new MateInterruptedException.
+     */
+    public MateInterruptedException() {
+        super();
+    }
+
+    /**
      * Constructs a new MateInterruptedException with the given cause.
      *
      * @param cause The cause of the exception.
