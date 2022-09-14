@@ -127,7 +127,7 @@ public final class DotConverter {
                 builder.append('/');
                 builder.append(stateId);
                 builder.append(".png\"");
-                builder.append(", shape=\"box\", imagescale=true");
+                builder.append(", shape=\"box\"");
             }
 
             builder.append("]\n");
@@ -143,6 +143,10 @@ public final class DotConverter {
 
             if (actionList.contains(edge.getAction())) {
                 builder.append(", color = red, fontcolor = red");
+            }
+
+            if (Properties.DOT_WITH_SCREENSHOTS()) {
+                builder.append(", fontsize=50, arrowsize=4, penwidth=5");
             }
 
             builder.append("];\n");
