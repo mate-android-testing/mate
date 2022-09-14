@@ -23,15 +23,6 @@ public abstract class Action {
     @NonNull
     public abstract String toShortString();
 
-    /**
-     * A further simplified description of the action. Primarily used
-     * for the dot graph.
-     *
-     * @return Returns a simplified string representation.
-     */
-    @NonNull
-    public abstract String toDotString();
-
     public abstract int hashCode();
 
     public abstract boolean equals(@Nullable Object o);

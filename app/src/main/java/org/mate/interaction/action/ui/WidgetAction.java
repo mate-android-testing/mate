@@ -209,15 +209,4 @@ public class WidgetAction extends UIAction {
             return actionType + "(" + widget.getClazz() + ")";
         }
     }
-
-    /**
-     * A simplified representation of the widget action containing only the widget id.
-     *
-     * @return Returns a more simplified string representation.
-     */
-    @NonNull
-    @Override
-    public String toDotString() {
-        return actionType + "(" + widget.getId() + ")";
-    }
 }

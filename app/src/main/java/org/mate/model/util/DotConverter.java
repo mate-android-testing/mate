@@ -138,7 +138,7 @@ public final class DotConverter {
             builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
                     edge.getSource().getId(),
                     edge.getTarget().getId(),
-                    edge.getAction().toDotString()));
+                    edge.getAction().toShortString()));
 
             if (actionList.contains(edge.getAction())) {
                 builder.append(", color = red, fontcolor = red");

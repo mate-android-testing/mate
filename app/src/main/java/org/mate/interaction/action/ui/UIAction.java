@@ -76,17 +76,6 @@ public class UIAction extends Action {
     }
 
     /**
-     * A simple text representation used for the dot graph.
-     *
-     * @return A string representation.
-     */
-    @NonNull
-    @Override
-    public String toDotString() {
-        return toShortString();
-    }
-
-    /**
      * Computes the hashcode of the ui action.
      *
      * @return Returns the hash code associated with the ui action.
