@@ -79,7 +79,7 @@ public final class DotConverter {
     public static void fetchScreenshots() {
         String dir = GRAPH_DIR + SCREENSHOTS_DIR;
 
-        Registry.getEnvironmentManager().fetchScreenshots(dir, dir);
+        Registry.getEnvironmentManager().fetchScreenshots(dir, GRAPH_DIR);
     }
 
     /**
