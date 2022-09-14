@@ -1,6 +1,7 @@
 package org.mate.model.util;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.model.Edge;
@@ -25,10 +26,9 @@ public final class DotConverter {
     private static final String DOT_DIR = "/data/data/org.mate/gui-model";
 
     // the location where the screenshots are stored
-    private static final String SCSH_DIR = "/screenshots";
+    private static final String SCREENSHOTS_DIR = "/screenshots";
 
-    // the location of the screenshots on the device
-    public static final String DEVICE_SCSH_DIR = "/dot";
+    private static final String GRAPH_DIR = "/graphs";
 
     // an internal counter to enumerate the dot files
     private static int counter = 0;
@@ -73,15 +73,31 @@ public final class DotConverter {
         counter++;
     }
 
+    /**
+     * Fetches the screenshots into the graph file.
+     */
     public static void fetchScreenshots() {
-        String targetDir = DOT_DIR + SCSH_DIR;
-        File dir = new File(targetDir);
+        String dir = GRAPH_DIR + SCREENSHOTS_DIR;
 
-        if (!dir.exists()) {
-            MATE.log("Creating screenshot folder succeeded: " + dir.mkdir());
+        Registry.getEnvironmentManager().fetchScreenshots(dir, dir);
+    }
+
+    /**
+     * Takes a screenshot.
+     *
+     * @param state Name of the screenshot.
+     */
+    public static void takeScreenshot(String state) {
+        if (Properties.DOT_WITH_SCREENSHOTS()) {
+            String screenshotDir = GRAPH_DIR + SCREENSHOTS_DIR;
+            File dir = new File(screenshotDir);
+
+            if (!dir.exists()) {
+                MATE.log("Creating screenshot folder succeeded: " + dir.mkdir());
+            }
+
+            Registry.getEnvironmentManager().takeScreenshot(screenshotDir, state);
         }
-
-        Registry.getEnvironmentManager().fetchScreenshots(DEVICE_SCSH_DIR, targetDir);
     }
 
     /**
@@ -101,8 +117,19 @@ public final class DotConverter {
 
         for (IScreenState state : guiModel.getStates()) {
             String stateId = state.getId();
-            builder.append(String.format(Locale.getDefault(), "%s [label=\"%s\"]\n",
+            builder.append(String.format(Locale.getDefault(), "%s [label=\"%s\"",
                     stateId, stateId));
+
+            if (Properties.DOT_WITH_SCREENSHOTS()) {
+                builder.append(", image=\".");
+                builder.append(SCREENSHOTS_DIR);
+                builder.append('/');
+                builder.append(stateId);
+                builder.append(".png\"");
+                builder.append(", shape=\"box\"");
+            }
+
+            builder.append("]\n");
         }
 
         List<Action> actionList = testCase != null ? testCase.getEventSequence() : new ArrayList<>();

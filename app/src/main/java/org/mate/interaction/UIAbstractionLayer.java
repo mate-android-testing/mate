@@ -4,6 +4,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
@@ -14,6 +15,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.fsm.FSMModel;
+import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
@@ -94,8 +96,15 @@ public class UIAbstractionLayer {
         activities = deviceMgr.getActivities();
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
-        lastScreenState.setId("S" + lastScreenStateNumber);
+        String id = "S" + lastScreenStateNumber;
+        lastScreenState.setId(id);
         lastScreenStateNumber++;
+
+        // Save screenshot
+        if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+            DotConverter.takeScreenshot(id);
+        }
+
         guiModel = new FSMModel(lastScreenState, packageName);
         guiWalker = new GUIWalker(this);
     }
@@ -536,8 +545,17 @@ public class UIAbstractionLayer {
                 return recordedScreenState;
             }
         }
-        screenState.setId("S" + lastScreenStateNumber);
+
+        String id = "S" + lastScreenStateNumber;
+
+        screenState.setId(id);
         lastScreenStateNumber++;
+
+        //Take a screenshot of the new screen state
+        if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+            DotConverter.takeScreenshot(id);
+        }
+
         return screenState;
     }
 
