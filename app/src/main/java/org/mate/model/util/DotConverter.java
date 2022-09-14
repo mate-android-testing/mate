@@ -117,16 +117,17 @@ public final class DotConverter {
 
         for (IScreenState state : guiModel.getStates()) {
             String stateId = state.getId();
-            builder.append(String.format(Locale.getDefault(), "%s [label=\"%s\"",
-                    stateId, stateId));
+            builder.append(String.format(Locale.getDefault(), "%s [label=\"", stateId));
 
-            if (Properties.DOT_WITH_SCREENSHOTS()) {
-                builder.append(", image=\".");
+            if (!Properties.DOT_WITH_SCREENSHOTS()) {
+                builder.append(String.format(Locale.getDefault(), "%s\"", stateId));
+            } else {
+                builder.append("\", image=\".");
                 builder.append(SCREENSHOTS_DIR);
                 builder.append('/');
                 builder.append(stateId);
                 builder.append(".png\"");
-                builder.append(", shape=\"box\"");
+                builder.append(", shape=\"box\", imagescale=true");
             }
 
             builder.append("]\n");
@@ -148,9 +149,6 @@ public final class DotConverter {
         }
 
         builder.append("}\n");
-
-        MATE.log_acc("BUILD SOME GRAPH STRING!");
-        MATE.log_acc(builder.toString());
 
         return builder.toString();
     }
