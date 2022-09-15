@@ -14,8 +14,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Provides a conversion method to export a {@link IGUIModel} to a dot file.
@@ -34,7 +37,7 @@ public final class DotConverter {
     private static int counter = 0;
 
     // A collection of testcases for the final dot graph
-    private static TestCase[] recordedCases;
+    private static List<TestCase> recordedCases = new ArrayList<>();
 
     // List of 25 colors to color the test cases
     private static final String[] colors = {
@@ -45,8 +48,6 @@ public final class DotConverter {
             "darkslategray", "orangered", "plum", "darkcyan", "indigo"
     };
 
-    private static String[] edges = {};
-
     /**
      * Converts the gui model to a dot file. The dot file is stored on the app-internal storage of
      * MATE, see {@link #DOT_DIR}.
@@ -54,7 +55,9 @@ public final class DotConverter {
      * @param guiModel The gui model that should be converted.
      */
     public static void convertFinal(IGUIModel guiModel) {
-        String dotFileName = "Final_Model";
+        assert guiModel != null;
+
+        String dotFileName = "Final_Model.dot";
         String dotFileContent = toDOT(guiModel);
 
         convert(dotFileName, dotFileContent);
@@ -68,11 +71,19 @@ public final class DotConverter {
      * @param testCase The test case that should be highlighted.
      */
     public static void convertTestcase(IGUIModel guiModel, TestCase testCase) {
+        assert guiModel != null;
+        assert testCase != null;
+
         String dotFileName = "Testcase" + counter + ".dot";
         String dotFileContent = toDOT(guiModel, testCase);
-        counter++;
+
+        if (Arrays.stream(Properties.TESTCASES_HIGHLIGHTED()).anyMatch(x -> x == counter)) {
+            recordedCases.add(testCase);
+        }
 
         convert(dotFileName, dotFileContent);
+
+        counter++;
     }
 
     private static void convert(String dotFileName, String dotFileContent) {
@@ -103,7 +114,7 @@ public final class DotConverter {
 
         builder.append("strict digraph g {\n");
         builder.append(toDotNodes(guiModel));
-
+        builder.append(toDotEdges(guiModel));
         builder.append(toDotLegend());
         builder.append("}\n");
 
@@ -119,33 +130,11 @@ public final class DotConverter {
      * @return Returns the dot conform gui model.
      */
     private static String toDOT(IGUIModel guiModel, TestCase testCase) {
-        assert guiModel != null;
-        assert testCase != null;
-
         StringBuilder builder = new StringBuilder();
 
         builder.append("strict digraph g {\n");
         builder.append(toDotNodes(guiModel));
-
-        List<Action> actionList = testCase.getEventSequence();
-
-        for (Edge edge : guiModel.getEdges()) {
-            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
-                    edge.getSource().getId(),
-                    edge.getTarget().getId(),
-                    edge.getAction().toShortString()));
-
-            if (actionList.contains(edge.getAction())) {
-                builder.append(", color = tomato, fontcolor = tomato");
-            }
-
-            if (Properties.DOT_WITH_SCREENSHOTS()) {
-                builder.append(", fontsize=50, arrowsize=4, penwidth=5");
-            }
-
-            builder.append("];\n");
-        }
-
+        builder.append(toDotEdges(guiModel, testCase));
         builder.append("}\n");
 
         return builder.toString();
@@ -175,8 +164,112 @@ public final class DotConverter {
         return builder.toString();
     }
 
+    private static String toDotEdges(IGUIModel guiModel, TestCase testCase) {
+        StringBuilder builder = new StringBuilder();
+        Set<Action> actionSet = new HashSet<>(testCase.getEventSequence());
+
+        for (Edge edge : guiModel.getEdges()) {
+            if (actionSet.contains(edge.getAction())) {
+                toDotEdge(edge, "tomato", "tomato");
+            } else {
+                toDotEdge(edge, "black", "black");
+            }
+        }
+
+        return builder.toString();
+    }
+
+    private static String toDotEdges(IGUIModel guiModel) {
+        StringBuilder builder = new StringBuilder();
+        Set<Action>[] actionSet = new Set[recordedCases.size()];
+
+        for (int i = 0;  i < actionSet.length; i++) {
+            actionSet[i] = new HashSet<>(recordedCases.get(i).getEventSequence());
+        }
+
+        for (Edge edge : guiModel.getEdges()) {
+            String color = getEdgeColor(edge, actionSet);
+
+            builder.append(toDotEdge(edge, color, "black"));
+        }
+
+        return builder.toString();
+    }
+
+    private static String toDotEdge(Edge edge, String edgeColor, String fontcolor) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
+                edge.getSource().getId(),
+                edge.getTarget().getId(),
+                edge.getAction().toShortString()));
+
+        builder.append(", color = \"");
+        builder.append(edgeColor);
+        builder.append("\", fontcolor = \"");
+        builder.append(fontcolor);
+        builder.append('\"');
+
+        if (Properties.DOT_WITH_SCREENSHOTS()) {
+            builder.append(", fontsize=50, arrowsize=4, penwidth=5");
+        }
+
+        builder.append("];\n");
+
+        return builder.toString();
+    }
+
+    private static String getEdgeColor(Edge edge, Set<Action>[] actionsSets) {
+        StringBuilder colorOfEdge = new StringBuilder();
+
+        for (int i = 0; i < actionsSets.length; i++) {
+            if (actionsSets[i].contains(edge.getAction())) {
+                String color = i < colors.length ? colors[i] : "black";
+
+                colorOfEdge.append(color);
+                colorOfEdge.append(':');
+            }
+        }
+
+        if (colorOfEdge.length() == 0) {
+            return "black";
+        } else {
+            colorOfEdge.deleteCharAt(colorOfEdge.length() - 1);
+
+            // With this the dot graph doesn't draw multiple lines
+            colorOfEdge.append(":black;0.001");
+        }
+
+        return colorOfEdge.toString();
+    }
+
     private static String toDotLegend() {
         StringBuilder builder = new StringBuilder();
+
+        builder.append("subgraph cluster_01 { \n \t label = \"Legend\";\n \tshape = rectangle;\n" +
+                "\tcolor = black;\n\t");
+
+        for (TestCase testcase : recordedCases) {
+            builder.append('\"');
+            builder.append(testcase.getId());
+            builder.append("1\" [style=invis]\n\t\"");
+            builder.append(testcase.getId());
+            builder.append("2\" [style=invis]\n\t");
+        }
+
+        for (int i = 0; i < recordedCases.size(); i++) {
+            String id = recordedCases.get(i).getId();
+            String color = i < colors.length ? colors[i] : "black";
+
+            builder.append(id);
+            builder.append("1 -> ");
+            builder.append(id);
+            builder.append("2 [color=\"");
+            builder.append(color);
+            builder.append("\"] \n\t");
+        }
+
+        builder.append("\t }");
 
         return builder.toString();
     }
