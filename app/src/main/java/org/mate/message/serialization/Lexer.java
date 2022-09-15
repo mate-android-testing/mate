@@ -1,5 +1,6 @@
 package org.mate.message.serialization;
 
+import org.mate.MATE;
 import org.mate.utils.MateInterruptedException;
 
 import java.io.IOException;
@@ -73,6 +74,7 @@ public class Lexer {
                 nextChar = reader.read();
             } catch(final ClosedByInterruptException e) {
                 assert Thread.interrupted(); // Clear the interrupt flag.
+                MATE.log_warn("Interrupt during lexing input: " + value);
                 throw new MateInterruptedException(e);
             } catch (IOException e) {
                 return LexResult.failure("Lexing value failed: IO error while reading from input: "
@@ -80,7 +82,7 @@ public class Lexer {
             }
 
             if (nextChar == -1) {
-                return LexResult.failure("Lexing value failed: unexpected EOF");
+                return LexResult.failure("Lexing value failed: unexpected EOF for input: " + value);
             }
 
             char chr = (char) nextChar;
