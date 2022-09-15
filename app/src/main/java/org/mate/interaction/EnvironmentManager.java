@@ -40,7 +40,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.8";
+    private static final String MESSAGE_PROTOCOL_VERSION = "2.9";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -401,16 +401,40 @@ public class EnvironmentManager {
      *
      * @param testcaseDir The test case directory.
      * @param testCase The name of the test case file.
+     * @return Returns {@code true} if the test case could be successfully fetched and removed,
+     *         otherwise {@code false} is returned.
      */
     public boolean fetchTestCase(String testcaseDir, String testCase) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_test_case")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder(
+                "/utility/fetch_test_case")
                 .withParameter("deviceId", emulator)
                 .withParameter("testcaseDir", testcaseDir)
                 .withParameter("testcase", testCase);
         Message response = sendMessage(messageBuilder.build());
         boolean success = Boolean.parseBoolean(response.getParameter("response"));
         MATE.log("Fetching TestCase from emulator succeeded: " + success);
+        return success;
+    }
+
+    /**
+     * Fetches and removes an espresso test from the internal storage of the emulator.
+     *
+     * @param espressoDir The espresso tests directory on the emulator.
+     * @param testCase The name of the espresso test.
+     * @return Returns {@code true} if the espresso test could be successfully fetched and removed,
+     *         otherwise {@code false} is returned.
+     */
+    public boolean fetchEspressoTest(String espressoDir, String testCase) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder(
+                "/utility/fetch_espresso_test")
+                .withParameter("deviceId", emulator)
+                .withParameter("espressoDir", espressoDir)
+                .withParameter("testcase", testCase);
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching espresso test from emulator succeeded: " + success);
         return success;
     }
 
