@@ -501,7 +501,9 @@ public class EnvironmentManager {
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("graph_type", graphType.name())
                 .withParameter("apk", Properties.APK())
-                .withParameter("target", Properties.TARGET());
+                .withParameter("target", Properties.TARGET())
+                .withParameter("stack_trace_path", Properties.STACK_TRACE_PATH())
+                ;
 
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
