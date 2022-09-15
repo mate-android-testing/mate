@@ -119,7 +119,7 @@ public class TestCase {
         }
 
         if (Properties.CONVERT_GUI_TO_DOT() == DotConverter.Option.ALL) {
-            DotConverter.convert(Registry.getUiAbstractionLayer().getGuiModel(), this);
+            DotConverter.convertTestcase(Registry.getUiAbstractionLayer().getGuiModel(), this);
         }
 
         // record stats about a test case, in particular about intent based actions

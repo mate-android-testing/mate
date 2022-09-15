@@ -33,14 +33,28 @@ public final class DotConverter {
     // an internal counter to enumerate the dot files
     private static int counter = 0;
 
+    // A collection of testcases for the final dot graph
+    private static TestCase[] recordedCases;
+
+    // List of 25 colors to color the test cases
+    private static final String[] colors = {
+            "tomato", "blue", "green", "orange", "yellow",
+            "deeppink", "aqua", "lime", "chocolate", "darkviolet",
+            "gray", "midnightblue", "goldrod", "lightpink", "darkred",
+            "saddlebrown", "lightblue", "magenta", "olive", "yellowgreen",
+            "darkslategray", "orangered", "plum", "darkcyan", "indigo"
+    };
+
+    private static String[] edges = {};
+
     /**
      * Converts the gui model to a dot file. The dot file is stored on the app-internal storage of
      * MATE, see {@link #DOT_DIR}.
      *
      * @param guiModel The gui model that should be converted.
      */
-    public static void convert(IGUIModel guiModel) {
-        convert(guiModel, null);
+    public static void convertFinal(IGUIModel guiModel) {
+        convertTestcase(guiModel, null);
     }
 
     /**
@@ -50,7 +64,7 @@ public final class DotConverter {
      * @param guiModel The gui model to be converted.
      * @param testCase The test case that should be highlighted.
      */
-    public static void convert(IGUIModel guiModel, TestCase testCase) {
+    public static void convertTestcase(IGUIModel guiModel, TestCase testCase) {
         String dotFileName = "GUIModel" + counter + ".dot";
         File dotDir = new File(DOT_DIR);
 
@@ -142,7 +156,7 @@ public final class DotConverter {
                     edge.getAction().toShortString()));
 
             if (actionList.contains(edge.getAction())) {
-                builder.append(", color = red, fontcolor = red");
+                builder.append(", color = tomato, fontcolor = tomato");
             }
 
             if (Properties.DOT_WITH_SCREENSHOTS()) {

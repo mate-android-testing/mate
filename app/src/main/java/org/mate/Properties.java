@@ -423,6 +423,10 @@ public class Properties {
      * End AutoDroid properties
      */
 
+    /*
+     * Properties for dot graph
+     */
+
     /**
      * Whether the gui model should be converted to a dot file and how often.
      *
@@ -436,6 +440,17 @@ public class Properties {
      * @return {@code true}, if the dot graph should include screenshots. Otherwise {@code false}.
      */
     public static boolean DOT_WITH_SCREENSHOTS() {return propertyOr(false); }
+
+    /**
+     * A property for distinguish which test case will be highlighted in the final dot graph.
+     *
+     * @return a list of testcases, that will be highlighted by a color.
+     */
+    public static int[] TESTCASES_HIGHLIGHTED() {
+        int[] emptyArray = {};
+
+        return propertyOr(emptyArray);
+    }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
