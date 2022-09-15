@@ -55,7 +55,7 @@ public final class DotConverter {
      */
     public static void convertFinal(IGUIModel guiModel) {
         String dotFileName = "Final_Model";
-        String dotFileContent = toDOT(guiModel, null);
+        String dotFileContent = toDOT(guiModel);
 
         convert(dotFileName, dotFileContent);
     }
@@ -96,6 +96,91 @@ public final class DotConverter {
         }
     }
 
+    private static String toDOT(IGUIModel guiModel) {
+        assert guiModel != null;
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("strict digraph g {\n");
+        builder.append(toDotNodes(guiModel));
+
+        builder.append(toDotLegend());
+        builder.append("}\n");
+
+        return builder.toString();
+    }
+
+    /**
+     * Converts a gui model to a dot file for a certain test case.
+     *
+     * @param guiModel The gui model to be converted.
+     * @param testCase The test case, that should be highlighted. If it's {@code null},
+     *                 no edge gets highlighted.
+     * @return Returns the dot conform gui model.
+     */
+    private static String toDOT(IGUIModel guiModel, TestCase testCase) {
+        assert guiModel != null;
+        assert testCase != null;
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("strict digraph g {\n");
+        builder.append(toDotNodes(guiModel));
+
+        List<Action> actionList = testCase.getEventSequence();
+
+        for (Edge edge : guiModel.getEdges()) {
+            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
+                    edge.getSource().getId(),
+                    edge.getTarget().getId(),
+                    edge.getAction().toShortString()));
+
+            if (actionList.contains(edge.getAction())) {
+                builder.append(", color = tomato, fontcolor = tomato");
+            }
+
+            if (Properties.DOT_WITH_SCREENSHOTS()) {
+                builder.append(", fontsize=50, arrowsize=4, penwidth=5");
+            }
+
+            builder.append("];\n");
+        }
+
+        builder.append("}\n");
+
+        return builder.toString();
+    }
+
+    private static String toDotNodes(IGUIModel guiModel) {
+        StringBuilder builder = new StringBuilder();
+
+        for (IScreenState state : guiModel.getStates()) {
+            String stateId = state.getId();
+            builder.append(String.format(Locale.getDefault(), "%s [label=\"", stateId));
+
+            if (!Properties.DOT_WITH_SCREENSHOTS()) {
+                builder.append(String.format(Locale.getDefault(), "%s\"", stateId));
+            } else {
+                builder.append("\", image=\".");
+                builder.append(SCREENSHOTS_DIR);
+                builder.append('/');
+                builder.append(stateId);
+                builder.append(".png\"");
+                builder.append(", shape=\"box\"");
+            }
+
+            builder.append("]\n");
+        }
+
+        return builder.toString();
+    }
+
+    private static String toDotLegend() {
+        StringBuilder builder = new StringBuilder();
+
+        return builder.toString();
+    }
+
     /**
      * Fetches the screenshots into the graph file.
      */
@@ -121,67 +206,6 @@ public final class DotConverter {
 
             Registry.getEnvironmentManager().takeScreenshot(screenshotDir, state);
         }
-    }
-
-    private static String toDot(IGUIModel guiModel) {
-        StringBuilder builder = new StringBuilder();
-
-        return builder.toString();
-    }
-
-    /**
-     * Converts a gui model to a dot file for a certain test case.
-     *
-     * @param guiModel The gui model to be converted.
-     * @param testCase The test case, that should be highlighted. If it's {@code null},
-     *                 no edge gets highlighted.
-     * @return Returns the dot conform gui model.
-     */
-    private static String toDOT(IGUIModel guiModel, TestCase testCase) {
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("strict digraph g {\n");
-
-        for (IScreenState state : guiModel.getStates()) {
-            String stateId = state.getId();
-            builder.append(String.format(Locale.getDefault(), "%s [label=\"", stateId));
-
-            if (!Properties.DOT_WITH_SCREENSHOTS()) {
-                builder.append(String.format(Locale.getDefault(), "%s\"", stateId));
-            } else {
-                builder.append("\", image=\".");
-                builder.append(SCREENSHOTS_DIR);
-                builder.append('/');
-                builder.append(stateId);
-                builder.append(".png\"");
-                builder.append(", shape=\"box\"");
-            }
-
-            builder.append("]\n");
-        }
-
-        List<Action> actionList = testCase != null ? testCase.getEventSequence() : new ArrayList<>();
-
-        for (Edge edge : guiModel.getEdges()) {
-            builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
-                    edge.getSource().getId(),
-                    edge.getTarget().getId(),
-                    edge.getAction().toShortString()));
-
-            if (actionList.contains(edge.getAction())) {
-                builder.append(", color = tomato, fontcolor = tomato");
-            }
-
-            if (Properties.DOT_WITH_SCREENSHOTS()) {
-                builder.append(", fontsize=50, arrowsize=4, penwidth=5");
-            }
-
-            builder.append("];\n");
-        }
-
-        builder.append("}\n");
-
-        return builder.toString();
     }
 
     /**
