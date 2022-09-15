@@ -54,7 +54,10 @@ public final class DotConverter {
      * @param guiModel The gui model that should be converted.
      */
     public static void convertFinal(IGUIModel guiModel) {
-        convertTestcase(guiModel, null);
+        String dotFileName = "Final_Model";
+        String dotFileContent = toDOT(guiModel, null);
+
+        convert(dotFileName, dotFileContent);
     }
 
     /**
@@ -65,7 +68,14 @@ public final class DotConverter {
      * @param testCase The test case that should be highlighted.
      */
     public static void convertTestcase(IGUIModel guiModel, TestCase testCase) {
-        String dotFileName = "GUIModel" + counter + ".dot";
+        String dotFileName = "Testcase" + counter + ".dot";
+        String dotFileContent = toDOT(guiModel, testCase);
+        counter++;
+
+        convert(dotFileName, dotFileContent);
+    }
+
+    private static void convert(String dotFileName, String dotFileContent) {
         File dotDir = new File(DOT_DIR);
 
         if (!dotDir.exists()) {
@@ -75,7 +85,7 @@ public final class DotConverter {
         File dotFile = new File(dotDir, dotFileName);
 
         try (Writer fileWriter = new FileWriter(dotFile)) {
-            fileWriter.write(toDOT(guiModel, testCase));
+            fileWriter.write(dotFileContent);
             fileWriter.flush();
 
             // Fetch and remove dot file from emulator!
@@ -84,7 +94,6 @@ public final class DotConverter {
         } catch (IOException e) {
             throw new IllegalStateException("Couldn't save dot file!", e);
         }
-        counter++;
     }
 
     /**
@@ -114,8 +123,14 @@ public final class DotConverter {
         }
     }
 
+    private static String toDot(IGUIModel guiModel) {
+        StringBuilder builder = new StringBuilder();
+
+        return builder.toString();
+    }
+
     /**
-     * Converts a gui model to a dot file.
+     * Converts a gui model to a dot file for a certain test case.
      *
      * @param guiModel The gui model to be converted.
      * @param testCase The test case, that should be highlighted. If it's {@code null},
@@ -123,8 +138,6 @@ public final class DotConverter {
      * @return Returns the dot conform gui model.
      */
     private static String toDOT(IGUIModel guiModel, TestCase testCase) {
-
-        // TODO: Avoid overlapping labels!
 
         StringBuilder builder = new StringBuilder();
         builder.append("strict digraph g {\n");
