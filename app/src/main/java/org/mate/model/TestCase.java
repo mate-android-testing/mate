@@ -15,6 +15,7 @@ import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.espresso.EspressoConverter;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
@@ -124,6 +125,11 @@ public class TestCase {
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
             TestCaseSerializer.serializeTestCase(this);
+        }
+
+        // convert test case to reproducible espresso test
+        if (Properties.CONVERT_TEST_CASE_TO_ESPRESSO_TEST()) {
+            EspressoConverter.convert(this);
         }
 
         // record stats about a test case, in particular about intent based actions
