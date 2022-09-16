@@ -1,5 +1,7 @@
 package org.mate.utils;
 
+import org.mate.MATE;
+
 /**
  * A collection of utility functions.
  */
@@ -28,6 +30,7 @@ public class Utils {
      */
     public static void throwOnInterrupt() {
         if (Thread.interrupted()) {
+            MATE.log_debug("Interrupt detected!");
             throw new MateInterruptedException();
         }
     }
