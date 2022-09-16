@@ -1747,6 +1747,7 @@ public class DeviceMgr {
          * traces won't be lost.
          */
         if (interrupted != null) {
+            MATE.log_debug("Interrupt detected during dumping traces!");
             throw interrupted;
         }
     }
@@ -1839,6 +1840,7 @@ public class DeviceMgr {
                  * We suspend the interrupt until the tracer hopefully completed dumping its traces.
                  * By re-throwing, we terminate the current thread.
                  */
+                MATE.log_debug("Interrupt detected during waiting for tracer!");
                 throw interrupted;
             }
 
