@@ -46,6 +46,11 @@ public class EnvironmentManager {
     private static final String MESSAGE_PROTOCOL_VERSION = "2.9";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
+    /**
+     * The maximal number of how often a request is sent to MATE-Server in case of a fault.
+     */
+    private static final int MAX_NUMBER_OF_TRIES = 3;
+
     private String emulator = null;
     private Socket server;
     private final int port;
@@ -148,29 +153,66 @@ public class EnvironmentManager {
      * @return Response {@link org.mate.message.Message} of the server
      */
     public synchronized Message sendMessage(Message message) {
+
         if (!active) {
             throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
         }
+
+        MATE.log_debug("Send message with subject " + message.getSubject());
         addMetadata(message);
 
-        try {
-            server.getOutputStream().write(Serializer.serialize(message));
-            server.getOutputStream().flush();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            throw new IllegalStateException(e);
-        }
+        int numberOfTries = 0;
 
-        Message response = messageParser.nextMessage();
+        while (true) {
 
-        verifyMetadata(response);
-        if (response.getSubject().equals("/error")) {
-            MATE.log("Received error message from mate-server: "
-                    + response.getParameter("info"));
-            return null;
+            try {
+                server.getOutputStream().write(Serializer.serialize(message));
+                server.getOutputStream().flush();
+            } catch (IOException e) {
+                MATE.log("socket error sending");
+                throw new IllegalStateException(e);
+            }
+
+            Message response;
+
+            try {
+                response = messageParser.nextMessage();
+            } catch (IllegalStateException lexerException) {
+
+                MATE.log_warn("Lexing response failed: " + lexerException);
+
+                /*
+                 * MATE-Server might still be processing the old request and trying to send data
+                 * through the socket, so to ensure MATE-Server does not confuse the different
+                 * requests we just close the socket and open a new one.
+                 */
+                try {
+                    server.close();
+                    reconnect();
+                } catch (final IOException e) {
+                    throw new RuntimeException("Could not establish a new connection to MATE-Server!", e);
+                }
+
+                numberOfTries++;
+
+                if (numberOfTries < MAX_NUMBER_OF_TRIES) {
+                    continue;
+                } else {
+                    throw new IllegalStateException(lexerException);
+                }
+            }
+
+            verifyMetadata(response);
+
+            if (response.getSubject().equals("/error")) {
+                MATE.log("Received error message from MATE-Server: "
+                        + response.getParameter("info"));
+                throw new IllegalStateException("MATE-Server couldn't send a successful response!");
+            }
+
+            stripMetadata(response);
+            return response;
         }
-        stripMetadata(response);
-        return response;
     }
 
     /**
