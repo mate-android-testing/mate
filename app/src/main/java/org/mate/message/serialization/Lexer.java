@@ -74,7 +74,7 @@ public class Lexer {
                 nextChar = reader.read();
             } catch(final ClosedByInterruptException e) {
                 assert Thread.interrupted(); // Clear the interrupt flag.
-                MATE.log_warn("Interrupt during lexing input: " + value);
+                MATE.log_debug("Interrupt during lexing input: " + value);
                 throw new MateInterruptedException(e);
             } catch (IOException e) {
                 return LexResult.failure("Lexing value failed: IO error while reading from input: "

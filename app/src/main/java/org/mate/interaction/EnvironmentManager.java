@@ -147,15 +147,28 @@ public class EnvironmentManager {
     }
 
     /**
-     * Send a {@link org.mate.message.Message} to the server and return the response of the server
+     * Closes the socket to MATE-Server and tries to re-connect.
+     */
+    private void closeAndReconnect() {
+        try {
+            server.close();
+            reconnect();
+        } catch (final IOException e) {
+            throw new RuntimeException("Could not establish a new connection to MATE-Server!", e);
+        }
+    }
+
+    /**
+     * Sends a {@link org.mate.message.Message} to the server and returns the response of the server.
      *
-     * @param message {@link org.mate.message.Message} that will be send to the server
-     * @return Response {@link org.mate.message.Message} of the server
+     * @param message The {@link org.mate.message.Message} that will be send to the server.
+     * @return Returns the response {@link org.mate.message.Message} of the server.
      */
     public synchronized Message sendMessage(Message message) {
 
         if (!active) {
-            throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
+            throw new IllegalStateException("EnvironmentManager is no longer active and can not " +
+                    "be used for communication!");
         }
 
         MATE.log_debug("Send message with subject " + message.getSubject());
@@ -169,8 +182,21 @@ public class EnvironmentManager {
                 server.getOutputStream().write(Serializer.serialize(message));
                 server.getOutputStream().flush();
             } catch (IOException e) {
-                MATE.log("socket error sending");
-                throw new IllegalStateException(e);
+
+                MATE.log_debug("socket error sending");
+                closeAndReconnect();
+
+                try {
+                    server.getOutputStream().write(Serializer.serialize(message));
+                    server.getOutputStream().flush();
+                } catch (IOException exception) {
+                    /*
+                    * If we can't send the request the second time, it's likely that we can't
+                    * recover from this fault and thus abort the execution.
+                     */
+                    MATE.log_debug("socket error sending");
+                    throw new IllegalStateException(exception);
+                }
             }
 
             Message response;
@@ -179,19 +205,14 @@ public class EnvironmentManager {
                 response = messageParser.nextMessage();
             } catch (IllegalStateException lexerException) {
 
-                MATE.log_warn("Lexing response failed: " + lexerException);
+                MATE.log_debug("Lexing response failed: " + lexerException);
 
                 /*
                  * MATE-Server might still be processing the old request and trying to send data
                  * through the socket, so to ensure MATE-Server does not confuse the different
                  * requests we just close the socket and open a new one.
                  */
-                try {
-                    server.close();
-                    reconnect();
-                } catch (final IOException e) {
-                    throw new RuntimeException("Could not establish a new connection to MATE-Server!", e);
-                }
+                closeAndReconnect();
 
                 numberOfTries++;
 
@@ -205,7 +226,7 @@ public class EnvironmentManager {
             verifyMetadata(response);
 
             if (response.getSubject().equals("/error")) {
-                MATE.log("Received error message from MATE-Server: "
+                MATE.log_debug("Received error message from MATE-Server: "
                         + response.getParameter("info"));
                 throw new IllegalStateException("MATE-Server couldn't send a successful response!");
             }
