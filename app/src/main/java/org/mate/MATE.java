@@ -146,7 +146,7 @@ public class MATE {
             try {
                 Registry.getEnvironmentManager().reconnect();
             } catch (final IOException e) {
-                MATE.log_error("Cannot re-connect to Mate-Server.");
+                MATE.log_error("Cannot re-connect to MATE-Server.");
                 e.printStackTrace();
             }
 
