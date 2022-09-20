@@ -139,6 +139,17 @@ public class MATE {
             e.printStackTrace();
         } finally {
 
+            /*
+            * The interrupt caused by the TimeoutRun class may closed the connection to the MATE-Server.
+            * We need to re-connect in order to request the final coverage for instance.
+             */
+            try {
+                Registry.getEnvironmentManager().reconnect();
+            } catch (final IOException e) {
+                MATE.log_error("Cannot re-connect to MATE-Server.");
+                e.printStackTrace();
+            }
+
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 CoverageUtils.logFinalCoverage();
             }

@@ -17,11 +17,14 @@ import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Objective;
+import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageDTO;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -40,12 +43,18 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.9";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.0";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
+    /**
+     * The maximal number of how often a request is sent to MATE-Server in case of a fault.
+     */
+    private static final int MAX_NUMBER_OF_TRIES = 3;
+
     private String emulator = null;
-    private final Socket server;
-    private final Parser messageParser;
+    private Socket server;
+    private final int port;
+    private Parser messageParser;
     private boolean active;
 
     /**
@@ -54,7 +63,7 @@ public class EnvironmentManager {
      * test case the traces file multiple times. Otherwise, the last fetch trial overwrites
      * the traces file for the given test case with an empty file.
      */
-    private Set<String> coveredTestCases = new HashSet<>();
+    private final Set<String> coveredTestCases = new HashSet<>();
 
     /**
      * Initialises a new environment manager communicating with
@@ -67,8 +76,7 @@ public class EnvironmentManager {
     }
 
     /**
-     * Initialises a new environment manager communicating with
-     * the MATE server on the given port.
+     * Initialises a new environment manager communicating with the MATE server on the given port.
      *
      * @param port The MATE server port.
      * @throws IOException If no connection could be established with the MATE server.
@@ -76,7 +84,46 @@ public class EnvironmentManager {
     public EnvironmentManager(int port) throws IOException {
         active = true;
         server = new Socket(DEFAULT_SERVER_IP, port);
-        messageParser = new Parser(server.getInputStream());
+        this.port = port;
+
+        /*
+         * The input stream obtained from server.getInputStream() cannot be interrupted when
+         * waiting for a response from the server. We need to wrap the input stream around a
+         * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+         * will be thrown.
+         */
+        final InputStream interruptibleInputStream = Channels.newInputStream(
+                Channels.newChannel(server.getInputStream()));
+        messageParser = new Parser(interruptibleInputStream);
+        server.setSoTimeout(0);
+    }
+
+    /**
+     * Re-connects to Mate-Server if the connection has been closed.
+     *
+     * @throws IOException If the connection is closed and cannot be re-established.
+     */
+    public void reconnect() throws IOException {
+
+        Utils.sleep(1000);
+
+        if (server.isClosed()) {
+            MATE.log_debug("Re-connecting to MATE-Server.");
+            server = new Socket(DEFAULT_SERVER_IP, port);
+
+            /*
+            * The input stream obtained from server.getInputStream() cannot be interrupted when
+            * waiting for a response from the server. We need to wrap the input stream around a
+            * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+            * will be thrown.
+             */
+            final InputStream interruptibleInputStream = Channels.newInputStream(
+                    Channels.newChannel(server.getInputStream()));
+            messageParser = new Parser(interruptibleInputStream);
+            server.setSoTimeout(0);
+        } else {
+            MATE.log_debug("No need to re-connect to MATE-Server.");
+        }
     }
 
     /**
@@ -100,35 +147,93 @@ public class EnvironmentManager {
     }
 
     /**
-     * Send a {@link org.mate.message.Message} to the server and return the response of the server
+     * Closes the socket to MATE-Server and tries to re-connect.
+     */
+    private void closeAndReconnect() {
+        try {
+            server.close();
+            reconnect();
+        } catch (final IOException e) {
+            throw new RuntimeException("Could not establish a new connection to MATE-Server!", e);
+        }
+    }
+
+    /**
+     * Sends a {@link org.mate.message.Message} to the server and returns the response of the server.
      *
-     * @param message {@link org.mate.message.Message} that will be send to the server
-     * @return Response {@link org.mate.message.Message} of the server
+     * @param message The {@link org.mate.message.Message} that will be send to the server.
+     * @return Returns the response {@link org.mate.message.Message} of the server.
      */
     public synchronized Message sendMessage(Message message) {
+
         if (!active) {
-            throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
+            throw new IllegalStateException("EnvironmentManager is no longer active and can not " +
+                    "be used for communication!");
         }
+
+        MATE.log_debug("Send message with subject " + message.getSubject());
         addMetadata(message);
 
-        try {
-            server.getOutputStream().write(Serializer.serialize(message));
-            server.getOutputStream().flush();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            throw new IllegalStateException(e);
-        }
+        int numberOfTries = 0;
 
-        Message response = messageParser.nextMessage();
+        while (true) {
 
-        verifyMetadata(response);
-        if (response.getSubject().equals("/error")) {
-            MATE.log("Received error message from mate-server: "
-                    + response.getParameter("info"));
-            return null;
+            try {
+                server.getOutputStream().write(Serializer.serialize(message));
+                server.getOutputStream().flush();
+            } catch (IOException e) {
+
+                MATE.log_debug("socket error sending");
+                closeAndReconnect();
+
+                try {
+                    server.getOutputStream().write(Serializer.serialize(message));
+                    server.getOutputStream().flush();
+                } catch (IOException exception) {
+                    /*
+                    * If we can't send the request the second time, it's likely that we can't
+                    * recover from this fault and thus abort the execution.
+                     */
+                    MATE.log_debug("socket error sending");
+                    throw new IllegalStateException(exception);
+                }
+            }
+
+            Message response;
+
+            try {
+                response = messageParser.nextMessage();
+            } catch (IllegalStateException lexerException) {
+
+                MATE.log_debug("Lexing response failed: " + lexerException);
+
+                /*
+                 * MATE-Server might still be processing the old request and trying to send data
+                 * through the socket, so to ensure MATE-Server does not confuse the different
+                 * requests we just close the socket and open a new one.
+                 */
+                closeAndReconnect();
+
+                numberOfTries++;
+
+                if (numberOfTries < MAX_NUMBER_OF_TRIES) {
+                    continue;
+                } else {
+                    throw new IllegalStateException(lexerException);
+                }
+            }
+
+            verifyMetadata(response);
+
+            if (response.getSubject().equals("/error")) {
+                MATE.log_debug("Received error message from MATE-Server: "
+                        + response.getParameter("info"));
+                throw new IllegalStateException("MATE-Server couldn't send a successful response!");
+            }
+
+            stripMetadata(response);
+            return response;
         }
-        stripMetadata(response);
-        return response;
     }
 
     /**
