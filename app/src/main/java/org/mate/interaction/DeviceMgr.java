@@ -45,6 +45,7 @@ import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
 
 import java.io.BufferedReader;
@@ -1548,6 +1549,16 @@ public class DeviceMgr {
      * @return Returns the activities of the AUT.
      */
     public List<String> getActivities() {
+        return Registry.getManifest().getActivities().stream()
+                .map(ComponentDescription::getFullyQualifiedName)
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unused")
+    private List<String> getActivitiesFromPackageManager() {
+
+        // NOTE: This will only retrieve the exported/enabled activities, not necessarily all listed
+        // in the AndroidManifest.xml file!
 
         Instrumentation instrumentation = getInstrumentation();
 
@@ -1560,11 +1571,7 @@ public class DeviceMgr {
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {
-            MATE.log_warn("Couldn't retrieve activity names!");
-            MATE.log_warn(e.getMessage());
-
-            // fallback mechanism
-            return Registry.getEnvironmentManager().getActivityNames();
+            throw new IllegalStateException("Couldn't retrieve activity names!", e);
         }
     }
 
