@@ -429,6 +429,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of activities of the AUT.
      */
+    @SuppressWarnings("unused")
     public List<String> getActivityNames() {
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/android/get_activities")
