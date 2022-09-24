@@ -146,8 +146,8 @@ public class MATE {
             try {
                 Registry.getEnvironmentManager().reconnect();
             } catch (final IOException e) {
-                MATE.log_error("Cannot re-connect to MATE-Server.");
-                e.printStackTrace();
+                // The subsequent requests to the MATE-Server would fail anyways.
+                throw new IllegalStateException("Cannot re-connect to MATE-Server.", e);
             }
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
