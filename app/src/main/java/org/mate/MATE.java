@@ -158,9 +158,8 @@ public class MATE {
                 Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
             }
 
-            Registry.getEnvironmentManager().releaseEmulator();
-            // EnvironmentManager.deleteAllScreenShots(packageName);
             try {
+                Registry.getEnvironmentManager().releaseEmulator();
                 Registry.unregisterEnvironmentManager();
                 Registry.unregisterUiAbstractionLayer();
                 Registry.unregisterDeviceMgr();
@@ -168,7 +167,8 @@ public class MATE {
                 Registry.unregisterRandom();
                 Registry.unregisterPackageName();
                 Registry.unregisterTimeout();
-            } catch (IOException e) {
+            } catch (Exception e) {
+                MATE.log_acc("Couldn't de-allocate resources properly: " + e.getMessage());
                 e.printStackTrace();
             }
         }
