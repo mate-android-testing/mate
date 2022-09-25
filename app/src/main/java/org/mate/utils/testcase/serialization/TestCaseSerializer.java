@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 
 /**
  * Provides the functionality to serialize and de-serialize a {@link org.mate.model.TestCase}.
@@ -41,9 +42,9 @@ public final class TestCaseSerializer {
         MATE.log("Serializing TestCase " + recordCounter);
 
         // create the test-cases folder if not yet present
-        File dir = new File(TEST_CASES_DIR);
-        if (!dir.exists()) {
-            MATE.log("Creating test-cases folder succeeded: " + dir.mkdir());
+        File testCasesDir = new File(TEST_CASES_DIR);
+        if (!testCasesDir.exists()) {
+            MATE.log("Creating test-cases folder succeeded: " + testCasesDir.mkdir());
         }
 
         // log whether execution of test case resulted in a crash
@@ -52,7 +53,7 @@ public final class TestCaseSerializer {
         }
 
         // the output file
-        File testCaseFile = new File(dir, "TestCase" + recordCounter + ".xml");
+        File testCaseFile = new File(testCasesDir, "TestCase" + recordCounter + ".xml");
 
         // convert test case to xml
         XStream xstream = new XStream();
@@ -71,6 +72,8 @@ public final class TestCaseSerializer {
 
             // retry on failure
             if (!success) {
+                MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+                MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
                 MATE.log("Retry serialization...!");
                 fileWriter.write(testCaseXML);
                 fileWriter.flush();
@@ -79,11 +82,16 @@ public final class TestCaseSerializer {
             }
 
             if (!success) {
+                MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+                MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
                 MATE.log("Serializing TestCase " + recordCounter + " failed!");
                 throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
             }
         } catch (IOException e) {
             // TODO: we could try to write to external storage as a fallback if it is a memory issue
+
+            MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+            MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
 
             MATE.log("Retry serialization...!");
 
@@ -97,10 +105,14 @@ public final class TestCaseSerializer {
                         "TestCase" + recordCounter + ".xml");
 
                 if (!success) {
+                    MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+                    MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
                     MATE.log("Serializing TestCase " + recordCounter + " failed!");
                     throw new IllegalStateException(e);
                 }
             } catch (IOException ioe) {
+                MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+                MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
                 MATE.log("Serializing TestCase " + recordCounter + " failed!");
                 throw new IllegalStateException(e);
             }
