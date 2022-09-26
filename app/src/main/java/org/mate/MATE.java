@@ -154,8 +154,8 @@ public class MATE {
                 CoverageUtils.logFinalCoverage();
             }
 
-            if (Properties.GRAPH_TYPE() != null) {
-                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
+                Registry.getEnvironmentManager().drawGraph();
             }
 
             try {

@@ -9,6 +9,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.message.Message;
@@ -649,7 +650,7 @@ public class EnvironmentManager {
         MATE.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
-                .withParameter("raw", String.valueOf(raw));
+                .withParameter("raw", String.valueOf(Properties.DRAW_GRAPH() == DrawType.RAW));
         sendMessage(messageBuilder.build());
     }
 
