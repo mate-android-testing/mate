@@ -1,10 +1,12 @@
 package org.mate.crash_reproduction.fitness;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockDistance;
 import org.mate.exploration.genetic.fitness.CallTreeDistance;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.model.TestCase;
 
 import java.util.HashMap;
@@ -24,6 +26,8 @@ public class CrashDistance extends WeighedFitnessFunctions {
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
         if (chromosome.getValue().reachedTarget(targetStackTrace)) {
+            MATE.log("Was able to reproduce crash with " + chromosome.getValue().getId() + "!");
+            ConditionalTerminationCondition.satisfiedCondition();
             return 0;
         }
         return super.getNormalizedFitness(chromosome);
