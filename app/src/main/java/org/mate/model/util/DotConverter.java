@@ -122,8 +122,8 @@ public final class DotConverter {
 
         builder.append("strict digraph g {\n");
         builder.append(toDotNodes(guiModel));
-        builder.append(toDotEdges(guiModel, keys));
-        builder.append(toDotLegend(keys));
+        builder.append(toDotEdgesFinal(guiModel, keys));
+        builder.append(toDotFinalLegend(keys));
         builder.append("}\n");
 
         return builder.toString();
@@ -148,6 +148,12 @@ public final class DotConverter {
         return builder.toString();
     }
 
+    /**
+     * Creates a string representation of the screen states for a dot graph.
+     *
+     * @param guiModel the gui model containing all screen states.
+     * @return A string representation for the nodes of the dot graph.
+     */
     private static String toDotNodes(IGUIModel guiModel) {
         StringBuilder builder = new StringBuilder();
 
@@ -172,6 +178,41 @@ public final class DotConverter {
         return builder.toString();
     }
 
+    /**
+     * Creates a string representation of the edges for a dot graph of the final model.
+     *
+     * @param guiModel the gui model containing all edges
+     * @param keys A list of keys from {@link DotConverter#recordedCases}.
+     * @return A string representation of all
+     */
+    private static String toDotEdgesFinal(IGUIModel guiModel, List<Integer> keys) {
+        StringBuilder builder = new StringBuilder();
+        Set<Action>[] actionSet = new Set[keys.size()];
+
+        for (int i = 0;  i < actionSet.length; i++) {
+            TestCase testCase = recordedCases.get(keys.get(i));
+            assert testCase != null;
+
+            actionSet[i] = new HashSet<>(testCase.getEventSequence());
+        }
+
+        for (Edge edge : guiModel.getEdges()) {
+            String color = getEdgeColor(edge, actionSet);
+
+            builder.append(toDotEdge(edge, color, "black"));
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Creates a string representation of all edges for a given gui model.
+     * The edges for a highlighting a certain test case.
+     *
+     * @param guiModel contains the edges.
+     * @param testCase contains the edges which will be highlighted.
+     * @return A string representation for the edges in the dot graph.
+     */
     private static String toDotEdges(IGUIModel guiModel, TestCase testCase) {
         StringBuilder builder = new StringBuilder();
         Set<Action> actionSet = new HashSet<>(testCase.getEventSequence());
@@ -192,26 +233,14 @@ public final class DotConverter {
         return builder.toString();
     }
 
-    private static String toDotEdges(IGUIModel guiModel, List<Integer> keys) {
-        StringBuilder builder = new StringBuilder();
-        Set<Action>[] actionSet = new Set[keys.size()];
-
-        for (int i = 0;  i < actionSet.length; i++) {
-            TestCase testCase = recordedCases.get(keys.get(i));
-            assert testCase != null;
-
-            actionSet[i] = new HashSet<>(testCase.getEventSequence());
-        }
-
-        for (Edge edge : guiModel.getEdges()) {
-            String color = getEdgeColor(edge, actionSet);
-
-            builder.append(toDotEdge(edge, color, "black"));
-        }
-
-        return builder.toString();
-    }
-
+    /**
+     * Creates a string representation of a single edge in the dot graph.
+     *
+     * @param edge The edge which is converted into a string representation.
+     * @param edgeColor The color of the edge in the dot graph.
+     * @param fontcolor The color of the tag assigned to the edge.
+     * @return The string representation of the edge.
+     */
     private static String toDotEdge(Edge edge, String edgeColor, String fontcolor) {
         StringBuilder builder = new StringBuilder();
 
@@ -235,6 +264,16 @@ public final class DotConverter {
         return builder.toString();
     }
 
+    /**
+     * Determines the colors an edge contains for the final model.
+     * An edge can be used by more than one testcase, therefore this method can highlight it with
+     * different colors.
+     *
+     * @param edge The edge for which the color is calculated.
+     * @param actionsSets A set of actions. If the set contains the respective edge, the edge is
+     *                    colored by a color assigned to the actions.
+     * @return A string containing all colors for this edge.
+     */
     private static String getEdgeColor(Edge edge, Set<Action>[] actionsSets) {
         StringBuilder colorOfEdge = new StringBuilder();
 
@@ -252,14 +291,20 @@ public final class DotConverter {
         } else {
             colorOfEdge.deleteCharAt(colorOfEdge.length() - 1);
 
-            // With this the dot graph doesn't draw multiple lines
+            // Without this the dot graph draws multiple edges instead of one
             colorOfEdge.append(":black;0.001");
         }
 
         return colorOfEdge.toString();
     }
 
-    private static String toDotLegend(List<Integer> keys) {
+    /**
+     * Creates the string representation for the legend in the final dot graph
+     *
+     * @param keys The keys for the highlighted testcases. The legend shows the color of those.
+     * @return The legend as a string representation for dot.
+     */
+    private static String toDotFinalLegend(List<Integer> keys) {
         StringBuilder builder = new StringBuilder();
 
         builder.append("subgraph cluster_01 { \n \t label = \"Legend\";\n \tshape = rectangle;\n" +
@@ -281,7 +326,7 @@ public final class DotConverter {
             builder.append(id);
             builder.append("2 [label=\"Testcase ");
             builder.append(id);
-            builder.append("\" color=\"");
+            builder.append("\", color=\"");
             builder.append(color);
             builder.append("\"] \n\t");
         }
