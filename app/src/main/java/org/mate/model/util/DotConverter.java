@@ -15,9 +15,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,7 +39,7 @@ public final class DotConverter {
     private static int counter = 0;
 
     // A collection of testcases for the final dot graph
-    private static List<TestCase> recordedCases = new ArrayList<>();
+    private static final Map<Integer, TestCase> recordedCases = new HashMap<>();
 
     // List of 25 colors to color the test cases
     private static final String[] colors = {
@@ -78,7 +80,7 @@ public final class DotConverter {
         String dotFileContent = toDOT(guiModel, testCase);
 
         if (Arrays.stream(Properties.TESTCASES_HIGHLIGHTED()).anyMatch(x -> x == counter)) {
-            recordedCases.add(testCase);
+            recordedCases.put(counter, testCase);
         }
 
         convert(dotFileName, dotFileContent);
@@ -112,10 +114,16 @@ public final class DotConverter {
 
         StringBuilder builder = new StringBuilder();
 
+        /*
+         * The keys of recordedCases are saved in this list, so that the order of the key set
+         * doesn't change between the two functions toDotEdges(...) and toDotLegend(...)
+         */
+        List<Integer> keys = new ArrayList<>(recordedCases.keySet());
+
         builder.append("strict digraph g {\n");
         builder.append(toDotNodes(guiModel));
-        builder.append(toDotEdges(guiModel));
-        builder.append(toDotLegend());
+        builder.append(toDotEdges(guiModel, keys));
+        builder.append(toDotLegend(keys));
         builder.append("}\n");
 
         return builder.toString();
@@ -167,24 +175,32 @@ public final class DotConverter {
     private static String toDotEdges(IGUIModel guiModel, TestCase testCase) {
         StringBuilder builder = new StringBuilder();
         Set<Action> actionSet = new HashSet<>(testCase.getEventSequence());
+        MATE.log("Get Edges set: " + guiModel.getEdges().size());
 
         for (Edge edge : guiModel.getEdges()) {
+            String edgeString = "";
+
             if (actionSet.contains(edge.getAction())) {
-                toDotEdge(edge, "tomato", "tomato");
+                edgeString = toDotEdge(edge, "tomato", "tomato");
             } else {
-                toDotEdge(edge, "black", "black");
+                edgeString = toDotEdge(edge, "black", "black");
             }
+
+            builder.append(edgeString);
         }
 
         return builder.toString();
     }
 
-    private static String toDotEdges(IGUIModel guiModel) {
+    private static String toDotEdges(IGUIModel guiModel, List<Integer> keys) {
         StringBuilder builder = new StringBuilder();
-        Set<Action>[] actionSet = new Set[recordedCases.size()];
+        Set<Action>[] actionSet = new Set[keys.size()];
 
         for (int i = 0;  i < actionSet.length; i++) {
-            actionSet[i] = new HashSet<>(recordedCases.get(i).getEventSequence());
+            TestCase testCase = recordedCases.get(keys.get(i));
+            assert testCase != null;
+
+            actionSet[i] = new HashSet<>(testCase.getEventSequence());
         }
 
         for (Edge edge : guiModel.getEdges()) {
@@ -243,28 +259,29 @@ public final class DotConverter {
         return colorOfEdge.toString();
     }
 
-    private static String toDotLegend() {
+    private static String toDotLegend(List<Integer> keys) {
         StringBuilder builder = new StringBuilder();
 
         builder.append("subgraph cluster_01 { \n \t label = \"Legend\";\n \tshape = rectangle;\n" +
                 "\tcolor = black;\n\t");
 
-        for (TestCase testcase : recordedCases) {
-            builder.append('\"');
-            builder.append(testcase.getId());
-            builder.append("1\" [style=invis]\n\t\"");
-            builder.append(testcase.getId());
-            builder.append("2\" [style=invis]\n\t");
+        for (Integer integer : keys) {
+            builder.append(integer);
+            builder.append("1 [style=invis]\n\t");
+            builder.append(integer);
+            builder.append("2 [style=invis]\n\t");
         }
 
         for (int i = 0; i < recordedCases.size(); i++) {
-            String id = recordedCases.get(i).getId();
+            int id = keys.get(i);
             String color = i < colors.length ? colors[i] : "black";
 
             builder.append(id);
             builder.append("1 -> ");
             builder.append(id);
-            builder.append("2 [color=\"");
+            builder.append("2 [label=\"Testcase ");
+            builder.append(id);
+            builder.append("\" color=\"");
             builder.append(color);
             builder.append("\"] \n\t");
         }
