@@ -642,10 +642,8 @@ public class EnvironmentManager {
 
     /**
      * Requests the drawing of the graph.
-     *
-     * @param raw Whether drawing the raw graph or target and visited vertices should be marked.
      */
-    public void drawGraph(boolean raw) {
+    public void drawGraph() {
 
         MATE.log_acc("Drawing graph!");
 
