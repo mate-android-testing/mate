@@ -60,7 +60,7 @@ public final class DotConverter {
         assert guiModel != null;
 
         String dotFileName = "Final_Model.dot";
-        String dotFileContent = toDOT(guiModel);
+        String dotFileContent = toDOTFinal(guiModel);
 
         convert(dotFileName, dotFileContent);
     }
@@ -88,6 +88,12 @@ public final class DotConverter {
         counter++;
     }
 
+    /**
+     * Writes a dot file.
+     *
+     * @param dotFileName the name of the file.
+     * @param dotFileContent content of the file that hopefully fulfills the dot syntax
+     */
     private static void convert(String dotFileName, String dotFileContent) {
         File dotDir = new File(DOT_DIR);
 
@@ -109,7 +115,13 @@ public final class DotConverter {
         }
     }
 
-    private static String toDOT(IGUIModel guiModel) {
+    /**
+     * Converts the final gui model into a string representation of a dot graph.
+     *
+     * @param guiModel the model which is converted into a state diagram.
+     * @return A string representation of the dot graph.
+     */
+    private static String toDOTFinal(IGUIModel guiModel) {
         assert guiModel != null;
 
         StringBuilder builder = new StringBuilder();
@@ -216,7 +228,6 @@ public final class DotConverter {
     private static String toDotEdges(IGUIModel guiModel, TestCase testCase) {
         StringBuilder builder = new StringBuilder();
         Set<Action> actionSet = new HashSet<>(testCase.getEventSequence());
-        MATE.log("Get Edges set: " + guiModel.getEdges().size());
 
         for (Edge edge : guiModel.getEdges()) {
             String edgeString = "";
@@ -337,16 +348,7 @@ public final class DotConverter {
     }
 
     /**
-     * Fetches the screenshots into the graph file.
-     */
-    public static void fetchScreenshots() {
-        String dir = GRAPH_DIR + SCREENSHOTS_DIR;
-
-        Registry.getEnvironmentManager().fetchScreenshots(dir, GRAPH_DIR);
-    }
-
-    /**
-     * Takes a screenshot.
+     * Takes a screenshot and saves it in the apps folder.
      *
      * @param state Name of the screenshot.
      */

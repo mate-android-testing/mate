@@ -101,7 +101,8 @@ public class UIAbstractionLayer {
         lastScreenStateNumber++;
 
         // Save screenshot
-        if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+        if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
+                && Properties.DOT_WITH_SCREENSHOTS()) {
             DotConverter.takeScreenshot(id);
         }
 
@@ -552,7 +553,8 @@ public class UIAbstractionLayer {
         lastScreenStateNumber++;
 
         //Take a screenshot of the new screen state
-        if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+        if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
+                && Properties.DOT_WITH_SCREENSHOTS()) {
             DotConverter.takeScreenshot(id);
         }
 

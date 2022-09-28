@@ -1336,24 +1336,4 @@ public class EnvironmentManager {
 
         return success;
     }
-
-    /**
-     * Fetches the screenshot from a source directory to a certain target directory.
-     *
-     * @param sourceDir The source directory.
-     * @param targetDir The target directory.
-     * @return {@code true}, if the operation was successful.
-     */
-    public boolean fetchScreenshots(String sourceDir, String targetDir) {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_screenshots")
-                .withParameter("deviceId", emulator)
-                .withParameter("sourceDir", sourceDir)
-                .withParameter("targetDir", targetDir);
-
-        Message response = sendMessage(messageBuilder.build());
-        boolean success = Boolean.parseBoolean(response.getParameter("response"));
-        MATE.log("Fetching screenshots from emulator succeeded: " + success);
-
-        return success;
-    }
 }
