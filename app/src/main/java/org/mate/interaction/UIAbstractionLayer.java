@@ -21,6 +21,7 @@ import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
@@ -145,8 +146,11 @@ public class UIAbstractionLayer {
                     retry = true;
                     retryCount += 1;
                     continue;
+                } else if (e instanceof MateInterruptedException) {
+                    // This hand-crafted 'interrupt' exception signals the end of the timeout run.
+                    throw e;
                 }
-                Log.e("acc", "", e);
+                Log.e("acc", "Unexpected exception during action execution: ", e);
             }
         }
         return FAILURE_UNKNOWN;
