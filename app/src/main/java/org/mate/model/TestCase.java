@@ -9,14 +9,17 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.genetic.chromosome.Chromosome;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
+import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
@@ -381,6 +384,11 @@ public class TestCase {
 
             return resultingTc;
         } finally {
+            // TODO ugly hack that ensures that coverage+fitness is stored before TestCase#finish is called
+            IChromosome<TestCase> chromosome = new Chromosome<>(resultingTc);
+            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
+            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+
             // serialize test case, record test case stats, etc.
             resultingTc.finish();
         }
