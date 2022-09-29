@@ -1648,6 +1648,7 @@ public class DeviceMgr {
      * the external storage.
      */
     private void sendBroadcastToTracer() {
+        MATE.log_debug("Sending broadcast...");
         Intent intent = new Intent("STORE_TRACES");
         intent.setComponent(new ComponentName(Registry.getPackageName(),
                 "de.uni_passau.fim.auermich.tracer.Tracer"));
