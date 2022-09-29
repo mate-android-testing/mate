@@ -1800,6 +1800,8 @@ public class DeviceMgr {
      */
     private boolean waitForTracer() {
 
+        MATE.log_debug("Waiting for info.txt/traces.txt...");
+
         boolean tracesFileExists = tracesFileExists();
         boolean infoFileExists = infoFileExists();
 
@@ -1857,6 +1859,7 @@ public class DeviceMgr {
             }
         }
 
+        MATE.log_debug("Waiting for info.txt/traces.txt completed!");
         return true;
     }
 
