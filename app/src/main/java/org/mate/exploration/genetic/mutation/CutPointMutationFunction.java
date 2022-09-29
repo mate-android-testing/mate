@@ -84,17 +84,16 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
                 }
             }
         } finally {
+            if (!isTestSuiteExecution) {
+                /*
+                 * If we deal with a test suite execution, the storing of coverage
+                 * and fitness data is handled by the test suite mutation operator itself.
+                 */
+                FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
+                CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
+                CoverageUtils.logChromosomeCoverage(mutatedChromosome);
+            }
             mutant.finish();
-        }
-
-        if (!isTestSuiteExecution) {
-            /*
-             * If we deal with a test suite execution, the storing of coverage
-             * and fitness data is handled by the test suite mutation operator itself.
-             */
-            FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
-            CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         }
 
         return mutatedChromosome;
