@@ -33,12 +33,12 @@ public final class TestCaseSerializer {
     private static int replayCounter = 0;
 
     /**
-     * Serializes a given {@link TestCase} to XML and stores it on the
-     * app-internal storage of MATE.
+     * Serializes a given {@link TestCase} to XML and stores it on the app-internal storage of MATE.
      *
      * @param testCase The test case to be serialized and stored.
      */
     public static void serializeTestCase(TestCase testCase) {
+
         MATE.log("Serializing TestCase " + recordCounter);
 
         // create the test-cases folder if not yet present
@@ -62,33 +62,9 @@ public final class TestCaseSerializer {
         String testCaseXML = xstream.toXML(testCase);
 
         try (Writer fileWriter = new FileWriter(testCaseFile)) {
-
             fileWriter.write(testCaseXML);
             fileWriter.flush();
-
-            // fetch serialized test case from emulator + clean up
-            boolean success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
-                    "TestCase" + recordCounter + ".xml");
-
-            // retry on failure
-            if (!success) {
-                MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-                MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
-                MATE.log("Retry serialization...!");
-                fileWriter.write(testCaseXML);
-                fileWriter.flush();
-                success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
-                        "TestCase" + recordCounter + ".xml");
-            }
-
-            if (!success) {
-                MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-                MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
-                MATE.log("Serializing TestCase " + recordCounter + " failed!");
-                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
-            }
         } catch (IOException e) {
-            // TODO: we could try to write to external storage as a fallback if it is a memory issue
 
             MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
             MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
@@ -99,26 +75,37 @@ public final class TestCaseSerializer {
 
                 fileWriter.write(testCaseXML);
                 fileWriter.flush();
-
-                // fetch serialized test case from emulator + clean up
-                boolean success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
-                        "TestCase" + recordCounter + ".xml");
-
-                if (!success) {
-                    MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-                    MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
-                    MATE.log("Serializing TestCase " + recordCounter + " failed!");
-                    throw new IllegalStateException(e);
-                }
-            } catch (IOException ioe) {
-                MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-                MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
+            } catch (IOException e1) {
                 MATE.log("Serializing TestCase " + recordCounter + " failed!");
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!", e1);
             }
         }
 
-        // update counter
+        // fetch serialized test case from emulator + clean up
+        boolean success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
+                "TestCase" + recordCounter + ".xml");
+
+        // retry on failure
+        if (!success) {
+            MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+            MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
+            MATE.log("Retry fetching test case...!");
+
+            /*
+            * Typically, one should wait a couple of seconds before re-sending the request.
+            * However, to avoid dealing with a possible interrupt, we sleep on MATE-Server side.
+             */
+            success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
+                    "TestCase" + recordCounter + ".xml");
+        }
+
+        if (!success) {
+            MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
+            MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
+            MATE.log("Serializing TestCase " + recordCounter + " failed!");
+            throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
+        }
+
         recordCounter++;
     }
 
