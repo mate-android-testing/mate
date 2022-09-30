@@ -31,8 +31,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
 import static org.mate.interaction.action.ActionResult.SUCCESS;
 import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
 
@@ -148,12 +146,13 @@ public class UIAbstractionLayer {
                     continue;
                 } else if (e instanceof MateInterruptedException) {
                     // This hand-crafted 'interrupt' exception signals the end of the timeout run.
+                    MATE.log_debug("Interrupt during executeAction()!");
                     throw e;
                 }
                 Log.e("acc", "Unexpected exception during action execution: ", e);
             }
         }
-        return FAILURE_UNKNOWN;
+        throw new IllegalStateException("Couldn't execute action: " + action);
     }
 
     /**
@@ -246,9 +245,7 @@ public class UIAbstractionLayer {
 
         // if current package is null, emulator has crashed/closed
         if (currentPackageName == null) {
-            MATE.log_acc("CURRENT PACKAGE: NULL");
-            return FAILURE_EMULATOR_CRASH;
-            // TODO: what to do when the emulator crashes?
+            throw new IllegalStateException("Couldn't retrieve package name of current state!");
         }
 
         ActionResult result;
@@ -375,8 +372,13 @@ public class UIAbstractionLayer {
                     retry = true;
                     retryCount += 1;
                     continue;
+                } else if (e instanceof MateInterruptedException) {
+                    // This hand-crafted 'interrupt' exception signals the end of the timeout run.
+                    MATE.log_debug("Interrupt during clearScreen()!");
+                    throw e;
                 }
-                Log.e("acc", "", e);
+                Log.e("acc", "Unexpected exception during clearing screen: ", e);
+                throw e;
             }
         }
         return screenState;

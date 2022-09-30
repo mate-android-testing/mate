@@ -422,9 +422,6 @@ public class TestCase {
                 }
             case SUCCESS_OUTBOUND:
                 return false;
-            case FAILURE_UNKNOWN:
-            case FAILURE_EMULATOR_CRASH:
-                return false;
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
