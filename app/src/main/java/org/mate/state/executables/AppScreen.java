@@ -5,6 +5,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.StaleObjectException;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -244,18 +245,23 @@ public class AppScreen {
              * In order to retrieve the hint of a widget, we have to clear the
              * input, and this in turn should display the hint if we are lucky.
              */
+            try {
+                // save original input
+                String textBeforeClear = Objects.toString(uiObject.getText(), "");
 
-            // save original input
-            String textBeforeClear = Objects.toString(uiObject.getText(), "");
+                // reset input and hope that this causes a hint to be set
+                uiObject.setText("");
+                String textAfterClear = Objects.toString(uiObject.getText(), "");
 
-            // reset input and hope that this causes a hint to be set
-            uiObject.setText("");
-            String textAfterClear = Objects.toString(uiObject.getText(), "");
+                // restore original input
+                uiObject.setText(textBeforeClear);
 
-            // restore original input
-            uiObject.setText(textBeforeClear);
-
-            hint = textAfterClear;
+                hint = textAfterClear;
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                MATE.log_warn("Couldn't derive hint for widget: " + widget);
+            }
         }
 
         return hint;
