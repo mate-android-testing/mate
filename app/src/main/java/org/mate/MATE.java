@@ -158,6 +158,8 @@ public class MATE {
                 Registry.getEnvironmentManager().drawGraph();
             }
 
+            MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());
+
             try {
                 Registry.getEnvironmentManager().releaseEmulator();
                 Registry.unregisterEnvironmentManager();
