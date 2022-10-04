@@ -31,9 +31,9 @@ public final class DotConverter {
     private static final String DOT_DIR = "/data/data/org.mate/gui-model";
 
     // the location where the screenshots are stored
-    private static final String SCREENSHOTS_DIR = "/screenshots";
+    private static final String SCREENSHOTS_DIR = "screenshots";
 
-    private static final String GRAPH_DIR = "/graphs";
+    private static final String GRAPH_DIR = "dot";
 
     // an internal counter to enumerate the dot files
     private static int counter = 0;
@@ -176,8 +176,10 @@ public final class DotConverter {
             if (!Properties.DOT_WITH_SCREENSHOTS()) {
                 builder.append(String.format(Locale.getDefault(), "%s\"", stateId));
             } else {
-                builder.append("\", image=\".");
+                builder.append("\", image=\"../");
                 builder.append(SCREENSHOTS_DIR);
+                builder.append('/');
+                builder.append(GRAPH_DIR);
                 builder.append('/');
                 builder.append(stateId);
                 builder.append(".png\"");
@@ -354,7 +356,7 @@ public final class DotConverter {
      */
     public static void takeScreenshot(String state) {
         if (Properties.DOT_WITH_SCREENSHOTS()) {
-            String screenshotDir = GRAPH_DIR + SCREENSHOTS_DIR;
+            String screenshotDir = GRAPH_DIR;
             File dir = new File(screenshotDir);
 
             if (!dir.exists()) {
