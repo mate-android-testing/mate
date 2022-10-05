@@ -126,16 +126,24 @@ public final class DotConverter {
 
         StringBuilder builder = new StringBuilder();
 
-        /*
-         * The keys of recordedCases are saved in this list, so that the order of the key set
-         * doesn't change between the two functions toDotEdges(...) and toDotLegend(...)
-         */
-        List<Integer> keys = new ArrayList<>(recordedCases.keySet());
-
-        builder.append("strict digraph g {\n");
+        builder.append("digraph g {\n");
         builder.append(toDotNodes(guiModel));
-        builder.append(toDotEdgesFinal(guiModel, keys));
-        builder.append(toDotFinalLegend(keys));
+
+        if (recordedCases.isEmpty()) {
+            builder.append(toDotEdges(guiModel, null));
+
+        } else {
+
+            /*
+             * The keys of recordedCases are saved in this list, so that the order of the key set
+             * doesn't change between the two functions toDotEdges(...) and toDotLegend(...)
+             */
+            List<Integer> keys = new ArrayList<>(recordedCases.keySet());
+
+            builder.append(toDotEdgesFinal(guiModel, keys));
+            builder.append(toDotFinalLegend(keys));
+        }
+
         builder.append("}\n");
 
         return builder.toString();
@@ -152,7 +160,7 @@ public final class DotConverter {
     private static String toDOT(IGUIModel guiModel, TestCase testCase) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("strict digraph g {\n");
+        builder.append("digraph g {\n");
         builder.append(toDotNodes(guiModel));
         builder.append(toDotEdges(guiModel, testCase));
         builder.append("}\n");
@@ -178,8 +186,6 @@ public final class DotConverter {
             } else {
                 builder.append("\", image=\"../");
                 builder.append(SCREENSHOTS_DIR);
-                builder.append('/');
-                builder.append(GRAPH_DIR);
                 builder.append('/');
                 builder.append(stateId);
                 builder.append(".png\"");
@@ -212,8 +218,9 @@ public final class DotConverter {
 
         for (Edge edge : guiModel.getEdges()) {
             String color = getEdgeColor(edge, actionSet);
+            String edgeString = edge.getSource().getId() + " -> " + edge.getTarget().getId();
 
-            builder.append(toDotEdge(edge, color, "black"));
+            builder.append(toDotEdge(edgeString, edge.getAction().toShortString(), color, "black"));
         }
 
         return builder.toString();
@@ -229,18 +236,47 @@ public final class DotConverter {
      */
     private static String toDotEdges(IGUIModel guiModel, TestCase testCase) {
         StringBuilder builder = new StringBuilder();
-        Set<Action> actionSet = new HashSet<>(testCase.getEventSequence());
+        Set<Action> actionSet = testCase == null
+                ? new HashSet<>() : new HashSet<>(testCase.getEventSequence());
+        Map<String, StringBuilder> highlightedEdges = new HashMap<>();
+        Map<String, StringBuilder> normalEdges = new HashMap<>();
 
         for (Edge edge : guiModel.getEdges()) {
-            String edgeString = "";
+            String edgeString = edge.getSource().getId() + "->" + edge.getTarget().getId();
 
             if (actionSet.contains(edge.getAction())) {
-                edgeString = toDotEdge(edge, "tomato", "tomato");
+                if (highlightedEdges.containsKey(edgeString)) {
+                    StringBuilder actions = highlightedEdges.get(edgeString);
+                    actions.append("\\n<");
+                    actions.append(edge.getAction().toShortString());
+                    actions.append('>');
+                } else {
+                    StringBuilder actions = new StringBuilder("<");
+                    actions.append(edge.getAction().toShortString());
+                    actions.append('>');
+                    highlightedEdges.put(edgeString, actions);
+                }
             } else {
-                edgeString = toDotEdge(edge, "black", "black");
+                if (normalEdges.containsKey(edgeString)) {
+                    StringBuilder actions = normalEdges.get(edgeString);
+                    actions.append("\\n<");
+                    actions.append(edge.getAction().toShortString());
+                    actions.append('>');
+                } else {
+                    StringBuilder actions = new StringBuilder("<");
+                    actions.append(edge.getAction().toShortString());
+                    actions.append('>');
+                    normalEdges.put(edgeString, actions);
+                }
             }
+        }
 
-            builder.append(edgeString);
+        for (String elem : highlightedEdges.keySet()) {
+            builder.append(toDotEdge(elem, highlightedEdges.get(elem).toString(), "tomato", "tomato"));
+        }
+
+        for (String elem : normalEdges.keySet()) {
+            builder.append(toDotEdge(elem, normalEdges.get(elem).toString(),"black", "black"));
         }
 
         return builder.toString();
@@ -249,20 +285,24 @@ public final class DotConverter {
     /**
      * Creates a string representation of a single edge in the dot graph.
      *
-     * @param edge The edge which is converted into a string representation.
+     * @param edge The string representation of an edge without attributes (S -> T)
+     * @param actions The string representation of all actions that use the edge
      * @param edgeColor The color of the edge in the dot graph.
      * @param fontcolor The color of the tag assigned to the edge.
      * @return The string representation of the edge.
      */
-    private static String toDotEdge(Edge edge, String edgeColor, String fontcolor) {
+    private static String toDotEdge(String edge, String actions, String edgeColor, String fontcolor) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
+        /*builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
                 edge.getSource().getId(),
                 edge.getTarget().getId(),
-                edge.getAction().toShortString()));
+                edge.getAction().toShortString()));*/
 
-        builder.append(", color = \"");
+        builder.append(edge);
+        builder.append(" [label=\"");
+        builder.append(actions);
+        builder.append("\", color = \"");
         builder.append(edgeColor);
         builder.append("\", fontcolor = \"");
         builder.append(fontcolor);
@@ -354,16 +394,9 @@ public final class DotConverter {
      *
      * @param state Name of the screenshot.
      */
-    public static void takeScreenshot(String state) {
+    public static void takeScreenshot(String state, String packageName) {
         if (Properties.DOT_WITH_SCREENSHOTS()) {
-            String screenshotDir = GRAPH_DIR;
-            File dir = new File(screenshotDir);
-
-            if (!dir.exists()) {
-                MATE.log("Creating screenshot folder succeeded: " + dir.mkdir());
-            }
-
-            Registry.getEnvironmentManager().takeScreenshot(screenshotDir, state);
+            Registry.getEnvironmentManager().takeScreenshot(packageName, state);
         }
     }
 

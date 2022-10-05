@@ -103,7 +103,7 @@ public class UIAbstractionLayer {
         // Save screenshot
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_WITH_SCREENSHOTS()) {
-            DotConverter.takeScreenshot(id);
+            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
         }
 
         guiModel = new FSMModel(lastScreenState, packageName);
@@ -555,7 +555,7 @@ public class UIAbstractionLayer {
         //Take a screenshot of the new screen state
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_WITH_SCREENSHOTS()) {
-            DotConverter.takeScreenshot(id);
+            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
         }
 
         return screenState;
