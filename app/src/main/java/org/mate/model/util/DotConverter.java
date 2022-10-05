@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -208,6 +209,7 @@ public final class DotConverter {
     private static String toDotEdgesFinal(IGUIModel guiModel, List<Integer> keys) {
         StringBuilder builder = new StringBuilder();
         Set<Action>[] actionSet = new Set[keys.size()];
+        int edgeCounter = 0;
 
         for (int i = 0;  i < actionSet.length; i++) {
             TestCase testCase = recordedCases.get(keys.get(i));
@@ -218,9 +220,11 @@ public final class DotConverter {
 
         for (Edge edge : guiModel.getEdges()) {
             String color = getEdgeColor(edge, actionSet);
-            String edgeString = edge.getSource().getId() + " -> " + edge.getTarget().getId();
+            String source = edge.getSource().getId();
+            String target = edge.getTarget().getId();
 
-            builder.append(toDotEdge(edgeString, edge.getAction().toShortString(), color, "black"));
+            builder.append(toDotEdge(source, target, edge.getAction().toShortString(), color, "lightgray", edgeCounter));
+            edgeCounter++;
         }
 
         return builder.toString();
@@ -238,23 +242,27 @@ public final class DotConverter {
         StringBuilder builder = new StringBuilder();
         Set<Action> actionSet = testCase == null
                 ? new HashSet<>() : new HashSet<>(testCase.getEventSequence());
-        Map<String, StringBuilder> highlightedEdges = new HashMap<>();
-        Map<String, StringBuilder> normalEdges = new HashMap<>();
+        Map<String, StringBuilder[]> dotEdges = new HashMap<>();
+        int edgeCounter = 0;
 
         for (Edge edge : guiModel.getEdges()) {
             if (actionSet.contains(edge.getAction())) {
-                addToMap(highlightedEdges, edge);
+                addToMap(dotEdges, edge, "tomato", "tomato");
             } else {
-                addToMap(normalEdges, edge);
+                addToMap(dotEdges, edge, "black", "lightgray");
             }
         }
 
-        for (String elem : highlightedEdges.keySet()) {
-            builder.append(toDotEdge(elem, highlightedEdges.get(elem).toString(), "tomato", "tomato"));
-        }
+        for (String elem : dotEdges.keySet()) {
+            StringBuilder actions = dotEdges.get(elem)[0];
+            StringBuilder source = dotEdges.get(elem)[1];
+            StringBuilder target = dotEdges.get(elem)[2];
+            StringBuilder edgeColor = dotEdges.get(elem)[3];
+            StringBuilder fillColor = dotEdges.get(elem)[4];
 
-        for (String elem : normalEdges.keySet()) {
-            builder.append(toDotEdge(elem, normalEdges.get(elem).toString(),"black", "black"));
+            builder.append(toDotEdge(source.toString(), target.toString(), actions.toString(),
+                    edgeColor.toString(), fillColor.toString(), edgeCounter));
+            edgeCounter++;
         }
 
         return builder.toString();
@@ -265,51 +273,86 @@ public final class DotConverter {
      *
      * @param map The map which is used to save a string representation.
      * @param edge The edge saved in the map.
+     * @param edgeColor Color of the edge.
+     * @param fillColor Color of the tag assigned to the edge.
      */
-    private static void addToMap(Map<String, StringBuilder> map, Edge edge) {
-        String edgeString = edge.getSource().getId() + "->" + edge.getTarget().getId();
+    private static void addToMap(Map<String, StringBuilder[]> map, Edge edge, String edgeColor, String fillColor) {
+        String edgeString = edge.getSource().getId() + "/" + edge.getTarget().getId()
+                + "/" + edgeColor + "/" + fillColor;
 
         if (map.containsKey(edgeString)) {
-            StringBuilder actions = map.get(edgeString);
+            StringBuilder actions = map.get(edgeString)[0];
             actions.append("\\n<");
             actions.append(edge.getAction().toShortString());
             actions.append('>');
         } else {
+            StringBuilder[] strings = new StringBuilder[5];
+
             StringBuilder actions = new StringBuilder("<");
             actions.append(edge.getAction().toShortString());
             actions.append('>');
-            map.put(edgeString, actions);
+
+            strings[0] = actions;
+            strings[1] = new StringBuilder(edge.getSource().getId());
+            strings[2] = new StringBuilder(edge.getTarget().getId());
+            strings[3] = new StringBuilder(edgeColor);
+            strings[4] = new StringBuilder(fillColor);
+
+            map.put(edgeString, strings);
         }
     }
 
     /**
      * Creates a string representation of a single edge in the dot graph.
      *
-     * @param edge The string representation of an edge without attributes (S -> T)
+     * @param source The id of the source node
+     * @param target The id of the target node
      * @param actions The string representation of all actions that use the edge
      * @param edgeColor The color of the edge in the dot graph.
-     * @param fontcolor The color of the tag assigned to the edge.
+     * @param fillColor The color of the tag assigned to the edge.
+     * @param edgeCounter An unique number for this edge
      * @return The string representation of the edge.
      */
-    private static String toDotEdge(String edge, String actions, String edgeColor, String fontcolor) {
+    private static String toDotEdge(String source, String target, String actions, String edgeColor, String fillColor,
+                                    int edgeCounter) {
+        String edgeNode = "E" + edgeCounter;
         StringBuilder builder = new StringBuilder();
 
-        /*builder.append(String.format(Locale.getDefault(), "%s -> %s [label=\"<%s>\"",
-                edge.getSource().getId(),
-                edge.getTarget().getId(),
-                edge.getAction().toShortString()));*/
-
-        builder.append(edge);
+        builder.append(edgeNode);
         builder.append(" [label=\"");
         builder.append(actions);
-        builder.append("\", color = \"");
-        builder.append(edgeColor);
-        builder.append("\", fontcolor = \"");
-        builder.append(fontcolor);
+        builder.append("\", fontcolor = \"black\", shape=\"box\", color=\"white\", style = \"filled\", fillcolor = \"");
+        builder.append(fillColor);
         builder.append('\"');
 
         if (Properties.DOT_WITH_SCREENSHOTS()) {
-            builder.append(", fontsize=50, arrowsize=4, penwidth=5");
+            builder.append(", fontsize=50");
+        }
+
+        builder.append("];\n");
+
+        builder.append(source);
+        builder.append("->");
+        builder.append(edgeNode);
+        builder.append(" [label=\"\", arrowhead=none, color=\"");
+        builder.append(edgeColor);
+        builder.append('\"');
+
+        if (Properties.DOT_WITH_SCREENSHOTS()) {
+            builder.append(", fontsize=50, arrowsize=4, penwidth=5, minlen=5");
+        }
+
+        builder.append("];\n");
+
+        builder.append(edgeNode);
+        builder.append("->");
+        builder.append(target);
+        builder.append(" [label=\"\", color=\"");
+        builder.append(edgeColor);
+        builder.append('\"');
+
+        if (Properties.DOT_WITH_SCREENSHOTS()) {
+            builder.append(", fontsize=50, arrowsize=4, penwidth=5, minlen=5");
         }
 
         builder.append("];\n");
