@@ -242,32 +242,10 @@ public final class DotConverter {
         Map<String, StringBuilder> normalEdges = new HashMap<>();
 
         for (Edge edge : guiModel.getEdges()) {
-            String edgeString = edge.getSource().getId() + "->" + edge.getTarget().getId();
-
             if (actionSet.contains(edge.getAction())) {
-                if (highlightedEdges.containsKey(edgeString)) {
-                    StringBuilder actions = highlightedEdges.get(edgeString);
-                    actions.append("\\n<");
-                    actions.append(edge.getAction().toShortString());
-                    actions.append('>');
-                } else {
-                    StringBuilder actions = new StringBuilder("<");
-                    actions.append(edge.getAction().toShortString());
-                    actions.append('>');
-                    highlightedEdges.put(edgeString, actions);
-                }
+                addToMap(highlightedEdges, edge);
             } else {
-                if (normalEdges.containsKey(edgeString)) {
-                    StringBuilder actions = normalEdges.get(edgeString);
-                    actions.append("\\n<");
-                    actions.append(edge.getAction().toShortString());
-                    actions.append('>');
-                } else {
-                    StringBuilder actions = new StringBuilder("<");
-                    actions.append(edge.getAction().toShortString());
-                    actions.append('>');
-                    normalEdges.put(edgeString, actions);
-                }
+                addToMap(normalEdges, edge);
             }
         }
 
@@ -280,6 +258,28 @@ public final class DotConverter {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * Help method to add a string representation of an edge to a map.
+     *
+     * @param map The map which is used to save a string representation.
+     * @param edge The edge saved in the map.
+     */
+    private static void addToMap(Map<String, StringBuilder> map, Edge edge) {
+        String edgeString = edge.getSource().getId() + "->" + edge.getTarget().getId();
+
+        if (map.containsKey(edgeString)) {
+            StringBuilder actions = map.get(edgeString);
+            actions.append("\\n<");
+            actions.append(edge.getAction().toShortString());
+            actions.append('>');
+        } else {
+            StringBuilder actions = new StringBuilder("<");
+            actions.append(edge.getAction().toShortString());
+            actions.append('>');
+            map.put(edgeString, actions);
+        }
     }
 
     /**
