@@ -42,7 +42,11 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
             probabilities.put(action, weight);
         }
 
-        return fixed(probabilities, 0.5);
+        return toProbabilities(probabilities);
+    }
+
+    protected <T> Map<T, Double> toProbabilities(Map<T, Double> weights) {
+        return fixed(weights, 0.5);
     }
 
     private <T> Map<T, Double> fixed(Map<T, Double> weights, double maxProb) {

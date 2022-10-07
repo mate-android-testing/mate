@@ -14,6 +14,12 @@ public enum Initializer {
             return new StoatProbabilityInitialization(0.6);
         }
     },
+    EVEN_STOAT {
+        @Override
+        public BiFunction<List<Action>, IScreenState, Map<Action, Double>> get() {
+            return new EvenStoatInitializer(0.6);
+        }
+    },
     UNIFORM {
         @Override
         public BiFunction<List<Action>, IScreenState, Map<Action, Double>> get() {
