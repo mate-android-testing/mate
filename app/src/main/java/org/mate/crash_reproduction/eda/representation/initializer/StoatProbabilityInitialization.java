@@ -2,6 +2,7 @@ package org.mate.crash_reproduction.eda.representation.initializer;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
@@ -88,37 +89,7 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
 
     private double getActionWeight(List<Action> prevActions, IScreenState state, UIAction action) {
         // the weight depends on the action type
-        double eventTypeWeight;
-        switch (action.getActionType()) {
-            case DPAD_UP:
-            case DPAD_DOWN:
-            case DPAD_LEFT:
-            case DPAD_RIGHT:
-            case DPAD_CENTER:
-                eventTypeWeight = 0.1;
-                break;
-            case SWIPE_UP:
-            case SWIPE_LEFT:
-            case SWIPE_RIGHT:
-            case DELETE:
-            case SEARCH:
-                eventTypeWeight = 0.5;
-                break;
-            case MENU:
-            case FILL_FORM_AND_SUBMIT:
-            case SWIPE_DOWN:
-                eventTypeWeight = 2;
-                break;
-            case CLICK:
-                eventTypeWeight = 1.5;
-                break;
-            default:
-                eventTypeWeight = 1;
-                break;
-        }
-        if (actionForcesTestToFinish(state, action)) {
-            eventTypeWeight = 0.1;
-        }
+        double eventTypeWeight = actionForcesTestToFinish(state, action) ? 0.1 : getEventTypeWeight(action.getActionType());
 
         int unvisitedChildren = 0;
 
@@ -137,5 +108,30 @@ public class StoatProbabilityInitialization implements BiFunction<List<Action>, 
                 .anyMatch(edge -> edge.getSource().equals(state)
                         && !edge.getTarget().getPackageName().equals(Registry.getPackageName()) // action leads outside the app
                 );
+    }
+
+    protected double getEventTypeWeight(ActionType actionType) {
+        switch (actionType) {
+            case DPAD_UP:
+            case DPAD_DOWN:
+            case DPAD_LEFT:
+            case DPAD_RIGHT:
+            case DPAD_CENTER:
+                return 0.1;
+            case SWIPE_UP:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+            case DELETE:
+            case SEARCH:
+                return 0.5;
+            case MENU:
+            case FILL_FORM_AND_SUBMIT:
+            case SWIPE_DOWN:
+                return 2;
+            case CLICK:
+                return 1.5;
+            default:
+                return 1;
+        }
     }
 }
