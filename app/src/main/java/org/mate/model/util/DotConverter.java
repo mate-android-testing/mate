@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -215,7 +214,7 @@ public final class DotConverter {
             TestCase testCase = recordedCases.get(keys.get(i));
             assert testCase != null;
 
-            actionSet[i] = new HashSet<>(testCase.getEventSequence());
+            actionSet[i] = new HashSet<>(testCase.getActionSequence());
         }
 
         for (Edge edge : guiModel.getEdges()) {
@@ -241,7 +240,7 @@ public final class DotConverter {
     private static String toDotEdges(IGUIModel guiModel, TestCase testCase) {
         StringBuilder builder = new StringBuilder();
         Set<Action> actionSet = testCase == null
-                ? new HashSet<>() : new HashSet<>(testCase.getEventSequence());
+                ? new HashSet<>() : new HashSet<>(testCase.getActionSequence());
         Map<String, EdgeStringContainer> dotEdges = new HashMap<>();
         int edgeCounter = 0;
 
