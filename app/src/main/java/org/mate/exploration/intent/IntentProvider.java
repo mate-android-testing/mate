@@ -74,6 +74,13 @@ public class IntentProvider {
                 .filter(ComponentDescription::hasIntentFilter)
                 .collect(Collectors.toList());
 
+        /*
+        * A dynamic receiver can't be triggered by an explicit intent, thus we need to remove those
+        * receivers from the component list, otherwise getAction() may select a dynamic receiver
+        * as target and fails consequently.
+         */
+        components.removeAll(dynamicReceivers);
+
         MATE.log("Derived the following components: " + components);
         MATE.log("Derived the following system event receivers: " + systemEventReceivers);
         MATE.log("Derived the following dynamic receivers: " + dynamicReceivers);

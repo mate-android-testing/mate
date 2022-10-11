@@ -230,7 +230,7 @@ public class UIAbstractionLayer {
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
 
-            if(Properties.SURROGATE_MODEL()) {
+            if (Properties.SURROGATE_MODEL()) {
                 SurrogateModel surrogateModel = (SurrogateModel) guiModel;
                 Set<String> traces = deviceMgr.getTraces();
                 surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
@@ -269,7 +269,7 @@ public class UIAbstractionLayer {
         // update gui model
         state = toRecordedScreenState(state);
 
-        if(Properties.SURROGATE_MODEL()) {
+        if (Properties.SURROGATE_MODEL()) {
             SurrogateModel surrogateModel = (SurrogateModel) guiModel;
             Set<String> traces = deviceMgr.getTraces();
             surrogateModel.update(lastScreenState, state, action, result, traces);

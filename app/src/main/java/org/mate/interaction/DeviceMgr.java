@@ -35,6 +35,7 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
@@ -44,6 +45,7 @@ import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
 
 import java.io.BufferedReader;
@@ -1547,6 +1549,16 @@ public class DeviceMgr {
      * @return Returns the activities of the AUT.
      */
     public List<String> getActivities() {
+        return Registry.getManifest().getActivities().stream()
+                .map(ComponentDescription::getFullyQualifiedName)
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unused")
+    private List<String> getActivitiesFromPackageManager() {
+
+        // NOTE: This will only retrieve the exported/enabled activities, not necessarily all listed
+        // in the AndroidManifest.xml file!
 
         Instrumentation instrumentation = getInstrumentation();
 
@@ -1559,11 +1571,7 @@ public class DeviceMgr {
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {
-            MATE.log_warn("Couldn't retrieve activity names!");
-            MATE.log_warn(e.getMessage());
-
-            // fallback mechanism
-            return Registry.getEnvironmentManager().getActivityNames();
+            throw new IllegalStateException("Couldn't retrieve activity names!", e);
         }
     }
 
@@ -1594,14 +1602,15 @@ public class DeviceMgr {
             Registry.getEnvironmentManager().clearAppData();
         }
 
-        if (Properties.SURROGATE_MODEL()) {
-            /*
-             * The execution of the 'pm clear' command also drops the runtime permissions of the
-             * AUT, thus we have to re-grant it in order to write the traces properly.
-             */
-            MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
-
-        }
+        /*
+         * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
+         * thus we have to re-grant them in order to allow the tracer to write its traces to the
+         * external storage. Otherwise, one may encounter the following situation: A reset is
+         * performed, dropping the runtime permissions. The execution of the next actions triggers
+         * dumping the traces because the cache limit of the tracer is reached. This operation would
+         * fail consequently.
+         */
+        MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
     }
 
     /**
@@ -1646,68 +1655,62 @@ public class DeviceMgr {
     }
 
     /**
-     * Reads the traces from the external memory and deletes afterwards the info and traces file.
+     * Retrieves a file handle on some file located on the external storage.
      *
-     * @return Returns the set of traces.
+     * @param filename The name of the file.
+     * @return Returns a file handle for the specified file on the external storage.
      */
-    public Set<String> getTraces() {
+    private File getFileFromExternalStorage(final String filename) {
+        final File sdCard = Environment.getExternalStorageDirectory();
+        return new File(sdCard, filename);
+    }
 
-        File sdCard = Environment.getExternalStorageDirectory();
-        File infoFile = new File(sdCard, "info.txt");
+    /**
+     * Retrieves the info.txt file from the external storage.
+     *
+     * @return Returns a file handle on the info.txt file.
+     */
+    private File getInfoFile() {
+        return getFileFromExternalStorage("info.txt");
+    }
 
-        /*
-         * If the AUT has been crashed, the uncaught exception handler takes over and produces both
-         * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
-         * every other condition, there should be no info.txt present and the broadcast is necessary.
-         *
-         */
-        if (!infoFile.exists()) {
-            // triggers the dumping of traces to a file called traces.txt
-            sendBroadcastToTracer();
-        }
+    /**
+     * Retrieves the traces.txt file from the external storage.
+     *
+     * @return Returns a file handle on the traces.txt file.
+     */
+    private File getTracesFile() {
+        return getFileFromExternalStorage("traces.txt");
+    }
 
-        /*
-         * We need to wait until the info.txt file is generated, once it is there, we know that all
-         * traces have been dumped.
-         */
-        while (!infoFile.exists()) {
-            MATE.log_debug("Waiting for info.txt...");
-            Utils.sleep(200);
-        }
+    /**
+     * Checks whether the info.txt file exists.
+     *
+     * @return Returns {@code true} if the info.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean infoFileExists() {
+        return getInfoFile().exists();
+    }
 
-        File traceFile = new File(sdCard, "traces.txt");
+    /**
+     * Checks whether the traces.txt file exists.
+     *
+     * @return Returns {@code true} if the traces.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean tracesFileExists() {
+        return getTracesFile().exists();
+    }
 
-        /*
-         * The method exists() may return 'false' if we try to access it while it is written by
-         * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
-         * only if the info.txt doesn't exist yet, this should never happen.
-         *
-         */
-        if (!traceFile.exists()) {
-            infoFile.delete();
-            throw new IllegalStateException("The file traces.txt doesn't exist!");
-        }
-
-        Set<String> traces = new HashSet<>();
-
-        try (BufferedReader reader
-                     = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile)))) {
-
-            String line = reader.readLine();
-
-            while (line != null) {
-                traces.add(line);
-                line = reader.readLine();
-            }
-
-        } catch (IOException e) {
-            infoFile.delete();
-            throw new IllegalStateException("Couldn't read traces!", e);
-        }
+    /**
+     * Deletes both the traces.txt and info.txt file from the external storage.
+     */
+    private void deleteTraceFiles() {
 
         // delete both files in order that the next action is assigned the correct traces
-        boolean removedTracesFile = traceFile.delete();
-        boolean removedInfoFile = infoFile.delete();
+        boolean removedTracesFile = getTracesFile().delete();
+        boolean removedInfoFile = getInfoFile().delete();
 
         if (!removedInfoFile) {
             MATE.log_warn("Couldn't remove the info.txt file!");
@@ -1716,29 +1719,194 @@ public class DeviceMgr {
         if (!removedTracesFile) {
             MATE.log_warn("Couldn't remove the traces.txt file!");
         }
+    }
+
+    /**
+     * Requests the dumping of the traces by sending a broadcast to the tracer.
+     */
+    private void dumpTraces() {
+
+        // triggers the dumping of traces to a file called traces.txt
+        sendBroadcastToTracer();
+
+        /*
+         * We need to wait until the info.txt file is generated, once it is there, we know that all
+         * traces have been dumped.
+         */
+        MateInterruptedException interrupted = null;
+        while (!infoFileExists()) {
+            MATE.log_debug("Waiting for info.txt...");
+            try {
+                Utils.sleep(200);
+            } catch (final MateInterruptedException e) {
+                /*
+                 * We might get a timeout (signaled through an interrupt) while waiting for the
+                 * traces to be written. In that case we still want to wait for the tracer to write
+                 * its traces.
+                 */
+                interrupted = e;
+            }
+        }
+
+        /*
+         * Re-throw the interrupt exception caught while waiting for the tracer to finish dumping
+         * its traces. This is done before reading and deleting the traces.txt file, so that the
+         * traces won't be lost.
+         */
+        if (interrupted != null) {
+            MATE.log_debug("Interrupt detected during dumping traces!");
+            throw interrupted;
+        }
+    }
+
+    /**
+     * Reads the traces from the traces.txt file.
+     *
+     * @return Returns the traces from the traces.txt file.
+     */
+    private Set<String> readTracesFile() {
+
+        /*
+         * The method exists() may return 'false' if we try to access it while it is written by
+         * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
+         * only if the info.txt doesn't exist yet, this should never happen.
+         */
+        if (!tracesFileExists()) {
+            getInfoFile().delete();
+            throw new IllegalStateException("The file traces.txt doesn't exist!");
+        }
+
+        final Set<String> traces = new HashSet<>();
+
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(getTracesFile())))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                traces.add(line);
+            }
+        } catch (final IOException e) {
+            getInfoFile().delete();
+            throw new IllegalStateException("Couldn't read traces!", e);
+        }
 
         return traces;
     }
 
     /**
-     * Stores the traces to a file called traces.txt on the external memory.
+     * Waits for the tracer until it dumped both the traces.txt and info.txt file.
+     *
+     * @return Returns {@code true} if the waiting was successful, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean waitForTracer() {
+
+        boolean tracesFileExists = tracesFileExists();
+        boolean infoFileExists = infoFileExists();
+
+        if (infoFileExists && !tracesFileExists) {
+            MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+            return false;
+        }
+
+        if (tracesFileExists && !infoFileExists) {
+            /*
+             * There are two possible states here:
+             *
+             *     1) The tracer is currently dumping its traces, and we just need to wait for it
+             *        to finish.
+             *     2) The tracer dumped the traces because its cache got full. In that case we need
+             *        to call the tracer to get the remaining traces.
+             *
+             * We have no clear method of determining in which state we are in, so we have to wait
+             * for a while to have the tracer potentially finish dumping its traces and re-check for
+             * the info.txt.
+             */
+            MateInterruptedException interrupted = null;
+            final int maxWaitTimeInSeconds = 30;
+
+            for (int i = 1; i < maxWaitTimeInSeconds; ++i) {
+
+                try {
+                    Utils.sleep(1);
+                } catch (final MateInterruptedException e) {
+                    // keep track of any interrupt
+                    interrupted = e;
+                }
+
+                tracesFileExists = tracesFileExists();
+                infoFileExists = infoFileExists();
+
+                if (tracesFileExists && infoFileExists) {
+                    // We were in case 1), now the tracer has finished dumping the traces.
+                    break;
+                }
+            }
+
+            if (interrupted != null) {
+                /*
+                 * We suspend the interrupt until the tracer hopefully completed dumping its traces.
+                 * By re-throwing, we terminate the current thread.
+                 */
+                MATE.log_debug("Interrupt detected during waiting for tracer!");
+                throw interrupted;
+            }
+
+            if (infoFileExists && !tracesFileExists) {
+                MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Reads the traces from the external memory and deletes afterwards the info and traces file.
+     *
+     * @return Returns the set of traces.
+     */
+    public Set<String> getTraces() {
+
+        /*
+         * If an interrupt happened, i.e. the TimeoutRun signaled the end of the execution, we abort
+         * the execution here.
+         */
+        Utils.throwOnInterrupt();
+
+        if (!waitForTracer()) {
+            MATE.log_warn("Couldn't wait for tracer.");
+            return new HashSet<>(0);
+        }
+
+        /*
+         * If the AUT has been crashed, the uncaught exception handler takes over and produces both
+         * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
+         * every other condition, there should be no info.txt present and the broadcast is necessary.
+         */
+        if (!infoFileExists()) {
+            dumpTraces();
+        }
+
+        final Set<String> traces = readTracesFile();
+        deleteTraceFiles();
+        return traces;
+    }
+
+    /**
+     * Stores the traces to a file called traces.txt on the external memory. Also generates a file
+     * called info.txt that contains the number of written traces and indicates that the writing
+     * of the traces has been completed.
      *
      * @param traces The traces to be stored.
      */
     public void storeTraces(Set<String> traces) {
 
-        File sdCard = Environment.getExternalStorageDirectory();
-        File traceFile = new File(sdCard, "traces.txt");
-
-        try (Writer fileWriter = new FileWriter(traceFile)) {
-
-            for (String trace : traces) {
+        try (final Writer fileWriter = new FileWriter(getTracesFile())) {
+            for (final String trace : traces) {
                 fileWriter.write(trace);
                 fileWriter.write(System.lineSeparator());
             }
-
-            fileWriter.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Couldn't write to traces.txt!", e);
         }
 
@@ -1746,12 +1914,9 @@ public class DeviceMgr {
          * The info.txt indicates that the dumping of traces has been completed and it contains
          * the number of written traces.
          */
-        File infoFile = new File(sdCard, "info.txt");
-
-        try (Writer fileWriter = new FileWriter(infoFile)) {
+        try (final Writer fileWriter = new FileWriter(getInfoFile())) {
             fileWriter.write(traces.size());
-            fileWriter.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Couldn't write to info.txt!", e);
         }
     }
