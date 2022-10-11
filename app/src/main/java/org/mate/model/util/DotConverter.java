@@ -184,9 +184,15 @@ public final class DotConverter {
             builder.append(" [label=\"");
 
             if (!Properties.DOT_WITH_SCREENSHOTS()) {
-                builder.append(String.format(Locale.getDefault(), "%s\"", stateId));
+                if (stateId.equals(FSMModel.VIRTUAL_ROOT_REPRESENTATION)) {
+                    builder.append("Root");
+                } else {
+                    builder.append(stateId);
+                }
+
+                builder.append("\"");
             } else if (stateId.equals(FSMModel.VIRTUAL_ROOT_REPRESENTATION)) {
-                builder.append("Root\", fontsize=50");
+                builder.append("Root\", fontsize=250");
             } else {
                 builder.append("\", image=\"../");
                 builder.append(SCREENSHOTS_DIR);
