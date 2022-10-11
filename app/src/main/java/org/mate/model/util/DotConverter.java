@@ -242,7 +242,7 @@ public final class DotConverter {
         StringBuilder builder = new StringBuilder();
         Set<Action> actionSet = testCase == null
                 ? new HashSet<>() : new HashSet<>(testCase.getEventSequence());
-        Map<String, StringBuilder[]> dotEdges = new HashMap<>();
+        Map<String, EdgeStringContainer> dotEdges = new HashMap<>();
         int edgeCounter = 0;
 
         for (Edge edge : guiModel.getEdges()) {
@@ -254,14 +254,13 @@ public final class DotConverter {
         }
 
         for (String elem : dotEdges.keySet()) {
-            StringBuilder actions = dotEdges.get(elem)[0];
-            StringBuilder source = dotEdges.get(elem)[1];
-            StringBuilder target = dotEdges.get(elem)[2];
-            StringBuilder edgeColor = dotEdges.get(elem)[3];
-            StringBuilder fillColor = dotEdges.get(elem)[4];
+            String actions = dotEdges.get(elem).getActions().toString();
+            String source = dotEdges.get(elem).getSource();
+            String target = dotEdges.get(elem).getTarget();
+            String edgeColor = dotEdges.get(elem).getEdgeColor();
+            String fillColor = dotEdges.get(elem).getFillColor();
 
-            builder.append(toDotEdge(source.toString(), target.toString(), actions.toString(),
-                    edgeColor.toString(), fillColor.toString(), edgeCounter));
+            builder.append(toDotEdge(source, target, actions, edgeColor, fillColor, edgeCounter));
             edgeCounter++;
         }
 
@@ -276,29 +275,24 @@ public final class DotConverter {
      * @param edgeColor Color of the edge.
      * @param fillColor Color of the tag assigned to the edge.
      */
-    private static void addToMap(Map<String, StringBuilder[]> map, Edge edge, String edgeColor, String fillColor) {
+    private static void addToMap(Map<String, EdgeStringContainer> map, Edge edge, String edgeColor,
+                                 String fillColor) {
         String edgeString = edge.getSource().getId() + "/" + edge.getTarget().getId()
                 + "/" + edgeColor + "/" + fillColor;
 
         if (map.containsKey(edgeString)) {
-            StringBuilder actions = map.get(edgeString)[0];
+            StringBuilder actions = map.get(edgeString).getActions();
             actions.append("\\n<");
             actions.append(edge.getAction().toShortString());
             actions.append('>');
         } else {
-            StringBuilder[] strings = new StringBuilder[5];
+            String action = '<' + edge.getAction().toShortString() + '>';
+            String source = edge.getSource().getId();
+            String target = edge.getTarget().getId();
+            EdgeStringContainer container
+                    = new EdgeStringContainer(action, source, target, edgeColor, fillColor);
 
-            StringBuilder actions = new StringBuilder("<");
-            actions.append(edge.getAction().toShortString());
-            actions.append('>');
-
-            strings[0] = actions;
-            strings[1] = new StringBuilder(edge.getSource().getId());
-            strings[2] = new StringBuilder(edge.getTarget().getId());
-            strings[3] = new StringBuilder(edgeColor);
-            strings[4] = new StringBuilder(fillColor);
-
-            map.put(edgeString, strings);
+            map.put(edgeString, container);
         }
     }
 
@@ -462,5 +456,47 @@ public final class DotConverter {
          * The conversion should take place after each test case and at the end.
          */
         ALL;
+    }
+
+    /**
+     * Container for containing information of a dot string.
+     * These information are the actions, the initial screen state and the target screen state
+     * and the color of the edge as well as the color surrounded by the label.
+     */
+    private static class EdgeStringContainer {
+        private final StringBuilder actions;
+        private final String source;
+        private final String target;
+        private final String edgeColor;
+        private final String fillColor;
+
+        private EdgeStringContainer(String action, String source, String target, String color,
+                                    String fillColor) {
+            this.actions = new StringBuilder(action);
+            this.source = source;
+            this.target = target;
+            this.edgeColor = color;
+            this.fillColor = fillColor;
+        }
+
+        protected StringBuilder getActions() {
+            return actions;
+        }
+
+        protected String getSource() {
+            return source;
+        }
+
+        public String getTarget() {
+            return target;
+        }
+
+        public String getEdgeColor() {
+            return edgeColor;
+        }
+
+        public String getFillColor() {
+            return fillColor;
+        }
     }
 }
