@@ -7,6 +7,7 @@ import org.mate.interaction.action.Action;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.FSMModel;
 import org.mate.state.IScreenState;
 
 import java.io.File;
@@ -179,10 +180,13 @@ public final class DotConverter {
 
         for (IScreenState state : guiModel.getStates()) {
             String stateId = state.getId();
-            builder.append(String.format(Locale.getDefault(), "%s [label=\"", stateId));
+            builder.append(stateId);
+            builder.append(" [label=\"");
 
             if (!Properties.DOT_WITH_SCREENSHOTS()) {
                 builder.append(String.format(Locale.getDefault(), "%s\"", stateId));
+            } else if (stateId.equals(FSMModel.VIRTUAL_ROOT_REPRESENTATION)) {
+                builder.append("Root\", fontsize=50");
             } else {
                 builder.append("\", image=\"../");
                 builder.append(SCREENSHOTS_DIR);

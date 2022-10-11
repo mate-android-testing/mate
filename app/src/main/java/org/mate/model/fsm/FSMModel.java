@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
  */
 public class FSMModel implements IGUIModel {
 
+    public static final String VIRTUAL_ROOT_REPRESENTATION = "VIRTUAL_ROOT_STATE";
+
     /**
      * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
      * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
@@ -32,7 +34,7 @@ public class FSMModel implements IGUIModel {
 
         @Override
         public String getId() {
-            return "VIRTUAL_ROOT_STATE";
+            return VIRTUAL_ROOT_REPRESENTATION;
         }
 
         @Override
