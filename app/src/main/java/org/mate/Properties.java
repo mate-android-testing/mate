@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.GraphType;
 import org.mate.model.util.DotConverter;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -51,6 +52,32 @@ public class Properties {
     public static float BEST_ANT() {
         return propertyOr(3);
     }
+
+    /**
+     * Defines the equivalence check for two screen states.
+     *
+     * @return Returns the selected state equivalence check.
+     */
+    public static StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL() {
+        return propertyOr(StateEquivalenceLevel.WIDGET);
+    }
+
+    /**
+     * Returns the specified cosine similarity coefficient.
+     *
+     * @return Returns the cosine similarity threshold.
+     */
+    public static float COSINE_SIMILARITY_THRESHOLD() {
+        return propertyOr(0.95f);
+    }
+
+    /**
+     * Whether the surrogate model should be used or not.
+     *
+     * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
+     *          is returned.
+     */
+    public static boolean SURROGATE_MODEL() { return propertyOr(false); }
 
     /*
     * Intent fuzzing related properties.

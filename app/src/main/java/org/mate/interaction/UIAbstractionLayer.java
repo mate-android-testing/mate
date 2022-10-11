@@ -6,6 +6,7 @@ import android.util.Log;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exceptions.AUTCrashException;
+import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.ActionType;
@@ -14,15 +15,17 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
+import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.util.DotConverter;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
+import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.Utils;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -99,15 +102,18 @@ public class UIAbstractionLayer {
         String id = "S" + lastScreenStateNumber;
         lastScreenState.setId(id);
         lastScreenStateNumber++;
+        if (Properties.SURROGATE_MODEL()) {
+            guiModel = new SurrogateModel(lastScreenState, packageName);
+        } else {
+            guiModel = new FSMModel(lastScreenState, packageName);
+        }
+        guiWalker = new GUIWalker(this);
 
         // Save screenshot
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_WITH_SCREENSHOTS()) {
             DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
         }
-
-        guiModel = new FSMModel(lastScreenState, packageName);
-        guiWalker = new GUIWalker(this);
     }
 
     /**
@@ -155,14 +161,57 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Executes the given action. As a side effect, the screen state
-     * model is updated.
+     * Executes the given action. As a side effect, the gui model is updated.
      *
      * @param action The action to be executed.
      * @return Returns the outcome of the execution, e.g. success.
      */
     private ActionResult executeActionUnsafe(Action action) {
+
         IScreenState state;
+
+        if (Properties.SURROGATE_MODEL()) {
+
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+
+            if (surrogateModel.isInPrediction()) {
+
+                // check if the surrogate model can predict the action
+                ActionResult actionResult = surrogateModel.predictAction(action);
+
+                if (actionResult != null) {
+                    surrogateModel.addPredictedAction(action);
+                    lastScreenState = surrogateModel.getCurrentScreenState();
+                    return actionResult;
+                } else {
+                    /*
+                    * The surrogate model couldn't successfully predict the action, thus we need to
+                    * return to the last check point and execute all cached actions.
+                     */
+                    surrogateModel.setInPrediction(false);
+                    lastScreenState = surrogateModel.goToLastCheckPointState();
+                    ActionResult result = executeCachedActions(surrogateModel.getPredictedActions());
+                    surrogateModel.resetPredictedActions();
+                    surrogateModel.setInPrediction(true);
+
+                    // If a cached action closes the AUT, we abort the action execution here.
+                    if(result != SUCCESS && result != null) {
+                        return result;
+                    }
+                }
+            }
+
+            /*
+            * Since the execution of cached actions may lead to a different screen state than
+            * expected, the given action might be not applicable anymore. In such a case, we pick
+            * a random action that is applicable on the current screen.
+             */
+            if(!getExecutableActions().contains(action)) {
+                MATE.log_warn("Can't apply given action on current screen! Select random action.");
+                action = Randomness.randomElement(getExecutableActions());
+            }
+        }
+
         try {
             deviceMgr.executeAction(action);
         } catch (AUTCrashException e) {
@@ -177,31 +226,24 @@ public class UIAbstractionLayer {
              */
             deviceMgr.pressHome();
 
-            // update screen state model
+            // update gui model
             state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
             state = toRecordedScreenState(state);
-            guiModel.update(lastScreenState, state, action);
+
+            if(Properties.SURROGATE_MODEL()) {
+                SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+                Set<String> traces = deviceMgr.getTraces();
+                surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+            } else {
+                guiModel.update(lastScreenState, state, action);
+            }
+
             lastScreenState = state;
+
             return FAILURE_APP_CRASH;
         }
 
         state = clearScreen();
-
-        // TODO: assess if timeout should be added to primitive actions as well
-        // check whether there is a progress bar on the screen
-        long timeToWait = waitForProgressBar(state);
-        // if there is a progress bar
-        if (timeToWait > 0) {
-            // add 2 sec just to be sure
-            timeToWait += 2000;
-            // set that the current action needs to wait before new action
-            if (action instanceof WidgetAction) {
-                WidgetAction wa = (WidgetAction) action;
-                wa.setTimeToWait(timeToWait);
-            }
-            // get a new state
-            state = clearScreen();
-        }
 
         // get the package name of the app currently running
         String currentPackageName = state.getPackageName();
@@ -213,19 +255,66 @@ public class UIAbstractionLayer {
             // TODO: what to do when the emulator crashes?
         }
 
-        // update gui model
-        state = toRecordedScreenState(state);
-        guiModel.update(lastScreenState, state, action);
-        lastScreenState = state;
+        ActionResult result;
 
         // check whether the package of the app currently running is from the app under test
         // if it is not, this causes a restart of the app
         if (!currentPackageName.equals(this.packageName)) {
             MATE.log("current package different from app package: " + currentPackageName);
-            return SUCCESS_OUTBOUND;
+            result = SUCCESS_OUTBOUND;
         } else {
-            return SUCCESS;
+            result = SUCCESS;
         }
+
+        // update gui model
+        state = toRecordedScreenState(state);
+
+        if(Properties.SURROGATE_MODEL()) {
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            Set<String> traces = deviceMgr.getTraces();
+            surrogateModel.update(lastScreenState, state, action, result, traces);
+        } else {
+            guiModel.update(lastScreenState, state, action);
+        }
+
+        lastScreenState = state;
+
+        return result;
+    }
+
+    /**
+     * Executes the cached actions as long as an action doesn't leave the AUT.
+     *
+     * @param actions The list of actions to be executed, might be empty.
+     * @return Returns the action result associated with the last executed action or {@code null}
+     *          if no cached action was executed at all.
+     */
+    private ActionResult executeCachedActions(final List<Action> actions) {
+
+        assert Properties.SURROGATE_MODEL();
+
+        ActionResult result = null;
+
+        for(Action action : actions) {
+            result = executeActionUnsafe(action);
+            if(result != SUCCESS) {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Stores the given traces on the external storage. This needs to be called after each test case
+     * and before a call to
+     * {@link org.mate.utils.FitnessUtils#storeTestCaseChromosomeFitness(IChromosome)},
+     * {@link org.mate.utils.FitnessUtils#storeTestSuiteChromosomeFitness(IChromosome, TestCase)},
+     * {@link org.mate.utils.coverage.CoverageUtils#storeTestCaseChromosomeCoverage(IChromosome)} or
+     * {@link org.mate.utils.coverage.CoverageUtils#storeTestSuiteChromosomeCoverage(IChromosome, TestCase)}.
+     */
+    public void storeTraces(Set<String> traces) {
+        deviceMgr.storeTraces(traces);
     }
 
     /**
@@ -263,6 +352,14 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for presence of permission dialog
+                if (handlePermissionDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                // TODO: handle progress bar
+
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
                     change = true;
@@ -271,12 +368,6 @@ public class UIAbstractionLayer {
 
                 // check for google sign in dialog
                 if (handleGoogleSignInDialog(screenState)) {
-                    change = true;
-                    continue;
-                }
-
-                // check for presence of permission dialog
-                if (handlePermissionDialog(screenState)) {
                     change = true;
                     continue;
                 }
@@ -293,6 +384,33 @@ public class UIAbstractionLayer {
             }
         }
         return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows a progress bar. If this is the case, we wait 10 seconds.
+     * This may take several iterations until the progress bar is gone.
+     *
+     * @param screenState The current screen.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    @SuppressWarnings("unused")
+    private boolean handleProgressBar(IScreenState screenState) {
+
+        /*
+        * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
+        *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
+        *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
+         */
+
+        // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
+
+        if (deviceMgr.checkForProgressBar(screenState)) {
+            MATE.log("Detected progress bar! Waiting...");
+            Utils.sleep(10000);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -341,11 +459,16 @@ public class UIAbstractionLayer {
 
         /*
          * The permission dialog has a different package name depending on the API level.
-         * We currently support API level 25 and 28.
+         * We currently support API level 25, 28 and 29.
          */
+
+        // API 25, 28:
         if (screenState.getPackageName().equals("com.google.android.packageinstaller")
                 || screenState.getPackageName().equals("com.android.packageinstaller")
-                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")) {
+                || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")
+                // API 29:
+                || screenState.getPackageName().equals("com.android.permissioncontroller")
+                || screenState.getPackageName().equals("com.google.android.permissioncontroller")) {
 
             MATE.log("Detected permission dialog!");
 
@@ -354,13 +477,20 @@ public class UIAbstractionLayer {
                 Widget widget = action.getWidget();
 
                 /*
-                 * The resource id for the allow button stays the same for both API 25
-                 * and API 28, although the package name differs.
+                 * The resource id of the allow button may differ as well between different API levels.
                  */
                 if (action.getActionType() == ActionType.CLICK
+                        // API 25, 28:
                         && (widget.getResourceID()
                                 .equals("com.android.packageinstaller:id/permission_allow_button")
-                            || widget.getText().toLowerCase().equals("allow"))) {
+                            // API: 29
+                            || widget.getResourceID().equals(
+                                    "com.android.permissioncontroller:id/permission_allow_button")
+                            || widget.getResourceID().equals(
+                                    "com.android.packageinstaller:id/continue_button")
+                            || widget.getText().equalsIgnoreCase("continue")
+                            // API 25, 28, 29:
+                            || widget.getText().equalsIgnoreCase("allow"))) {
                     try {
                         deviceMgr.executeAction(action);
                         return true;
@@ -417,42 +547,6 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Checks whether a progress bar appeared on the screen. If this is the case,
-     * waits a certain amount of time that the progress bar can reach completion.
-     *
-     * @param state The recording of the current screen.
-     * @return Returns the amount of time it has waited for completion.
-     */
-    private long waitForProgressBar(IScreenState state) {
-
-        long ini = new Date().getTime();
-        long end = new Date().getTime();
-        boolean hadProgressBar = false;
-        boolean hasProgressBar = true;
-
-        // wait a certain amount of time (22 seconds at max)
-        while (hasProgressBar && (end - ini) < 22000) {
-
-            // check whether a widget represents a progress bar
-            hasProgressBar = false;
-
-            for (Widget widget : state.getWidgets()) {
-                if (deviceMgr.checkForProgressBar(widget)) {
-                    MATE.log("WAITING PROGRESS BAR TO FINISH");
-                    hasProgressBar = true;
-                    hadProgressBar = true;
-                    Utils.sleep(3000);
-                    state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
-                }
-            }
-            end = new Date().getTime();
-        }
-        if (!hadProgressBar)
-            return 0;
-        return end - ini;
-    }
-
-    /**
      * Returns the screen width.
      *
      * @return Returns the screen width in pixels.
@@ -475,6 +569,19 @@ public class UIAbstractionLayer {
      */
     public void resetApp() {
 
+        if (Properties.SURROGATE_MODEL()) {
+            // If the surrogate model was able to predict every action, we can avoid the reset.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            if (surrogateModel.hasPredictedLastTestCase()) {
+                MATE.log("Skip reset!");
+                // reset screen state
+                lastScreenState = toRecordedScreenState(clearScreen());
+                guiModel.addRootState(lastScreenState);
+                surrogateModel.goToState(lastScreenState);
+                return;
+            }
+        }
+
         try {
             deviceMgr.getDevice().wakeUp();
         } catch (RemoteException e) {
@@ -492,12 +599,17 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
 
         /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
+        * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+        * possible root states.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRootState(lastScreenState);
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.goToState(lastScreenState);
+        }
     }
 
     /**
@@ -508,12 +620,17 @@ public class UIAbstractionLayer {
         Utils.sleep(2000);
 
         /*
-         * TODO: Try to merge different start screen states. If the restart leads to a different
-         *  start screen state (this happens sporadically), we introduce an isolated subgraph in the
-         *  gui model with the next update call. Another possible fix is to introduce an dedicated
-         *  restart action that then connects the subgraph through a restart edge.
+         * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
+         * possible root states.
          */
         lastScreenState = toRecordedScreenState(clearScreen());
+        guiModel.addRootState(lastScreenState);
+
+        if (Properties.SURROGATE_MODEL()) {
+            // We need to move the FSM back in the correct state.
+            SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+            surrogateModel.goToState(lastScreenState);
+        }
     }
 
     /**

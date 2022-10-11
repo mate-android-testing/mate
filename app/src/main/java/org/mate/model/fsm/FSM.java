@@ -3,8 +3,12 @@ package org.mate.model.fsm;
 import android.support.annotation.NonNull;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
+import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceFactory;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -24,7 +28,7 @@ import java.util.stream.Collectors;
 public class FSM {
 
     /**
-     * The root state.
+     * The (virtual) root state.
      */
     private final State root;
 
@@ -54,6 +58,18 @@ public class FSM {
     private final String packageName;
 
     /**
+     * The current state in the FSM.
+     */
+    private State currentState;
+
+    /**
+     * The current state equivalence level that defines how two {@link State}s are compared for
+     * equality. Depending on the state equivalence level, the FSM may contain more or less states.
+     */
+    private static final StateEquivalenceLevel STATE_EQUIVALENCE_LEVEL
+            = Properties.STATE_EQUIVALENCE_LEVEL();
+
+    /**
      * Creates a new finite state machine with an initial start state.
      *
      * @param root The start or root state.
@@ -68,27 +84,27 @@ public class FSM {
 
         // the initial state is a new state
         reachedNewState = true;
+        currentState = root;
     }
 
     /**
-     * Adds a new transition to the FSM linking two states with an action.
-     * As a side effect tracks whether we reached a new state.
+     * Adds a new transition to the FSM linking two states with an action. As a side effect tracks
+     * whether we reached a new state and internally updates the current FSM state.
      *
-     * @param source The source state.
-     * @param target The target or destination state.
-     * @param action The action linking both states.
+     * @param transition The new transition.
      */
-    public void addTransition(State source, State target, Action action) {
+    public void addTransition(Transition transition) {
 
-        states.add(source);
+        states.add(transition.getSource());
 
         // check whether we reached a new state
-        reachedNewState = states.add(target);
+        reachedNewState = states.add(transition.getTarget());
 
-        Transition transition = new Transition(source, target, action);
         if (transitions.add(transition)) {
             MATE.log_debug(String.valueOf(this));
         }
+
+        currentState = transition.getTarget();
     }
 
     /**
@@ -127,18 +143,22 @@ public class FSM {
     }
 
     /**
-     * Converts the given screen state into a state used by the FSM.
-     * Returns a cached version of this state or a new state if the given
-     * screen state is new.
+     * Converts the given screen state into a state used by the FSM. Returns a cached version of
+     * this state or a new state if the given screen state is new.
      *
      * @param screenState The given screen state.
      * @return Returns a FSM state corresponding to the given screen state.
      */
     public State getState(IScreenState screenState) {
 
+        IStateEquivalence stateEquivalence
+                = StateEquivalenceFactory.getStateEquivalenceCheck(STATE_EQUIVALENCE_LEVEL);
+
         for (State state : states) {
-            if (state.getScreenState().equals(screenState)) {
-                return state;
+            if (state != root) { // skip the virtual root state
+                if (stateEquivalence.checkEquivalence(screenState, state.getScreenState())) {
+                    return state;
+                }
             }
         }
 
@@ -149,7 +169,7 @@ public class FSM {
      * Whether the last transition lead to a new state.
      *
      * @return Returns {@code} if a new state has been reached,
-     *          otherwise {@code} false is returned.
+     *         otherwise {@code} false is returned.
      */
     public boolean reachedNewState() {
         return reachedNewState;
@@ -209,9 +229,23 @@ public class FSM {
      * @param source The source state.
      * @return Returns the outgoing transitions from the given state.
      */
-    private Set<Transition> getOutgoingTransitions(State source) {
+    public Set<Transition> getOutgoingTransitions(State source) {
         return transitions.stream()
                 .filter(transition -> transition.getSource().equals(source))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns the outgoing transitions from the given source state with the given action.
+     *
+     * @param source The source state.
+     * @param action The given action.
+     * @return Returns the outgoing transitions from the given state and action.
+     */
+    public Set<Transition> getOutgoingTransitions(State source, Action action) {
+        return transitions.stream()
+                .filter(transition -> transition.getSource().equals(source))
+                .filter(transition -> transition.getAction().equals(action))
                 .collect(Collectors.toSet());
     }
 
@@ -221,7 +255,7 @@ public class FSM {
      * @param source The source state.
      * @param target The target state.
      * @return Returns any transition between the given source and target state if such transition
-     *          exists.
+     *         exists.
      */
     private Optional<Transition> getAnyTransition(State source, State target) {
         return transitions.stream()
@@ -258,7 +292,7 @@ public class FSM {
     }
 
     /**
-     * Returns the root state of the FSM.
+     * Returns the (virtual) root state of the FSM.
      *
      * @return Returns the root state.
      */
@@ -292,7 +326,40 @@ public class FSM {
     }
 
     /**
-     *  Returns a simple text representation of the FSM.
+     * Returns the state the FSM is in right now.
+     *
+     * @return Returns the current state.
+     */
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    /**
+     * Returns the id of the current FSM state.
+     *
+     * @return Returns the current state id.
+     */
+    public String getCurrentStateId() {
+        return currentState.getScreenState().getId();
+    }
+
+    /**
+     * Moves the FSM in the given state.
+     *
+     * @param state The new state to which the FSM should move.
+     */
+    public void goToState(State state) {
+
+        // TODO: This may happen if the start screen state is not deterministic!
+        if (!states.contains(state)) {
+            throw new IllegalStateException("Can't move FSM in a state that it has not seen yet!");
+        }
+
+        currentState = state;
+    }
+
+    /**
+     * Returns a simple text representation of the FSM.
      *
      * @return Returns a simple string representation of the FSM.
      */

@@ -126,6 +126,7 @@ public final class CoverageUtils {
      */
     public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
                                                                 String activity) {
+
         Set<String> visited = visitedActivities.getOrDefault(chromosome, new HashSet<>());
         visited.add(activity);
         visitedActivities.put(chromosome, visited);
@@ -219,22 +220,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-
-                // log activity coverage in any case
-                MATE.log("Activity coverage of chromosome "
-                        + chromosome.getValue().toString() + ": " + getActivityCoverage(chromosome));
-
-                MATE.log("Coverage of chromosome " + chromosome.getValue().toString() + ": "
-                        + Registry.getEnvironmentManager().getCoverage(
-                        Properties.COVERAGE(), chromosome));
-
-                if (chromosome.getValue() instanceof TestSuite) {
-                    for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                        MATE.log("Coverage of individual chromosome " + testCase + ": "
-                                + getCoverage(Properties.COVERAGE(), (IChromosome<TestSuite>) chromosome, testCase));
-                    }
-                }
-                break;
             case ALL_COVERAGE:
 
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager().getCoverage(
@@ -254,6 +239,10 @@ public final class CoverageUtils {
                 break;
             default:
                 break;
+        }
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+            MATE.log_acc("Intermediate coverage: " + getCombinedCoverage(Properties.COVERAGE()));
         }
     }
 
@@ -317,7 +306,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager().getCombinedCoverage(coverage, null);
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCombinedCoverage(coverage, null);
@@ -365,7 +353,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
-                return Registry.getEnvironmentManager().getCombinedCoverage(coverage, chromosomes);
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCombinedCoverage(coverage, chromosomes);
@@ -424,8 +411,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCoverage(coverage, testSuite.getValue().getId(), testCase.getId());
@@ -466,7 +451,6 @@ public final class CoverageUtils {
             case METHOD_COVERAGE:
             case BASIC_BLOCK_LINE_COVERAGE:
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager().getCoverage(coverage, chromosome);
             case ALL_COVERAGE:
                 CoverageDTO coverageDTO = Registry.getEnvironmentManager()
                         .getCoverage(coverage, chromosome);
