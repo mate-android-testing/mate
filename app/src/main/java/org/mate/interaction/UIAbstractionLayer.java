@@ -102,18 +102,20 @@ public class UIAbstractionLayer {
         String id = "S" + lastScreenStateNumber;
         lastScreenState.setId(id);
         lastScreenStateNumber++;
-        if (Properties.SURROGATE_MODEL()) {
-            guiModel = new SurrogateModel(lastScreenState, packageName);
-        } else {
-            guiModel = new FSMModel(lastScreenState, packageName);
-        }
-        guiWalker = new GUIWalker(this);
 
         // Save screenshot
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_WITH_SCREENSHOTS()) {
             DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
         }
+
+        if (Properties.SURROGATE_MODEL()) {
+            guiModel = new SurrogateModel(lastScreenState, packageName);
+        } else {
+            guiModel = new FSMModel(lastScreenState, packageName);
+        }
+
+        guiWalker = new GUIWalker(this);
     }
 
     /**
