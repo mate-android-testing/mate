@@ -51,7 +51,8 @@ public class BranchMultiObjectiveFitnessFunction<T> implements IFitnessFunction<
         if (!cache.get(branch).containsKey(chromosome)) {
 
             // retrieves the fitness value for every single branch
-            List<Double> branchFitnessVector = FitnessUtils.getFitness(chromosome, branches);
+            List<Double> branchFitnessVector = FitnessUtils.getFitness(chromosome, branches,
+                    FitnessFunction.BRANCH_MULTI_OBJECTIVE);
 
             // update the cache
             for (int i = 0; i < branchFitnessVector.size(); i++) {

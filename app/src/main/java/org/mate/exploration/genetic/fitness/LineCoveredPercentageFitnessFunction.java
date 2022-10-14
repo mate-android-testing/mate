@@ -96,7 +96,8 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
         }
 
         MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> coveredPercentage = FitnessUtils.getFitness(chromosome, lines);
+        List<Double> coveredPercentage = FitnessUtils.getFitness(chromosome, lines,
+                FitnessFunction.LINE_PERCENTAGE_COVERAGE);
         for (int i = 0; i < coveredPercentage.size(); i++) {
             cache.get(lines.get(i)).put(chromosome, coveredPercentage.get(i));
         }

@@ -55,7 +55,8 @@ public class BasicBlockMultiObjectiveFitnessFunction<T> implements IFitnessFunct
             basicBlockFitnessValue = cache.get(block).get(chromosome);
         } else {
             // retrieves the fitness value for every single basic block
-            List<Double> basicBlockFitnessVector = FitnessUtils.getFitness(chromosome, blocks);
+            List<Double> basicBlockFitnessVector = FitnessUtils.getFitness(chromosome, blocks,
+                    FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
             // insert them into the cache
             for (int i = 0; i < basicBlockFitnessVector.size(); i++) {

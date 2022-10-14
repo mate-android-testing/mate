@@ -43,17 +43,10 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
-        FitnessFunction[] usedFitnessFunctions = Properties.FITNESS_FUNCTIONS();
-
-        if (usedFitnessFunctions == null) {
-            if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-                Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
-            }
-        } else {
-            for (FitnessFunction fitness : usedFitnessFunctions) {
-                if (fitnessFunctions.contains(fitness)) {
-                    Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
-                }
+        for (FitnessFunction fitness : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(fitness)) {
+                Registry.getEnvironmentManager()
+                        .copyFitnessData(sourceChromosome, targetChromosome, testCases, fitness);
             }
         }
     }
@@ -87,27 +80,15 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
-        FitnessFunction[] usedFitnessFunctions = Properties.FITNESS_FUNCTIONS();
+        for (FitnessFunction function : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(function)) {
+                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId, function);
+            }
+        }
 
-        if (usedFitnessFunctions == null) {
-            if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
-            }
-
-            if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            }
-        } else {
-            for (FitnessFunction fitness : usedFitnessFunctions) {
-                if (fitnessFunctions.contains(fitness)) {
-                    Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId);
-                }
-            }
-
-            if (Arrays.stream(usedFitnessFunctions).anyMatch(
-                    function -> function == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
-                LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
-            }
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).anyMatch(
+                function -> function == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
+            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 
@@ -118,12 +99,19 @@ public class FitnessUtils {
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
-            BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
-            BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+        for (FitnessFunction function : Properties.FITNESS_FUNCTIONS()) {
+            switch (function) {
+                case LINE_PERCENTAGE_COVERAGE:
+                    LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+                    break;
+                case BASIC_BLOCK_MULTI_OBJECTIVE:
+                    BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+                    break;
+                case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                    BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+                    break;
+                default:
+            }
         }
     }
 
@@ -189,7 +177,7 @@ public class FitnessUtils {
                  */
             default:
                 throw new UnsupportedOperationException("Fitness function "
-                        + Properties.FITNESS_FUNCTION() + " not yet supported!");
+                        + function + " not yet supported!");
         }
     }
 
@@ -199,23 +187,30 @@ public class FitnessUtils {
      *
      * @param chromosome The chromosome for which the fitness vector should be evaluated.
      * @param objectives A list of objectives, e.g. lines or branches, or {@code null} if not required.
+     * @param function The fitness function used.
      * @param <T> Specifies whether the chromosome is a test suite or a test case.
      * @return Returns the fitness vector for the given chromosome.
      */
-    public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives) {
+    public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives,
+                                              FitnessFunction function) {
 
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBranchDistanceVector(chromosome, objectives);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            return Registry.getEnvironmentManager().getLineCoveredPercentage(chromosome, objectives);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBasicBlockFitnessVector(chromosome, objectives);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
-            return Registry.getEnvironmentManager().getBranchFitnessVector(chromosome, objectives);
+        switch (function) {
+            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                return Registry.getEnvironmentManager()
+                        .getBranchDistanceVector(chromosome, objectives);
+            case LINE_PERCENTAGE_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getLineCoveredPercentage(chromosome, objectives);
+            case BASIC_BLOCK_MULTI_OBJECTIVE:
+                return Registry.getEnvironmentManager()
+                        .getBasicBlockFitnessVector(chromosome, objectives);
+            case BRANCH_MULTI_OBJECTIVE:
+                return Registry.getEnvironmentManager()
+                        .getBranchFitnessVector(chromosome, objectives);
+            default:
+                throw new UnsupportedOperationException("Fitness function "
+                        + function + " not yet supported!");
         }
-
-        throw new UnsupportedOperationException("Fitness function "
-                + Properties.FITNESS_FUNCTION() + " not yet supported!");
     }
 
     /**
