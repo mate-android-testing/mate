@@ -43,8 +43,18 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
-        if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
+        FitnessFunction[] usedFitnessFunctions = Properties.FITNESS_FUNCTIONS();
+
+        if (usedFitnessFunctions == null) {
+            if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
+                Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
+            }
+        } else {
+            for (FitnessFunction fitness : usedFitnessFunctions) {
+                if (fitnessFunctions.contains(fitness)) {
+                    Registry.getEnvironmentManager().copyFitnessData(sourceChromosome, targetChromosome, testCases);
+                }
+            }
         }
     }
 
@@ -121,30 +131,39 @@ public class FitnessUtils {
      * Retrieves the fitness value for the given chromosome.
      *
      * @param chromosome The chromosome for which the fitness value should be evaluated.
+     * @param function The fitness function used.
      * @param <T> Specifies whether the chromosome is a test suite or a test case.
      * @return Returns the fitness value for the given chromosome.
      */
-    public static <T> double getFitness(IChromosome<T> chromosome) {
+    public static <T> double getFitness(IChromosome<T> chromosome, FitnessFunction function) {
 
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
-            return Registry.getEnvironmentManager()
-                    .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
-            return Registry.getEnvironmentManager().getBranchDistance(chromosome);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
-            return Registry.getEnvironmentManager()
-                    .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
-            return Registry.getEnvironmentManager()
-                    .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
-            return Registry.getEnvironmentManager()
-                    .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome).getLineCoverage();
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
-            return Registry.getEnvironmentManager()
-                    .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
-            // GE specifies the 'core' fitness function in the GE_FITNESS_FUNCTION() property
+        switch (function) {
+            case BRANCH_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
+            case BRANCH_DISTANCE:
+                return Registry.getEnvironmentManager().getBranchDistance(chromosome);
+            case LINE_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
+            case METHOD_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
+            case BASIC_BLOCK_LINE_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome)
+                        .getLineCoverage();
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+                return Registry.getEnvironmentManager()
+                        .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome)
+                        .getBranchCoverage();
+            case GENO_TO_PHENO_TYPE:
+                // GE specifies the 'core' fitness function in the GE_FITNESS_FUNCTION() property
+
+                // TODO: GENETIC Algorithms
+                /*
+                if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
+
             if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
                 return Registry.getEnvironmentManager()
                         .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
@@ -167,9 +186,11 @@ public class FitnessUtils {
                         + Properties.GE_FITNESS_FUNCTION() + " not yet supported!");
             }
         }
-
-        throw new UnsupportedOperationException("Fitness function "
-                + Properties.FITNESS_FUNCTION() + " not yet supported!");
+                 */
+            default:
+                throw new UnsupportedOperationException("Fitness function "
+                        + Properties.FITNESS_FUNCTION() + " not yet supported!");
+        }
     }
 
     /**

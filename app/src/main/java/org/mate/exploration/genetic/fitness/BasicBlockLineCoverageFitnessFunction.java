@@ -21,7 +21,8 @@ public class BasicBlockLineCoverageFitnessFunction<T> implements IFitnessFunctio
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double basicBlockLineCoverage = FitnessUtils.getFitness(chromosome);
+        double basicBlockLineCoverage
+                = FitnessUtils.getFitness(chromosome, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE);
 
         if (basicBlockLineCoverage == 100.0) {
             ConditionalTerminationCondition.satisfiedCondition();

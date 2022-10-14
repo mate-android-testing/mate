@@ -35,7 +35,7 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
         if (cache.containsKey(chromosome)) {
             branchDistance = cache.get(chromosome);
         } else {
-            branchDistance = FitnessUtils.getFitness(chromosome);
+            branchDistance = FitnessUtils.getFitness(chromosome, FitnessFunction.BRANCH_DISTANCE);
         }
 
         /*
