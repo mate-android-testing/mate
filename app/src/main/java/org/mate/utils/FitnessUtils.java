@@ -148,33 +148,28 @@ public class FitnessUtils {
             case GENO_TO_PHENO_TYPE:
                 // GE specifies the 'core' fitness function in the GE_FITNESS_FUNCTION() property
 
-                // TODO: GENETIC Algorithms
-                /*
-                if (Properties.FITNESS_FUNCTION() == FitnessFunction.GENO_TO_PHENO_TYPE) {
-
-            if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
-            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome).getLineCoverage();
-            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
-            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
-                return Registry.getEnvironmentManager().getBranchDistance(chromosome);
-            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
-            } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
-            } else {
-                throw new UnsupportedOperationException("GE fitness function "
-                        + Properties.GE_FITNESS_FUNCTION() + " not yet supported!");
-            }
-        }
-                 */
+                // TODO: Find solution for Geno_to_pheno_type
+                if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
+                    return Registry.getEnvironmentManager()
+                            .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
+                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
+                    return Registry.getEnvironmentManager()
+                            .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome).getLineCoverage();
+                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
+                    return Registry.getEnvironmentManager()
+                            .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
+                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
+                    return Registry.getEnvironmentManager().getBranchDistance(chromosome);
+                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
+                    return Registry.getEnvironmentManager()
+                            .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
+                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
+                    return Registry.getEnvironmentManager()
+                            .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
+                } else {
+                    throw new UnsupportedOperationException("GE fitness function "
+                            + Properties.GE_FITNESS_FUNCTION() + " not yet supported!");
+                }
             default:
                 throw new UnsupportedOperationException("Fitness function "
                         + function + " not yet supported!");
