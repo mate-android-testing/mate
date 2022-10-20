@@ -43,7 +43,9 @@ public class ExecuteMATEGeneticAlgorithm {
                 builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
             }
         } else if (Properties.ALGORITHM() == Algorithm.NOVELTY_SEARCH) {
-            builder = builder.withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name());
+            FitnessFunction[] novelty = {FitnessFunction.NOVELTY};
+
+            builder = builder.withFitnessFunctions(novelty, Properties.OBJECTIVE().name());
         } else {
             builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS());
         }

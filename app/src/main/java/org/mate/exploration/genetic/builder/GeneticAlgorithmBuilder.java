@@ -184,48 +184,15 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
-    /**
-     * Specifies the fitness function of the genetic algorithm.
-     *
-     * @param fitnessFunction The fitness function that should be used.
-     * @return Returns the current builder state.
-     */
-    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction) {
+    public GeneticAlgorithmBuilder withGenoToPhenoType() {
+        FitnessFunction[] function = {FitnessFunction.GENO_TO_PHENO_TYPE};
+        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, 1);
 
-        int amountFitnessFunctions = Integer.parseInt(
-                properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
-        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY,
-                String.valueOf(amountFitnessFunctions + 1));
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, String.valueOf(1));
+        properties.setProperty(key, FitnessFunction.GENO_TO_PHENO_TYPE.name());
 
-        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT,
-                amountFitnessFunctions);
-        properties.setProperty(key, fitnessFunction.name());
+        org.mate.Properties.setProperty("fitness_functions", function);
 
-        // TODO: Remove once all properties are enforced via the mate.properties file!
-        if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            org.mate.Properties.setProperty("fitness_function", fitnessFunction);
-        }
-        return this;
-    }
-
-    /**
-     * Specifies the fitness function of the genetic algorithm with a custom function argument.
-     *
-     * @param arg1 The custom function argument.
-     * @param fitnessFunction The fitness function that should be used.
-     * @return Returns the current builder state.
-     */
-    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction, String arg1) {
-
-        int amountFitnessFunctions = Integer.parseInt(
-                properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
-
-        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_ARG_KEY_FORMAT,
-                amountFitnessFunctions);
-
-        properties.setProperty(key, arg1);
-
-        withFitnessFunction(fitnessFunction);
         return this;
     }
 
