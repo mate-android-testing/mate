@@ -21,7 +21,7 @@ public class ExecuteMATERandomWalk {
                     .withAlgorithm(Algorithm.RANDOM_WALK)
                     .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                     .withMutationFunction(Properties.MUTATION_FUNCTION())
-                    .withFitnessFunction(Properties.FITNESS_FUNCTION())
+                    .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                     .withTerminationCondition(Properties.TERMINATION_CONDITION());
 
             final IGeneticAlgorithm randomWalk = builder.build();

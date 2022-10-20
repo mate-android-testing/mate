@@ -37,7 +37,7 @@ public class ExecuteMATEMIO {
         List<String> objectives = Registry.getEnvironmentManager().getObjectives(Properties.OBJECTIVE());
 
         for (String objective : objectives) {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
         }
 
         final IGeneticAlgorithm mio = builder.build();

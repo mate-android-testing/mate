@@ -230,6 +230,24 @@ public class GeneticAlgorithmBuilder {
     }
 
     /**
+     * Specifies the fitness functions of the genetic algorithm with a custom function argument.
+     *
+     * @param arg1 The custom function argument.
+     * @param fitnessFunctions A list of fitness function that should be used.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions, String arg1) {
+
+        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_ARG_KEY_FORMAT,
+                fitnessFunctions.length);
+
+        properties.setProperty(key, arg1);
+
+        withFitnessFunctions(fitnessFunctions);
+        return this;
+    }
+
+    /**
      * Specifies the termination condition of the genetic algorithm.
      *
      * @param terminationCondition The termination condition that should be used.

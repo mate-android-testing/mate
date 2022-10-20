@@ -20,7 +20,7 @@ public class ExecuteMATERandomSearch {
         final IGeneticAlgorithm randomSearch = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.RANDOM_SEARCH)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withFitnessFunction(Properties.FITNESS_FUNCTION())
+                .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .build();
 

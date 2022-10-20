@@ -25,7 +25,7 @@ public class ExecuteMATEOnePlusOne {
                 .withAlgorithm(Algorithm.ONE_PLUS_ONE)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withMutationFunction(Properties.MUTATION_FUNCTION())
-                .withFitnessFunction(Properties.FITNESS_FUNCTION())
+                .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .build();
 

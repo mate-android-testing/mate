@@ -40,12 +40,12 @@ public class ExecuteMATEGeneticAlgorithm {
 
             // we need to associate with each objective (branch, line) a fitness function
             for (String objective : objectives) {
-                builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
+                builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
             }
         } else if (Properties.ALGORITHM() == Algorithm.NOVELTY_SEARCH) {
             builder = builder.withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name());
         } else {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS());
         }
 
         final IGeneticAlgorithm genericGA = builder.build();
