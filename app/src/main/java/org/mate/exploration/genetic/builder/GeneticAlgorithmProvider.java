@@ -185,9 +185,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("StandardGA requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("StandardGA requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("StandardGA requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -217,9 +217,9 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("RandomSearch requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("RandomSearch requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("RandomSearch requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -251,9 +251,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("NSGA-II requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("NSGA-II requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -295,9 +295,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("MOSA requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("MOSA requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("MOSA requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -333,9 +333,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("MIO requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("MIO requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("MIO requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -372,9 +372,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("OnePlusOne requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("OnePlusOne requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("OnePlusOne requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -401,9 +401,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("RandomWalk requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("RandomWalk requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("RandomWalk requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -436,9 +436,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("NoveltySearch requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("NoveltySearch requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NoveltySearch requires a termination condition. You have to" +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -543,10 +543,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             throw new IllegalStateException("Sapienz requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if ((org.mate.Properties.FITNESS_FUNCTION() == null)
-                && (org.mate.Properties.FITNESS_FUNCTIONS() == null)) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("Sapienz requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
