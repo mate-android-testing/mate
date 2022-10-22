@@ -69,6 +69,7 @@ public class DeviceMgr {
      * The probability for considering the hint for the input generation.
      */
     private static final double PROB_HINT = 0.5;
+    private static final double PROB_WHITESPACE = 0.5;
 
     /**
      * The probability for mutating a given hint.
@@ -1123,6 +1124,10 @@ public class DeviceMgr {
                     return Randomness.randomElement(tokens);
                 }
             }
+        }
+
+        if (random.nextDouble() < PROB_WHITESPACE) {
+            return " ";
         }
 
         /*
