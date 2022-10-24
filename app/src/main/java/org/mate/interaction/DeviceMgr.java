@@ -38,6 +38,7 @@ import org.mate.state.IScreenState;
 import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
+import org.mate.utils.UIAutomatorException;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
@@ -118,6 +119,11 @@ public class DeviceMgr {
             "--bind name:s:user_rotation --bind value:i:1";
 
     /**
+     * The error message when the ui automator is disconnected.
+     */
+    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
+
+    /**
      * The device instance provided by the instrumentation class to perform various actions.
      */
     private final UiDevice device;
@@ -173,22 +179,35 @@ public class DeviceMgr {
      */
     public void executeAction(Action action) throws AUTCrashException {
 
-        if (action instanceof WidgetAction) {
-            executeAction((WidgetAction) action);
-        } else if (action instanceof PrimitiveAction) {
-            executeAction((PrimitiveAction) action);
-        } else if (action instanceof IntentBasedAction) {
-            executeAction((IntentBasedAction) action);
-        } else if (action instanceof SystemAction) {
-            executeAction((SystemAction) action);
-        } else if (action instanceof MotifAction) {
-            executeAction((MotifAction) action);
-        } else if (action instanceof UIAction) {
-            executeAction((UIAction) action);
-        } else {
-            throw new UnsupportedOperationException("Actions class "
-                    + action.getClass().getSimpleName() + " not yet supported");
+        try {
+            if (action instanceof WidgetAction) {
+                executeAction((WidgetAction) action);
+            } else if (action instanceof PrimitiveAction) {
+                executeAction((PrimitiveAction) action);
+            } else if (action instanceof IntentBasedAction) {
+                executeAction((IntentBasedAction) action);
+            } else if (action instanceof SystemAction) {
+                executeAction((SystemAction) action);
+            } else if (action instanceof MotifAction) {
+                executeAction((MotifAction) action);
+            } else if (action instanceof UIAction) {
+                executeAction((UIAction) action);
+            } else {
+                throw new UnsupportedOperationException("Actions class "
+                        + action.getClass().getSimpleName() + " not yet supported");
+            }
+        } catch (IllegalStateException e) {
+            MATE.log_debug("Couldn't execute action: " + action);
+            e.printStackTrace();
+            if (Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)) {
+                throw new UIAutomatorException("UIAutomator disconnected, couldn't execute action!");
+            } else {
+                // unexpected behaviour
+                throw e;
+            }
         }
+
+        checkForCrash();
     }
 
     /**
@@ -196,7 +215,7 @@ public class DeviceMgr {
      *
      * @param action The system event.
      */
-    private void executeAction(SystemAction action) throws AUTCrashException {
+    private void executeAction(SystemAction action) {
 
         // the inner class separator '$' needs to be escaped
         String receiver = action.getReceiver().replaceAll("\\$", Matcher.quoteReplacement("\\$"));
@@ -228,16 +247,14 @@ public class DeviceMgr {
             Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
                     action.getReceiver(), action.getAction(), action.isDynamicReceiver());
         }
-        checkForCrash();
     }
 
     /**
      * Executes the given motif action.
      *
      * @param action The given motif action.
-     * @throws AUTCrashException If the app crashes.
      */
-    private void executeAction(MotifAction action) throws AUTCrashException {
+    private void executeAction(MotifAction action) {
 
         ActionType typeOfAction = action.getActionType();
 
@@ -252,7 +269,6 @@ public class DeviceMgr {
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
-        checkForCrash();
     }
 
     /**
@@ -511,9 +527,8 @@ public class DeviceMgr {
      * Executes the given ui action.
      *
      * @param action The given ui action.
-     * @throws AUTCrashException If the app crashes.
      */
-    private void executeAction(UIAction action) throws AUTCrashException {
+    private void executeAction(UIAction action) {
 
         ActionType typeOfAction = action.getActionType();
 
@@ -585,7 +600,6 @@ public class DeviceMgr {
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
-        checkForCrash();
     }
 
     /**
@@ -594,7 +608,7 @@ public class DeviceMgr {
      *
      * @param action The action which contains the Intent to be sent.
      */
-    private void executeAction(IntentBasedAction action) throws AUTCrashException {
+    private void executeAction(IntentBasedAction action) {
 
         Intent intent = action.getIntent();
 
@@ -633,16 +647,14 @@ public class DeviceMgr {
                 e.printStackTrace();
             }
         }
-        checkForCrash();
     }
 
     /**
      * Executes a primitive action, e.g. a click on a specific coordinate.
      *
      * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    private void executeAction(PrimitiveAction action) throws AUTCrashException {
+    private void executeAction(PrimitiveAction action) {
 
         switch (action.getActionType()) {
             case CLICK:
@@ -679,7 +691,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for primitive actions.");
         }
-        checkForCrash();
     }
 
     /**
@@ -793,9 +804,8 @@ public class DeviceMgr {
      * Executes a widget action, e.g. a click on a certain widget.
      *
      * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    private void executeAction(WidgetAction action) throws AUTCrashException {
+    private void executeAction(WidgetAction action) {
 
         Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
@@ -824,8 +834,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for widget actions.");
         }
-
-        checkForCrash();
     }
 
     /**

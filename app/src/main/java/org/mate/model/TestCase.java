@@ -403,6 +403,13 @@ public class TestCase {
             String activityAfterAction = newState.getActivityName();
             String newStateID = newState.getId();
 
+            if (actionResult == ActionResult.FAILURE_UIAUTOMATOR
+                    || actionResult == ActionResult.FAILURE_UNKNOWN) {
+                // We couldn't derive the target state.
+                activityAfterAction = "unknown";
+                newStateID = "unknown";
+            }
+
             actionSequence.add(action);
             activitySequence.add(activityAfterAction);
             stateSequence.add(newStateID);
@@ -421,6 +428,9 @@ public class TestCase {
                     crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
                 }
             case SUCCESS_OUTBOUND:
+                return false;
+            case FAILURE_UIAUTOMATOR:
+            case FAILURE_UNKNOWN:
                 return false;
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
