@@ -10,15 +10,30 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Performs a timeout-based execution task, i.e. the algorithm we like to run.
+ */
 public class TimeoutRun {
-    private static synchronized void withInterruptLock(Runnable r) {
-        r.run();
-    }
 
     public static boolean timeoutRun(Callable<Void> c, long milliseconds) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
 
-        Future<Void> future = executor.submit(c);
+        // We like to log the exception that caused terminating the thread.
+        final Callable<Void> logExceptions = () -> {
+            try {
+                c.call();
+                return null;
+            } catch (final MateInterruptedException e) {
+                MATE.log_acc("Terminating timeout thread with interrupt: " + e.getMessage());
+                throw e;
+            } catch(final Exception e) {
+                MATE.log_acc("Unexpected exception in timeout thread: " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
+        };
+
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final Future<Void> future = executor.submit(logExceptions);
         boolean finishedWithoutTimeout = false;
 
         try {
