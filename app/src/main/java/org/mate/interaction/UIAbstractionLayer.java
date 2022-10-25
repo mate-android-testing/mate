@@ -350,7 +350,7 @@ public class UIAbstractionLayer {
                 // TODO: Check in subroutines for uiautomator issue and don't catch exceptions here.
                 if (Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)) {
                     MATE.log_debug("UIAutomator disconnected, couldn't clear screen!");
-                    throw new UIAutomatorException("UIAutomator disconnected, couldn't clear screen!");
+                    throw new UIAutomatorException("UIAutomator disconnected, couldn't clear screen!", e);
                 } else {
                     Log.e("acc", "Unexpected exception during clearing screen: ", e);
                     throw e;

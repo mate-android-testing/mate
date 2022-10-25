@@ -82,7 +82,7 @@ public class AppScreen {
         } catch (Exception e) {
             MATE.log_debug("Couldn't parse widgets: " + e.getMessage());
             e.printStackTrace();
-            throw new UIAutomatorException("UIAutomator disconnected, couldn't parse widgets!");
+            throw new UIAutomatorException("UIAutomator disconnected, couldn't parse widgets!", e);
         }
         MATE.log_debug("Number of widgets: " + widgets.size());
     }
@@ -184,9 +184,7 @@ public class AppScreen {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (node.isShowingHintText()) {
-                    if (node.getHintText() instanceof String) {
-                        hint = (String) node.getHintText();
-                    }
+                    hint = node.getHintText().toString(); 
                 }
             } else {
                 // fallback mechanism for older devices
