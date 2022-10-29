@@ -255,9 +255,9 @@ public class GeneticAlgorithmBuilder {
     }
 
     public GeneticAlgorithmBuilder withGenoToPhenoType() {
-        FitnessFunction[] function = {FitnessFunction.GENO_TO_PHENO_TYPE};
-
-        org.mate.Properties.setProperty("fitness_functions", function);
+        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, 0);
+        properties.setProperty(key, FitnessFunction.GENO_TO_PHENO_TYPE.name());
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, "1");
 
         return this;
     }

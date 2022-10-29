@@ -26,7 +26,6 @@ public class ExecuteMATESapienz {
         FitnessFunction[] sapienzFitness = new FitnessFunction[] {
                 FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.NUMBER_OF_CRASHES,
-                FitnessFunction.BRANCH_DISTANCE,
                 FitnessFunction.TEST_LENGTH
         };
 
