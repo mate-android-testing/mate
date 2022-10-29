@@ -534,13 +534,13 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("Sapienz requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+        } else if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
             throw new IllegalStateException("Sapienz requires a crossover function. You have to " +
                     "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("Sapienz requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("Sapienz requires a mutation function. You have to " +
                     "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
@@ -654,6 +654,26 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
+     * Initialises the crossover functions of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the fitness functions used by the genetic algorithm.
+     */
+    private <T> List<ICrossOverFunction<T>> initializeCrossOverFunctions() {
+        int amountCrossoverFunction = Integer.parseInt(
+                properties.getProperty(GeneticAlgorithmBuilder.AMOUNT_CROSSOVER_FUNCTIONS_KEY));
+        if (amountCrossoverFunction == 0) {
+            return null;
+        } else {
+            List<ICrossOverFunction<T>> crossOverFunctions = new ArrayList<>();
+            for (int i = 0; i < amountCrossoverFunction; i++) {
+                crossOverFunctions.add(this.<T>initializeCrossOverFunction(i));
+            }
+            return crossOverFunctions;
+        }
+    }
+
+    /**
      * Initialises the crossover function of the genetic algorithm.
      *
      * @param <T> The type wrapped by the chromosomes.
@@ -681,6 +701,55 @@ public class GeneticAlgorithmProvider {
                     throw new UnsupportedOperationException("Unknown crossover function: "
                             + crossOverFunctionId);
             }
+        }
+    }
+
+    /**
+     * Initialises the crossover function of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the crossover function used by the genetic algorithm.
+     */
+    private <T> ICrossOverFunction<T> initializeCrossOverFunction(int index) {
+
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE,
+                GeneticAlgorithmBuilder.CROSSOVER_FUNCTION_KEY_FORMAT, index);
+        String crossOverFunctionId = properties.getProperty(key);
+
+        switch (CrossOverFunction.valueOf(crossOverFunctionId)) {
+            case TEST_CASE_MERGE_CROSS_OVER:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
+            case TEST_SUITE_UNIFORM_CROSS_OVER:
+                return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
+            case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
+                return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
+            case INTEGER_SEQUENCE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
+            default:
+                throw new UnsupportedOperationException("Unknown crossover function: "
+                        + crossOverFunctionId);
+        }
+    }
+
+    /**
+     * Initialises the crossover functions of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the fitness functions used by the genetic algorithm.
+     */
+    private <T> List<IMutationFunction<T>> initializeMutationFunctions() {
+        int amountMutationFunction = Integer.parseInt(
+                properties.getProperty(GeneticAlgorithmBuilder.AMOUNT_MUTATION_FUNCTIONS_KEY));
+        if (amountMutationFunction == 0) {
+            return null;
+        } else {
+            List<IMutationFunction<T>> mutationFunctions = new ArrayList<>();
+            for (int i = 0; i < amountMutationFunction; i++) {
+                mutationFunctions.add(this.<T>initializeMutationFunction(i));
+            }
+            return mutationFunctions;
         }
     }
 
@@ -726,6 +795,49 @@ public class GeneticAlgorithmProvider {
                     throw new UnsupportedOperationException("Unknown mutation function: "
                             + mutationFunctionId);
             }
+        }
+    }
+
+    /**
+     * Initialises the mutation function of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the mutation function used by the genetic algorithm.
+     */
+    private <T> IMutationFunction<T> initializeMutationFunction(int index) {
+
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE,
+                GeneticAlgorithmBuilder.MUTATION_FUNCTION_KEY_FORMAT, index);
+        String mutationFunctionId = properties.getProperty(key);
+
+        switch (MutationFunction.valueOf(mutationFunctionId)) {
+            case TEST_CASE_CUT_POINT_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
+            case TEST_SUITE_CUT_POINT_MUTATION:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
+            case SAPIENZ_MUTATION:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
+            case PRIMITIVE_SHUFFLE_MUTATION:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
+            case SHUFFLE_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
+            case INTEGER_SEQUENCE_POINT_MUTATION:
+                return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
+            case INTEGER_SEQUENCE_LENGTH_MUTATION:
+                return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
+            default:
+                throw new UnsupportedOperationException("Unknown mutation function: "
+                        + mutationFunctionId);
         }
     }
 

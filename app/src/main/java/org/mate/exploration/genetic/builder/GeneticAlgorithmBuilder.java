@@ -250,10 +250,6 @@ public class GeneticAlgorithmBuilder {
 
     public GeneticAlgorithmBuilder withGenoToPhenoType() {
         FitnessFunction[] function = {FitnessFunction.GENO_TO_PHENO_TYPE};
-        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, 1);
-
-        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, String.valueOf(1));
-        properties.setProperty(key, FitnessFunction.GENO_TO_PHENO_TYPE.name());
 
         org.mate.Properties.setProperty("fitness_functions", function);
 
@@ -462,8 +458,12 @@ public class GeneticAlgorithmBuilder {
     public <T> IGeneticAlgorithm<T> build() {
         MATE.log_acc("Building genetic algorithm with properties:");
         for (String key : properties.stringPropertyNames()) {
-            if (key.startsWith("fitness_function")
-                    && Integer.parseInt(properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY)) > 5) {
+            if ((key.startsWith("fitness_function")
+                    && Integer.parseInt(properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY)) > 5)
+                || (key.startsWith("crossover_function")
+                    && Integer.parseInt(properties.getProperty(AMOUNT_CROSSOVER_FUNCTIONS_KEY)) > 5)
+                || (key.startsWith("mutation_function")
+                    && Integer.parseInt(properties.getProperty(AMOUNT_MUTATION_FUNCTIONS_KEY)) > 5)) {
                 continue;
             }
             MATE.log_acc("Key: " + key + ", Value: " + properties.getProperty(key));
