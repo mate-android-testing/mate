@@ -20,7 +20,7 @@ public class ExecuteMATERandomWalk {
             final GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                     .withAlgorithm(Algorithm.RANDOM_WALK)
                     .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                    .withMutationFunction(Properties.MUTATION_FUNCTION())
+                    .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                     .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                     .withTerminationCondition(Properties.TERMINATION_CONDITION());
 

@@ -26,7 +26,7 @@ public class ExecuteMATENoveltySearch {
                 .withAlgorithm(Algorithm.NOVELTY_SEARCH)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(SelectionFunction.NOVELTY_RANK_SELECTION)
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
                 .withFitnessFunctions(novelty, Properties.OBJECTIVE().name())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())

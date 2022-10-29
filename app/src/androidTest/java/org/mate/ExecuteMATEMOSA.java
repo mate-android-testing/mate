@@ -26,7 +26,7 @@ public class ExecuteMATEMOSA {
                 .withAlgorithm(Algorithm.MOSA)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())

@@ -24,7 +24,7 @@ public class ExecuteMATEMIO {
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MIO)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())

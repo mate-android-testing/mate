@@ -167,10 +167,6 @@ public class Properties {
 
     public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
 
-    public static MutationFunction MUTATION_FUNCTION() {
-        return propertyOr(null);
-    }
-
     public static MutationFunction[] MUTATION_FUNCTIONS() {
         return propertyOr(null);
     }

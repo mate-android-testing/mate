@@ -25,7 +25,7 @@ public class ExecuteMATEGeneticAlgorithm {
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
