@@ -148,11 +148,6 @@ public class Properties {
 
     public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
 
-    // TODO: DELETE Function
-    public static FitnessFunction FITNESS_FUNCTION() {
-        return propertyOr(null);
-    }
-
     /**
      * Determines a list of fitness functions from the properties file.
      *
@@ -163,7 +158,7 @@ public class Properties {
     }
 
     /**
-     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTION()}
+     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTIONS()}
      * provides the mapping from geno to phenotype, this property specifies the core fitness function.
      *
      * @return Returns the core fitness function used in the context of GE.
