@@ -135,15 +135,7 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunction(CrossOverFunction crossoverFunction) {
-
-        properties.setProperty(CROSSOVER_FUNCTION_KEY, crossoverFunction.name());
-
-        // TODO: Remove once all properties are enforced via the mate.properties file!
-        if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
-            org.mate.Properties.setProperty("crossover_function", crossoverFunction);
-        }
-
-        return this;
+        return withCrossoverFunctions(new CrossOverFunction[] { crossoverFunction });
     }
 
     /**
@@ -185,15 +177,7 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunction(MutationFunction mutationFunction) {
-
-        properties.setProperty(MUTATION_FUNCTION_KEY, mutationFunction.name());
-
-        // TODO: Remove once all properties are enforced via the mate.properties file!
-        if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            org.mate.Properties.setProperty("mutation_function", mutationFunction);
-        }
-
-        return this;
+        return withMutationFunctions(new MutationFunction[] {mutationFunction});
     }
 
     /**
