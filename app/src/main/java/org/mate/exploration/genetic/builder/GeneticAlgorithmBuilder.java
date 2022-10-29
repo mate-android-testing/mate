@@ -153,6 +153,8 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunctions(CrossOverFunction[] crossoverFunctions) {
+        assert crossoverFunctions != null;
+
         int counter = 0;
 
         for (int i = 0; i < crossoverFunctions.length; i++) {
@@ -201,6 +203,8 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunctions(MutationFunction[] mutationFunctions) {
+        assert mutationFunctions != null;
+
         int counter = 0;
 
         for (int i = 0; i < mutationFunctions.length; i++) {
@@ -225,6 +229,8 @@ public class GeneticAlgorithmBuilder {
     }
 
     public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions) {
+        assert fitnessFunctions != null;
+
         int counter = 0;
 
         for (int i = 0; i < fitnessFunctions.length; i++) {

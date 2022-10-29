@@ -100,7 +100,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
      * Initializes MIO with the relevant attributes.
      *
      * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
-     * @param mutationFunction The used mutation function, see {@link IMutationFunction}.
+     * @param mutationFunctions The used mutation function, see {@link IMutationFunction}.
      * @param fitnessFunctions The used fitness function, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
      * @param populationSize The population size n.
@@ -112,7 +112,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
      * @param pSampleRandom The sampling probability P_r.
      */
     public MIO(IChromosomeFactory<T> chromosomeFactory,
-               IMutationFunction<T> mutationFunction,
+               List<IMutationFunction<T>> mutationFunctions,
                List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
                int populationSize,
@@ -126,7 +126,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
         super(chromosomeFactory,
                 null,
                 null,
-                mutationFunction,
+                mutationFunctions,
                 fitnessFunctions,
                 terminationCondition,
                 populationSize,
@@ -266,7 +266,9 @@ public class MIO<T> extends GeneticAlgorithm<T> {
 
             // sample up to m mutants from the same base chromosome
             for (int i = 0; i < mutationRate; i++) {
-                IChromosome<T> mutant = mutationFunction.mutate(chromosome);
+
+                // TODO:
+                IChromosome<T> mutant = mutationFunctions.get(0).mutate(chromosome);
                 population.add(mutant);
                 MATE.log_acc("Sampled mutant " + mutant + "!");
             }

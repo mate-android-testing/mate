@@ -41,12 +41,12 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     /**
      * The used crossover function, see {@link ICrossOverFunction}.
      */
-    protected ICrossOverFunction<T> crossOverFunction;
+    protected List<ICrossOverFunction<T>> crossOverFunctions;
 
     /**
      * The used mutation function, see {@link IMutationFunction}.
      */
-    protected IMutationFunction<T> mutationFunction;
+    protected List<IMutationFunction<T>> mutationFunctions;
 
     /**
      * The used fitness functions, see {@link IFitnessFunction}.
@@ -93,8 +93,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
+     * @param crossOverFunctions The used crossover function.
+     * @param mutationFunctions The used mutation function.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
@@ -104,8 +104,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory,
                             ISelectionFunction<T> selectionFunction,
-                            ICrossOverFunction<T> crossOverFunction,
-                            IMutationFunction<T> mutationFunction,
+                            List<ICrossOverFunction<T>> crossOverFunctions,
+                            List<IMutationFunction<T>> mutationFunctions,
                             List<IFitnessFunction<T>> fitnessFunctions,
                             ITerminationCondition terminationCondition,
                             int populationSize,
@@ -115,8 +115,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         this.chromosomeFactory = chromosomeFactory;
         this.selectionFunction = selectionFunction;
-        this.crossOverFunction = crossOverFunction;
-        this.mutationFunction = mutationFunction;
+        this.crossOverFunctions = crossOverFunctions;
+        this.mutationFunctions = mutationFunctions;
         this.fitnessFunctions = fitnessFunctions;
         this.terminationCondition = terminationCondition;
 
@@ -189,7 +189,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                offsprings = crossOverFunction.cross(parents);
+                //TODO:
+                offsprings = crossOverFunctions.get(0).cross(parents);
             } else {
                 offsprings = parents;
             }
@@ -197,7 +198,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             for (IChromosome<T> offspring : offsprings) {
 
                 if (Randomness.getRnd().nextDouble() < pMutate) {
-                    offspring = mutationFunction.mutate(offspring);
+                    //TODO:
+                    offspring = mutationFunctions.get(0).mutate(offspring);
                 }
 
                 if (newGeneration.size() < bigPopulationSize) {

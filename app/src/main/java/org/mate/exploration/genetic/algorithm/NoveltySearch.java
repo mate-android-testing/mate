@@ -74,8 +74,8 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
+     * @param crossOverFunctions The used crossover function.
+     * @param mutationFunctions The used mutation function.
      * @param fitnessFunctions The used fitness/novelty function.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
@@ -88,8 +88,8 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      */
     public NoveltySearch(IChromosomeFactory<T> chromosomeFactory,
                          ISelectionFunction<T> selectionFunction,
-                         ICrossOverFunction<T> crossOverFunction,
-                         IMutationFunction<T> mutationFunction,
+                         List<ICrossOverFunction<T>> crossOverFunctions,
+                         List<IMutationFunction<T>> mutationFunctions,
                          List<IFitnessFunction<T>> fitnessFunctions,
                          ITerminationCondition terminationCondition,
                          int populationSize,
@@ -99,7 +99,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                          int nearestNeighbours,
                          int archiveLimit,
                          double noveltyThreshold) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
+        super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions,
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
         this.nearestNeighbours = nearestNeighbours; // the number of nearest neighbours k
@@ -158,7 +158,9 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> parent;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                parent = crossOverFunction.cross(parents).get(0);
+
+                //TODO:
+                parent = crossOverFunctions.get(0).cross(parents).get(0);
             } else {
                 parent = parents.get(0);
             }
@@ -166,7 +168,9 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> offspring;
 
             if (Randomness.getRnd().nextDouble() < pMutate) {
-                offspring = mutationFunction.mutate(parent);
+
+                // TODO:
+                offspring = mutationFunctions.get(0).mutate(parent);
             } else {
                 offspring = parent;
             }

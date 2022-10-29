@@ -38,8 +38,8 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
+     * @param crossOverFunctions The used crossover function.
+     * @param mutationFunctions The used mutation function.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size N.
@@ -49,15 +49,15 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
      */
     public NSGAII(IChromosomeFactory<T> chromosomeFactory,
                   ISelectionFunction<T> selectionFunction,
-                  ICrossOverFunction<T> crossOverFunction,
-                  IMutationFunction<T> mutationFunction,
+                  List<ICrossOverFunction<T>> crossOverFunctions,
+                  List<IMutationFunction<T>> mutationFunctions,
                   List<IFitnessFunction<T>> fitnessFunctions,
                   ITerminationCondition terminationCondition,
                   int populationSize,
                   int bigPopulationSize,
                   double pCrossover,
                   double pMutate) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
+        super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions,
                 fitnessFunctions, terminationCondition, populationSize,
                 bigPopulationSize, pCrossover, pMutate);
         this.selectionFunction = (CrowdedTournamentSelectionFunction<T>) selectionFunction;
@@ -89,7 +89,8 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
             List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                offsprings = crossOverFunction.cross(parents);
+                // TODO:
+                offsprings = crossOverFunctions.get(0).cross(parents);
             } else {
                 offsprings = parents;
             }
@@ -97,7 +98,8 @@ public class NSGAII<T> extends GeneticAlgorithm<T> {
             for (IChromosome<T> offspring : offsprings) {
 
                 if (Randomness.getRnd().nextDouble() < pMutate) {
-                    offspring = mutationFunction.mutate(offspring);
+                    // TODO:
+                    offspring = mutationFunctions.get(0).mutate(offspring);
                 }
 
                 if (newGeneration.size() < bigPopulationSize) {

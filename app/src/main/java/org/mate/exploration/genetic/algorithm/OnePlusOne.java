@@ -24,18 +24,18 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
      * Initialises the 1+1 genetic algorithm with the necessary attributes.
      *
      * @param chromosomeFactory The used chromosome factory.
-     * @param mutationFunction The used mutation function.
+     * @param mutationFunctions The used mutation function.
      * @param fitnessFunctions The used fitness functions. Only a single fitness function is used here.
      * @param terminationCondition The used termination condition.
      */
     public OnePlusOne(IChromosomeFactory<T> chromosomeFactory,
-                      IMutationFunction<T> mutationFunction,
+                      List<IMutationFunction<T>> mutationFunctions,
                       List<IFitnessFunction<T>> fitnessFunctions,
                       ITerminationCondition terminationCondition) {
         super(chromosomeFactory,
                 null,
                 null,
-                mutationFunction,
+                mutationFunctions,
                 fitnessFunctions,
                 terminationCondition,
                 1,
@@ -55,7 +55,8 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
         // sample a single offspring by mutation
-        IChromosome<T> offspring = mutationFunction.mutate(population.get(0));
+        //TODO:
+        IChromosome<T> offspring = mutationFunctions.get(0).mutate(population.get(0));
         population.add(offspring);
 
         // evaluate fitness
