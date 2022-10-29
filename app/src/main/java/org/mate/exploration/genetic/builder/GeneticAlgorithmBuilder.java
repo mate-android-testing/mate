@@ -24,6 +24,8 @@ public class GeneticAlgorithmBuilder {
     public static final String ALGORITHM_KEY = "algorithm";
     public static final String FITNESS_FUNCTION_KEY_FORMAT = "fitness_function_%d";
     public static final String FITNESS_FUNCTION_ARG_KEY_FORMAT = "fitness_function_%d_arg";
+    public static final String CROSSOVER_FUNCTION_KEY_FORMAT = "crossover_function_%d";
+    public static final String MUTATION_FUNCTION_KEY_FORMAT = "mutation_function_%d";
     public static final String CHROMOSOME_FACTORY_KEY = "chromosome_factory";
     public static final String MAX_NUM_EVENTS_KEY = "num_events";
     public static final String USE_DEFAULTS_KEY = "use_defaults";
@@ -37,6 +39,8 @@ public class GeneticAlgorithmBuilder {
     public static final String P_MUTATE_KEY = "p_mutate";
     public static final String P_CROSSOVER_KEY = "p_crossover";
     public static final String AMOUNT_FITNESS_FUNCTIONS_KEY = "amount_fitness_functions";
+    public static final String AMOUNT_CROSSOVER_FUNCTIONS_KEY = "amount_crossover_functions";
+    public static final String AMOUNT_MUTATION_FUNCTIONS_KEY = "amount_mutation_functions";
     public static final String BIG_POPULATION_SIZE_KEY = "big_population_size";
     public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
     public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
@@ -143,6 +147,36 @@ public class GeneticAlgorithmBuilder {
     }
 
     /**
+     * Specifies the crossover functions of the genetic algorithm.
+     *
+     * @param crossoverFunctions A list of crossover functions that should be used.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withCrossoverFunctions(CrossOverFunction[] crossoverFunctions) {
+        int counter = 0;
+
+        for (int i = 0; i < crossoverFunctions.length; i++) {
+            if (crossoverFunctions[i] != null) {
+                String key = "";
+
+                key = String.format(FORMAT_LOCALE, CROSSOVER_FUNCTION_KEY_FORMAT, counter);
+                properties.setProperty(key, crossoverFunctions[i].name());
+
+                counter++;
+            }
+        }
+
+        properties.setProperty(AMOUNT_CROSSOVER_FUNCTIONS_KEY, String.valueOf(crossoverFunctions.length));
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("crossover_functions", crossoverFunctions);
+        }
+
+        return this;
+    }
+
+    /**
      * Specifies the mutation function of the genetic algorithm.
      *
      * @param mutationFunction The mutation function that should be used.
@@ -155,6 +189,36 @@ public class GeneticAlgorithmBuilder {
         // TODO: Remove once all properties are enforced via the mate.properties file!
         if (org.mate.Properties.MUTATION_FUNCTION() == null) {
             org.mate.Properties.setProperty("mutation_function", mutationFunction);
+        }
+
+        return this;
+    }
+
+    /**
+     * Specifies the mutation functions of the genetic algorithm.
+     *
+     * @param mutationFunctions A list of mutation functions that should be used.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withMutationFunctions(MutationFunction[] mutationFunctions) {
+        int counter = 0;
+
+        for (int i = 0; i < mutationFunctions.length; i++) {
+            if (mutationFunctions[i] != null) {
+                String key = "";
+
+                key = String.format(FORMAT_LOCALE, MUTATION_FUNCTION_KEY_FORMAT, counter);
+                properties.setProperty(key, mutationFunctions[i].name());
+
+                counter++;
+            }
+        }
+
+        properties.setProperty(AMOUNT_MUTATION_FUNCTIONS_KEY, String.valueOf(mutationFunctions.length));
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("mutation_functions", mutationFunctions);
         }
 
         return this;
