@@ -171,8 +171,6 @@ public class Properties {
         return propertyOr(null);
     }
 
-    public static CrossOverFunction CROSSOVER_FUNCTION() { return propertyOr(null); }
-
     public static CrossOverFunction[] CROSSOVER_FUNCTIONS() { return propertyOr(null); }
 
     public static TerminationCondition TERMINATION_CONDITION() { return propertyOr(null); }

@@ -33,7 +33,7 @@ public class ExecuteMATENSGAII {
                 .withAlgorithm(Algorithm.NSGAII)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
-                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
                 .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withFitnessFunctions(functions)
                 .withPopulationSize(Properties.POPULATION_SIZE())

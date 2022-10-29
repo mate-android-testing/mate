@@ -24,7 +24,7 @@ public class ExecuteMATEStandardGeneticAlgorithm {
                 .withAlgorithm(Algorithm.STANDARD_GA)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
-                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
                 .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())

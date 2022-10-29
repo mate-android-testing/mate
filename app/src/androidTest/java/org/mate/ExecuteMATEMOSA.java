@@ -25,7 +25,7 @@ public class ExecuteMATEMOSA {
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
                 .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
