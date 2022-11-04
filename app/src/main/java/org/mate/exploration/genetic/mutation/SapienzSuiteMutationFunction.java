@@ -4,6 +4,8 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.crossover.OnePointCrossOverFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
@@ -19,7 +21,7 @@ import java.util.List;
  * https://discovery.ucl.ac.uk/id/eprint/1508043/1/p_issta16_sapienz.pdf. In particular, have
  * a look at section 3.1 and Algorithm 2.
  */
-public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
+public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossOver<TestSuite> {
 
     /**
      * The probability for mutation.
@@ -43,13 +45,27 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     }
 
     /**
-     * Performs variation as described in the Sapienz paper, see section 3.1 and Algorithm 2.
+     * Performs variation as described in the Sapienz paper with the one point cross over function,
+     * see section 3.1 and Algorithm 2.
      *
      * @param chromosome The chromosome to be mutated.
      * @return Returns the mutated chromosome.
      */
     @Override
     public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome) {
+        return mutate(chromosome, new OnePointCrossOverFunction<>());
+    }
+
+    /**
+     * Performs variation as described in the Sapienz paper, see section 3.1 and Algorithm 2.
+     *
+     * @param chromosome The chromosome to be mutated.
+     * @param crossOverFunction The cross over function used in the mutation step.
+     * @return Returns the mutated chromosome.
+     */
+    @Override
+    public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome,
+                                         ICrossOverFunction<TestSuite> crossOverFunction) {
 
         TestSuite mutatedTestSuite = new TestSuite();
         IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
@@ -71,7 +87,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                  */
                 TestCase t1 = testCases.get(i - 1);
                 TestCase t2 = testCases.get(i);
-                onePointCrossover(t1, t2);
+                crossOverFunction.cross(wrap(t1, t2));
                 notMutatedTestCases.remove(t1);
                 notMutatedTestCases.remove(t2);
             }
@@ -128,30 +144,21 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     }
 
     /**
-     * Performs an (in-place) one-point crossover with the given two test cases.
+     * Wraps two test cases into a test suite that is contained by a single chromosome in a list.
      *
      * @param t1 The first test case.
      * @param t2 The second test case.
+     * @return A list of a single chromosome containing a test suite with two test cases.
      */
-    private void onePointCrossover(TestCase t1, TestCase t2) {
+    private List<IChromosome<TestSuite>> wrap(TestCase t1, TestCase t2) {
+        List<IChromosome<TestSuite>> wrappedTestCases = new ArrayList<>();
+        TestSuite dummySuite = new TestSuite("");
+        dummySuite.getTestCases().add(t1);
+        dummySuite.getTestCases().add(t2);
 
-        TestCase copyT1 = TestCase.newDummy();
-        copyT1.getEventSequence().addAll(t1.getEventSequence());
-        TestCase copyT2 = TestCase.newDummy();
-        copyT2.getEventSequence().addAll(t2.getEventSequence());
+        IChromosome<TestSuite> chromosome = new Chromosome<>(dummySuite);
+        wrappedTestCases.add(chromosome);
 
-        int lengthT1 = t1.getEventSequence().size();
-        int lengthT2 = t2.getEventSequence().size();
-        int min = Math.min(lengthT1, lengthT2);
-        int cutPoint = Randomness.getRnd().nextInt(min);
-
-        t1.getEventSequence().clear();
-        t2.getEventSequence().clear();
-
-        t1.getEventSequence().addAll(copyT1.getEventSequence().subList(0, cutPoint));
-        t1.getEventSequence().addAll(copyT2.getEventSequence().subList(cutPoint, lengthT2));
-
-        t2.getEventSequence().addAll(copyT2.getEventSequence().subList(0, cutPoint));
-        t2.getEventSequence().addAll(copyT1.getEventSequence().subList(cutPoint, lengthT1));
+        return wrappedTestCases;
     }
 }

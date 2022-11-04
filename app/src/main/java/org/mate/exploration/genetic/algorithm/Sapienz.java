@@ -8,8 +8,11 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
+import org.mate.exploration.genetic.mutation.IMutationFunctionWithCrossOver;
+import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
+import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -27,14 +30,14 @@ import java.util.Map;
 public class Sapienz<T> extends GeneticAlgorithm<T> {
 
     /**
-     *
+     * The uniform cross over function.
      */
-    private ICrossOverFunction<T> uniformCrossOver;
+    private final ICrossOverFunction<T> uniformCrossOver;
 
     /**
-     *
+     * The one point cross over function used in the mutation step of the Sapienz algorithm.
      */
-    private ICrossOverFunction<T> onePointCrossOver;
+    private final ICrossOverFunction<T> onePointCrossOver;
 
     /**
      * Initializes Sapienz with the relevant attributes.
@@ -99,8 +102,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
 
-                //TODO:
-                IChromosome<T> offspring = crossOverFunctions.get(0).cross(parents).get(0);
+                IChromosome<T> offspring = uniformCrossOver.cross(parents).get(0);
                 newGeneration.add(offspring);
             } else if (rnd < pCrossover + pMutate) { // if r < p + q (apply mutation)
 
@@ -110,7 +112,17 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 * Note that the mutation function directly executes the mutated individual x1'.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
-                IChromosome<T> offspring = singleMutationFunction.mutate(parents.get(0));
+                IChromosome<T> offspring = null;
+
+                if (singleMutationFunction instanceof IMutationFunctionWithCrossOver) {
+                    IMutationFunctionWithCrossOver<T> mutationWithCross
+                            = (IMutationFunctionWithCrossOver<T>) singleMutationFunction;
+
+                    offspring = mutationWithCross.mutate(parents.get(0), onePointCrossOver);
+                } else {
+                    offspring = singleMutationFunction.mutate(parents.get(0));
+                }
+
                 newGeneration.add(offspring);
             } else { // (apply reproduction)
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
