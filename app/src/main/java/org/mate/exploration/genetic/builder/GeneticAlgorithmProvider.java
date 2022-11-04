@@ -679,37 +679,6 @@ public class GeneticAlgorithmProvider {
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the crossover function used by the genetic algorithm.
      */
-    private <T> ICrossOverFunction<T> initializeCrossOverFunction() {
-
-        String crossOverFunctionId
-                = properties.getProperty(GeneticAlgorithmBuilder.CROSSOVER_FUNCTION_KEY);
-        if (crossOverFunctionId == null) {
-            return null;
-        } else {
-            switch (CrossOverFunction.valueOf(crossOverFunctionId)) {
-                case TEST_CASE_MERGE_CROSS_OVER:
-                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
-                case TEST_SUITE_UNIFORM_CROSS_OVER:
-                    return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
-                case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
-                    return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
-                case INTEGER_SEQUENCE_POINT_CROSS_OVER:
-                    return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
-                default:
-                    throw new UnsupportedOperationException("Unknown crossover function: "
-                            + crossOverFunctionId);
-            }
-        }
-    }
-
-    /**
-     * Initialises the crossover function of the genetic algorithm.
-     *
-     * @param <T> The type wrapped by the chromosomes.
-     * @return Returns the crossover function used by the genetic algorithm.
-     */
     private <T> ICrossOverFunction<T> initializeCrossOverFunction(int index) {
 
         String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE,
@@ -750,51 +719,6 @@ public class GeneticAlgorithmProvider {
                 mutationFunctions.add(this.<T>initializeMutationFunction(i));
             }
             return mutationFunctions;
-        }
-    }
-
-    /**
-     * Initialises the mutation function of the genetic algorithm.
-     *
-     * @param <T> The type wrapped by the chromosomes.
-     * @return Returns the mutation function used by the genetic algorithm.
-     */
-    private <T> IMutationFunction<T> initializeMutationFunction() {
-
-        String mutationFunctionId
-                = properties.getProperty(GeneticAlgorithmBuilder.MUTATION_FUNCTION_KEY);
-        if (mutationFunctionId == null) {
-            return null;
-        } else {
-            switch (MutationFunction.valueOf(mutationFunctionId)) {
-                case TEST_CASE_CUT_POINT_MUTATION:
-                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
-                case TEST_SUITE_CUT_POINT_MUTATION:
-                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
-                case SAPIENZ_MUTATION:
-                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
-                case PRIMITIVE_SHUFFLE_MUTATION:
-                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
-                case SHUFFLE_MUTATION:
-                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
-                case INTEGER_SEQUENCE_POINT_MUTATION:
-                    return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
-                case INTEGER_SEQUENCE_LENGTH_MUTATION:
-                    return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
-                default:
-                    throw new UnsupportedOperationException("Unknown mutation function: "
-                            + mutationFunctionId);
-            }
         }
     }
 
