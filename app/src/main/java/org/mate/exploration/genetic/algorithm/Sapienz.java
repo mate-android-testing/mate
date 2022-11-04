@@ -27,6 +27,16 @@ import java.util.Map;
 public class Sapienz<T> extends GeneticAlgorithm<T> {
 
     /**
+     *
+     */
+    private ICrossOverFunction<T> uniformCrossOver;
+
+    /**
+     *
+     */
+    private ICrossOverFunction<T> onPointCrossOver;
+
+    /**
      * Initializes Sapienz with the relevant attributes.
      *
      * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
@@ -53,6 +63,14 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
         super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions,
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
+
+        if (crossOverFunctions.size() != 2) {
+            uniformCrossOver = crossOverFunctions.get(0);
+            onPointCrossOver = crossOverFunctions.get(1);
+        } else {
+            throw new IllegalArgumentException("Sapienz needs two cross over functions! "
+                    + "An uniform cross over function and the on point cross over function.");
+        }
     }
 
     /**
