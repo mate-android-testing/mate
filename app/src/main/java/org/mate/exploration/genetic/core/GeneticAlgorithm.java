@@ -39,14 +39,24 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected ISelectionFunction<T> selectionFunction;
 
     /**
-     * The used crossover function, see {@link ICrossOverFunction}.
+     * A list of used crossover function, see {@link ICrossOverFunction}.
      */
     protected List<ICrossOverFunction<T>> crossOverFunctions;
 
     /**
-     * The used mutation function, see {@link IMutationFunction}.
+     * A crossover function chosen from {@link GeneticAlgorithm#crossOverFunctions}
+     */
+    protected ICrossOverFunction<T> singleCrossOverFunction;
+
+    /**
+     * A list of used mutation function, see {@link IMutationFunction}.
      */
     protected List<IMutationFunction<T>> mutationFunctions;
+
+    /**
+     * A mutation function chosen from {@link GeneticAlgorithm#mutationFunctions}
+     */
+    protected IMutationFunction<T> singleMutationFunction;
 
     /**
      * The used fitness functions, see {@link IFitnessFunction}.
@@ -127,6 +137,14 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         this.pMutate = pMutate;
 
         currentGenerationNumber = 0;
+
+        if (this.crossOverFunctions != null) {
+            singleCrossOverFunction = this.crossOverFunctions.get(0);
+        }
+
+        if (this.mutationFunctions != null) {
+            singleMutationFunction = this.mutationFunctions.get(0);
+        }
     }
 
     /**
@@ -189,8 +207,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                //TODO:
-                offsprings = crossOverFunctions.get(0).cross(parents);
+                offsprings = singleCrossOverFunction.cross(parents);
             } else {
                 offsprings = parents;
             }
@@ -198,8 +215,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             for (IChromosome<T> offspring : offsprings) {
 
                 if (Randomness.getRnd().nextDouble() < pMutate) {
-                    //TODO:
-                    offspring = mutationFunctions.get(0).mutate(offspring);
+                    offspring = singleMutationFunction.mutate(offspring);
                 }
 
                 if (newGeneration.size() < bigPopulationSize) {

@@ -55,8 +55,7 @@ public class OnePlusOne<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
         // sample a single offspring by mutation
-        //TODO:
-        IChromosome<T> offspring = mutationFunctions.get(0).mutate(population.get(0));
+        IChromosome<T> offspring = singleMutationFunction.mutate(population.get(0));
         population.add(offspring);
 
         // evaluate fitness

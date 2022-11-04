@@ -52,9 +52,7 @@ public class RandomWalk<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Creating generation #" + (currentGenerationNumber + 1));
 
         IChromosome<T> chromosome = population.get(0);
-
-        //TODO:
-        IChromosome<T> mutant = mutationFunctions.get(0).mutate(chromosome);
+        IChromosome<T> mutant = singleMutationFunction.mutate(chromosome);
 
         // keep solely the mutant (offspring)
         population.clear();

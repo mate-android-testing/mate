@@ -92,9 +92,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 * Note that the mutation function directly executes the mutated individual x1'.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
-
-                //TODO:
-                IChromosome<T> offspring = mutationFunctions.get(0).mutate(parents.get(0));
+                IChromosome<T> offspring = singleMutationFunction.mutate(parents.get(0));
                 newGeneration.add(offspring);
             } else { // (apply reproduction)
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);

@@ -126,7 +126,7 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
             List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                offsprings = crossOverFunctions.get(0).cross(parents);
+                offsprings = singleCrossOverFunction.cross(parents);
             } else {
                 offsprings = parents;
             }
@@ -134,7 +134,7 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
             for (IChromosome<T> offspring : offsprings) {
 
                 if (Randomness.getRnd().nextDouble() < pMutate) {
-                    offspring = mutationFunctions.get(0).mutate(offspring);
+                    offspring = singleMutationFunction.mutate(offspring);
                 }
 
                 if (newGeneration.size() < bigPopulationSize) {

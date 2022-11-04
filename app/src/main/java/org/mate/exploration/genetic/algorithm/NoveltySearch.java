@@ -158,9 +158,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> parent;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-
-                //TODO:
-                parent = crossOverFunctions.get(0).cross(parents).get(0);
+                parent = singleCrossOverFunction.cross(parents).get(0);
             } else {
                 parent = parents.get(0);
             }
@@ -168,9 +166,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> offspring;
 
             if (Randomness.getRnd().nextDouble() < pMutate) {
-
-                // TODO:
-                offspring = mutationFunctions.get(0).mutate(parent);
+                offspring = singleMutationFunction.mutate(parent);
             } else {
                 offspring = parent;
             }
