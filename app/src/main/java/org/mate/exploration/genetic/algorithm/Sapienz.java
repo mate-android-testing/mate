@@ -34,7 +34,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
     /**
      *
      */
-    private ICrossOverFunction<T> onPointCrossOver;
+    private ICrossOverFunction<T> onePointCrossOver;
 
     /**
      * Initializes Sapienz with the relevant attributes.
@@ -66,7 +66,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
 
         if (crossOverFunctions.size() != 2) {
             uniformCrossOver = crossOverFunctions.get(0);
-            onPointCrossOver = crossOverFunctions.get(1);
+            onePointCrossOver = crossOverFunctions.get(1);
         } else {
             throw new IllegalArgumentException("Sapienz needs two cross over functions! "
                     + "An uniform cross over function and the on point cross over function.");

@@ -25,7 +25,7 @@ public class ExecuteMATESapienz {
 
         CrossOverFunction[] sapienzCrossOver = new CrossOverFunction[] {
                 CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER,
-                CrossOverFunction.ON_POINT_CROSS_OVER
+                CrossOverFunction.ONE_POINT_CROSS_OVER
         };
 
         FitnessFunction[] sapienzFitness = new FitnessFunction[] {
