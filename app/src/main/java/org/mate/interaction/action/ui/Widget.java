@@ -1074,7 +1074,8 @@ public class Widget {
                     && getX1() == other.getX1() &&
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
-                    getY2() == other.getY2();
+                    getY2() == other.getY2() &&
+                    isVisible() == other.isVisible();
         }
     }
 
@@ -1090,7 +1091,8 @@ public class Widget {
                 getX1(),
                 getX2(),
                 getY1(),
-                getY2());
+                getY2(),
+                isVisible());
     }
 
     /**
