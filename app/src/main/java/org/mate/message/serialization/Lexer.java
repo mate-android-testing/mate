@@ -72,7 +72,7 @@ public class Lexer {
         while (true) {
             try {
                 nextChar = reader.read();
-            } catch(final ClosedByInterruptException e) {
+            } catch (final ClosedByInterruptException e) {
                 assert Thread.interrupted(); // Clear the interrupt flag.
                 MATE.log_debug("Interrupt during lexing input: " + value);
                 throw new MateInterruptedException(e);

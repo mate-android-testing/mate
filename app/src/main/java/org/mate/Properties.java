@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
 import org.mate.model.util.DotConverter;
 import org.mate.state.equivalence.StateEquivalenceLevel;
@@ -318,9 +319,9 @@ public class Properties {
         return propertyOr("no_target");
     }
 
-    // whether to draw raw graph or 'extended' graph
-    public static boolean DRAW_RAW_GRAPH() {
-        return propertyOr(true);
+    // how the graph should be drawn
+    public static DrawType DRAW_GRAPH() {
+        return propertyOr(null);
     }
 
     /*

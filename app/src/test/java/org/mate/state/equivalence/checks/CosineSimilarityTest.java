@@ -13,6 +13,7 @@ import org.mockito.MockedStatic;
 
 import java.util.Arrays;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -31,14 +32,17 @@ public class CosineSimilarityTest {
      * @param depth The depth of the widget in the ui hierarchy.
      * @param text The text of the widget.
      * @param contentDescription The content description of the widget.
+     * @param visible Whether the widget is visible or not.
      * @return Returns the mocked widget.
      */
-    private Widget mockWidget(String clazz, int depth, String text, String contentDescription) {
+    private Widget mockWidget(String clazz, int depth, String text, String contentDescription,
+                              boolean visible) {
         Widget widget = mock(Widget.class);
         when(widget.getClazz()).thenReturn(clazz);
         when(widget.getDepth()).thenReturn(depth);
         when(widget.getText()).thenReturn(text);
         when(widget.getContentDesc()).thenReturn(contentDescription);
+        when(widget.isVisible()).thenReturn(visible);
         return widget;
     }
 
@@ -61,8 +65,10 @@ public class CosineSimilarityTest {
     public void testFullCosineSimilarity() {
 
         // create two screen states with the same two buttons
-        Widget cancel = mockWidget("Button", 3, "Cancel", "Cancel");
-        Widget submit = mockWidget("Button", 3, "Submit", "Submit");
+        Widget cancel = mockWidget("Button", 3, "Cancel",
+                "Cancel", true);
+        Widget submit = mockWidget("Button", 3, "Submit",
+                "Submit", true);
 
         AppScreen screenMock = mockAppScreen(cancel, submit);
         IScreenState first = new ActionsScreenState(screenMock);
@@ -87,8 +93,10 @@ public class CosineSimilarityTest {
     @Test
     public void testZeroCosineSimilarity() {
 
-        Widget cancel = mockWidget("Button", 3, "Cancel", "Cancel");
-        Widget submit = mockWidget("Button", 3, "Submit", "Submit");
+        Widget cancel = mockWidget("Button", 3, "Cancel",
+                "Cancel", true);
+        Widget submit = mockWidget("Button", 3, "Submit",
+                "Submit", true);
 
         AppScreen firstScreenMock = mockAppScreen(cancel);
         AppScreen secondScreenMock = mockAppScreen(submit);
@@ -113,8 +121,10 @@ public class CosineSimilarityTest {
     @Test
     public void testPartialCosineSimilarity() {
 
-        Widget cancel = mockWidget("Button", 3, "Cancel", "Cancel");
-        Widget submit = mockWidget("Button", 3, "Submit", "Submit");
+        Widget cancel = mockWidget("Button", 3, "Cancel",
+                "Cancel", true);
+        Widget submit = mockWidget("Button", 3, "Submit",
+                "Submit", true);
 
         AppScreen firstScreenMock = mockAppScreen(cancel, submit);
         AppScreen secondScreenMock = mockAppScreen(submit);
@@ -132,4 +142,34 @@ public class CosineSimilarityTest {
             assertTrue(cosineSimilarity.checkEquivalence(first, second));
         }
     }
+
+    /**
+     * Tests if an invisible widget is different to it's visible counterpart.
+     */
+    @Test
+    public void testVisibility() {
+
+        Widget visible = mockWidget("Button", 3, "Submit",
+                "Submit", true);
+        Widget invisible = mockWidget("Button", 3, "Submit",
+                "Submit", false);
+
+        AppScreen firstScreenMock = mockAppScreen(visible);
+        AppScreen secondScreenMock = mockAppScreen(invisible);
+
+        IScreenState first = new ActionsScreenState(firstScreenMock);
+        IScreenState second = new ActionsScreenState(secondScreenMock);
+
+        try (MockedStatic<Properties> propertyMock = mockStatic(Properties.class)) {
+            propertyMock.when(Properties::STATE_EQUIVALENCE_LEVEL)
+                    .thenReturn(StateEquivalenceLevel.COSINE_SIMILARITY);
+            propertyMock.when(Properties::COSINE_SIMILARITY_THRESHOLD).thenReturn(0.7f);
+
+            IStateEquivalence cosineSimilarity =
+                    StateEquivalenceFactory.getStateEquivalenceCheck(Properties.STATE_EQUIVALENCE_LEVEL());
+
+            assertFalse(cosineSimilarity.checkEquivalence(first, second));
+        }
+    }
+
 }

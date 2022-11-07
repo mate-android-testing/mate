@@ -73,7 +73,8 @@ public class CosineSimilarity implements IStateEquivalence {
              */
             String text = widget.getContentDesc().isEmpty() ? widget.getText() : widget.getContentDesc();
 
-            String key = String.format("%s@%s@%s", widget.getClazz(), widget.getDepth(), text);
+            String key = String.format("%s@%s@%s@%b", widget.getClazz(), widget.getDepth(),
+                    text, widget.isVisible());
             featureVector.put(key, 1);
         }
 
