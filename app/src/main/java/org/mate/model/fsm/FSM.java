@@ -2,7 +2,6 @@ package org.mate.model.fsm;
 
 import android.support.annotation.NonNull;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
@@ -100,9 +99,7 @@ public class FSM {
         // check whether we reached a new state
         reachedNewState = states.add(transition.getTarget());
 
-        if (transitions.add(transition)) {
-            MATE.log_debug(String.valueOf(this));
-        }
+        transitions.add(transition);
 
         currentState = transition.getTarget();
     }

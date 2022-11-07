@@ -146,21 +146,22 @@ public class MATE {
             try {
                 Registry.getEnvironmentManager().reconnect();
             } catch (final IOException e) {
-                MATE.log_error("Cannot re-connect to MATE-Server.");
-                e.printStackTrace();
+                // The subsequent requests to the MATE-Server would fail anyways.
+                throw new IllegalStateException("Cannot re-connect to MATE-Server.", e);
             }
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 CoverageUtils.logFinalCoverage();
             }
 
-            if (Properties.GRAPH_TYPE() != null) {
-                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
+                Registry.getEnvironmentManager().drawGraph();
             }
 
-            Registry.getEnvironmentManager().releaseEmulator();
-            // EnvironmentManager.deleteAllScreenShots(packageName);
+            MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());
+
             try {
+                Registry.getEnvironmentManager().releaseEmulator();
                 Registry.unregisterEnvironmentManager();
                 Registry.unregisterUiAbstractionLayer();
                 Registry.unregisterDeviceMgr();
@@ -168,7 +169,8 @@ public class MATE {
                 Registry.unregisterRandom();
                 Registry.unregisterPackageName();
                 Registry.unregisterTimeout();
-            } catch (IOException e) {
+            } catch (Exception e) {
+                MATE.log_acc("Couldn't de-allocate resources properly: " + e.getMessage());
                 e.printStackTrace();
             }
         }
