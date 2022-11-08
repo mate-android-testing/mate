@@ -1522,7 +1522,8 @@ public class EnvironmentManager {
      *         Otherwise, {@code false}.
      */
     public boolean fetchDotGraphFromDevice(String graphDir, String graphFile) {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/fetch_dot_graph")
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_dot_graph")
                 .withParameter("deviceId", emulator)
                 .withParameter("dirName", graphDir)
                 .withParameter("fileName", graphFile);
