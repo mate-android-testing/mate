@@ -77,13 +77,9 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
         Randomness.shuffleList(testCases);
 
         // Copy for the cross over function
-        TestSuite suiteCopy = new TestSuite();
-        IChromosome<TestSuite> chromosomeCopy = new Chromosome<>(suiteCopy);
-        List<IChromosome<TestSuite>> list = new ArrayList<>();
         List<TestCase> testCasesCopy = new ArrayList<>(testCases);
+        List<IChromosome<TestSuite>> list = wrap(testCasesCopy);
 
-        list.add(chromosomeCopy);
-        suiteCopy.getTestCases().addAll(testCasesCopy);
 
         for (int i = 1; i < testCasesCopy.size(); i = i + 2) {
             double rnd = Randomness.getRnd().nextDouble();
@@ -154,5 +150,23 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
 
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         return mutatedChromosome;
+    }
+
+    /**
+     * Wraps the a list of test cases into a list with a single chromosome which contains a test
+     * suite with these test cases.
+     *
+     * @param testCases The test cases which are wrapped into this bigger data structure.
+     * @return A list of a single chromosome containing a test suite.
+     */
+    public List<IChromosome<TestSuite>> wrap(List<TestCase> testCases) {
+        TestSuite suiteCopy = new TestSuite();
+        IChromosome<TestSuite> chromosomeCopy = new Chromosome<>(suiteCopy);
+        List<IChromosome<TestSuite>> list = new ArrayList<>();
+
+        list.add(chromosomeCopy);
+        suiteCopy.getTestCases().addAll(testCases);
+
+        return list;
     }
 }
