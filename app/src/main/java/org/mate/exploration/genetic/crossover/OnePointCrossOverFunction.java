@@ -28,6 +28,11 @@ public class OnePointCrossOverFunction<T> implements ICrossOverFunction<T>{
         TestCase t2;
 
         if (object instanceof TestCase) {
+            if (parents.size() == 1) {
+                MATE.log_warn("OnePointCrossOverFunction not applicable on a single testcase!");
+                return Collections.singletonList(parents.get(0));
+            }
+
             t1 = (TestCase) object;
             t2 = (TestCase) parents.get(1).getValue();
         } else if (object instanceof TestSuite) {
