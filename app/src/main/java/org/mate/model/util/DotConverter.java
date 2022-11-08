@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -109,7 +108,7 @@ public final class DotConverter {
             fileWriter.flush();
 
             // Fetch and remove dot file from emulator!
-            Registry.getEnvironmentManager().fetchDotGraphFromDevice(DOT_DIR, dotFileName);
+            Registry.getEnvironmentManager().fetchDotGraph(DOT_DIR, dotFileName);
             MATE.log("Fetch and remove dot file from " + dotFile.getAbsolutePath());
         } catch (IOException e) {
             throw new IllegalStateException("Couldn't save dot file!", e);

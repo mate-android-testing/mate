@@ -1521,7 +1521,7 @@ public class EnvironmentManager {
      * @return {@code true}, if the server reports that the operation was successful.
      *         Otherwise, {@code false}.
      */
-    public boolean fetchDotGraphFromDevice(String graphDir, String graphFile) {
+    public boolean fetchDotGraph(String graphDir, String graphFile) {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_dot_graph")
                 .withParameter("deviceId", emulator)
