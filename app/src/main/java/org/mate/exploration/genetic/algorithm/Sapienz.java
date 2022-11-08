@@ -30,12 +30,14 @@ import java.util.Map;
 public class Sapienz<T> extends GeneticAlgorithm<T> {
 
     /**
-     * The uniform cross over function.
+     * The outer cross over function.
+     * Typically, it is an uniform cross over function.
      */
     private final ICrossOverFunction<T> uniformCrossOver;
 
     /**
-     * The one point cross over function used in the mutation step of the Sapienz algorithm.
+     * The cross over function used in the mutation step of the Sapienz algorithm.
+     * Typically, it is an one point cross over function.
      */
     private final ICrossOverFunction<T> onePointCrossOver;
 
