@@ -71,13 +71,24 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
         IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
 
         List<TestCase> testCases = chromosome.getValue().getTestCases();
-        List<TestCase> notMutatedTestCases = new ArrayList<>(testCases);
+        List<TestCase> notMutatedTestCases = new ArrayList<>();
 
         // shuffle the test cases within the test suite
         Randomness.shuffleList(testCases);
 
-        for (int i = 1; i < testCases.size(); i = i + 2) {
+        // Copy for the cross over function
+        TestSuite suiteCopy = new TestSuite();
+        IChromosome<TestSuite> chromosomeCopy = new Chromosome<>(suiteCopy);
+        List<IChromosome<TestSuite>> list = new ArrayList<>();
+        List<TestCase> testCasesCopy = new ArrayList<>(testCases);
+
+        list.add(chromosomeCopy);
+        suiteCopy.getTestCases().addAll(testCasesCopy);
+
+        for (int i = 1; i < testCasesCopy.size(); i = i + 2) {
             double rnd = Randomness.getRnd().nextDouble();
+            TestCase t1 = testCasesCopy.get(i - 1);
+            TestCase t2 = testCasesCopy.get(i);
 
             if (rnd < pMutate) { // if r < q
                 /*
@@ -85,12 +96,14 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
                 * MATE only supports crossover functions that return a single offspring, we make
                 * the one-point crossover here in place.
                  */
-                TestCase t1 = testCases.get(i - 1);
-                TestCase t2 = testCases.get(i);
-                crossOverFunction.cross(wrap(t1, t2));
-                notMutatedTestCases.remove(t1);
-                notMutatedTestCases.remove(t2);
+                crossOverFunction.cross(list);
+            } else {
+                notMutatedTestCases.add(t1);
+                notMutatedTestCases.add(t2);
             }
+
+            testCasesCopy.remove(0);
+            testCasesCopy.remove(0);
         }
 
         for (int i = 0; i < testCases.size(); i++) {
@@ -141,24 +154,5 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
 
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         return mutatedChromosome;
-    }
-
-    /**
-     * Wraps two test cases into a test suite that is contained by a single chromosome in a list.
-     *
-     * @param t1 The first test case.
-     * @param t2 The second test case.
-     * @return A list of a single chromosome containing a test suite with two test cases.
-     */
-    private List<IChromosome<TestSuite>> wrap(TestCase t1, TestCase t2) {
-        List<IChromosome<TestSuite>> wrappedTestCases = new ArrayList<>();
-        TestSuite dummySuite = new TestSuite("");
-        dummySuite.getTestCases().add(t1);
-        dummySuite.getTestCases().add(t2);
-
-        IChromosome<TestSuite> chromosome = new Chromosome<>(dummySuite);
-        wrappedTestCases.add(chromosome);
-
-        return wrappedTestCases;
     }
 }
