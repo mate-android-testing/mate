@@ -9,10 +9,8 @@ import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunctionWithCrossOver;
-import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -69,12 +67,12 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
 
-        if (crossOverFunctions.size() != 2) {
+        if (crossOverFunctions.size() == 2) {
             uniformCrossOver = crossOverFunctions.get(0);
             onePointCrossOver = crossOverFunctions.get(1);
         } else {
             throw new IllegalArgumentException("Sapienz needs two cross over functions! "
-                    + "An uniform cross over function and the on point cross over function.");
+                    + "An uniform cross over function and the one point cross over function.");
         }
     }
 
