@@ -4,8 +4,6 @@ import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.crossover.ICrossOverFunction;
-import org.mate.exploration.genetic.crossover.OnePointCrossOverFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.FitnessUtils;
@@ -21,7 +19,7 @@ import java.util.List;
  * https://discovery.ucl.ac.uk/id/eprint/1508043/1/p_issta16_sapienz.pdf. In particular, have
  * a look at section 3.1 and Algorithm 2.
  */
-public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossOver<TestSuite> {
+public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
 
     /**
      * The probability for mutation.
@@ -53,54 +51,31 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
      */
     @Override
     public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome) {
-        return mutate(chromosome, new OnePointCrossOverFunction<>());
-    }
-
-    /**
-     * Performs variation as described in the Sapienz paper, see section 3.1 and Algorithm 2.
-     *
-     * @param chromosome The chromosome to be mutated.
-     * @param crossOverFunction The cross over function used in the mutation step.
-     * @return Returns the mutated chromosome.
-     */
-    @Override
-    public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome,
-                                         ICrossOverFunction<TestSuite> crossOverFunction) {
-
         TestSuite mutatedTestSuite = new TestSuite();
         IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
 
         List<TestCase> testCases = chromosome.getValue().getTestCases();
-        List<TestCase> notMutatedTestCases = new ArrayList<>();
+        List<TestCase> notMutatedTestCases = new ArrayList<>(testCases);
 
         // shuffle the test cases within the test suite
-        Randomness.shuffleList(testCases);
+        /*Randomness.shuffleList(testCases);
 
-        // Copy for the cross over function
-        List<TestCase> testCasesCopy = new ArrayList<>(testCases);
-        List<IChromosome<TestSuite>> list = wrap(testCasesCopy);
-
-
-        for (int i = 1; i < testCasesCopy.size(); i = i + 2) {
+        for (int i = 1; i < testCases.size(); i = i + 2) {
             double rnd = Randomness.getRnd().nextDouble();
-            TestCase t1 = testCasesCopy.get(i - 1);
-            TestCase t2 = testCasesCopy.get(i);
 
             if (rnd < pMutate) { // if r < q
                 /*
-                * Sapienz performs a one-point crossover on two neighbouring test cases. Since
-                * MATE only supports crossover functions that return a single offspring, we make
-                * the one-point crossover here in place.
+                 * Sapienz performs a one-point crossover on two neighbouring test cases. Since
+                 * MATE only supports crossover functions that return a single offspring, we make
+                 * the one-point crossover here in place.
                  */
-                crossOverFunction.cross(list);
-            } else {
-                notMutatedTestCases.add(t1);
-                notMutatedTestCases.add(t2);
+                /*TestCase t1 = testCases.get(i - 1);
+                TestCase t2 = testCases.get(i);
+                onePointCrossover(t1, t2);
+                notMutatedTestCases.remove(t1);
+                notMutatedTestCases.remove(t2);
             }
-
-            testCasesCopy.remove(0);
-            testCasesCopy.remove(0);
-        }
+        }*/
 
         for (int i = 0; i < testCases.size(); i++) {
             double rnd = Randomness.getRnd().nextDouble();
@@ -150,23 +125,5 @@ public class SapienzSuiteMutationFunction implements IMutationFunctionWithCrossO
 
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
         return mutatedChromosome;
-    }
-
-    /**
-     * Wraps the a list of test cases into a list with a single chromosome which contains a test
-     * suite with these test cases.
-     *
-     * @param testCases The test cases which are wrapped into this bigger data structure.
-     * @return A list of a single chromosome containing a test suite.
-     */
-    public List<IChromosome<TestSuite>> wrap(List<TestCase> testCases) {
-        TestSuite suiteCopy = new TestSuite();
-        IChromosome<TestSuite> chromosomeCopy = new Chromosome<>(suiteCopy);
-        List<IChromosome<TestSuite>> list = new ArrayList<>();
-
-        list.add(chromosomeCopy);
-        suiteCopy.getTestCases().addAll(testCases);
-
-        return list;
     }
 }

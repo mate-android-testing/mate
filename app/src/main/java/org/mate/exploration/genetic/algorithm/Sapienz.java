@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
@@ -8,9 +9,10 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
-import org.mate.exploration.genetic.mutation.IMutationFunctionWithCrossOver;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
+import org.mate.model.TestCase;
+import org.mate.model.TestSuite;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
      * The cross over function used in the mutation step of the Sapienz algorithm.
      * Typically, it is an one point cross over function.
      */
-    private final ICrossOverFunction<T> onePointCrossOver;
+    private final ICrossOverFunction<TestCase> onePointCrossOver;
 
     /**
      * Initializes Sapienz with the relevant attributes.
@@ -69,7 +71,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
 
         if (crossOverFunctions.size() == 2) {
             uniformCrossOver = crossOverFunctions.get(0);
-            onePointCrossOver = crossOverFunctions.get(1);
+            onePointCrossOver = (ICrossOverFunction<TestCase>) crossOverFunctions.get(1);
         } else {
             throw new IllegalArgumentException("Sapienz needs two cross over functions! "
                     + "An uniform cross over function and the one point cross over function.");
@@ -112,16 +114,14 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 * Note that the mutation function directly executes the mutated individual x1'.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
-                IChromosome<T> offspring = null;
+                IChromosome<T> parent = parents.get(0);
+                T object = parent.getValue();
 
-                if (singleMutationFunction instanceof IMutationFunctionWithCrossOver) {
-                    IMutationFunctionWithCrossOver<T> mutationWithCross
-                            = (IMutationFunctionWithCrossOver<T>) singleMutationFunction;
-
-                    offspring = mutationWithCross.mutate(parents.get(0), onePointCrossOver);
-                } else {
-                    offspring = singleMutationFunction.mutate(parents.get(0));
+                if (object instanceof TestSuite) {
+                    parent = produceTestCaseMutation((TestSuite) object);
                 }
+
+                IChromosome<T> offspring = singleMutationFunction.mutate(parent);
 
                 newGeneration.add(offspring);
             } else { // (apply reproduction)
@@ -182,5 +182,45 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
         // fill up the remaining slots with the least crowded chromosomes of the last front
         survivors.addAll(lastFront.subList(0, populationSize - survivors.size()));
         return survivors;
+    }
+
+    private IChromosome<T> produceTestCaseMutation(TestSuite testSuite) {
+        List<TestCase> testCases = new ArrayList<>(testSuite.getTestCases());
+
+        // TODO: Not mutated
+        // shuffle the test cases within the test suite
+        Randomness.shuffleList(testCases);
+
+        for (int i = 1; i < testCases.size(); i = i + 2) {
+            double rnd = Randomness.getRnd().nextDouble();
+
+            if (rnd < pMutate) { // if r < q
+                /*
+                 * Sapienz performs a one-point crossover on two neighbouring test cases. Since
+                 * MATE only supports crossover functions that return a single offspring, we make
+                 * the one-point crossover here in place.
+                 */
+                TestCase t1 = testCases.get(i - 1);
+                TestCase t2 = testCases.get(i);
+                IChromosome<TestCase> t1Chromosome = new Chromosome<>(t1);
+                IChromosome<TestCase> t2Chromosome = new Chromosome<>(t2);
+                List<IChromosome<TestCase>> t1AndT2 = new ArrayList<>();
+                t1AndT2.add(t1Chromosome);
+                t1AndT2.add(t2Chromosome);
+
+                List<IChromosome<TestCase>> result = onePointCrossOver.cross(t1AndT2);
+
+                TestCase t1Result = result.get(0).getValue();
+                TestCase t2Result = result.get(1).getValue();
+
+                testCases.set((i - 1), t1Result);
+                testCases.set(i, t2Result);
+            }
+        }
+
+        TestSuite suite = new TestSuite();
+        suite.getTestCases().addAll(testCases);
+
+        return new Chromosome<>((T) suite);
     }
 }

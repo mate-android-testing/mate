@@ -3,7 +3,6 @@ package org.mate.exploration.genetic.crossover;
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
-import org.mate.model.TestSuite;
 import org.mate.utils.Randomness;
 
 import java.util.Collections;
@@ -12,7 +11,7 @@ import java.util.List;
 /**
  * Provides the second cross over function called one point cross over from the Sapienz algorithm.
  */
-public class OnePointCrossOverFunction<T> implements ICrossOverFunction<T>{
+public class OnePointCrossOverFunction implements ICrossOverFunction<TestCase>{
 
     /**
      * Performs an (in-place) one-point crossover with the given two test cases.
@@ -21,35 +20,14 @@ public class OnePointCrossOverFunction<T> implements ICrossOverFunction<T>{
      * @return the offsprings.
      */
     @Override
-    public List<IChromosome<T>> cross(List<IChromosome<T>> parents) {
-
-        T object = parents.get(0).getValue();
-        TestCase t1;
-        TestCase t2;
-
-        if (object instanceof TestCase) {
-            if (parents.size() == 1) {
-                MATE.log_warn("OnePointCrossOverFunction not applicable on a single testcase!");
-                return Collections.singletonList(parents.get(0));
-            }
-
-            t1 = (TestCase) object;
-            t2 = (TestCase) parents.get(1).getValue();
-        } else if (object instanceof TestSuite) {
-            TestSuite suite = (TestSuite) object;
-            List<TestCase> cases = suite.getTestCases();
-
-            if (cases.size() == 1) {
-                MATE.log_warn("OnePointCrossOverFunction not applicable on a single testcase!");
-                return Collections.singletonList(parents.get(0));
-            }
-
-            t1 = cases.get(0);
-            t2 = cases.get(1);
-        } else {
-            throw new IllegalStateException("Error! One point cross over function hasn't "
-                    + "implemented the class " + object.getClass() + " yet!");
+    public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
+        if (parents.size() == 1) {
+            MATE.log_warn("OnePointCrossOverFunction not applicable on a single testcase!");
+            return Collections.singletonList(parents.get(0));
         }
+
+        TestCase t1 = parents.get(0).getValue();
+        TestCase t2 = parents.get(1).getValue();
 
         TestCase copyT1 = TestCase.newDummy();
         copyT1.getEventSequence().addAll(t1.getEventSequence());
