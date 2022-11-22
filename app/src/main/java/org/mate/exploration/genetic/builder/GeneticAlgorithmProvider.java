@@ -24,6 +24,7 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
+import org.mate.exploration.genetic.crossover.OnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
@@ -696,6 +697,8 @@ public class GeneticAlgorithmProvider {
                 return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
             case INTEGER_SEQUENCE_POINT_CROSS_OVER:
                 return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
+            case ONE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new OnePointCrossOverFunction();
             default:
                 throw new UnsupportedOperationException("Unknown crossover function: "
                         + crossOverFunctionId);
@@ -747,6 +750,7 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
+                //return (IMutationFunction<T>) new SapienzTest(getPMutate());
             case PRIMITIVE_SHUFFLE_MUTATION:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
