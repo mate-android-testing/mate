@@ -124,6 +124,11 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
 
                 IChromosome<T> offspring = singleMutationFunction.mutate(parent);
 
+                if (offspring.getValue() instanceof List) {
+                    List<T> list = (List<T>) offspring.getValue();
+                    offspring = new Chromosome<>((T) list);
+                }
+
                 /*IChromosome<T> offspring;
                 if (singleMutationFunction instanceof IMutationWithCrossOver) {
                     IMutationWithCrossOver<TestCase, T> mutation
@@ -195,42 +200,41 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
     }
 
     private IChromosome<T> produceTestCaseMutation(TestSuite testSuite) {
-        List<TestCase> testCases = new ArrayList<>(testSuite.getTestCases());
+        List<TestCase> shuffled = new ArrayList<>(testSuite.getTestCases());
+        List<TestCase> crossOvered = new ArrayList<>();
 
-        // TODO: Not mutated
+        TestSuite shuffledTestSuite = new TestSuite();
+        TestSuite crossOverTestSuite = new TestSuite();
+
+        List<TestSuite> suiteList = new ArrayList<>();
+        suiteList.add(testSuite);
+        suiteList.add(shuffledTestSuite);
+        suiteList.add(crossOverTestSuite);
+
         // shuffle the test cases within the test suite
-        Randomness.shuffleList(testCases);
+        Randomness.shuffleList(shuffled);
 
-        for (int i = 1; i < testCases.size(); i = i + 2) {
-            double rnd = Randomness.getRnd().nextDouble();
+        for (int i = 1; i < shuffled.size(); i = i + 2) {
+            TestCase t1 = shuffled.get(i - 1);
+            TestCase t2 = shuffled.get(i);
+            IChromosome<TestCase> t1Chromosome = new Chromosome<>(t1);
+            IChromosome<TestCase> t2Chromosome = new Chromosome<>(t2);
+            List<IChromosome<TestCase>> t1AndT2 = new ArrayList<>();
+            t1AndT2.add(t1Chromosome);
+            t1AndT2.add(t2Chromosome);
 
-            if (rnd < pMutate) { // if r < q
-                /*
-                 * Sapienz performs a one-point crossover on two neighbouring test cases. Since
-                 * MATE only supports crossover functions that return a single offspring, we make
-                 * the one-point crossover here in place.
-                 */
-                TestCase t1 = testCases.get(i - 1);
-                TestCase t2 = testCases.get(i);
-                IChromosome<TestCase> t1Chromosome = new Chromosome<>(t1);
-                IChromosome<TestCase> t2Chromosome = new Chromosome<>(t2);
-                List<IChromosome<TestCase>> t1AndT2 = new ArrayList<>();
-                t1AndT2.add(t1Chromosome);
-                t1AndT2.add(t2Chromosome);
+            List<IChromosome<TestCase>> result = onePointCrossOver.cross(t1AndT2);
 
-                List<IChromosome<TestCase>> result = onePointCrossOver.cross(t1AndT2);
+            t1 = result.get(0).getValue();
+            t2 = result.get(1).getValue();
 
-                TestCase t1Result = result.get(0).getValue();
-                TestCase t2Result = result.get(1).getValue();
-
-                testCases.set((i - 1), t1Result);
-                testCases.set(i, t2Result);
-            }
+            crossOvered.add(t1);
+            crossOvered.add(t2);
         }
 
-        TestSuite suite = new TestSuite();
-        suite.getTestCases().addAll(testCases);
+        shuffledTestSuite.getTestCases().addAll(shuffled);
+        crossOverTestSuite.getTestCases().addAll(crossOvered);
 
-        return new Chromosome<>((T) suite);
+        return new Chromosome<>((T) suiteList);
     }
 }

@@ -12,6 +12,8 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,7 +21,7 @@ import java.util.List;
  * https://discovery.ucl.ac.uk/id/eprint/1508043/1/p_issta16_sapienz.pdf. In particular, have
  * a look at section 3.1 and Algorithm 2.
  */
-public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
+public class SapienzSuiteMutationFunction implements IMutationFunction<List<TestSuite>> {
 
     /**
      * The probability for mutation.
@@ -50,17 +52,21 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
      * @return Returns the mutated chromosome.
      */
     @Override
-    public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome) {
+    public IChromosome<List<TestSuite>> mutate(IChromosome<List<TestSuite>> chromosome) {
+        TestSuite original = chromosome.getValue().get(0);
+        TestSuite shuffled = chromosome.getValue().get(1);
+        TestSuite crossOver = chromosome.getValue().get(2);
+
         TestSuite mutatedTestSuite = new TestSuite();
         IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
+        List<TestSuite> mutatedList = new ArrayList<>();
+        mutatedList.add(mutatedTestSuite);
 
-        List<TestCase> testCases = chromosome.getValue().getTestCases();
-        List<TestCase> notMutatedTestCases = new ArrayList<>(testCases);
+        List<TestCase> shuffledTestCases = shuffled.getTestCases();
+        List<TestCase> crossOverTestCases = crossOver.getTestCases();
+        List<TestCase> notMutatedTestCases = new LinkedList<>();
 
-        // shuffle the test cases within the test suite
-        /*Randomness.shuffleList(testCases);
-
-        for (int i = 1; i < testCases.size(); i = i + 2) {
+        for (int i = 1; i < shuffledTestCases.size(); i = i + 2) {
             double rnd = Randomness.getRnd().nextDouble();
 
             if (rnd < pMutate) { // if r < q
@@ -69,18 +75,24 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
                  * MATE only supports crossover functions that return a single offspring, we make
                  * the one-point crossover here in place.
                  */
-                /*TestCase t1 = testCases.get(i - 1);
-                TestCase t2 = testCases.get(i);
-                onePointCrossover(t1, t2);
-                notMutatedTestCases.remove(t1);
-                notMutatedTestCases.remove(t2);
-            }
-        }*/
+                TestCase t1 = crossOverTestCases.get(i - 1);
+                TestCase t2 = crossOverTestCases.get(i);
 
-        for (int i = 0; i < testCases.size(); i++) {
+                shuffledTestCases.set((i - 1), t1);
+                shuffledTestCases.set(i, t2);
+            } else {
+                TestCase t1 = shuffledTestCases.get(i - 1);
+                TestCase t2 = shuffledTestCases.get(i);
+
+                notMutatedTestCases.add(t1);
+                notMutatedTestCases.add(t2);
+            }
+        }
+
+        for (int i = 0; i < shuffledTestCases.size(); i++) {
             double rnd = Randomness.getRnd().nextDouble();
 
-            TestCase testCase = testCases.get(i);
+            TestCase testCase = shuffledTestCases.get(i);
 
             if (rnd < pMutate) { // if r < q
 
@@ -96,7 +108,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         }
 
         // we need to execute those test cases that have been mutated
-        for (TestCase testCase : testCases) {
+        for (TestCase testCase : shuffledTestCases) {
             if (!notMutatedTestCases.contains(testCase)) {
 
                 TestCase executed = TestCase.fromDummy(testCase);
@@ -118,12 +130,12 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
         // we need to copy fitness and coverage data for those test cases that haven't be mutated
         if (!notMutatedTestCases.isEmpty()) {
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                CoverageUtils.copyCoverageData(chromosome, mutatedChromosome, notMutatedTestCases);
+                CoverageUtils.copyCoverageData(new Chromosome<>(original), mutatedChromosome, notMutatedTestCases);
             }
-            FitnessUtils.copyFitnessData(chromosome, mutatedChromosome, notMutatedTestCases);
+            FitnessUtils.copyFitnessData(new Chromosome<>(original), mutatedChromosome, notMutatedTestCases);
         }
 
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-        return mutatedChromosome;
+        return new Chromosome<>(mutatedList);
     }
 }
