@@ -45,7 +45,7 @@ public final class DotConverter {
     private static final String[] colors = {
             "tomato", "blue", "green", "orange", "yellow",
             "deeppink", "aqua", "lime", "chocolate", "darkviolet",
-            "gray", "midnightblue", "goldrod", "lightpink", "darkred",
+            "gray", "midnightblue", "goldenrod", "lightpink", "darkred",
             "saddlebrown", "lightblue", "magenta", "olive", "yellowgreen",
             "darkslategray", "orangered", "plum", "darkcyan", "indigo"
     };
