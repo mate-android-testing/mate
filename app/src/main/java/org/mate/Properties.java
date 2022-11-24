@@ -538,7 +538,7 @@ public class Properties {
      */
 
     /*
-     * Properties for dot graph
+     * Begin Dot Graph properties
      */
 
     /**
@@ -549,22 +549,16 @@ public class Properties {
     public static DotConverter.Option CONVERT_GUI_TO_DOT() { return propertyOr(DotConverter.Option.NONE); }
 
     /**
-     * Determines, if the generated dot graph contains screenshots.
+     * Determines if the generated dot graph should include screenshots or plain labels for the states.
      *
-     * @return {@code true}, if the dot graph should include screenshots. Otherwise {@code false}.
+     * @return Returns {@code true} if the dot graph should include screenshots,
+     *          otherwise {@code false} is returned.
      */
-    public static boolean DOT_WITH_SCREENSHOTS() {return propertyOr(false); }
+    public static boolean DOT_GRAPH_WITH_SCREENSHOTS() {return propertyOr(false); }
 
-    /**
-     * A property for distinguish which test case will be highlighted in the final dot graph.
-     *
-     * @return a list of testcases, that will be highlighted by a color.
+    /*
+     * End Dot Graph properties
      */
-    public static int[] TESTCASES_HIGHLIGHTED() {
-        int[] emptyArray = {};
-
-        return propertyOr(emptyArray);
-    }
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
