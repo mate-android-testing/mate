@@ -159,6 +159,10 @@ public class MATE {
                 Registry.getEnvironmentManager().drawGraph();
             }
 
+            if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+                DotConverter.convertFinal(Registry.getUiAbstractionLayer().getGuiModel());
+            }
+
             MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());
 
             try {
