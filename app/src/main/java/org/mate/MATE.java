@@ -10,6 +10,7 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.util.DotConverter;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
@@ -94,9 +95,6 @@ public class MATE {
         final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
 
-        // internally checks for permission dialogs and grants permissions if required
-        Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
-
         // check whether the AUT could be successfully started
         if (!Registry.getPackageName().equals(device.getCurrentPackageName())) {
             MATE.log_acc("Currently displayed app: " + device.getCurrentPackageName());
@@ -106,6 +104,9 @@ public class MATE {
         // try to allocate emulator
         String emulator = Registry.getEnvironmentManager().allocateEmulator(Registry.getPackageName());
         MATE.log_acc("Emulator: " + emulator);
+
+        // internally checks for permission dialogs and grants permissions if required
+        Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
         if (emulator == null || emulator.isEmpty()) {
             throw new IllegalStateException("Emulator couldn't be properly allocated!");
@@ -156,6 +157,10 @@ public class MATE {
 
             if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
                 Registry.getEnvironmentManager().drawGraph();
+            }
+
+            if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+                DotConverter.convertFinal(Registry.getUiAbstractionLayer().getGuiModel());
             }
 
             MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());

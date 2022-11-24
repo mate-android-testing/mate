@@ -18,6 +18,7 @@ import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.surrogate.SurrogateModel;
+import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
@@ -95,13 +96,22 @@ public class UIAbstractionLayer {
         activities = deviceMgr.getActivities();
         // check for any kind of dialogs (permission, crash, ...) initially
         lastScreenState = clearScreen();
-        lastScreenState.setId("S" + lastScreenStateNumber);
+        String id = "S" + lastScreenStateNumber;
+        lastScreenState.setId(id);
         lastScreenStateNumber++;
+
+        // take a screenshot of the new screen state for the dot model
+        if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
+                && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
+            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
+        }
+
         if (Properties.SURROGATE_MODEL()) {
             guiModel = new SurrogateModel(lastScreenState, packageName);
         } else {
             guiModel = new FSMModel(lastScreenState, packageName);
         }
+
         guiWalker = new GUIWalker(this);
     }
 
@@ -638,8 +648,18 @@ public class UIAbstractionLayer {
                 return recordedScreenState;
             }
         }
-        screenState.setId("S" + lastScreenStateNumber);
+
+        String id = "S" + lastScreenStateNumber;
+
+        screenState.setId(id);
         lastScreenStateNumber++;
+
+        // take a screenshot of the new screen state for the dot model
+        if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
+                && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
+            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
+        }
+
         return screenState;
     }
 

@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
+import org.mate.model.util.DotConverter;
 import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
@@ -534,6 +535,29 @@ public class Properties {
 
     /*
      * End AutoDroid properties
+     */
+
+    /*
+     * Begin Dot Graph properties
+     */
+
+    /**
+     * Whether the gui model should be converted to a dot file and how often.
+     *
+     * @return Returns the conversion option.
+     */
+    public static DotConverter.Option CONVERT_GUI_TO_DOT() { return propertyOr(DotConverter.Option.NONE); }
+
+    /**
+     * Determines if the generated dot graph should include screenshots or plain labels for the states.
+     *
+     * @return Returns {@code true} if the dot graph should include screenshots,
+     *          otherwise {@code false} is returned.
+     */
+    public static boolean DOT_GRAPH_WITH_SCREENSHOTS() {return propertyOr(false); }
+
+    /*
+     * End Dot Graph properties
      */
 
     /**

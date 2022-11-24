@@ -44,7 +44,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "3.0";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.1";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     /**
@@ -1511,5 +1511,27 @@ public class EnvironmentManager {
         }
 
         return chromosomeIds.toString();
+    }
+
+    /**
+     * Commands the server to fetch and remove the dot graph from the emulator.
+     *
+     * @param graphDir The directory on the emulator with the dot file.
+     * @param graphFile The file name of the dot graph.
+     * @return {@code true}, if the server reports that the operation was successful.
+     *         Otherwise, {@code false}.
+     */
+    public boolean fetchDotGraph(String graphDir, String graphFile) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_dot_graph")
+                .withParameter("deviceId", emulator)
+                .withParameter("dirName", graphDir)
+                .withParameter("fileName", graphFile);
+
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching dot file from emulator succeeded: " + success);
+
+        return success;
     }
 }
