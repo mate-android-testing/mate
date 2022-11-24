@@ -17,8 +17,8 @@ import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
-import org.mate.model.util.DotConverter;
 import org.mate.model.fsm.surrogate.SurrogateModel;
+import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
 import org.mate.state.ScreenStateType;
@@ -100,9 +100,9 @@ public class UIAbstractionLayer {
         lastScreenState.setId(id);
         lastScreenStateNumber++;
 
-        // Save screenshot
+        // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
-                && Properties.DOT_WITH_SCREENSHOTS()) {
+                && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
             DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
         }
 
@@ -654,9 +654,9 @@ public class UIAbstractionLayer {
         screenState.setId(id);
         lastScreenStateNumber++;
 
-        //Take a screenshot of the new screen state
+        // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
-                && Properties.DOT_WITH_SCREENSHOTS()) {
+                && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
             DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
         }
 
