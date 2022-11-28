@@ -801,6 +801,15 @@ public class GeneticAlgorithmProvider {
                 .FITNESS_FUNCTION_KEY_FORMAT, index);
         String fitnessFunctionId = properties.getProperty(key);
 
+        if (org.mate.Properties.USE_GENO_TO_PHENO()) {
+            return initializeGenoToPhenoFitnessFunction();
+        } else {
+            return initializeNormalFitnessFunction(fitnessFunctionId, index);
+        }
+    }
+
+    private <T> IFitnessFunction<T> initializeNormalFitnessFunction(String fitnessFunctionId,
+                                                                    int index) {
         switch (FitnessFunction.valueOf(fitnessFunctionId)) {
             case NUMBER_OF_ACTIVITIES:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
@@ -843,15 +852,19 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
-            case GENO_TO_PHENO_TYPE:
-                return (IFitnessFunction<T>)
-                        new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), getPhenoTypeFitnessFunction());
             case NOVELTY:
                 return (IFitnessFunction<T>) new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunctionId);
         }
+    }
+
+    private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction() {
+        IFitnessFunction<T> genoToPhenoFitness = (IFitnessFunction<T>)
+                new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), getPhenoTypeFitnessFunction());
+
+        return genoToPhenoFitness;
     }
 
     /**
