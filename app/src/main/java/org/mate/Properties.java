@@ -163,7 +163,12 @@ public class Properties {
      *
      * @return Returns the core fitness function used in the context of GE.
      */
+    // TODO: DELETE
     public static FitnessFunction GE_FITNESS_FUNCTION() { return propertyOr(null); }
+
+    public static boolean USE_GENO_TO_PHENO() {
+        return propertyOr(false);
+    }
 
     public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
 

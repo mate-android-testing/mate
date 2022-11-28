@@ -32,8 +32,6 @@ public class GeneticAlgorithmBuilder {
     public static final String TERMINATION_CONDITION_KEY = "termination_condition";
     public static final String NUMBER_ITERATIONS_KEY = "number_of_iterations";
     public static final String SELECTION_FUNCTION_KEY = "selection_function";
-    public static final String CROSSOVER_FUNCTION_KEY = "crossover_function";
-    public static final String MUTATION_FUNCTION_KEY = "mutation_function";
     public static final String NUM_TESTCASES_KEY = "num_test_cases";
     public static final String POPULATION_SIZE_KEY = "population_size";
     public static final String P_MUTATE_KEY = "p_mutate";
@@ -49,6 +47,7 @@ public class GeneticAlgorithmBuilder {
     public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
     public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
     public static final String GE_MAPPING_FUNCTION_KEY = "ge_mapping_function";
+    public static final String USE_GENO_TO_PHENO_KEY = "geno_to_pheno";
 
     /**
      * The list of properties..
@@ -239,9 +238,11 @@ public class GeneticAlgorithmBuilder {
     }
 
     public GeneticAlgorithmBuilder withGenoToPhenoType() {
-        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, 0);
-        properties.setProperty(key, FitnessFunction.GENO_TO_PHENO_TYPE.name());
-        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, "1");
+        properties.setProperty(USE_GENO_TO_PHENO_KEY, "true");
+
+        if (!org.mate.Properties.USE_GENO_TO_PHENO()) {
+            org.mate.Properties.setProperty("use_geno_to_pheno", true);
+        }
 
         return this;
     }
