@@ -801,7 +801,13 @@ public class GeneticAlgorithmProvider {
                 .FITNESS_FUNCTION_KEY_FORMAT, index);
         String fitnessFunctionId = properties.getProperty(key);
 
-        if (org.mate.Properties.USE_GENO_TO_PHENO()) {
+        String genoKey = GeneticAlgorithmBuilder.USE_GENO_TO_PHENO_KEY;
+
+        boolean isGenoToPhenoType
+                = properties.containsKey(genoKey)
+                && (properties.getProperty(genoKey).equals("true"));
+
+        if (isGenoToPhenoType) {
             return initializeGenoToPhenoFitnessFunction(fitnessFunctionId);
         } else {
             return initializeNormalFitnessFunction(fitnessFunctionId, index);

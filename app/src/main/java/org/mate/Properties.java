@@ -157,15 +157,6 @@ public class Properties {
         return propertyOr(null);
     }
 
-    /**
-     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTIONS()}
-     * provides the mapping from geno to phenotype, this property specifies the core fitness function.
-     *
-     * @return Returns the core fitness function used in the context of GE.
-     */
-    // TODO: DELETE
-    public static FitnessFunction GE_FITNESS_FUNCTION() { return propertyOr(null); }
-
     public static boolean USE_GENO_TO_PHENO() {
         return propertyOr(false);
     }
