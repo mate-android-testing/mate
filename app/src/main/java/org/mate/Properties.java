@@ -157,6 +157,11 @@ public class Properties {
         return propertyOr(null);
     }
 
+    /**
+     * Specifies the algorithms fitness functions to be Geno To Pheno Type or not.
+     *
+     * @return a boolean if the translation from geno to pheno is used in this test run.
+     */
     public static boolean USE_GENO_TO_PHENO() {
         return propertyOr(false);
     }

@@ -814,6 +814,14 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initializes one fitness function without the geno to pheno type.
+     *
+     * @param fitnessFunctionId The name of the fitness function.
+     * @param index The current index of the fitness function.
+     * @param <T> The type of the chromosome used by the fitness function.
+     * @return An initialized fitness function.
+     */
     private <T> IFitnessFunction<T> initializeNormalFitnessFunction(String fitnessFunctionId,
                                                                     int index) {
         switch (FitnessFunction.valueOf(fitnessFunctionId)) {
@@ -866,6 +874,13 @@ public class GeneticAlgorithmProvider {
         }
     }
 
+    /**
+     * Initializes one fitness function with the geno to pheno type.
+     *
+     * @param fitnessFunctionId The name of the fitness function.
+     * @param <T> The type of the chromosome used by the fitness function.
+     * @return An initialized fitness function.
+     */
     private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction(
             String fitnessFunctionId) {
         IFitnessFunction<T> genoToPhenoFitness;

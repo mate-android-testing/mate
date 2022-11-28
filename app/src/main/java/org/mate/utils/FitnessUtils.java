@@ -131,6 +131,14 @@ public class FitnessUtils {
         }
     }
 
+    /**
+     * Retrieves the fitness value from a given fitness function for a given chromosome.
+     *
+     * @param chromosome The used chromosome.
+     * @param function The used fitness function.
+     * @param <T> The type of the chromosome.
+     * @return The fitness value for the chromosome.
+     */
     private static <T> double getFitnessNormal(IChromosome<T> chromosome,
                                                  FitnessFunction function) {
         switch (function) {
@@ -159,6 +167,14 @@ public class FitnessUtils {
         }
     }
 
+    /**
+     * Retrieves the fitness value from a given geno to pheno fitness function.
+     *
+     * @param chromosome The used chromosome.
+     * @param function The used fitness function.
+     * @param <T> The type of the chromosome.
+     * @return The fitness value for the chromosome.
+     */
     private static <T> double getFitnessGenoToPheno(IChromosome<T> chromosome,
                                                   FitnessFunction function) {
         switch (function) {

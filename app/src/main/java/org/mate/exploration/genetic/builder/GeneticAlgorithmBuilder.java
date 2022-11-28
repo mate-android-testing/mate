@@ -237,6 +237,11 @@ public class GeneticAlgorithmBuilder {
         return this;
     }
 
+    /**
+     * Specifies the algorithms fitness functions to be Geno To Pheno Type.
+     *
+     * @return Returns the current builder state.
+     */
     public GeneticAlgorithmBuilder withGenoToPhenoType() {
         properties.setProperty(USE_GENO_TO_PHENO_KEY, "true");
 
