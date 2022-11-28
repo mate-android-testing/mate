@@ -259,7 +259,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         Set<FitnessFunction> fitnessSet
                 = new HashSet<>(Arrays.asList(Properties.FITNESS_FUNCTIONS()));
 
-        if (fitnessSet.contains(FitnessFunction.GENO_TO_PHENO_TYPE)) {
+        if (Properties.USE_GENO_TO_PHENO()) {
             /*
             * We need to force the evaluation of all chromosomes such that the fitness and coverage
             * data are produced.
@@ -275,7 +275,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        if (population.size() <= 10 && !fitnessSet.contains(FitnessFunction.GENO_TO_PHENO_TYPE)) {
+        if (population.size() <= 10 && !Properties.USE_GENO_TO_PHENO()) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
@@ -297,7 +297,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             MATE.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
 
-            if (fitnessSet.contains(FitnessFunction.GENO_TO_PHENO_TYPE)) {
+            if (Properties.USE_GENO_TO_PHENO()) {
 
                 GenotypePhenotypeMappedFitnessFunction<S, T> fitnessFunction
                         = (GenotypePhenotypeMappedFitnessFunction<S, T>) fitnessFunctions.get(0);
