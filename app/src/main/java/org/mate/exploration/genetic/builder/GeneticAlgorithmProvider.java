@@ -802,7 +802,7 @@ public class GeneticAlgorithmProvider {
         String fitnessFunctionId = properties.getProperty(key);
 
         if (org.mate.Properties.USE_GENO_TO_PHENO()) {
-            return initializeGenoToPhenoFitnessFunction();
+            return initializeGenoToPhenoFitnessFunction(fitnessFunctionId);
         } else {
             return initializeNormalFitnessFunction(fitnessFunctionId, index);
         }
@@ -860,9 +860,37 @@ public class GeneticAlgorithmProvider {
         }
     }
 
-    private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction() {
-        IFitnessFunction<T> genoToPhenoFitness = (IFitnessFunction<T>)
-                new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), getPhenoTypeFitnessFunction());
+    private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction(
+            String fitnessFunctionId) {
+        IFitnessFunction<T> genoToPhenoFitness;
+        IFitnessFunction<T> function;
+
+        switch (FitnessFunction.valueOf(fitnessFunctionId)) {
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+                function = new BasicBlockBranchCoverageFitnessFunction<>();
+                break;
+            case BASIC_BLOCK_LINE_COVERAGE:
+                function = new BasicBlockLineCoverageFitnessFunction<>();
+                break;
+            case BRANCH_COVERAGE:
+                function = new BranchCoverageFitnessFunction<>();
+                break;
+            case BRANCH_DISTANCE:
+                function = new BranchDistanceFitnessFunction<>();
+                break;
+            case LINE_COVERAGE:
+                function = new LineCoverageFitnessFunction<>();
+                break;
+            case METHOD_COVERAGE:
+                function = new MethodCoverageFitnessFunction<>();
+                break;
+            default:
+                throw new UnsupportedOperationException("GE fitness function "
+                        + fitnessFunctionId + " not yet supported!");
+        }
+
+        genoToPhenoFitness = (IFitnessFunction<T>)
+                new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), function);
 
         return genoToPhenoFitness;
     }
@@ -1162,38 +1190,6 @@ public class GeneticAlgorithmProvider {
             default:
                 throw new UnsupportedOperationException("GE mapping function "
                         + geMappingFunction + " not yet supported!");
-        }
-    }
-
-    /**
-     * Retrieves the 'core' fitness function that is actually applied on pheno type.
-     *
-     * @param <T> The type wrapped by the chromosomes.
-     * @return Returns the 'core' fitness function used in GE.
-     */
-    private <T> IFitnessFunction<T> getPhenoTypeFitnessFunction() {
-
-        FitnessFunction fitnessFunction = org.mate.Properties.GE_FITNESS_FUNCTION();
-
-        if (fitnessFunction == null) {
-            throw new IllegalStateException("Property GE_FITNESS_FUNCTION() not specified!");
-        }
-
-        if (fitnessFunction == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
-            return new BasicBlockBranchCoverageFitnessFunction<>();
-        } else if (fitnessFunction == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
-            return new BasicBlockLineCoverageFitnessFunction<>();
-        } else if (fitnessFunction == FitnessFunction.BRANCH_COVERAGE) {
-            return new BranchCoverageFitnessFunction<>();
-        } else if (fitnessFunction == FitnessFunction.BRANCH_DISTANCE) {
-            return new BranchDistanceFitnessFunction<>();
-        } else if (fitnessFunction == FitnessFunction.LINE_COVERAGE) {
-            return new LineCoverageFitnessFunction<>();
-        } else if (fitnessFunction == FitnessFunction.METHOD_COVERAGE) {
-            return new MethodCoverageFitnessFunction<>();
-        } else {
-            throw new UnsupportedOperationException("GE fitness function "
-                    + fitnessFunction + " not yet supported!");
         }
     }
 }
