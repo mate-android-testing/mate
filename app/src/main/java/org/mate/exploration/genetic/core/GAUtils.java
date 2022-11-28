@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -197,32 +198,36 @@ public class GAUtils {
         }
 
         // derive the remaining pareto fronts
-        int i = 1;
-        List<IChromosome<T>> nextParetoFront = paretoFronts.get(i);
+        int rank = 1;
+        List<IChromosome<T>> currentParetoFront = paretoFronts.get(rank);
 
-        while (!nextParetoFront.isEmpty()) {
+        while (!currentParetoFront.isEmpty()) {
 
-            List<IChromosome<T>> nextFront = new LinkedList<>();
+            List<IChromosome<T>> nextParetoFront = new ArrayList<>();
 
-            for (IChromosome<T> p : nextParetoFront) {
+            for (IChromosome<T> p : currentParetoFront) {
                 for (IChromosome<T> q : dominationSets.get(p)) {
 
                     int dominationCtr = dominationCounters.get(q) - 1;
                     dominationCounters.put(q, dominationCtr);
 
                     if (dominationCtr == 0) {
-                        // q belongs to the next front
-                        nextFront.add(q);
+                        // q belongs to the next front (actually all duplicates as well)
+                        for (IChromosome<T> chromosome : population) {
+                            if (chromosome.equals(q)) {
+                                nextParetoFront.add(q);
+                            }
+                        }
                     }
                 }
             }
 
-            i = i + 1;
-            nextParetoFront = nextFront;
-
+            rank = rank + 1;
             if (!nextParetoFront.isEmpty()) {
-                paretoFronts.put(i, nextParetoFront);
+                paretoFronts.put(rank, nextParetoFront);
             }
+
+            currentParetoFront = nextParetoFront;
         }
 
         return paretoFronts;

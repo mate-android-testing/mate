@@ -51,7 +51,6 @@ public class ManualExploration implements Algorithm {
                 MATE.log_acc("New state: " + state.getId());
                 MATE.log_acc("Activity: " + state.getActivityName());
 
-
                 if (enableAccessibilityChecks) {
 
                     // record screenshots of new states

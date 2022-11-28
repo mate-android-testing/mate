@@ -9,6 +9,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.graph.DrawType;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.graph.GraphType;
 import org.mate.interaction.action.ui.Widget;
@@ -18,13 +19,17 @@ import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.Objective;
+import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageDTO;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -40,12 +45,18 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.6";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.1";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
+    /**
+     * The maximal number of how often a request is sent to MATE-Server in case of a fault.
+     */
+    private static final int MAX_NUMBER_OF_TRIES = 3;
+
     private String emulator = null;
-    private final Socket server;
-    private final Parser messageParser;
+    private Socket server;
+    private final int port;
+    private Parser messageParser;
     private boolean active;
 
     /**
@@ -54,7 +65,7 @@ public class EnvironmentManager {
      * test case the traces file multiple times. Otherwise, the last fetch trial overwrites
      * the traces file for the given test case with an empty file.
      */
-    private Set<String> coveredTestCases = new HashSet<>();
+    private final Set<String> coveredTestCases = new HashSet<>();
 
     /**
      * Initialises a new environment manager communicating with
@@ -67,8 +78,7 @@ public class EnvironmentManager {
     }
 
     /**
-     * Initialises a new environment manager communicating with
-     * the MATE server on the given port.
+     * Initialises a new environment manager communicating with the MATE server on the given port.
      *
      * @param port The MATE server port.
      * @throws IOException If no connection could be established with the MATE server.
@@ -76,7 +86,46 @@ public class EnvironmentManager {
     public EnvironmentManager(int port) throws IOException {
         active = true;
         server = new Socket(DEFAULT_SERVER_IP, port);
-        messageParser = new Parser(server.getInputStream());
+        this.port = port;
+
+        /*
+         * The input stream obtained from server.getInputStream() cannot be interrupted when
+         * waiting for a response from the server. We need to wrap the input stream around a
+         * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+         * will be thrown.
+         */
+        final InputStream interruptibleInputStream = Channels.newInputStream(
+                Channels.newChannel(server.getInputStream()));
+        messageParser = new Parser(interruptibleInputStream);
+        server.setSoTimeout(0);
+    }
+
+    /**
+     * Re-connects to Mate-Server if the connection has been closed.
+     *
+     * @throws IOException If the connection is closed and cannot be re-established.
+     */
+    public void reconnect() throws IOException {
+
+        Utils.sleep(1000);
+
+        if (server.isClosed()) {
+            MATE.log_debug("Re-connecting to MATE-Server.");
+            server = new Socket(DEFAULT_SERVER_IP, port);
+
+            /*
+            * The input stream obtained from server.getInputStream() cannot be interrupted when
+            * waiting for a response from the server. We need to wrap the input stream around a
+            * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+            * will be thrown.
+             */
+            final InputStream interruptibleInputStream = Channels.newInputStream(
+                    Channels.newChannel(server.getInputStream()));
+            messageParser = new Parser(interruptibleInputStream);
+            server.setSoTimeout(0);
+        } else {
+            MATE.log_debug("No need to re-connect to MATE-Server.");
+        }
     }
 
     /**
@@ -100,35 +149,93 @@ public class EnvironmentManager {
     }
 
     /**
-     * Send a {@link org.mate.message.Message} to the server and return the response of the server
+     * Closes the socket to MATE-Server and tries to re-connect.
+     */
+    private void closeAndReconnect() {
+        try {
+            server.close();
+            reconnect();
+        } catch (final IOException e) {
+            throw new RuntimeException("Could not establish a new connection to MATE-Server!", e);
+        }
+    }
+
+    /**
+     * Sends a {@link org.mate.message.Message} to the server and returns the response of the server.
      *
-     * @param message {@link org.mate.message.Message} that will be send to the server
-     * @return Response {@link org.mate.message.Message} of the server
+     * @param message The {@link org.mate.message.Message} that will be send to the server.
+     * @return Returns the response {@link org.mate.message.Message} of the server.
      */
     public synchronized Message sendMessage(Message message) {
+
         if (!active) {
-            throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
+            throw new IllegalStateException("EnvironmentManager is no longer active and can not " +
+                    "be used for communication!");
         }
+
+        MATE.log_debug("Send message with subject " + message.getSubject());
         addMetadata(message);
 
-        try {
-            server.getOutputStream().write(Serializer.serialize(message));
-            server.getOutputStream().flush();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            throw new IllegalStateException(e);
-        }
+        int numberOfTries = 0;
 
-        Message response = messageParser.nextMessage();
+        while (true) {
 
-        verifyMetadata(response);
-        if (response.getSubject().equals("/error")) {
-            MATE.log("Received error message from mate-server: "
-                    + response.getParameter("info"));
-            return null;
+            try {
+                server.getOutputStream().write(Serializer.serialize(message));
+                server.getOutputStream().flush();
+            } catch (IOException e) {
+
+                MATE.log_debug("socket error sending");
+                closeAndReconnect();
+
+                try {
+                    server.getOutputStream().write(Serializer.serialize(message));
+                    server.getOutputStream().flush();
+                } catch (IOException exception) {
+                    /*
+                    * If we can't send the request the second time, it's likely that we can't
+                    * recover from this fault and thus abort the execution.
+                     */
+                    MATE.log_debug("socket error sending");
+                    throw new IllegalStateException(exception);
+                }
+            }
+
+            Message response;
+
+            try {
+                response = messageParser.nextMessage();
+            } catch (IllegalStateException lexerException) {
+
+                MATE.log_debug("Lexing response failed: " + lexerException);
+
+                /*
+                 * MATE-Server might still be processing the old request and trying to send data
+                 * through the socket, so to ensure MATE-Server does not confuse the different
+                 * requests we just close the socket and open a new one.
+                 */
+                closeAndReconnect();
+
+                numberOfTries++;
+
+                if (numberOfTries < MAX_NUMBER_OF_TRIES) {
+                    continue;
+                } else {
+                    throw new IllegalStateException(lexerException);
+                }
+            }
+
+            verifyMetadata(response);
+
+            if (response.getSubject().equals("/error")) {
+                MATE.log_debug("Received error message from MATE-Server: "
+                        + response.getParameter("info"));
+                throw new IllegalStateException("MATE-Server couldn't send a successful response!");
+            }
+
+            stripMetadata(response);
+            return response;
         }
-        stripMetadata(response);
-        return response;
     }
 
     /**
@@ -231,6 +338,7 @@ public class EnvironmentManager {
      * @param targetChromosome The target chromosome.
      * @param testCases        The test cases belonging to the source chromosome.
      * @param function         The fitness function which is copied.
+     * @param testCases The test cases belonging to the source chromosome.
      */
     public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
                                 IChromosome<TestSuite> targetChromosome,
@@ -271,7 +379,7 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases        The test cases belonging to the source chromosome.
+     * @param testCases The test cases belonging to the source chromosome.
      */
     public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
                                  IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
@@ -327,6 +435,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of activities of the AUT.
      */
+    @SuppressWarnings("unused")
     public List<String> getActivityNames() {
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/android/get_activities")
@@ -336,32 +445,33 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the list of objectives based on objective property.
+     * Returns the number of objectives based on objective property.
      *
      * @param objective The specified objective property.
-     * @return Returns a list of objectives, e.g. the list of branches.
+     * @return Returns the number of objectives, e.g. the number of branches.
      */
-    public List<String> getObjectives(Objective objective) {
+    public int getNumberOfObjectives(Objective objective) {
+
         if (objective == null) {
             throw new IllegalStateException("Objective property not defined!");
         }
 
         MATE.log_acc("Getting objectives...!");
 
-        List<String> objectives;
+        int numberOfObjectives;
 
         if (objective == Objective.LINES) {
-            objectives = getSourceLines();
+            numberOfObjectives = getNumberOfSourceLines();
         } else if (objective == Objective.BRANCHES) {
-            objectives = getBranches();
+            numberOfObjectives = getNumberOfBranches();
         } else if (objective == Objective.BLOCKS) {
-            objectives =  getBasicBlocks();
+            numberOfObjectives = getNumberOfBasicBlocks();
         } else {
             throw new UnsupportedOperationException("Objective " + objective + " not yet supported!");
         }
 
-        MATE.log_acc("Number of objectives: " + objectives.size());
-        return objectives;
+        MATE.log_acc("Number of objectives: " + numberOfObjectives);
+        return numberOfObjectives;
     }
 
     /**
@@ -371,6 +481,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of basic blocks.
      */
+    @SuppressWarnings("unused")
     public List<String> getBasicBlocks() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_basic_blocks")
@@ -382,15 +493,33 @@ public class EnvironmentManager {
     }
 
     /**
+     * Requests the number of basic blocks of the AUT. Each basic block typically represents a
+     * testing target in the context of MIO/MOSA.
+     *
+     * @return Returns the number of branches.
+     */
+    public int getNumberOfBasicBlocks() {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_number_of_basic_blocks")
+                .withParameter("packageName", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Integer.parseInt(response.getParameter("blocks"));
+    }
+
+    /**
      * Fetches a serialized test case from the internal storage of the emulator.
      * Also removes the serialized test case afterwards.
      *
      * @param testcaseDir The test case directory.
-     * @param testCase    The name of the test case file.
+     * @param testCase The name of the test case file.
+     * @return Returns {@code true} if the test case could be successfully fetched and removed,
+     *         otherwise {@code false} is returned.
      */
     public boolean fetchTestCase(String testcaseDir, String testCase) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_test_case")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder(
+                "/utility/fetch_test_case")
                 .withParameter("deviceId", emulator)
                 .withParameter("testcaseDir", testcaseDir)
                 .withParameter("testcase", testCase);
@@ -401,13 +530,34 @@ public class EnvironmentManager {
     }
 
     /**
+     * Fetches and removes an espresso test from the internal storage of the emulator.
+     *
+     * @param espressoDir The espresso tests directory on the emulator.
+     * @param testCase The name of the espresso test.
+     * @return Returns {@code true} if the espresso test could be successfully fetched and removed,
+     *         otherwise {@code false} is returned.
+     */
+    public boolean fetchEspressoTest(String espressoDir, String testCase) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder(
+                "/utility/fetch_espresso_test")
+                .withParameter("deviceId", emulator)
+                .withParameter("espressoDir", espressoDir)
+                .withParameter("testcase", testCase);
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching espresso test from emulator succeeded: " + success);
+        return success;
+    }
+
+    /**
      * Simulates a system event by broadcasting the notification of the occurrence of
      * a system event to a certain receiver.
      *
      * @param packageName The package name of the AUT.
-     * @param receiver    The receiver listening for the system event.
-     * @param action      The system event.
-     * @param dynamic     Whether the receiver is a dynamic receiver or not.
+     * @param receiver The receiver listening for the system event.
+     * @param action The system event.
+     * @param dynamic Whether the receiver is a dynamic receiver or not.
      * @return Returns whether broadcasting the system event succeeded or not.
      */
     public boolean executeSystemEvent(String packageName, String receiver, String action, boolean dynamic) {
@@ -497,15 +647,13 @@ public class EnvironmentManager {
 
     /**
      * Requests the drawing of the graph.
-     *
-     * @param raw Whether drawing the raw graph or target and visited vertices should be marked.
      */
-    public void drawGraph(boolean raw) {
+    public void drawGraph() {
 
         MATE.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
-                .withParameter("raw", String.valueOf(raw));
+                .withParameter("raw", String.valueOf(Properties.DRAW_GRAPH() == DrawType.RAW));
         sendMessage(messageBuilder.build());
     }
 
@@ -515,6 +663,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of branches.
      */
+    @SuppressWarnings("unused")
     public List<String> getBranches() {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_branches")
@@ -522,6 +671,21 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Arrays.asList(response.getParameter("branches").split("\\+"));
+    }
+
+    /**
+     * Requests the number of branches of the AUT. Each branch typically represents a testing target
+     * in the context of MIO/MOSA.
+     *
+     * @return Returns the number of branches.
+     */
+    public int getNumberOfBranches() {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_number_of_branches")
+                .withParameter("packageName", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Integer.parseInt(response.getParameter("branches"));
     }
 
     /**
@@ -600,22 +764,22 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the branch fitness vector for the given chromosome. A branch fitness
-     * vector consists of n entries, where n refers to the number of branches.
-     * The nth entry in the vector refers to the fitness value of the nth branch.
+     * Retrieves the branch fitness vector for the given chromosome. A branch fitness vector consists
+     * of n entries, where n refers to the number of branches. The nth entry in the vector refers to
+     * the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of branches.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @param numberOfBranches The number of branches.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch fitness vector for the given chromosome.
      */
-    public <T> List<Double> getBranchFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
+    public <T> BitSet getBranchFitnessVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch fitness vector of dummy test case...");
                 // a dummy test case has a branch fitness of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(objectives.size(), 0.0);
+                return new BitSet(numberOfBranches);
             }
         }
 
@@ -627,11 +791,17 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
-        List<Double> branchFitnessVector = new ArrayList<>();
-        String[] branchFitnessValues = response.getParameter("branch_fitness_vector").split("\\+");
 
-        for (String branchFitnessValue : branchFitnessValues) {
-            branchFitnessVector.add(Double.parseDouble(branchFitnessValue));
+        String[] branchFitnessValues = response.getParameter("branch_fitness_vector").split("\\+");
+        assert branchFitnessValues.length == numberOfBranches;
+
+        final BitSet branchFitnessVector = new BitSet(branchFitnessValues.length);
+
+        for (int i = 0; i < branchFitnessValues.length; ++i) {
+            final String fitness = branchFitnessValues[i];
+            if (fitness.equals("1")) {
+                branchFitnessVector.set(i);
+            }
         }
 
         return branchFitnessVector;
@@ -643,17 +813,17 @@ public class EnvironmentManager {
      * The nth entry in the vector refers to the fitness value of the nth basic block.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of basic blocks.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @param numberOfBasicBlocks The number of basic blocks.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the basic block fitness vector for the given chromosome.
      */
-    public <T> List<Double> getBasicBlockFitnessVector(IChromosome<T> chromosome, List<String> objectives) {
+    public <T> BitSet getBasicBlockFitnessVector(IChromosome<T> chromosome, int numberOfBasicBlocks) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve basic block fitness vector of dummy test case...");
                 // a dummy test case has a basic block fitness of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(objectives.size(), 0.0);
+                return new BitSet(numberOfBasicBlocks);
             }
         }
 
@@ -665,33 +835,39 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
-        List<Double> basicBlockFitnessVector = new ArrayList<>();
-        String[] basicBlockFitnessValues = response.getParameter("basic_block_fitness_vector").split("\\+");
 
-        for (String basicBlockFitnessValue : basicBlockFitnessValues) {
-            basicBlockFitnessVector.add(Double.parseDouble(basicBlockFitnessValue));
+        String[] basicBlockFitnessValues = response.getParameter("basic_block_fitness_vector").split("\\+");
+        assert basicBlockFitnessValues.length == numberOfBasicBlocks;
+
+        final BitSet basicBlockFitnessVector = new BitSet(basicBlockFitnessValues.length);
+
+        for (int i = 0; i < basicBlockFitnessValues.length; ++i) {
+            final String fitness = basicBlockFitnessValues[i];
+            if (fitness.equals("1")) {
+                basicBlockFitnessVector.set(i);
+            }
         }
 
         return basicBlockFitnessVector;
     }
 
     /**
-     * Retrieves the branch distance vector for the given chromosome. A branch distance
-     * vector consists of n entries, where n refers to the number of branches.
-     * The nth entry in the vector refers to the fitness value of the nth branch.
+     * Retrieves the branch distance vector for the given chromosome. A branch distance vector
+     * consists of n entries, where n refers to the number of branches. The nth entry in the vector
+     * refers to the fitness value of the nth branch.
      *
      * @param chromosome The given chromosome.
-     * @param objectives The list of branches. Is not transmitted to avoid load on socket.
-     * @param <T>        Specifies whether the chromosome refers to a test case or a test suite.
+     * @param numberOfBranches The number of branches.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, List<String> objectives) {
+    public <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
                 // a dummy test case has a branch distance of 1.0 (worst value) for each objective
-                return Collections.nCopies(objectives.size(), 1.0);
+                return Collections.nCopies(numberOfBranches, 1.0f);
             }
         }
 
@@ -702,32 +878,56 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         Message response = sendMessage(messageBuilder.build());
-        List<Double> branchDistanceVector = new ArrayList<>();
         String[] branchDistances = response.getParameter("branch_distance_vector").split("\\+");
+        assert branchDistances.length == numberOfBranches;
+
+        List<Float> branchDistanceVector = new ArrayList<>();
 
         for (String branchDistance : branchDistances) {
-            branchDistanceVector.add(Double.parseDouble(branchDistance));
+            branchDistanceVector.add(Float.parseFloat(branchDistance));
         }
 
         return branchDistanceVector;
     }
 
     /**
-     * Returns the list of source lines of the AUT. A single
-     * source line has the following format:
+     * Returns the list of source lines of the AUT. A single source line has the following format:
      * package name + class name + line number
      *
      * @return Returns the sources lines of the AUT.
      */
+    @SuppressWarnings("unused")
     public List<String> getSourceLines() {
+
         Message response = sendMessage(new Message.MessageBuilder("/coverage/getSourceLines")
                 .withParameter("packageName", Registry.getPackageName())
                 .build());
-        if (!"/coverage/getSourceLines".equals(response.getSubject())) {
-            MATE.log_acc("ERROR: unable to retrieve source lines");
-            return null;
+
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Unable to retrieve source lines!");
+            throw new IllegalStateException(response.getParameter("info"));
+        } else {
+            return Arrays.asList(response.getParameter("lines").split("\n"));
         }
-        return Arrays.asList(response.getParameter("lines").split("\n"));
+    }
+
+    /**
+     * Returns the number of source lines of the AUT.
+     *
+     * @return Returns the sources lines of the AUT.
+     */
+    public int getNumberOfSourceLines() {
+
+        Message response = sendMessage(new Message.MessageBuilder("/coverage/getNumberOfSourceLines")
+                .withParameter("packageName", Registry.getPackageName())
+                .build());
+
+        if (response.getSubject().equals("/error")) {
+            MATE.log_acc("Unable to retrieve number of source lines!");
+            throw new IllegalStateException(response.getParameter("info"));
+        } else {
+            return Integer.parseInt(response.getParameter("lines"));
+        }
     }
 
     /**
@@ -735,10 +935,10 @@ public class EnvironmentManager {
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      * This method is used to store the coverage data for the last incomplete test case.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
-     * @param entityId     Identifies the test case if chromosomeId specifies a test suite,
-     *                     otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      */
     public void storeCoverageData(Coverage coverage, String chromosomeId, String entityId) {
 
@@ -771,10 +971,10 @@ public class EnvironmentManager {
      * Stores the coverage information of the given test case. By storing
      * we mean that a trace/coverage file is generated/fetched from the emulator.
      *
-     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
-     *                   otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      */
     public <T> void storeCoverageData(Coverage coverage, IChromosome<T> chromosome, String entityId) {
 
@@ -819,10 +1019,10 @@ public class EnvironmentManager {
     /**
      * Requests the combined coverage information for the given set of test cases / test suites.
      *
-     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomes The list of chromosomes (test cases or test suites) for which the
-     *                    coverage should be computed.
-     * @param <T>         Refers to a test case or a test suite.
+     *         coverage should be computed.
+     * @param <T> Refers to a test case or a test suite.
      * @return Returns the combined coverage information for a set of chromosomes.
      */
     public <T> CoverageDTO getCombinedCoverage(Coverage coverage, List<IChromosome<T>> chromosomes) {
@@ -894,9 +1094,9 @@ public class EnvironmentManager {
      * A convenient function to retrieve the coverage of a single test case within
      * a test suite.
      *
-     * @param coverage    The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param testSuiteId Identifies the test suite.
-     * @param testCaseId  Identifies the individual test case.
+     * @param testCaseId Identifies the individual test case.
      * @return Returns the coverage of the given test case.
      */
     public CoverageDTO getCoverage(Coverage coverage, String testSuiteId, String testCaseId) {
@@ -916,7 +1116,7 @@ public class EnvironmentManager {
      * A chromosome can be either a test case or a test suite. This method is used
      * to retrieve the coverage of the last incomplete test case.
      *
-     * @param coverage     The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosomeId Identifies either a test case or a test suite.
      * @return Returns the coverage of the given test case.
      */
@@ -935,7 +1135,7 @@ public class EnvironmentManager {
      * Convenient function to request the coverage information for a given chromosome.
      * A chromosome can be either a test case or a test suite.
      *
-     * @param coverage   The coverage type, e.g. BRANCH_COVERAGE.
+     * @param coverage The coverage type, e.g. BRANCH_COVERAGE.
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the coverage of the given test case.
      */
@@ -961,21 +1161,21 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns a fitness vector for the given chromosome and the specified lines
-     * where each entry indicates to which degree the line was covered.
+     * Returns a fitness vector for the given chromosome and the specified lines where each entry
+     * indicates to which degree the line was covered.
      *
      * @param chromosome The given chromosome.
-     * @param lines      The lines for which coverage should be retrieved.
-     * @param <T>        Indicates the type of the chromosome, i.e. test case or test suite.
+     * @param numberOfLines The number of lines.
+     * @param <T> Indicates the type of the chromosome, i.e. test case or test suite.
      * @return Returns line percentage coverage vector.
      */
-    public <T> List<Double> getLineCoveredPercentage(IChromosome<T> chromosome, List<String> lines) {
+    public <T> List<Float> getLinePercentageVector(IChromosome<T> chromosome, int numberOfLines) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve line percentage vector of dummy test case...");
                 // a dummy test case has a line percentage of 0.0 for each objective (0.0 == worst)
-                return Collections.nCopies(lines.size(), 0.0);
+                return Collections.nCopies(numberOfLines, 0.0f);
             }
         }
 
@@ -983,7 +1183,6 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/coverage/lineCoveredPercentages")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("lines", lines.stream().collect(Collectors.joining("*")))
                 .withParameter("chromosomes", chromosomeId);
         Message response = sendMessage(messageBuilder.build());
 
@@ -991,12 +1190,11 @@ public class EnvironmentManager {
             MATE.log_acc("Retrieving line covered percentages failed!");
             throw new IllegalStateException(response.getParameter("info"));
         } else {
-            // convert result
-            List<Double> coveragePercentagesVector = new ArrayList<>();
+            List<Float> coveragePercentagesVector = new ArrayList<>();
             String[] coveragePercentages = response.getParameter("coveragePercentages").split("\n");
 
             for (String coveragePercentage : coveragePercentages) {
-                coveragePercentagesVector.add(Double.parseDouble(coveragePercentage));
+                coveragePercentagesVector.add(Float.parseFloat(coveragePercentage));
             }
 
             return coveragePercentagesVector;
@@ -1027,7 +1225,7 @@ public class EnvironmentManager {
      * Records a screenshot.
      *
      * @param packageName The package name of the AUT.
-     * @param nodeId      Some id of the screen state.
+     * @param nodeId Some id of the screen state.
      */
     public void takeScreenshot(String packageName, String nodeId) {
 
@@ -1043,9 +1241,9 @@ public class EnvironmentManager {
      * Checks whether a flickering of a screen state can be detected.
      *
      * @param packageName The package name of the screen state.
-     * @param stateId     Identifies the screen state.
+     * @param stateId Identifies the screen state.
      * @return Returns {@code true} if flickering was detected, otherwise
-     * {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean checkForFlickering(String packageName, String stateId) {
 
@@ -1074,8 +1272,8 @@ public class EnvironmentManager {
      * Another accessibility function.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId     The id of the screen state.
-     * @param widget      The widget for which this metric should be evaluated.
+     * @param stateId The id of the screen state.
+     * @param widget The widget for which this metric should be evaluated.
      * @return Returns ...
      */
     public double matchesSurroundingColor(String packageName, String stateId, Widget widget) {
@@ -1096,8 +1294,8 @@ public class EnvironmentManager {
      * Retrieves the contrast ratio of the widget residing on the screen state.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId     Identifies the screens state.
-     * @param widget      The widget on which the contrast ratio should be evaluated.
+     * @param stateId Identifies the screens state.
+     * @param widget The widget on which the contrast ratio should be evaluated.
      * @return Returns the contrast ratio.
      */
     public double getContrastRatio(String packageName, String stateId, Widget widget) {
@@ -1141,8 +1339,8 @@ public class EnvironmentManager {
      * Gets the luminance of the given widget.
      *
      * @param packageName The package name corresponding to the screen state.
-     * @param stateId     Identifies the screens state.
-     * @param widget      The widget on which the contrast ratio should be evaluated.
+     * @param stateId Identifies the screens state.
+     * @param widget The widget on which the contrast ratio should be evaluated.
      * @return Returns the luminance of the given widget.
      */
     public String getLuminance(String packageName, String stateId, Widget widget) {
@@ -1221,7 +1419,7 @@ public class EnvironmentManager {
      * Returns the chromosome id of the given chromosome.
      *
      * @param chromosome The chromosome.
-     * @param <T>        Refers either to a {@link TestCase} or a {@link TestSuite}.
+     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
      * @return Returns the chromosome id of the given chromosome.
      */
     private <T> String getChromosomeId(IChromosome<T> chromosome) {
@@ -1320,5 +1518,27 @@ public class EnvironmentManager {
         }
 
         return chromosomeIds.toString();
+    }
+
+    /**
+     * Commands the server to fetch and remove the dot graph from the emulator.
+     *
+     * @param graphDir The directory on the emulator with the dot file.
+     * @param graphFile The file name of the dot graph.
+     * @return {@code true}, if the server reports that the operation was successful.
+     *         Otherwise, {@code false}.
+     */
+    public boolean fetchDotGraph(String graphDir, String graphFile) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_dot_graph")
+                .withParameter("deviceId", emulator)
+                .withParameter("dirName", graphDir)
+                .withParameter("fileName", graphFile);
+
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching dot file from emulator succeeded: " + success);
+
+        return success;
     }
 }

@@ -302,11 +302,11 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
     private int getChromosomeLength(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+            return ((TestCase) chromosome.getValue()).getActionSequence().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             int length = 0;
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                length += testCase.getEventSequence().size();
+                length += testCase.getActionSequence().size();
             }
             return length;
         } else {

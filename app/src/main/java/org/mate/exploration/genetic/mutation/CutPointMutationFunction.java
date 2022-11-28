@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -75,7 +76,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             for (int i = 0; i < maxNumEvents; i++) {
                 UIAction newAction;
                 if (i < cutPoint) {
-                    newAction = (UIAction) chromosome.getValue().getEventSequence().get(i);
+                    newAction = (UIAction) chromosome.getValue().getActionSequence().get(i);
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
@@ -86,8 +87,11 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             }
         } finally {
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel
+                        = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+                surrogateModel.updateTestCase(mutant);
             }
 
             if (!isTestSuiteExecution) {
@@ -113,11 +117,11 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
      * @return Returns the selected cut point.
      */
     private int chooseCutPoint(TestCase testCase) {
-        if (testCase.getEventSequence().isEmpty()) {
+        if (testCase.getActionSequence().isEmpty()) {
             MATE.log_warn("Choosing cut point from empty test case " + testCase + "!");
             return 0;
         } else {
-            return Randomness.getRnd().nextInt(testCase.getEventSequence().size());
+            return Randomness.getRnd().nextInt(testCase.getActionSequence().size());
         }
     }
 }

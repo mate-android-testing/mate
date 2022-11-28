@@ -255,12 +255,10 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("NSGA-II requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
-        } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to " +
-                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
         return new NSGAII<>(
@@ -547,6 +545,7 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("Sapienz requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
+                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -792,6 +791,7 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the i-th fitness function of the genetic algorithm.
      *
+     * @param index The fitness function index.
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the i-th fitness function used by the genetic algorithm.
      */
@@ -826,19 +826,19 @@ public class GeneticAlgorithmProvider {
             case BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
             case BRANCH_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(index);
             case BRANCH_DISTANCE:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(index);
             case BASIC_BLOCK_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(index);
             case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
             case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(index);
             case BASIC_BLOCK_LINE_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:

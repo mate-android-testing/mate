@@ -6,6 +6,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -29,11 +30,11 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
      * chromosome factory.
      */
     public PrimitiveTestCaseMergeCrossOverFunction() {
-        executeActions = false;
+        executeActions = true;
     }
 
     /**
-     * Sets whether the actions should be directly or not.
+     * Sets whether the actions should be directly executed or not.
      *
      * @param executeActions Whether the actions should be directly executed.
      */
@@ -58,19 +59,22 @@ public class PrimitiveTestCaseMergeCrossOverFunction implements ICrossOverFuncti
         TestCase parent0 = parents.get(0).getValue();
         TestCase parent1 = parents.get(1).getValue();
         TestCase offspring = TestCase.newDummy();
-        int l0 = parent0.getEventSequence().size() / 2;
-        int l1 = parent1.getEventSequence().size() / 2;
+        int l0 = parent0.getActionSequence().size() / 2;
+        int l1 = parent1.getActionSequence().size() / 2;
         int start0 = Randomness.getRnd().nextInt(l0 + 1);
         int start1 = Randomness.getRnd().nextInt(l1 + 1);
-        offspring.getEventSequence().addAll(parent0.getEventSequence().subList(start0, start0 + l0));
-        offspring.getEventSequence().addAll(parent1.getEventSequence().subList(start1, start1 + l1));
+        offspring.getActionSequence().addAll(parent0.getActionSequence().subList(start0, start0 + l0));
+        offspring.getActionSequence().addAll(parent1.getActionSequence().subList(start1, start1 + l1));
 
         if (executeActions) {
             TestCase executedTestCase = TestCase.fromDummy(offspring);
             Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
 
-            if(Properties.SURROGATE_MODEL()) {
-                Registry.getUiAbstractionLayer().storeTraces();
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel
+                        = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+                surrogateModel.updateTestCase(executedTestCase);
             }
 
             FitnessUtils.storeTestCaseChromosomeFitness(chromosome);

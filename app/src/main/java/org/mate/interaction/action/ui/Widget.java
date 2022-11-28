@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.state.executables.StateEquivalenceLevel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -334,6 +332,15 @@ public class Widget {
     }
 
     /**
+     * Returns the depth of the widget in the ui hierarchy.
+     *
+     * @return Returns the widgets' depth in the ui hierarchy.
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
      * Returns the siblings of this widget. If there are no siblings, an empty list is returned.
      *
      * @return Returns the siblings of the widget.
@@ -505,6 +512,28 @@ public class Widget {
                 parent = parent.getParent();
         }
         return false;
+    }
+
+    /**
+     * Determines whether the parent widget is a scroll view.
+     *
+     * @return Returns {@code true} if the parent is a scroll view,
+     *         otherwise {@code false} is returned.
+     */
+    public boolean isSonOfScrollView() {
+
+        if (parent == null) {
+            return false;
+        }
+
+        try {
+            Class<?> clazz = Class.forName(parent.getClazz());
+            return android.widget.ScrollView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
     }
 
     /**
@@ -988,8 +1017,8 @@ public class Widget {
      */
     public boolean isProgressBarType() {
         /*
-        * There are a few sub classes of the base class ProgressBar, but those don't represent
-        * progress bars in the classical sense, i.e. they are 'abused' for primarily rating bars.
+         * There are a few sub classes of the base class ProgressBar, but those don't represent
+         * progress bars in the classical sense, i.e. they are 'abused' for primarily rating bars.
          */
         return getClazz().equals("android.widget.ProgressBar");
     }
@@ -1027,7 +1056,8 @@ public class Widget {
     }
 
     /**
-     * Compares two widgets for equality.
+     * Compares two {@link Widget}s for equality, which is given when the widgets have the same
+     * {@link #id} and are located at the same position.
      *
      * @param o The object to which we compare.
      * @return Returns {@code true} if both widgets are equal, otherwise {@code false} is returned.
@@ -1040,22 +1070,12 @@ public class Widget {
             return false;
         } else {
             Widget other = (Widget) o;
-
-            if (Properties.STATE_EQUIVALENCE_LEVEL() == StateEquivalenceLevel.WIDGET_WITH_ATTRIBUTES) {
-                return getId().equals(other.getId())
-                        && getX1() == other.getX1() &&
-                        getX2() == other.getX2() &&
-                        getY1() == other.getY1() &&
-                        getY2() == other.getY2() &&
-                        Objects.equals(getText(), other.getText()) &&
-                        Objects.equals(getContentDesc(), other.getContentDesc());
-            } else {
-                return getId().equals(other.getId())
-                        && getX1() == other.getX1() &&
-                        getX2() == other.getX2() &&
-                        getY1() == other.getY1() &&
-                        getY2() == other.getY2();
-            }
+            return getId().equals(other.getId())
+                    && getX1() == other.getX1() &&
+                    getX2() == other.getX2() &&
+                    getY1() == other.getY1() &&
+                    getY2() == other.getY2() &&
+                    isVisible() == other.isVisible();
         }
     }
 
@@ -1066,23 +1086,13 @@ public class Widget {
      */
     @Override
     public int hashCode() {
-        if (Properties.STATE_EQUIVALENCE_LEVEL() == StateEquivalenceLevel.WIDGET_WITH_ATTRIBUTES) {
-            return Objects.hash(
-                    getId(),
-                    getX1(),
-                    getX2(),
-                    getY1(),
-                    getY2(),
-                    getText(),
-                    getContentDesc());
-        } else {
-            return Objects.hash(
-                    getId(),
-                    getX1(),
-                    getX2(),
-                    getY1(),
-                    getY2());
-        }
+        return Objects.hash(
+                getId(),
+                getX1(),
+                getX2(),
+                getY1(),
+                getY2(),
+                isVisible());
     }
 
     /**

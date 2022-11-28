@@ -218,6 +218,7 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isEditTextType()) {
                 MATE.log_debug("Widget is an edit text instance!");
                 widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
 
                /*
                * TODO: Use static analysis to detect whether an onclick handler is registered.
@@ -385,6 +386,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<WidgetAction> textInsertActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
+                .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
                 .collect(Collectors.toList());
 
         List<WidgetAction> clickableButtonActions = widgetActions.stream()
@@ -483,11 +485,13 @@ public class ActionsScreenState extends AbstractScreenState {
         // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
         // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
         uiActions.add(new UIAction(ActionType.DELETE, activityName));
+        /*
         uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
+         */
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
     }

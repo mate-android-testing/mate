@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static android.support.test.InstrumentationRegistry.getContext;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 
 /**
@@ -63,7 +62,7 @@ public class GUIWalker {
      *
      * @param uiAbstractionLayer The ui abstraction layer.
      */
-    public GUIWalker(UIAbstractionLayer uiAbstractionLayer){
+    public GUIWalker(UIAbstractionLayer uiAbstractionLayer) {
         this.guiModel = uiAbstractionLayer.getGuiModel();
         this.uiAbstractionLayer = uiAbstractionLayer;
         if (quickLaunch) {
@@ -78,7 +77,7 @@ public class GUIWalker {
      *
      * @param screenStateId The screen state id.
      * @return Returns {@code true} if the transition to the screen state was successful, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean goToState(String screenStateId) {
         IScreenState screenState = guiModel.getScreenStateById(screenStateId);
@@ -90,7 +89,7 @@ public class GUIWalker {
      *
      * @param screenState The screen state.
      * @return Returns {@code true} if the transition to the screen state was successful, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     public boolean goToState(final IScreenState screenState) {
 
@@ -117,7 +116,7 @@ public class GUIWalker {
      *
      * @param screenState The state that should be reached.
      * @return Returns {@code true} if the state could be successfully reached, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     private boolean quickLaunch(final IScreenState screenState) {
         return quickLaunch(screenState.getActivityName());
@@ -128,14 +127,14 @@ public class GUIWalker {
      *
      * @param activityName The activity that should be launched.
      * @return Returns {@code true} if the activity could be successfully launched, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     private boolean quickLaunch(String activityName) {
 
         /*
-        * TODO: Under certain (yet unknown) conditions a quick launch might not work. This can be
-        *  even the main activity or any activity alias referring to the main activity. There might
-        *  be a relation to crash that happened shortly before.
+         * TODO: Under certain (yet unknown) conditions a quick launch might not work. This can be
+         *  even the main activity or any activity alias referring to the main activity. There might
+         *  be a relation to crash that happened shortly before.
          */
 
         MATE.log_acc("Try to quick launch activity: " + activityName);
@@ -158,9 +157,9 @@ public class GUIWalker {
 
         if (!activityComponent.hasIntentFilter()) {
             /*
-            * If the component doesn't define any intent filter at all, the activity can be only
-            * started via an explicit intent. Since we use in any case an explicit intent here, we
-            * simply add a dummy intent filter to be able to re-use the same functionality.
+             * If the component doesn't define any intent filter at all, the activity can be only
+             * started via an explicit intent. Since we use in any case an explicit intent here, we
+             * simply add a dummy intent filter to be able to re-use the same functionality.
              */
             activityComponent.addIntentFilter(new IntentFilterDescription());
         }
@@ -179,12 +178,12 @@ public class GUIWalker {
                 final String currentActivity = Registry.getUiAbstractionLayer().getCurrentActivity();
 
                 // check that we actually reached the target activity
-                if(success && (currentActivity.equals(activityName)
+                if (success && (currentActivity.equals(activityName)
                         /*
-                        * TODO: Re-verify this behaviour once the current activity name can be
-                        *  fetched reliable. Right now, it seems like the current activity equals
-                        *  the name of the activity alias and this alternative in the if statement
-                        *  is superfluous.
+                         * TODO: Re-verify this behaviour once the current activity name can be
+                         *  fetched reliable. Right now, it seems like the current activity equals
+                         *  the name of the activity alias and this alternative in the if statement
+                         *  is superfluous.
                          */
                         || (activityComponent.isActivityAlias()
                         && currentActivity.equals(activityComponent.getTargetActivity())))) {
@@ -202,7 +201,7 @@ public class GUIWalker {
      *
      * @param activity The target activity.
      * @return Returns {@code true} if the activity could be successfully launched, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     private boolean quickLaunchCloseActivity(String activity) {
 
@@ -276,7 +275,7 @@ public class GUIWalker {
      *
      * @param actions The list of actions that should be executed.
      * @return Returns {@code true} if all actions could be applied successfully, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     private boolean replayActions(final List<Action> actions) {
         for (Action action : actions) {
@@ -294,7 +293,7 @@ public class GUIWalker {
      * @param source The source state.
      * @param target The target state.
      * @return Returns {@code true} if the transition to the target state was possible, otherwise
-     *          {@code false} is returned.
+     *         {@code false} is returned.
      */
     private boolean goFromTo(final IScreenState source, final IScreenState target) {
 
@@ -327,7 +326,7 @@ public class GUIWalker {
      *
      * @param activity The activity that should be launched.
      * @return Returns {@code true} if the activity could be reached, otherwise {@code false} is
-     *          returned.
+     *         returned.
      */
     public boolean goToActivity(String activity) {
 
@@ -352,7 +351,7 @@ public class GUIWalker {
      *
      * @param activity The activity that should be launched.
      * @return Returns {@code true} if the activity could be reached, otherwise {@code false} is
-     *          returned.
+     *         returned.
      */
     private boolean goToActivityByState(String activity) {
 
@@ -380,10 +379,10 @@ public class GUIWalker {
      * Moves the AUT to the main activity, i.e. the start screen.
      *
      * @return Returns {@code true} if the main activity could be launched, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean goToMainActivity() {
-        Context context = getContext();
+        Context context = getTargetContext();
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(Registry.getPackageName());
         try {

@@ -5,9 +5,12 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides a fitness metric based on branch distance for multi-objective algorithms. This requires
@@ -18,24 +21,54 @@ import java.util.Map;
  */
 public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessFunction<T> {
 
-    // a cache that stores for each branch the set of test cases and its fitness value
-    private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
-
-    // all branches (shared by instances)
-    private static final List<String> branches = new ArrayList<>();
-
-    // the current branch we want to evaluate this fitness function against
-    private final String branch;
+    /**
+     * The cache is basically a two-dimensional array compacted to one dimension, i.e. the dimensions
+     * are joined together in a linear fashion. We could say that we joined together multiple sub
+     * lists, where each sub list represents the fitness values for a given chromosome. Each sub
+     * list has {@link #numberOfBranches} entries.
+     *
+     * A visual representation of the cache would look as follows:
+     *
+     * chromosome 1      chromosome 2     ...  chromosome n
+     * [[branch 1 to n], [branch 1 to n], ..., [branch 1 to n]]  (sub lists)
+     *
+     * By having the chromosome index, see {@link #chromosomeToCacheIndex}, and the number of branches,
+     * see {@link #numberOfBranches}, we can compute the starting position of the chromosome in the
+     * cache. By adding the branch index, we can retrieve the fitness value from the cache for the
+     * given chromosome and objective (branch).
+     */
+    private static final List<Float> cache = new ArrayList<>();
 
     /**
-     * Initialises the fitness function with the given branch as target.
-     *
-     * @param branch The target branch.
+     * Maps a chromosome to its index in the cache.
      */
-    public BranchDistanceMultiObjectiveFitnessFunction(String branch) {
-        this.branch = branch;
-        branches.add(branch);
-        cache.put(branch, new HashMap<>());
+    private static final Map<IChromosome, Integer> chromosomeToCacheIndex = new HashMap<>();
+
+    /**
+     * We keep track of the used cache indices. Since we clean the cache from time to time, certain
+     * indices get available again, which we re-use when assigning a new index, see
+     * {@link #assignNewCacheIndex(IChromosome)}.
+     */
+    private static final BitSet usedCacheIndices = new BitSet();
+
+    /**
+     * Tracks the total number of branches / fitness functions.
+     */
+    private static int numberOfBranches;
+
+    /**
+     * Represents the index of the n-th branch / fitness function.
+     */
+    private final int index;
+
+    /**
+     * Initialises the fitness function with the given index of the branch.
+     *
+     * @param index The index of the n-th branch / fitness function.
+     */
+    public BranchDistanceMultiObjectiveFitnessFunction(int index) {
+        this.index = index;
+        numberOfBranches++;
     }
 
     /**
@@ -48,19 +81,47 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        if (!cache.get(branch).containsKey(chromosome)) {
+        Integer cacheIndex = chromosomeToCacheIndex.get(chromosome);
 
-            // retrieves the fitness value for every single branch
-            List<Double> branchDistanceVector = FitnessUtils.getFitness(chromosome, branches,
-                    FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
+        if (cacheIndex == null) {
+            // the chromosome hasn't been cached yet
+            cacheIndex = assignNewCacheIndex(chromosome);
 
-            // update the cache
-            for (int i = 0; i < branchDistanceVector.size(); i++) {
-                cache.get(branches.get(i)).put(chromosome, branchDistanceVector.get(i));
+            // retrieve the fitness value for every single branch
+            final List<Float> branchDistanceVector
+                    = FitnessUtils.getBranchDistanceVector(chromosome, numberOfBranches);
+
+            // describes the starting position of the chromosome in the cache
+            final int baseIndex = cacheIndex * numberOfBranches;
+            assert baseIndex <= cache.size();
+
+            if (baseIndex < cache.size()) {
+                // we can re-use the slots of a chromosome that has been cleaned earlier
+                for (int i = 0; i < numberOfBranches; i++) {
+                    cache.set(baseIndex + i, branchDistanceVector.get(i));
+                }
+            } else {
+                // we need to enlarge the cache
+                for (int i = 0; i < numberOfBranches; i++) {
+                    cache.add(baseIndex + i, branchDistanceVector.get(i));
+                }
             }
         }
 
-        return cache.get(branch).get(chromosome);
+        return cache.get(cacheIndex * numberOfBranches + index);
+    }
+
+    /**
+     * Assigns to the given chromosome a new index in the cache.
+     *
+     * @param chromosome The given chromosome.
+     * @return Returns the new cache index of the chromosome.
+     */
+    private int assignNewCacheIndex(final IChromosome<T> chromosome) {
+        final int newIndex = usedCacheIndices.nextClearBit(0);
+        usedCacheIndices.set(newIndex);
+        chromosomeToCacheIndex.put(chromosome, newIndex);
+        return newIndex;
     }
 
     /**
@@ -87,26 +148,21 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
     /**
      * Removes chromosomes from the cache that are no longer in use in order to avoid memory issues.
      *
-     * @param chromosomes The list of active chromosomes.
+     * @param activeChromosomes The list of active chromosomes.
      */
-    public static <T> void cleanCache(List<IChromosome<T>> chromosomes) {
+    public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        if (branches.size() == 0 || cache.size() == 0) {
-            return;
+        Set<IChromosome<T>> cachedChromosomes = new HashSet(chromosomeToCacheIndex.keySet());
+
+        for (IChromosome<T> activeChromosome : activeChromosomes) {
+            cachedChromosomes.remove(activeChromosome);
         }
 
-        List<IChromosome<T>> activeChromosomes = new ArrayList<>(chromosomes);
-
-        int count = 0;
-        for (String branch : branches) {
-            Map<IChromosome, Double> branchCache =  cache.get(branch);
-            for (IChromosome chromosome: new ArrayList<>(branchCache.keySet())) {
-                if (!activeChromosomes.contains(chromosome)) {
-                    branchCache.remove(chromosome);
-                    count++;
-                }
-            }
+        for (IChromosome<T> inactiveChromosome : cachedChromosomes) {
+            final int index = chromosomeToCacheIndex.remove(inactiveChromosome);
+            usedCacheIndices.clear(index);
         }
-        MATE.log_acc("Cleaning cache: " + count + " inactive chromosome removed.");
+
+        MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
     }
 }

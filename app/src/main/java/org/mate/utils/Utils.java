@@ -1,5 +1,7 @@
 package org.mate.utils;
 
+import org.mate.MATE;
+
 /**
  * A collection of utility functions.
  */
@@ -18,7 +20,19 @@ public class Utils {
         try {
             Thread.sleep(time);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new MateInterruptedException(e);
         }
     }
+
+    /**
+     * Throws a {@code MateInterruptedException} if the calling thread has been interrupted and
+     * clears the interrupted status. Does nothing, if the calling thread has not been interrupted.
+     */
+    public static void throwOnInterrupt() {
+        if (Thread.interrupted()) {
+            MATE.log_debug("Interrupt detected!");
+            throw new MateInterruptedException();
+        }
+    }
+
 }
