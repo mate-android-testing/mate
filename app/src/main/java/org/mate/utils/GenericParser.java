@@ -27,14 +27,15 @@ public class GenericParser {
     public static <T> T parse(Class<T> clazz, String s) throws Exception {
         if (clazz.isArray()) {
             Class<?> clazzOfArray = clazz.getComponentType();
-
             return (T) parseArray(clazzOfArray, s);
         } else {
             return parseElement(clazz, s);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T[] parseArray(Class<T> clazz, String s) throws Exception {
+
         s = s.replace(" ", "");
         String[] sElements = s.split(",");
         T[] elements = (T[]) Array.newInstance(clazz, sElements.length);
