@@ -36,10 +36,11 @@ public class LineCoverageFitnessFunction<T> implements IFitnessFunction<T> {
     public double getFitness(IChromosome<T> chromosome) {
         if (cache.containsKey(chromosome)) {
             return cache.get(chromosome);
+        } else {
+            double fitness = FitnessUtils.getFitness(chromosome, FitnessFunction.LINE_COVERAGE);
+            cache.put(chromosome, fitness);
+            return fitness;
         }
-        double fitness = FitnessUtils.getFitness(chromosome, FitnessFunction.LINE_COVERAGE);
-        cache.put(chromosome, fitness);
-        return fitness;
     }
 
     /**

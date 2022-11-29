@@ -143,32 +143,6 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
     }
 
     /**
-     * Retrieves the fitness value for the given chromosome.
-     *
-     * @param chromosome The chromosome for which the fitness should be evaluated.
-     * @param <T> The type wrapped by the chromosome.
-     */
-    public static <T> void retrieveFitnessValues(IChromosome<T> chromosome) {
-
-        if (lines.size() == 0) {
-            return;
-        }
-
-        if (cache.size() == 0) {
-            for (String line : lines) {
-                cache.put(line, new HashMap<>());
-            }
-        }
-
-        MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> coveredPercentage = FitnessUtils.getFitness(chromosome, lines,
-                FitnessFunction.LINE_PERCENTAGE_COVERAGE);
-        for (int i = 0; i < coveredPercentage.size(); i++) {
-            cache.get(lines.get(i)).put(chromosome, coveredPercentage.get(i));
-        }
-    }
-
-    /**
      * Removes chromosomes from the cache that are no longer in use in order to avoid memory issues.
      *
      * @param activeChromosomes The list of active chromosomes.

@@ -19,7 +19,7 @@ public class BranchDistanceFitnessFunction<T> implements IFitnessFunction<T> {
     /**
      * Caches for each chromosome the computed branch distance.
      */
-    private Map<IChromosome<T>, Double> cache = new HashMap<>();
+    private final Map<IChromosome<T>, Double> cache = new HashMap<>();
 
     /**
      * Computes the branch distance value for the given chromosome.

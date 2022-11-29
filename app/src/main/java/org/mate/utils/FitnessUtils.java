@@ -12,8 +12,8 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 import org.mate.utils.coverage.Coverage;
 
-import java.util.BitSet;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -37,12 +37,6 @@ public class FitnessUtils {
     public static void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
                                         IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
-        /*
-         * TODO: Support multi-valued fitness function property. We may want to combine multiple
-         *  fitness functions that all produce some sort of traces. Right now, we can only handle
-         *  one such fitness function at a time.
-         */
-
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
@@ -51,10 +45,10 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
-        for (FitnessFunction fitness : Properties.FITNESS_FUNCTIONS()) {
-            if (fitnessFunctions.contains(fitness)) {
+        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(fitnessFunction)) {
                 Registry.getEnvironmentManager()
-                        .copyFitnessData(sourceChromosome, targetChromosome, testCases, fitness);
+                        .copyFitnessData(sourceChromosome, targetChromosome, testCases, fitnessFunction);
             }
         }
     }
@@ -66,26 +60,7 @@ public class FitnessUtils {
      * @param chromosome The given test case.
      */
     public static void storeTestCaseChromosomeFitness(IChromosome<TestCase> chromosome) {
-
-        /*
-        * TODO: Support multi-valued fitness function property. We may want to combine multiple
-        *  fitness functions that all produce some sort of traces. Right now, we can only handle
-        *  one such fitness function at a time.
-         */
-
-        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE,
-                FitnessFunction.METHOD_COVERAGE,
-                FitnessFunction.NOVELTY,
-                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
-                FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
-                FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE, FitnessFunction.BRANCH_MULTI_OBJECTIVE);
-
-        if (fitnessFunctions.contains(Properties.FITNESS_FUNCTION())) {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome, null);
-        }
-        storeTestSuite(chromosome, null);
+        storeFitnessData(chromosome, null);
     }
 
     /**
@@ -96,15 +71,27 @@ public class FitnessUtils {
      * @param testCase The test case within the test suite.
      */
     public static void storeTestSuiteChromosomeFitness(IChromosome<TestSuite> chromosome, TestCase testCase) {
-        storeTestSuite(chromosome, testCase.getId());
+        storeFitnessData(chromosome, testCase.getId());
     }
 
-    private static <T> void storeTestSuite(IChromosome<T> chromosome, String testCaseId) {
-        /*
-         * TODO: Support multi-valued fitness function property. We may want to combine multiple
-         *  fitness functions that all produce some sort of traces. Right now, we can only handle
-         *  one such fitness function at a time.
-         */
+    /**
+     * Stores for the given chromosome the fitness data, e.g. the traces.
+     *
+     * @param chromosome The chromosome for which the fitness data should be stored.
+     * @param testCaseId Refers to a test case within a test suite or {@code null} if the chromosome
+     *          describes a test case.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
+     */
+    private static <T> void storeFitnessData(IChromosome<T> chromosome, String testCaseId) {
+
+        if (Properties.FITNESS_FUNCTIONS() == null) {
+            /*
+            * If the underlying algorithm doesn't use any fitness function but uses the default
+            * chromosome factory or any derivative of it, storeFitnessData() is called. Since there
+            * is no fitness function specified, the subsequent foreach loop would cause a NPE.
+             */
+            return;
+        }
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
@@ -113,15 +100,10 @@ public class FitnessUtils {
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
                 FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
-        for (FitnessFunction function : Properties.FITNESS_FUNCTIONS()) {
-            if (fitnessFunctions.contains(function)) {
-                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId, function);
+        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(fitnessFunction)) {
+                Registry.getEnvironmentManager().storeFitnessData(chromosome, testCaseId, fitnessFunction);
             }
-        }
-
-        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).anyMatch(
-                function -> function == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
-            LineCoveredPercentageFitnessFunction.retrieveFitnessValues(chromosome);
         }
     }
 
@@ -132,22 +114,8 @@ public class FitnessUtils {
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        /*
-         * TODO: Support multi-valued fitness function property. We may want to combine multiple
-         *  fitness functions that all produce some sort of traces. Right now, we can only handle
-         *  one such fitness function at a time.
-         */
-
-        if (Properties.FITNESS_FUNCTION() == FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
-            LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
-            BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
-            BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-        } else if (Properties.FITNESS_FUNCTION() == FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
-            BranchMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-        for (FitnessFunction function : Properties.FITNESS_FUNCTIONS()) {
-            switch (function) {
+        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
+            switch (fitnessFunction) {
                 case LINE_PERCENTAGE_COVERAGE:
                     LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
                     break;
@@ -157,7 +125,9 @@ public class FitnessUtils {
                 case BRANCH_DISTANCE_MULTI_OBJECTIVE:
                     BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
                     break;
-                default:
+                case BRANCH_MULTI_OBJECTIVE:
+                    BranchMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+                    break;
             }
         }
     }
@@ -166,13 +136,13 @@ public class FitnessUtils {
      * Retrieves the fitness value for the given chromosome.
      *
      * @param chromosome The chromosome for which the fitness value should be evaluated.
-     * @param function The fitness function used.
+     * @param fitnessFunction The fitness function used.
      * @param <T> Specifies whether the chromosome is a test suite or a test case.
      * @return Returns the fitness value for the given chromosome.
      */
-    public static <T> double getFitness(IChromosome<T> chromosome, FitnessFunction function) {
+    public static <T> double getFitness(IChromosome<T> chromosome, FitnessFunction fitnessFunction) {
 
-        switch (function) {
+        switch (fitnessFunction) {
             case BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager()
                         .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
@@ -194,8 +164,6 @@ public class FitnessUtils {
                         .getBranchCoverage();
             case GENO_TO_PHENO_TYPE:
                 // GE specifies the 'core' fitness function in the GE_FITNESS_FUNCTION() property
-
-                // TODO: Find solution for Geno_to_pheno_type
                 if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
                     return Registry.getEnvironmentManager()
                             .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
@@ -219,7 +187,7 @@ public class FitnessUtils {
                 }
             default:
                 throw new UnsupportedOperationException("Fitness function "
-                        + function + " not yet supported!");
+                        + fitnessFunction + " not yet supported!");
         }
     }
 
@@ -233,7 +201,8 @@ public class FitnessUtils {
      */
     public static <T> BitSet getBranchFitnessVector(IChromosome<T> chromosome, int numberOfBranches) {
 
-        if (Properties.FITNESS_FUNCTION() != FitnessFunction.BRANCH_MULTI_OBJECTIVE) {
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
+                fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_MULTI_OBJECTIVE)) {
             throw new IllegalStateException("Unexpected fitness function!");
         }
 
@@ -250,7 +219,8 @@ public class FitnessUtils {
      */
     public static <T> BitSet getBasicBlockFitnessVector(IChromosome<T> chromosome, int numberOfBasicBlocks) {
 
-        if (Properties.FITNESS_FUNCTION() != FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE) {
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
+                fitnessFunction -> fitnessFunction == FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE)) {
             throw new IllegalStateException("Unexpected fitness function!");
         }
 
@@ -267,7 +237,8 @@ public class FitnessUtils {
      */
     public static <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
 
-        if (Properties.FITNESS_FUNCTION() != FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE) {
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
+                fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE)) {
             throw new IllegalStateException("Unexpected fitness function!");
         }
 
@@ -284,40 +255,12 @@ public class FitnessUtils {
      */
     public static <T> List<Float> getLinePercentageVector(IChromosome<T> chromosome, int numberOfLines) {
 
-        if (Properties.FITNESS_FUNCTION() != FitnessFunction.LINE_PERCENTAGE_COVERAGE) {
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
+                fitnessFunction -> fitnessFunction == FitnessFunction.LINE_PERCENTAGE_COVERAGE)) {
             throw new IllegalStateException("Unexpected fitness function!");
         }
 
         return Registry.getEnvironmentManager().getLinePercentageVector(chromosome, numberOfLines);
-     * Retrieves the fitness vector for the given chromosome, i.e. the chromosome is evaluated
-     * against each single objective, e.g. branch.
-     *
-     * @param chromosome The chromosome for which the fitness vector should be evaluated.
-     * @param objectives A list of objectives, e.g. lines or branches, or {@code null} if not required.
-     * @param function The fitness function used.
-     * @param <T> Specifies whether the chromosome is a test suite or a test case.
-     * @return Returns the fitness vector for the given chromosome.
-     */
-    public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives,
-                                              FitnessFunction function) {
-
-        switch (function) {
-            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                return Registry.getEnvironmentManager()
-                        .getBranchDistanceVector(chromosome, objectives);
-            case LINE_PERCENTAGE_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getLineCoveredPercentage(chromosome, objectives);
-            case BASIC_BLOCK_MULTI_OBJECTIVE:
-                return Registry.getEnvironmentManager()
-                        .getBasicBlockFitnessVector(chromosome, objectives);
-            case BRANCH_MULTI_OBJECTIVE:
-                return Registry.getEnvironmentManager()
-                        .getBranchFitnessVector(chromosome, objectives);
-            default:
-                throw new UnsupportedOperationException("Fitness function "
-                        + function + " not yet supported!");
-        }
     }
 
     /**

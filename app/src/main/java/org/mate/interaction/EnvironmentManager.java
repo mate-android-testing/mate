@@ -9,8 +9,8 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.graph.DrawType;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.message.Message;
@@ -337,13 +337,12 @@ public class EnvironmentManager {
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
      * @param testCases        The test cases belonging to the source chromosome.
-     * @param function         The fitness function which is copied.
-     * @param testCases The test cases belonging to the source chromosome.
+     * @param fitnessFunction  The underlying fitness function.
      */
-    public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
-                                IChromosome<TestSuite> targetChromosome,
-                                List<TestCase> testCases,
-                                FitnessFunction function) {
+    public void copyFitnessData(final IChromosome<TestSuite> sourceChromosome,
+                                final IChromosome<TestSuite> targetChromosome,
+                                final List<TestCase> testCases,
+                                final FitnessFunction fitnessFunction) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -360,7 +359,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/copy_fitness_data")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("fitnessFunction", function.name())
+                .withParameter("fitnessFunction", fitnessFunction.name())
                 .withParameter("chromosome_src", sourceChromosome.getValue().getId())
                 .withParameter("chromosome_target", targetChromosome.getValue().getId())
                 .withParameter("entities", sb.toString());
@@ -381,8 +380,9 @@ public class EnvironmentManager {
      * @param targetChromosome The target chromosome.
      * @param testCases The test cases belonging to the source chromosome.
      */
-    public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
-                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+    public void copyCoverageData(final IChromosome<TestSuite> sourceChromosome,
+                                 final IChromosome<TestSuite> targetChromosome,
+                                 final List<TestCase> testCases) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -694,10 +694,10 @@ public class EnvironmentManager {
      * @param chromosome Refers either to a test case or to a test suite.
      * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
      *                   otherwise {@code null}.
-     * @param function The fitness function which is getting stored.
+     * @param fitnessFunction The underlying fitness function.
      */
-    public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId,
-                                     FitnessFunction function) {
+    public <T> void storeFitnessData(final IChromosome<T> chromosome, final String entityId,
+                                     final FitnessFunction fitnessFunction) {
 
         if (entityId != null && entityId.equals("dummy")) {
             MATE.log_warn("Trying to store fitness data of dummy test case...");
@@ -720,7 +720,7 @@ public class EnvironmentManager {
         coveredTestCases.add(testcase);
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_fitness_data")
-                .withParameter("fitnessFunction", function.name())
+                .withParameter("fitnessFunction", fitnessFunction.name())
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
