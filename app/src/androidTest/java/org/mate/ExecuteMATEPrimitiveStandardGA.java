@@ -28,7 +28,7 @@ public class ExecuteMATEPrimitiveStandardGA {
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withCrossoverFunction(CrossOverFunction.PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER)
                 .withMutationFunction(MutationFunction.PRIMITIVE_SHUFFLE_MUTATION)
-                .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
+                .withFitnessFunction(Properties.FITNESS_FUNCTION())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())

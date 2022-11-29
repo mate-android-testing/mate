@@ -24,8 +24,8 @@ public class ExecuteMATEOnePlusOne {
         final IGeneticAlgorithm onePlusOne = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.ONE_PLUS_ONE)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
-                .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withFitnessFunction(Properties.FITNESS_FUNCTION())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .build();
 

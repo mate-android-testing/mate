@@ -22,7 +22,7 @@ public class ExecuteMATEMIO {
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MIO)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
@@ -36,11 +36,7 @@ public class ExecuteMATEMIO {
                 = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
         // we need to associate with each objective (branch, line) a fitness function
-        for (int i = 0; i < numberOfObjectives; i++) {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
-        for (String objective : objectives) {
-            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
-        }
+        builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
 
         final IGeneticAlgorithm mio = builder.build();
         mate.testApp(mio);

@@ -28,7 +28,7 @@ public class ExecuteMATEListAnalogousGE {
                 .withChromosomeFactory(ChromosomeFactory.INTEGER_SEQUENCE_CHROMOSOME_FACTORY)
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withGEMappingFunction(GEMappingFunction.LIST_ANALOGOUS_MAPPING)
-                .withGenoToPhenoType()
+                .withFitnessFunction(FitnessFunction.GENO_TO_PHENO_TYPE)
                 .withCrossoverFunction(CrossOverFunction.INTEGER_SEQUENCE_POINT_CROSS_OVER)
                 .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_LENGTH_MUTATION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())

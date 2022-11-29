@@ -23,8 +23,8 @@ public class ExecuteMATEMOSA {
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
-                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
+                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
@@ -36,11 +36,7 @@ public class ExecuteMATEMOSA {
                 = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
         // we need to associate with each objective (branch, line) a fitness function
-        for (int i = 0; i < numberOfObjectives; i++) {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
-        for (String objective : objectives) {
-            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
-        }
+        builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
 
         final IGeneticAlgorithm mosa = builder.build();
         mate.testApp(mosa);

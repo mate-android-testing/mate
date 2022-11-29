@@ -20,15 +20,13 @@ public class ExecuteMATENoveltySearch {
 
         MATE mate = new MATE();
 
-        FitnessFunction[] novelty = {FitnessFunction.NOVELTY};
-
         final IGeneticAlgorithm noveltySearch = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NOVELTY_SEARCH)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(SelectionFunction.NOVELTY_RANK_SELECTION)
-                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
-                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
-                .withFitnessFunctions(novelty, Properties.OBJECTIVE().name())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
