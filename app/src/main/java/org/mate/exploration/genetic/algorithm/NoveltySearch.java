@@ -74,9 +74,9 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunctions The used crossover function.
-     * @param mutationFunctions The used mutation function.
-     * @param fitnessFunctions The used fitness/novelty function.
+     * @param crossOverFunctions The used crossover functions.
+     * @param mutationFunctions The used mutation functions.
+     * @param fitnessFunctions The used fitness/novelty functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
      * @param bigPopulationSize The big population size.
@@ -158,7 +158,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> parent;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                parent = singleCrossOverFunction.cross(parents).get(0);
+                parent = crossOverFunction.cross(parents).get(0);
             } else {
                 parent = parents.get(0);
             }
@@ -166,7 +166,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
             IChromosome<T> offspring;
 
             if (Randomness.getRnd().nextDouble() < pMutate) {
-                offspring = singleMutationFunction.mutate(parent);
+                offspring = mutationFunction.mutate(parent);
             } else {
                 offspring = parent;
             }

@@ -22,7 +22,7 @@ public class RandomWalk<T> extends GeneticAlgorithm<T> {
      * Initialises the random walk with all necessary attributes.
      *
      * @param chromosomeFactory The used chromosome factory.
-     * @param mutationFunctions The used mutation function.
+     * @param mutationFunctions The used mutation functions.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      */
@@ -52,7 +52,7 @@ public class RandomWalk<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Creating generation #" + (currentGenerationNumber + 1));
 
         IChromosome<T> chromosome = population.get(0);
-        IChromosome<T> mutant = singleMutationFunction.mutate(chromosome);
+        IChromosome<T> mutant = mutationFunction.mutate(chromosome);
 
         // keep solely the mutant (offspring)
         population.clear();

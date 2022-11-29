@@ -9,7 +9,6 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
-import org.mate.exploration.genetic.mutation.IMutationWithCrossOver;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.model.TestCase;
@@ -122,7 +121,7 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                     parent = produceTestCaseMutation((TestSuite) object);
                 }
 
-                IChromosome<T> offspring = singleMutationFunction.mutate(parent);
+                IChromosome<T> offspring = mutationFunction.mutate(parent);
 
                 if (offspring.getValue() instanceof List) {
                     List<T> list = (List<T>) offspring.getValue();
