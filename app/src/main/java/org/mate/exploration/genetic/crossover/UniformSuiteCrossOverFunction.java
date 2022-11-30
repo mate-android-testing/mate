@@ -17,7 +17,7 @@ import java.util.List;
  * Provides a uniform crossover operation for {@link TestSuite}s, i.e. the offspring consists
  * of a random combination of the genes from the parents t1 and t2.
  */
-public class UniformSuiteCrossoverFunction implements ICrossOverFunction<TestSuite> {
+public class UniformSuiteCrossOverFunction implements ICrossOverFunction<TestSuite> {
 
     /**
      * Performs a uniform crossover on the two given test suites. The offspring test suite
