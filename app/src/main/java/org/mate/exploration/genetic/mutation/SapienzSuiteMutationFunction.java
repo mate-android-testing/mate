@@ -13,7 +13,6 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -140,7 +139,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<List<Test
         }
 
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-        return mutatedChromosome;
+        return new Chromosome<>(mutatedList);
     }
 
     /**
@@ -169,6 +168,5 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<List<Test
 
         t2.getActionSequence().addAll(copyT2.getActionSequence().subList(0, cutPoint));
         t2.getActionSequence().addAll(copyT1.getActionSequence().subList(cutPoint, lengthT1));
-        return new Chromosome<>(mutatedList);
     }
 }
