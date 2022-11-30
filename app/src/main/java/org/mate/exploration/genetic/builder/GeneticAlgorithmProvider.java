@@ -756,7 +756,7 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
-            case SHUFFLE_MUTATION:
+            case TEST_CASE_SHUFFLE_MUTATION:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
