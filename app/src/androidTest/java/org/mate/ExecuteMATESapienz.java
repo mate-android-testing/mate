@@ -23,11 +23,6 @@ public class ExecuteMATESapienz {
 
         MATE mate = new MATE();
 
-        CrossOverFunction[] crossOverFunctions = new CrossOverFunction[]{
-                CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER,
-                CrossOverFunction.PRIMITIVE_ONE_POINT_CROSS_OVER
-        };
-
         FitnessFunction[] fitnessFunctions = new FitnessFunction[]{
                 FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.NUMBER_OF_CRASHES,
@@ -38,9 +33,9 @@ public class ExecuteMATESapienz {
                 new GeneticAlgorithmBuilder()
                         .withAlgorithm(Algorithm.SAPIENZ)
                         .withChromosomeFactory(ChromosomeFactory.SAPIENZ_SUITE_RANDOM_CHROMOSOME_FACTORY)
-                        .withCrossoverFunctions(crossOverFunctions)
                         .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                         .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)
+                        .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
                         .withFitnessFunctions(fitnessFunctions)
                         .withTerminationCondition(Properties.TERMINATION_CONDITION())
                         .withPopulationSize(Properties.POPULATION_SIZE())

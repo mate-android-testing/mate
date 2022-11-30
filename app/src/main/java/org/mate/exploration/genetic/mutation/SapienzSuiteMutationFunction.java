@@ -13,7 +13,6 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ import java.util.List;
  * https://discovery.ucl.ac.uk/id/eprint/1508043/1/p_issta16_sapienz.pdf. In particular, have
  * a look at section 3.1 and Algorithm 2.
  */
-public class SapienzSuiteMutationFunction implements IMutationFunction<List<TestSuite>> {
+public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite> {
 
     /**
      * The probability for mutation.
@@ -45,28 +44,24 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<List<Test
     }
 
     /**
-     * Performs variation as described in the Sapienz paper with the one point cross over function,
-     * see section 3.1 and Algorithm 2.
+     * Performs variation as described in the Sapienz paper, see section 3.1 and Algorithm 2.
      *
      * @param chromosome The chromosome to be mutated.
      * @return Returns the mutated chromosome.
      */
     @Override
-    public IChromosome<List<TestSuite>> mutate(IChromosome<List<TestSuite>> chromosome) {
-        TestSuite original = chromosome.getValue().get(0);
-        TestSuite shuffled = chromosome.getValue().get(1);
-        TestSuite crossOver = chromosome.getValue().get(2);
+    public IChromosome<TestSuite> mutate(IChromosome<TestSuite> chromosome) {
 
         TestSuite mutatedTestSuite = new TestSuite();
         IChromosome<TestSuite> mutatedChromosome = new Chromosome<>(mutatedTestSuite);
-        List<TestSuite> mutatedList = new ArrayList<>();
-        mutatedList.add(mutatedTestSuite);
 
-        List<TestCase> shuffledTestCases = shuffled.getTestCases();
-        List<TestCase> crossOverTestCases = crossOver.getTestCases();
-        List<TestCase> notMutatedTestCases = new LinkedList<>();
+        List<TestCase> testCases = chromosome.getValue().getTestCases();
+        List<TestCase> notMutatedTestCases = new ArrayList<>(testCases);
 
-        for (int i = 1; i < shuffledTestCases.size(); i = i + 2) {
+        // shuffle the test cases within the test suite
+        Randomness.shuffleList(testCases);
+
+        for (int i = 1; i < testCases.size(); i = i + 2) {
             double rnd = Randomness.getRnd().nextDouble();
 
             if (rnd < pMutate) { // if r < q
@@ -75,24 +70,18 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<List<Test
                  * MATE only supports crossover functions that return a single offspring, we make
                  * the one-point crossover here in place.
                  */
-                TestCase t1 = crossOverTestCases.get(i - 1);
-                TestCase t2 = crossOverTestCases.get(i);
-
-                shuffledTestCases.set((i - 1), t1);
-                shuffledTestCases.set(i, t2);
-            } else {
-                TestCase t1 = shuffledTestCases.get(i - 1);
-                TestCase t2 = shuffledTestCases.get(i);
-
-                notMutatedTestCases.add(t1);
-                notMutatedTestCases.add(t2);
+                TestCase t1 = testCases.get(i - 1);
+                TestCase t2 = testCases.get(i);
+                onePointCrossover(t1, t2);
+                notMutatedTestCases.remove(t1);
+                notMutatedTestCases.remove(t2);
             }
         }
 
-        for (int i = 0; i < shuffledTestCases.size(); i++) {
+        for (int i = 0; i < testCases.size(); i++) {
             double rnd = Randomness.getRnd().nextDouble();
 
-            TestCase testCase = shuffledTestCases.get(i);
+            TestCase testCase = testCases.get(i);
 
             if (rnd < pMutate) { // if r < q
 
@@ -108,7 +97,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<List<Test
         }
 
         // we need to execute those test cases that have been mutated
-        for (TestCase testCase : shuffledTestCases) {
+        for (TestCase testCase : testCases) {
             if (!notMutatedTestCases.contains(testCase)) {
 
                 TestCase executed = TestCase.fromDummy(testCase);
@@ -133,13 +122,13 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<List<Test
         // we need to copy fitness and coverage data for those test cases that haven't be mutated
         if (!notMutatedTestCases.isEmpty()) {
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
-                CoverageUtils.copyCoverageData(new Chromosome<>(original), mutatedChromosome, notMutatedTestCases);
+                CoverageUtils.copyCoverageData(chromosome, mutatedChromosome, notMutatedTestCases);
             }
-            FitnessUtils.copyFitnessData(new Chromosome<>(original), mutatedChromosome, notMutatedTestCases);
+            FitnessUtils.copyFitnessData(chromosome, mutatedChromosome, notMutatedTestCases);
         }
 
         CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-        return new Chromosome<>(mutatedList);
+        return mutatedChromosome;
     }
 
     /**

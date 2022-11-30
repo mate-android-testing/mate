@@ -1,7 +1,6 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
-import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
@@ -11,8 +10,6 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
-import org.mate.model.TestCase;
-import org.mate.model.TestSuite;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -30,25 +27,13 @@ import java.util.Map;
 public class Sapienz<T> extends GeneticAlgorithm<T> {
 
     /**
-     * The outer cross over function.
-     * Typically, it is an uniform cross over function.
-     */
-    private final ICrossOverFunction<T> uniformCrossOver;
-
-    /**
-     * The cross over function used in the mutation step of the Sapienz algorithm.
-     * Typically, it is an one point cross over function.
-     */
-    private final ICrossOverFunction<TestCase> onePointCrossOver;
-
-    /**
      * Initializes Sapienz with the relevant attributes.
      *
      * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
      * @param selectionFunction The used selection function, see {@link ISelectionFunction}.
-     * @param crossOverFunctions The used crossover function, see {@link ICrossOverFunction}.
-     * @param mutationFunctions The used mutation function, see {@link IMutationFunction}.
-     * @param fitnessFunctions The used fitness function, see {@link IFitnessFunction}.
+     * @param crossOverFunctions The used crossover functions, see {@link ICrossOverFunction}.
+     * @param mutationFunctions The used mutation functions, see {@link IMutationFunction}.
+     * @param fitnessFunctions The used fitness functions, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
      * @param populationSize The population size n.
      * @param bigPopulationSize The big population size.
@@ -68,14 +53,6 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
         super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions,
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
-
-        if (crossOverFunctions.size() == 2) {
-            uniformCrossOver = crossOverFunctions.get(0);
-            onePointCrossOver = (ICrossOverFunction<TestCase>) crossOverFunctions.get(1);
-        } else {
-            throw new IllegalArgumentException("Sapienz needs two cross over functions! "
-                    + "An uniform cross over function and the one point cross over function.");
-        }
     }
 
     /**
@@ -94,7 +71,6 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
             double rnd = Randomness.getRnd().nextDouble();
 
             if (rnd < pCrossover) { // if r < p (apply crossover)
-
                 /*
                 * Sapienz uses a uniform crossover operator that takes two individuals x1, x2 as input
                 * and returns two individuals x1', x2'. The first individual x1' is added to the
@@ -103,40 +79,16 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 * function directly executes the offspring x1' if necessary.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
-
-                IChromosome<T> offspring = uniformCrossOver.cross(parents).get(0);
+                IChromosome<T> offspring = crossOverFunction.cross(parents).get(0);
                 newGeneration.add(offspring);
             } else if (rnd < pCrossover + pMutate) { // if r < p + q (apply mutation)
-
                 /*
                 * Sapienz mutates a randomly selected individual x1 in a multi-step mutation
                 * procedure and adds the mutated individual x1' to the offspring population Q.
                 * Note that the mutation function directly executes the mutated individual x1'.
                  */
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
-                IChromosome<T> parent = parents.get(0);
-                T object = parent.getValue();
-
-                if (object instanceof TestSuite) {
-                    parent = produceTestCaseMutation((TestSuite) object);
-                }
-
-                IChromosome<T> offspring = mutationFunction.mutate(parent);
-
-                if (offspring.getValue() instanceof List) {
-                    List<T> list = (List<T>) offspring.getValue();
-                    offspring = new Chromosome<>((T) list);
-                }
-
-                /*IChromosome<T> offspring;
-                if (singleMutationFunction instanceof IMutationWithCrossOver) {
-                    IMutationWithCrossOver<TestCase, T> mutation
-                            = (IMutationWithCrossOver<TestCase, T>) singleMutationFunction;
-                    offspring = mutation.mutate(parent, onePointCrossOver);
-                } else {
-                    offspring = singleMutationFunction.mutate(parent);
-                }*/
-
+                IChromosome<T> offspring = mutationFunction.mutate(parents.get(0));
                 newGeneration.add(offspring);
             } else { // (apply reproduction)
                 List<IChromosome<T>> parents = selectionFunction.select(population, fitnessFunctions);
@@ -196,44 +148,5 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
         // fill up the remaining slots with the least crowded chromosomes of the last front
         survivors.addAll(lastFront.subList(0, populationSize - survivors.size()));
         return survivors;
-    }
-
-    private IChromosome<T> produceTestCaseMutation(TestSuite testSuite) {
-        List<TestCase> shuffled = new ArrayList<>(testSuite.getTestCases());
-        List<TestCase> crossOvered = new ArrayList<>();
-
-        TestSuite shuffledTestSuite = new TestSuite();
-        TestSuite crossOverTestSuite = new TestSuite();
-
-        List<TestSuite> suiteList = new ArrayList<>();
-        suiteList.add(testSuite);
-        suiteList.add(shuffledTestSuite);
-        suiteList.add(crossOverTestSuite);
-
-        // shuffle the test cases within the test suite
-        Randomness.shuffleList(shuffled);
-
-        for (int i = 1; i < shuffled.size(); i = i + 2) {
-            TestCase t1 = shuffled.get(i - 1);
-            TestCase t2 = shuffled.get(i);
-            IChromosome<TestCase> t1Chromosome = new Chromosome<>(t1);
-            IChromosome<TestCase> t2Chromosome = new Chromosome<>(t2);
-            List<IChromosome<TestCase>> t1AndT2 = new ArrayList<>();
-            t1AndT2.add(t1Chromosome);
-            t1AndT2.add(t2Chromosome);
-
-            List<IChromosome<TestCase>> result = onePointCrossOver.cross(t1AndT2);
-
-            t1 = result.get(0).getValue();
-            t2 = result.get(1).getValue();
-
-            crossOvered.add(t1);
-            crossOvered.add(t2);
-        }
-
-        shuffledTestSuite.getTestCases().addAll(shuffled);
-        crossOverTestSuite.getTestCases().addAll(crossOvered);
-
-        return new Chromosome<>((T) suiteList);
     }
 }
