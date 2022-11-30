@@ -56,6 +56,7 @@ import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFun
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.mutation.TestSuiteShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
@@ -760,6 +761,8 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
+            case TEST_SUITE_SHUFFLE_MUTATION:
+                return (IMutationFunction<T>) new TestSuiteShuffleMutationFunction();
             case INTEGER_SEQUENCE_POINT_MUTATION:
                 return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
             case INTEGER_SEQUENCE_LENGTH_MUTATION:
