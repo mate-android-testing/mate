@@ -100,8 +100,8 @@ public class MIO<T> extends GeneticAlgorithm<T> {
      * Initializes MIO with the relevant attributes.
      *
      * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
-     * @param mutationFunction The used mutation function, see {@link IMutationFunction}.
-     * @param fitnessFunctions The used fitness function, see {@link IFitnessFunction}.
+     * @param mutationFunctions The used mutation functions, see {@link IMutationFunction}.
+     * @param fitnessFunctions The used fitness functions, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
      * @param populationSize The population size n.
      * @param bigPopulationSize The big population size, unused here.
@@ -112,7 +112,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
      * @param pSampleRandom The sampling probability P_r.
      */
     public MIO(IChromosomeFactory<T> chromosomeFactory,
-               IMutationFunction<T> mutationFunction,
+               List<IMutationFunction<T>> mutationFunctions,
                List<IFitnessFunction<T>> fitnessFunctions,
                ITerminationCondition terminationCondition,
                int populationSize,
@@ -126,7 +126,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
         super(chromosomeFactory,
                 null,
                 null,
-                mutationFunction,
+                mutationFunctions,
                 fitnessFunctions,
                 terminationCondition,
                 populationSize,

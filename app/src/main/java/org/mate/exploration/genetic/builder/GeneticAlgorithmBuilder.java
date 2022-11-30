@@ -24,19 +24,21 @@ public class GeneticAlgorithmBuilder {
     public static final String ALGORITHM_KEY = "algorithm";
     public static final String FITNESS_FUNCTION_KEY_FORMAT = "fitness_function_%d";
     public static final String FITNESS_FUNCTION_ARG_KEY_FORMAT = "fitness_function_%d_arg";
+    public static final String CROSSOVER_FUNCTION_KEY_FORMAT = "crossover_function_%d";
+    public static final String MUTATION_FUNCTION_KEY_FORMAT = "mutation_function_%d";
     public static final String CHROMOSOME_FACTORY_KEY = "chromosome_factory";
     public static final String MAX_NUM_EVENTS_KEY = "num_events";
     public static final String USE_DEFAULTS_KEY = "use_defaults";
     public static final String TERMINATION_CONDITION_KEY = "termination_condition";
     public static final String NUMBER_ITERATIONS_KEY = "number_of_iterations";
     public static final String SELECTION_FUNCTION_KEY = "selection_function";
-    public static final String CROSSOVER_FUNCTION_KEY = "crossover_function";
-    public static final String MUTATION_FUNCTION_KEY = "mutation_function";
     public static final String NUM_TESTCASES_KEY = "num_test_cases";
     public static final String POPULATION_SIZE_KEY = "population_size";
     public static final String P_MUTATE_KEY = "p_mutate";
     public static final String P_CROSSOVER_KEY = "p_crossover";
     public static final String AMOUNT_FITNESS_FUNCTIONS_KEY = "amount_fitness_functions";
+    public static final String AMOUNT_CROSSOVER_FUNCTIONS_KEY = "amount_crossover_functions";
+    public static final String AMOUNT_MUTATION_FUNCTIONS_KEY = "amount_mutation_functions";
     public static final String BIG_POPULATION_SIZE_KEY = "big_population_size";
     public static final String P_SAMPLE_RANDOM_KEY = "p_sample_random";
     public static final String FOCUSED_SEARCH_START_KEY = "focused_search_start";
@@ -131,12 +133,27 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunction(CrossOverFunction crossoverFunction) {
+        return withCrossoverFunctions(new CrossOverFunction[] { crossoverFunction });
+    }
 
-        properties.setProperty(CROSSOVER_FUNCTION_KEY, crossoverFunction.name());
+    /**
+     * Specifies the crossover functions of the genetic algorithm.
+     *
+     * @param crossoverFunctions A list of crossover functions that should be used.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withCrossoverFunctions(CrossOverFunction[] crossoverFunctions) {
+
+        for (int i = 0; i < crossoverFunctions.length; i++) {
+            String key = String.format(FORMAT_LOCALE, CROSSOVER_FUNCTION_KEY_FORMAT, i);
+            properties.setProperty(key, crossoverFunctions[i].name());
+        }
+
+        properties.setProperty(AMOUNT_CROSSOVER_FUNCTIONS_KEY, String.valueOf(crossoverFunctions.length));
 
         // TODO: Remove once all properties are enforced via the mate.properties file!
-        if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
-            org.mate.Properties.setProperty("crossover_function", crossoverFunction);
+        if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("crossover_functions", crossoverFunctions);
         }
 
         return this;
@@ -149,12 +166,27 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunction(MutationFunction mutationFunction) {
+        return withMutationFunctions(new MutationFunction[] {mutationFunction});
+    }
 
-        properties.setProperty(MUTATION_FUNCTION_KEY, mutationFunction.name());
+    /**
+     * Specifies the mutation functions of the genetic algorithm.
+     *
+     * @param mutationFunctions A list of mutation functions that should be used.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withMutationFunctions(MutationFunction[] mutationFunctions) {
+
+        for (int i = 0; i < mutationFunctions.length; i++) {
+            String key = String.format(FORMAT_LOCALE, MUTATION_FUNCTION_KEY_FORMAT, i);
+            properties.setProperty(key, mutationFunctions[i].name());
+        }
+
+        properties.setProperty(AMOUNT_MUTATION_FUNCTIONS_KEY, String.valueOf(mutationFunctions.length));
 
         // TODO: Remove once all properties are enforced via the mate.properties file!
-        if (org.mate.Properties.MUTATION_FUNCTION() == null) {
-            org.mate.Properties.setProperty("mutation_function", mutationFunction);
+        if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("mutation_functions", mutationFunctions);
         }
 
         return this;
@@ -167,41 +199,88 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction) {
+        return withFitnessFunctions(new FitnessFunction[]{fitnessFunction});
+    }
 
-        int amountFitnessFunctions = Integer.parseInt(
-                properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
-        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY,
-                String.valueOf(amountFitnessFunctions + 1));
+    /**
+     * Specifies the fitness function of the genetic algorithm.
+     *
+     * @param fitnessFunction The fitness function that should be used.
+     * @param arg An optional argument for the fitness function.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction, String arg) {
+        return withFitnessFunctions(new FitnessFunction[]{fitnessFunction}, new String[]{arg});
+    }
 
-        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT,
-                amountFitnessFunctions);
-        properties.setProperty(key, fitnessFunction.name());
+    /**
+     * Specifies the fitness functions in a many-objective search algorithm like MIO or MOSA.
+     *
+     * @param fitnessFunction The fitness function that should be used for each objective.
+     * @param numberOfObjectives The number of objectives, e.g. branches.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction fitnessFunction, int numberOfObjectives) {
+
+        FitnessFunction[] fitnessFunctions = new FitnessFunction[numberOfObjectives];
+
+        for (int i = 0; i < numberOfObjectives; i++) {
+            String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, i);
+            properties.setProperty(key, fitnessFunction.name());
+            fitnessFunctions[i] = fitnessFunction;
+        }
+
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, String.valueOf(numberOfObjectives));
 
         // TODO: Remove once all properties are enforced via the mate.properties file!
-        if (org.mate.Properties.FITNESS_FUNCTION() == null) {
-            org.mate.Properties.setProperty("fitness_function", fitnessFunction);
+        if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("fitness_functions", fitnessFunctions);
         }
+
         return this;
     }
 
     /**
-     * Specifies the fitness function of the genetic algorithm with a custom function argument.
+     * Specifies the fitness functions of the genetic algorithm.
      *
-     * @param arg1 The custom function argument.
-     * @param fitnessFunction The fitness function that should be used.
+     * @param fitnessFunctions A list of fitness functions that should be used.
      * @return Returns the current builder state.
      */
-    public GeneticAlgorithmBuilder withFitnessFunction(FitnessFunction fitnessFunction, String arg1) {
+    public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions) {
 
-        int amountFitnessFunctions = Integer.parseInt(
-                properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY));
+        for (int i = 0; i < fitnessFunctions.length; i++) {
+            String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_KEY_FORMAT, i);
+            properties.setProperty(key, fitnessFunctions[i].name());
+        }
 
-        String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_ARG_KEY_FORMAT,
-                amountFitnessFunctions);
+        properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, String.valueOf(fitnessFunctions.length));
 
-        properties.setProperty(key, arg1);
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            org.mate.Properties.setProperty("fitness_functions", fitnessFunctions);
+        }
 
-        withFitnessFunction(fitnessFunction);
+        return this;
+    }
+
+    /**
+     * Specifies the fitness functions of the genetic algorithm with a custom fitness function argument.
+     *
+     * @param args A custom fitness function argument for each fitness function.
+     * @param fitnessFunctions A list of fitness function that should be used.
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions, String[] args) {
+
+        // each fitness function has a single argument
+        assert fitnessFunctions.length == args.length;
+
+        for (int i = 0; i < args.length; i++) {
+            String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_ARG_KEY_FORMAT, i);
+            properties.setProperty(key, args[i]);
+        }
+
+        withFitnessFunctions(fitnessFunctions);
         return this;
     }
 
@@ -389,8 +468,12 @@ public class GeneticAlgorithmBuilder {
     public <T> IGeneticAlgorithm<T> build() {
         MATE.log_acc("Building genetic algorithm with properties:");
         for (String key : properties.stringPropertyNames()) {
-            if (key.startsWith("fitness_function")
-                    && Integer.parseInt(properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY)) > 5) {
+            if ((key.startsWith("fitness_function")
+                    && Integer.parseInt(properties.getProperty(AMOUNT_FITNESS_FUNCTIONS_KEY)) > 5)
+                || (key.startsWith("crossover_function")
+                    && Integer.parseInt(properties.getProperty(AMOUNT_CROSSOVER_FUNCTIONS_KEY)) > 5)
+                || (key.startsWith("mutation_function")
+                    && Integer.parseInt(properties.getProperty(AMOUNT_MUTATION_FUNCTIONS_KEY)) > 5)) {
                 continue;
             }
             MATE.log_acc("Key: " + key + ", Value: " + properties.getProperty(key));

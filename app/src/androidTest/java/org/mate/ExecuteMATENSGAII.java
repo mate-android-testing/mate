@@ -23,15 +23,19 @@ public class ExecuteMATENSGAII {
 
         MATE mate = new MATE();
 
+        FitnessFunction[] fitnessFunctions = new FitnessFunction[]{
+                FitnessFunction.NUMBER_OF_ACTIVITIES,
+                FitnessFunction.TEST_LENGTH,
+                FitnessFunction.NUMBER_OF_CRASHES
+        };
+
         IGeneticAlgorithm nsga = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.NSGAII)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
                 .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
                 .withMutationFunction(Properties.MUTATION_FUNCTION())
-                .withFitnessFunction(FitnessFunction.NUMBER_OF_ACTIVITIES)
-                .withFitnessFunction(FitnessFunction.TEST_LENGTH)
-                .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
+                .withFitnessFunctions(fitnessFunctions)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withPMutate(Properties.P_MUTATE())

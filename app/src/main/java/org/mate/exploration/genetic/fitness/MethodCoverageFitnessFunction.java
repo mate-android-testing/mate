@@ -21,7 +21,8 @@ public class MethodCoverageFitnessFunction<T> implements IFitnessFunction<T> {
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double methodCoverage = FitnessUtils.getFitness(chromosome);
+        double methodCoverage
+                = FitnessUtils.getFitness(chromosome, FitnessFunction.METHOD_COVERAGE);
 
         if (methodCoverage == 100.0) {
             ConditionalTerminationCondition.satisfiedCondition();

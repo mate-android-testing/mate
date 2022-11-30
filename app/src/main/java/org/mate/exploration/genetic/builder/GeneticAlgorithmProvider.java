@@ -24,6 +24,7 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
+import org.mate.exploration.genetic.crossover.PrimitiveOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
@@ -143,7 +144,7 @@ public class GeneticAlgorithmProvider {
 
         switch (Algorithm.valueOf(algorithmName)) {
             case STANDARD_GA:
-                return initializeGenericGeneticAlgorithm();
+                return initializeStandardGA();
             case ONE_PLUS_ONE:
                 return initializeOnePlusOne();
             case NSGAII:
@@ -171,23 +172,23 @@ public class GeneticAlgorithmProvider {
      * @param <T> The type of the chromosomes.
      * @return Returns an instance of the standard genetic algorithm.
      */
-    private <T> StandardGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+    private <T> StandardGeneticAlgorithm<T> initializeStandardGA() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("StandardGA requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+        } else if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
             throw new IllegalStateException("StandardGA requires a crossover function. You have to " +
-                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("StandardGA requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("StandardGA requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("StandardGA requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("StandardGA requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -196,8 +197,8 @@ public class GeneticAlgorithmProvider {
         return new StandardGeneticAlgorithm<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeCrossOverFunctions(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
@@ -217,9 +218,9 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("RandomSearch requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("RandomSearch requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("RandomSearch requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -242,15 +243,18 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("NSGA-II requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+        } else if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
             throw new IllegalStateException("NSGA-II requires a crossover function. You have to " +
-                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("NSGA-II requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("NSGA-II requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("NSGA-II requires a fitness function. You have to " +
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -259,8 +263,8 @@ public class GeneticAlgorithmProvider {
         return new NSGAII<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeCrossOverFunctions(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
@@ -280,18 +284,18 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("MOSA requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+        } else if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
             throw new IllegalStateException("MOSA requires a crossover function. You have to " +
-                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("MOSA requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("MOSA requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("MOSA requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("MOSA requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -303,8 +307,8 @@ public class GeneticAlgorithmProvider {
         return new MOSA<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeCrossOverFunctions(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
@@ -324,12 +328,12 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("MIO requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("MIO requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("MIO requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("MIO requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -340,7 +344,7 @@ public class GeneticAlgorithmProvider {
 
         return new MIO<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
@@ -363,12 +367,12 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("OnePlusOne requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("OnePlusOne requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("OnePlusOne requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("OnePlusOne requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -376,7 +380,7 @@ public class GeneticAlgorithmProvider {
 
         return new OnePlusOne<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition());
     }
@@ -392,12 +396,12 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("RandomWalk requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("RandomWalk requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("RandomWalk requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("RandomWalk requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -405,7 +409,7 @@ public class GeneticAlgorithmProvider {
 
         return new RandomWalk<>(
                 this.<T>initializeChromosomeFactory(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 this.initializeTerminationCondition());
     }
@@ -421,18 +425,18 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("NoveltySearch requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+        } else if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
             throw new IllegalStateException("NoveltySearch requires a crossover function. You have to " +
-                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("NoveltySearch requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("NoveltySearch requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.FITNESS_FUNCTION() == null) {
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("NoveltySearch requires a fitness function. You have to " +
-                    "define the property org.mate.Properties.FITNESS_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NoveltySearch requires a termination condition. You have to" +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -444,8 +448,8 @@ public class GeneticAlgorithmProvider {
         return new NoveltySearch<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeCrossOverFunctions(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
@@ -528,15 +532,18 @@ public class GeneticAlgorithmProvider {
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("Sapienz requires a chromosome factory. You have to " +
                     "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
-        } else if (org.mate.Properties.CROSSOVER_FUNCTION() == null) {
+        } else if (org.mate.Properties.CROSSOVER_FUNCTIONS() == null) {
             throw new IllegalStateException("Sapienz requires a crossover function. You have to " +
-                    "define the property org.mate.Properties.CROSSOVER_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.CROSSOVER_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.SELECTION_FUNCTION() == null) {
             throw new IllegalStateException("Sapienz requires a selection function. You have to " +
                     "define the property org.mate.Properties.SELECTION_FUNCTION() appropriately!");
-        } else if (org.mate.Properties.MUTATION_FUNCTION() == null) {
+        } else if (org.mate.Properties.MUTATION_FUNCTIONS() == null) {
             throw new IllegalStateException("Sapienz requires a mutation function. You have to " +
-                    "define the property org.mate.Properties.MUTATION_FUNCTION() appropriately!");
+                    "define the property org.mate.Properties.MUTATION_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("Sapienz requires a fitness function. You have to " +
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
@@ -548,8 +555,8 @@ public class GeneticAlgorithmProvider {
         return new Sapienz<>(
                 this.<T>initializeChromosomeFactory(),
                 this.<T>initializeSelectionFunction(),
-                this.<T>initializeCrossOverFunction(),
-                this.<T>initializeMutationFunction(),
+                this.<T>initializeCrossOverFunctions(),
+                this.<T>initializeMutationFunctions(),
                 this.<T>initializeFitnessFunctions(),
                 initializeTerminationCondition(),
                 getPopulationSize(),
@@ -645,33 +652,77 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
+     * Initialises the crossover functions of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the crossover functions used by the genetic algorithm.
+     */
+    private <T> List<ICrossOverFunction<T>> initializeCrossOverFunctions() {
+
+        int amountCrossoverFunction = Integer.parseInt(
+                properties.getProperty(GeneticAlgorithmBuilder.AMOUNT_CROSSOVER_FUNCTIONS_KEY));
+
+        if (amountCrossoverFunction == 0) {
+            return null;
+        } else {
+            List<ICrossOverFunction<T>> crossOverFunctions = new ArrayList<>();
+            for (int i = 0; i < amountCrossoverFunction; i++) {
+                crossOverFunctions.add(this.initializeCrossOverFunction(i));
+            }
+            return crossOverFunctions;
+        }
+    }
+
+    /**
      * Initialises the crossover function of the genetic algorithm.
      *
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the crossover function used by the genetic algorithm.
      */
-    private <T> ICrossOverFunction<T> initializeCrossOverFunction() {
+    private <T> ICrossOverFunction<T> initializeCrossOverFunction(int index) {
 
-        String crossOverFunctionId
-                = properties.getProperty(GeneticAlgorithmBuilder.CROSSOVER_FUNCTION_KEY);
-        if (crossOverFunctionId == null) {
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE,
+                GeneticAlgorithmBuilder.CROSSOVER_FUNCTION_KEY_FORMAT, index);
+        String crossOverFunction = properties.getProperty(key);
+
+        switch (CrossOverFunction.valueOf(crossOverFunction)) {
+            case TEST_CASE_MERGE_CROSS_OVER:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
+            case TEST_SUITE_UNIFORM_CROSS_OVER:
+                return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
+            case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
+                return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
+            case INTEGER_SEQUENCE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
+            case PRIMITIVE_ONE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new PrimitiveOnePointCrossOverFunction();
+            default:
+                throw new UnsupportedOperationException("Unknown crossover function: "
+                        + crossOverFunction);
+        }
+    }
+
+    /**
+     * Initialises the mutation functions of the genetic algorithm.
+     *
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the mutation functions used by the genetic algorithm.
+     */
+    private <T> List<IMutationFunction<T>> initializeMutationFunctions() {
+
+        int amountMutationFunction = Integer.parseInt(
+                properties.getProperty(GeneticAlgorithmBuilder.AMOUNT_MUTATION_FUNCTIONS_KEY));
+
+        if (amountMutationFunction == 0) {
             return null;
         } else {
-            switch (CrossOverFunction.valueOf(crossOverFunctionId)) {
-                case TEST_CASE_MERGE_CROSS_OVER:
-                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
-                case TEST_SUITE_UNIFORM_CROSS_OVER:
-                    return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
-                case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
-                    return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
-                case INTEGER_SEQUENCE_POINT_CROSS_OVER:
-                    return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
-                default:
-                    throw new UnsupportedOperationException("Unknown crossover function: "
-                            + crossOverFunctionId);
+            List<IMutationFunction<T>> mutationFunctions = new ArrayList<>();
+            for (int i = 0; i < amountMutationFunction; i++) {
+                mutationFunctions.add(this.initializeMutationFunction(i));
             }
+            return mutationFunctions;
         }
     }
 
@@ -681,42 +732,41 @@ public class GeneticAlgorithmProvider {
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the mutation function used by the genetic algorithm.
      */
-    private <T> IMutationFunction<T> initializeMutationFunction() {
+    private <T> IMutationFunction<T> initializeMutationFunction(int index) {
 
-        String mutationFunctionId
-                = properties.getProperty(GeneticAlgorithmBuilder.MUTATION_FUNCTION_KEY);
-        if (mutationFunctionId == null) {
-            return null;
-        } else {
-            switch (MutationFunction.valueOf(mutationFunctionId)) {
-                case TEST_CASE_CUT_POINT_MUTATION:
-                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
-                case TEST_SUITE_CUT_POINT_MUTATION:
-                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
-                case SAPIENZ_MUTATION:
-                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
-                case PRIMITIVE_SHUFFLE_MUTATION:
-                    // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
-                case SHUFFLE_MUTATION:
-                    // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                    // different T for their chromosomes
-                    return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
-                case INTEGER_SEQUENCE_POINT_MUTATION:
-                    return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
-                case INTEGER_SEQUENCE_LENGTH_MUTATION:
-                    return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
-                default:
-                    throw new UnsupportedOperationException("Unknown mutation function: "
-                            + mutationFunctionId);
-            }
+        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE,
+                GeneticAlgorithmBuilder.MUTATION_FUNCTION_KEY_FORMAT, index);
+        String mutationFunctionId = properties.getProperty(key);
+
+        switch (MutationFunction.valueOf(mutationFunctionId)) {
+            case TEST_CASE_CUT_POINT_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
+            case TEST_SUITE_CUT_POINT_MUTATION:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new SuiteCutPointMutationFunction(getNumEvents());
+            case SAPIENZ_MUTATION:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new SapienzSuiteMutationFunction(getPMutate());
+                //return (IMutationFunction<T>) new SapienzTest(getPMutate());
+            case PRIMITIVE_SHUFFLE_MUTATION:
+                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
+            case TEST_CASE_SHUFFLE_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
+            case INTEGER_SEQUENCE_POINT_MUTATION:
+                return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
+            case INTEGER_SEQUENCE_LENGTH_MUTATION:
+                return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
+            default:
+                throw new UnsupportedOperationException("Unknown mutation function: "
+                        + mutationFunctionId);
         }
     }
 
@@ -1105,7 +1155,7 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Retrieves the 'core' fitness function that is actually applied on pheno type.
+     * Retrieves the 'core' fitness function that is actually applied on the pheno type.
      *
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the 'core' fitness function used in GE.

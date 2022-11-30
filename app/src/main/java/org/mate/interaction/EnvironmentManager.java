@@ -9,6 +9,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
 import org.mate.interaction.action.ui.Widget;
@@ -335,10 +336,13 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases The test cases belonging to the source chromosome.
+     * @param testCases        The test cases belonging to the source chromosome.
+     * @param fitnessFunction  The underlying fitness function.
      */
-    public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
-                                IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+    public void copyFitnessData(final IChromosome<TestSuite> sourceChromosome,
+                                final IChromosome<TestSuite> targetChromosome,
+                                final List<TestCase> testCases,
+                                final FitnessFunction fitnessFunction) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -355,7 +359,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/copy_fitness_data")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
+                .withParameter("fitnessFunction", fitnessFunction.name())
                 .withParameter("chromosome_src", sourceChromosome.getValue().getId())
                 .withParameter("chromosome_target", targetChromosome.getValue().getId())
                 .withParameter("entities", sb.toString());
@@ -376,8 +380,9 @@ public class EnvironmentManager {
      * @param targetChromosome The target chromosome.
      * @param testCases The test cases belonging to the source chromosome.
      */
-    public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
-                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+    public void copyCoverageData(final IChromosome<TestSuite> sourceChromosome,
+                                 final IChromosome<TestSuite> targetChromosome,
+                                 final List<TestCase> testCases) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -687,10 +692,12 @@ public class EnvironmentManager {
      * Stores the fitness data for the given chromosome.
      *
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
-     *         otherwise {@code null}.
+     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
+     *                   otherwise {@code null}.
+     * @param fitnessFunction The underlying fitness function.
      */
-    public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId) {
+    public <T> void storeFitnessData(final IChromosome<T> chromosome, final String entityId,
+                                     final FitnessFunction fitnessFunction) {
 
         if (entityId != null && entityId.equals("dummy")) {
             MATE.log_warn("Trying to store fitness data of dummy test case...");
@@ -713,7 +720,7 @@ public class EnvironmentManager {
         coveredTestCases.add(testcase);
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_fitness_data")
-                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
+                .withParameter("fitnessFunction", fitnessFunction.name())
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
@@ -731,7 +738,7 @@ public class EnvironmentManager {
 
     /**
      * Retrieves the branch distance for the given chromosome. Note that
-     * {@link #storeFitnessData(IChromosome, String)} has to be called previously.
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
      *
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the branch distance for the given chromosome.
@@ -1432,7 +1439,7 @@ public class EnvironmentManager {
 
     /**
      * Returns the novelty vector for the given chromosomes.
-     * Note that {@link #storeFitnessData(IChromosome, String)} has to be called previously.
+     * Note that {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
      *
      * @param chromosomes The list of chromosomes for which the novelty should be computed.
      * @param nearestNeighbours The number of nearest neighbours k that should be considered.

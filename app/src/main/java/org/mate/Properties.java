@@ -190,12 +190,37 @@ public class Properties {
         return propertyOr(2);
     }
 
+    /**
+     * Convenience function to specify a single fitness function. Ideally you should specify the
+     * fitness function via the property {@link #FITNESS_FUNCTIONS()}.
+     *
+     * @return Returns the specified fitness function or {@code null} if none was specified.
+     */
     public static FitnessFunction FITNESS_FUNCTION() {
+
+        /*
+         * NOTE: We can't call another property method that relies upon propertyOr(), since the
+         * property name is derived from the stack trace from a fixed position, which is corrupted
+         * when nested property methods are called. Thus, we require the hard-coded property name.
+         */
+        FitnessFunction fitnessFunction = propertyOrNull("fitness_function");
+
+        if (fitnessFunction == null) {
+            FitnessFunction[] mutationFunctions = propertyOrNull("fitness_functions");
+            if (mutationFunctions != null) {
+                fitnessFunction = mutationFunctions[0];
+            }
+        }
+
+        return fitnessFunction;
+    }
+
+    public static FitnessFunction[] FITNESS_FUNCTIONS() {
         return propertyOr(null);
     }
 
     /**
-     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTION()}
+     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTIONS()}
      * provides the mapping from geno to phenotype, this property specifies the core fitness function.
      *
      * @return Returns the core fitness function used in the context of GE.
@@ -208,25 +233,67 @@ public class Properties {
         return propertyOr(null);
     }
 
+    /**
+     * Convenience function to specify a single mutation function. Ideally you should specify the
+     * mutation function via the property {@link #MUTATION_FUNCTIONS()}.
+     *
+     * @return Returns the specified mutation function or {@code null} if none was specified.
+     */
     public static MutationFunction MUTATION_FUNCTION() {
+
+        /*
+        * NOTE: We can't call another property method that relies upon propertyOr(), since the
+        * property name is derived from the stack trace from a fixed position, which is corrupted
+        * when nested property methods are called. Thus, we require the hard-coded property name.
+         */
+        MutationFunction mutationFunction = propertyOrNull("mutation_function");
+
+        if (mutationFunction == null) {
+            MutationFunction[] mutationFunctions = propertyOrNull("mutation_functions");
+            if (mutationFunctions != null) {
+                mutationFunction = mutationFunctions[0];
+            }
+        }
+
+        return mutationFunction;
+    }
+
+    public static MutationFunction[] MUTATION_FUNCTIONS() {
         return propertyOr(null);
     }
 
+    /**
+     * Convenience function to specify a single crossover function. Ideally you should specify the
+     * crossover function via the property {@link #CROSSOVER_FUNCTIONS()}.
+     *
+     * @return Returns the specified crossover function or {@code null} if none was specified.
+     */
     public static CrossOverFunction CROSSOVER_FUNCTION() {
-        return propertyOr(null);
+
+        /*
+         * NOTE: We can't call another property method that relies upon propertyOr(), since the
+         * property name is derived from the stack trace from a fixed position, which is corrupted
+         * when nested property methods are called. Thus, we require the hard-coded property name.
+         */
+        CrossOverFunction crossOverFunction = propertyOrNull("crossover_function");
+
+        if (crossOverFunction == null) {
+            CrossOverFunction[] mutationFunctions = propertyOrNull("crossover_functions");
+            if (mutationFunctions != null) {
+                crossOverFunction = mutationFunctions[0];
+            }
+        }
+
+        return crossOverFunction;
     }
 
-    public static TerminationCondition TERMINATION_CONDITION() {
-        return propertyOr(null);
-    }
+    public static CrossOverFunction[] CROSSOVER_FUNCTIONS() { return propertyOr(null); }
 
-    public static ChromosomeFactory CHROMOSOME_FACTORY() {
-        return propertyOr(null);
-    }
+    public static TerminationCondition TERMINATION_CONDITION() { return propertyOr(null); }
 
-    public static Algorithm ALGORITHM() {
-        return propertyOr(null);
-    }
+    public static ChromosomeFactory CHROMOSOME_FACTORY() { return propertyOr(null); }
+
+    public static Algorithm ALGORITHM() { return propertyOr(null); }
 
     /*
      * Begin Greybox Fuzzing properties
@@ -578,6 +645,15 @@ public class Properties {
             return ((T) propertiesInstance.store.get(callerName));
         }
         return defaultValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T propertyOrNull(String key) {
+        Properties propertiesInstance = Registry.getProperties();
+        if (propertiesInstance.store.containsKey(key)) {
+            return ((T) propertiesInstance.store.get(key));
+        }
+        return null;
     }
 
     private final Map<String, Object> store;
