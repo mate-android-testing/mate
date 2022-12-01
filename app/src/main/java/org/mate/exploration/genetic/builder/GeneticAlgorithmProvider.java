@@ -27,6 +27,7 @@ import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunct
 import org.mate.exploration.genetic.crossover.PrimitiveOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.crossover.TestSuiteOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossOverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
@@ -693,6 +694,8 @@ public class GeneticAlgorithmProvider {
                 return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
             case TEST_SUITE_UNIFORM_CROSS_OVER:
                 return (ICrossOverFunction<T>) new UniformSuiteCrossOverFunction();
+            case TEST_SUITE_ONE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new TestSuiteOnePointCrossOverFunction();
             case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
                 return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
             case INTEGER_SEQUENCE_POINT_CROSS_OVER:
