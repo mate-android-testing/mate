@@ -57,8 +57,6 @@ public class PrimitiveOnePointCrossOverFunction implements ICrossOverFunction<Te
             return Collections.singletonList(parents.get(0));
         }
 
-        MATE.log_acc("Undergo crossover...");
-
         TestCase t1 = parents.get(0).getValue();
         TestCase t2 = parents.get(1).getValue();
 
@@ -88,7 +86,6 @@ public class PrimitiveOnePointCrossOverFunction implements ICrossOverFunction<Te
             CoverageUtils.logChromosomeCoverage(chromosome);
 
             executedTestCase.finish();
-
             return Collections.singletonList(chromosome);
         }
 
