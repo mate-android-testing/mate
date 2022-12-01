@@ -323,11 +323,11 @@ public class TestCase {
         }
 
         int count = 0;
-        for (Action action0 : testCase.actionSequence) {
+        for (Action action : testCase.actionSequence) {
             if (count < finalSize) {
-                if (!(action0 instanceof WidgetAction)
-                        || Registry.getUiAbstractionLayer().getExecutableActions().contains(action0)) {
-                    if (!resultingTc.updateTestCase(action0, count)) {
+                if (!(action instanceof WidgetAction)
+                        || Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+                    if (!resultingTc.updateTestCase(action, count)) {
                         return resultingTc;
                     }
                     count++;
