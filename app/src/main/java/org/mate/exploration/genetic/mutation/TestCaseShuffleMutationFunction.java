@@ -43,8 +43,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
             Randomness.shuffleList(actions);
             TestCase mutatedTestCase = TestCase.newDummy();
             mutatedTestCase.getActionSequence().addAll(actions);
-            IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutatedTestCase);
-            return mutatedChromosome;
+            return new Chromosome<>(mutatedTestCase);
         }
     }
 
