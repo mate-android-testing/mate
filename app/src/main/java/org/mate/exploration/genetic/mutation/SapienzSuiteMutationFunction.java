@@ -30,7 +30,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
     /**
      * The inner-individual mutation operator as described in section 3.1.
      */
-    private final TestCaseShuffleMutationFunction testCaseShuffleMutationFunction;
+    private final PrimitiveTestCaseShuffleMutationFunction testCaseShuffleMutationFunction;
 
     /**
      * Initialises the mutation function.
@@ -39,7 +39,7 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
      */
     public SapienzSuiteMutationFunction(double pMutate) {
         this.pMutate = pMutate;
-        testCaseShuffleMutationFunction = new TestCaseShuffleMutationFunction(false);
+        testCaseShuffleMutationFunction = new PrimitiveTestCaseShuffleMutationFunction();
         testCaseShuffleMutationFunction.setExecuteActions(false);
     }
 
