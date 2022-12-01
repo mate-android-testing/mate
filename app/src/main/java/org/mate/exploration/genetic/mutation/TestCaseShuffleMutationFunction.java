@@ -36,6 +36,10 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
      */
     @Override
     public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome) {
+        /*
+        * TODO: Provide a more sophisticated shuffle mutation that can be actually executed, otherwise
+        *  this operation is a duplicate of its primitive counter part and can be removed.
+         */
         if (executeActions) {
             throw new UnsupportedOperationException("Not implemented yet!");
         } else {
