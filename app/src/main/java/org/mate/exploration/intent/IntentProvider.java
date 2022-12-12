@@ -18,8 +18,10 @@ import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,17 +58,17 @@ public class IntentProvider {
 
         components = IntentInfoParser.parseIntentInfoFile(
                 filterComponents(Registry.getManifest().getComponents().stream()
-                .filter(component -> component.isEnabled() && component.isExported())
-                .filter(component -> !component.isContentProvider())
-                .collect(Collectors.toList())));
+                        .filter(component -> component.isEnabled() && component.isExported())
+                        .filter(component -> !component.isContentProvider())
+                        .collect(Collectors.toList())));
 
         systemEventActions = SystemActionParser.parseSystemEventActions();
         systemEventReceivers = extractSystemEventReceivers(components, systemEventActions);
 
         /*
-        * TODO: We may need to derive the dynamic receivers before the system event receivers,
-        *  since extractSystemEventReceivers() potentially removes components, see the inline
-        *  comments!
+         * TODO: We may need to derive the dynamic receivers before the system event receivers,
+         *  since extractSystemEventReceivers() potentially removes components, see the inline
+         *  comments!
          */
         dynamicReceivers = components.stream()
                 .filter(ComponentDescription::isDynamicReceiver)
@@ -75,9 +77,9 @@ public class IntentProvider {
                 .collect(Collectors.toList());
 
         /*
-        * A dynamic receiver can't be triggered by an explicit intent, thus we need to remove those
-        * receivers from the component list, otherwise getAction() may select a dynamic receiver
-        * as target and fails consequently.
+         * A dynamic receiver can't be triggered by an explicit intent, thus we need to remove those
+         * receivers from the component list, otherwise getAction() may select a dynamic receiver
+         * as target and fails consequently.
          */
         components.removeAll(dynamicReceivers);
 
@@ -136,12 +138,12 @@ public class IntentProvider {
                 for (IntentFilterDescription intentFilter : component.getIntentFilters()) {
 
                     /*
-                    * TODO: If an intent filter contains multiple actions (which might be the case
-                    *  for dynamic receivers, since those can only define a single filter), the
-                    *  most correct option would be to split the intent filter into multiple filters
-                    *  separating the actions from system event actions. Right now, we remove the
-                    *  complete intent filter from the original component, which might contain a
-                    *  mixture of system and intent-based actions.
+                     * TODO: If an intent filter contains multiple actions (which might be the case
+                     *  for dynamic receivers, since those can only define a single filter), the
+                     *  most correct option would be to split the intent filter into multiple filters
+                     *  separating the actions from system event actions. Right now, we remove the
+                     *  complete intent filter from the original component, which might contain a
+                     *  mixture of system and intent-based actions.
                      */
                     if (describesSystemEvent(systemEvents, intentFilter)) {
 
@@ -161,11 +163,11 @@ public class IntentProvider {
                 }
 
                 /*
-                * TODO: Only remove the receiver if really all actions contained in the intent
-                *  filter(s) describe system events, see the above comment. Right now, we remove
-                *  the receiver if at least a single action per intent filter refers to a system
-                *  event. Hence, we may drop a (dynamic) receiver at this point, which might react
-                *  to both kinds of actions.
+                 * TODO: Only remove the receiver if really all actions contained in the intent
+                 *  filter(s) describe system events, see the above comment. Right now, we remove
+                 *  the receiver if at least a single action per intent filter refers to a system
+                 *  event. Hence, we may drop a (dynamic) receiver at this point, which might react
+                 *  to both kinds of actions.
                  */
                 if (!component.hasIntentFilter()) {
                     /*
@@ -364,6 +366,53 @@ public class IntentProvider {
     }
 
     /**
+     * Retrieves the applicable system actions.
+     *
+     * @return Returns the list of applicable system actions.
+     */
+    public List<SystemAction> getSystemActions() {
+
+        final List<SystemAction> systemActions = new ArrayList<>();
+
+        // TODO: try to make selection deterministic
+        for (ComponentDescription systemEventReceiver : systemEventReceivers) {
+            final IntentFilterDescription intentFilter
+                    = Randomness.randomElement(systemEventReceiver.getIntentFilters());
+            final String action = Randomness.randomElement(intentFilter.getActions());
+            systemActions.add(new SystemAction(systemEventReceiver, intentFilter, action));
+        }
+
+        return systemActions;
+    }
+
+    /**
+     * Retrieves the applicable intent-based actions per component type, e.g. activity.
+     *
+     * @return Returns the applicable intent-based actions per component type.
+     */
+    public Map<ComponentType, List<IntentBasedAction>> getIntentBasedActions() {
+
+        final Map<ComponentType, List<IntentBasedAction>> actions = new HashMap<>();
+
+        for (final ComponentDescription component : components) {
+
+            final ComponentType type = component.getType();
+            List<IntentBasedAction> intentBasedActions = actions.get(type);
+
+            if (intentBasedActions == null) {
+                intentBasedActions = new ArrayList<>();
+                actions.put(type, intentBasedActions);
+            }
+
+            // TODO: call appropriate generateIntentBasedAction() method based on component's attributes
+            // TODO: try to make selection deterministic
+            intentBasedActions.add(generateIntentBasedAction(component));
+        }
+
+        return actions;
+    }
+
+    /**
      * Checks whether the currently visible activity defines a callback for onNewIntent().
      *
      * @return Returns {@code true} if the current activity implements onNewIntent(),
@@ -444,9 +493,9 @@ public class IntentProvider {
                                                         boolean dynamicReceiver, boolean handleOnNewIntent) {
 
         /*
-        * There are components that were explicitly exported although they don't offer any intent
-        * filter, e.g. activity-aliases. In this case we simply construct an explicit intent without
-        * any further attributes.
+         * There are components that were explicitly exported although they don't offer any intent
+         * filter, e.g. activity-aliases. In this case we simply construct an explicit intent without
+         * any further attributes.
          */
         if (!component.hasIntentFilter()) {
             MATE.log_debug("Targeting component without intent filter: " + component.getFullyQualifiedName());

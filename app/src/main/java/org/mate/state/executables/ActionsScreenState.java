@@ -1,6 +1,10 @@
 package org.mate.state.executables;
 
 import org.mate.MATE;
+import org.mate.exploration.intent.IntentProvider;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
@@ -9,6 +13,7 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,7 +26,7 @@ import java.util.stream.Collectors;
 public class ActionsScreenState extends AbstractScreenState {
 
     /**
-     * Defines the actions that are applicable on the associated screen.
+     * Defines the ui actions that are applicable on the associated screen.
      */
     private List<UIAction> actions;
 
@@ -31,6 +36,11 @@ public class ActionsScreenState extends AbstractScreenState {
     private final AppScreen appScreen;
 
     /**
+     * Provides access to the applicable intent-based and system actions.
+     */
+    private final static IntentProvider INTENT_PROVIDER = new IntentProvider();
+
+    /**
      * Creates a new screen state based on the given {@link AppScreen}.
      *
      * @param appScreen The given app screen.
@@ -38,7 +48,7 @@ public class ActionsScreenState extends AbstractScreenState {
     public ActionsScreenState(AppScreen appScreen) {
         super(appScreen.getPackageName(), appScreen.getActivityName(), appScreen.getWidgets());
         this.appScreen = appScreen;
-        this.actions = null;
+        this.actions = null; // initialized lazily
     }
 
     /**
@@ -51,7 +61,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // actions get init lazily
         if (actions == null) {
-            actions = getActions();
+            actions = getUIActions();
         }
 
         List<WidgetAction> widgetActions = new ArrayList<>();
@@ -73,7 +83,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // actions get init lazily
         if (actions == null) {
-            actions = getActions();
+            actions = getUIActions();
         }
 
         List<MotifAction> motifActions = new ArrayList<>();
@@ -86,12 +96,27 @@ public class ActionsScreenState extends AbstractScreenState {
     }
 
     /**
+     * Retrieves the list of actions that are applicable on the underlying screen. This list is
+     * composed of ui and intent actions.
+     *
+     * @return Returns the list of all applicable actions on the underlying screen.
+     */
+    @Override
+    public List<Action> getActions() {
+        final List<Action> actions = new ArrayList<>();
+        actions.addAll(getUIActions());
+        actions.addAll(getIntentBasedActions());
+        actions.addAll(getSystemActions());
+        return actions;
+    }
+
+    /**
      * Extracts the list of applicable ui actions on the underlying screen.
      *
      * @return Returns the list of ui actions.
      */
     @Override
-    public List<UIAction> getActions() {
+    public List<UIAction> getUIActions() {
 
         // check whether the actions have been requested once
         if (actions != null) {
@@ -316,7 +341,7 @@ public class ActionsScreenState extends AbstractScreenState {
         MATE.log_debug("Derived the following widget actions: " + widgetActions);
 
         List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
-        uiActions.addAll(getUIActions());
+        uiActions.addAll(getIndependentUIActions());
         uiActions.addAll(getMotifActions(widgetActions));
         actions = Collections.unmodifiableList(uiActions);
         return actions;
@@ -468,11 +493,11 @@ public class ActionsScreenState extends AbstractScreenState {
     }
 
     /**
-     * Returns the list of actions are applicable independent on any widgets.
+     * Returns the list of ui actions that are applicable independent of any widgets.
      *
-     * @return Returns the list of actions applicable on any screen.
+     * @return Returns the list of ui actions applicable on any screen.
      */
-    private List<UIAction> getUIActions() {
+    private List<UIAction> getIndependentUIActions() {
 
         List<UIAction> uiActions = new ArrayList<>();
         uiActions.add(new UIAction(ActionType.BACK, activityName));
@@ -494,6 +519,27 @@ public class ActionsScreenState extends AbstractScreenState {
          */
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
+    }
+
+    /**
+     * Retrieves the applicable intent-based actions.
+     *
+     * @return Returns the list of applicable intent-based actions.
+     */
+    @Override
+    public List<IntentBasedAction> getIntentBasedActions() {
+        return INTENT_PROVIDER.getIntentBasedActions().values().stream()
+                .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves the applicable system actions.
+     *
+     * @return Returns the list of applicable system actions.
+     */
+    @Override
+    public List<SystemAction> getSystemActions() {
+        return INTENT_PROVIDER.getSystemActions();
     }
 
     /**

@@ -178,7 +178,7 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         } else {
 
             IScreenState currentState = uiAbstractionLayer.getLastScreenState();
-            List<UIAction> availableActions = currentState.getActions();
+            List<Action> availableActions = currentState.getActions();
 
             // associate non-executed actions with the initial q-value and initialise execution counter
             Map<Action, Integer> actionFrequency = stateActionFrequencyMap.getOrDefault(currentState, new HashMap<>());

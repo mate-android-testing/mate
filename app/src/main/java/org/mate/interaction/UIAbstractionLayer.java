@@ -116,12 +116,22 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Returns the list of executable actions on the current screen. This includes both ui and
+     * intent actions.
+     *
+     * @return Returns the list of executable (ui and intent) actions.
+     */
+    public List<Action> getExecutableActions() {
+        return getLastScreenState().getActions();
+    }
+
+    /**
      * Returns the list of executable ui actions on the current screen.
      *
      * @return Returns the list of executable widget actions.
      */
-    public List<UIAction> getExecutableActions() {
-        return getLastScreenState().getActions();
+    public List<UIAction> getExecutableUIActions() {
+        return getLastScreenState().getUIActions();
     }
 
     /**
