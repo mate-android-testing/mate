@@ -255,10 +255,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     protected <S> void logCurrentFitness() {
 
-        // TODO: Find solution for Geno_to_pheno_type
-        Set<FitnessFunction> fitnessSet
-                = new HashSet<>(Arrays.asList(Properties.FITNESS_FUNCTIONS()));
-
         if (Properties.USE_GENO_TO_PHENO()) {
             /*
             * We need to force the evaluation of all chromosomes such that the fitness and coverage

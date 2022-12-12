@@ -30,6 +30,7 @@ public class ExecuteMATEEqualWeightedGE {
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withGEMappingFunction(GEMappingFunction.LIST_BASED_EQUAL_WEIGHTED_MAPPING)
                 .withGenoToPhenoType()
+                .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
                 .withCrossoverFunction(CrossOverFunction.INTEGER_SEQUENCE_POINT_CROSS_OVER)
                 .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_POINT_MUTATION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
