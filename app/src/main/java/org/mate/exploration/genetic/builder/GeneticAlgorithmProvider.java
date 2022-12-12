@@ -100,6 +100,11 @@ public class GeneticAlgorithmProvider {
     private final Properties properties;
 
     /**
+     * This variable provides a one time initialization.
+     */
+    private IGenotypePhenotypeMapping mapping = null;
+
+    /**
      * Constructs the genetic algorithm by consuming the given properties.
      *
      * @param properties The list of properties.
@@ -910,8 +915,9 @@ public class GeneticAlgorithmProvider {
                         + fitnessFunctionId + " not yet supported!");
         }
 
-        genoToPhenoFitness = (IFitnessFunction<T>)
-                new GenotypePhenotypeMappedFitnessFunction<>(getGenoToPhenoTypeMapping(), function);
+        mapping = mapping == null ? getGenoToPhenoTypeMapping() : mapping;
+        genoToPhenoFitness = new GenotypePhenotypeMappedFitnessFunction<>(
+                mapping, function);
 
         return genoToPhenoFitness;
     }
