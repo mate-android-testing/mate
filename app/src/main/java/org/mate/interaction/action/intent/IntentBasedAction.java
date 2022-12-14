@@ -3,7 +3,6 @@ package org.mate.interaction.action.intent;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import org.mate.interaction.action.Action;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
 import org.mate.utils.manifest.element.IntentFilterDescription;
@@ -11,17 +10,20 @@ import org.mate.utils.manifest.element.IntentFilterDescription;
 import java.util.Objects;
 import java.util.Set;
 
-public class IntentBasedAction extends Action {
+/**
+ * A non-privileged intent action that can be received by any component matching the intent filter.
+ */
+public class IntentBasedAction extends IntentAction {
 
+    /**
+     * The intent that is sent.
+     */
     private final Intent intent;
-    private final ComponentDescription component;
-    private final IntentFilterDescription intentFilter;
 
     public IntentBasedAction(Intent intent, ComponentDescription component,
                              IntentFilterDescription intentFilter) {
+        super(component, intentFilter);
         this.intent = intent;
-        this.component = component;
-        this.intentFilter = intentFilter;
     }
 
     public ComponentType getComponentType() {
@@ -30,14 +32,6 @@ public class IntentBasedAction extends Action {
 
     public Intent getIntent() {
         return intent;
-    }
-
-    public ComponentDescription getComponent() {
-        return component;
-    }
-
-    public IntentFilterDescription getIntentFilter() {
-        return intentFilter;
     }
 
     /**
