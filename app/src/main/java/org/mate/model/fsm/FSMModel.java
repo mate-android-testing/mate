@@ -3,6 +3,7 @@ package org.mate.model.fsm;
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.StartAction;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.MotifAction;
@@ -69,6 +70,11 @@ public class FSMModel implements IGUIModel {
 
         @Override
         public List<IntentBasedAction> getIntentBasedActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentAction> getIntentActions() {
             throw new UnsupportedOperationException("Do not call this method!");
         }
 

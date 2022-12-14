@@ -1,6 +1,7 @@
 package org.mate.state;
 
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.MotifAction;
@@ -24,6 +25,7 @@ public interface IScreenState {
     List<UIAction> getUIActions();
     List<SystemAction> getSystemActions();
     List<IntentBasedAction> getIntentBasedActions();
+    List<IntentAction> getIntentActions();
     List<WidgetAction> getWidgetActions();
     List<MotifAction> getMotifActions();
     String getActivityName();

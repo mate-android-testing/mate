@@ -4,6 +4,7 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.intent.IntentProvider;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
@@ -105,8 +106,7 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         if (Properties.USE_INTENT_ACTIONS()) {
-            actions.addAll(getIntentBasedActions());
-            actions.addAll(getSystemActions());
+            actions.addAll(getIntentActions());
         }
 
         if (Properties.USE_MOTIF_ACTIONS()) {
@@ -524,6 +524,20 @@ public class ActionsScreenState extends AbstractScreenState {
          */
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
+    }
+
+    /**
+     * Retrieves the applicable intent actions.
+     *
+     * @return Returns the list of applicable intent actions.
+     */
+    @Override
+    public List<IntentAction> getIntentActions() {
+        final List<IntentAction> intentActions = new ArrayList<>();
+        intentActions.addAll(getIntentBasedActions());
+        intentActions.addAll(getSystemActions());
+        return intentActions;
+
     }
 
     /**
