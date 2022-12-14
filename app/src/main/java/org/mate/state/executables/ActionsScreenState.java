@@ -1,6 +1,7 @@
 package org.mate.state.executables;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.intent.IntentProvider;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.intent.IntentBasedAction;
@@ -80,19 +81,7 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<MotifAction> getMotifActions() {
-
-        // actions get init lazily
-        if (actions == null) {
-            actions = getUIActions();
-        }
-
-        List<MotifAction> motifActions = new ArrayList<>();
-        for (UIAction uiAction : actions) {
-            if (uiAction instanceof MotifAction) {
-                motifActions.add((MotifAction) uiAction);
-            }
-        }
-        return Collections.unmodifiableList(motifActions);
+        return extractMotifActions(getWidgetActions());
     }
 
     /**
@@ -103,10 +92,22 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<Action> getActions() {
+
         final List<Action> actions = new ArrayList<>();
-        actions.addAll(getUIActions());
-        actions.addAll(getIntentBasedActions());
-        actions.addAll(getSystemActions());
+
+        if (Properties.USE_UI_ACTIONS()) {
+            actions.addAll(getUIActions());
+        }
+
+        if (Properties.USE_INTENT_ACTIONS()) {
+            actions.addAll(getIntentBasedActions());
+            actions.addAll(getSystemActions());
+        }
+
+        if (Properties.USE_MOTIF_ACTIONS()) {
+            actions.addAll(getMotifActions());
+        }
+
         return actions;
     }
 
@@ -340,9 +341,8 @@ public class ActionsScreenState extends AbstractScreenState {
         MATE.log_debug("Number of widget actions: " + widgetActions.size());
         MATE.log_debug("Derived the following widget actions: " + widgetActions);
 
-        List<UIAction> uiActions = new ArrayList<UIAction>(widgetActions);
+        List<UIAction> uiActions = new ArrayList<>(widgetActions);
         uiActions.addAll(getIndependentUIActions());
-        uiActions.addAll(getMotifActions(widgetActions));
         actions = Collections.unmodifiableList(uiActions);
         return actions;
     }
@@ -354,15 +354,15 @@ public class ActionsScreenState extends AbstractScreenState {
      * @param widgetActions The extracted widget actions of the current screen.
      * @return Returns a list of applicable motif genes.
      */
-    private List<MotifAction> getMotifActions(Set<WidgetAction> widgetActions) {
+    private List<MotifAction> extractMotifActions(List<WidgetAction> widgetActions) {
 
-        List<MotifAction> motifActions = new ArrayList<>();
+        final List<MotifAction> motifActions = new ArrayList<>();
         motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
         motifActions.addAll(extractSpinnerScrollActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
-        return motifActions;
+        return Collections.unmodifiableList(motifActions);
     }
 
     /**
@@ -371,10 +371,10 @@ public class ActionsScreenState extends AbstractScreenState {
      * spinner, which in turn opens the drop-down menu, and click or scroll to select a different
      * entry.
      *
-     * @param widgetActions The set of extracted widget actions.
+     * @param widgetActions The list of extracted widget actions.
      * @return Returns the possible spinner motif actions if any.
      */
-    private List<MotifAction> extractSpinnerScrollActions(Set<WidgetAction> widgetActions) {
+    private List<MotifAction> extractSpinnerScrollActions(List<WidgetAction> widgetActions) {
 
         List<MotifAction> spinnerScrollActions = new ArrayList<>();
 
@@ -397,10 +397,10 @@ public class ActionsScreenState extends AbstractScreenState {
     /**
      * Extracts the possible 'fill form and click submit button' motif actions.
      *
-     * @param widgetActions The set of extracted widget actions.
+     * @param widgetActions The list of extracted widget actions.
      * @return Returns the possible 'fill form and click submit button' actions if any.
      */
-    private List<MotifAction> extractFillFormAndSubmitActions(Set<WidgetAction> widgetActions) {
+    private List<MotifAction> extractFillFormAndSubmitActions(List<WidgetAction> widgetActions) {
 
         List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
 

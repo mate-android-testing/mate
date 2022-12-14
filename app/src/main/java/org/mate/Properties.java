@@ -295,6 +295,29 @@ public class Properties {
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
 
+    /**
+     * Whether a screen state should return {@link org.mate.interaction.action.ui.UIAction}s and
+     * {@link org.mate.interaction.action.ui.WidgetAction}s.
+     *
+     * @return Returns {@code true} (default option) when a screen state should return ui actions.
+     */
+    public static boolean USE_UI_ACTIONS() { return propertyOr(true); }
+
+    /**
+     * Whether a screen state should return {@link org.mate.interaction.action.intent.SystemAction}s
+     * and {@link org.mate.interaction.action.intent.IntentBasedAction}s.
+     *
+     * @return Returns {@code true} (default option) when a screen state should return intent actions.
+     */
+    public static boolean USE_INTENT_ACTIONS() { return propertyOr(true); }
+
+    /**
+     * Whether a screen state should return {@link org.mate.interaction.action.ui.MotifAction}s.
+     *
+     * @return Returns {@code true} (default option) when a screen state should return motif actions.
+     */
+    public static boolean USE_MOTIF_ACTIONS() { return propertyOr(true); }
+
     /*
      * Begin Greybox Fuzzing properties
      */
