@@ -808,7 +808,7 @@ public class GeneticAlgorithmProvider {
         boolean isGenoToPhenoType = org.mate.Properties.USE_GENO_TO_PHENO();
 
         if (isGenoToPhenoType) {
-            return initializeGenoToPhenoFitnessFunction(fitnessFunction);
+            return initializeGenoToPhenoFitnessFunction(fitnessFunction, index);
         } else {
             return initializeNormalFitnessFunction(fitnessFunction, index);
         }
@@ -878,11 +878,12 @@ public class GeneticAlgorithmProvider {
      * Initializes one fitness function with the geno to pheno type.
      *
      * @param fitnessFunction One of the fitness functions used by this run.
+     * @param index The index of the current fitness function.
      * @param <T> The type of the chromosome used by the fitness function.
      * @return An initialized fitness function.
      */
     private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction(
-            FitnessFunction fitnessFunction) {
+            FitnessFunction fitnessFunction, int index) {
         IFitnessFunction<T> genoToPhenoFitness;
         IFitnessFunction<T> function;
 
@@ -893,14 +894,31 @@ public class GeneticAlgorithmProvider {
             case BASIC_BLOCK_LINE_COVERAGE:
                 function = new BasicBlockLineCoverageFitnessFunction<>();
                 break;
+            case BASIC_BLOCK_MULTI_OBJECTIVE:
+                function = (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(
+                        getFitnessFunctionArgument(index));
+                break;
             case BRANCH_COVERAGE:
                 function = new BranchCoverageFitnessFunction<>();
+                break;
+            case BRANCH_MULTI_OBJECTIVE:
+                function = (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(
+                        getFitnessFunctionArgument(index));
                 break;
             case BRANCH_DISTANCE:
                 function = new BranchDistanceFitnessFunction<>();
                 break;
+            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                function = (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(
+                        getFitnessFunctionArgument(index));
+                break;
             case LINE_COVERAGE:
                 function = new LineCoverageFitnessFunction<>();
+                break;
+            case LINE_PERCENTAGE_COVERAGE:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                function = (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
                 break;
             case METHOD_COVERAGE:
                 function = new MethodCoverageFitnessFunction<>();
