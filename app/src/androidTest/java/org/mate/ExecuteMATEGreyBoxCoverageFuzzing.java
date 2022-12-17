@@ -33,9 +33,7 @@ public class ExecuteMATEGreyBoxCoverageFuzzing {
 
         final GreyBoxCoverageFuzzer<?> greyBoxCoverageFuzzer = new GreyBoxCoverageFuzzer<>(
                 translateChromosomeFactory(Properties.CHROMOSOME_FACTORY()),
-
-                //TODO:
-                translateMutationFunction(Properties.MUTATION_FUNCTIONS()[0]),
+                translateMutationFunction(Properties.MUTATION_FUNCTION()),
                 translateTerminationCondition(Properties.TERMINATION_CONDITION()),
                 Properties.GREY_BOX_COVERAGE_CRITERION(),
                 Properties.SEED_CORPUS_SIZE(),

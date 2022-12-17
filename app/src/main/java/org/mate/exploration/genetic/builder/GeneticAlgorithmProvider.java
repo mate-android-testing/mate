@@ -24,7 +24,7 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
-import org.mate.exploration.genetic.crossover.OnePointCrossOverFunction;
+import org.mate.exploration.genetic.crossover.PrimitiveOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
@@ -149,7 +149,7 @@ public class GeneticAlgorithmProvider {
 
         switch (Algorithm.valueOf(algorithmName)) {
             case STANDARD_GA:
-                return initializeGenericGeneticAlgorithm();
+                return initializeStandardGA();
             case ONE_PLUS_ONE:
                 return initializeOnePlusOne();
             case NSGAII:
@@ -177,7 +177,7 @@ public class GeneticAlgorithmProvider {
      * @param <T> The type of the chromosomes.
      * @return Returns an instance of the standard genetic algorithm.
      */
-    private <T> StandardGeneticAlgorithm<T> initializeGenericGeneticAlgorithm() {
+    private <T> StandardGeneticAlgorithm<T> initializeStandardGA() {
 
         if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
             throw new IllegalStateException("StandardGA requires a chromosome factory. You have to " +
@@ -263,9 +263,6 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("NSGA-II requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
-        } else if (org.mate.Properties.OBJECTIVE() == null) {
-            throw new IllegalStateException("NSGA-II requires the type of objectives. You have to " +
-                    "define the property org.mate.Properties.OBJECTIVE() appropriately!");
         }
 
         return new NSGAII<>(
@@ -663,17 +660,19 @@ public class GeneticAlgorithmProvider {
      * Initialises the crossover functions of the genetic algorithm.
      *
      * @param <T> The type wrapped by the chromosomes.
-     * @return Returns the fitness functions used by the genetic algorithm.
+     * @return Returns the crossover functions used by the genetic algorithm.
      */
     private <T> List<ICrossOverFunction<T>> initializeCrossOverFunctions() {
+
         int amountCrossoverFunction = Integer.parseInt(
                 properties.getProperty(GeneticAlgorithmBuilder.AMOUNT_CROSSOVER_FUNCTIONS_KEY));
+
         if (amountCrossoverFunction == 0) {
             return null;
         } else {
             List<ICrossOverFunction<T>> crossOverFunctions = new ArrayList<>();
             for (int i = 0; i < amountCrossoverFunction; i++) {
-                crossOverFunctions.add(this.<T>initializeCrossOverFunction(i));
+                crossOverFunctions.add(this.initializeCrossOverFunction(i));
             }
             return crossOverFunctions;
         }
@@ -689,9 +688,9 @@ public class GeneticAlgorithmProvider {
 
         String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE,
                 GeneticAlgorithmBuilder.CROSSOVER_FUNCTION_KEY_FORMAT, index);
-        String crossOverFunctionId = properties.getProperty(key);
+        String crossOverFunction = properties.getProperty(key);
 
-        switch (CrossOverFunction.valueOf(crossOverFunctionId)) {
+        switch (CrossOverFunction.valueOf(crossOverFunction)) {
             case TEST_CASE_MERGE_CROSS_OVER:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
@@ -702,29 +701,31 @@ public class GeneticAlgorithmProvider {
                 return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
             case INTEGER_SEQUENCE_POINT_CROSS_OVER:
                 return (ICrossOverFunction<T>) new IntegerSequencePointCrossOverFunction();
-            case ONE_POINT_CROSS_OVER:
-                return (ICrossOverFunction<T>) new OnePointCrossOverFunction();
+            case PRIMITIVE_ONE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new PrimitiveOnePointCrossOverFunction();
             default:
                 throw new UnsupportedOperationException("Unknown crossover function: "
-                        + crossOverFunctionId);
+                        + crossOverFunction);
         }
     }
 
     /**
-     * Initialises the crossover functions of the genetic algorithm.
+     * Initialises the mutation functions of the genetic algorithm.
      *
      * @param <T> The type wrapped by the chromosomes.
-     * @return Returns the fitness functions used by the genetic algorithm.
+     * @return Returns the mutation functions used by the genetic algorithm.
      */
     private <T> List<IMutationFunction<T>> initializeMutationFunctions() {
+
         int amountMutationFunction = Integer.parseInt(
                 properties.getProperty(GeneticAlgorithmBuilder.AMOUNT_MUTATION_FUNCTIONS_KEY));
+
         if (amountMutationFunction == 0) {
             return null;
         } else {
             List<IMutationFunction<T>> mutationFunctions = new ArrayList<>();
             for (int i = 0; i < amountMutationFunction; i++) {
-                mutationFunctions.add(this.<T>initializeMutationFunction(i));
+                mutationFunctions.add(this.initializeMutationFunction(i));
             }
             return mutationFunctions;
         }
@@ -760,7 +761,7 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new PrimitiveTestCaseShuffleMutationFunction();
-            case SHUFFLE_MUTATION:
+            case TEST_CASE_SHUFFLE_MUTATION:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
@@ -849,19 +850,19 @@ public class GeneticAlgorithmProvider {
             case BRANCH_COVERAGE:
                 return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
             case BRANCH_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(index);
             case BRANCH_DISTANCE:
                 return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(index);
             case BASIC_BLOCK_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(index);
             case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
             case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
+                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(index);
             case BASIC_BLOCK_LINE_COVERAGE:
                 return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:

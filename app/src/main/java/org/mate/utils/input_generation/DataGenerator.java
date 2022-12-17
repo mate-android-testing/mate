@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mate.utils.input_generation.Letters.SET_OF_LOW_BIG_NUMBER_LETTERS;
@@ -127,9 +128,15 @@ public final class DataGenerator {
 
         // If no word with given length was found.
         if (stb.length() == 0) {
-            stb.append(Randomness.randomElement(words.stream()
+
+            // pick any word that is not longer than maxLength
+            Set<String> wordsUpToMaxLength = words.stream()
                     .filter(word -> word.length() < maxLength)
-                    .collect(Collectors.toSet())));
+                    .collect(Collectors.toSet());
+
+            if (!wordsUpToMaxLength.isEmpty()) {
+                stb.append(Randomness.randomElement(wordsUpToMaxLength));
+            }
         } else {
 
             // Remove the last white space.

@@ -1,11 +1,13 @@
 package org.mate.interaction;
 
 import android.app.Instrumentation;
+import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -17,6 +19,7 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import org.mate.MATE;
 import org.mate.Properties;
@@ -32,8 +35,10 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
+import org.mate.utils.UIAutomatorException;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
@@ -41,6 +46,7 @@ import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
 
 import java.io.BufferedReader;
@@ -63,8 +69,8 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.support.test.InstrumentationRegistry.getContext;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
 import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
 
@@ -111,6 +117,11 @@ public class DeviceMgr {
      */
     private final String LANDSCAPE_MODE_CMD = "content insert --uri content://settings/system " +
             "--bind name:s:user_rotation --bind value:i:1";
+
+    /**
+     * The error message when the ui automator is disconnected.
+     */
+    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
 
     /**
      * The device instance provided by the instrumentation class to perform various actions.
@@ -168,22 +179,35 @@ public class DeviceMgr {
      */
     public void executeAction(Action action) throws AUTCrashException {
 
-        if (action instanceof WidgetAction) {
-            executeAction((WidgetAction) action);
-        } else if (action instanceof PrimitiveAction) {
-            executeAction((PrimitiveAction) action);
-        } else if (action instanceof IntentBasedAction) {
-            executeAction((IntentBasedAction) action);
-        } else if (action instanceof SystemAction) {
-            executeAction((SystemAction) action);
-        } else if (action instanceof MotifAction) {
-            executeAction((MotifAction) action);
-        } else if (action instanceof UIAction) {
-            executeAction((UIAction) action);
-        } else {
-            throw new UnsupportedOperationException("Actions class "
-                    + action.getClass().getSimpleName() + " not yet supported");
+        try {
+            if (action instanceof WidgetAction) {
+                executeAction((WidgetAction) action);
+            } else if (action instanceof PrimitiveAction) {
+                executeAction((PrimitiveAction) action);
+            } else if (action instanceof IntentBasedAction) {
+                executeAction((IntentBasedAction) action);
+            } else if (action instanceof SystemAction) {
+                executeAction((SystemAction) action);
+            } else if (action instanceof MotifAction) {
+                executeAction((MotifAction) action);
+            } else if (action instanceof UIAction) {
+                executeAction((UIAction) action);
+            } else {
+                throw new UnsupportedOperationException("Actions class "
+                        + action.getClass().getSimpleName() + " not yet supported");
+            }
+        } catch (IllegalStateException e) {
+            MATE.log_debug("Couldn't execute action: " + action);
+            e.printStackTrace();
+            if (Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)) {
+                throw new UIAutomatorException("UIAutomator disconnected, couldn't execute action!");
+            } else {
+                // unexpected behaviour
+                throw e;
+            }
         }
+
+        checkForCrash();
     }
 
     /**
@@ -191,7 +215,7 @@ public class DeviceMgr {
      *
      * @param action The system event.
      */
-    private void executeAction(SystemAction action) throws AUTCrashException {
+    private void executeAction(SystemAction action) {
 
         // the inner class separator '$' needs to be escaped
         String receiver = action.getReceiver().replaceAll("\\$", Matcher.quoteReplacement("\\$"));
@@ -223,16 +247,14 @@ public class DeviceMgr {
             Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
                     action.getReceiver(), action.getAction(), action.isDynamicReceiver());
         }
-        checkForCrash();
     }
 
     /**
      * Executes the given motif action.
      *
      * @param action The given motif action.
-     * @throws AUTCrashException If the app crashes.
      */
-    private void executeAction(MotifAction action) throws AUTCrashException {
+    private void executeAction(MotifAction action) {
 
         ActionType typeOfAction = action.getActionType();
 
@@ -247,7 +269,6 @@ public class DeviceMgr {
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
-        checkForCrash();
     }
 
     /**
@@ -280,7 +301,7 @@ public class DeviceMgr {
                 for (int i = 0; i < primitiveActions.size(); i++) {
                     PrimitiveAction primitiveAction = (PrimitiveAction) primitiveActions.get(i);
                     if (i < primitiveActions.size() - 1) {
-                        handleEdit(primitiveAction);
+                        handleEdit(primitiveAction, false);
                     } else {
                         // the last primitive action represents the click on the submit button
                         handleClick(primitiveAction);
@@ -316,7 +337,7 @@ public class DeviceMgr {
                     inputFields.stream().forEach(widget -> {
                         PrimitiveAction typeText = new PrimitiveAction(widget.getX(), widget.getY(),
                                 ActionType.TYPE_TEXT, currentActivity);
-                        handleEdit(typeText);
+                        handleEdit(typeText, false);
                         uiActions.add(typeText);
                     });
 
@@ -343,16 +364,21 @@ public class DeviceMgr {
      */
     private Widget findWidget(UiObject2 uiElement) {
 
+        // cache attributes to avoid stale object exception
+        String className = uiElement.getClassName();
+        Rect bounds = uiElement.getVisibleBounds();
+        String resourceName = uiElement.getResourceName();
+
         IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         for (Widget widget : screenState.getWidgets()) {
 
             String resourceID = widget.getResourceID().isEmpty() ? null : widget.getResourceID();
 
-            if (widget.getClazz().equals(uiElement.getClassName())
-                    && widget.getBounds().equals(uiElement.getVisibleBounds())
-                    && Objects.equals(resourceID, uiElement.getResourceName())) {
-                    return widget;
+            if (widget.getClazz().equals(className)
+                    && widget.getBounds().equals(bounds)
+                    && Objects.equals(resourceID, resourceName)) {
+                return widget;
             }
         }
 
@@ -440,9 +466,9 @@ public class DeviceMgr {
             if (Registry.isReplayMode()) {
 
                 /*
-                * It is possible that the spinner action wasn't actually executed at record time,
-                * because there was no spinner available. In this case, we can't do anything else
-                * than simply ignoring the action.
+                 * It is possible that the spinner action wasn't actually executed at record time,
+                 * because there was no spinner available. In this case, we can't do anything else
+                 * than simply ignoring the action.
                  */
                 if (!action.getUIActions().isEmpty()) {
 
@@ -477,9 +503,9 @@ public class DeviceMgr {
                         .collect(Collectors.toList());
 
                 /*
-                * If no spinner is available on the current screen, we simply do nothing alike
-                * a primitive action may have no effect, e.g. a click on a random coordinate which
-                * area is not covered by any clickable widget.
+                 * If no spinner is available on the current screen, we simply do nothing alike
+                 * a primitive action may have no effect, e.g. a click on a random coordinate which
+                 * area is not covered by any clickable widget.
                  */
                 if (!spinners.isEmpty()) {
 
@@ -501,9 +527,8 @@ public class DeviceMgr {
      * Executes the given ui action.
      *
      * @param action The given ui action.
-     * @throws AUTCrashException If the app crashes.
      */
-    private void executeAction(UIAction action) throws AUTCrashException {
+    private void executeAction(UIAction action) {
 
         ActionType typeOfAction = action.getActionType();
 
@@ -575,7 +600,6 @@ public class DeviceMgr {
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
-        checkForCrash();
     }
 
     /**
@@ -584,13 +608,17 @@ public class DeviceMgr {
      *
      * @param action The action which contains the Intent to be sent.
      */
-    private void executeAction(IntentBasedAction action) throws AUTCrashException {
+    private void executeAction(IntentBasedAction action) {
 
         Intent intent = action.getIntent();
 
         try {
             switch (action.getComponentType()) {
                 case ACTIVITY:
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        // https://stackoverflow.com/a/57490942/6110448
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
                     InstrumentationRegistry.getTargetContext().startActivity(intent);
                     break;
                 case SERVICE:
@@ -603,7 +631,7 @@ public class DeviceMgr {
                     throw new UnsupportedOperationException("Component type not supported yet!");
             }
         } catch (Exception e) {
-            final String msg = "Calling startActivity() from outside of an Activity  context " +
+            final String msg = "Calling startActivity() from outside of an Activity context " +
                     "requires the FLAG_ACTIVITY_NEW_TASK flag.";
             if (e.getMessage().contains(msg) && action.getComponentType() == ComponentType.ACTIVITY) {
                 MATE.log("Retrying sending intent with ACTIVITY_NEW_TASK flag!");
@@ -619,16 +647,14 @@ public class DeviceMgr {
                 e.printStackTrace();
             }
         }
-        checkForCrash();
     }
 
     /**
      * Executes a primitive action, e.g. a click on a specific coordinate.
      *
      * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    private void executeAction(PrimitiveAction action) throws AUTCrashException {
+    private void executeAction(PrimitiveAction action) {
 
         switch (action.getActionType()) {
             case CLICK:
@@ -650,7 +676,10 @@ public class DeviceMgr {
                 device.swipe(action.getX(), action.getY(), action.getX() - 300, action.getY(), 15);
                 break;
             case TYPE_TEXT:
-                handleEdit(action);
+                handleEdit(action, false);
+                break;
+            case CLEAR_TEXT:
+                handleEdit(action, true);
                 break;
             case BACK:
                 device.pressBack();
@@ -662,7 +691,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for primitive actions.");
         }
-        checkForCrash();
     }
 
     /**
@@ -678,8 +706,9 @@ public class DeviceMgr {
      * Inserts a text into a input field based on the given primitive action.
      *
      * @param action The given primitive action.
+     * @param clear Whether the text field should be cleared (filled with an empty string).
      */
-    private void handleEdit(PrimitiveAction action) {
+    private void handleEdit(PrimitiveAction action, boolean clear) {
 
         // clicking on the screen should get a focus on the underlying 'widget'
         device.click(action.getX(), action.getY());
@@ -697,50 +726,86 @@ public class DeviceMgr {
                 widget = findWidget(uiElement);
             } catch (StaleObjectException e) {
 
-                MATE.log_warn("Stale ui element!");
+                MATE.log_warn("Stale UiObject2!");
                 e.printStackTrace();
 
                 /*
-                * Unfortunately, it can happen that the requested ui element gets immediately stale.
-                * The only way to recover from such a situation is to call findObject() another time.
+                 * Unfortunately, it can happen that the requested ui element gets immediately stale.
+                 * The only way to recover from such a situation is to call findObject() another time.
                  */
                 uiElement = device.findObject(By.focused(true));
                 if (uiElement != null) {
-                    widget = findWidget(uiElement);
+
+                    try {
+                        widget = findWidget(uiElement);
+                    } catch (StaleObjectException ex) {
+                        MATE.log_warn("Stale UiObject2!");
+                        ex.printStackTrace();
+                    }
                 }
             }
 
             if (widget != null && widget.isEditTextType()) {
 
-                /*
-                * If we run in replay mode, we should use the recorded text instead of a new text
-                * that is randomly created. Otherwise, we may end up in a different state and
-                * subsequent actions might not show the same behaviour as in the recorded run.
-                 */
-                String textData = Registry.isReplayMode() ? action.getText() :
-                        Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
+                // use empty string for clearing
+                String textData = "";
+
+                if (!clear) {
+                    /*
+                     * If we run in replay mode, we should use the recorded text instead of a new text
+                     * that is randomly created. Otherwise, we may end up in a different state and
+                     * subsequent actions might not show the same behaviour as in the recorded run.
+                     */
+                    textData = Registry.isReplayMode() ? action.getText() :
+                            Objects.toString(generateTextData(widget, widget.getMaxTextLength()), "");
+                }
 
                 MATE.log_debug("Inserting text: " + textData);
-                uiElement.setText(textData);
 
-                // record for possible replaying + findObject() relies on it
-                action.setText(textData);
-                widget.setText(textData);
+                try {
+                    uiElement.setText(textData);
+
+                    // record for possible replaying + findObject() relies on it
+                    action.setText(textData);
+                    widget.setText(textData);
+                } catch (StaleObjectException e) {
+                    MATE.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
+                } finally {
+                    // we need to close the soft keyboard, but only if it is present
+                    if (isKeyboardOpened()) {
+                        device.pressBack();
+                    }
+                }
             }
-
-            // we need to close the soft keyboard, but only if it is present, see:
-            // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-            device.pressBack();
         }
+    }
+
+    /**
+     * Checks whether the soft keyboard is opened or not.
+     *
+     * @return Returns {@code true} if the soft keyboard is opened, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean isKeyboardOpened() {
+
+        // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
+        UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+
+        for (AccessibilityWindowInfo window : uiAutomation.getWindows()) {
+            if (window.getType() == AccessibilityWindowInfo.TYPE_INPUT_METHOD) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Executes a widget action, e.g. a click on a certain widget.
      *
      * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    private void executeAction(WidgetAction action) throws AUTCrashException {
+    private void executeAction(WidgetAction action) {
 
         Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
@@ -753,13 +818,10 @@ public class DeviceMgr {
                 handleLongClick(selectedWidget);
                 break;
             case TYPE_TEXT:
-                handleEdit(selectedWidget);
-                break;
             case TYPE_SPECIFIC_TEXT:
                 handleEdit(selectedWidget);
-            case CLEAR_WIDGET:
-                // TODO: Do we actually need this action?
-                //  A 'type text' action overwrites the previous text anyways.
+                break;
+            case CLEAR_TEXT:
                 handleClear(selectedWidget);
                 break;
             case SWIPE_DOWN:
@@ -772,8 +834,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for widget actions.");
         }
-
-        checkForCrash();
     }
 
     /**
@@ -810,7 +870,7 @@ public class DeviceMgr {
      *
      * @param screenState The given screen state.
      * @return Returns {@code true} if the screen contains a progress bar, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean checkForProgressBar(IScreenState screenState) {
 
@@ -914,11 +974,28 @@ public class DeviceMgr {
      * @param widget The widget whose input should be cleared.
      */
     private void handleClear(Widget widget) {
-        UiObject2 obj = findObject(widget);
-        if (obj != null) {
-            obj.setText("");
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText("");
+
+        UiObject2 uiObject = findObject(widget);
+
+        if (uiObject != null) {
+
+            try {
+                uiObject.setText("");
+
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText("");
+
+                // we need to close the soft keyboard, but only if it is present
+                if (isKeyboardOpened()) {
+                    device.pressBack();
+                }
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                handleEditFallback(widget, "");
+            }
+        } else {
+            handleEditFallback(widget, "");
         }
     }
 
@@ -938,8 +1015,15 @@ public class DeviceMgr {
         if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
-                X = obj.getVisibleBounds().centerX();
-                Y = obj.getVisibleBounds().centerY();
+                try {
+                    X = obj.getVisibleBounds().centerX();
+                    Y = obj.getVisibleBounds().centerY();
+                } catch (StaleObjectException e) {
+                    MATE.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
+                    X = widget.getX();
+                    Y = widget.getY();
+                }
             } else {
                 X = widget.getX();
                 Y = widget.getY();
@@ -976,14 +1060,24 @@ public class DeviceMgr {
      * @param widget The widget on which a long click should be applied.
      */
     private void handleLongClick(Widget widget) {
+
         // TODO: consider https://stackoverflow.com/questions/21432561/how-to-achieve-long-click-in-uiautomator
         UiObject2 obj = findObject(widget);
-        int X = widget.getX();
-        int Y = widget.getY();
-        if (obj != null) {
-            X = obj.getVisibleBounds().centerX();
-            Y = obj.getVisibleBounds().centerY();
+
+        int X = 0, Y = 0;
+
+        try {
+            if (obj != null) {
+                X = obj.getVisibleBounds().centerX();
+                Y = obj.getVisibleBounds().centerY();
+            }
+        } catch (StaleObjectException e) {
+            MATE.log_warn("Stale UiObject2!");
+            e.printStackTrace();
+            X = widget.getX();
+            Y = widget.getY();
         }
+
         device.swipe(X, Y, X, Y, 120);
     }
 
@@ -992,47 +1086,55 @@ public class DeviceMgr {
      * best effort approach.
      *
      * @param widget The widget whose ui object should be looked up.
-     * @return Returns the corresponding ui object or {@code null} if no
-     *         such ui object could be found.
+     * @return Returns the corresponding ui object or {@code null} if no sui ui object could be
+     *         found or the ui object got stale in the meantime.
      */
     private UiObject2 findObject(Widget widget) {
 
-        // retrieve all ui objects that match the given widget resource id
-        List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+        try {
 
-        if (objs != null) {
-            if (objs.size() == 1) {
-                return objs.get(0);
-            } else {
-                /*
-                 * It can happen that multiple widgets share the same resource id,
-                 * thus we need to compare on the text attribute.
-                 */
-                for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
-                        return uiObject2;
+            // retrieve all ui objects that match the given widget resource id
+            List<UiObject2> objs = device.findObjects(By.res(widget.getResourceID()));
+
+            if (objs != null) {
+                if (objs.size() == 1) {
+                    return objs.get(0);
+                } else {
+                    /*
+                     * It can happen that multiple widgets share the same resource id,
+                     * thus we need to compare on the text attribute.
+                     */
+                    for (UiObject2 uiObject2 : objs) {
+                        if (uiObject2.getText() != null && uiObject2.getText().equals(widget.getText()))
+                            return uiObject2;
+                    }
                 }
             }
-        }
 
-        // if no match for id, try to find the object by text match
-        objs = device.findObjects(By.text(widget.getText()));
+            // if no match for id, try to find the object by text match
+            objs = device.findObjects(By.text(widget.getText()));
 
-        if (objs != null) {
-            if (objs.size() == 1) {
-                return objs.get(0);
-            } else {
-                // try to match by content description or widget boundary
-                for (UiObject2 uiObject2 : objs) {
-                    if (uiObject2.getContentDescription() != null
-                            && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
-                            (uiObject2.getVisibleBounds() != null
-                                    && uiObject2.getVisibleBounds().centerX() == widget.getX()
-                                    && uiObject2.getVisibleBounds().centerY() == widget.getY()))
-                        return uiObject2;
+            if (objs != null) {
+                if (objs.size() == 1) {
+                    return objs.get(0);
+                } else {
+                    // try to match by content description or widget boundary
+                    for (UiObject2 uiObject2 : objs) {
+                        if (uiObject2.getContentDescription() != null
+                                && uiObject2.getContentDescription().equals(widget.getContentDesc()) ||
+                                (uiObject2.getVisibleBounds() != null
+                                        && uiObject2.getVisibleBounds().centerX() == widget.getX()
+                                        && uiObject2.getVisibleBounds().centerY() == widget.getY()))
+                            return uiObject2;
+                    }
                 }
             }
+
+        } catch (StaleObjectException e) {
+            MATE.log_warn("Stale UiObject2!");
+            e.printStackTrace();
         }
+
         return null;
     }
 
@@ -1058,26 +1160,55 @@ public class DeviceMgr {
 
         if (uiObject != null) {
 
-            uiObject.setText(textData);
-
-            // reflect change since we cache screen states and findObject() relies on it
-            widget.setText(textData);
-        } else {
-            // try to click on the widget, which in turn should get focused
-            device.click(widget.getX(), widget.getY());
-            UiObject2 obj = device.findObject(By.focused(true));
-            if (obj != null) {
-                obj.setText(textData);
+            try {
+                uiObject.setText(textData);
 
                 // reflect change since we cache screen states and findObject() relies on it
                 widget.setText(textData);
 
-                // we need to close the soft keyboard, but only if it is present, see:
-                // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
-                device.pressBack();
-            } else {
-                MATE.log("  ********* obj " + widget.getId() + "  not found");
+                // we need to close the soft keyboard, but only if it is present
+                if (isKeyboardOpened()) {
+                    device.pressBack();
+                }
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                handleEditFallback(widget, textData);
             }
+        } else {
+            handleEditFallback(widget, textData);
+        }
+    }
+
+    /**
+     * Provides a fallback mechanism for editing a text field.
+     *
+     * @param widget The text field widget.
+     * @param textData The text to be inserted.
+     */
+    private void handleEditFallback(Widget widget, String textData) {
+
+        // try to click on the widget, which in turn should get focused
+        device.click(widget.getX(), widget.getY());
+        UiObject2 obj = device.findObject(By.focused(true));
+        if (obj != null) {
+            try {
+                obj.setText(textData);
+
+                // reflect change since we cache screen states and findObject() relies on it
+                widget.setText(textData);
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                MATE.log_warn("Couldn't edit widget: " + widget);
+            } finally {
+                // we need to close the soft keyboard, but only if it is present
+                if (isKeyboardOpened()) {
+                    device.pressBack();
+                }
+            }
+        } else {
+            MATE.log_warn("Couldn't edit widget: " + widget);
         }
     }
 
@@ -1235,7 +1366,7 @@ public class DeviceMgr {
     public void restartApp() {
         MATE.log("Restarting app");
         // Launch the app
-        Context context = getContext();
+        Context context = getTargetContext();
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(packageName);
         // Clear out any previous instances
@@ -1347,18 +1478,18 @@ public class DeviceMgr {
     private List<String> extractFragments(String output) {
 
         /*
-        * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
-        *
-        *  Local FragmentActivity 30388ff State:
-        *     Added Fragments:
-        *       #0: MyFragment{b4f3bc} (642de726-ae2d-439c-a047-4a4a35a6f435 id=0x7f080071)
-        *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
-        *     Back Stack Index: 0 (this line seems to be optional!)
-        *     FragmentManager misc state:
-        */
+         * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
+         *
+         *  Local FragmentActivity 30388ff State:
+         *     Added Fragments:
+         *       #0: MyFragment{b4f3bc} (642de726-ae2d-439c-a047-4a4a35a6f435 id=0x7f080071)
+         *       #1: MySecondFragment{a918ac1} (12f5630f-b93c-40c8-a9fa-49b74745678a id=0x7f080071)
+         *     Back Stack Index: 0 (this line seems to be optional!)
+         *     FragmentManager misc state:
+         */
 
         final String fragmentActivityState = output.split("Local FragmentActivity")[1];
-        
+
         // If no fragment is visible, the 'Added Fragments:' line is missing!
         if (!fragmentActivityState.contains("Added Fragments:")) {
             return Collections.emptyList();
@@ -1371,7 +1502,7 @@ public class DeviceMgr {
                 .split(System.lineSeparator());
 
         return Arrays.stream(fragmentLines)
-                .filter(line -> !line.replaceAll("\\s+","").isEmpty())
+                .filter(line -> !line.replaceAll("\\s+", "").isEmpty())
                 .map(line -> line.split(":")[1])
                 .map(line -> line.split("\\{")[0])
                 .map(String::trim)
@@ -1426,6 +1557,16 @@ public class DeviceMgr {
      * @return Returns the activities of the AUT.
      */
     public List<String> getActivities() {
+        return Registry.getManifest().getActivities().stream()
+                .map(ComponentDescription::getFullyQualifiedName)
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unused")
+    private List<String> getActivitiesFromPackageManager() {
+
+        // NOTE: This will only retrieve the exported/enabled activities, not necessarily all listed
+        // in the AndroidManifest.xml file!
 
         Instrumentation instrumentation = getInstrumentation();
 
@@ -1438,11 +1579,7 @@ public class DeviceMgr {
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {
-            MATE.log_warn("Couldn't retrieve activity names!");
-            MATE.log_warn(e.getMessage());
-
-            // fallback mechanism
-            return Registry.getEnvironmentManager().getActivityNames();
+            throw new IllegalStateException("Couldn't retrieve activity names!", e);
         }
     }
 
@@ -1473,14 +1610,15 @@ public class DeviceMgr {
             Registry.getEnvironmentManager().clearAppData();
         }
 
-        if (Properties.SURROGATE_MODEL()) {
-            /*
-             * The execution of the 'pm clear' command also drops the runtime permissions of the
-             * AUT, thus we have to re-grant it in order to write the traces properly.
-             */
-            MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
-
-        }
+        /*
+         * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
+         * thus we have to re-grant them in order to allow the tracer to write its traces to the
+         * external storage. Otherwise, one may encounter the following situation: A reset is
+         * performed, dropping the runtime permissions. The execution of the next actions triggers
+         * dumping the traces because the cache limit of the tracer is reached. This operation would
+         * fail consequently.
+         */
+        MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
     }
 
     /**
@@ -1504,7 +1642,7 @@ public class DeviceMgr {
                 }
             }
 
-        } catch(IOException e) {
+        } catch (IOException e) {
             MATE.log_warn("Couldn't retrieve stack trace of last crash!");
             MATE.log_warn(e.getMessage());
         }
@@ -1518,6 +1656,7 @@ public class DeviceMgr {
      * the external storage.
      */
     private void sendBroadcastToTracer() {
+        MATE.log_debug("Sending broadcast...");
         Intent intent = new Intent("STORE_TRACES");
         intent.setComponent(new ComponentName(Registry.getPackageName(),
                 "de.uni_passau.fim.auermich.tracer.Tracer"));
@@ -1525,89 +1664,271 @@ public class DeviceMgr {
     }
 
     /**
-     * Reads the traces from the external memory and deletes afterwards the traces file.
+     * Retrieves a file handle on some file located on the external storage.
      *
-     * @return Returns the set of traces.
-     *
+     * @param filename The name of the file.
+     * @return Returns a file handle for the specified file on the external storage.
      */
-    public Set<String> getTraces() {
+    private File getFileFromExternalStorage(final String filename) {
+        final File sdCard = Environment.getExternalStorageDirectory();
+        return new File(sdCard, filename);
+    }
+
+    /**
+     * Retrieves the info.txt file from the external storage.
+     *
+     * @return Returns a file handle on the info.txt file.
+     */
+    private File getInfoFile() {
+        return getFileFromExternalStorage("info.txt");
+    }
+
+    /**
+     * Retrieves the traces.txt file from the external storage.
+     *
+     * @return Returns a file handle on the traces.txt file.
+     */
+    private File getTracesFile() {
+        return getFileFromExternalStorage("traces.txt");
+    }
+
+    /**
+     * Checks whether the info.txt file exists.
+     *
+     * @return Returns {@code true} if the info.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean infoFileExists() {
+        return getInfoFile().exists();
+    }
+
+    /**
+     * Checks whether the traces.txt file exists.
+     *
+     * @return Returns {@code true} if the traces.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean tracesFileExists() {
+        return getTracesFile().exists();
+    }
+
+    /**
+     * Deletes both the traces.txt and info.txt file from the external storage.
+     */
+    private void deleteTraceFiles() {
+
+        // delete both files in order that the next action is assigned the correct traces
+        boolean removedTracesFile = getTracesFile().delete();
+        boolean removedInfoFile = getInfoFile().delete();
+
+        if (!removedInfoFile) {
+            MATE.log_warn("Couldn't remove the info.txt file!");
+        }
+
+        if (!removedTracesFile) {
+            MATE.log_warn("Couldn't remove the traces.txt file!");
+        }
+    }
+
+    /**
+     * Requests the dumping of the traces by sending a broadcast to the tracer.
+     */
+    private void dumpTraces() {
 
         // triggers the dumping of traces to a file called traces.txt
         sendBroadcastToTracer();
 
-        File sdCard = Environment.getExternalStorageDirectory();
-        File infoFile = new File(sdCard, "info.txt");
-
         /*
-        * We need to wait until the info.txt file is generated, once it is there, we know that all
-        * traces have been dumped.
+         * We need to wait until the info.txt file is generated, once it is there, we know that all
+         * traces have been dumped.
          */
-        while(!infoFile.exists()) {
-            MATE.log("Waiting for info.txt...");
-            Utils.sleep(200);
+        MateInterruptedException interrupted = null;
+        while (!infoFileExists()) {
+            MATE.log_debug("Waiting for info.txt...");
+            try {
+                Utils.sleep(200);
+            } catch (final MateInterruptedException e) {
+                /*
+                 * We might get a timeout (signaled through an interrupt) while waiting for the
+                 * traces to be written. In that case we still want to wait for the tracer to write
+                 * its traces.
+                 */
+                interrupted = e;
+            }
         }
 
-        File traceFile = new File(sdCard, "traces.txt");
+        /*
+         * Re-throw the interrupt exception caught while waiting for the tracer to finish dumping
+         * its traces. This is done before reading and deleting the traces.txt file, so that the
+         * traces won't be lost.
+         */
+        if (interrupted != null) {
+            MATE.log_debug("Interrupt detected during dumping traces!");
+            throw interrupted;
+        }
+    }
 
-        if (!traceFile.exists()) {
+    /**
+     * Reads the traces from the traces.txt file.
+     *
+     * @return Returns the traces from the traces.txt file.
+     */
+    private Set<String> readTracesFile() {
+
+        /*
+         * The method exists() may return 'false' if we try to access it while it is written by
+         * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
+         * only if the info.txt doesn't exist yet, this should never happen.
+         */
+        if (!tracesFileExists()) {
+            getInfoFile().delete();
             throw new IllegalStateException("The file traces.txt doesn't exist!");
         }
 
-        Set<String> traces = new HashSet<>();
+        final Set<String> traces = new HashSet<>();
 
-        try (BufferedReader reader
-                     = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile)))) {
-
-            String line = reader.readLine();
-
-            while (line != null) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(getTracesFile())))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
                 traces.add(line);
-                line = reader.readLine();
             }
-
-        } catch (IOException e) {
+        } catch (final IOException e) {
+            getInfoFile().delete();
             throw new IllegalStateException("Couldn't read traces!", e);
         }
-
-        // remove both files
-        traceFile.delete();
-        infoFile.delete();
 
         return traces;
     }
 
     /**
-     * Stores the traces to a file called traces.txt on the external memory.
+     * Waits for the tracer until it dumped both the traces.txt and info.txt file.
+     *
+     * @return Returns {@code true} if the waiting was successful, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean waitForTracer() {
+
+        MATE.log_debug("Waiting for info.txt/traces.txt...");
+
+        boolean tracesFileExists = tracesFileExists();
+        boolean infoFileExists = infoFileExists();
+
+        if (infoFileExists && !tracesFileExists) {
+            MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+            return false;
+        }
+
+        if (tracesFileExists && !infoFileExists) {
+            /*
+             * There are two possible states here:
+             *
+             *     1) The tracer is currently dumping its traces, and we just need to wait for it
+             *        to finish.
+             *     2) The tracer dumped the traces because its cache got full. In that case we need
+             *        to call the tracer to get the remaining traces.
+             *
+             * We have no clear method of determining in which state we are in, so we have to wait
+             * for a while to have the tracer potentially finish dumping its traces and re-check for
+             * the info.txt.
+             */
+            MateInterruptedException interrupted = null;
+            final int maxWaitTimeInSeconds = 30;
+
+            for (int i = 1; i < maxWaitTimeInSeconds; ++i) {
+
+                try {
+                    Utils.sleep(1);
+                } catch (final MateInterruptedException e) {
+                    // keep track of any interrupt
+                    interrupted = e;
+                }
+
+                tracesFileExists = tracesFileExists();
+                infoFileExists = infoFileExists();
+
+                if (tracesFileExists && infoFileExists) {
+                    // We were in case 1), now the tracer has finished dumping the traces.
+                    break;
+                }
+            }
+
+            if (interrupted != null) {
+                /*
+                 * We suspend the interrupt until the tracer hopefully completed dumping its traces.
+                 * By re-throwing, we terminate the current thread.
+                 */
+                MATE.log_debug("Interrupt detected during waiting for tracer!");
+                throw interrupted;
+            }
+
+            if (infoFileExists && !tracesFileExists) {
+                MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+                return false;
+            }
+        }
+
+        MATE.log_debug("Waiting for info.txt/traces.txt completed!");
+        return true;
+    }
+
+    /**
+     * Reads the traces from the external memory and deletes afterwards the info and traces file.
+     *
+     * @return Returns the set of traces.
+     */
+    public Set<String> getTraces() {
+
+        /*
+         * If an interrupt happened, i.e. the TimeoutRun signaled the end of the execution, we abort
+         * the execution here.
+         */
+        Utils.throwOnInterrupt();
+
+        if (!waitForTracer()) {
+            MATE.log_warn("Couldn't wait for tracer.");
+            return new HashSet<>(0);
+        }
+
+        /*
+         * If the AUT has been crashed, the uncaught exception handler takes over and produces both
+         * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
+         * every other condition, there should be no info.txt present and the broadcast is necessary.
+         */
+        if (!infoFileExists()) {
+            dumpTraces();
+        }
+
+        final Set<String> traces = readTracesFile();
+        deleteTraceFiles();
+        return traces;
+    }
+
+    /**
+     * Stores the traces to a file called traces.txt on the external memory. Also generates a file
+     * called info.txt that contains the number of written traces and indicates that the writing
+     * of the traces has been completed.
      *
      * @param traces The traces to be stored.
      */
     public void storeTraces(Set<String> traces) {
 
-        File sdCard = Environment.getExternalStorageDirectory();
-        File traceFile = new File(sdCard, "traces.txt");
-
-        try (Writer fileWriter = new FileWriter(traceFile)) {
-
-            for(String trace : traces) {
+        try (final Writer fileWriter = new FileWriter(getTracesFile())) {
+            for (final String trace : traces) {
                 fileWriter.write(trace);
                 fileWriter.write(System.lineSeparator());
             }
-
-            fileWriter.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Couldn't write to traces.txt!", e);
         }
 
         /*
-        * The info.txt indicates that the dumping of traces has been completed and it contains
-        * the number of written traces.
+         * The info.txt indicates that the dumping of traces has been completed and it contains
+         * the number of written traces.
          */
-        File infoFile = new File(sdCard, "info.txt");
-
-        try (Writer fileWriter = new FileWriter(infoFile)) {
+        try (final Writer fileWriter = new FileWriter(getInfoFile())) {
             fileWriter.write(traces.size());
-            fileWriter.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Couldn't write to info.txt!", e);
         }
     }

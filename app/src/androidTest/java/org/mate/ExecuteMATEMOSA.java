@@ -9,8 +9,6 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 
-import java.util.List;
-
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEMOSA {
 
@@ -25,8 +23,8 @@ public class ExecuteMATEMOSA {
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MOSA)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
-                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
+                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
@@ -34,13 +32,11 @@ public class ExecuteMATEMOSA {
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER());
 
-        List<String> objectives = Registry.getEnvironmentManager()
-                .getObjectives(Properties.OBJECTIVE());
+        int numberOfObjectives
+                = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
         // we need to associate with each objective (branch, line) a fitness function
-        for (String objective : objectives) {
-            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
-        }
+        builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
 
         final IGeneticAlgorithm mosa = builder.build();
         mate.testApp(mosa);

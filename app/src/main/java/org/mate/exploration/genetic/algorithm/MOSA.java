@@ -55,8 +55,8 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunctions The used crossover function.
-     * @param mutationFunctions The used mutation function.
+     * @param crossOverFunctions The used crossover functions.
+     * @param mutationFunctions The used mutation functions.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size N.
@@ -126,7 +126,7 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
             List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                offsprings = singleCrossOverFunction.cross(parents);
+                offsprings = crossOverFunction.cross(parents);
             } else {
                 offsprings = parents;
             }
@@ -134,7 +134,7 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
             for (IChromosome<T> offspring : offsprings) {
 
                 if (Randomness.getRnd().nextDouble() < pMutate) {
-                    offspring = singleMutationFunction.mutate(offspring);
+                    offspring = mutationFunction.mutate(offspring);
                 }
 
                 if (newGeneration.size() < bigPopulationSize) {
@@ -302,11 +302,11 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
     private int getChromosomeLength(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+            return ((TestCase) chromosome.getValue()).getActionSequence().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             int length = 0;
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                length += testCase.getEventSequence().size();
+                length += testCase.getActionSequence().size();
             }
             return length;
         } else if (chromosome.getValue() instanceof List) {

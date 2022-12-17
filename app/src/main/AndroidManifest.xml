@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -11,6 +12,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="MATE"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:requestLegacyExternalStorage="true">
 
     </application>

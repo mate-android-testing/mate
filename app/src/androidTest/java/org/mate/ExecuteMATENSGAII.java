@@ -23,7 +23,7 @@ public class ExecuteMATENSGAII {
 
         MATE mate = new MATE();
 
-        FitnessFunction[] functions = {
+        FitnessFunction[] fitnessFunctions = new FitnessFunction[]{
                 FitnessFunction.NUMBER_OF_ACTIVITIES,
                 FitnessFunction.TEST_LENGTH,
                 FitnessFunction.NUMBER_OF_CRASHES
@@ -33,9 +33,9 @@ public class ExecuteMATENSGAII {
                 .withAlgorithm(Algorithm.NSGAII)
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(SelectionFunction.CROWDED_TOURNAMENT_SELECTION)
-                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
-                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
-                .withFitnessFunctions(functions)
+                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
+                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withFitnessFunctions(fitnessFunctions)
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
                 .withPMutate(Properties.P_MUTATE())

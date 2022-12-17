@@ -44,9 +44,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected List<ICrossOverFunction<T>> crossOverFunctions;
 
     /**
-     * A crossover function chosen from {@link GeneticAlgorithm#crossOverFunctions}
+     * Only set if the underlying algorithm uses exactly one crossover function.
      */
-    protected ICrossOverFunction<T> singleCrossOverFunction;
+    protected ICrossOverFunction<T> crossOverFunction;
 
     /**
      * A list of used mutation function, see {@link IMutationFunction}.
@@ -54,9 +54,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected List<IMutationFunction<T>> mutationFunctions;
 
     /**
-     * A mutation function chosen from {@link GeneticAlgorithm#mutationFunctions}
+     * Only set if the underlying algorithm uses exactly one mutation function.
      */
-    protected IMutationFunction<T> singleMutationFunction;
+    protected IMutationFunction<T> mutationFunction;
 
     /**
      * The used fitness functions, see {@link IFitnessFunction}.
@@ -138,12 +138,14 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         currentGenerationNumber = 0;
 
-        if (this.crossOverFunctions != null) {
-            singleCrossOverFunction = this.crossOverFunctions.get(0);
+        if (this.crossOverFunctions != null && this.crossOverFunctions.size() == 1) {
+            // provide a convenience attribute if there is only a single crossover function used
+            crossOverFunction = this.crossOverFunctions.get(0);
         }
 
-        if (this.mutationFunctions != null) {
-            singleMutationFunction = this.mutationFunctions.get(0);
+        if (this.mutationFunctions != null && this.mutationFunctions.size() == 1) {
+            // provide a convenience attribute if there is only a single mutation function used
+            mutationFunction = this.mutationFunctions.get(0);
         }
     }
 
@@ -207,7 +209,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             List<IChromosome<T>> offsprings;
 
             if (Randomness.getRnd().nextDouble() < pCrossover) {
-                offsprings = singleCrossOverFunction.cross(parents);
+                offsprings = crossOverFunction.cross(parents);
             } else {
                 offsprings = parents;
             }
@@ -215,7 +217,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             for (IChromosome<T> offspring : offsprings) {
 
                 if (Randomness.getRnd().nextDouble() < pMutate) {
-                    offspring = singleMutationFunction.mutate(offspring);
+                    offspring = mutationFunction.mutate(offspring);
                 }
 
                 if (newGeneration.size() < bigPopulationSize) {
@@ -255,15 +257,18 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     protected <S> void logCurrentFitness() {
 
+        final Set<FitnessFunction> fitnessFunctions
+                = new HashSet<>(Arrays.asList(Properties.FITNESS_FUNCTIONS()));
+
         if (Properties.USE_GENO_TO_PHENO()) {
             /*
             * We need to force the evaluation of all chromosomes such that the fitness and coverage
             * data are produced.
              */
-            for (int i = 0; i < fitnessFunctions.size(); i++) {
+            for (int i = 0; i < this.fitnessFunctions.size(); i++) {
                 MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
-                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));
@@ -273,18 +278,18 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         if (population.size() <= 10 && !Properties.USE_GENO_TO_PHENO()) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
-            for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
+            for (int i = 0; i < Math.min(this.fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
-                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": "
                             + fitnessFunction.getFitness(chromosome));
                 }
             }
-            if (fitnessFunctions.size() > 5) {
+            if (this.fitnessFunctions.size() > 5) {
                 MATE.log_acc("Omitted other fitness function because there are too many ("
-                        + fitnessFunctions.size() + ")");
+                        + this.fitnessFunctions.size() + ")");
             }
         }
 
@@ -296,7 +301,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             if (Properties.USE_GENO_TO_PHENO()) {
 
                 GenotypePhenotypeMappedFitnessFunction<S, T> fitnessFunction
-                        = (GenotypePhenotypeMappedFitnessFunction<S, T>) fitnessFunctions.get(0);
+                        = (GenotypePhenotypeMappedFitnessFunction<S, T>) this.fitnessFunctions.get(0);
 
                 List<IChromosome<T>> phenotypePopulation = new ArrayList<>();
 

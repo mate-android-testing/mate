@@ -9,8 +9,10 @@ import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
+import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
-import org.mate.state.executables.StateEquivalenceLevel;
+import org.mate.model.util.DotConverter;
+import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
 import org.mate.utils.Objective;
 import org.mate.utils.coverage.Coverage;
@@ -19,17 +21,19 @@ import org.mate.utils.testcase.OptimisationStrategy;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Properties {
 
     // the timeout in minutes
-    public static int TIMEOUT() { return propertyOr(5); }
+    public static int TIMEOUT() {
+        return propertyOr(5);
+    }
 
     public static int ANT_GENERATION() {
         return propertyOr(5);
     }
+
     public static int ANT_NUMBER() {
         return propertyOr(5);
     }
@@ -64,17 +68,30 @@ public class Properties {
     }
 
     /**
+     * Returns the specified cosine similarity coefficient.
+     *
+     * @return Returns the cosine similarity threshold.
+     */
+    public static float COSINE_SIMILARITY_THRESHOLD() {
+        return propertyOr(0.95f);
+    }
+
+    /**
      * Whether the surrogate model should be used or not.
      *
      * @return Returns {@code true} if the surrogate model should be used, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
-    public static boolean SURROGATE_MODEL() { return propertyOr(false); }
+    public static boolean SURROGATE_MODEL() {
+        return propertyOr(false);
+    }
 
     /*
-    * Intent fuzzing related properties.
+     * Intent fuzzing related properties.
      */
-    public static float RELATIVE_INTENT_AMOUNT() { return propertyOr(0.0f); }
+    public static float RELATIVE_INTENT_AMOUNT() {
+        return propertyOr(0.0f);
+    }
 
     /**
      * The optimisation strategy that should be applied.
@@ -85,17 +102,34 @@ public class Properties {
         return propertyOr(OptimisationStrategy.NO_OPTIMISATION);
     }
 
-    /*
-    * Whether to record stats about test cases or not.
+    /**
+     * Whether additional stats about a test case should be recorded/logged.
+     *
+     * @return Returns {@code true} if additional stats should be recorded/logged, otherwise
+     *         {@code false} is returned.
      */
     public static boolean RECORD_TEST_CASE_STATS() {
         return propertyOr(false);
     }
 
-    /*
-    * Whether to serialize a test case. Default: off.
+    /**
+     * Whether a {@link org.mate.model.TestCase} should be serialized to a XML representation
+     * using the XStream library.
+     *
+     * @return Returns {@code true} if a test case should be serialized to XML, otherwise
+     *         {@code false} is returned.
      */
     public static boolean RECORD_TEST_CASE() {
+        return propertyOr(false);
+    }
+
+    /**
+     * Whether a {@link org.mate.model.TestCase} should be converted to an espresso test.
+     *
+     * @return Returns {@code true} if a test case should be converted to an espresso test,
+     *         otherwise {@code false} is returned.
+     */
+    public static boolean CONVERT_TEST_CASE_TO_ESPRESSO_TEST() {
         return propertyOr(false);
     }
 
@@ -113,7 +147,9 @@ public class Properties {
         return propertyOr(20);
     }
 
-    public static int BIG_POPULATION_SIZE() { return propertyOr(40); }
+    public static int BIG_POPULATION_SIZE() {
+        return propertyOr(40);
+    }
 
     public static int NUMBER_TESTCASES() {
         return propertyOr(2);
@@ -143,17 +179,43 @@ public class Properties {
         return propertyOr(10);
     }
 
-    public static int MUTATION_RATE() { return propertyOr(1); }
+    public static int MUTATION_RATE() {
+        return propertyOr(1);
+    }
 
-    public static int TOURNAMENT_SIZE() { return propertyOr(2); }
+    public static int TOURNAMENT_SIZE() {
+        return propertyOr(2);
+    }
 
-    public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }
+    public static int DEFAULT_SELECTION_SIZE() {
+        return propertyOr(2);
+    }
 
     /**
-     * Determines a list of fitness functions from the properties file.
+     * Convenience function to specify a single fitness function. Ideally you should specify the
+     * fitness function via the property {@link #FITNESS_FUNCTIONS()}.
      *
-     * @return a list of fitness functions.
+     * @return Returns the specified fitness function or {@code null} if none was specified.
      */
+    public static FitnessFunction FITNESS_FUNCTION() {
+
+        /*
+         * NOTE: We can't call another property method that relies upon propertyOr(), since the
+         * property name is derived from the stack trace from a fixed position, which is corrupted
+         * when nested property methods are called. Thus, we require the hard-coded property name.
+         */
+        FitnessFunction fitnessFunction = propertyOrNull("fitness_function");
+
+        if (fitnessFunction == null) {
+            FitnessFunction[] mutationFunctions = propertyOrNull("fitness_functions");
+            if (mutationFunctions != null) {
+                fitnessFunction = mutationFunctions[0];
+            }
+        }
+
+        return fitnessFunction;
+    }
+
     public static FitnessFunction[] FITNESS_FUNCTIONS() {
         return propertyOr(null);
     }
@@ -167,10 +229,62 @@ public class Properties {
         return propertyOr(false);
     }
 
-    public static SelectionFunction SELECTION_FUNCTION() { return propertyOr(null); }
+    public static SelectionFunction SELECTION_FUNCTION() {
+        return propertyOr(null);
+    }
+
+    /**
+     * Convenience function to specify a single mutation function. Ideally you should specify the
+     * mutation function via the property {@link #MUTATION_FUNCTIONS()}.
+     *
+     * @return Returns the specified mutation function or {@code null} if none was specified.
+     */
+    public static MutationFunction MUTATION_FUNCTION() {
+
+        /*
+        * NOTE: We can't call another property method that relies upon propertyOr(), since the
+        * property name is derived from the stack trace from a fixed position, which is corrupted
+        * when nested property methods are called. Thus, we require the hard-coded property name.
+         */
+        MutationFunction mutationFunction = propertyOrNull("mutation_function");
+
+        if (mutationFunction == null) {
+            MutationFunction[] mutationFunctions = propertyOrNull("mutation_functions");
+            if (mutationFunctions != null) {
+                mutationFunction = mutationFunctions[0];
+            }
+        }
+
+        return mutationFunction;
+    }
 
     public static MutationFunction[] MUTATION_FUNCTIONS() {
         return propertyOr(null);
+    }
+
+    /**
+     * Convenience function to specify a single crossover function. Ideally you should specify the
+     * crossover function via the property {@link #CROSSOVER_FUNCTIONS()}.
+     *
+     * @return Returns the specified crossover function or {@code null} if none was specified.
+     */
+    public static CrossOverFunction CROSSOVER_FUNCTION() {
+
+        /*
+         * NOTE: We can't call another property method that relies upon propertyOr(), since the
+         * property name is derived from the stack trace from a fixed position, which is corrupted
+         * when nested property methods are called. Thus, we require the hard-coded property name.
+         */
+        CrossOverFunction crossOverFunction = propertyOrNull("crossover_function");
+
+        if (crossOverFunction == null) {
+            CrossOverFunction[] mutationFunctions = propertyOrNull("crossover_functions");
+            if (mutationFunctions != null) {
+                crossOverFunction = mutationFunctions[0];
+            }
+        }
+
+        return crossOverFunction;
     }
 
     public static CrossOverFunction[] CROSSOVER_FUNCTIONS() { return propertyOr(null); }
@@ -199,14 +313,18 @@ public class Properties {
      *
      * @return Returns the initial size of the seed corpus.
      */
-    public static int SEED_CORPUS_SIZE() { return propertyOr(10); }
+    public static int SEED_CORPUS_SIZE() {
+        return propertyOr(10);
+    }
 
     /**
      * The maximal assignable energy p.
      *
      * @return Returns the maximal assignable energy.
      */
-    public static int MAX_ENERGY() { return propertyOr(10); }
+    public static int MAX_ENERGY() {
+        return propertyOr(10);
+    }
 
     /*
      * End Greybox Fuzzing properties
@@ -230,7 +348,7 @@ public class Properties {
     }
 
     /*
-    * Begin Graph properties
+     * Begin Graph properties
      */
 
     // the graph type, e.g. CFG or SGD
@@ -264,13 +382,17 @@ public class Properties {
     }
 
     // how and which target vertex should be selected, e.g. a random branch vertex
-    public static String TARGET() { return propertyOr("no_target"); }
+    public static String TARGET() {
+        return propertyOr("no_target");
+    }
 
-    // whether to draw raw graph or 'extended' graph
-    public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }
+    // how the graph should be drawn
+    public static DrawType DRAW_GRAPH() {
+        return propertyOr(null);
+    }
 
     /*
-    * End Graph properties
+     * End Graph properties
      */
 
     // Primitive actions or widget based actions?
@@ -284,7 +406,7 @@ public class Properties {
     }
 
     /*
-    * Begin GE properties
+     * Begin GE properties
      */
 
     public static int GE_SEQUENCE_LENGTH() {
@@ -295,16 +417,12 @@ public class Properties {
         return propertyOr(AndroidListBasedBiasedMapping.BIAS_50_PERCENT);
     }
 
-    public static GEMappingFunction GE_MAPPING_FUNCTION() {
-        return propertyOr(null);
-    }
-
     public static int GE_MUTATION_COUNT() {
         return propertyOr(3);
     }
 
     /*
-    * End GE properties
+     * End GE properties
      */
 
     /**
@@ -313,14 +431,18 @@ public class Properties {
      *
      * @return Returns the novelty threshold T.
      */
-    public static double NOVELTY_THRESHOLD() { return propertyOr(0.0); }
+    public static double NOVELTY_THRESHOLD() {
+        return propertyOr(0.0);
+    }
 
     /**
      * Novelty Search - Defines the maximal size of the archive.
      *
      * @return Returns the archive size L.
      */
-    public static int ARCHIVE_LIMIT() { return propertyOr(10); }
+    public static int ARCHIVE_LIMIT() {
+        return propertyOr(10);
+    }
 
     /**
      * Novelty Search - Defines the number of nearest neighbours that should be considered
@@ -328,14 +450,18 @@ public class Properties {
      *
      * @return Returns the number of nearest neighbours k.
      */
-    public static int NEAREST_NEIGHBOURS() { return propertyOr(3); }
+    public static int NEAREST_NEIGHBOURS() {
+        return propertyOr(3);
+    }
 
     /**
      * Controls whether quick launch is enabled or disabled.
      *
      * @return Returns {@code true} if quick launch is enabled, otherwise {@code false} is returned.
      */
-    public static boolean QUICK_LAUNCH() { return propertyOr(true); }
+    public static boolean QUICK_LAUNCH() {
+        return propertyOr(true);
+    }
 
     /*
      * Begin AimDroid properties
@@ -346,35 +472,45 @@ public class Properties {
      *
      * @return Returns the epsilon used in the learning policy.
      */
-    public static double EPSILON() { return propertyOr(0.1d);}
+    public static double EPSILON() {
+        return propertyOr(0.1d);
+    }
 
     /**
      * The alpha used in the SARSA equation.
      *
      * @return Returns the alpha used in the SARSA equation.
      */
-    public static double ALPHA() { return propertyOr(0.8d); }
+    public static double ALPHA() {
+        return propertyOr(0.8d);
+    }
 
     /**
      * The gamma used in the SARSA equation.
      *
      * @return Returns the gamma used in the SARSA equation.
      */
-    public static double GAMMA() { return propertyOr(0.8d); }
+    public static double GAMMA() {
+        return propertyOr(0.8d);
+    }
 
     /**
      * The minL constant used in the bound method (the minimal number of actions).
      *
      * @return Returns the minL constant.
      */
-    public static int MIN_L() { return propertyOr(20); }
+    public static int MIN_L() {
+        return propertyOr(20);
+    }
 
     /**
      * The maxL constant used in the bound method (the maximal number of actions).
      *
      * @return Returns the maxL constant.
      */
-    public static int MAX_L() { return propertyOr(50); }
+    public static int MAX_L() {
+        return propertyOr(50);
+    }
 
     /*
      * End AimDroid properties
@@ -389,35 +525,43 @@ public class Properties {
      *
      * @return Returns the epsilon used in the greedy learning policy.
      */
-    public static float ABT_EPSILON() { return propertyOr(0.8f); }
+    public static float ABT_EPSILON() {
+        return propertyOr(0.8f);
+    }
 
     /**
      * The static discount factor used in equation (1).
      *
      * @return Returns the static discount factor.
      */
-    public static float ABT_DISCOUNT_FACTOR() { return propertyOr(0.9f); }
+    public static float ABT_DISCOUNT_FACTOR() {
+        return propertyOr(0.9f);
+    }
 
     /**
      * The maximal number of episodes (testcases).
      *
      * @return Returns the maximal number of episodes.
      */
-    public static int ABT_MAX_NUM_OF_EPISODES() { return propertyOr(100); }
+    public static int ABT_MAX_NUM_OF_EPISODES() {
+        return propertyOr(100);
+    }
 
     /**
      * The maximal length of an episode (a test case).
      *
      * @return Returns the maximal episode length.
      */
-    public static int ABT_MAX_EPISODE_LENGTH() { return propertyOr(50); }
+    public static int ABT_MAX_EPISODE_LENGTH() {
+        return propertyOr(50);
+    }
 
     /*
      * End AutoBlackTest properties
      */
 
     /*
-    * Begin AutoDroid properties
+     * Begin AutoDroid properties
      */
 
     /**
@@ -425,37 +569,69 @@ public class Properties {
      *
      * @return Returns the probability for selecting the home button.
      */
-    public static float P_HOME_BUTTON() { return propertyOr(0.05f); }
+    public static float P_HOME_BUTTON() {
+        return propertyOr(0.05f);
+    }
 
     /**
      * The initial q-value for a new action.
      *
      * @return Returns the initial q-value for a new action.
      */
-    public static float INITIAL_Q_VALUE() { return propertyOr(500f); }
+    public static float INITIAL_Q_VALUE() {
+        return propertyOr(500f);
+    }
 
     /**
      * The maximal number of episodes (testcases).
      *
      * @return Returns the maximal number of episodes.
      */
-    public static int MAX_NUM_OF_EPISODES() { return propertyOr(100); }
+    public static int MAX_NUM_OF_EPISODES() {
+        return propertyOr(100);
+    }
 
     /**
      * The maximal length of an episode (a test case).
      *
      * @return Returns the maximal episode length.
      */
-    public static int MAX_EPISODE_LENGTH() { return propertyOr(50); }
+    public static int MAX_EPISODE_LENGTH() {
+        return propertyOr(50);
+    }
 
     /*
      * End AutoDroid properties
+     */
+
+    /*
+     * Begin Dot Graph properties
+     */
+
+    /**
+     * Whether the gui model should be converted to a dot file and how often.
+     *
+     * @return Returns the conversion option.
+     */
+    public static DotConverter.Option CONVERT_GUI_TO_DOT() { return propertyOr(DotConverter.Option.NONE); }
+
+    /**
+     * Determines if the generated dot graph should include screenshots or plain labels for the states.
+     *
+     * @return Returns {@code true} if the dot graph should include screenshots,
+     *          otherwise {@code false} is returned.
+     */
+    public static boolean DOT_GRAPH_WITH_SCREENSHOTS() {return propertyOr(false); }
+
+    /*
+     * End Dot Graph properties
      */
 
     /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored
      * the given default value will be returned.
+     *
      * @param defaultValue Default value of the property
      * @param <T> Type of the property
      * @return Value of the property if stored otherwise the given default value
@@ -469,6 +645,15 @@ public class Properties {
             return ((T) propertiesInstance.store.get(callerName));
         }
         return defaultValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T propertyOrNull(String key) {
+        Properties propertiesInstance = Registry.getProperties();
+        if (propertiesInstance.store.containsKey(key)) {
+            return ((T) propertiesInstance.store.get(key));
+        }
+        return null;
     }
 
     private final Map<String, Object> store;
