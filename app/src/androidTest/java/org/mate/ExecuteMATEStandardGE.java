@@ -24,13 +24,20 @@ public class ExecuteMATEStandardGE {
 
         MATE mate = new MATE();
 
+        FitnessFunction[] singleFitnessFunction = Properties.FITNESS_FUNCTIONS();
+
+        if (singleFitnessFunction.length > 1) {
+            throw new IllegalArgumentException("List Analogous Genetic Algorithm takes only one "
+                    + "fitness function.");
+        }
+
         final IGeneticAlgorithm<List<Integer>> standardGE = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.STANDARD_GA)
                 .withChromosomeFactory(ChromosomeFactory.INTEGER_SEQUENCE_CHROMOSOME_FACTORY)
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withGEMappingFunction(GEMappingFunction.LIST_BASED_BIASED_MAPPING)
                 .withGenoToPhenoType()
-                .withFitnessFunctions(Properties.FITNESS_FUNCTIONS())
+                .withFitnessFunctions(singleFitnessFunction)
                 .withCrossoverFunction(CrossOverFunction.INTEGER_SEQUENCE_POINT_CROSS_OVER)
                 .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_POINT_MUTATION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
