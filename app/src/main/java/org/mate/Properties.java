@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.graph.GraphType;
 import org.mate.state.executables.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
@@ -292,6 +293,10 @@ public class Properties {
 
     public static int GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND() {
         return propertyOr(AndroidListBasedBiasedMapping.BIAS_50_PERCENT);
+    }
+
+    public static GEMappingFunction GE_MAPPING_FUNCTION() {
+        return propertyOr(null);
     }
 
     public static int GE_MUTATION_COUNT() {
