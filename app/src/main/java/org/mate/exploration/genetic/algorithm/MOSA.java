@@ -309,6 +309,10 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
                 length += testCase.getEventSequence().size();
             }
             return length;
+        } else if (chromosome.getValue() instanceof List) {
+            List chromosomeValue = (List) chromosome.getValue();
+
+            return chromosomeValue.size();
         } else {
             throw new UnsupportedOperationException("Chromosome type "
                     + chromosome.getValue().getClass() + " not yet supported!");
