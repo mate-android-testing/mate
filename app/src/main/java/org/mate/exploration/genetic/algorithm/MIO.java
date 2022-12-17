@@ -681,6 +681,11 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             } else if (fst.getValue() instanceof TestSuite) {
                 return ((TestSuite) snd.getValue()).getTestCases().size()
                         - ((TestSuite) fst.getValue()).getTestCases().size();
+            } else if (fst.getValue() instanceof List) {
+                List fstList = (List) fst.getValue();
+                List sndList = (List) snd.getValue();
+
+                return sndList.size() - fstList.size();
             } else {
                 throw new IllegalStateException("Chromosome type " + fst.getValue().getClass()
                         + "not yet supported!");
