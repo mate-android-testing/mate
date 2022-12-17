@@ -6,6 +6,7 @@ import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
 
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Provides a comparator that compares two {@link IChromosome}s primarily based on its fitness values
@@ -74,6 +75,10 @@ public class FitnessAndLengthComparator<T> implements Comparator<IChromosome<T>>
                 length += testCase.getEventSequence().size();
             }
             return length;
+        } else if (chromosome.getValue() instanceof List) {
+            List chromosomeValue = (List) chromosome.getValue();
+
+            return chromosomeValue.size();
         } else {
             throw new UnsupportedOperationException("Chromosome type "
                     + chromosome.getValue().getClass() + " not yet supported!");
