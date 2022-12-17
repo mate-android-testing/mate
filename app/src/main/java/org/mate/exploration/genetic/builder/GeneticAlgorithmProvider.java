@@ -781,14 +781,14 @@ public class GeneticAlgorithmProvider {
      * @return Returns the fitness functions used by the genetic algorithm.
      */
     private <T> List<IFitnessFunction<T>> initializeFitnessFunctions() {
-        int amountFitnessFunctions = Integer.parseInt(properties.getProperty
-                (GeneticAlgorithmBuilder.AMOUNT_FITNESS_FUNCTIONS_KEY));
-        if (amountFitnessFunctions == 0) {
+        FitnessFunction[] usedFunctions = org.mate.Properties.FITNESS_FUNCTIONS();
+
+        if (usedFunctions.length == 0) {
             return null;
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
-            for (int i = 0; i < amountFitnessFunctions; i++) {
-                fitnessFunctions.add(this.<T>initializeFitnessFunction(i));
+            for (int i = 0; i < usedFunctions.length; i++) {
+                fitnessFunctions.add(this.<T>initializeFitnessFunction(usedFunctions[i], i));
             }
             return fitnessFunctions;
         }
@@ -797,39 +797,34 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the i-th fitness function of the genetic algorithm.
      *
+     * @param fitnessFunction The fitness function used.
+     * @param index The current index of the fitness function to get possible arguments attached
+     *              to the fitness function.
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the i-th fitness function used by the genetic algorithm.
      */
-    private <T> IFitnessFunction<T> initializeFitnessFunction(int index) {
-
-        String key = String.format(GeneticAlgorithmBuilder.FORMAT_LOCALE, GeneticAlgorithmBuilder
-                .FITNESS_FUNCTION_KEY_FORMAT, index);
-        String fitnessFunctionId = properties.getProperty(key);
-
-        String genoKey = GeneticAlgorithmBuilder.USE_GENO_TO_PHENO_KEY;
-
-        boolean isGenoToPhenoType
-                = properties.containsKey(genoKey)
-                && (properties.getProperty(genoKey).equals("true"));
+    private <T> IFitnessFunction<T> initializeFitnessFunction(FitnessFunction fitnessFunction,
+                                                              int index) {
+        boolean isGenoToPhenoType = org.mate.Properties.USE_GENO_TO_PHENO();
 
         if (isGenoToPhenoType) {
-            return initializeGenoToPhenoFitnessFunction(fitnessFunctionId);
+            return initializeGenoToPhenoFitnessFunction(fitnessFunction);
         } else {
-            return initializeNormalFitnessFunction(fitnessFunctionId, index);
+            return initializeNormalFitnessFunction(fitnessFunction, index);
         }
     }
 
     /**
      * Initializes one fitness function without the geno to pheno type.
      *
-     * @param fitnessFunctionId The name of the fitness function.
+     * @param fitnessFunction The name of the fitness function.
      * @param index The current index of the fitness function.
      * @param <T> The type of the chromosome used by the fitness function.
      * @return An initialized fitness function.
      */
-    private <T> IFitnessFunction<T> initializeNormalFitnessFunction(String fitnessFunctionId,
+    private <T> IFitnessFunction<T> initializeNormalFitnessFunction(FitnessFunction fitnessFunction,
                                                                     int index) {
-        switch (FitnessFunction.valueOf(fitnessFunctionId)) {
+        switch (fitnessFunction) {
             case NUMBER_OF_ACTIVITIES:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
@@ -875,23 +870,23 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
-                        + fitnessFunctionId);
+                        + fitnessFunction.name());
         }
     }
 
     /**
      * Initializes one fitness function with the geno to pheno type.
      *
-     * @param fitnessFunctionId The name of the fitness function.
+     * @param fitnessFunction One of the fitness functions used by this run.
      * @param <T> The type of the chromosome used by the fitness function.
      * @return An initialized fitness function.
      */
     private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction(
-            String fitnessFunctionId) {
+            FitnessFunction fitnessFunction) {
         IFitnessFunction<T> genoToPhenoFitness;
         IFitnessFunction<T> function;
 
-        switch (FitnessFunction.valueOf(fitnessFunctionId)) {
+        switch (fitnessFunction) {
             case BASIC_BLOCK_BRANCH_COVERAGE:
                 function = new BasicBlockBranchCoverageFitnessFunction<>();
                 break;
@@ -912,7 +907,7 @@ public class GeneticAlgorithmProvider {
                 break;
             default:
                 throw new UnsupportedOperationException("GE fitness function "
-                        + fitnessFunctionId + " not yet supported!");
+                        + fitnessFunction.name() + " not yet supported!");
         }
 
         mapping = mapping == null ? getGenoToPhenoTypeMapping() : mapping;
