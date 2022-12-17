@@ -124,35 +124,21 @@ public class FitnessUtils {
      * @return Returns the fitness value for the given chromosome.
      */
     public static <T> double getFitness(IChromosome<T> chromosome, FitnessFunction function) {
-        if (Properties.USE_GENO_TO_PHENO()) {
-            return getFitnessGenoToPheno(chromosome, function);
-        } else {
-            return getFitnessNormal(chromosome, function);
-        }
-    }
-
-    /**
-     * Retrieves the fitness value from a given fitness function for a given chromosome.
-     *
-     * @param chromosome The used chromosome.
-     * @param function The used fitness function.
-     * @param <T> The type of the chromosome.
-     * @return The fitness value for the chromosome.
-     */
-    private static <T> double getFitnessNormal(IChromosome<T> chromosome,
-                                                 FitnessFunction function) {
         switch (function) {
             case BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
+                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome)
+                        .getBranchCoverage();
             case BRANCH_DISTANCE:
                 return Registry.getEnvironmentManager().getBranchDistance(chromosome);
             case LINE_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
+                        .getCoverage(Coverage.LINE_COVERAGE, chromosome)
+                        .getLineCoverage();
             case METHOD_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
+                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome)
+                        .getMethodCoverage();
             case BASIC_BLOCK_LINE_COVERAGE:
                 return Registry.getEnvironmentManager()
                         .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome)
@@ -168,44 +154,6 @@ public class FitnessUtils {
     }
 
     /**
-     * Retrieves the fitness value from a given geno to pheno fitness function.
-     *
-     * @param chromosome The used chromosome.
-     * @param function The used fitness function.
-     * @param <T> The type of the chromosome.
-     * @return The fitness value for the chromosome.
-     */
-    private static <T> double getFitnessGenoToPheno(IChromosome<T> chromosome,
-                                                  FitnessFunction function) {
-        switch (function) {
-            case BASIC_BLOCK_BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome)
-                        .getBranchCoverage();
-            case BASIC_BLOCK_LINE_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome)
-                        .getLineCoverage();
-            case BRANCH_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome)
-                        .getBranchCoverage();
-            case BRANCH_DISTANCE:
-                return Registry.getEnvironmentManager().getBranchDistance(chromosome);
-            case METHOD_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome)
-                        .getMethodCoverage();
-            case LINE_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
-            default:
-                throw new UnsupportedOperationException("GE fitness function "
-                        + function + " not yet supported!");
-        }
-    }
-
-    /**
      * Retrieves the fitness vector for the given chromosome, i.e. the chromosome is evaluated
      * against each single objective, e.g. branch.
      *
@@ -215,7 +163,8 @@ public class FitnessUtils {
      * @param <T> Specifies whether the chromosome is a test suite or a test case.
      * @return Returns the fitness vector for the given chromosome.
      */
-    public static <T> List<Double> getFitness(IChromosome<T> chromosome, List<String> objectives,
+    public static <T> List<Double> getFitness(IChromosome<T> chromosome,
+                                              List<String> objectives,
                                               FitnessFunction function) {
 
         switch (function) {
