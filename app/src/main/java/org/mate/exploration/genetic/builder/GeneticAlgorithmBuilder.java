@@ -262,7 +262,7 @@ public class GeneticAlgorithmBuilder {
     public GeneticAlgorithmBuilder withFitnessFunctions(FitnessFunction[] fitnessFunctions, String arg1) {
 
         String key = String.format(FORMAT_LOCALE, FITNESS_FUNCTION_ARG_KEY_FORMAT,
-                fitnessFunctions.length);
+                fitnessFunctions.length - 1);
 
         properties.setProperty(key, arg1);
 
