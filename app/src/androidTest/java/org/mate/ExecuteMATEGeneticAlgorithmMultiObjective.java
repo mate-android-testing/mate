@@ -38,17 +38,13 @@ public class ExecuteMATEGeneticAlgorithmMultiObjective {
 
         if (Properties.ALGORITHM() == Algorithm.MIO || Properties.ALGORITHM() == Algorithm.MOSA) {
 
-            List<String> objectives = Registry.getEnvironmentManager()
-                    .getObjectives(Properties.OBJECTIVE());
+            int numberOfObjectives
+                    = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
             // we need to associate with each objective (branch, line) a fitness function
-            for (String objective : objectives) {
-                builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS(), objective);
-            }
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
         } else if (Properties.ALGORITHM() == Algorithm.NOVELTY_SEARCH) {
-            FitnessFunction[] novelty = {FitnessFunction.NOVELTY};
-
-            builder = builder.withFitnessFunctions(novelty, Properties.OBJECTIVE().name());
+            builder = builder.withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name());
         } else {
             builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS());
         }

@@ -409,6 +409,10 @@ public class Properties {
      * Begin GE properties
      */
 
+    public static GEMappingFunction GE_MAPPING_FUNCTION() {
+        return propertyOr(null);
+    }
+
     public static int GE_SEQUENCE_LENGTH() {
         return propertyOr(100);
     }

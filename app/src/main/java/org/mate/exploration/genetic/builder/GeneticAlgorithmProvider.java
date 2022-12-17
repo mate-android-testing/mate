@@ -896,22 +896,19 @@ public class GeneticAlgorithmProvider {
                 function = new BasicBlockLineCoverageFitnessFunction<>();
                 break;
             case BASIC_BLOCK_MULTI_OBJECTIVE:
-                function = (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(
-                        getFitnessFunctionArgument(index));
+                function = (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(index);
                 break;
             case BRANCH_COVERAGE:
                 function = new BranchCoverageFitnessFunction<>();
                 break;
             case BRANCH_MULTI_OBJECTIVE:
-                function = (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(
-                        getFitnessFunctionArgument(index));
+                function = (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(index);
                 break;
             case BRANCH_DISTANCE:
                 function = new BranchDistanceFitnessFunction<>();
                 break;
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                function = (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(
-                        getFitnessFunctionArgument(index));
+                function = (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(index);
                 break;
             case LINE_COVERAGE:
                 function = new LineCoverageFitnessFunction<>();
@@ -919,7 +916,7 @@ public class GeneticAlgorithmProvider {
             case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
-                function = (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(getFitnessFunctionArgument(index));
+                function = (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(index);
                 break;
             case METHOD_COVERAGE:
                 function = new MethodCoverageFitnessFunction<>();

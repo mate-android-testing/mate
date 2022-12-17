@@ -5,6 +5,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.model.TestCase;
@@ -12,6 +13,7 @@ import org.mate.model.TestSuite;
 import org.mate.utils.coverage.Coverage;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -166,39 +168,6 @@ public class FitnessUtils {
             default:
                 throw new UnsupportedOperationException("Fitness function "
                         + fitnessFunction + " not yet supported!");
-        }
-    }
-
-    /**
-     * Retrieves the fitness vector for the given chromosome, i.e. the chromosome is evaluated
-     * against each single objective, e.g. branch.
-     *
-     * @param chromosome The chromosome for which the fitness vector should be evaluated.
-     * @param objectives A list of objectives, e.g. lines or branches, or {@code null} if not required.
-     * @param function The fitness function used.
-     * @param <T> Specifies whether the chromosome is a test suite or a test case.
-     * @return Returns the fitness vector for the given chromosome.
-     */
-    public static <T> List<Double> getFitness(IChromosome<T> chromosome,
-                                              List<String> objectives,
-                                              FitnessFunction function) {
-
-        switch (function) {
-            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                return Registry.getEnvironmentManager()
-                        .getBranchDistanceVector(chromosome, objectives);
-            case LINE_PERCENTAGE_COVERAGE:
-                return Registry.getEnvironmentManager()
-                        .getLineCoveredPercentage(chromosome, objectives);
-            case BASIC_BLOCK_MULTI_OBJECTIVE:
-                return Registry.getEnvironmentManager()
-                        .getBasicBlockFitnessVector(chromosome, objectives);
-            case BRANCH_MULTI_OBJECTIVE:
-                return Registry.getEnvironmentManager()
-                        .getBranchFitnessVector(chromosome, objectives);
-            default:
-                throw new UnsupportedOperationException("Fitness function "
-                        + function + " not yet supported!");
         }
     }
 
