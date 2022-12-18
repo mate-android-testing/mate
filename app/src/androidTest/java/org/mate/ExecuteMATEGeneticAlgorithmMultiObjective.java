@@ -10,8 +10,6 @@ import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 
-import java.util.List;
-
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEGeneticAlgorithmMultiObjective {
 
