@@ -1,11 +1,13 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
@@ -300,6 +302,11 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      * @return Returns the length of the given chromosome.
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
+        if (fitnessFunctions.get(0) instanceof GenotypePhenotypeMappedFitnessFunction) {
+            GenotypePhenotypeMappedFitnessFunction castedFunction
+                    = (GenotypePhenotypeMappedFitnessFunction) fitnessFunctions.get(0);
+            chromosome = castedFunction.getPhenoType(chromosome);
+        }
 
         if (chromosome.getValue() instanceof TestCase) {
             return ((TestCase) chromosome.getValue()).getActionSequence().size();
@@ -309,10 +316,6 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
                 length += testCase.getActionSequence().size();
             }
             return length;
-        } else if (chromosome.getValue() instanceof List) {
-            List chromosomeValue = (List) chromosome.getValue();
-
-            return chromosomeValue.size();
         } else {
             throw new UnsupportedOperationException("Chromosome type "
                     + chromosome.getValue().getClass() + " not yet supported!");

@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.comparator;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
@@ -66,6 +67,11 @@ public class FitnessAndLengthComparator<T> implements Comparator<IChromosome<T>>
      * @return Returns the length of the given chromosome.
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
+        if (fitnessFunction instanceof GenotypePhenotypeMappedFitnessFunction) {
+            GenotypePhenotypeMappedFitnessFunction castedFunction
+                    = (GenotypePhenotypeMappedFitnessFunction) fitnessFunction;
+            chromosome = castedFunction.getPhenoType(chromosome);
+        }
 
         if (chromosome.getValue() instanceof TestCase) {
             return ((TestCase) chromosome.getValue()).getActionSequence().size();
@@ -75,10 +81,6 @@ public class FitnessAndLengthComparator<T> implements Comparator<IChromosome<T>>
                 length += testCase.getActionSequence().size();
             }
             return length;
-        } else if (chromosome.getValue() instanceof List) {
-            List chromosomeValue = (List) chromosome.getValue();
-
-            return chromosomeValue.size();
         } else {
             throw new UnsupportedOperationException("Chromosome type "
                     + chromosome.getValue().getClass() + " not yet supported!");

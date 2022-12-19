@@ -5,6 +5,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
@@ -675,17 +676,19 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> fst = o1.chromosome;
             IChromosome<T> snd = o2.chromosome;
 
+            if (fitnessFunctions.get(0) instanceof GenotypePhenotypeMappedFitnessFunction) {
+                GenotypePhenotypeMappedFitnessFunction castedFunction
+                        = (GenotypePhenotypeMappedFitnessFunction) fitnessFunctions.get(0);
+                fst = castedFunction.getPhenoType(fst);
+                snd = castedFunction.getPhenoType(snd);
+            }
+
             if (fst.getValue() instanceof TestCase) {
                 return ((TestCase) snd.getValue()).getActionSequence().size()
                         - ((TestCase) fst.getValue()).getActionSequence().size();
             } else if (fst.getValue() instanceof TestSuite) {
                 return ((TestSuite) snd.getValue()).getTestCases().size()
                         - ((TestSuite) fst.getValue()).getTestCases().size();
-            } else if (fst.getValue() instanceof List) {
-                List fstList = (List) fst.getValue();
-                List sndList = (List) snd.getValue();
-
-                return sndList.size() - fstList.size();
             } else {
                 throw new IllegalStateException("Chromosome type " + fst.getValue().getClass()
                         + "not yet supported!");
