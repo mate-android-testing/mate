@@ -722,7 +722,14 @@ public class MIO<T> extends GeneticAlgorithm<T> {
         @Override
         public String toString() {
 
+            IChromosome<T> chromosome = this.chromosome;
             int size = -1;
+
+            if (fitnessFunctions.get(0) instanceof GenotypePhenotypeMappedFitnessFunction) {
+                GenotypePhenotypeMappedFitnessFunction castedFunction
+                        = (GenotypePhenotypeMappedFitnessFunction) fitnessFunctions.get(0);
+                chromosome = castedFunction.getPhenoType(this.chromosome);
+            }
 
             if (chromosome.getValue() instanceof TestCase) {
                 size = ((TestCase) chromosome.getValue()).getActionSequence().size();
