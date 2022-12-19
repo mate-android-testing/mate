@@ -1,7 +1,6 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
