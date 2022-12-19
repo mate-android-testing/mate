@@ -35,17 +35,29 @@ public class ActionsScreenState extends AbstractScreenState {
     /**
      * Defines the applicable intent actions on any screen.
      */
-    private static List<IntentBasedAction> intentBasedActions;
+    private static final List<IntentBasedAction> intentBasedActions;
 
     /**
      * Defines the applicable system actions on any screen.
      */
-    private static List<SystemAction> systemActions;
+    private static final List<SystemAction> systemActions;
 
     /**
      * Represents the app screen with its widgets.
      */
     private final AppScreen appScreen;
+
+    static {
+        // intent actions are applicable independent of the underlying screen state
+
+        final IntentProvider intentProvider = new IntentProvider();
+
+        intentBasedActions = intentProvider.getIntentBasedActions().values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        systemActions = intentProvider.getSystemActions();
+    }
 
     /**
      * Creates a new screen state based on the given {@link AppScreen}.
@@ -547,14 +559,6 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<IntentBasedAction> getIntentBasedActions() {
-
-        // init lazily
-        if (intentBasedActions == null) {
-            intentBasedActions = new IntentProvider()
-                    .getIntentBasedActions().values().stream()
-                    .flatMap(Collection::stream).collect(Collectors.toList());
-        }
-
         return intentBasedActions;
     }
 
@@ -565,12 +569,6 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<SystemAction> getSystemActions() {
-
-        // init lazily
-        if (systemActions == null) {
-            systemActions = new IntentProvider().getSystemActions();
-        }
-
         return systemActions;
     }
 
