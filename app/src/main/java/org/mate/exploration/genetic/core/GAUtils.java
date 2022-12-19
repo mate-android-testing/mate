@@ -91,7 +91,10 @@ public class GAUtils {
      *
      * @param chromosomes The given list of chromosomes to be sorted.
      * @param fitnessFunction The given fitness function.
-     * @param <T> The type of the chromosomes. Only {@link TestCase}s and {@link TestSuite}s are supported.
+     * @param <T> The type of the chromosomes.
+     *           Only {@link TestCase}s and {@link TestSuite}s are supported.
+     *           Also {@link org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping}s
+     *           are supported, if they map {@link TestCase}s or {@link TestSuite}s.
      * @return Returns the chromosomes sorted based on its fitness values and its lengths.
      */
     public static <T> List<IChromosome<T>> sortByFitnessAndLength(
