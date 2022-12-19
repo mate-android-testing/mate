@@ -206,9 +206,9 @@ public class Properties {
         FitnessFunction fitnessFunction = propertyOrNull("fitness_function");
 
         if (fitnessFunction == null) {
-            FitnessFunction[] mutationFunctions = propertyOrNull("fitness_functions");
-            if (mutationFunctions != null) {
-                fitnessFunction = mutationFunctions[0];
+            FitnessFunction[] fitnessFunctions = propertyOrNull("fitness_functions");
+            if (fitnessFunctions != null) {
+                fitnessFunction = fitnessFunctions[0];
             }
         }
 
