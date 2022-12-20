@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
@@ -676,11 +677,9 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> fst = o1.chromosome;
             IChromosome<T> snd = o2.chromosome;
 
-            if (fitnessFunctions.get(0) instanceof GenotypePhenotypeMappedFitnessFunction) {
-                GenotypePhenotypeMappedFitnessFunction castedFunction
-                        = (GenotypePhenotypeMappedFitnessFunction) fitnessFunctions.get(0);
-                fst = castedFunction.getPhenoType(fst);
-                snd = castedFunction.getPhenoType(snd);
+            if (Properties.USE_GENO_TO_PHENO()) {
+                fst = GenotypePhenotypeMappedFitnessFunction.getPhenoType(fst);
+                snd = GenotypePhenotypeMappedFitnessFunction.getPhenoType(snd);
             }
 
             if (fst.getValue() instanceof TestCase) {
@@ -725,10 +724,8 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> chromosome = this.chromosome;
             int size = -1;
 
-            if (fitnessFunctions.get(0) instanceof GenotypePhenotypeMappedFitnessFunction) {
-                GenotypePhenotypeMappedFitnessFunction castedFunction
-                        = (GenotypePhenotypeMappedFitnessFunction) fitnessFunctions.get(0);
-                chromosome = castedFunction.getPhenoType(this.chromosome);
+            if (Properties.USE_GENO_TO_PHENO()) {
+                chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(this.chromosome);
             }
 
             if (chromosome.getValue() instanceof TestCase) {

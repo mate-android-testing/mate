@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
@@ -301,10 +302,8 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      * @return Returns the length of the given chromosome.
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
-        if (fitnessFunctions.get(0) instanceof GenotypePhenotypeMappedFitnessFunction) {
-            GenotypePhenotypeMappedFitnessFunction castedFunction
-                    = (GenotypePhenotypeMappedFitnessFunction) fitnessFunctions.get(0);
-            chromosome = castedFunction.getPhenoType(chromosome);
+        if (Properties.USE_GENO_TO_PHENO()) {
+            chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(chromosome);
         }
 
         if (chromosome.getValue() instanceof TestCase) {

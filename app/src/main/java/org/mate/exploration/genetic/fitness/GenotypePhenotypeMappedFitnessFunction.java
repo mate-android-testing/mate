@@ -15,7 +15,7 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     /**
      * Provides the mapping from genotype to phenotype.
      */
-    private final IGenotypePhenotypeMapping<S, T> genotypePhenotypeMapping;
+    private static IGenotypePhenotypeMapping genotypePhenotypeMapping;
 
     /**
      * The fitness function that can applied on the phenotype.
@@ -26,13 +26,14 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
      * Initialises the fitness function with the given genotype to phenotype mapping and the
      * fitness function that is applicable on the phenotype.
      *
-     * @param genotypePhenotypeMapping Provides the mapping from genotype to phenotype.
      * @param phenotypeFitnessFunction The fitness function that can be applied on the phenotype.
      */
-    public GenotypePhenotypeMappedFitnessFunction(IGenotypePhenotypeMapping<S, T> genotypePhenotypeMapping,
-                                                  IFitnessFunction<T> phenotypeFitnessFunction) {
-        this.genotypePhenotypeMapping = genotypePhenotypeMapping;
+    public GenotypePhenotypeMappedFitnessFunction(IFitnessFunction<T> phenotypeFitnessFunction) {
         this.phenotypeFitnessFunction = phenotypeFitnessFunction;
+    }
+
+    public static <S, T> void setGenotypePhenotypeMapping(IGenotypePhenotypeMapping<S, T> mapping) {
+        genotypePhenotypeMapping = mapping;
     }
 
     /**
@@ -76,7 +77,7 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
      * @param genotypeChromosome The given genotype chromosome.
      * @return Returns the genotype chromosome.
      */
-    public IChromosome<T> getPhenoType(IChromosome<S> genotypeChromosome) {
+    public static <S, T> IChromosome<T> getPhenoType(IChromosome<S> genotypeChromosome) {
         return genotypePhenotypeMapping.map(genotypeChromosome);
     }
 }

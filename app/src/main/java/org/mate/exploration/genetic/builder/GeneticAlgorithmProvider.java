@@ -100,11 +100,6 @@ public class GeneticAlgorithmProvider {
     private final Properties properties;
 
     /**
-     * This variable provides a one time initialization.
-     */
-    private IGenotypePhenotypeMapping mapping = null;
-
-    /**
      * Constructs the genetic algorithm by consuming the given properties.
      *
      * @param properties The list of properties.
@@ -783,35 +778,33 @@ public class GeneticAlgorithmProvider {
      */
     private <T> List<IFitnessFunction<T>> initializeFitnessFunctions() {
         FitnessFunction[] usedFunctions = org.mate.Properties.FITNESS_FUNCTIONS();
+        boolean isGenoToPhenoType = org.mate.Properties.USE_GENO_TO_PHENO();
 
         if (usedFunctions.length == 0) {
             return null;
         } else {
             List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
-            for (int i = 0; i < usedFunctions.length; i++) {
-                fitnessFunctions.add(this.<T>initializeFitnessFunction(usedFunctions[i], i));
+
+            if (isGenoToPhenoType) {
+                IGenotypePhenotypeMapping mapping = getGenoToPhenoTypeMapping();
+                GenotypePhenotypeMappedFitnessFunction.setGenotypePhenotypeMapping(mapping);
+
+                for (int i = 0; i < usedFunctions.length; i++) {
+                    IFitnessFunction<T> genoToPhenoFitnessFunction
+                            = initializeGenoToPhenoFitnessFunction(usedFunctions[i], i);
+
+                    fitnessFunctions.add(genoToPhenoFitnessFunction);
+                }
+            } else {
+                for (int i = 0; i < usedFunctions.length; i++) {
+                    IFitnessFunction<T> genoToPhenoFitnessFunction
+                            = initializeFitnessFunction(usedFunctions[i], i);
+
+                    fitnessFunctions.add(genoToPhenoFitnessFunction);
+                }
             }
+
             return fitnessFunctions;
-        }
-    }
-
-    /**
-     * Initialises the i-th fitness function of the genetic algorithm.
-     *
-     * @param fitnessFunction The fitness function used.
-     * @param index The current index of the fitness function to get possible arguments attached
-     *              to the fitness function.
-     * @param <T> The type wrapped by the chromosomes.
-     * @return Returns the i-th fitness function used by the genetic algorithm.
-     */
-    private <T> IFitnessFunction<T> initializeFitnessFunction(FitnessFunction fitnessFunction,
-                                                              int index) {
-        boolean isGenoToPhenoType = org.mate.Properties.USE_GENO_TO_PHENO();
-
-        if (isGenoToPhenoType) {
-            return initializeGenoToPhenoFitnessFunction(fitnessFunction, index);
-        } else {
-            return initializeNormalFitnessFunction(fitnessFunction, index);
         }
     }
 
@@ -823,7 +816,7 @@ public class GeneticAlgorithmProvider {
      * @param <T> The type of the chromosome used by the fitness function.
      * @return An initialized fitness function.
      */
-    private <T> IFitnessFunction<T> initializeNormalFitnessFunction(FitnessFunction fitnessFunction,
+    private <T> IFitnessFunction<T> initializeFitnessFunction(FitnessFunction fitnessFunction,
                                                                     int index) {
         switch (fitnessFunction) {
             case NUMBER_OF_ACTIVITIES:
@@ -926,9 +919,7 @@ public class GeneticAlgorithmProvider {
                         + fitnessFunction.name() + " not yet supported!");
         }
 
-        mapping = mapping == null ? getGenoToPhenoTypeMapping() : mapping;
-        genoToPhenoFitness = new GenotypePhenotypeMappedFitnessFunction<>(
-                mapping, function);
+        genoToPhenoFitness = new GenotypePhenotypeMappedFitnessFunction<>(function);
 
         return genoToPhenoFitness;
     }
