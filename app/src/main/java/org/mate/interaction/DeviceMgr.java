@@ -1120,7 +1120,6 @@ public class DeviceMgr {
                 Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
 
                 if (!tokens.isEmpty()) {
-                    MATE.log("TEXT DATA: stack trace user input");
                     return Randomness.randomElement(tokens);
                 }
             }
@@ -1137,10 +1136,8 @@ public class DeviceMgr {
         if (widget.isHintPresent()) {
             if (inputFieldType.isValid(widget.getHint()) && random.nextDouble() < PROB_HINT) {
                 if (inputFieldType != InputFieldType.NOTHING && random.nextDouble() < PROB_HINT_MUTATION) {
-                    MATE.log("TEXT DATA: hint mutated");
                     return Mutation.mutateInput(inputFieldType, widget.getHint());
                 } else {
-                    MATE.log("TEXT DATA: hint");
                     return widget.getHint();
                 }
             }
@@ -1177,7 +1174,6 @@ public class DeviceMgr {
                         if (random.nextDouble() < PROB_STATIC_STRING_MUTATION) {
                             randomStaticString = Mutation.mutateInput(inputFieldType, randomStaticString);
                         }
-                        MATE.log("TEXT DATA: random static string");
                         return randomStaticString;
                     }
                 }
@@ -1189,14 +1185,12 @@ public class DeviceMgr {
                  */
                 randomStaticString = staticStrings.getRandomStringFor(uiComponents);
                 if (randomStaticString != null) {
-                    MATE.log("TEXT DATA: random static string");
                     return randomStaticString;
                 }
             }
         }
 
         // fallback mechanism
-        MATE.log("TEXT DATA: fallback, static strings initialized: " + staticStrings.isInitialised());
         return generateRandomInput(inputFieldType, maxLength);
     }
 
