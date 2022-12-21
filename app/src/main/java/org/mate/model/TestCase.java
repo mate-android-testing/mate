@@ -85,9 +85,6 @@ public class TestCase {
      */
     private StackTrace crashStackTrace = null;
 
-    @XStreamOmitField
-    private String nickName = "";
-
     /**
      * Should be used for the creation of dummy test cases.
      * This suppresses the log that indicates a new test case
@@ -101,10 +98,6 @@ public class TestCase {
         visitedStates = new HashSet<>();
         eventSequence = new ArrayList<>();
         activitySequence = new ArrayList<>();
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
     }
 
     private static int counter = 0;
@@ -161,11 +154,11 @@ public class TestCase {
         Chromosome<TestCase> chromosome = new Chromosome<>(this);
 
         if (Properties.TARGET().equals("stack_trace")) {
-            MATE.log(nickName + " Testcase fitness: " + new CrashDistance().getFitness(chromosome));
+            MATE.log("Testcase fitness: " + new CrashDistance().getFitness(chromosome));
             Registry.getEnvironmentManager().logReachedTargets(chromosome);
         }
-        MATE.log(nickName + " Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
-        MATE.log(nickName + " Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
+        MATE.log("Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
+        MATE.log("Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
         // TODO: log the test case actions in a proper format
     }
 

@@ -269,8 +269,6 @@ public class Properties {
 
     public static boolean STACK_TRACE_USER_INPUT_SEEDING() { return propertyOr(false); }
 
-    public static boolean ACTIVITY_GRAPH() { return propertyOr(false); }
-
     // whether to draw raw graph or 'extended' graph
     public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }
 

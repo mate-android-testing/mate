@@ -65,12 +65,9 @@ public class PIPE extends RepresentationBasedModel {
 
         IChromosome<TestCase> best = sortedPopulation.get(0);
         MATE.log("Best testcase from update is: " + best.getValue().getId());
-        IChromosome<TestCase> worst = sortedPopulation.get(sortedPopulation.size() - 1);
 
-        best.getValue().setNickName("Best");
         if (elitist == null || fitnessFunction.getFitness(best) < fitnessFunction.getFitness(elitist)) {
             elitist = best;
-            elitist.getValue().setNickName("Elitist");
         }
 
         // Elitist learning does not lead to a new population so we repeatedly apply it

@@ -782,13 +782,6 @@ public class EnvironmentManager {
         return distances;
     }
 
-    public void activityGraphInit() {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/activity_graph_init")
-                .withParameter("packageName", Registry.getPackageName());
-
-        Message response = sendMessage(messageBuilder.build());
-    }
-
     /**
      * Retrieves the branch fitness vector for the given chromosome. A branch fitness
      * vector consists of n entries, where n refers to the number of branches.

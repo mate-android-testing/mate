@@ -1,5 +1,7 @@
 package org.mate.exploration.genetic.builder;
 
+import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
+
 import org.mate.crash_reproduction.fitness.CrashDistance;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.MIO;
@@ -46,7 +48,6 @@ import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction
 import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
-import org.mate.exploration.genetic.fitness.TargetActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
@@ -81,8 +82,6 @@ import org.mate.exploration.intent.IntentChromosomeFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
 
 /**
  * Provides a {@link GeneticAlgorithm} by consuming the properties specified via the
@@ -796,8 +795,6 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(getFitnessFunctionArgument(index));
             case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
-            case ACTIVITY_DISTANCE:
-                return new TargetActivityFitnessFunction<>();
             case LINE_PERCENTAGE_COVERAGE:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
@@ -1143,8 +1140,6 @@ public class GeneticAlgorithmProvider {
             return new LineCoverageFitnessFunction<>();
         } else if (fitnessFunction == FitnessFunction.METHOD_COVERAGE) {
             return new MethodCoverageFitnessFunction<>();
-        } else if (fitnessFunction == FitnessFunction.ACTIVITY_DISTANCE) {
-            return new TargetActivityFitnessFunction<>();
         } else {
             throw new UnsupportedOperationException("GE fitness function "
                     + fitnessFunction + " not yet supported!");
