@@ -142,6 +142,8 @@ public class Properties {
 
     public static double PIPE_MUTATION_RATE() { return propertyOr(0.4); }
 
+    public static boolean PROMISING_ACTIONS() { return propertyOr(true); }
+
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
     public static int DEFAULT_SELECTION_SIZE() { return propertyOr(2); }

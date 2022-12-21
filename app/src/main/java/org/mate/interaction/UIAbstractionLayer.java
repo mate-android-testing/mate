@@ -117,7 +117,7 @@ public class UIAbstractionLayer {
     }
 
     public List<WidgetAction> getPromisingActions(IScreenState state) {
-        if (Properties.TARGET().equals("stack_trace")) {
+        if (Properties.TARGET().equals("stack_trace") && Properties.PROMISING_ACTIONS()) {
             Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
             List<WidgetAction> widgetActions = state.getWidgetActions();
             List<WidgetAction> actionsContainingToken = widgetActions.stream()
