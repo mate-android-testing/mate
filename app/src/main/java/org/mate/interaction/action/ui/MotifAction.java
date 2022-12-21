@@ -7,11 +7,9 @@ import org.mate.Registry;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Represents a motif gene, i.e. a combination of multiple widget or primitive actions, e.g.
@@ -46,7 +44,7 @@ public class MotifAction extends UIAction {
      * @param uiActions The list of ui actions that represent the motif gene.
      */
     public MotifAction(ActionType actionType, String activityName, List<UIAction> uiActions) {
-        super(actionType, activityName, uiActions.stream().map(UIAction::getFragmentNames).flatMap(Collection::stream).collect(Collectors.toList()), uiActions.get(0).screenStateId);
+        super(actionType, activityName);
         this.uiActions = uiActions;
     }
 

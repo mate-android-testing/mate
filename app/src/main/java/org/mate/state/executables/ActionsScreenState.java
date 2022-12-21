@@ -95,16 +95,13 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // check whether the actions have been requested once
         if (actions != null) {
-            for (UIAction action : actions) {
-                action.setScreenStateId(id);
-            }
             return actions;
         }
 
         if (activityName.contains("GoogleOAuthActivity")) {
             MATE.log_acc("Reached GoogleOAuthActivity!");
             // we can't authenticate here, so only allow to press 'BACK'
-            return Collections.singletonList(new UIAction(ActionType.BACK, activityName, fragmentNames, id));
+            return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
         }
         
         MATE.log_debug("Retrieving widget actions for screen state...");
@@ -167,7 +164,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             if (widget.isSettingsOption()) {
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                 continue;
             }
 
@@ -196,11 +193,11 @@ public class ActionsScreenState extends AbstractScreenState {
                 * on the spinner widget itself.
                  */
                 if (widget.isClickable() || widget.isCheckable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                 }
 
                 if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK, id));
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
                 }
 
                 // we define the scrolling action directly on the spinner widget
@@ -225,12 +222,12 @@ public class ActionsScreenState extends AbstractScreenState {
 
             if (widget.isCheckableType()) {
                 MATE.log_debug("Widget implements checkable interface!");
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
             if (widget.isEditTextType()) {
                 MATE.log_debug("Widget is an edit text instance!");
-                widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
 
                /*
                * TODO: Use static analysis to detect whether an onclick handler is registered.
@@ -249,11 +246,11 @@ public class ActionsScreenState extends AbstractScreenState {
                 // TODO: Use static analysis to detect whether click/long click refer to the same
                 //  event handler.
                 if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                 }
 
                 if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK, id));
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
                 }
             }
 
@@ -268,13 +265,13 @@ public class ActionsScreenState extends AbstractScreenState {
                  */
 
                 if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                     // it doesn't make sense to add another action to spinner instance
                     continue;
                 }
 
                 if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK, id));
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
                     // it doesn't make sense to add another action to spinner instance
                     continue;
                 }
@@ -290,10 +287,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 * vertical scrolling by nesting layouts, so it is not possible to determine
                 * the direction of the scroll view. Thus, we add swipes for all directions.
                  */
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP, id));
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN, id));
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT, id));
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
 
                 // it doesn't make sense to add another action to scrollable widgets
                 continue;
@@ -305,17 +302,17 @@ public class ActionsScreenState extends AbstractScreenState {
              * however those elements represent in most cases clickable widgets.
              */
             if (widget.isSonOfListView()) {
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
             // TODO: might be redundant with isCheckableType()
             if (widget.isCheckable()) {
                 // we check a widget by clicking on it
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
             if (widget.isLongClickable()) {
-                widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK, id));
+                widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
             }
 
             /*
@@ -325,7 +322,7 @@ public class ActionsScreenState extends AbstractScreenState {
              * which leaf widget, in particular which text view, defines an event handler
              * and thus should be clickable.
              */
-            widgetActions.add(new WidgetAction(widget, ActionType.CLICK, id));
+            widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
         }
 
         MATE.log_debug("Number of widget actions: " + widgetActions.size());
@@ -490,24 +487,24 @@ public class ActionsScreenState extends AbstractScreenState {
     private List<UIAction> getUIActions() {
 
         List<UIAction> uiActions = new ArrayList<>();
-        uiActions.add(new UIAction(ActionType.BACK, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.MENU, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName, fragmentNames, id));
-        // uiActions.add(new UIAction(ActionType.HOME, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.SEARCH, activityName, fragmentNames, id));
-        // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName, fragmentNames, id));
-        // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName, fragmentNames, id));
-        // uiActions.add(new UIAction(ActionType.SLEEP, activityName, fragmentNames, id));
-        // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.DELETE, activityName, fragmentNames, id));
+        uiActions.add(new UIAction(ActionType.BACK, activityName));
+        uiActions.add(new UIAction(ActionType.MENU, activityName));
+        uiActions.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
+        // uiActions.add(new UIAction(ActionType.HOME, activityName));
+        uiActions.add(new UIAction(ActionType.SEARCH, activityName));
+        // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
+        // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
+        // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
+        // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
+        uiActions.add(new UIAction(ActionType.DELETE, activityName));
         /*
-        uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.DPAD_UP, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName, fragmentNames, id));
-        uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName, fragmentNames, id));
+        uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
+        uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
          */
-        uiActions.add(new UIAction(ActionType.ENTER, activityName, fragmentNames, id));
+        uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
     }
 

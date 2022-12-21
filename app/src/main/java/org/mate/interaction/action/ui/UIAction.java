@@ -5,10 +5,7 @@ import android.support.annotation.Nullable;
 
 import org.mate.interaction.action.Action;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Represents a ui action. This can be either a widget-based action, a primitive action
@@ -26,33 +23,15 @@ public class UIAction extends Action {
      */
     protected final String activityName;
 
-    protected final Set<String> fragmentNames;
-
-    protected String screenStateId;
-
-    public String getScreenStateId() {
-        return screenStateId;
-    }
-
-    public void setScreenStateId(String screenStateId) {
-        this.screenStateId = screenStateId;
-    }
-
-    public UIAction(ActionType actionType, String activityName, Collection<String> fragmentNames) {
-        this(actionType, activityName, fragmentNames, "");
-    }
-
     /**
      * Constructs a new ui action with the given action type.
      *
      * @param actionType The type of action, e.g. CLICK.
      * @param activityName The name of the activity on which the action should be applied.
      */
-    public UIAction(ActionType actionType, String activityName, Collection<String> fragmentNames, String screenStateId) {
+    public UIAction(ActionType actionType, String activityName) {
         this.actionType = actionType;
         this.activityName = activityName;
-        this.fragmentNames = new HashSet<>(fragmentNames);
-        this.screenStateId = screenStateId;
     }
 
     /**
@@ -71,10 +50,6 @@ public class UIAction extends Action {
      */
     public String getActivityName() {
         return activityName;
-    }
-
-    public Set<String> getFragmentNames() {
-        return fragmentNames;
     }
 
     /**

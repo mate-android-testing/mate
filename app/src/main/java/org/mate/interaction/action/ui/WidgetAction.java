@@ -2,12 +2,9 @@ package org.mate.interaction.action.ui;
 
 import android.support.annotation.NonNull;
 
-import org.mate.Registry;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Encapsulates an action together with a certain widget.
@@ -43,18 +40,14 @@ public class WidgetAction extends UIAction {
     @Deprecated
     private float proportionalPheromone;
 
-    public WidgetAction(Widget widget, ActionType actionType) {
-        this(widget, actionType, "");
-    }
-
     /**
      * Links a widget to a certain action, e.g. a click on a button.
      *
      * @param widget The widget on which the action should be applied.
      * @param actionType The kind of action, e.g. 'CLICK'.
      */
-    public WidgetAction(Widget widget, ActionType actionType, String screenStateId) {
-        super(actionType, widget.getActivity(), Registry.getDeviceMgr().getCurrentFragments(widget.getActivity()), screenStateId);
+    public WidgetAction(Widget widget, ActionType actionType) {
+        super(actionType, widget.getActivity());
         this.widget = widget;
         setExtraInfo("");
         adjActions = new ArrayList<>();

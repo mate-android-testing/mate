@@ -7,7 +7,6 @@ import org.mate.Registry;
 import org.mate.utils.Randomness;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Objects;
 
 /**
@@ -37,7 +36,7 @@ public class PrimitiveAction extends UIAction {
      * @param activity The current activity.
      */
     public PrimitiveAction(int x, int y, ActionType actionType, String activity) {
-        super(actionType, activity, new LinkedList<>());
+        super(actionType, activity);
         this.x = x;
         this.y = y;
     }
