@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockDistance;
-import org.mate.exploration.genetic.fitness.CallTreeDistance;
+import org.mate.exploration.genetic.fitness.CallGraphDistance;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.model.TestCase;
@@ -17,7 +17,7 @@ public class CrashDistance extends WeighedFitnessFunctions {
 
     public CrashDistance() {
         super(new HashMap<IFitnessFunction<TestCase>, Double>(){{
-            put(new CallTreeDistance<>(), 1D);
+            put(new CallGraphDistance<>(), 1D);
             put(new BasicBlockDistance<>(), 1D);
             put(new ReachedRequiredConstructor(), 1D);
         }});

@@ -468,10 +468,10 @@ public class EnvironmentManager {
         return Boolean.parseBoolean(response.getParameter("response"));
     }
 
-    public double getCallTreeDistance(IChromosome<?> chromosome) {
+    public double getCallGraphDistance(IChromosome<?> chromosome) {
         String chromosomeId = getChromosomeId(chromosome);
 
-        return Double.parseDouble(sendMessage(new Message.MessageBuilder("/graph/call_tree_distance").withParameter("chromosome", chromosomeId).withParameter("packageName", Registry.getPackageName()).build()).getParameter("distance"));
+        return Double.parseDouble(sendMessage(new Message.MessageBuilder("/graph/call_graph_distance").withParameter("chromosome", chromosomeId).withParameter("packageName", Registry.getPackageName()).build()).getParameter("distance"));
     }
 
     public double getReachedRequiredConstructors(IChromosome<?> chromosome) {
@@ -604,8 +604,8 @@ public class EnvironmentManager {
         sendMessage(messageBuilder.build());
     }
 
-    public <T> void drawCallTree(String id, IChromosome<T> chromosome) {
-        sendMessage(new Message.MessageBuilder("/graph/callTree/draw")
+    public <T> void drawCallGraph(String id, IChromosome<T> chromosome) {
+        sendMessage(new Message.MessageBuilder("/graph/callGraph/draw")
                 .withParameter("id", id)
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", getChromosomeId(chromosome))
