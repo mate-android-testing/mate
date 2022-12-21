@@ -2,14 +2,9 @@ package org.mate.crash_reproduction.eda;
 
 import org.mate.Properties;
 import org.mate.crash_reproduction.eda.representation.IModelRepresentation;
-import org.mate.crash_reproduction.eda.univariate.CGA;
 import org.mate.crash_reproduction.eda.univariate.NoUpdate;
 import org.mate.crash_reproduction.eda.univariate.PIPE;
-import org.mate.crash_reproduction.eda.univariate.UMDA;
 import org.mate.crash_reproduction.fitness.CrashDistance;
-import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
-
-import java.util.Collections;
 
 public enum DistributionModel {
     PIPE {
@@ -35,18 +30,6 @@ public enum DistributionModel {
         @Override
         public IDistributionModel get(IModelRepresentation modelRepresentation) {
             return new NoUpdate(modelRepresentation);
-        }
-    },
-    CGA {
-        @Override
-        public IDistributionModel get(IModelRepresentation modelRepresentation) {
-            return new CGA(modelRepresentation, new CrashDistance());
-        }
-    },
-    UMDA {
-        @Override
-        public IDistributionModel get(IModelRepresentation modelRepresentation) {
-            return new UMDA(modelRepresentation, Collections.singletonList(new CrashDistance()), new FitnessSelectionFunction<>());
         }
     };
 

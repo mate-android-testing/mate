@@ -20,12 +20,6 @@ public enum Initializer {
             return new EvenStoatInitializer(0.6);
         }
     },
-    MORE_ROTATION_STOAT {
-        @Override
-        public BiFunction<List<Action>, IScreenState, Map<Action, Double>> get() {
-            return new MoreRotationStoat(0.6);
-        }
-    },
     UNIFORM {
         @Override
         public BiFunction<List<Action>, IScreenState, Map<Action, Double>> get() {
