@@ -60,8 +60,6 @@ public class TestCase {
      */
     private final List<String> activitySequence;
 
-    private final Set<String> visitedFragments = new HashSet<>();
-
     private final List<IScreenState> stateSequence = new LinkedList<>();
 
     public List<IScreenState> getStateSequence() {
@@ -92,7 +90,6 @@ public class TestCase {
      */
     private TestCase() {
         setId("dummy");
-        number = counter++;
         crashDetected = false;
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
@@ -100,8 +97,6 @@ public class TestCase {
         activitySequence = new ArrayList<>();
     }
 
-    private static int counter = 0;
-    private final int number;
     /**
      * Creates a new test case object with the given id.
      *
@@ -111,7 +106,6 @@ public class TestCase {
         MATE.log("Initialising new test case!");
         MATE.log("Testcase has the ID: " + id);
         setId(id);
-        number = counter++;
         crashDetected = false;
         visitedActivities = new HashSet<>();
         visitedStates = new HashSet<>();
@@ -158,7 +152,6 @@ public class TestCase {
             Registry.getEnvironmentManager().logReachedTargets(chromosome);
         }
         MATE.log("Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
-        MATE.log("Testcase reached fragments: [" + visitedFragments.stream().collect(Collectors.joining(", "))  + "]");
         // TODO: log the test case actions in a proper format
     }
 
@@ -430,12 +423,7 @@ public class TestCase {
 
         addEvent(action);
         ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
-//        Chromosome<TestCase> chromosome = new Chromosome<>(this);
-//        FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
-//        CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
-//        MATE.log("Branch Distance after action: " + new BranchDistanceFitnessFunction<TestCase>().getNormalizedFitness(chromosome));
 
-//        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), "T" + counter + "_" + actionID);
         // track the activity transitions of each action
         String activityAfterAction = Registry.getUiAbstractionLayer().getLastScreenState().getActivityName();
 

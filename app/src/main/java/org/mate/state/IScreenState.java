@@ -22,7 +22,6 @@ public interface IScreenState {
     List<WidgetAction> getWidgetActions();
     List<MotifAction> getMotifActions();
     String getActivityName();
-    Set<String> getFragmentNames();
     String getPackageName();
     ScreenStateType getType();
 }

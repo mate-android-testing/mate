@@ -33,8 +33,6 @@ public class AppScreen {
      */
     private final String activityName;
 
-    private final Set<String> fragmentNames;
-
     /**
      * Defines the package name that corresponds to the app screen.
      */
@@ -66,7 +64,6 @@ public class AppScreen {
 
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
-        this.fragmentNames = new HashSet<>(deviceMgr.getCurrentFragments(this.activityName));
         this.packageName = device.getCurrentPackageName();
 
         AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
@@ -222,10 +219,6 @@ public class AppScreen {
      */
     public String getActivityName() {
         return activityName;
-    }
-
-    public Set<String> getFragmentNames() {
-        return fragmentNames;
     }
 
     /**

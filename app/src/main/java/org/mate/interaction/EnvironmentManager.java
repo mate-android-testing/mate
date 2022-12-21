@@ -523,16 +523,6 @@ public class EnvironmentManager {
         this.chromosome = getChromosomeId(chromosome) + "+lastIncompleteTestCase";
     }
 
-    public Set<String> getTargetActivities() {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_target_activities")
-                .withParameter("package", Registry.getPackageName());
-
-        Message response = sendMessage(messageBuilder.build());
-        String targets = response.getParameter("target_activities");
-        MATE.log("Targets are: " + targets);
-        return new HashSet<>(Arrays.asList(targets.split(",")));
-    }
-
     public void logReachedTargets(IChromosome<?> chromosome) {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/reached_targets")
                 .withParameter("chromosome", getChromosomeId(chromosome))
@@ -738,48 +728,6 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("branch_distance"));
-    }
-
-    public <T> double getActivityDistance(IChromosome<T> chromosome) {
-        if (chromosome.getValue() instanceof TestCase) {
-            if (((TestCase) chromosome.getValue()).isDummy()) {
-                MATE.log_warn("Trying to retrieve branch distance of dummy test case...");
-                // a dummy test case has a branch distance of 1.0 (worst value)
-                return Integer.MAX_VALUE;
-            }
-        }
-
-        String activities = ((TestCase) chromosome.getValue()).getActivitySequence().stream().map(a -> a.replaceAll("/", "")).collect(Collectors.joining(","));
-
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_activity_distance")
-                .withParameter("targetActivities", Properties.TARGET())
-                .withParameter("activitySequence", activities);
-
-        Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("activity_distance"));
-    }
-
-    public int getMaxActivityDistance() {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_max_activity_distance")
-                .withParameter("targetActivities", Properties.TARGET());
-
-        Message response = sendMessage(messageBuilder.build());
-        return Integer.parseInt(response.getParameter("max_activity_distance"));
-    }
-
-    public Map<String, Integer> getAllActivityDistances() {
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_all_activity_distances")
-                .withParameter("targetActivities", Properties.TARGET());
-
-        Message response = sendMessage(messageBuilder.build());
-        String map = response.getParameter("activity_distances");
-
-        Map<String, Integer> distances = new HashMap<>();
-        for (String entry : map.split(";")) {
-            String[] parts = entry.split(":");
-            distances.put(parts[0], Integer.parseInt(parts[1]));
-        }
-        return distances;
     }
 
     /**

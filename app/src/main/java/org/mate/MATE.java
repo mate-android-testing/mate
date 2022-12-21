@@ -151,11 +151,6 @@ public class MATE {
                 Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
             }
 
-            if (Properties.TARGET().equals("stack_trace")) {
-                Set<String> targets = Registry.getEnvironmentManager().getTargetActivities();
-                Registry.getEnvironmentManager().writeFile("guiModel.dot", Registry.getUiAbstractionLayer().getGuiModel().toDotGraph(s -> CrashReproduction.reachedTarget(targets, s)));
-            }
-
             Registry.getEnvironmentManager().releaseEmulator();
             // EnvironmentManager.deleteAllScreenShots(packageName);
             try {

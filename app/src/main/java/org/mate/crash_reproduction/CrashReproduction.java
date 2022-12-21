@@ -7,10 +7,8 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
-import org.mate.state.IScreenState;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class CrashReproduction implements Algorithm {
@@ -79,10 +77,5 @@ public abstract class CrashReproduction implements Algorithm {
 
         population.stream().mapToDouble(fitnessFunctions.get(0)::getFitness).average()
                 .ifPresent(popFitness -> MATE.log("Fitness of generation #" + (currentGenerationNumber + 1) + " : " + popFitness));
-    }
-
-    public static boolean reachedTarget(Set<String> targets, IScreenState state) {
-        return targets.contains(state.getActivityName())
-                || state.getFragmentNames().stream().anyMatch(fragment -> targets.stream().anyMatch(target -> target.contains(fragment)));
     }
 }
