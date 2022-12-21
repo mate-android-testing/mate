@@ -145,13 +145,12 @@ public class TestCase {
             TestCaseStatistics.recordStats(this);
         }
 
-        Chromosome<TestCase> chromosome = new Chromosome<>(this);
-
         if (Properties.TARGET().equals("stack_trace")) {
+            Chromosome<TestCase> chromosome = new Chromosome<>(this);
+
             MATE.log("Testcase fitness: " + new CrashDistance().getFitness(chromosome));
             Registry.getEnvironmentManager().logReachedTargets(chromosome);
         }
-        MATE.log("Testcase reached activities: [" + visitedActivities.stream().collect(Collectors.joining(", ")) + "]");
         // TODO: log the test case actions in a proper format
     }
 

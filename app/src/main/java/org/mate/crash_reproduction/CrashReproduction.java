@@ -43,7 +43,6 @@ public abstract class CrashReproduction implements Algorithm {
         for (IChromosome<TestCase> testCaseIChromosome : population) {
             if (testCaseIChromosome.getValue().reachedTarget(targetStackTrace)) {
                 MATE.log("Was able to reproduce crash with " + testCaseIChromosome.getValue().getId() + "!");
-                Registry.getEnvironmentManager().setChromosome(testCaseIChromosome);
                 MATE.log("Actions necessary: [" + testCaseIChromosome.getValue().getEventSequence().stream().map(Action::toString).collect(Collectors.joining(", ")) + "]");
 
                 for (int i = 0; i < testCaseIChromosome.getValue().getEventSequence().size(); i++) {

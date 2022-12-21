@@ -1327,26 +1327,22 @@ public class DeviceMgr {
         return output.split("mResumedActivity")[1].split("\n")[0].split(" ")[3];
     }
 
-    private List<String> getCurrentFragments() {
-        return getCurrentFragments(getCurrentActivity());
-    }
-
     /**
      * Returns the currently visible fragments.
      *
      * @return Returns the currently visible fragments.
      */
-    public List<String> getCurrentFragments(String currentActivity) {
+    private List<String> getCurrentFragments() {
 
         // https://stackoverflow.com/questions/24429049/get-info-of-current-visible-fragments-in-android-dumpsys
         try {
-            String output = device.executeShellCommand("dumpsys activity " + currentActivity);
+            String output = device.executeShellCommand("dumpsys activity " + getCurrentActivity());
             List<String> fragments = extractFragments(output);
             MATE.log_debug("Currently active fragments: " + fragments);
             return fragments;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
-            throw new IllegalStateException(e);
+            return Collections.emptyList();
         }
     }
 

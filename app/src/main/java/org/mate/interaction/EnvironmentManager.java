@@ -517,12 +517,6 @@ public class EnvironmentManager {
         sendMessage(messageBuilder.build());
     }
 
-    private String chromosome = null;
-
-    public void setChromosome(IChromosome<?> chromosome) {
-        this.chromosome = getChromosomeId(chromosome) + "+lastIncompleteTestCase";
-    }
-
     public void logReachedTargets(IChromosome<?> chromosome) {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/reached_targets")
                 .withParameter("chromosome", getChromosomeId(chromosome))
@@ -606,10 +600,6 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(raw));
-
-        if (chromosome != null) {
-            messageBuilder.withParameter("chromosome", chromosome);
-        }
 
         sendMessage(messageBuilder.build());
     }
