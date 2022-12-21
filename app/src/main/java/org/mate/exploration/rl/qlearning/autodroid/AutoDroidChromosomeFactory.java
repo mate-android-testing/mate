@@ -174,8 +174,7 @@ public class AutoDroidChromosomeFactory extends AndroidRandomChromosomeFactory {
         double rnd = Randomness.getRnd().nextDouble();
 
         if (rnd < pHomeButton) {
-            String currentActivity = uiAbstractionLayer.getCurrentActivity();
-            return new UIAction(ActionType.HOME, currentActivity);
+            return new UIAction(ActionType.HOME, uiAbstractionLayer.getCurrentActivity());
         } else {
 
             IScreenState currentState = uiAbstractionLayer.getLastScreenState();
