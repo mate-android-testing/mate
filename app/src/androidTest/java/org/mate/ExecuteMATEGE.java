@@ -11,7 +11,7 @@ import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATEGeneticAlgorithmMultiObjective {
+public class ExecuteMATEGE {
 
     @Test
     public void useAppContext() {

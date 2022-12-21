@@ -809,9 +809,9 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Initializes one fitness function without the geno to pheno type.
+     * Initializes a single fitness function.
      *
-     * @param fitnessFunction The name of the fitness function.
+     * @param fitnessFunction The type of a fitness function.
      * @param index The current index of the fitness function.
      * @param <T> The type of the chromosome used by the fitness function.
      * @return An initialized fitness function.
@@ -869,9 +869,9 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Initializes one fitness function with the geno to pheno type.
+     * Initializes a single fitness function with the geno to pheno type.
      *
-     * @param fitnessFunction One of the fitness functions used by this run.
+     * @param fitnessFunction The type of a fitness function.
      * @param index The index of the current fitness function.
      * @param <T> The type of the chromosome used by the fitness function.
      * @return An initialized fitness function.

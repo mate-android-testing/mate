@@ -32,6 +32,13 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
         this.phenotypeFitnessFunction = phenotypeFitnessFunction;
     }
 
+    /**
+     * Sets the genotype-phenotype mapping globally for all instances.
+     *
+     * @param mapping the genotype-phenotype mapping.
+     * @param <S> The genotype generic type.
+     * @param <T> The phenotype generic type.
+     */
     public static <S, T> void setGenotypePhenotypeMapping(IGenotypePhenotypeMapping<S, T> mapping) {
         genotypePhenotypeMapping = mapping;
     }
@@ -75,6 +82,8 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
      * Returns the phenotype for the given genotype chromosome.
      *
      * @param genotypeChromosome The given genotype chromosome.
+     * @param <S> The genotype generic type.
+     * @param <T> The phenotype generic type.
      * @return Returns the genotype chromosome.
      */
     public static <S, T> IChromosome<T> getPhenoType(IChromosome<S> genotypeChromosome) {

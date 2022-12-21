@@ -171,7 +171,8 @@ public class FitnessUtils {
         }
     }
 
-    /** Retrieves the branch fitness vector for the given chromosome.
+    /**
+     * Retrieves the branch fitness vector for the given chromosome.
      *
      * @param chromosome The chromosome for which fitness should be evaluated.
      * @param numberOfBranches The number of branches.
