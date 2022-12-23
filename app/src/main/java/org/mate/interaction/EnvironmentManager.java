@@ -18,6 +18,7 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Objective;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
@@ -1260,11 +1261,37 @@ public class EnvironmentManager {
      * Clears the app cache.
      */
     public void clearAppData() {
-        Message response = sendMessage(new Message.MessageBuilder("/android/clearApp")
+
+        Utils.throwOnInterrupt();
+
+        Message request = new Message.MessageBuilder("/android/clearApp")
                 .withParameter("deviceId", emulator)
-                .build());
-        if (!"/android/clearApp".equals(response.getSubject())) {
+                .build();
+
+        Message response = null;
+        MateInterruptedException mateInterruptedException = null;
+
+        try {
+            response = sendMessage(request);
+        } catch(MateInterruptedException e) {
+            /*
+             * We still need to wait for mate-server to complete the request, so we just wait for a
+             * few seconds. This is important, because if we continue immediately and try to get the
+             * coverage of the last incomplete test case by invoking the tracer, then the tracer's
+             * permissions to write to the external storage might get dropped while it tries to write,
+             * because clearing the app data also revokes the tracer's permissions. This in turn
+             * causes a failure of the tracer to write its traces.
+             */
+            mateInterruptedException = e;
+            Utils.sleepWithoutInterrupt(3000);
+        }
+
+        if (response != null && !"/android/clearApp".equals(response.getSubject())) {
             MATE.log_acc("ERROR: unable clear app data");
+        }
+
+        if(mateInterruptedException != null) {
+            throw mateInterruptedException;
         }
     }
 
