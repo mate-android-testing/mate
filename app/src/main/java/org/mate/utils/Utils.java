@@ -25,6 +25,32 @@ public class Utils {
     }
 
     /**
+     * Suspends the current thread for a given time and suppresses any interrupt in the meantime.
+     *
+     * @param time The time amount in milliseconds to suspend the current thread.
+     */
+    public static void sleepWithoutInterrupt(final long time) {
+
+        long currentTime = System.currentTimeMillis();
+        final long startTime = currentTime;
+        final long endTime = startTime + time;
+        boolean interrupted = false;
+
+        while ((currentTime = System.currentTimeMillis()) < endTime) {
+            final long remainingTime = endTime - currentTime;
+            try {
+                Thread.sleep(remainingTime);
+            } catch (final InterruptedException ignored) {
+                interrupted = true;
+            }
+        }
+
+        if (interrupted) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
      * Throws a {@code MateInterruptedException} if the calling thread has been interrupted and
      * clears the interrupted status. Does nothing, if the calling thread has not been interrupted.
      */
