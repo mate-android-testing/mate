@@ -14,7 +14,7 @@ public class ExecuteMATEGE {
 
     @Test
     public void useAppContext() {
-        MATE.log_acc("Starting Genetic Algorithm...");
+        MATE.log_acc("Starting GE Algorithm...");
 
         MATE mate = new MATE();
 
@@ -46,7 +46,7 @@ public class ExecuteMATEGE {
             builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS());
         }
 
-        final IGeneticAlgorithm genericGA = builder.build();
-        mate.testApp(genericGA);
+        final IGeneticAlgorithm genericGE = builder.build();
+        mate.testApp(genericGE);
     }
 }
