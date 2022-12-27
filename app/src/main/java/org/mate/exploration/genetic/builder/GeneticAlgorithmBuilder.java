@@ -47,6 +47,7 @@ public class GeneticAlgorithmBuilder {
     public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
     public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
     public static final String GE_MAPPING_FUNCTION_KEY = "ge_mapping_function";
+    public static final String GENO_TO_PHENO_TYPE_MAPPING_KEY = "geno_to_pheno_type_mapping";
 
     /**
      * The list of properties..
@@ -286,6 +287,22 @@ public class GeneticAlgorithmBuilder {
     }
 
     /**
+     * Specifies that a geno to pheno type mapping is required.
+     *
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withGenoToPhenoTypeMapping() {
+
+        properties.setProperty(GENO_TO_PHENO_TYPE_MAPPING_KEY, "true");
+
+        if (!org.mate.Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            org.mate.Properties.setProperty("geno_to_pheno_type_mapping", true);
+        }
+
+        return this;
+    }
+
+    /**
      * Specifies the fitness functions of the genetic algorithm with a custom fitness function argument.
      *
      * @param args A custom fitness function argument for each fitness function.
@@ -478,6 +495,12 @@ public class GeneticAlgorithmBuilder {
      */
     public GeneticAlgorithmBuilder withGEMappingFunction(GEMappingFunction mappingFunction) {
         properties.setProperty(GE_MAPPING_FUNCTION_KEY, mappingFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.GE_MAPPING_FUNCTION() == null) {
+            org.mate.Properties.setProperty("ge_mapping_function", mappingFunction);
+        }
+
         return this;
     }
 
