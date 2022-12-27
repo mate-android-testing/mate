@@ -677,7 +677,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> fst = o1.chromosome;
             IChromosome<T> snd = o2.chromosome;
 
-            if (Properties.USE_GENO_TO_PHENO()) {
+            if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
                 fst = GenotypePhenotypeMappedFitnessFunction.getPhenoType(fst);
                 snd = GenotypePhenotypeMappedFitnessFunction.getPhenoType(snd);
             }
@@ -724,7 +724,7 @@ public class MIO<T> extends GeneticAlgorithm<T> {
             IChromosome<T> chromosome = this.chromosome;
             int size = -1;
 
-            if (Properties.USE_GENO_TO_PHENO()) {
+            if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
                 chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(this.chromosome);
             }
 

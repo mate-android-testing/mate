@@ -302,7 +302,8 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      * @return Returns the length of the given chromosome.
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
-        if (Properties.USE_GENO_TO_PHENO()) {
+
+        if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
             chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(chromosome);
         }
 

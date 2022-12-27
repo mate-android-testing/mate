@@ -5,7 +5,6 @@ import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
-import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
@@ -16,10 +15,7 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Provides an abstraction for the genetic algorithm.
@@ -257,10 +253,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     protected <S> void logCurrentFitness() {
 
-        final Set<FitnessFunction> fitnessFunctions
-                = new HashSet<>(Arrays.asList(Properties.FITNESS_FUNCTIONS()));
-
-        if (Properties.USE_GENO_TO_PHENO()) {
+        if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
             /*
             * We need to force the evaluation of all chromosomes such that the fitness and coverage
             * data are produced.
@@ -268,7 +261,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             for (int i = 0; i < this.fitnessFunctions.size(); i++) {
                 MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
-                IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
+                final IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));
@@ -276,11 +269,11 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             }
         }
 
-        if (population.size() <= 10 && !Properties.USE_GENO_TO_PHENO()) {
+        if (population.size() <= 10 && !Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
             MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(this.fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
-                IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
+                final IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": "
@@ -298,16 +291,15 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
             MATE.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
 
-            if (Properties.USE_GENO_TO_PHENO()) {
+            if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
 
-                GenotypePhenotypeMappedFitnessFunction<S, T> fitnessFunction
-                        = (GenotypePhenotypeMappedFitnessFunction<S, T>) this.fitnessFunctions.get(0);
-
-                List<IChromosome<T>> phenotypePopulation = new ArrayList<>();
+                final List<IChromosome<T>> phenotypePopulation = new ArrayList<>();
 
                 for (IChromosome<T> chromosome : population) {
                     // TODO: Fix this mismatch between the type variables!
-                    phenotypePopulation.add(fitnessFunction.getPhenoType((IChromosome<S>) chromosome));
+                    phenotypePopulation.add(
+                            GenotypePhenotypeMappedFitnessFunction
+                                    .getPhenoType((IChromosome<S>) chromosome));
                 }
 
                 MATE.log_acc("Combined coverage of current population: "

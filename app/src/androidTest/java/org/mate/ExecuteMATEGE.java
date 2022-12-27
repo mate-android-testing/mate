@@ -23,7 +23,7 @@ public class ExecuteMATEGE {
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withGEMappingFunction(Properties.GE_MAPPING_FUNCTION())
-                .withGenoToPhenoType()
+                .withGenoToPhenoTypeMapping()
                 .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
                 .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())

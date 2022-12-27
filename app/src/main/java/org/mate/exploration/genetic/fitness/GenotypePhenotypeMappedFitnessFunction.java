@@ -13,7 +13,7 @@ import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFunction<S> {
 
     /**
-     * Provides the mapping from genotype to phenotype.
+     * Provides the (shared) mapping from genotype to phenotype.
      */
     private static IGenotypePhenotypeMapping genotypePhenotypeMapping;
 
@@ -23,8 +23,7 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     private final IFitnessFunction<T> phenotypeFitnessFunction;
 
     /**
-     * Initialises the fitness function with the given genotype to phenotype mapping and the
-     * fitness function that is applicable on the phenotype.
+     * Initialises the geno to pheno type fitness function with the pheno type fitness function.
      *
      * @param phenotypeFitnessFunction The fitness function that can be applied on the phenotype.
      */
@@ -33,9 +32,9 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     }
 
     /**
-     * Sets the genotype-phenotype mapping globally for all instances.
+     * Sets the (shared) geno to pheno type mapping function.
      *
-     * @param mapping the genotype-phenotype mapping.
+     * @param mapping The geno to pheno type mapping function.
      * @param <S> The genotype generic type.
      * @param <T> The phenotype generic type.
      */

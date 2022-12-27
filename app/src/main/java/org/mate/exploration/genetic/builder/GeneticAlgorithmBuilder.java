@@ -32,8 +32,6 @@ public class GeneticAlgorithmBuilder {
     public static final String TERMINATION_CONDITION_KEY = "termination_condition";
     public static final String NUMBER_ITERATIONS_KEY = "number_of_iterations";
     public static final String SELECTION_FUNCTION_KEY = "selection_function";
-    public static final String CROSSOVER_FUNCTION_KEY = "crossover_function";
-    public static final String MUTATION_FUNCTION_KEY = "mutation_function";
     public static final String NUM_TESTCASES_KEY = "num_test_cases";
     public static final String POPULATION_SIZE_KEY = "population_size";
     public static final String P_MUTATE_KEY = "p_mutate";
@@ -49,7 +47,7 @@ public class GeneticAlgorithmBuilder {
     public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
     public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
     public static final String GE_MAPPING_FUNCTION_KEY = "ge_mapping_function";
-    public static final String USE_GENO_TO_PHENO_KEY = "geno_to_pheno";
+    public static final String GENO_TO_PHENO_TYPE_MAPPING_KEY = "geno_to_pheno_type_mapping";
 
     /**
      * The list of properties..
@@ -267,15 +265,16 @@ public class GeneticAlgorithmBuilder {
     }
 
     /**
-     * Specifies the algorithms fitness functions to be Geno To Pheno Type.
+     * Specifies that a geno to pheno type mapping is required.
      *
      * @return Returns the current builder state.
      */
-    public GeneticAlgorithmBuilder withGenoToPhenoType() {
-        properties.setProperty(USE_GENO_TO_PHENO_KEY, "true");
+    public GeneticAlgorithmBuilder withGenoToPhenoTypeMapping() {
 
-        if (!org.mate.Properties.USE_GENO_TO_PHENO()) {
-            org.mate.Properties.setProperty("use_geno_to_pheno", true);
+        properties.setProperty(GENO_TO_PHENO_TYPE_MAPPING_KEY, "true");
+
+        if (!org.mate.Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            org.mate.Properties.setProperty("geno_to_pheno_type_mapping", true);
         }
 
         return this;
@@ -474,6 +473,12 @@ public class GeneticAlgorithmBuilder {
      */
     public GeneticAlgorithmBuilder withGEMappingFunction(GEMappingFunction mappingFunction) {
         properties.setProperty(GE_MAPPING_FUNCTION_KEY, mappingFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.GE_MAPPING_FUNCTION() == null) {
+            org.mate.Properties.setProperty("ge_mapping_function", mappingFunction);
+        }
+
         return this;
     }
 

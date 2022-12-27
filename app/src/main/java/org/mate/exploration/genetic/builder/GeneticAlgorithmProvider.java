@@ -777,30 +777,32 @@ public class GeneticAlgorithmProvider {
      * @return Returns the fitness functions used by the genetic algorithm.
      */
     private <T> List<IFitnessFunction<T>> initializeFitnessFunctions() {
-        FitnessFunction[] usedFunctions = org.mate.Properties.FITNESS_FUNCTIONS();
-        boolean isGenoToPhenoType = org.mate.Properties.USE_GENO_TO_PHENO();
 
-        if (usedFunctions.length == 0) {
+        final FitnessFunction[] rawFitnessFunctions = org.mate.Properties.FITNESS_FUNCTIONS();
+        final boolean withGenoToPhenoTypeMapping = org.mate.Properties.GENO_TO_PHENO_TYPE_MAPPING();
+
+        if (rawFitnessFunctions.length == 0) {
             return null;
         } else {
-            List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
 
-            if (isGenoToPhenoType) {
-                IGenotypePhenotypeMapping mapping = getGenoToPhenoTypeMapping();
-                GenotypePhenotypeMappedFitnessFunction.setGenotypePhenotypeMapping(mapping);
+            final List<IFitnessFunction<T>> fitnessFunctions = new ArrayList<>();
 
-                for (int i = 0; i < usedFunctions.length; i++) {
-                    IFitnessFunction<T> genoToPhenoFitnessFunction
-                            = initializeGenoToPhenoFitnessFunction(usedFunctions[i], i);
+            if (withGenoToPhenoTypeMapping) {
 
-                    fitnessFunctions.add(genoToPhenoFitnessFunction);
+                // initialise the shared geno to pheno type mapping function
+                final IGenotypePhenotypeMapping<?,T> mappingFunction = getGenoToPhenoTypeMapping();
+                GenotypePhenotypeMappedFitnessFunction.setGenotypePhenotypeMapping(mappingFunction);
+
+                for (int i = 0; i < rawFitnessFunctions.length; i++) {
+                    final IFitnessFunction<T> fitnessFunction
+                            = initializeGenoToPhenoFitnessFunction(rawFitnessFunctions[i], i);
+                    fitnessFunctions.add(fitnessFunction);
                 }
             } else {
-                for (int i = 0; i < usedFunctions.length; i++) {
-                    IFitnessFunction<T> genoToPhenoFitnessFunction
-                            = initializeFitnessFunction(usedFunctions[i], i);
-
-                    fitnessFunctions.add(genoToPhenoFitnessFunction);
+                for (int i = 0; i < rawFitnessFunctions.length; i++) {
+                    final IFitnessFunction<T> fitnessFunction
+                            = initializeFitnessFunction(rawFitnessFunctions[i], i);
+                    fitnessFunctions.add(fitnessFunction);
                 }
             }
 
@@ -811,22 +813,18 @@ public class GeneticAlgorithmProvider {
     /**
      * Initializes a single fitness function.
      *
-     * @param fitnessFunction The type of a fitness function.
+     * @param fitnessFunction The fitness function type.
      * @param index The current index of the fitness function.
      * @param <T> The type of the chromosome used by the fitness function.
-     * @return An initialized fitness function.
+     * @return Returns the initialized fitness function.
      */
-    private <T> IFitnessFunction<T> initializeFitnessFunction(FitnessFunction fitnessFunction,
-                                                                    int index) {
+    private <T> IFitnessFunction<T> initializeFitnessFunction(final FitnessFunction fitnessFunction,
+                                                                    final int index) {
         switch (fitnessFunction) {
             case NUMBER_OF_ACTIVITIES:
-                // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new ActivityFitnessFunction();
+                return new ActivityFitnessFunction<>();
             case NUMBER_OF_CRASHES:
-                // Force cast. Only works if T is TestSuite. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new AmountCrashesFitnessFunction();
+                return new AmountCrashesFitnessFunction<>();
             case NUMBER_OF_STATES:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
@@ -837,31 +835,29 @@ public class GeneticAlgorithmProvider {
                 return (IFitnessFunction<T>)
                         new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
             case TEST_LENGTH:
-                return (IFitnessFunction<T>) new TestLengthFitnessFunction<>();
+                return new TestLengthFitnessFunction<>();
             case METHOD_COVERAGE:
-                return (IFitnessFunction<T>) new MethodCoverageFitnessFunction<>();
+                return new MethodCoverageFitnessFunction<>();
             case BRANCH_COVERAGE:
-                return (IFitnessFunction<T>) new BranchCoverageFitnessFunction<>();
+                return new BranchCoverageFitnessFunction<>();
             case BRANCH_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(index);
+                return new BranchMultiObjectiveFitnessFunction<>(index);
             case BRANCH_DISTANCE:
-                return (IFitnessFunction<T>) new BranchDistanceFitnessFunction();
+                return new BranchDistanceFitnessFunction<>();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(index);
+                return new BranchDistanceMultiObjectiveFitnessFunction<>(index);
             case BASIC_BLOCK_MULTI_OBJECTIVE:
-                return (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(index);
+                return new BasicBlockMultiObjectiveFitnessFunction<>(index);
             case LINE_COVERAGE:
                 return new LineCoverageFitnessFunction<>();
             case LINE_PERCENTAGE_COVERAGE:
-                // Force cast. Only works if T is TestCase. This fails if other properties expect a
-                // different T for their chromosomes
-                return (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(index);
+                return new LineCoveredPercentageFitnessFunction<>(index);
             case BASIC_BLOCK_LINE_COVERAGE:
-                return (IFitnessFunction<T>) new BasicBlockLineCoverageFitnessFunction<>();
+                return new BasicBlockLineCoverageFitnessFunction<>();
             case BASIC_BLOCK_BRANCH_COVERAGE:
-                return (IFitnessFunction<T>) new BasicBlockBranchCoverageFitnessFunction<>();
+                return new BasicBlockBranchCoverageFitnessFunction<>();
             case NOVELTY:
-                return (IFitnessFunction<T>) new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
+                return new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunction.name());
@@ -869,59 +865,78 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Initializes a single fitness function with the geno to pheno type.
+     * Initializes a single fitness function with the geno to pheno type mapping.
      *
-     * @param fitnessFunction The type of a fitness function.
+     * @param fitnessFunction The fitness function type.
      * @param index The index of the current fitness function.
      * @param <T> The type of the chromosome used by the fitness function.
-     * @return An initialized fitness function.
+     * @return Returns the initialized fitness function.
      */
     private <T> IFitnessFunction<T> initializeGenoToPhenoFitnessFunction(
-            FitnessFunction fitnessFunction, int index) {
-        IFitnessFunction<T> genoToPhenoFitness;
-        IFitnessFunction<T> function;
+            final FitnessFunction fitnessFunction, final int index) {
+
+        final IFitnessFunction<T> phenoTypeFitnessFunction;
 
         switch (fitnessFunction) {
-            case BASIC_BLOCK_BRANCH_COVERAGE:
-                function = new BasicBlockBranchCoverageFitnessFunction<>();
+            case NUMBER_OF_ACTIVITIES:
+                phenoTypeFitnessFunction = new ActivityFitnessFunction<>();
                 break;
-            case BASIC_BLOCK_LINE_COVERAGE:
-                function = new BasicBlockLineCoverageFitnessFunction<>();
+            case NUMBER_OF_CRASHES:
+                phenoTypeFitnessFunction = new AmountCrashesFitnessFunction<>();
                 break;
-            case BASIC_BLOCK_MULTI_OBJECTIVE:
-                function = (IFitnessFunction<T>) new BasicBlockMultiObjectiveFitnessFunction(index);
-                break;
-            case BRANCH_COVERAGE:
-                function = new BranchCoverageFitnessFunction<>();
-                break;
-            case BRANCH_MULTI_OBJECTIVE:
-                function = (IFitnessFunction<T>) new BranchMultiObjectiveFitnessFunction(index);
-                break;
-            case BRANCH_DISTANCE:
-                function = new BranchDistanceFitnessFunction<>();
-                break;
-            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                function = (IFitnessFunction<T>) new BranchDistanceMultiObjectiveFitnessFunction(index);
-                break;
-            case LINE_COVERAGE:
-                function = new LineCoverageFitnessFunction<>();
-                break;
-            case LINE_PERCENTAGE_COVERAGE:
+            case NUMBER_OF_STATES:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
-                function = (IFitnessFunction<T>) new LineCoveredPercentageFitnessFunction(index);
+                phenoTypeFitnessFunction = (IFitnessFunction<T>) new AndroidStateFitnessFunction();
+                break;
+            case COVERED_SPECIFIC_ACTIVITY:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                phenoTypeFitnessFunction = (IFitnessFunction<T>)
+                        new SpecificActivityCoveredFitnessFunction(getFitnessFunctionArgument(index));
+                break;
+            case TEST_LENGTH:
+                phenoTypeFitnessFunction = new TestLengthFitnessFunction<>();
+                break;
+            case BASIC_BLOCK_BRANCH_COVERAGE:
+                phenoTypeFitnessFunction = new BasicBlockBranchCoverageFitnessFunction<>();
+                break;
+            case BASIC_BLOCK_LINE_COVERAGE:
+                phenoTypeFitnessFunction = new BasicBlockLineCoverageFitnessFunction<>();
+                break;
+            case BASIC_BLOCK_MULTI_OBJECTIVE:
+                phenoTypeFitnessFunction = new BasicBlockMultiObjectiveFitnessFunction<>(index);
+                break;
+            case BRANCH_COVERAGE:
+                phenoTypeFitnessFunction = new BranchCoverageFitnessFunction<>();
+                break;
+            case BRANCH_MULTI_OBJECTIVE:
+                phenoTypeFitnessFunction = new BranchMultiObjectiveFitnessFunction<>(index);
+                break;
+            case BRANCH_DISTANCE:
+                phenoTypeFitnessFunction = new BranchDistanceFitnessFunction<>();
+                break;
+            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                phenoTypeFitnessFunction = new BranchDistanceMultiObjectiveFitnessFunction<>(index);
+                break;
+            case LINE_COVERAGE:
+                phenoTypeFitnessFunction = new LineCoverageFitnessFunction<>();
+                break;
+            case LINE_PERCENTAGE_COVERAGE:
+                phenoTypeFitnessFunction = new LineCoveredPercentageFitnessFunction<>(index);
                 break;
             case METHOD_COVERAGE:
-                function = new MethodCoverageFitnessFunction<>();
+                phenoTypeFitnessFunction = new MethodCoverageFitnessFunction<>();
+                break;
+            case NOVELTY:
+                phenoTypeFitnessFunction = new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
                 break;
             default:
                 throw new UnsupportedOperationException("GE fitness function "
                         + fitnessFunction.name() + " not yet supported!");
         }
 
-        genoToPhenoFitness = new GenotypePhenotypeMappedFitnessFunction<>(function);
-
-        return genoToPhenoFitness;
+        return new GenotypePhenotypeMappedFitnessFunction<>(phenoTypeFitnessFunction);
     }
 
     /**

@@ -220,16 +220,6 @@ public class Properties {
         return propertyOr(null);
     }
 
-    /**
-     * Specifies, if the algorithms fitness functions uses a geno to pheno type mapping for
-     * its chromosomes or not.
-     *
-     * @return a boolean for the case that a translation from geno to pheno type is used.
-     */
-    public static boolean USE_GENO_TO_PHENO() {
-        return propertyOr(false);
-    }
-
     public static SelectionFunction SELECTION_FUNCTION() {
         return propertyOr(null);
     }
@@ -411,9 +401,18 @@ public class Properties {
      */
 
     /**
+     * Whether a mapping from geno to pheno type is required.
+     *
+     * @return Returns {@code true} if a mapping is required, otherwise {@code false} is returned.
+     */
+    public static boolean GENO_TO_PHENO_TYPE_MAPPING() {
+        return propertyOr(false);
+    }
+
+    /**
      * Specifies the mapping function which is used for the geno to pheno type mapping.
      *
-     * @return a mapping function for GE.
+     * @return Returns the geno to pheno type mapping function.
      */
     public static GEMappingFunction GE_MAPPING_FUNCTION() {
         return propertyOr(null);
