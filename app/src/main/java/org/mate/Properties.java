@@ -8,6 +8,7 @@ import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
+import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
 import org.mate.model.util.DotConverter;
@@ -219,16 +220,6 @@ public class Properties {
         return propertyOr(null);
     }
 
-    /**
-     * In the context of GE, we have two fitness functions. While {@link #FITNESS_FUNCTIONS()}
-     * provides the mapping from geno to phenotype, this property specifies the core fitness function.
-     *
-     * @return Returns the core fitness function used in the context of GE.
-     */
-    public static FitnessFunction GE_FITNESS_FUNCTION() {
-        return propertyOr(null);
-    }
-
     public static SelectionFunction SELECTION_FUNCTION() {
         return propertyOr(null);
     }
@@ -408,6 +399,24 @@ public class Properties {
     /*
      * Begin GE properties
      */
+
+    /**
+     * Whether a mapping from geno to pheno type is required.
+     *
+     * @return Returns {@code true} if a mapping is required, otherwise {@code false} is returned.
+     */
+    public static boolean GENO_TO_PHENO_TYPE_MAPPING() {
+        return propertyOr(false);
+    }
+
+    /**
+     * Specifies the mapping function which is used for the geno to pheno type mapping.
+     *
+     * @return Returns the geno to pheno type mapping function.
+     */
+    public static GEMappingFunction GE_MAPPING_FUNCTION() {
+        return propertyOr(null);
+    }
 
     public static int GE_SEQUENCE_LENGTH() {
         return propertyOr(100);

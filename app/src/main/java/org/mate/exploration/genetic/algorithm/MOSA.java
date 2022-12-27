@@ -1,11 +1,13 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
@@ -300,6 +302,10 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      * @return Returns the length of the given chromosome.
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
+
+        if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(chromosome);
+        }
 
         if (chromosome.getValue() instanceof TestCase) {
             return ((TestCase) chromosome.getValue()).getActionSequence().size();
