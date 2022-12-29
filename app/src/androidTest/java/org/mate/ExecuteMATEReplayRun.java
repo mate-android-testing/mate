@@ -127,7 +127,7 @@ public class ExecuteMATEReplayRun {
 
             // check whether the UI action is applicable on the current state
             if ((nextAction instanceof WidgetAction || (nextAction instanceof MotifAction
-                    && Properties.WIDGET_BASED_ACTIONS()))
+                    && !Properties.USE_PRIMITIVE_ACTIONS()))
                     && !Registry.getUiAbstractionLayer().getExecutableActions().contains(nextAction)) {
 
                 // try to repair UI action
@@ -193,7 +193,7 @@ public class ExecuteMATEReplayRun {
                     }
                 }
             }
-        } else if (a instanceof MotifAction && Properties.WIDGET_BASED_ACTIONS()
+        } else if (a instanceof MotifAction && !Properties.USE_PRIMITIVE_ACTIONS()
                 && !Registry.getUiAbstractionLayer().getExecutableActions().contains(a)) {
 
             MotifAction selectedAction = (MotifAction) a;

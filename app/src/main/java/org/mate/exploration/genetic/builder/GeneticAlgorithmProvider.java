@@ -547,9 +547,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
-        } else if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
+        } else if (!org.mate.Properties.USE_PRIMITIVE_ACTIONS()) {
             throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn " +
-                    "the property Properties.WIDGET_BASED_ACTIONS() off.");
+                    "the property Properties.USE_PRIMITIVE_ACTIONS() on.");
         }
 
         return new Sapienz<>(

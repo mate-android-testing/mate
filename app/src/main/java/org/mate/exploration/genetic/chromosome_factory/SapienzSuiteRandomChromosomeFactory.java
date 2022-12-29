@@ -12,7 +12,7 @@ import org.mate.utils.coverage.CoverageUtils;
 /**
  * Provides a chromosome factory as described in the Sapienz paper, i.e. it generates test suites
  * which in turn consists of test cases that in turn consists of atomic (primitive) and motif genes.
- * Requires that the property {@link Properties#WIDGET_BASED_ACTIONS()} is set to {@code false}.
+ * Requires that the property {@link Properties#USE_PRIMITIVE_ACTIONS()} is set to {@code true}.
  */
 public class SapienzSuiteRandomChromosomeFactory implements IChromosomeFactory<TestSuite> {
 

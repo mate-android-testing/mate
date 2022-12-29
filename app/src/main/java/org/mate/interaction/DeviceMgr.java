@@ -278,7 +278,7 @@ public class DeviceMgr {
      */
     private void handleFillFormAndSubmit(MotifAction action) {
 
-        if (Properties.WIDGET_BASED_ACTIONS()) {
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
             List<UIAction> widgetActions = action.getUIActions();
 
@@ -450,7 +450,7 @@ public class DeviceMgr {
      */
     private void handleSpinnerScrolling(MotifAction action) {
 
-        if (Properties.WIDGET_BASED_ACTIONS()) {
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
             WidgetAction widgetAction = (WidgetAction) action.getUIActions().get(0);
 

@@ -409,9 +409,17 @@ public class Properties {
      * End Graph properties
      */
 
-    // Primitive actions or widget based actions?
-    public static boolean WIDGET_BASED_ACTIONS() {
-        return propertyOr(true);
+    /**
+     * Whether {@link org.mate.interaction.action.ui.PrimitiveAction}s should be used instead of
+     * {@link org.mate.interaction.action.ui.WidgetAction}s. This is only necessary when using an
+     * algorithm like {@link org.mate.exploration.genetic.algorithm.Sapienz} that relies upon
+     * primitive actions.
+     *
+     * @return Returns {@code true} if primitive actions should be used instead of widget actions,
+     *         otherwise {@code false} is returned.
+     */
+    public static boolean USE_PRIMITIVE_ACTIONS() {
+        return propertyOr(false);
     }
 
     // stack trace
