@@ -15,7 +15,6 @@ import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.ScreenStateType;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -49,14 +48,9 @@ public class ActionsScreenState extends AbstractScreenState {
 
     static {
         // intent actions are applicable independent of the underlying screen state
-
         final IntentProvider intentProvider = new IntentProvider();
-
-        intentBasedActions = intentProvider.getIntentBasedActions().values().stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-
-        systemActions = intentProvider.getSystemActions();
+        intentBasedActions = Collections.unmodifiableList(intentProvider.getIntentBasedActions());
+        systemActions = Collections.unmodifiableList(intentProvider.getSystemActions());
     }
 
     /**

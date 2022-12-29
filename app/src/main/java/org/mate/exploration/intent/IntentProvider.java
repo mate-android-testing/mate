@@ -18,10 +18,8 @@ import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -386,30 +384,32 @@ public class IntentProvider {
     }
 
     /**
-     * Retrieves the applicable intent-based actions per component type, e.g. activity.
+     * Retrieves the applicable intent-based actions.
      *
-     * @return Returns the applicable intent-based actions per component type.
+     * @return Returns the list of applicable intent-based actions.
      */
-    public Map<ComponentType, List<IntentBasedAction>> getIntentBasedActions() {
+    public List<IntentBasedAction> getIntentBasedActions() {
 
-        final Map<ComponentType, List<IntentBasedAction>> actions = new HashMap<>();
+        final List<IntentBasedAction> intentBasedActions = new ArrayList<>();
 
         for (final ComponentDescription component : components) {
 
-            final ComponentType type = component.getType();
-            List<IntentBasedAction> intentBasedActions = actions.get(type);
+            /*
+            * The intent can be received in any case via getIntent(), e.g. within onCreate(). Certain
+            * components also implement onNewIntent(), which represents another option to receive
+            * an intent. To cover both cases, we randomly decide which option should be used.
+             */
+            boolean handleOnNewIntent = component.isHandlingOnNewIntent();
 
-            if (intentBasedActions == null) {
-                intentBasedActions = new ArrayList<>();
-                actions.put(type, intentBasedActions);
+            if (handleOnNewIntent) {
+                handleOnNewIntent = Randomness.getRnd().nextBoolean();
             }
 
-            // TODO: call appropriate generateIntentBasedAction() method based on component's attributes
-            // TODO: try to make selection deterministic
-            intentBasedActions.add(generateIntentBasedAction(component));
+            intentBasedActions.add(generateIntentBasedAction(component,
+                    component.isDynamicReceiver(), handleOnNewIntent));
         }
 
-        return actions;
+        return intentBasedActions;
     }
 
     /**
