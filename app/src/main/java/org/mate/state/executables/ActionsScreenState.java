@@ -48,9 +48,14 @@ public class ActionsScreenState extends AbstractScreenState {
 
     static {
         // intent actions are applicable independent of the underlying screen state
-        final IntentProvider intentProvider = new IntentProvider();
-        intentBasedActions = Collections.unmodifiableList(intentProvider.getIntentBasedActions());
-        systemActions = Collections.unmodifiableList(intentProvider.getSystemActions());
+        if (Properties.USE_INTENT_ACTIONS()) {
+            final IntentProvider intentProvider = new IntentProvider();
+            intentBasedActions = Collections.unmodifiableList(intentProvider.getIntentBasedActions());
+            systemActions = Collections.unmodifiableList(intentProvider.getSystemActions());
+        } else {
+            intentBasedActions = Collections.emptyList();
+            systemActions = Collections.emptyList();
+        }
     }
 
     /**
