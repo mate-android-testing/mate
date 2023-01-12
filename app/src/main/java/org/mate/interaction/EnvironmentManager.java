@@ -115,10 +115,10 @@ public class EnvironmentManager {
             server = new Socket(DEFAULT_SERVER_IP, port);
 
             /*
-            * The input stream obtained from server.getInputStream() cannot be interrupted when
-            * waiting for a response from the server. We need to wrap the input stream around a
-            * channel to make this possible. If an interrupt happens, a ClosedInterruptException
-            * will be thrown.
+             * The input stream obtained from server.getInputStream() cannot be interrupted when
+             * waiting for a response from the server. We need to wrap the input stream around a
+             * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+             * will be thrown.
              */
             final InputStream interruptibleInputStream = Channels.newInputStream(
                     Channels.newChannel(server.getInputStream()));
@@ -194,8 +194,8 @@ public class EnvironmentManager {
                     server.getOutputStream().flush();
                 } catch (IOException exception) {
                     /*
-                    * If we can't send the request the second time, it's likely that we can't
-                    * recover from this fault and thus abort the execution.
+                     * If we can't send the request the second time, it's likely that we can't
+                     * recover from this fault and thus abort the execution.
                      */
                     MATE.log_debug("socket error sending");
                     throw new IllegalStateException(exception);
@@ -337,8 +337,8 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases        The test cases belonging to the source chromosome.
-     * @param fitnessFunction  The underlying fitness function.
+     * @param testCases The test cases belonging to the source chromosome.
+     * @param fitnessFunction The underlying fitness function.
      */
     public void copyFitnessData(final IChromosome<TestSuite> sourceChromosome,
                                 final IChromosome<TestSuite> targetChromosome,
@@ -693,8 +693,8 @@ public class EnvironmentManager {
      * Stores the fitness data for the given chromosome.
      *
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
-     *                   otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      * @param fitnessFunction The underlying fitness function.
      */
     public <T> void storeFitnessData(final IChromosome<T> chromosome, final String entityId,
@@ -1273,7 +1273,7 @@ public class EnvironmentManager {
 
         try {
             response = sendMessage(request);
-        } catch(MateInterruptedException e) {
+        } catch (MateInterruptedException e) {
             /*
              * We still need to wait for mate-server to complete the request, so we just wait for a
              * few seconds. This is important, because if we continue immediately and try to get the
