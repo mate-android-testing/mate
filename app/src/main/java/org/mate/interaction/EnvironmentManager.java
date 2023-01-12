@@ -1290,7 +1290,7 @@ public class EnvironmentManager {
             MATE.log_acc("ERROR: unable clear app data");
         }
 
-        if(mateInterruptedException != null) {
+        if (mateInterruptedException != null) {
             throw mateInterruptedException;
         }
     }
