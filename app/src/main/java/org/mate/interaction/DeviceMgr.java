@@ -1589,6 +1589,8 @@ public class DeviceMgr {
      */
     public void clearApp() {
 
+        Utils.throwOnInterrupt();
+
         try {
             device.executeShellCommand("pm clear " + packageName);
 
@@ -1608,17 +1610,18 @@ public class DeviceMgr {
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
+        } finally {
+            /*
+             * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
+             * thus we have to re-grant them in order to allow the tracer to write its traces to the
+             * external storage. Otherwise, one may encounter the following situation: A reset is
+             * performed, dropping the runtime permissions. The execution of the next actions triggers
+             * dumping the traces because the cache limit of the tracer is reached. This operation would
+             * fail consequently. We need to call this operation in any case even when MATE received
+             * the timeout interrupt (only possible in the fallback mechanism!).
+             */
+            MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
         }
-
-        /*
-         * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
-         * thus we have to re-grant them in order to allow the tracer to write its traces to the
-         * external storage. Otherwise, one may encounter the following situation: A reset is
-         * performed, dropping the runtime permissions. The execution of the next actions triggers
-         * dumping the traces because the cache limit of the tracer is reached. This operation would
-         * fail consequently.
-         */
-        MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
     }
 
     /**

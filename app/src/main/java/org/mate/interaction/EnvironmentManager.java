@@ -1309,7 +1309,7 @@ public class EnvironmentManager {
              * causes a failure of the tracer to write its traces.
              */
             mateInterruptedException = e;
-            Utils.sleepWithoutInterrupt(3000);
+            Utils.sleepWithoutInterrupt(5000);
         }
 
         if (response != null && !"/android/clearApp".equals(response.getSubject())) {
