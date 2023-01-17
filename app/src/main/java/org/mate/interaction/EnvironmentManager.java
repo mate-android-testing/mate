@@ -602,7 +602,33 @@ public class EnvironmentManager {
                 = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName);
-        Message response = sendMessage(messageBuilder.build());
+
+        Message response = null;
+        MateInterruptedException mateInterruptedException = null;
+
+        try {
+            response = sendMessage(messageBuilder.build());
+        } catch (MateInterruptedException e) {
+            /*
+             * We still need to wait for mate-server to complete the request, so we just wait for a
+             * few seconds. This is important, because if we continue immediately and try to get the
+             * coverage of the last incomplete test case by invoking the tracer, then the tracer's
+             * permissions to write to the external storage might get dropped while it tries to write,
+             * because clearing the app data also revokes the tracer's permissions. This in turn
+             * causes a failure of the tracer to write its traces.
+             */
+            mateInterruptedException = e;
+            Utils.sleepWithoutInterrupt(5000);
+        }
+
+        if (response != null && !"/android/grant_runtime_permissions".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: Unable to grant runtime permissions!");
+        }
+
+        if (mateInterruptedException != null) {
+            throw mateInterruptedException;
+        }
+
         return Boolean.parseBoolean(response.getParameter("response"));
     }
 
