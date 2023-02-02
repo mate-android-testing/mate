@@ -8,7 +8,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.intent.parsers.IntentInfoParser;
 import org.mate.exploration.intent.parsers.SystemActionParser;
-import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
 import org.mate.utils.Randomness;
@@ -103,6 +103,18 @@ public class IntentProvider {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks whether the given action describes a system event.
+     *
+     * @param systemEvents The list of system events/actions.
+     * @param action The given action.
+     * @return Returns {@code true} if the given action refers to a system event, otherwise
+     *         {@code false} is returned.
+     */
+    private boolean describesSystemEvent(final List<String> systemEvents, final String action) {
+        return systemEvents.contains(action);
     }
 
     /**
@@ -283,26 +295,24 @@ public class IntentProvider {
      *
      * @return Returns an action encapsulating a dynamic broadcast receiver.
      */
-    public Action getDynamicReceiverAction() {
+    public IntentAction getDynamicReceiverAction() {
+
         if (!hasDynamicReceiver()) {
             throw new IllegalStateException("No dynamic broadcast receiver found!");
         } else {
             // select randomly a dynamic receiver
-            ComponentDescription component = Randomness.randomElement(dynamicReceivers);
-            IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
+            final ComponentDescription dynamicReceiver = Randomness.randomElement(dynamicReceivers);
+            final IntentFilterDescription intentFilter
+                    = Randomness.randomElement(dynamicReceiver.getIntentFilters());
+            final String action = Randomness.randomElement(intentFilter.getActions());
 
             // we need to distinguish between a dynamic system receiver and dynamic receiver
-            if (describesSystemEvent(systemEventActions, intentFilter)) {
-                /*
-                 * TODO: If the randomly selected action actually refers to a system event, we
-                 *  require a system action only, otherwise this is a regular intent-based action.
-                 */
-                String action = Randomness.randomElement(intentFilter.getActions());
-                SystemAction systemAction = new SystemAction(component, intentFilter, action);
+            if (describesSystemEvent(systemEventActions, action)) {
+                SystemAction systemAction = new SystemAction(dynamicReceiver, intentFilter, action);
                 systemAction.markAsDynamic();
                 return systemAction;
             } else {
-                return generateIntentBasedAction(component, true);
+                return generateIntentBasedAction(dynamicReceiver, true, intentFilter, action);
             }
         }
     }
@@ -411,7 +421,7 @@ public class IntentProvider {
             }
 
             intentBasedActions.add(generateIntentBasedAction(component,
-                    component.isDynamicReceiver(), handleOnNewIntent));
+                    component.isDynamicReceiver(), handleOnNewIntent, null, null));
         }
 
         return intentBasedActions;
@@ -473,15 +483,27 @@ public class IntentProvider {
         if (component == null) {
             throw new IllegalStateException("No component description found for current activity!");
         }
-        return generateIntentBasedAction(component, false, true);
+        return generateIntentBasedAction(component, false, true,
+                null, null);
     }
 
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component) {
-        return generateIntentBasedAction(component, false, false);
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component) {
+        return generateIntentBasedAction(component, false, false,
+                null, null);
     }
 
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component, boolean dynamicReceiver) {
-        return generateIntentBasedAction(component, dynamicReceiver, false);
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
+                                                        final boolean dynamicReceiver) {
+        return generateIntentBasedAction(component, dynamicReceiver, false,
+                null, null);
+    }
+
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
+                                                        final boolean dynamicReceiver,
+                                                        final IntentFilterDescription intentFilter,
+                                                        final String action) {
+        return generateIntentBasedAction(component, dynamicReceiver, false,
+                intentFilter, action);
     }
 
     /**
@@ -491,11 +513,16 @@ public class IntentProvider {
      * @param component The component information.
      * @param dynamicReceiver Whether the component is a dynamic receiver.
      * @param handleOnNewIntent Whether the intent should trigger the onNewIntent method.
+     * @param intentFilter The intent filter to use or {code null} if a random one should be picked.
+     * @param action The action to use or {@code null} if a random one should be picked.
      * @return Returns the corresponding IntentBasedAction encapsulating the component,
      *         the selected intent-filter and the generated intent.
      */
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component,
-                                                        boolean dynamicReceiver, boolean handleOnNewIntent) {
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
+                                                        final boolean dynamicReceiver,
+                                                        final boolean handleOnNewIntent,
+                                                        IntentFilterDescription intentFilter,
+                                                        String action) {
 
         /*
          * There are components that were explicitly exported although they don't offer any intent
@@ -503,22 +530,28 @@ public class IntentProvider {
          * any further attributes.
          */
         if (!component.hasIntentFilter()) {
-            MATE.log_debug("Targeting component without intent filter: " + component.getFullyQualifiedName());
+            MATE.log_debug("Targeting component without intent filter: "
+                    + component.getFullyQualifiedName());
             Intent intent = new Intent();
-            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
+            intent.setComponent(new ComponentName(Registry.getPackageName(),
+                    component.getFullyQualifiedName()));
             return new IntentBasedAction(intent, component, new IntentFilterDescription());
         }
 
         Set<IntentFilterDescription> intentFilters = component.getIntentFilters();
 
         // select a random intent filter
-        IntentFilterDescription intentFilter = Randomness.randomElement(intentFilters);
+        if (intentFilter == null) {
+            intentFilter = Randomness.randomElement(intentFilters);
+        }
 
         Intent intent = new Intent();
 
         // add a random action if present
         if (intentFilter.hasAction()) {
-            String action = Randomness.randomElement(intentFilter.getActions());
+            if (action == null) {
+                action = Randomness.randomElement(intentFilter.getActions());
+            }
             intent.setAction(action);
         }
 
@@ -564,7 +597,8 @@ public class IntentProvider {
             intent.setPackage(Registry.getPackageName());
         } else {
             // make every other intent explicit
-            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
+            intent.setComponent(new ComponentName(Registry.getPackageName(),
+                    component.getFullyQualifiedName()));
         }
 
         // construct suitable key-value pairs
