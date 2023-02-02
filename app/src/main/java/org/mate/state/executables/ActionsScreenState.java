@@ -42,6 +42,11 @@ public class ActionsScreenState extends AbstractScreenState {
     private static final List<SystemAction> systemActions;
 
     /**
+     * Defines the applicable dynamic receiver actions on any screen.
+     */
+    private static final List<IntentAction> dynamicReceiverIntentActions;
+
+    /**
      * Represents the app screen with its widgets.
      */
     private final AppScreen appScreen;
@@ -52,9 +57,11 @@ public class ActionsScreenState extends AbstractScreenState {
             final IntentProvider intentProvider = new IntentProvider();
             intentBasedActions = Collections.unmodifiableList(intentProvider.getIntentBasedActions());
             systemActions = Collections.unmodifiableList(intentProvider.getSystemActions());
+            dynamicReceiverIntentActions = Collections.unmodifiableList(intentProvider.getDynamicReceiverIntentActions());
         } else {
             intentBasedActions = Collections.emptyList();
             systemActions = Collections.emptyList();
+            dynamicReceiverIntentActions = Collections.emptyList();
         }
     }
 
@@ -547,6 +554,7 @@ public class ActionsScreenState extends AbstractScreenState {
         final List<IntentAction> intentActions = new ArrayList<>();
         intentActions.addAll(getIntentBasedActions());
         intentActions.addAll(getSystemActions());
+        intentActions.addAll(dynamicReceiverIntentActions);
         return intentActions;
 
     }

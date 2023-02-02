@@ -399,6 +399,39 @@ public class IntentProvider {
     }
 
     /**
+     * Retrieves the list of dynamic receiver intent actions.
+     *
+     * @return Returns the list of applicable dynamic receiver actions.
+     */
+    public List<IntentAction> getDynamicReceiverIntentActions() {
+
+        final List<IntentAction> dynamicReceiverIntentActions = new ArrayList<>();
+
+        for (ComponentDescription dynamicReceiver : dynamicReceivers) {
+            for (IntentFilterDescription intentFilter : dynamicReceiver.getIntentFilters()) {
+                for (String action : intentFilter.getActions()) {
+
+                    // we need to distinguish between a dynamic receiver and a dynamic system receiver
+                    if (describesSystemEvent(systemEventActions, action)) {
+
+                        final SystemAction systemAction = new SystemAction(dynamicReceiver,
+                                intentFilter, action);
+                        systemAction.markAsDynamic();
+                        dynamicReceiverIntentActions.add(systemAction);
+                    } else {
+                        final IntentBasedAction intentAction
+                                = generateIntentBasedAction(dynamicReceiver, true,
+                                false, intentFilter, action);
+                        dynamicReceiverIntentActions.add(intentAction);
+                    }
+                }
+            }
+        }
+
+        return dynamicReceiverIntentActions;
+    }
+
+    /**
      * Retrieves the applicable intent-based actions.
      *
      * @return Returns the list of applicable intent-based actions.
