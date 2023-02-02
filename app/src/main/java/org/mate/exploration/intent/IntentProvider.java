@@ -372,12 +372,17 @@ public class IntentProvider {
 
         final List<SystemAction> systemActions = new ArrayList<>();
 
-        // TODO: try to make selection deterministic
         for (ComponentDescription systemEventReceiver : systemEventReceivers) {
-            final IntentFilterDescription intentFilter
-                    = Randomness.randomElement(systemEventReceiver.getIntentFilters());
-            final String action = Randomness.randomElement(intentFilter.getActions());
-            systemActions.add(new SystemAction(systemEventReceiver, intentFilter, action));
+            for (IntentFilterDescription intentFilter : systemEventReceiver.getIntentFilters()) {
+                for (String action : intentFilter.getActions()) {
+                    final SystemAction systemAction
+                            = new SystemAction(systemEventReceiver, intentFilter, action);
+                    if (systemEventReceiver.isDynamicReceiver()) {
+                        systemAction.markAsDynamic();
+                    }
+                    systemActions.add(systemAction);
+                }
+            }
         }
 
         return systemActions;
