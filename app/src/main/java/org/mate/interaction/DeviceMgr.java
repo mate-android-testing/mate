@@ -404,6 +404,15 @@ public class DeviceMgr {
             return;
         }
 
+        /*
+        * The subsequent call to clickAndWait() can swallow a TimeoutException, which is thrown also
+        * by our TimeoutRun class to indicate the termination of the exploration. If swallowed, our
+        * timeout run thread would never terminate. To minimise such a case, we check if an interrupt
+        * was already triggered by our shutdown procedure and abort the execution in that case.
+        * See https://gitlab.infosun.fim.uni-passau.de/se2/mate/mate/-/merge_requests/184#note_80071.
+         */
+        Utils.throwOnInterrupt();
+
         Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
 
         if (success != null && success) {
