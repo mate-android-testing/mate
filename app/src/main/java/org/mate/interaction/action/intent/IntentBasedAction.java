@@ -26,6 +26,16 @@ public class IntentBasedAction extends IntentAction {
         this.intent = intent;
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param intentBasedAction The intent action to be copied.
+     */
+    public IntentBasedAction(IntentBasedAction intentBasedAction) {
+        super(intentBasedAction.getComponent(), intentBasedAction.intentFilter);
+        this.intent = (Intent) intentBasedAction.intent.clone();
+    }
+
     public ComponentType getComponentType() {
         return component.getType();
     }

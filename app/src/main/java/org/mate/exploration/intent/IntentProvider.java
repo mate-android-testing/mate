@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 
+import com.google.common.collect.Sets;
+
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.intent.parsers.IntentInfoParser;
@@ -312,7 +314,8 @@ public class IntentProvider {
                 systemAction.markAsDynamic();
                 return systemAction;
             } else {
-                return generateIntentBasedAction(dynamicReceiver, true, intentFilter, action);
+                return generateIntentBasedAction(dynamicReceiver, true, intentFilter,
+                        action, null);
             }
         }
     }
@@ -419,16 +422,37 @@ public class IntentProvider {
                         systemAction.markAsDynamic();
                         dynamicReceiverIntentActions.add(systemAction);
                     } else {
-                        final IntentBasedAction intentAction
-                                = generateIntentBasedAction(dynamicReceiver, true,
-                                false, intentFilter, action);
-                        dynamicReceiverIntentActions.add(intentAction);
+
+                        final Set<Set<String>> categoryCombinations
+                                = Sets.powerSet(intentFilter.getCategories());
+
+                        for (Set<String> categories : categoryCombinations) {
+
+                            final IntentBasedAction intentAction
+                                    = generateIntentBasedAction(dynamicReceiver, true,
+                                    false, intentFilter, action, categories);
+                            dynamicReceiverIntentActions.add(intentAction);
+                        }
                     }
                 }
             }
         }
 
         return dynamicReceiverIntentActions;
+    }
+
+    /**
+     * Creates an explicit intent with no attributes.
+     *
+     * @param component The component for which an empty intent should be generated.
+     * @return Returns the intent based action.
+     */
+    private IntentBasedAction createEmptyIntent(final ComponentDescription component) {
+
+        final Intent intent = new Intent();
+        intent.setComponent(new ComponentName(Registry.getPackageName(),
+                component.getFullyQualifiedName()));
+        return new IntentBasedAction(intent, component, new IntentFilterDescription());
     }
 
     /**
@@ -440,21 +464,56 @@ public class IntentProvider {
 
         final List<IntentBasedAction> intentBasedActions = new ArrayList<>();
 
+        // TODO: Add intents with mutated data uri.
+        // TODO: Add intents with mutated extras.
+
         for (final ComponentDescription component : components) {
 
-            /*
-            * The intent can be received in any case via getIntent(), e.g. within onCreate(). Certain
-            * components also implement onNewIntent(), which represents another option to receive
-            * an intent. To cover both cases, we randomly decide which option should be used.
-             */
-            boolean handleOnNewIntent = component.isHandlingOnNewIntent();
-
-            if (handleOnNewIntent) {
-                handleOnNewIntent = Randomness.getRnd().nextBoolean();
+            // there are components that are exported but have no intent filter
+            if (!component.hasIntentFilter()) {
+                MATE.log_debug("Targeting component without intent filter: "
+                        + component.getFullyQualifiedName());
+                intentBasedActions.add(createEmptyIntent(component));
+                continue;
             }
 
-            intentBasedActions.add(generateIntentBasedAction(component,
-                    component.isDynamicReceiver(), handleOnNewIntent, null, null));
+            for (IntentFilterDescription intentFilter : component.getIntentFilters()) {
+
+                for (String action : intentFilter.getActions()) {
+
+                    if (intentFilter.hasCategory()) {
+
+                        // mix every combination of categories with the fixed action
+                        Set<Set<String>> categoryCombinations
+                                = Sets.powerSet(intentFilter.getCategories());
+
+                        for (Set<String> categories : categoryCombinations) {
+
+                            final IntentBasedAction intentBasedAction
+                                    = generateIntentBasedAction(component,
+                                    component.isDynamicReceiver(), component.isHandlingOnNewIntent(),
+                                    intentFilter, action, categories);
+
+                            intentBasedActions.add(intentBasedAction);
+
+                            if (component.isHandlingOnNewIntent()) {
+                                // create a copy just without the onNewIntent flag
+                                final IntentBasedAction intentBasedActionCopy
+                                        = new IntentBasedAction(intentBasedAction);
+                                intentBasedActionCopy.getIntent().setFlags(0); // no flags
+                                intentBasedActions.add(intentBasedActionCopy);
+                            }
+                        }
+
+                    } else { // no categories
+                        final IntentBasedAction intentBasedAction
+                                = generateIntentBasedAction(component,
+                                component.isDynamicReceiver(), component.isHandlingOnNewIntent(),
+                                intentFilter, action, null);
+                        intentBasedActions.add(intentBasedAction);
+                    }
+                }
+            }
         }
 
         return intentBasedActions;
@@ -517,26 +576,21 @@ public class IntentProvider {
             throw new IllegalStateException("No component description found for current activity!");
         }
         return generateIntentBasedAction(component, false, true,
-                null, null);
+                null, null, null);
     }
 
     private IntentBasedAction generateIntentBasedAction(final ComponentDescription component) {
         return generateIntentBasedAction(component, false, false,
-                null, null);
-    }
-
-    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
-                                                        final boolean dynamicReceiver) {
-        return generateIntentBasedAction(component, dynamicReceiver, false,
-                null, null);
+                null, null, null);
     }
 
     private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
                                                         final boolean dynamicReceiver,
                                                         final IntentFilterDescription intentFilter,
-                                                        final String action) {
+                                                        final String action,
+                                                        final Set<String> categories) {
         return generateIntentBasedAction(component, dynamicReceiver, false,
-                intentFilter, action);
+                intentFilter, action, categories);
     }
 
     /**
@@ -548,6 +602,7 @@ public class IntentProvider {
      * @param handleOnNewIntent Whether the intent should trigger the onNewIntent method.
      * @param intentFilter The intent filter to use or {code null} if a random one should be picked.
      * @param action The action to use or {@code null} if a random one should be picked.
+     * @param categories The categories to use or {@code null} if random ones should be picked.
      * @return Returns the corresponding IntentBasedAction encapsulating the component,
      *         the selected intent-filter and the generated intent.
      */
@@ -555,7 +610,8 @@ public class IntentProvider {
                                                         final boolean dynamicReceiver,
                                                         final boolean handleOnNewIntent,
                                                         IntentFilterDescription intentFilter,
-                                                        String action) {
+                                                        String action,
+                                                        Set<String> categories) {
 
         /*
          * There are components that were explicitly exported although they don't offer any intent
@@ -565,10 +621,7 @@ public class IntentProvider {
         if (!component.hasIntentFilter()) {
             MATE.log_debug("Targeting component without intent filter: "
                     + component.getFullyQualifiedName());
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName(Registry.getPackageName(),
-                    component.getFullyQualifiedName()));
-            return new IntentBasedAction(intent, component, new IntentFilterDescription());
+            return createEmptyIntent(component);
         }
 
         Set<IntentFilterDescription> intentFilters = component.getIntentFilters();
@@ -591,21 +644,29 @@ public class IntentProvider {
         // add random categories if present
         if (intentFilter.hasCategory()) {
 
-            Set<String> categories = intentFilter.getCategories();
+            if (categories != null) {
+                // use the supplied categories
+                for (String category : categories) {
+                    intent.addCategory(category);
+                }
+            } else {
 
-            final double ALPHA = 1;
-            double decreasingFactor = ALPHA;
-            Random random = new Random();
+                categories = intentFilter.getCategories();
 
-            // add with decreasing probability categories (at least one)
-            while (random.nextDouble() < ALPHA / decreasingFactor) {
-                String category = Randomness.randomElement(categories);
-                intent.addCategory(category);
-                decreasingFactor /= 2;
+                final double ALPHA = 1;
+                double decreasingFactor = ALPHA;
+                Random random = new Random();
 
-                // we reached the maximal amount of categories we can add
-                if (intent.getCategories().size() == categories.size()) {
-                    break;
+                // add with decreasing probability categories (at least one)
+                while (random.nextDouble() < ALPHA / decreasingFactor) {
+                    String category = Randomness.randomElement(categories);
+                    intent.addCategory(category);
+                    decreasingFactor /= 2;
+
+                    // we reached the maximal amount of categories we can add
+                    if (intent.getCategories().size() == categories.size()) {
+                        break;
+                    }
                 }
             }
         }
