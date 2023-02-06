@@ -101,13 +101,27 @@ public class IntentBasedAction extends IntentAction {
             return false;
         } else {
             IntentBasedAction that = (IntentBasedAction) o;
-            return Objects.equals(intent, that.intent);
+
+            return Objects.equals(component, that.component)
+                    && Objects.equals(intentFilter, that.intentFilter)
+                    /*
+                     * We can't call here equals() on the Intent object directly, since it only
+                     * compares the references and nothing more.
+                     */
+                    && Objects.equals(intent.getAction(), that.intent.getAction())
+                    && Objects.equals(intent.getCategories(), that.intent.getCategories())
+                    && Objects.equals(intent.getData(), that.intent.getData())
+                    && Objects.equals(intent.getComponent(), that.intent.getComponent())
+                    // equals() on Bundle compares only the reference
+                    && Objects.equals(Objects.toString(intent.getExtras(), null),
+                    Objects.toString(that.intent.getExtras(), null));
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(intent);
+        return Objects.hash(component, intentFilter, intent.getAction(), intent.getCategories(),
+                intent.getData(), intent.getComponent(), intent.getExtras());
     }
 
     @NonNull

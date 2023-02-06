@@ -3,6 +3,7 @@ package org.mate.utils.manifest.element;
 import android.support.annotation.NonNull;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -245,5 +246,28 @@ public class DataDescription {
      */
     public Set<String> getMimeTypes() {
         return mimeTypes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            DataDescription other = (DataDescription) o;
+            return Objects.equals(hosts, other.hosts)
+                    && Objects.equals(mimeTypes, other.mimeTypes)
+                    && Objects.equals(pathPatterns, other.pathPatterns)
+                    && Objects.equals(pathPrefixes, other.pathPrefixes)
+                    && Objects.equals(paths, other.paths)
+                    && Objects.equals(ports, other.ports)
+                    && Objects.equals(schemes, other.schemes);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(hosts, mimeTypes, pathPatterns, pathPrefixes, paths, ports, schemes);
     }
 }
