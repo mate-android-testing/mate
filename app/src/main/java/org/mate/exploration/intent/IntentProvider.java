@@ -13,6 +13,7 @@ import org.mate.exploration.intent.parsers.SystemActionParser;
 import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
+import org.mate.utils.PowerSet;
 import org.mate.utils.Randomness;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
@@ -421,16 +422,18 @@ public class IntentProvider {
                                 intentFilter, action);
                         systemAction.markAsDynamic();
                         dynamicReceiverIntentActions.add(systemAction);
-                    } else {
+                    } else { // regular dynamic receiver
 
-                        final Set<Set<String>> categoryCombinations
-                                = Sets.powerSet(intentFilter.getCategories());
+                        // mix every combination of categories with the fixed action
+                        final PowerSet<String> categoryCombinations
+                                = new PowerSet<>(intentFilter.getCategories());
 
-                        for (Set<String> categories : categoryCombinations) {
+                        while (categoryCombinations.hasNext()) {
 
                             final IntentBasedAction intentAction
                                     = generateIntentBasedAction(dynamicReceiver, true,
-                                    false, intentFilter, action, categories);
+                                    false, intentFilter, action,
+                                    categoryCombinations.next());
                             dynamicReceiverIntentActions.add(intentAction);
                         }
                     }
@@ -464,9 +467,6 @@ public class IntentProvider {
 
         final List<IntentBasedAction> intentBasedActions = new ArrayList<>();
 
-        // TODO: Add intents with mutated data uri.
-        // TODO: Add intents with mutated extras.
-
         for (final ComponentDescription component : components) {
 
             // there are components that are exported but have no intent filter
@@ -484,15 +484,15 @@ public class IntentProvider {
                     if (intentFilter.hasCategory()) {
 
                         // mix every combination of categories with the fixed action
-                        Set<Set<String>> categoryCombinations
-                                = Sets.powerSet(intentFilter.getCategories());
+                        final PowerSet<String> categoryCombinations
+                                = new PowerSet<>(intentFilter.getCategories());
 
-                        for (Set<String> categories : categoryCombinations) {
+                        while (categoryCombinations.hasNext()) {
 
                             final IntentBasedAction intentBasedAction
                                     = generateIntentBasedAction(component,
                                     component.isDynamicReceiver(), component.isHandlingOnNewIntent(),
-                                    intentFilter, action, categories);
+                                    intentFilter, action, categoryCombinations.next());
 
                             intentBasedActions.add(intentBasedAction);
 
