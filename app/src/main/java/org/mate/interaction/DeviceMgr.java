@@ -1474,6 +1474,7 @@ public class DeviceMgr {
             return fragments;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            e.printStackTrace();
             return Collections.emptyList();
         }
     }
