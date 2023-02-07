@@ -3,8 +3,7 @@ package org.mate.exploration.intent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
-
-import com.google.common.collect.Sets;
+import android.os.Bundle;
 
 import org.mate.MATE;
 import org.mate.Registry;
@@ -17,12 +16,14 @@ import org.mate.utils.PowerSet;
 import org.mate.utils.Randomness;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
+import org.mate.utils.manifest.element.DataDescription;
 import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +32,11 @@ import java.util.stream.Collectors;
  * A factory to generate intents matching the specified component and intent filter.
  */
 public class IntentProvider {
+
+    /**
+     * The number of intents that should be generated with a mutated data uri.
+     */
+    private static final int MAX_NUMBER_OF_MUTANTS = 3;
 
     /**
      * The list of enabled and exported components that can be launched through an intent.
@@ -435,6 +441,9 @@ public class IntentProvider {
                                     false, intentFilter, action,
                                     categoryCombinations.next());
                             dynamicReceiverIntentActions.add(intentAction);
+
+                            // generate intents with a mutated data uri and extras
+                            dynamicReceiverIntentActions.addAll(generateMutants(intentAction));
                         }
                     }
                 }
@@ -516,7 +525,83 @@ public class IntentProvider {
             }
         }
 
+        // generate intents with a mutated data uri and extras
+        final List<IntentBasedAction> mutants
+                = new ArrayList<>(MAX_NUMBER_OF_MUTANTS * intentBasedActions.size());
+
+        for (IntentBasedAction intentBasedAction : intentBasedActions) {
+            mutants.addAll(generateMutants(intentBasedAction));
+        }
+
+        intentBasedActions.addAll(mutants);
+
         return intentBasedActions;
+    }
+
+    /**
+     * Generates up to {@link #MAX_NUMBER_OF_MUTANTS} intents with a mutated data uri and extras.
+     *
+     * @param intentBasedAction The intent from which the mutants are produced.
+     * @return Returns the list of mutated intents.
+     */
+    private List<IntentBasedAction> generateMutants(IntentBasedAction intentBasedAction) {
+
+        final List<IntentBasedAction> mutants = new ArrayList<>(MAX_NUMBER_OF_MUTANTS);
+
+        if (intentBasedAction.getIntentFilter().hasData()) {
+
+            final DataDescription dataTag = intentBasedAction.getIntentFilter().getData();
+            final Uri originalUri = intentBasedAction.getIntent().getData();
+            final Set<Uri> randomUris = new HashSet<>(MAX_NUMBER_OF_MUTANTS);
+
+            for (int i = 0; i < MAX_NUMBER_OF_MUTANTS; i++) {
+
+                final Uri uri = DataUriGenerator.generateRandomUri(dataTag);
+
+                if (uri != null && !uri.equals(originalUri)) { // only consider distinct uris
+                    randomUris.add(uri);
+                }
+            }
+
+            for (Uri uri : randomUris) {
+                final IntentBasedAction clone = new IntentBasedAction(intentBasedAction);
+                clone.getIntent().setData(uri);
+                mutants.add(clone);
+            }
+        }
+
+        if (intentBasedAction.getComponent().hasExtras()) {
+
+            final Bundle originalExtras = intentBasedAction.getIntent().getExtras();
+            final Set<Bundle> randomExtras = new HashSet<>(MAX_NUMBER_OF_MUTANTS);
+
+            for (int i = 0; i < MAX_NUMBER_OF_MUTANTS; i++) {
+
+                final Bundle extras
+                        = BundleGenerator.generateRandomBundle(intentBasedAction.getComponent());
+
+                if (originalExtras != null
+                        // equals() on Bundle just checks the reference
+                        && Objects.equals(extras.toString(), originalExtras.toString())) {
+                    randomExtras.add(extras);
+                }
+            }
+
+            int i = 0;
+            for (Bundle extras : randomExtras) {
+                if (i < mutants.size()) { // further mutate the already generated mutants
+                    IntentBasedAction mutant = mutants.get(i);
+                    mutant.getIntent().putExtras(extras);
+                } else { // generate a mutant
+                    final IntentBasedAction clone = new IntentBasedAction(intentBasedAction);
+                    clone.getIntent().putExtras(extras);
+                    mutants.add(clone);
+                }
+                i++;
+            }
+        }
+
+        return mutants;
     }
 
     /**
