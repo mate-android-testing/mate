@@ -50,6 +50,7 @@ public final class DataUriGenerator {
     /**
      * Generates a random but valid URI, i.e. a URI matching the data tag inside the intent filter.
      *
+     * @param data The given data tag.
      * @return Returns the generated URI or {@code null} if no URI could be derived.
      */
     public static Uri generateRandomUri(DataDescription data) {
