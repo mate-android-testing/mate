@@ -128,7 +128,7 @@ public class UIAbstractionLayer {
     /**
      * Returns the list of executable ui actions on the current screen.
      *
-     * @return Returns the list of executable widget actions.
+     * @return Returns the list of executable ui actions.
      */
     public List<UIAction> getExecutableUIActions() {
         return getLastScreenState().getUIActions();
