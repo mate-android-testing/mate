@@ -55,7 +55,7 @@ public final class DataUriGenerator {
      */
     public static Uri generateRandomUri(DataDescription data) {
 
-        Random rand = new Random();
+        Random random = Randomness.getRnd();
         StringBuilder uriBuilder = new StringBuilder();
 
         // no scheme => no uri
@@ -86,7 +86,7 @@ public final class DataUriGenerator {
 
                 // select random path, pathPrefix or pathPattern if present
                 if (data.hasPath() || data.hasPathPrefix() ||data.hasPathPattern()) {
-                    int pathIndex = rand.nextInt(data.getPaths().size()
+                    int pathIndex = random.nextInt(data.getPaths().size()
                             + data.getPathPrefixes().size() + data.getPathPatterns().size());
                     if (pathIndex < data.getPaths().size())
                         path = SetUtils.getElementAtIndex(data.getPaths(), pathIndex);
@@ -129,7 +129,7 @@ public final class DataUriGenerator {
                 String fileName = null;
 
                 if (!suitableFiles.isEmpty()) {
-                    fileName = (String) suitableFiles.toArray()[new Random().nextInt(suitableFiles.size())];
+                    fileName = (String) suitableFiles.toArray()[random.nextInt(suitableFiles.size())];
                 }
 
                 if (fileName != null) {
@@ -221,7 +221,7 @@ public final class DataUriGenerator {
      */
     private static String findSuitableFile(String mimeType) {
 
-        Random random = new Random();
+        Random random = Randomness.getRnd();
 
         if (mimeType.startsWith("*/")) {
             // select arbitrary file
@@ -340,7 +340,7 @@ public final class DataUriGenerator {
 
                         if (!suitableFiles.isEmpty()) {
                             // select randomly file
-                            return (String) suitableFiles.toArray()[new Random().nextInt(suitableFiles.size())];
+                            return (String) suitableFiles.toArray()[Randomness.getRnd().nextInt(suitableFiles.size())];
                         }
                     }
                 }

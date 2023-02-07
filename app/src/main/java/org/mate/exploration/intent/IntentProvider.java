@@ -655,7 +655,7 @@ public class IntentProvider {
 
                 final double ALPHA = 1;
                 double decreasingFactor = ALPHA;
-                Random random = new Random();
+                Random random = Randomness.getRnd();
 
                 // add with decreasing probability categories (at least one)
                 while (random.nextDouble() < ALPHA / decreasingFactor) {
