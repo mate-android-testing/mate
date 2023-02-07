@@ -9,6 +9,7 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -123,6 +124,15 @@ public class UIAbstractionLayer {
      */
     public List<Action> getExecutableActions() {
         return getLastScreenState().getActions();
+    }
+
+    /**
+     * Returns the list of executable intent actions.
+     *
+     * @return Returns the list of executable intent actions.
+     */
+    public List<IntentAction> getExecutableIntentActions() {
+        return getLastScreenState().getIntentActions();
     }
 
     /**

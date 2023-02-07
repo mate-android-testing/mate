@@ -21,6 +21,7 @@ import org.mate.exploration.genetic.chromosome_factory.IntentChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.UniformIntentChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -598,6 +599,8 @@ public class GeneticAlgorithmProvider {
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
             case INTENT_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
+            case UNIFORM_INTENT_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new UniformIntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
             case SAPIENZ_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
