@@ -1,7 +1,6 @@
 package org.mate.exploration.genetic.util.ge;
 
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.ListUtils;
 
 import java.util.List;
@@ -51,7 +50,7 @@ public class AndroidListBasedEqualWeightedDecisionBiasedMapping extends AndroidL
      */
     @Override
     protected Action selectAction() {
-        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        List<Action> executableActions = uiAbstractionLayer.getExecutableActions();
         int lowBound = 0;
         int highBound = executableActions.size() - 1;
         while (lowBound != highBound) {

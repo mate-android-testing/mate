@@ -47,6 +47,7 @@ public class GeneticAlgorithmBuilder {
     public static final String ARCHIVE_LIMIT_KEY = "archive_limit";
     public static final String NEAREST_NEIGHBOURS_KEY = "nearest_neighbours";
     public static final String GE_MAPPING_FUNCTION_KEY = "ge_mapping_function";
+    public static final String GENO_TO_PHENO_TYPE_MAPPING_KEY = "geno_to_pheno_type_mapping";
 
     /**
      * The list of properties..
@@ -133,7 +134,13 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunction(CrossOverFunction crossoverFunction) {
-        return withCrossoverFunctions(new CrossOverFunction[] { crossoverFunction });
+
+        if (crossoverFunction == null) {
+            // there might be no crossover function required
+            return this;
+        } else {
+            return withCrossoverFunctions(new CrossOverFunction[]{crossoverFunction});
+        }
     }
 
     /**
@@ -143,6 +150,11 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunctions(CrossOverFunction[] crossoverFunctions) {
+
+        if (crossoverFunctions == null) {
+            // there might be no crossover function(s) required
+            return this;
+        }
 
         for (int i = 0; i < crossoverFunctions.length; i++) {
             String key = String.format(FORMAT_LOCALE, CROSSOVER_FUNCTION_KEY_FORMAT, i);
@@ -166,7 +178,13 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunction(MutationFunction mutationFunction) {
-        return withMutationFunctions(new MutationFunction[] {mutationFunction});
+        
+        if (mutationFunction == null) {
+            // there might be no mutation function required
+            return this;
+        } else {
+            return withMutationFunctions(new MutationFunction[]{mutationFunction});
+        }
     }
 
     /**
@@ -176,6 +194,11 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunctions(MutationFunction[] mutationFunctions) {
+
+        if (mutationFunctions == null) {
+            // there might be no mutation function(s) required
+            return this;
+        }
 
         for (int i = 0; i < mutationFunctions.length; i++) {
             String key = String.format(FORMAT_LOCALE, MUTATION_FUNCTION_KEY_FORMAT, i);
@@ -258,6 +281,22 @@ public class GeneticAlgorithmBuilder {
         // TODO: Remove once all properties are enforced via the mate.properties file!
         if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             org.mate.Properties.setProperty("fitness_functions", fitnessFunctions);
+        }
+
+        return this;
+    }
+
+    /**
+     * Specifies that a geno to pheno type mapping is required.
+     *
+     * @return Returns the current builder state.
+     */
+    public GeneticAlgorithmBuilder withGenoToPhenoTypeMapping() {
+
+        properties.setProperty(GENO_TO_PHENO_TYPE_MAPPING_KEY, "true");
+
+        if (!org.mate.Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            org.mate.Properties.setProperty("geno_to_pheno_type_mapping", true);
         }
 
         return this;
@@ -456,6 +495,12 @@ public class GeneticAlgorithmBuilder {
      */
     public GeneticAlgorithmBuilder withGEMappingFunction(GEMappingFunction mappingFunction) {
         properties.setProperty(GE_MAPPING_FUNCTION_KEY, mappingFunction.name());
+
+        // TODO: Remove once all properties are enforced via the mate.properties file!
+        if (org.mate.Properties.GE_MAPPING_FUNCTION() == null) {
+            org.mate.Properties.setProperty("ge_mapping_function", mappingFunction);
+        }
+
         return this;
     }
 

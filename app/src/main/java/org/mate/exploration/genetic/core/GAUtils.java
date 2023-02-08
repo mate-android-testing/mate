@@ -34,14 +34,15 @@ public class GAUtils {
      * @param <T> The type of the chromosomes.
      * @return Returns the best chromosome from the given list of chromosomes.
      */
-    public static <T> IChromosome<T> getBest(List<IChromosome<T>> chromosomes, IFitnessFunction<T> fitnessFunction) {
+    public static <T> IChromosome<T> getBest(final List<IChromosome<T>> chromosomes,
+                                             final IFitnessFunction<T> fitnessFunction) {
 
         if (chromosomes.isEmpty()) {
             throw new IllegalStateException("Can't retrieve best chromosome from empty list!");
         }
 
         // cache the fitness values
-        Map<IChromosome<T>, Double> cache = new HashMap<>();
+        final Map<IChromosome<T>, Double> cache = new HashMap<>();
 
         final boolean isMaximizing = fitnessFunction.isMaximizing();
         IChromosome<T> best = null;
@@ -77,8 +78,8 @@ public class GAUtils {
      * @param <T> The type of the chromosomes.
      * @return Returns the chromosomes sorted based on its fitness values.
      */
-    public static <T> List<IChromosome<T>> sortByFitness(
-            List<IChromosome<T>> chromosomes, final IFitnessFunction<T> fitnessFunction) {
+    public static <T> List<IChromosome<T>> sortByFitness(final List<IChromosome<T>> chromosomes,
+                                                         final IFitnessFunction<T> fitnessFunction) {
         Collections.sort(chromosomes, new FitnessComparator<>(fitnessFunction));
         return chromosomes;
     }
@@ -95,7 +96,8 @@ public class GAUtils {
      * @return Returns the chromosomes sorted based on its fitness values and its lengths.
      */
     public static <T> List<IChromosome<T>> sortByFitnessAndLength(
-            List<IChromosome<T>> chromosomes, final IFitnessFunction<T> fitnessFunction) {
+            final List<IChromosome<T>> chromosomes,
+            final IFitnessFunction<T> fitnessFunction) {
         Collections.sort(chromosomes, new FitnessAndLengthComparator<>(fitnessFunction));
         return chromosomes;
     }
@@ -112,7 +114,7 @@ public class GAUtils {
      */
     @SuppressWarnings("unused")
     public static <T> List<IChromosome<T>> sortByRankAndCrowdingDistance(
-            List<IChromosome<T>> chromosomes,
+            final List<IChromosome<T>> chromosomes,
             final Map<IChromosome<T>, Double> crowdingDistanceMap,
             final Map<IChromosome<T>, Integer> rankMap) {
         Collections.sort(chromosomes, new CrowdedComparator<>(crowdingDistanceMap, rankMap));
@@ -130,7 +132,8 @@ public class GAUtils {
      * @return Returns the chromosomes sorted based on its crowding distance.
      */
     public static <T> List<IChromosome<T>> sortByCrowdingDistance(
-            List<IChromosome<T>> chromosomes, final Map<IChromosome<T>, Double> crowdingDistanceMap) {
+            final List<IChromosome<T>> chromosomes,
+            final Map<IChromosome<T>, Double> crowdingDistanceMap) {
         Collections.sort(chromosomes, new CrowdingDistanceComparator<>(crowdingDistanceMap));
         return chromosomes;
     }
@@ -145,16 +148,16 @@ public class GAUtils {
             final List<IChromosome<T>> population, final List<IFitnessFunction<T>> fitnessFunctions) {
 
         // associates the rank (pareto front) to the list of chromosomes belonging to it
-        Map<Integer, List<IChromosome<T>>> paretoFronts = new HashMap<>();
+        final Map<Integer, List<IChromosome<T>>> paretoFronts = new HashMap<>();
 
         // a comparator for two chromosomes based on domination relation
-        Comparator<IChromosome<T>> comparator = new DominationComparator<>(fitnessFunctions);
+        final Comparator<IChromosome<T>> comparator = new DominationComparator<>(fitnessFunctions);
 
         // maintains for each chromosome the set of dominated chromosomes
-        Map<IChromosome<T>, Set<IChromosome<T>>> dominationSets = new HashMap<>();
+        final Map<IChromosome<T>, Set<IChromosome<T>>> dominationSets = new HashMap<>();
 
         // maintains for each chromosome the domination counter
-        Map<IChromosome<T>, Integer> dominationCounters = new HashMap<>();
+        final Map<IChromosome<T>, Integer> dominationCounters = new HashMap<>();
 
         for (IChromosome<T> p : population) {
 
@@ -240,13 +243,14 @@ public class GAUtils {
      * @param fitnessFunctions The list of objective (fitness) functions.
      * @return Returns a mapping of chromosomes to its crowding distance values.
      */
-    public static <T> Map<IChromosome<T>, Double> crowdingDistanceAssignment(List<IChromosome<T>> population,
-                                                                  List<IFitnessFunction<T>> fitnessFunctions) {
+    public static <T> Map<IChromosome<T>, Double> crowdingDistanceAssignment(
+            final List<IChromosome<T>> population,
+            final List<IFitnessFunction<T>> fitnessFunctions) {
 
-        List<IChromosome<T>> solutions = new LinkedList<>(population);
-        int length = population.size();
+        final List<IChromosome<T>> solutions = new LinkedList<>(population);
+        final int length = population.size();
 
-        Map<IChromosome<T>, Double> crowdingDistanceAssignments = new HashMap<>();
+        final Map<IChromosome<T>, Double> crowdingDistanceAssignments = new HashMap<>();
 
         // init crowding distances
         for (IChromosome<T> solution : solutions) {
@@ -321,9 +325,10 @@ public class GAUtils {
      * @param paretoFronts The given pareto fronts.
      * @return Returns a mapping of chromosomes to its rank, i.e. the index of the pareto front.
      */
-    public static <T> Map<IChromosome<T>, Integer> getRankMap(Map<Integer, List<IChromosome<T>>> paretoFronts) {
+    public static <T> Map<IChromosome<T>, Integer> getRankMap(
+            final Map<Integer, List<IChromosome<T>>> paretoFronts) {
 
-        Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
+        final Map<IChromosome<T>, Integer> rankMap = new HashMap<>();
 
         for (Map.Entry<Integer, List<IChromosome<T>>> paretoFront : paretoFronts.entrySet()) {
             int rank = paretoFront.getKey();

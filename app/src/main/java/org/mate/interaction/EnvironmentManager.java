@@ -18,6 +18,7 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Objective;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
@@ -114,10 +115,10 @@ public class EnvironmentManager {
             server = new Socket(DEFAULT_SERVER_IP, port);
 
             /*
-            * The input stream obtained from server.getInputStream() cannot be interrupted when
-            * waiting for a response from the server. We need to wrap the input stream around a
-            * channel to make this possible. If an interrupt happens, a ClosedInterruptException
-            * will be thrown.
+             * The input stream obtained from server.getInputStream() cannot be interrupted when
+             * waiting for a response from the server. We need to wrap the input stream around a
+             * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+             * will be thrown.
              */
             final InputStream interruptibleInputStream = Channels.newInputStream(
                     Channels.newChannel(server.getInputStream()));
@@ -193,8 +194,8 @@ public class EnvironmentManager {
                     server.getOutputStream().flush();
                 } catch (IOException exception) {
                     /*
-                    * If we can't send the request the second time, it's likely that we can't
-                    * recover from this fault and thus abort the execution.
+                     * If we can't send the request the second time, it's likely that we can't
+                     * recover from this fault and thus abort the execution.
                      */
                     MATE.log_debug("socket error sending");
                     throw new IllegalStateException(exception);
@@ -336,8 +337,8 @@ public class EnvironmentManager {
      *
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
-     * @param testCases        The test cases belonging to the source chromosome.
-     * @param fitnessFunction  The underlying fitness function.
+     * @param testCases The test cases belonging to the source chromosome.
+     * @param fitnessFunction The underlying fitness function.
      */
     public void copyFitnessData(final IChromosome<TestSuite> sourceChromosome,
                                 final IChromosome<TestSuite> targetChromosome,
@@ -601,7 +602,33 @@ public class EnvironmentManager {
                 = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName);
-        Message response = sendMessage(messageBuilder.build());
+
+        Message response = null;
+        MateInterruptedException mateInterruptedException = null;
+
+        try {
+            response = sendMessage(messageBuilder.build());
+        } catch (MateInterruptedException e) {
+            /*
+             * We still need to wait for mate-server to complete the request, so we just wait for a
+             * few seconds. This is important, because if we continue immediately and try to get the
+             * coverage of the last incomplete test case by invoking the tracer, then the tracer's
+             * permissions to write to the external storage might get dropped while it tries to write,
+             * because clearing the app data also revokes the tracer's permissions. This in turn
+             * causes a failure of the tracer to write its traces.
+             */
+            mateInterruptedException = e;
+            Utils.sleepWithoutInterrupt(5000);
+        }
+
+        if (response != null && !"/android/grant_runtime_permissions".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: Unable to grant runtime permissions!");
+        }
+
+        if (mateInterruptedException != null) {
+            throw mateInterruptedException;
+        }
+
         return Boolean.parseBoolean(response.getParameter("response"));
     }
 
@@ -692,8 +719,8 @@ public class EnvironmentManager {
      * Stores the fitness data for the given chromosome.
      *
      * @param chromosome Refers either to a test case or to a test suite.
-     * @param entityId   Identifies the test case if chromosomeId specifies a test suite,
-     *                   otherwise {@code null}.
+     * @param entityId Identifies the test case if chromosomeId specifies a test suite,
+     *         otherwise {@code null}.
      * @param fitnessFunction The underlying fitness function.
      */
     public <T> void storeFitnessData(final IChromosome<T> chromosome, final String entityId,
@@ -1260,11 +1287,37 @@ public class EnvironmentManager {
      * Clears the app cache.
      */
     public void clearAppData() {
-        Message response = sendMessage(new Message.MessageBuilder("/android/clearApp")
+
+        Utils.throwOnInterrupt();
+
+        Message request = new Message.MessageBuilder("/android/clearApp")
                 .withParameter("deviceId", emulator)
-                .build());
-        if (!"/android/clearApp".equals(response.getSubject())) {
+                .build();
+
+        Message response = null;
+        MateInterruptedException mateInterruptedException = null;
+
+        try {
+            response = sendMessage(request);
+        } catch (MateInterruptedException e) {
+            /*
+             * We still need to wait for mate-server to complete the request, so we just wait for a
+             * few seconds. This is important, because if we continue immediately and try to get the
+             * coverage of the last incomplete test case by invoking the tracer, then the tracer's
+             * permissions to write to the external storage might get dropped while it tries to write,
+             * because clearing the app data also revokes the tracer's permissions. This in turn
+             * causes a failure of the tracer to write its traces.
+             */
+            mateInterruptedException = e;
+            Utils.sleepWithoutInterrupt(5000);
+        }
+
+        if (response != null && !"/android/clearApp".equals(response.getSubject())) {
             MATE.log_acc("ERROR: unable clear app data");
+        }
+
+        if (mateInterruptedException != null) {
+            throw mateInterruptedException;
         }
     }
 

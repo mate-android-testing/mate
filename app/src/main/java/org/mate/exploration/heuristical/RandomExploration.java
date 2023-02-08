@@ -4,7 +4,7 @@ import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
-import org.mate.exploration.intent.IntentChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.IntentChromosomeFactory;
 
 /**
  * Provides a random exploration strategy that produces {@link org.mate.model.TestCase}s consisting

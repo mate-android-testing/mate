@@ -278,7 +278,7 @@ public class DeviceMgr {
      */
     private void handleFillFormAndSubmit(MotifAction action) {
 
-        if (Properties.WIDGET_BASED_ACTIONS()) {
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
             List<UIAction> widgetActions = action.getUIActions();
 
@@ -404,6 +404,15 @@ public class DeviceMgr {
             return;
         }
 
+        /*
+        * The subsequent call to clickAndWait() can swallow a TimeoutException, which is thrown also
+        * by our TimeoutRun class to indicate the termination of the exploration. If swallowed, our
+        * timeout run thread would never terminate. To minimise such a case, we check if an interrupt
+        * was already triggered by our shutdown procedure and abort the execution in that case.
+        * See https://gitlab.infosun.fim.uni-passau.de/se2/mate/mate/-/merge_requests/184#note_80071.
+         */
+        Utils.throwOnInterrupt();
+
         Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
 
         if (success != null && success) {
@@ -450,7 +459,7 @@ public class DeviceMgr {
      */
     private void handleSpinnerScrolling(MotifAction action) {
 
-        if (Properties.WIDGET_BASED_ACTIONS()) {
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
             WidgetAction widgetAction = (WidgetAction) action.getUIActions().get(0);
 
@@ -1465,6 +1474,7 @@ public class DeviceMgr {
             return fragments;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            e.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -1589,6 +1599,8 @@ public class DeviceMgr {
      */
     public void clearApp() {
 
+        Utils.throwOnInterrupt();
+
         try {
             device.executeShellCommand("pm clear " + packageName);
 
@@ -1608,17 +1620,18 @@ public class DeviceMgr {
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
+        } finally {
+            /*
+             * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
+             * thus we have to re-grant them in order to allow the tracer to write its traces to the
+             * external storage. Otherwise, one may encounter the following situation: A reset is
+             * performed, dropping the runtime permissions. The execution of the next actions triggers
+             * dumping the traces because the cache limit of the tracer is reached. This operation would
+             * fail consequently. We need to call this operation in any case even when MATE received
+             * the timeout interrupt (only possible in the fallback mechanism!).
+             */
+            MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
         }
-
-        /*
-         * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
-         * thus we have to re-grant them in order to allow the tracer to write its traces to the
-         * external storage. Otherwise, one may encounter the following situation: A reset is
-         * performed, dropping the runtime permissions. The execution of the next actions triggers
-         * dumping the traces because the cache limit of the tracer is reached. This operation would
-         * fail consequently.
-         */
-        MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
     }
 
     /**

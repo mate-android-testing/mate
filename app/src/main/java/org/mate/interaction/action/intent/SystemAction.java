@@ -2,26 +2,15 @@ package org.mate.interaction.action.intent;
 
 import android.support.annotation.NonNull;
 
-import org.mate.interaction.action.Action;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.Objects;
 
 /**
- * Describes a system event notification that should be broad-casted to a certain receiver component.
+ * Describes a system event notification that should be broadcasted to a certain receiver component.
  */
-public class SystemAction extends Action {
-
-    /**
-     * The component describing the receiver of the system action.
-     */
-    private final ComponentDescription component;
-
-    /**
-     * The intent-filter of the receiver.
-     */
-    private final IntentFilterDescription intentFilter;
+public class SystemAction extends IntentAction {
 
     /**
      * The name of the receiver.
@@ -50,8 +39,7 @@ public class SystemAction extends Action {
      */
     public SystemAction(ComponentDescription component,
                         IntentFilterDescription intentFilter, String action) {
-        this.component = component;
-        this.intentFilter = intentFilter;
+        super(component, intentFilter);
         this.receiver = component.getFullyQualifiedName();
         this.action = action;
     }

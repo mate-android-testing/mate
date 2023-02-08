@@ -2,6 +2,7 @@ package org.mate.utils;
 
 import org.mate.Properties;
 import org.mate.Registry;
+import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
@@ -35,7 +36,7 @@ public class FitnessUtils {
      * @param testCases The test cases for which coverage data should be copied over.
      */
     public static void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
-                                        IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+                                       IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
 
         EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.BRANCH_COVERAGE,
                 FitnessFunction.BRANCH_DISTANCE, FitnessFunction.LINE_COVERAGE,
@@ -79,16 +80,16 @@ public class FitnessUtils {
      *
      * @param chromosome The chromosome for which the fitness data should be stored.
      * @param testCaseId Refers to a test case within a test suite or {@code null} if the chromosome
-     *          describes a test case.
+     *         describes a test case.
      * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      */
     private static <T> void storeFitnessData(IChromosome<T> chromosome, String testCaseId) {
 
         if (Properties.FITNESS_FUNCTIONS() == null) {
             /*
-            * If the underlying algorithm doesn't use any fitness function but uses the default
-            * chromosome factory or any derivative of it, storeFitnessData() is called. Since there
-            * is no fitness function specified, the subsequent foreach loop would cause a NPE.
+             * If the underlying algorithm doesn't use any fitness function but uses the default
+             * chromosome factory or any derivative of it, storeFitnessData() is called. Since there
+             * is no fitness function specified, the subsequent foreach loop would cause a NPE.
              */
             return;
         }
@@ -108,27 +109,32 @@ public class FitnessUtils {
     }
 
     /**
-     * Removes all non active chromosomes, i.e. obsolete chromosomes, from an internal cache.
+     * Removes all non active chromosomes, i.e. obsolete chromosomes, from an internal cache. This
+     * method should be only called in the context of multi-objective algorithms, where the same
+     * fitness function is used for every objective, e.g. branch.
      *
      * @param activeChromosomes The list of active chromosomes.
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
-            switch (fitnessFunction) {
-                case LINE_PERCENTAGE_COVERAGE:
-                    LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
-                    break;
-                case BASIC_BLOCK_MULTI_OBJECTIVE:
-                    BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-                    break;
-                case BRANCH_DISTANCE_MULTI_OBJECTIVE:
-                    BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-                    break;
-                case BRANCH_MULTI_OBJECTIVE:
-                    BranchMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
-                    break;
-            }
+        assert Properties.ALGORITHM() == Algorithm.MIO || Properties.ALGORITHM() == Algorithm.MOSA;
+
+        // TODO: perform a sanity check that the same fitness function is used for every objective
+        FitnessFunction fitnessFunction = Properties.FITNESS_FUNCTIONS()[0];
+
+        switch (fitnessFunction) {
+            case LINE_PERCENTAGE_COVERAGE:
+                LineCoveredPercentageFitnessFunction.cleanCache(activeChromosomes);
+                break;
+            case BASIC_BLOCK_MULTI_OBJECTIVE:
+                BasicBlockMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+                break;
+            case BRANCH_DISTANCE_MULTI_OBJECTIVE:
+                BranchDistanceMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+                break;
+            case BRANCH_MULTI_OBJECTIVE:
+                BranchMultiObjectiveFitnessFunction.cleanCache(activeChromosomes);
+                break;
         }
     }
 
@@ -145,15 +151,18 @@ public class FitnessUtils {
         switch (fitnessFunction) {
             case BRANCH_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
+                        .getCoverage(Coverage.BRANCH_COVERAGE, chromosome)
+                        .getBranchCoverage();
             case BRANCH_DISTANCE:
                 return Registry.getEnvironmentManager().getBranchDistance(chromosome);
             case LINE_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
+                        .getCoverage(Coverage.LINE_COVERAGE, chromosome)
+                        .getLineCoverage();
             case METHOD_COVERAGE:
                 return Registry.getEnvironmentManager()
-                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
+                        .getCoverage(Coverage.METHOD_COVERAGE, chromosome)
+                        .getMethodCoverage();
             case BASIC_BLOCK_LINE_COVERAGE:
                 return Registry.getEnvironmentManager()
                         .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome)
@@ -162,29 +171,6 @@ public class FitnessUtils {
                 return Registry.getEnvironmentManager()
                         .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome)
                         .getBranchCoverage();
-            case GENO_TO_PHENO_TYPE:
-                // GE specifies the 'core' fitness function in the GE_FITNESS_FUNCTION() property
-                if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE) {
-                    return Registry.getEnvironmentManager()
-                            .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome).getBranchCoverage();
-                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BASIC_BLOCK_LINE_COVERAGE) {
-                    return Registry.getEnvironmentManager()
-                            .getCoverage(Coverage.BASIC_BLOCK_LINE_COVERAGE, chromosome).getLineCoverage();
-                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_COVERAGE) {
-                    return Registry.getEnvironmentManager()
-                            .getCoverage(Coverage.BRANCH_COVERAGE, chromosome).getBranchCoverage();
-                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.BRANCH_DISTANCE) {
-                    return Registry.getEnvironmentManager().getBranchDistance(chromosome);
-                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.METHOD_COVERAGE) {
-                    return Registry.getEnvironmentManager()
-                            .getCoverage(Coverage.METHOD_COVERAGE, chromosome).getMethodCoverage();
-                } else if (Properties.GE_FITNESS_FUNCTION() == FitnessFunction.LINE_COVERAGE) {
-                    return Registry.getEnvironmentManager()
-                            .getCoverage(Coverage.LINE_COVERAGE, chromosome).getLineCoverage();
-                } else {
-                    throw new UnsupportedOperationException("GE fitness function "
-                            + Properties.GE_FITNESS_FUNCTION() + " not yet supported!");
-                }
             default:
                 throw new UnsupportedOperationException("Fitness function "
                         + fitnessFunction + " not yet supported!");
