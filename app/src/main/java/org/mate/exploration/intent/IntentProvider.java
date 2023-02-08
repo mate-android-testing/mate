@@ -3,23 +3,27 @@ package org.mate.exploration.intent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.intent.parsers.IntentInfoParser;
 import org.mate.exploration.intent.parsers.SystemActionParser;
-import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.intent.IntentBasedAction;
 import org.mate.interaction.action.intent.SystemAction;
+import org.mate.utils.PowerSet;
 import org.mate.utils.Randomness;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
+import org.mate.utils.manifest.element.DataDescription;
 import org.mate.utils.manifest.element.IntentFilterDescription;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +32,11 @@ import java.util.stream.Collectors;
  * A factory to generate intents matching the specified component and intent filter.
  */
 public class IntentProvider {
+
+    /**
+     * The number of intents that should be generated with a mutated data uri.
+     */
+    private static final int MAX_NUMBER_OF_MUTANTS = 3;
 
     /**
      * The list of enabled and exported components that can be launched through an intent.
@@ -56,17 +65,17 @@ public class IntentProvider {
 
         components = IntentInfoParser.parseIntentInfoFile(
                 filterComponents(Registry.getManifest().getComponents().stream()
-                .filter(component -> component.isEnabled() && component.isExported())
-                .filter(component -> !component.isContentProvider())
-                .collect(Collectors.toList())));
+                        .filter(component -> component.isEnabled() && component.isExported())
+                        .filter(component -> !component.isContentProvider())
+                        .collect(Collectors.toList())));
 
         systemEventActions = SystemActionParser.parseSystemEventActions();
         systemEventReceivers = extractSystemEventReceivers(components, systemEventActions);
 
         /*
-        * TODO: We may need to derive the dynamic receivers before the system event receivers,
-        *  since extractSystemEventReceivers() potentially removes components, see the inline
-        *  comments!
+         * TODO: We may need to derive the dynamic receivers before the system event receivers,
+         *  since extractSystemEventReceivers() potentially removes components, see the inline
+         *  comments!
          */
         dynamicReceivers = components.stream()
                 .filter(ComponentDescription::isDynamicReceiver)
@@ -75,9 +84,9 @@ public class IntentProvider {
                 .collect(Collectors.toList());
 
         /*
-        * A dynamic receiver can't be triggered by an explicit intent, thus we need to remove those
-        * receivers from the component list, otherwise getAction() may select a dynamic receiver
-        * as target and fails consequently.
+         * A dynamic receiver can't be triggered by an explicit intent, thus we need to remove those
+         * receivers from the component list, otherwise getAction() may select a dynamic receiver
+         * as target and fails consequently.
          */
         components.removeAll(dynamicReceivers);
 
@@ -103,6 +112,18 @@ public class IntentProvider {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks whether the given action describes a system event.
+     *
+     * @param systemEvents The list of system events/actions.
+     * @param action The given action.
+     * @return Returns {@code true} if the given action refers to a system event, otherwise
+     *         {@code false} is returned.
+     */
+    private boolean describesSystemEvent(final List<String> systemEvents, final String action) {
+        return systemEvents.contains(action);
     }
 
     /**
@@ -136,12 +157,12 @@ public class IntentProvider {
                 for (IntentFilterDescription intentFilter : component.getIntentFilters()) {
 
                     /*
-                    * TODO: If an intent filter contains multiple actions (which might be the case
-                    *  for dynamic receivers, since those can only define a single filter), the
-                    *  most correct option would be to split the intent filter into multiple filters
-                    *  separating the actions from system event actions. Right now, we remove the
-                    *  complete intent filter from the original component, which might contain a
-                    *  mixture of system and intent-based actions.
+                     * TODO: If an intent filter contains multiple actions (which might be the case
+                     *  for dynamic receivers, since those can only define a single filter), the
+                     *  most correct option would be to split the intent filter into multiple filters
+                     *  separating the actions from system event actions. Right now, we remove the
+                     *  complete intent filter from the original component, which might contain a
+                     *  mixture of system and intent-based actions.
                      */
                     if (describesSystemEvent(systemEvents, intentFilter)) {
 
@@ -161,11 +182,11 @@ public class IntentProvider {
                 }
 
                 /*
-                * TODO: Only remove the receiver if really all actions contained in the intent
-                *  filter(s) describe system events, see the above comment. Right now, we remove
-                *  the receiver if at least a single action per intent filter refers to a system
-                *  event. Hence, we may drop a (dynamic) receiver at this point, which might react
-                *  to both kinds of actions.
+                 * TODO: Only remove the receiver if really all actions contained in the intent
+                 *  filter(s) describe system events, see the above comment. Right now, we remove
+                 *  the receiver if at least a single action per intent filter refers to a system
+                 *  event. Hence, we may drop a (dynamic) receiver at this point, which might react
+                 *  to both kinds of actions.
                  */
                 if (!component.hasIntentFilter()) {
                     /*
@@ -283,26 +304,25 @@ public class IntentProvider {
      *
      * @return Returns an action encapsulating a dynamic broadcast receiver.
      */
-    public Action getDynamicReceiverAction() {
+    public IntentAction getDynamicReceiverAction() {
+
         if (!hasDynamicReceiver()) {
             throw new IllegalStateException("No dynamic broadcast receiver found!");
         } else {
             // select randomly a dynamic receiver
-            ComponentDescription component = Randomness.randomElement(dynamicReceivers);
-            IntentFilterDescription intentFilter = Randomness.randomElement(component.getIntentFilters());
+            final ComponentDescription dynamicReceiver = Randomness.randomElement(dynamicReceivers);
+            final IntentFilterDescription intentFilter
+                    = Randomness.randomElement(dynamicReceiver.getIntentFilters());
+            final String action = Randomness.randomElement(intentFilter.getActions());
 
             // we need to distinguish between a dynamic system receiver and dynamic receiver
-            if (describesSystemEvent(systemEventActions, intentFilter)) {
-                /*
-                 * TODO: If the randomly selected action actually refers to a system event, we
-                 *  require a system action only, otherwise this is a regular intent-based action.
-                 */
-                String action = Randomness.randomElement(intentFilter.getActions());
-                SystemAction systemAction = new SystemAction(component, intentFilter, action);
+            if (describesSystemEvent(systemEventActions, action)) {
+                SystemAction systemAction = new SystemAction(dynamicReceiver, intentFilter, action);
                 systemAction.markAsDynamic();
                 return systemAction;
             } else {
-                return generateIntentBasedAction(component, true);
+                return generateIntentBasedAction(dynamicReceiver, true, intentFilter,
+                        action, null);
             }
         }
     }
@@ -364,6 +384,227 @@ public class IntentProvider {
     }
 
     /**
+     * Retrieves the applicable system actions.
+     *
+     * @return Returns the list of applicable system actions.
+     */
+    public List<SystemAction> getSystemActions() {
+
+        final List<SystemAction> systemActions = new ArrayList<>();
+
+        for (ComponentDescription systemEventReceiver : systemEventReceivers) {
+            for (IntentFilterDescription intentFilter : systemEventReceiver.getIntentFilters()) {
+                for (String action : intentFilter.getActions()) {
+                    final SystemAction systemAction
+                            = new SystemAction(systemEventReceiver, intentFilter, action);
+                    if (systemEventReceiver.isDynamicReceiver()) {
+                        systemAction.markAsDynamic();
+                    }
+                    systemActions.add(systemAction);
+                }
+            }
+        }
+
+        return systemActions;
+    }
+
+    /**
+     * Retrieves the list of dynamic receiver intent actions.
+     *
+     * @return Returns the list of applicable dynamic receiver actions.
+     */
+    public List<IntentAction> getDynamicReceiverIntentActions() {
+
+        final List<IntentAction> dynamicReceiverIntentActions = new ArrayList<>();
+
+        for (ComponentDescription dynamicReceiver : dynamicReceivers) {
+            for (IntentFilterDescription intentFilter : dynamicReceiver.getIntentFilters()) {
+                for (String action : intentFilter.getActions()) {
+
+                    // we need to distinguish between a dynamic receiver and a dynamic system receiver
+                    if (describesSystemEvent(systemEventActions, action)) {
+
+                        final SystemAction systemAction = new SystemAction(dynamicReceiver,
+                                intentFilter, action);
+                        systemAction.markAsDynamic();
+                        dynamicReceiverIntentActions.add(systemAction);
+                    } else { // regular dynamic receiver
+
+                        // mix every combination of categories with the fixed action
+                        final PowerSet<String> categoryCombinations
+                                = new PowerSet<>(intentFilter.getCategories());
+
+                        while (categoryCombinations.hasNext()) {
+
+                            final IntentBasedAction intentAction
+                                    = generateIntentBasedAction(dynamicReceiver, true,
+                                    false, intentFilter, action,
+                                    categoryCombinations.next());
+                            dynamicReceiverIntentActions.add(intentAction);
+
+                            // generate intents with a mutated data uri and extras
+                            dynamicReceiverIntentActions.addAll(generateMutants(intentAction));
+                        }
+                    }
+                }
+            }
+        }
+
+        return dynamicReceiverIntentActions;
+    }
+
+    /**
+     * Creates an explicit intent with no attributes.
+     *
+     * @param component The component for which an empty intent should be generated.
+     * @return Returns the intent based action.
+     */
+    private IntentBasedAction createEmptyIntent(final ComponentDescription component) {
+
+        final Intent intent = new Intent();
+        intent.setComponent(new ComponentName(Registry.getPackageName(),
+                component.getFullyQualifiedName()));
+        return new IntentBasedAction(intent, component, new IntentFilterDescription());
+    }
+
+    /**
+     * Retrieves the applicable intent-based actions.
+     *
+     * @return Returns the list of applicable intent-based actions.
+     */
+    public List<IntentBasedAction> getIntentBasedActions() {
+
+        final List<IntentBasedAction> intentBasedActions = new ArrayList<>();
+
+        for (final ComponentDescription component : components) {
+
+            // there are components that are exported but have no intent filter
+            if (!component.hasIntentFilter()) {
+                MATE.log_debug("Targeting component without intent filter: "
+                        + component.getFullyQualifiedName());
+                intentBasedActions.add(createEmptyIntent(component));
+                continue;
+            }
+
+            for (IntentFilterDescription intentFilter : component.getIntentFilters()) {
+
+                for (String action : intentFilter.getActions()) {
+
+                    if (intentFilter.hasCategory()) {
+
+                        // mix every combination of categories with the fixed action
+                        final PowerSet<String> categoryCombinations
+                                = new PowerSet<>(intentFilter.getCategories());
+
+                        while (categoryCombinations.hasNext()) {
+
+                            final IntentBasedAction intentBasedAction
+                                    = generateIntentBasedAction(component,
+                                    component.isDynamicReceiver(), component.isHandlingOnNewIntent(),
+                                    intentFilter, action, categoryCombinations.next());
+
+                            intentBasedActions.add(intentBasedAction);
+
+                            if (component.isHandlingOnNewIntent()) {
+                                // create a copy just without the onNewIntent flag
+                                final IntentBasedAction intentBasedActionCopy
+                                        = new IntentBasedAction(intentBasedAction);
+                                intentBasedActionCopy.getIntent().setFlags(0); // no flags
+                                intentBasedActions.add(intentBasedActionCopy);
+                            }
+                        }
+
+                    } else { // no categories
+                        final IntentBasedAction intentBasedAction
+                                = generateIntentBasedAction(component,
+                                component.isDynamicReceiver(), component.isHandlingOnNewIntent(),
+                                intentFilter, action, null);
+                        intentBasedActions.add(intentBasedAction);
+                    }
+                }
+            }
+        }
+
+        // generate intents with a mutated data uri and extras
+        final List<IntentBasedAction> mutants
+                = new ArrayList<>(MAX_NUMBER_OF_MUTANTS * intentBasedActions.size());
+
+        for (IntentBasedAction intentBasedAction : intentBasedActions) {
+            mutants.addAll(generateMutants(intentBasedAction));
+        }
+
+        intentBasedActions.addAll(mutants);
+
+        return intentBasedActions;
+    }
+
+    /**
+     * Generates up to {@link #MAX_NUMBER_OF_MUTANTS} intents with a mutated data uri and extras.
+     *
+     * @param intentBasedAction The intent from which the mutants are produced.
+     * @return Returns the list of mutated intents.
+     */
+    private List<IntentBasedAction> generateMutants(IntentBasedAction intentBasedAction) {
+
+        final List<IntentBasedAction> mutants = new ArrayList<>(MAX_NUMBER_OF_MUTANTS);
+
+        if (intentBasedAction.getIntentFilter().hasData()) {
+
+            final DataDescription dataTag = intentBasedAction.getIntentFilter().getData();
+            final Uri originalUri = intentBasedAction.getIntent().getData();
+            final Set<Uri> randomUris = new HashSet<>(MAX_NUMBER_OF_MUTANTS);
+
+            for (int i = 0; i < MAX_NUMBER_OF_MUTANTS; i++) {
+
+                final Uri uri = DataUriGenerator.generateRandomUri(dataTag);
+
+                if (uri != null && !uri.equals(originalUri)) { // only consider distinct uris
+                    randomUris.add(uri);
+                }
+            }
+
+            for (Uri uri : randomUris) {
+                final IntentBasedAction clone = new IntentBasedAction(intentBasedAction);
+                clone.getIntent().setData(uri);
+                mutants.add(clone);
+            }
+        }
+
+        if (intentBasedAction.getComponent().hasExtras()) {
+
+            final Bundle originalExtras = intentBasedAction.getIntent().getExtras();
+            final Set<Bundle> randomExtras = new HashSet<>(MAX_NUMBER_OF_MUTANTS);
+
+            for (int i = 0; i < MAX_NUMBER_OF_MUTANTS; i++) {
+
+                final Bundle extras
+                        = BundleGenerator.generateRandomBundle(intentBasedAction.getComponent());
+
+                if (originalExtras != null
+                        // equals() on Bundle just checks the reference
+                        && Objects.equals(extras.toString(), originalExtras.toString())) {
+                    randomExtras.add(extras);
+                }
+            }
+
+            int i = 0;
+            for (Bundle extras : randomExtras) {
+                if (i < mutants.size()) { // further mutate the already generated mutants
+                    IntentBasedAction mutant = mutants.get(i);
+                    mutant.getIntent().putExtras(extras);
+                } else { // generate a mutant
+                    final IntentBasedAction clone = new IntentBasedAction(intentBasedAction);
+                    clone.getIntent().putExtras(extras);
+                    mutants.add(clone);
+                }
+                i++;
+            }
+        }
+
+        return mutants;
+    }
+
+    /**
      * Checks whether the currently visible activity defines a callback for onNewIntent().
      *
      * @return Returns {@code true} if the current activity implements onNewIntent(),
@@ -419,15 +660,22 @@ public class IntentProvider {
         if (component == null) {
             throw new IllegalStateException("No component description found for current activity!");
         }
-        return generateIntentBasedAction(component, false, true);
+        return generateIntentBasedAction(component, false, true,
+                null, null, null);
     }
 
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component) {
-        return generateIntentBasedAction(component, false, false);
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component) {
+        return generateIntentBasedAction(component, false, false,
+                null, null, null);
     }
 
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component, boolean dynamicReceiver) {
-        return generateIntentBasedAction(component, dynamicReceiver, false);
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
+                                                        final boolean dynamicReceiver,
+                                                        final IntentFilterDescription intentFilter,
+                                                        final String action,
+                                                        final Set<String> categories) {
+        return generateIntentBasedAction(component, dynamicReceiver, false,
+                intentFilter, action, categories);
     }
 
     /**
@@ -437,55 +685,73 @@ public class IntentProvider {
      * @param component The component information.
      * @param dynamicReceiver Whether the component is a dynamic receiver.
      * @param handleOnNewIntent Whether the intent should trigger the onNewIntent method.
+     * @param intentFilter The intent filter to use or {code null} if a random one should be picked.
+     * @param action The action to use or {@code null} if a random one should be picked.
+     * @param categories The categories to use or {@code null} if random ones should be picked.
      * @return Returns the corresponding IntentBasedAction encapsulating the component,
      *         the selected intent-filter and the generated intent.
      */
-    private IntentBasedAction generateIntentBasedAction(ComponentDescription component,
-                                                        boolean dynamicReceiver, boolean handleOnNewIntent) {
+    private IntentBasedAction generateIntentBasedAction(final ComponentDescription component,
+                                                        final boolean dynamicReceiver,
+                                                        final boolean handleOnNewIntent,
+                                                        IntentFilterDescription intentFilter,
+                                                        String action,
+                                                        Set<String> categories) {
 
         /*
-        * There are components that were explicitly exported although they don't offer any intent
-        * filter, e.g. activity-aliases. In this case we simply construct an explicit intent without
-        * any further attributes.
+         * There are components that were explicitly exported although they don't offer any intent
+         * filter, e.g. activity-aliases. In this case we simply construct an explicit intent without
+         * any further attributes.
          */
         if (!component.hasIntentFilter()) {
-            MATE.log_debug("Targeting component without intent filter: " + component.getFullyQualifiedName());
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
-            return new IntentBasedAction(intent, component, new IntentFilterDescription());
+            MATE.log_debug("Targeting component without intent filter: "
+                    + component.getFullyQualifiedName());
+            return createEmptyIntent(component);
         }
 
         Set<IntentFilterDescription> intentFilters = component.getIntentFilters();
 
         // select a random intent filter
-        IntentFilterDescription intentFilter = Randomness.randomElement(intentFilters);
+        if (intentFilter == null) {
+            intentFilter = Randomness.randomElement(intentFilters);
+        }
 
         Intent intent = new Intent();
 
         // add a random action if present
         if (intentFilter.hasAction()) {
-            String action = Randomness.randomElement(intentFilter.getActions());
+            if (action == null) {
+                action = Randomness.randomElement(intentFilter.getActions());
+            }
             intent.setAction(action);
         }
 
         // add random categories if present
         if (intentFilter.hasCategory()) {
 
-            Set<String> categories = intentFilter.getCategories();
+            if (categories != null) {
+                // use the supplied categories
+                for (String category : categories) {
+                    intent.addCategory(category);
+                }
+            } else {
 
-            final double ALPHA = 1;
-            double decreasingFactor = ALPHA;
-            Random random = new Random();
+                categories = intentFilter.getCategories();
 
-            // add with decreasing probability categories (at least one)
-            while (random.nextDouble() < ALPHA / decreasingFactor) {
-                String category = Randomness.randomElement(categories);
-                intent.addCategory(category);
-                decreasingFactor /= 2;
+                final double ALPHA = 1;
+                double decreasingFactor = ALPHA;
+                Random random = Randomness.getRnd();
 
-                // we reached the maximal amount of categories we can add
-                if (intent.getCategories().size() == categories.size()) {
-                    break;
+                // add with decreasing probability categories (at least one)
+                while (random.nextDouble() < ALPHA / decreasingFactor) {
+                    String category = Randomness.randomElement(categories);
+                    intent.addCategory(category);
+                    decreasingFactor /= 2;
+
+                    // we reached the maximal amount of categories we can add
+                    if (intent.getCategories().size() == categories.size()) {
+                        break;
+                    }
                 }
             }
         }
@@ -510,7 +776,8 @@ public class IntentProvider {
             intent.setPackage(Registry.getPackageName());
         } else {
             // make every other intent explicit
-            intent.setComponent(new ComponentName(Registry.getPackageName(), component.getFullyQualifiedName()));
+            intent.setComponent(new ComponentName(Registry.getPackageName(),
+                    component.getFullyQualifiedName()));
         }
 
         // construct suitable key-value pairs

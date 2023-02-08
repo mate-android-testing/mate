@@ -340,7 +340,7 @@ public class TestCase {
         }
         for (; count < finalSize; count++) {
             Action action;
-            if (Properties.WIDGET_BASED_ACTIONS()) {
+            if (!Properties.USE_PRIMITIVE_ACTIONS()) {
                 action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
             } else {
                 action = PrimitiveAction.randomAction();

@@ -207,9 +207,9 @@ public class Properties {
         FitnessFunction fitnessFunction = propertyOrNull("fitness_function");
 
         if (fitnessFunction == null) {
-            FitnessFunction[] mutationFunctions = propertyOrNull("fitness_functions");
-            if (mutationFunctions != null) {
-                fitnessFunction = mutationFunctions[0];
+            FitnessFunction[] fitnessFunctions = propertyOrNull("fitness_functions");
+            if (fitnessFunctions != null) {
+                fitnessFunction = fitnessFunctions[0];
             }
         }
 
@@ -285,6 +285,29 @@ public class Properties {
     public static ChromosomeFactory CHROMOSOME_FACTORY() { return propertyOr(null); }
 
     public static Algorithm ALGORITHM() { return propertyOr(null); }
+
+    /**
+     * Whether a screen state should return {@link org.mate.interaction.action.ui.UIAction}s and
+     * {@link org.mate.interaction.action.ui.WidgetAction}s.
+     *
+     * @return Returns {@code true} (default option) when a screen state should return ui actions.
+     */
+    public static boolean USE_UI_ACTIONS() { return propertyOr(true); }
+
+    /**
+     * Whether a screen state should return {@link org.mate.interaction.action.intent.SystemAction}s
+     * and {@link org.mate.interaction.action.intent.IntentBasedAction}s.
+     *
+     * @return Returns {@code true} (default option) when a screen state should return intent actions.
+     */
+    public static boolean USE_INTENT_ACTIONS() { return propertyOr(true); }
+
+    /**
+     * Whether a screen state should return {@link org.mate.interaction.action.ui.MotifAction}s.
+     *
+     * @return Returns {@code true} (default option) when a screen state should return motif actions.
+     */
+    public static boolean USE_MOTIF_ACTIONS() { return propertyOr(true); }
 
     /*
      * Begin Greybox Fuzzing properties
@@ -386,9 +409,17 @@ public class Properties {
      * End Graph properties
      */
 
-    // Primitive actions or widget based actions?
-    public static boolean WIDGET_BASED_ACTIONS() {
-        return propertyOr(true);
+    /**
+     * Whether {@link org.mate.interaction.action.ui.PrimitiveAction}s should be used instead of
+     * {@link org.mate.interaction.action.ui.WidgetAction}s. This is only necessary when using an
+     * algorithm like {@link org.mate.exploration.genetic.algorithm.Sapienz} that relies upon
+     * primitive actions.
+     *
+     * @return Returns {@code true} if primitive actions should be used instead of widget actions,
+     *         otherwise {@code false} is returned.
+     */
+    public static boolean USE_PRIMITIVE_ACTIONS() {
+        return propertyOr(false);
     }
 
     // stack trace

@@ -101,7 +101,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
         IChromosome<TestCase> chromosome = super.createChromosome();
 
         // updates the unvisited widgets for the last executed action
-        computeUnvisitedWidgets(uiAbstractionLayer.getExecutableActions());
+        computeUnvisitedWidgets(uiAbstractionLayer.getExecutableUIActions());
 
         previousAction = null;
 
@@ -117,7 +117,7 @@ public class HeuristicalChromosomeFactory extends AndroidRandomChromosomeFactory
     @Override
     protected Action selectAction() {
 
-        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
+        List<UIAction> executableActions = uiAbstractionLayer.getExecutableUIActions();
 
         // compute unvisited widgets of previous action (if there is a previous action)
        computeUnvisitedWidgets(executableActions);

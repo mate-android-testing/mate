@@ -9,6 +9,7 @@ import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
+import org.mate.interaction.action.intent.IntentAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -116,12 +117,31 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Returns the list of executable actions on the current screen. This includes both ui and
+     * intent actions.
+     *
+     * @return Returns the list of executable (ui and intent) actions.
+     */
+    public List<Action> getExecutableActions() {
+        return getLastScreenState().getActions();
+    }
+
+    /**
+     * Returns the list of executable intent actions.
+     *
+     * @return Returns the list of executable intent actions.
+     */
+    public List<IntentAction> getExecutableIntentActions() {
+        return getLastScreenState().getIntentActions();
+    }
+
+    /**
      * Returns the list of executable ui actions on the current screen.
      *
-     * @return Returns the list of executable widget actions.
+     * @return Returns the list of executable ui actions.
      */
-    public List<UIAction> getExecutableActions() {
-        return getLastScreenState().getActions();
+    public List<UIAction> getExecutableUIActions() {
+        return getLastScreenState().getUIActions();
     }
 
     /**

@@ -17,9 +17,11 @@ import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.IntentChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.UniformIntentChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
@@ -75,7 +77,6 @@ import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisionBiasedMapping;
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
-import org.mate.exploration.intent.IntentChromosomeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -547,9 +548,9 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
             throw new IllegalStateException("Sapienz requires a termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
-        } else if (org.mate.Properties.WIDGET_BASED_ACTIONS()) {
+        } else if (!org.mate.Properties.USE_PRIMITIVE_ACTIONS()) {
             throw new IllegalStateException("Sapienz can not handle widget-based actions! Turn " +
-                    "the property Properties.WIDGET_BASED_ACTIONS() off.");
+                    "the property Properties.USE_PRIMITIVE_ACTIONS() on.");
         }
 
         return new Sapienz<>(
@@ -596,8 +597,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IChromosomeFactory<T>) new PrimitiveAndroidRandomChromosomeFactory(getNumEvents());
-            case INTENT_ANDROID_RANDOM_CHROMOSOME_FACTORY:
+            case INTENT_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
+            case UNIFORM_INTENT_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new UniformIntentChromosomeFactory(getNumEvents(), org.mate.Properties.RELATIVE_INTENT_AMOUNT());
             case SAPIENZ_RANDOM_CHROMOSOME_FACTORY:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes

@@ -134,7 +134,13 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunction(CrossOverFunction crossoverFunction) {
-        return withCrossoverFunctions(new CrossOverFunction[] { crossoverFunction });
+
+        if (crossoverFunction == null) {
+            // there might be no crossover function required
+            return this;
+        } else {
+            return withCrossoverFunctions(new CrossOverFunction[]{crossoverFunction});
+        }
     }
 
     /**
@@ -144,6 +150,11 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withCrossoverFunctions(CrossOverFunction[] crossoverFunctions) {
+
+        if (crossoverFunctions == null) {
+            // there might be no crossover function(s) required
+            return this;
+        }
 
         for (int i = 0; i < crossoverFunctions.length; i++) {
             String key = String.format(FORMAT_LOCALE, CROSSOVER_FUNCTION_KEY_FORMAT, i);
@@ -167,7 +178,13 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunction(MutationFunction mutationFunction) {
-        return withMutationFunctions(new MutationFunction[] {mutationFunction});
+        
+        if (mutationFunction == null) {
+            // there might be no mutation function required
+            return this;
+        } else {
+            return withMutationFunctions(new MutationFunction[]{mutationFunction});
+        }
     }
 
     /**
@@ -177,6 +194,11 @@ public class GeneticAlgorithmBuilder {
      * @return Returns the current builder state.
      */
     public GeneticAlgorithmBuilder withMutationFunctions(MutationFunction[] mutationFunctions) {
+
+        if (mutationFunctions == null) {
+            // there might be no mutation function(s) required
+            return this;
+        }
 
         for (int i = 0; i < mutationFunctions.length; i++) {
             String key = String.format(FORMAT_LOCALE, MUTATION_FUNCTION_KEY_FORMAT, i);
