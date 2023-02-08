@@ -129,7 +129,7 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
             // replace with a random ui action
             final List<UIAction> candidateAction = uiAbstractionLayer
                     .getLastScreenState()
-                    .getActions()
+                    .getUIActions()
                     .stream()
                     .filter(a -> !action.equals(a)
                             && !(a instanceof MotifAction)
