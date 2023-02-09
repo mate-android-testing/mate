@@ -219,7 +219,7 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
                 .collect(Collectors.toList());
 
         if (!sameWidgetDifferentAction.isEmpty()) {
-            return Randomness.randomElement(differentWidgetSameAction);
+            return Randomness.randomElement(sameWidgetDifferentAction);
         }
 
         return Randomness.randomElement(widgetActions);
