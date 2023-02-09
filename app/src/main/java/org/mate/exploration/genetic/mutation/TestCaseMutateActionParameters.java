@@ -127,7 +127,7 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
             return mutate((WidgetAction) action);
         } else {
             // replace with a random ui action
-            final List<UIAction> candidateAction = uiAbstractionLayer
+            final List<UIAction> candidateActions = uiAbstractionLayer
                     .getLastScreenState()
                     .getUIActions()
                     .stream()
@@ -137,8 +137,8 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
                             && !(a instanceof WidgetAction))
                     .collect(Collectors.toList());
 
-            if (!candidateAction.isEmpty()) {
-                return Randomness.randomElement(candidateAction);
+            if (!candidateActions.isEmpty()) {
+                return Randomness.randomElement(candidateActions);
             } else {
                 return action;
             }
