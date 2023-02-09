@@ -1,11 +1,20 @@
 package org.mate.exploration.genetic.mutation;
 
+import android.net.Uri;
+import android.os.Bundle;
+
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.intent.BundleGenerator;
+import org.mate.exploration.intent.DataUriGenerator;
+import org.mate.exploration.intent.IntentProvider;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.intent.IntentAction;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
@@ -20,12 +29,12 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Provides a mutation function for {@link TestCase}s that replaces the individual actions by actions
- * of the same type, e.g. a {@link MotifAction} is replaced by a {@link MotifAction}. This mutation
- * is only applicable for {@link UIAction}s.
+ * of the same type, e.g. a {@link MotifAction} is replaced by a {@link MotifAction}.
  */
 public class TestCaseMutateActionParameters implements IMutationFunction<TestCase> {
 
@@ -39,6 +48,11 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
      * produces {@link org.mate.model.TestSuite}s or not.
      */
     private boolean isTestSuiteExecution = false;
+
+    /**
+     * Enables access to the intent generation.
+     */
+    private static final IntentProvider intentProvider = new IntentProvider();
 
     /**
      * Initialises the mutation function.
@@ -77,6 +91,14 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
                 final Action oldAction = chromosome.getValue().getActionSequence().get(i);
                 if (oldAction instanceof UIAction) {
                     final UIAction newAction = mutate((UIAction) oldAction);
+
+                    // check that the ui action is actually applicable
+                    if ((!uiAbstractionLayer.getExecutableUIActions().contains(newAction))
+                            || !mutant.updateTestCase(newAction, i)) {
+                        break;
+                    }
+                } else if (oldAction instanceof IntentAction) {
+                    final IntentAction newAction = mutate((IntentAction) oldAction);
                     if (!mutant.updateTestCase(newAction, i)) {
                         break;
                     }
@@ -109,6 +131,98 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
         }
 
         return mutatedChromosome;
+    }
+
+    /**
+     * Mutates the given intent action.
+     *
+     * @param action The action to be mutated.
+     * @return Returns the mutated intent action.
+     */
+    private IntentAction mutate(final IntentAction action) {
+        if (action instanceof IntentBasedAction) {
+            return mutate((IntentBasedAction) action);
+        } else if (action instanceof SystemAction) {
+            return mutate((SystemAction) action);
+        } else {
+            throw new UnsupportedOperationException("Unknown action type: " + action.getClass());
+        }
+    }
+
+    /**
+     * Mutates the given intent action by replacing individual attributes like action, categories,
+     * data uri and extras.
+     *
+     * @param action The intent action to be mutated.
+     * @return Returns the mutated intent action.
+     */
+    private IntentAction mutate(final IntentBasedAction action) {
+
+        // TODO: Mutate each attribute only with a probability of 1/2?
+
+        // mutate action
+        if (action.getIntentFilter().hasAction()
+                && action.getIntentFilter().getActions().size() > 1) {
+            final Set<String> actions = action.getIntentFilter().getActions();
+            final String oldAction = action.getIntent().getAction();
+            String randomAction = Randomness.randomElement(actions);
+            while (randomAction.equals(oldAction)) {
+                randomAction = Randomness.randomElement(actions);
+            }
+            action.getIntent().setAction(randomAction);
+        }
+
+        // mutate categories
+        if (action.getIntentFilter().hasCategory()
+                && action.getIntentFilter().getCategories().size() > 1) {
+            final Set<String> categories
+                    = Randomness.randomSubset(action.getIntentFilter().getCategories());
+            action.getIntent().getCategories().clear();
+            action.getIntent().getCategories().addAll(categories);
+        }
+
+        // mutate data uri
+        if (action.getIntentFilter().hasData()) {
+            final Uri uri = DataUriGenerator.generateRandomUri(action.getIntentFilter().getData());
+            if (uri != null) {
+                action.getIntent().setData(uri);
+            }
+        }
+
+        // mutate extras
+        if (action.getComponent().hasExtras()) {
+            final Bundle extras = BundleGenerator.generateRandomBundle(action.getComponent());
+            action.getIntent().putExtras(extras);
+        }
+
+        return action;
+    }
+
+    /**
+     * Mutates the given system action by replacing the system event if possible.
+     *
+     * @param action The system action to be mutated.
+     * @return Returns the mutated system action.
+     */
+    private IntentAction mutate(final SystemAction action) {
+
+        // mutate action
+        if (action.getIntentFilter().hasAction()
+                && action.getIntentFilter().getActions().size() > 1) {
+            final Set<String> actions = action.getIntentFilter().getActions();
+            final String oldAction = action.getAction();
+            String randomAction = Randomness.randomElement(actions);
+            while (randomAction.equals(oldAction)) {
+                randomAction = Randomness.randomElement(actions);
+            }
+
+            if (intentProvider.describesSystemEvent(randomAction)) {
+                // only if the new action also refers to a system event
+                action.setAction(randomAction);
+            }
+        }
+
+        return action;
     }
 
     /**

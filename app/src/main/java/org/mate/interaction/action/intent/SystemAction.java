@@ -25,7 +25,7 @@ public class SystemAction extends IntentAction {
     /**
      * The action that the receiver expects.
      */
-    private final String action;
+    private String action;
 
     // TODO: certain system events may also require a category, which should be included in the intent
     //  likewise data tags (URIs) could be relevant
@@ -77,6 +77,15 @@ public class SystemAction extends IntentAction {
      */
     public String getAction() {
         return action;
+    }
+
+    /**
+     * Sets a new action.
+     *
+     * @param action The new action.
+     */
+    public void setAction(String action) {
+        this.action = action;
     }
 
     /**
