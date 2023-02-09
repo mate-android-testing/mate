@@ -134,7 +134,10 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
                     .filter(a -> !action.equals(a)
                             && !(a instanceof MotifAction)
                             && !(a instanceof PrimitiveAction)
-                            && !(a instanceof WidgetAction))
+                            && !(a instanceof WidgetAction)
+                            // prevent possible shortening of action sequence
+                            && a.getActionType() != ActionType.HOME
+                            && a.getActionType() != ActionType.BACK)
                     .collect(Collectors.toList());
 
             if (!candidateActions.isEmpty()) {
