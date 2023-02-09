@@ -3,6 +3,7 @@ package org.mate.utils;
 import org.mate.Registry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -117,6 +118,34 @@ public class Randomness {
     }
 
     /**
+     * Returns a non-empty sub set generated in a random fashion. The given set must be not empty.
+     *
+     * @param set The non-empty set from which a random sub set should be derived.
+     * @param <T> The type of the elements in the set.
+     * @return Returns a non-empty sub set.
+     */
+    public static <T> Set<T> randomSubset(Set<T> set) {
+
+        if (set.isEmpty()) {
+            throw new IllegalArgumentException("Empty set supplied!");
+        }
+
+        final Set<T> subset = new HashSet<>();
+
+        final int size = Math.max(1, getInRangeStd(set.size() + 1)); // avoid empty sub set
+
+        for (int i = 0; i < size; i++) {
+            T randomElement = randomElement(set);
+            while (subset.contains(randomElement)) { // select until we get a new element
+                randomElement = randomElement(set);
+            }
+            subset.add(randomElement);
+        }
+
+        return subset;
+    }
+
+    /**
      * Generates a random double in the range [min,max).
      *
      * @param min The minimal value (inclusive).
@@ -139,7 +168,7 @@ public class Randomness {
             throw new IllegalArgumentException("Range must be greater than zero!");
         }
 
-        return getInRangeStd(range, 2.0/15.0 * range);
+        return getInRangeStd(range, 2.0 / 15.0 * range);
     }
 
     /**
@@ -189,8 +218,7 @@ public class Randomness {
         Random random = getRnd();
         List<Integer> result = new ArrayList<>(count);
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result.add(random.nextInt(bound));
         }
 
@@ -203,8 +231,7 @@ public class Randomness {
         Random random = getRnd();
         List<Integer> result = new ArrayList<>(count);
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result.add(random.nextInt(bound));
 
             // insert with some probability null values between the other values
@@ -223,8 +250,7 @@ public class Randomness {
         Random random = getRnd();
         int[] result = new int[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextInt(bound);
         }
 
@@ -236,8 +262,7 @@ public class Randomness {
         Random random = getRnd();
         float[] result = new float[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextFloat();
         }
 
@@ -249,8 +274,7 @@ public class Randomness {
         Random random = getRnd();
         double[] result = new double[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextDouble();
         }
 
@@ -262,8 +286,7 @@ public class Randomness {
         Random random = getRnd();
         long[] result = new long[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextLong();
         }
 
@@ -275,9 +298,8 @@ public class Randomness {
         Random random = getRnd();
         short[] result = new short[count];
 
-        for (int i = 0; i < count; i++)
-        {
-            https://stackoverflow.com/a/10189329/6110448
+        for (int i = 0; i < count; i++) {
+            // https://stackoverflow.com/a/10189329/6110448
             result[i] = (short) random.nextInt(1 << 16);
         }
 
@@ -297,8 +319,7 @@ public class Randomness {
         Random random = getRnd();
         boolean[] result = new boolean[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextBoolean();
         }
 
@@ -310,10 +331,9 @@ public class Randomness {
         Random random = getRnd();
         char[] result = new char[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             // a-z: https://stackoverflow.com/a/2627801/6110448
-            result[i] = (char)(random.nextInt(26) + 'a');
+            result[i] = (char) (random.nextInt(26) + 'a');
         }
 
         return result;
