@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -150,6 +151,29 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
     }
 
     /**
+     * Replaces the categories of the given intent with the supplied categories. Unfortunately,
+     * you can't call clear() and addAll() directly, because internally {@code null} is used when
+     * the set of categories is empty.
+     *
+     * @param intent The given intent.
+     * @param categories The new categories for the intent.
+     */
+    private void replaceCategories(Intent intent, final Set<String> categories) {
+
+        final Set<String> oldCategories = intent.getCategories();
+
+        if (oldCategories != null) {
+            for (final String category : oldCategories) {
+                intent.removeCategory(category);
+            }
+        }
+
+        for (final String category : categories) {
+            intent.addCategory(category);
+        }
+    }
+
+    /**
      * Mutates the given intent action by replacing individual attributes like action, categories,
      * data uri and extras.
      *
@@ -177,8 +201,7 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
                 && action.getIntentFilter().getCategories().size() > 1) {
             final Set<String> categories
                     = Randomness.randomSubset(action.getIntentFilter().getCategories());
-            action.getIntent().getCategories().clear();
-            action.getIntent().getCategories().addAll(categories);
+            replaceCategories(action.getIntent(), categories);
         }
 
         // mutate data uri
