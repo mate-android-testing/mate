@@ -86,7 +86,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // actions get init lazily
         if (actions == null) {
-            actions = getUIActions();
+            actions = getWidgetAndUIActions();
         }
 
         List<WidgetAction> widgetActions = new ArrayList<>();
@@ -120,7 +120,7 @@ public class ActionsScreenState extends AbstractScreenState {
         final List<Action> actions = new ArrayList<>();
 
         if (Properties.USE_UI_ACTIONS()) {
-            actions.addAll(getUIActions());
+            actions.addAll(getWidgetAndUIActions());
         }
 
         if (Properties.USE_INTENT_ACTIONS()) {
@@ -141,6 +141,26 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     @Override
     public List<UIAction> getUIActions() {
+
+        final List<UIAction> actions = new ArrayList<>();
+
+        if (Properties.USE_UI_ACTIONS()) {
+            actions.addAll(getWidgetAndUIActions());
+        }
+
+        if (Properties.USE_MOTIF_ACTIONS()) {
+            actions.addAll(getMotifActions());
+        }
+
+        return actions;
+    }
+
+    /**
+     * Extracts the list of applicable widget and ui actions on the underlying screen.
+     *
+     * @return Returns the list of widget and ui actions.
+     */
+    private List<UIAction> getWidgetAndUIActions() {
 
         // check whether the actions have been requested once
         if (actions != null) {
