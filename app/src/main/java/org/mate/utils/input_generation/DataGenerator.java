@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.mate.utils.input_generation.Letters.SET_OF_BIG_LETTERS;
 import static org.mate.utils.input_generation.Letters.SET_OF_LOW_BIG_NUMBER_LETTERS;
 import static org.mate.utils.input_generation.Letters.SET_OF_LOW_LETTERS;
 import static org.mate.utils.input_generation.Letters.SET_OF_NUMBERS;
@@ -63,11 +64,12 @@ public final class DataGenerator {
 
             case TEXT_VARIATION_POSTAL_ADDRESS:
                 return generateMultiLine(Randomness.getRnd().nextInt(MAX_STRING_LENGTH_MULTILINE),
-                        Letters.SET_OF_BIG_LETTERS,
+                        SET_OF_BIG_LETTERS,
                         Letters.SET_OF_LOW_LETTERS,
                         Letters.SET_OF_NUMBERS);
 
             case TEXT_VARIATION_PERSON_NAME:
+            case CLASS_TEXT:
                 return generateRandomString(BOUND_STRING, SET_OF_LOW_BIG_NUMBER_LETTERS);
             case TEXT_VARIATION_PASSWORD:
                 return generateRandomString(BOUND_STRING, SET_OF_LOW_BIG_NUMBER_LETTERS, SET_OF_SPECIAL_SIGNS);
@@ -77,10 +79,15 @@ public final class DataGenerator {
                 return generateRandomPhone();
             case NUMBER_FLAG_SIGNED:
                 return generateRandomNumber(true, BOUND_NUMBERS);
+            case TEXT_VARIATION_URI:
+                return generateRandomURI();
+            case TEXT_VARIATION_CAP_CHARACTERS:
+            case TEXT_VARIATION_CAP_WORDS:
+            case TEXT_VARIATION_CAP_SENTENCES:
+                return generateRandomString(BOUND_STRING, SET_OF_BIG_LETTERS);
+            case CLASS_NUMBER_NORMAL:
             case NUMBER_VARIATION_PASSWORD:
                 return generateRandomNumber(false, BOUND_NUMBERS);
-
-            case CLASS_NUMBER:
             case NUMBER_FLAG_DECIMAL:
                 return generateRandomDecNumber(BOUND_NUMBERS);
             case DATETIME_VARIATION_TIME:
@@ -230,7 +237,25 @@ public final class DataGenerator {
                 .append(generateRandomString(2 + random.nextInt(8), SET_OF_NUMBERS));
 
         return stb.toString();
+    }
 
+    /**
+     * Generates a random URI using common schemes for android apps.
+     *
+     * @return A random URI with the following format:
+     *         scheme://hostPrefix.hostName.hostSuffix/path.
+     */
+    private static String generateRandomURI() {
+        // Common uri schemes for android app.
+        String[] schemes = {"http", "https", "ftp", "mailto", "file", "app"};
+        String hostPrefix = generateRandomString(4, SET_OF_LOW_LETTERS);
+        String hostName = generateRandomString(12, SET_OF_LOW_LETTERS);
+        String hostSuffix = generateRandomString(3, SET_OF_LOW_LETTERS);
+        String path = "/" + generateRandomString(10, SET_OF_LOW_LETTERS);
+        Random random = Randomness.getRnd();
+
+        return schemes[random.nextInt(schemes.length)] +
+                "://" + hostPrefix + "." + hostName + "." + hostSuffix + path;
     }
 
     /**

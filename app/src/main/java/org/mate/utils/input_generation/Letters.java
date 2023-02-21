@@ -23,7 +23,7 @@ public enum Letters {
     /**
      * A set consisting of special characters.
      */
-    SET_OF_SPECIAL_SIGNS("+-*/!\"§$%&/()=?´`_.,@€<>|{[]}\\:;^°"),
+    SET_OF_SPECIAL_SIGNS("+-*\"\\/!$%&/()=?`_.,@<>|{[]}:;^"),
 
     /**
      * A set consisting of a linebreak.

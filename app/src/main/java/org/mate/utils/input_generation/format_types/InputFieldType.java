@@ -65,6 +65,52 @@ public enum InputFieldType {
      */
     TEXT_VARIATION_EMAIL("[\\w\\._%+-]+\\@[\\w.-]+\\.[A-Za-z]{2,4}",
             InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS | InputType.TYPE_CLASS_TEXT),
+
+    /**
+     * Regex rules:
+     * <ul>
+     *  <li>Allow Normal text</li>
+     * </ul>
+     */
+    CLASS_TEXT(".*",
+            InputType.TYPE_TEXT_VARIATION_NORMAL | InputType.TYPE_CLASS_TEXT),
+
+    /**
+     * Regex rules:
+     * <ul>
+     *     <li>Allow words with all capital letters on it</li>
+     * </ul>
+     */
+    TEXT_VARIATION_CAP_CHARACTERS("\\b[A-Z]+\\b",
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS),
+
+    /**
+     * Regex rules:
+     * <ul>
+     *     <li>Allow words that starts with capital letters</li>
+     * </ul>
+     */
+    TEXT_VARIATION_CAP_WORDS("\\b[A-Z].*?\\b",
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS),
+
+    /**
+     * Regex rules:
+     * <ul>
+     *     <li>Allow sentences what starts with capital letters</li>
+     * </ul>
+     */
+    TEXT_VARIATION_CAP_SENTENCES("\\b[A-Z][^.!?]+[.!?]+",
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES),
+
+    /**
+     * Regex rules:
+     * <ul>
+     *     <li>Allow a URI with scheme, full host name, and path</li>
+     * </ul>
+     */
+    TEXT_VARIATION_URI("\\w+:(\\/?\\/?)[^\\s]+",
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI),
+
     /**
      * Regex rules:
      * <ul>
@@ -102,7 +148,7 @@ public enum InputFieldType {
      *  <li>at least 1 character</li>
      * </ul>
      */
-    CLASS_NUMBER("^[0-9]+", InputType.TYPE_NUMBER_FLAG_DECIMAL
+    CLASS_NUMBER_NORMAL("^[0-9]+", InputType.TYPE_NUMBER_VARIATION_NORMAL
             | InputType.TYPE_CLASS_NUMBER),
 
     /**
