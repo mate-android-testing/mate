@@ -8,8 +8,6 @@ import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
-import java.util.List;
-
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEMIO {
 
@@ -34,11 +32,11 @@ public class ExecuteMATEMIO {
                 .withFocusedSearchStart(Properties.P_FOCUSED_SEARCH_START())
                 .withMutationRate(Properties.MUTATION_RATE());
 
-        List<String> objectives = Registry.getEnvironmentManager().getObjectives(Properties.OBJECTIVE());
+        int numberOfObjectives
+                = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
-        for (String objective : objectives) {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
-        }
+        // we need to associate with each objective (branch, line) a fitness function
+        builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
 
         final IGeneticAlgorithm mio = builder.build();
         mate.testApp(mio);

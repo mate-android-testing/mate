@@ -5,7 +5,7 @@ import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
-import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.ISelectionFunction;
@@ -35,12 +35,22 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
     protected ISelectionFunction<T> selectionFunction;
 
     /**
-     * The used crossover function, see {@link ICrossOverFunction}.
+     * A list of used crossover function, see {@link ICrossOverFunction}.
+     */
+    protected List<ICrossOverFunction<T>> crossOverFunctions;
+
+    /**
+     * Only set if the underlying algorithm uses exactly one crossover function.
      */
     protected ICrossOverFunction<T> crossOverFunction;
 
     /**
-     * The used mutation function, see {@link IMutationFunction}.
+     * A list of used mutation function, see {@link IMutationFunction}.
+     */
+    protected List<IMutationFunction<T>> mutationFunctions;
+
+    /**
+     * Only set if the underlying algorithm uses exactly one mutation function.
      */
     protected IMutationFunction<T> mutationFunction;
 
@@ -89,8 +99,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
+     * @param crossOverFunctions The used crossover function.
+     * @param mutationFunctions The used mutation function.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
@@ -100,8 +110,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     public GeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory,
                             ISelectionFunction<T> selectionFunction,
-                            ICrossOverFunction<T> crossOverFunction,
-                            IMutationFunction<T> mutationFunction,
+                            List<ICrossOverFunction<T>> crossOverFunctions,
+                            List<IMutationFunction<T>> mutationFunctions,
                             List<IFitnessFunction<T>> fitnessFunctions,
                             ITerminationCondition terminationCondition,
                             int populationSize,
@@ -111,8 +121,8 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         this.chromosomeFactory = chromosomeFactory;
         this.selectionFunction = selectionFunction;
-        this.crossOverFunction = crossOverFunction;
-        this.mutationFunction = mutationFunction;
+        this.crossOverFunctions = crossOverFunctions;
+        this.mutationFunctions = mutationFunctions;
         this.fitnessFunctions = fitnessFunctions;
         this.terminationCondition = terminationCondition;
 
@@ -123,6 +133,16 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         this.pMutate = pMutate;
 
         currentGenerationNumber = 0;
+
+        if (this.crossOverFunctions != null && this.crossOverFunctions.size() == 1) {
+            // provide a convenience attribute if there is only a single crossover function used
+            crossOverFunction = this.crossOverFunctions.get(0);
+        }
+
+        if (this.mutationFunctions != null && this.mutationFunctions.size() == 1) {
+            // provide a convenience attribute if there is only a single mutation function used
+            mutationFunction = this.mutationFunctions.get(0);
+        }
     }
 
     /**
@@ -228,36 +248,63 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
     /**
      * Logs the fitness of the current population.
+     *
+     * @param <S> The genotype generic type.
      */
-    protected void logCurrentFitness() {
+    protected <S> void logCurrentFitness() {
 
-        if (population.size() <= 10) {
-            MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
-            for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
+        if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            /*
+            * We need to force the evaluation of all chromosomes such that the fitness and coverage
+            * data are produced.
+             */
+            for (int i = 0; i < this.fitnessFunctions.size(); i++) {
+                MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
-                IFitnessFunction<T> fitnessFunction = fitnessFunctions.get(i);
+                final IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
+                for (int j = 0; j < population.size(); j++) {
+                    IChromosome<T> chromosome = population.get(j);
+                    MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));
+                }
+            }
+        }
+
+        if (population.size() <= 10 && !Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
+            for (int i = 0; i < Math.min(this.fitnessFunctions.size(), 5); i++) {
+                MATE.log_acc("Fitness function " + (i + 1) + ":");
+                final IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
                     IChromosome<T> chromosome = population.get(j);
                     MATE.log_acc("Chromosome " + (j + 1) + ": "
                             + fitnessFunction.getFitness(chromosome));
                 }
             }
-            if (fitnessFunctions.size() > 5) {
+            if (this.fitnessFunctions.size() > 5) {
                 MATE.log_acc("Omitted other fitness function because there are too many ("
-                        + fitnessFunctions.size() + ")");
+                        + this.fitnessFunctions.size() + ")");
             }
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
             MATE.log_acc("Combined coverage until now: "
                     + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
 
-            if (population.size() <= 10
-                    /*
-                    * TODO: We need a way to access the phenotype here, otherwise it tries to
-                    *  use the genotype, which results in a crash.
-                     */
-                    && Properties.FITNESS_FUNCTION() != FitnessFunction.GENO_TO_PHENO_TYPE) {
+            if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+
+                final List<IChromosome<T>> phenotypePopulation = new ArrayList<>();
+
+                for (IChromosome<T> chromosome : population) {
+                    // TODO: Fix this mismatch between the type variables!
+                    phenotypePopulation.add(
+                            GenotypePhenotypeMappedFitnessFunction
+                                    .getPhenoType((IChromosome<S>) chromosome));
+                }
+
+                MATE.log_acc("Combined coverage of current population: "
+                        + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), phenotypePopulation));
+            } else {
                 MATE.log_acc("Combined coverage of current population: "
                         + CoverageUtils.getCombinedCoverage(Properties.COVERAGE(), population));
             }

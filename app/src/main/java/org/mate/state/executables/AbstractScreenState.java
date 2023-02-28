@@ -40,7 +40,7 @@ public abstract class AbstractScreenState implements IScreenState {
      * @param activityName The activity name that corresponds to the screen state.
      * @param widgets The list of widgets part of the screen state.
      */
-    public AbstractScreenState(String packageName, String activityName, List<Widget> widgets){
+    public AbstractScreenState(String packageName, String activityName, List<Widget> widgets) {
         this.widgets = widgets;
         this.packageName = packageName;
         this.activityName = activityName;
@@ -72,7 +72,7 @@ public abstract class AbstractScreenState implements IScreenState {
      * @return Returns the associated widgets of the screen state.
      */
     @Override
-    public List<Widget> getWidgets(){
+    public List<Widget> getWidgets() {
         return Collections.unmodifiableList(widgets);
     }
 
@@ -97,11 +97,12 @@ public abstract class AbstractScreenState implements IScreenState {
     }
 
     /**
-     * Compares two abstract screen states for equality.
+     * Compares two {@link AbstractScreenState}s for equality. We consider the states equal if they
+     * refer to the same package and activity and share the same widgets.
      *
      * @param o The other screen state to compare against.
-     * @return Returns {@code true} if both screen states are equal,
-     *          otherwise {@code false} is returned.
+     * @return Returns {@code true} if both screen states are equal, otherwise {@code false} is
+     *         returned.
      */
     @Override
     public boolean equals(Object o) {
@@ -111,9 +112,9 @@ public abstract class AbstractScreenState implements IScreenState {
             return false;
         } else {
             AbstractScreenState other = (AbstractScreenState) o;
-            return Objects.equals(activityName, other.activityName) &&
-                    Objects.equals(packageName, other.packageName) &&
-                    Objects.equals(widgets, other.widgets);
+            return Objects.equals(this.packageName, other.packageName)
+                    && Objects.equals(this.activityName, other.activityName)
+                    && Objects.equals(widgets, other.widgets);
         }
     }
 

@@ -1,7 +1,6 @@
 package org.mate.exploration.genetic.util.ge;
 
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.UIAction;
 import org.mate.utils.ListUtils;
 
 import java.util.List;
@@ -38,8 +37,8 @@ public class AndroidListAnalogousMapping extends AndroidListBasedMapping<Integer
      */
     @Override
     protected Action selectAction() {
-        List<UIAction> executableActions = uiAbstractionLayer.getExecutableActions();
-        UIAction selectedAction = ListUtils.wrappedGet(
+        List<Action> executableActions = uiAbstractionLayer.getExecutableActions();
+        Action selectedAction = ListUtils.wrappedGet(
                 executableActions,
                 activeGenotypeChromosome.getValue().get(activeGenotypeCurrentCodonIndex));
         activeGenotypeCurrentCodonIndex++;

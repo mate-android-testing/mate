@@ -1,11 +1,13 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -97,6 +99,13 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
+
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                 * If we deal with a test suite execution, the storing of coverage
@@ -106,6 +115,7 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;
@@ -122,9 +132,9 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
     }
 
     /**
-     * Selects a random ui action.
+     * Selects a random action.
      *
-     * @return Returns the randomly selected ui action.
+     * @return Returns the randomly selected action.
      */
     protected Action selectAction() {
         return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());

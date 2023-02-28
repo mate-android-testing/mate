@@ -3,7 +3,6 @@ package org.mate.interaction.action.intent;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import org.mate.interaction.action.Action;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
 import org.mate.utils.manifest.element.IntentFilterDescription;
@@ -11,17 +10,30 @@ import org.mate.utils.manifest.element.IntentFilterDescription;
 import java.util.Objects;
 import java.util.Set;
 
-public class IntentBasedAction extends Action {
+/**
+ * A non-privileged intent action that can be received by any component matching the intent filter.
+ */
+public class IntentBasedAction extends IntentAction {
 
+    /**
+     * The intent that is sent.
+     */
     private final Intent intent;
-    private final ComponentDescription component;
-    private final IntentFilterDescription intentFilter;
 
     public IntentBasedAction(Intent intent, ComponentDescription component,
                              IntentFilterDescription intentFilter) {
+        super(component, intentFilter);
         this.intent = intent;
-        this.component = component;
-        this.intentFilter = intentFilter;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param intentBasedAction The intent action to be copied.
+     */
+    public IntentBasedAction(IntentBasedAction intentBasedAction) {
+        super(intentBasedAction.getComponent(), intentBasedAction.intentFilter);
+        this.intent = (Intent) intentBasedAction.intent.clone();
     }
 
     public ComponentType getComponentType() {
@@ -30,14 +42,6 @@ public class IntentBasedAction extends Action {
 
     public Intent getIntent() {
         return intent;
-    }
-
-    public ComponentDescription getComponent() {
-        return component;
-    }
-
-    public IntentFilterDescription getIntentFilter() {
-        return intentFilter;
     }
 
     /**
@@ -97,13 +101,27 @@ public class IntentBasedAction extends Action {
             return false;
         } else {
             IntentBasedAction that = (IntentBasedAction) o;
-            return Objects.equals(intent, that.intent);
+
+            return Objects.equals(component, that.component)
+                    && Objects.equals(intentFilter, that.intentFilter)
+                    /*
+                     * We can't call here equals() on the Intent object directly, since it only
+                     * compares the references and nothing more.
+                     */
+                    && Objects.equals(intent.getAction(), that.intent.getAction())
+                    && Objects.equals(intent.getCategories(), that.intent.getCategories())
+                    && Objects.equals(intent.getData(), that.intent.getData())
+                    && Objects.equals(intent.getComponent(), that.intent.getComponent())
+                    // equals() on Bundle compares only the reference
+                    && Objects.equals(Objects.toString(intent.getExtras(), null),
+                    Objects.toString(that.intent.getExtras(), null));
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(intent);
+        return Objects.hash(component, intentFilter, intent.getAction(), intent.getCategories(),
+                intent.getData(), intent.getComponent(), intent.getExtras());
     }
 
     @NonNull

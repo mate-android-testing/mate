@@ -7,8 +7,7 @@ import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
-
-import java.util.List;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEGeneticAlgorithm {
@@ -23,8 +22,8 @@ public class ExecuteMATEGeneticAlgorithm {
                 .withAlgorithm(Properties.ALGORITHM())
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
-                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
+                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
@@ -34,15 +33,15 @@ public class ExecuteMATEGeneticAlgorithm {
 
         if (Properties.ALGORITHM() == Algorithm.MIO || Properties.ALGORITHM() == Algorithm.MOSA) {
 
-            List<String> objectives = Registry.getEnvironmentManager()
-                    .getObjectives(Properties.OBJECTIVE());
+            int numberOfObjectives
+                    = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
             // we need to associate with each objective (branch, line) a fitness function
-            for (String objective : objectives) {
-                builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
-            }
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
+        } else if (Properties.ALGORITHM() == Algorithm.NOVELTY_SEARCH) {
+            builder = builder.withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name());
         } else {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS());
         }
 
         final IGeneticAlgorithm genericGA = builder.build();

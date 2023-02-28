@@ -11,6 +11,7 @@ import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.model.util.DotConverter;
 import org.mate.utils.MersenneTwister;
 import org.mate.utils.TimeoutRun;
 import org.mate.utils.coverage.Coverage;
@@ -96,9 +97,6 @@ public class MATE {
         final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
 
-        // internally checks for permission dialogs and grants permissions if required
-        Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
-
         // check whether the AUT could be successfully started
         if (!Registry.getPackageName().equals(device.getCurrentPackageName())) {
             MATE.log_acc("Currently displayed app: " + device.getCurrentPackageName());
@@ -108,6 +106,9 @@ public class MATE {
         // try to allocate emulator
         String emulator = Registry.getEnvironmentManager().allocateEmulator(Registry.getPackageName());
         MATE.log_acc("Emulator: " + emulator);
+
+        // internally checks for permission dialogs and grants permissions if required
+        Registry.registerUiAbstractionLayer(new UIAbstractionLayer(deviceMgr, Registry.getPackageName()));
 
         if (emulator == null || emulator.isEmpty()) {
             throw new IllegalStateException("Emulator couldn't be properly allocated!");
@@ -143,17 +144,33 @@ public class MATE {
             e.printStackTrace();
         } finally {
 
+            /*
+            * The interrupt caused by the TimeoutRun class may closed the connection to the MATE-Server.
+            * We need to re-connect in order to request the final coverage for instance.
+             */
+            try {
+                Registry.getEnvironmentManager().reconnect();
+            } catch (final IOException e) {
+                // The subsequent requests to the MATE-Server would fail anyways.
+                throw new IllegalStateException("Cannot re-connect to MATE-Server.", e);
+            }
+
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 CoverageUtils.logFinalCoverage();
             }
 
-            if (Properties.GRAPH_TYPE() != null) {
-                Registry.getEnvironmentManager().drawGraph(Properties.DRAW_RAW_GRAPH());
+            if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
+                Registry.getEnvironmentManager().drawGraph();
             }
 
-            Registry.getEnvironmentManager().releaseEmulator();
-            // EnvironmentManager.deleteAllScreenShots(packageName);
+            if (Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE) {
+                DotConverter.convertFinal(Registry.getUiAbstractionLayer().getGuiModel());
+            }
+
+            MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());
+
             try {
+                Registry.getEnvironmentManager().releaseEmulator();
                 Registry.unregisterEnvironmentManager();
                 Registry.unregisterUiAbstractionLayer();
                 Registry.unregisterDeviceMgr();
@@ -161,7 +178,8 @@ public class MATE {
                 Registry.unregisterRandom();
                 Registry.unregisterPackageName();
                 Registry.unregisterTimeout();
-            } catch (IOException e) {
+            } catch (Exception e) {
+                MATE.log_acc("Couldn't de-allocate resources properly: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -186,4 +204,5 @@ public class MATE {
     public static void log_error(String msg) {
         Log.e("error", msg);
     }
+
 }

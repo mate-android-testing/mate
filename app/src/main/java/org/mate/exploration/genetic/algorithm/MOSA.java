@@ -1,11 +1,13 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GAUtils;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
@@ -55,8 +57,8 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
+     * @param crossOverFunctions The used crossover functions.
+     * @param mutationFunctions The used mutation functions.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size N.
@@ -66,15 +68,15 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      */
     public MOSA(IChromosomeFactory<T> chromosomeFactory,
                 ISelectionFunction<T> selectionFunction,
-                ICrossOverFunction<T> crossOverFunction,
-                IMutationFunction<T> mutationFunction,
+                List<ICrossOverFunction<T>> crossOverFunctions,
+                List<IMutationFunction<T>> mutationFunctions,
                 List<IFitnessFunction<T>> fitnessFunctions,
                 ITerminationCondition terminationCondition,
                 int populationSize,
                 int bigPopulationSize,
                 double pCrossover,
                 double pMutate) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction, fitnessFunctions,
+        super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions, fitnessFunctions,
                 terminationCondition, populationSize, bigPopulationSize, pCrossover, pMutate);
 
         uncoveredFitnessFunctions.addAll(fitnessFunctions);
@@ -301,12 +303,16 @@ public class MOSA<T> extends GeneticAlgorithm<T> {
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
 
+        if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(chromosome);
+        }
+
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+            return ((TestCase) chromosome.getValue()).getActionSequence().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             int length = 0;
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                length += testCase.getEventSequence().size();
+                length += testCase.getActionSequence().size();
             }
             return length;
         } else {

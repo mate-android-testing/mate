@@ -74,9 +74,9 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
-     * @param fitnessFunctions The used fitness/novelty function.
+     * @param crossOverFunctions The used crossover functions.
+     * @param mutationFunctions The used mutation functions.
+     * @param fitnessFunctions The used fitness/novelty functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
      * @param bigPopulationSize The big population size.
@@ -88,8 +88,8 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
      */
     public NoveltySearch(IChromosomeFactory<T> chromosomeFactory,
                          ISelectionFunction<T> selectionFunction,
-                         ICrossOverFunction<T> crossOverFunction,
-                         IMutationFunction<T> mutationFunction,
+                         List<ICrossOverFunction<T>> crossOverFunctions,
+                         List<IMutationFunction<T>> mutationFunctions,
                          List<IFitnessFunction<T>> fitnessFunctions,
                          ITerminationCondition terminationCondition,
                          int populationSize,
@@ -99,7 +99,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
                          int nearestNeighbours,
                          int archiveLimit,
                          double noveltyThreshold) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
+        super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions,
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
         this.nearestNeighbours = nearestNeighbours; // the number of nearest neighbours k

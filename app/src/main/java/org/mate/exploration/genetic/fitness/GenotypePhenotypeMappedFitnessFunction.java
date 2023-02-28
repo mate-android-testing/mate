@@ -13,9 +13,9 @@ import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFunction<S> {
 
     /**
-     * Provides the mapping from genotype to phenotype.
+     * Provides the (shared) mapping from genotype to phenotype.
      */
-    private final IGenotypePhenotypeMapping<S, T> genotypePhenotypeMapping;
+    private static IGenotypePhenotypeMapping genotypePhenotypeMapping;
 
     /**
      * The fitness function that can applied on the phenotype.
@@ -23,16 +23,23 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     private final IFitnessFunction<T> phenotypeFitnessFunction;
 
     /**
-     * Initialises the fitness function with the given genotype to phenotype mapping and the
-     * fitness function that is applicable on the phenotype.
+     * Initialises the geno to pheno type fitness function with the pheno type fitness function.
      *
-     * @param genotypePhenotypeMapping Provides the mapping from genotype to phenotype.
      * @param phenotypeFitnessFunction The fitness function that can be applied on the phenotype.
      */
-    public GenotypePhenotypeMappedFitnessFunction(IGenotypePhenotypeMapping<S, T> genotypePhenotypeMapping,
-                                                  IFitnessFunction<T> phenotypeFitnessFunction) {
-        this.genotypePhenotypeMapping = genotypePhenotypeMapping;
+    public GenotypePhenotypeMappedFitnessFunction(IFitnessFunction<T> phenotypeFitnessFunction) {
         this.phenotypeFitnessFunction = phenotypeFitnessFunction;
+    }
+
+    /**
+     * Sets the (shared) geno to pheno type mapping function.
+     *
+     * @param mapping The geno to pheno type mapping function.
+     * @param <S> The genotype generic type.
+     * @param <T> The phenotype generic type.
+     */
+    public static <S, T> void setGenotypePhenotypeMapping(IGenotypePhenotypeMapping<S, T> mapping) {
+        genotypePhenotypeMapping = mapping;
     }
 
     /**
@@ -68,5 +75,17 @@ public class GenotypePhenotypeMappedFitnessFunction<S, T> implements IFitnessFun
     @Override
     public double getNormalizedFitness(IChromosome<S> genotypeChromosome) {
         return phenotypeFitnessFunction.getNormalizedFitness(genotypePhenotypeMapping.map(genotypeChromosome));
+    }
+
+    /**
+     * Returns the phenotype for the given genotype chromosome.
+     *
+     * @param genotypeChromosome The given genotype chromosome.
+     * @param <S> The genotype generic type.
+     * @param <T> The phenotype generic type.
+     * @return Returns the genotype chromosome.
+     */
+    public static <S, T> IChromosome<T> getPhenoType(IChromosome<S> genotypeChromosome) {
+        return genotypePhenotypeMapping.map(genotypeChromosome);
     }
 }

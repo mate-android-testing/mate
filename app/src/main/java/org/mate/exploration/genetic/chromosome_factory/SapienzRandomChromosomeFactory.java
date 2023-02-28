@@ -9,6 +9,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
@@ -16,7 +17,7 @@ import org.mate.utils.coverage.CoverageUtils;
 /**
  * Provides a chromosome factory as described in the Sapienz paper, i.e. it generates test cases
  * consisting of atomic (primitive) and motif genes. Requires that the property
- * {@link Properties#WIDGET_BASED_ACTIONS()} is set to {@code false}.
+ * {@link Properties#USE_PRIMITIVE_ACTIONS()} is set to {@code true}.
  */
 public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCase> {
 
@@ -99,6 +100,13 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 }
             }
         } finally {
+
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                  * If we deal with a test suite execution, the storing of coverage
@@ -108,6 +116,7 @@ public class SapienzRandomChromosomeFactory implements IChromosomeFactory<TestCa
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;

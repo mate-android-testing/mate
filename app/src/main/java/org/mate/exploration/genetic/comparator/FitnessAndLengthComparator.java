@@ -1,6 +1,8 @@
 package org.mate.exploration.genetic.comparator;
 
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
@@ -66,12 +68,16 @@ public class FitnessAndLengthComparator<T> implements Comparator<IChromosome<T>>
      */
     private int getChromosomeLength(IChromosome<T> chromosome) {
 
+        if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
+            chromosome = GenotypePhenotypeMappedFitnessFunction.getPhenoType(chromosome);
+        }
+
         if (chromosome.getValue() instanceof TestCase) {
-            return ((TestCase) chromosome.getValue()).getEventSequence().size();
+            return ((TestCase) chromosome.getValue()).getActionSequence().size();
         } else if (chromosome.getValue() instanceof TestSuite) {
             int length = 0;
             for (TestCase testCase : ((TestSuite) chromosome.getValue()).getTestCases()) {
-                length += testCase.getEventSequence().size();
+                length += testCase.getActionSequence().size();
             }
             return length;
         } else {

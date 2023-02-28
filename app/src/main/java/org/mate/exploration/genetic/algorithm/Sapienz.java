@@ -31,9 +31,9 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory, see {@link IChromosomeFactory}.
      * @param selectionFunction The used selection function, see {@link ISelectionFunction}.
-     * @param crossOverFunction The used crossover function, see {@link ICrossOverFunction}.
-     * @param mutationFunction The used mutation function, see {@link IMutationFunction}.
-     * @param fitnessFunctions The used fitness function, see {@link IFitnessFunction}.
+     * @param crossOverFunctions The used crossover functions, see {@link ICrossOverFunction}.
+     * @param mutationFunctions The used mutation functions, see {@link IMutationFunction}.
+     * @param fitnessFunctions The used fitness functions, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
      * @param populationSize The population size n.
      * @param bigPopulationSize The big population size.
@@ -42,15 +42,15 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
      */
     public Sapienz(IChromosomeFactory<T> chromosomeFactory,
                    ISelectionFunction<T> selectionFunction,
-                   ICrossOverFunction<T> crossOverFunction,
-                   IMutationFunction<T> mutationFunction,
+                   List<ICrossOverFunction<T>> crossOverFunctions,
+                   List<IMutationFunction<T>> mutationFunctions,
                    List<IFitnessFunction<T>> fitnessFunctions,
                    ITerminationCondition terminationCondition,
                    int populationSize,
                    int bigPopulationSize,
                    double pCrossover,
                    double pMutate) {
-        super(chromosomeFactory, selectionFunction, crossOverFunction, mutationFunction,
+        super(chromosomeFactory, selectionFunction, crossOverFunctions, mutationFunctions,
                 fitnessFunctions, terminationCondition, populationSize, bigPopulationSize,
                 pCrossover, pMutate);
     }
@@ -71,7 +71,6 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
             double rnd = Randomness.getRnd().nextDouble();
 
             if (rnd < pCrossover) { // if r < p (apply crossover)
-
                 /*
                 * Sapienz uses a uniform crossover operator that takes two individuals x1, x2 as input
                 * and returns two individuals x1', x2'. The first individual x1' is added to the
@@ -83,7 +82,6 @@ public class Sapienz<T> extends GeneticAlgorithm<T> {
                 IChromosome<T> offspring = crossOverFunction.cross(parents).get(0);
                 newGeneration.add(offspring);
             } else if (rnd < pCrossover + pMutate) { // if r < p + q (apply mutation)
-
                 /*
                 * Sapienz mutates a randomly selected individual x1 in a multi-step mutation
                 * procedure and adds the mutated individual x1' to the offspring population Q.

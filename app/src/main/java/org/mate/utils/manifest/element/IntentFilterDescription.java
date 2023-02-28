@@ -149,9 +149,9 @@ public class IntentFilterDescription {
             return false;
         } else {
             IntentFilterDescription other = (IntentFilterDescription) o;
-            return Objects.equals(actions, other.actions) &&
-                    Objects.equals(categories, other.categories) &&
-                    Objects.equals(data, other.data);
+            return Objects.equals(actions, other.actions)
+                    && Objects.equals(categories, other.categories)
+                    && Objects.equals(data, other.data);
         }
     }
 

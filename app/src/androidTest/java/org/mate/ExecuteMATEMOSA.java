@@ -9,8 +9,6 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 
-import java.util.List;
-
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEMOSA {
 
@@ -34,13 +32,11 @@ public class ExecuteMATEMOSA {
                 .withPMutate(Properties.P_MUTATE())
                 .withPCrossover(Properties.P_CROSSOVER());
 
-        List<String> objectives = Registry.getEnvironmentManager()
-                .getObjectives(Properties.OBJECTIVE());
+        int numberOfObjectives
+                = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
         // we need to associate with each objective (branch, line) a fitness function
-        for (String objective : objectives) {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION(), objective);
-        }
+        builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
 
         final IGeneticAlgorithm mosa = builder.build();
         mate.testApp(mosa);

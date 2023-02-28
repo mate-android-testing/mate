@@ -5,9 +5,12 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides a fitness function that aims to maximise a hand-crafted line metric. This fitness function
@@ -16,44 +19,106 @@ import java.util.Map;
  */
 public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction<T> {
 
-    // TODO: find better solution than static map... (i know its ugly)
-    private static final Map<String, Map<IChromosome, Double>> cache = new HashMap<>();
-
     /**
-     * The possible target lines.
-     */
-    private static List<String> lines = new ArrayList<>();
-
-    /**
-     * The line for which the fitness value should be evaluated.
-     */
-    private final String line;
-
-    /**
-     * Initialises the fitness function with the given line as target.
+     * The cache is basically a two-dimensional array compacted to one dimension, i.e. the dimensions
+     * are joined together in a linear fashion. We could say that we joined together multiple sub
+     * lists, where each sub list represents the fitness values for a given chromosome. Each sub
+     * list has {@link #numberOfLines} entries.
      *
-     * @param line The target line.
+     * A visual representation of the cache would look as follows:
+     *
+     * chromosome 1      chromosome 2     ...  chromosome n
+     * [[line 1 to n], [line 1 to n], ..., [line 1 to n]]  (sub lists)
+     *
+     * By having the chromosome index, see {@link #chromosomeToCacheIndex}, and the number of lines,
+     * see {@link #numberOfLines}, we can compute the starting position of the chromosome in the
+     * cache. By adding the line index, we can retrieve the fitness value from the cache for the
+     * given chromosome and objective (line).
      */
-    public LineCoveredPercentageFitnessFunction(String line) {
-        this.line = line;
-        lines.add(line);
+    private static final List<Float> cache = new ArrayList<>();
+
+    /**
+     * Maps a chromosome to its index in the cache.
+     */
+    private static final Map<IChromosome, Integer> chromosomeToCacheIndex = new HashMap<>();
+
+    /**
+     * We keep track of the used cache indices. Since we clean the cache from time to time, certain
+     * indices get available again, which we re-use when assigning a new index, see
+     * {@link #assignNewCacheIndex(IChromosome)}.
+     */
+    private static final BitSet usedCacheIndices = new BitSet();
+
+    /**
+     * Tracks the total number of lines / fitness functions.
+     */
+    private static int numberOfLines;
+
+    /**
+     * Represents the index of the n-th line / fitness function.
+     */
+    private final int index;
+
+    /**
+     * Initialises the fitness function with the given index of the branch.
+     *
+     * @param index The index of the n-th branch / fitness function.
+     */
+    public LineCoveredPercentageFitnessFunction(int index) {
+        this.index = index;
+        numberOfLines++;
     }
 
     /**
-     * Retrieves the line metric value for the given chromosome. Note that the value must be
-     * already in the cache, i.e. a call to {@link #retrieveFitnessValues(IChromosome)} must
-     * precede this call.
+     * Retrieves the line metric value for the given chromosome.
      *
      * @param chromosome The chromosome for which we want to retrieve its fitness value.
      * @return Returns the line metric value for the given chromosome.
      */
     @Override
     public double getFitness(IChromosome<T> chromosome) {
-        if (!cache.get(line).containsKey(chromosome)) {
-            throw new IllegalStateException("Fitness for chromosome " + chromosome
-                    + " not in cache. Must fetch fitness previously for performance reasons");
+
+        Integer cacheIndex = chromosomeToCacheIndex.get(chromosome);
+
+        if (cacheIndex == null) {
+            // the chromosome hasn't been cached yet
+            cacheIndex = assignNewCacheIndex(chromosome);
+
+            // retrieve the fitness value for every single line
+            final List<Float> lineCoverageVector
+                    = FitnessUtils.getLinePercentageVector(chromosome, numberOfLines);
+
+            // describes the starting position of the chromosome in the cache
+            final int baseIndex = cacheIndex * numberOfLines;
+            assert baseIndex <= cache.size();
+
+            if (baseIndex < cache.size()) {
+                // we can re-use the slots of a chromosome that has been cleaned earlier
+                for (int i = 0; i < numberOfLines; i++) {
+                    cache.set(baseIndex + i, lineCoverageVector.get(i));
+                }
+            } else {
+                // we need to enlarge the cache
+                for (int i = 0; i < numberOfLines; i++) {
+                    cache.add(baseIndex + i, lineCoverageVector.get(i));
+                }
+            }
         }
-        return cache.get(line).get(chromosome);
+
+        return cache.get(cacheIndex * numberOfLines + index);
+    }
+
+    /**
+     * Assigns to the given chromosome a new index in the cache.
+     *
+     * @param chromosome The given chromosome.
+     * @return Returns the new cache index of the chromosome.
+     */
+    private int assignNewCacheIndex(final IChromosome<T> chromosome) {
+        final int newIndex = usedCacheIndices.nextClearBit(0);
+        usedCacheIndices.set(newIndex);
+        chromosomeToCacheIndex.put(chromosome, newIndex);
+        return newIndex;
     }
 
     /**
@@ -78,53 +143,23 @@ public class LineCoveredPercentageFitnessFunction<T> implements IFitnessFunction
     }
 
     /**
-     * Retrieves the fitness value for the given chromosome.
-     *
-     * @param chromosome The chromosome for which the fitness should be evaluated.
-     * @param <T> The type wrapped by the chromosome.
-     */
-    public static <T> void retrieveFitnessValues(IChromosome<T> chromosome) {
-
-        if (lines.size() == 0) {
-            return;
-        }
-
-        if (cache.size() == 0) {
-            for (String line : lines) {
-                cache.put(line, new HashMap<>());
-            }
-        }
-
-        MATE.log_acc("retrieving fitness values for chromosome " + chromosome);
-        List<Double> coveredPercentage = FitnessUtils.getFitness(chromosome, lines);
-        for (int i = 0; i < coveredPercentage.size(); i++) {
-            cache.get(lines.get(i)).put(chromosome, coveredPercentage.get(i));
-        }
-    }
-
-    /**
      * Removes chromosomes from the cache that are no longer in use in order to avoid memory issues.
      *
-     * @param chromosomes The list of active chromosomes.
+     * @param activeChromosomes The list of active chromosomes.
      */
-    public static <T> void cleanCache(List<IChromosome<T>> chromosomes) {
+    public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        if (lines.size() == 0 || cache.size() == 0) {
-            return;
+        Set<IChromosome<T>> cachedChromosomes = new HashSet(chromosomeToCacheIndex.keySet());
+
+        for (IChromosome<T> activeChromosome : activeChromosomes) {
+            cachedChromosomes.remove(activeChromosome);
         }
 
-        List<IChromosome<T>> activeChromosomes = new ArrayList<>(chromosomes);
-
-        int count = 0;
-        for (String line : lines) {
-            Map<IChromosome, Double> lineCache = cache.get(line);
-            for (IChromosome chromosome: new ArrayList<>(lineCache.keySet())) {
-                if (!activeChromosomes.contains(chromosome)) {
-                    lineCache.remove(chromosome);
-                    count++;
-                }
-            }
+        for (IChromosome<T> inactiveChromosome : cachedChromosomes) {
+            final int index = chromosomeToCacheIndex.remove(inactiveChromosome);
+            usedCacheIndices.clear(index);
         }
-        MATE.log_acc("Cleaning cache: " + count + " inactive chromosome removed.");
+
+        MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
     }
 }

@@ -150,9 +150,9 @@ public class Widget {
     /**
      * Creates a new widget.
      *
-     * @param node       A node in the ui hierarchy.
-     * @param activity   The activity name the widget belongs to.
-     * @param depth      The depth of the node in the ui hierarchy.
+     * @param node A node in the ui hierarchy.
+     * @param activity The activity name the widget belongs to.
+     * @param depth The depth of the node in the ui hierarchy.
      * @param localIndex A local index for the widget's children.
      */
     public Widget(Widget parent, AccessibilityNodeInfo node, String activity,
@@ -170,11 +170,11 @@ public class Widget {
         children = new ArrayList<>();
 
         /*
-        * NOTE: An AccessibilityNodeInfo object is only valid (non null) for a certain
-        * amount of time, afterwards it expires. This means, we can't re-use this object
-        * to get an up-to-date state of the widget, e.g. the currently displayed text.
-        * Thus, we need to save all node attributes in dedicated variables and request
-        * an ui object instead of performing the action directly on the node object.
+         * NOTE: An AccessibilityNodeInfo object is only valid (non null) for a certain
+         * amount of time, afterwards it expires. This means, we can't re-use this object
+         * to get an up-to-date state of the widget, e.g. the currently displayed text.
+         * Thus, we need to save all node attributes in dedicated variables and request
+         * an ui object instead of performing the action directly on the node object.
          */
         Rect bounds = new Rect();
         node.getBoundsInScreen(bounds);
@@ -369,6 +369,15 @@ public class Widget {
     }
 
     /**
+     * Returns the depth of the widget in the ui hierarchy.
+     *
+     * @return Returns the widgets' depth in the ui hierarchy.
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
      * Returns the siblings of this widget. If there are no siblings, an empty list is returned.
      *
      * @return Returns the siblings of the widget.
@@ -465,7 +474,7 @@ public class Widget {
      * Returns whether the widget has children.
      *
      * @return Returns {@code true} if the widget has children, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean hasChildren() {
         return hasChildren;
@@ -484,7 +493,7 @@ public class Widget {
      * Returns whether the widget is visible or not.
      *
      * @return Returns {@code true} if the widget is visible, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isVisible() {
         return visible;
@@ -503,7 +512,7 @@ public class Widget {
      * Returns whether this widget represents a container, e.g. a linear layout.
      *
      * @return Returns {@code true} if the widget is a container, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isContainer() {
         // TODO: extend with layouts defined at https://developer.android.com/reference/androidx/classes.html
@@ -529,7 +538,7 @@ public class Widget {
      * linear layout.
      *
      * @return Returns {@code true} if this widget is a son of an actionable container,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfActionableContainer() {
         Widget parent = this.parent;
@@ -543,10 +552,32 @@ public class Widget {
     }
 
     /**
+     * Determines whether the parent widget is a scroll view.
+     *
+     * @return Returns {@code true} if the parent is a scroll view,
+     *         otherwise {@code false} is returned.
+     */
+    public boolean isSonOfScrollView() {
+
+        if (parent == null) {
+            return false;
+        }
+
+        try {
+            Class<?> clazz = Class.forName(parent.getClazz());
+            return android.widget.ScrollView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether the widget is either clickable, long-clickable or checkable.
      *
      * @return Returns {@code true} if this widget is actionable,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isActionable() {
         return isClickable() || isLongClickable() || isCheckable();
@@ -608,7 +639,7 @@ public class Widget {
      * Checks whether this widget represents an edit text widget.
      *
      * @return Returns {@code true} if this widget is an edit text widget, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isEditTextType() {
         try {
@@ -633,7 +664,7 @@ public class Widget {
      *
      * @param type The type (class name) to check for.
      * @return Returns {@code true} if the parent widget is of the given type,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean directSonOf(String type) {
         Widget parent = this.parent;
@@ -647,7 +678,7 @@ public class Widget {
      *
      * @param type The type (class name) to check for.
      * @return Returns {@code true} if any parent widget is of the given type,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOf(String type) {
         Widget parent = this.parent;
@@ -664,7 +695,7 @@ public class Widget {
      * Checks whether any parent widget is checkable.
      *
      * @return Returns {@code true} if a parent widget is checkable,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfCheckable() {
         Widget parent = this.parent;
@@ -681,7 +712,7 @@ public class Widget {
      * Checks whether any parent widget is long clickable.
      *
      * @return Returns {@code true} if a parent widget is long clickable,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfLongClickable() {
         Widget parent = this.parent;
@@ -698,7 +729,7 @@ public class Widget {
      * Checks whether any parent widget is clickable.
      *
      * @return Returns {@code true} if a parent widget is clickable,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfClickable() {
         Widget parent = this.parent;
@@ -715,7 +746,7 @@ public class Widget {
      * Checks whether any parent widget is scrollable.
      *
      * @return Returns {@code true} if a parent widget is scrollable,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfScrollable() {
         Widget parent = this.parent;
@@ -785,7 +816,7 @@ public class Widget {
      * Checks whether this widget represents a button.
      *
      * @return Returns {@code true} if this widget is a button, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isButtonType() {
         try {
@@ -803,7 +834,7 @@ public class Widget {
      * Checks whether this widget represents an image button.
      *
      * @return Returns {@code true} if this widget is an image button, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isImageButtonType() {
         try {
@@ -820,7 +851,7 @@ public class Widget {
      * Checks whether this widget represents an image switcher.
      *
      * @return Returns {@code true} if this widget is an image switcher, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isImageSwitcherType() {
         try {
@@ -865,7 +896,7 @@ public class Widget {
      * Checks whether the widget represents a vertical or horizontal scroll view.
      *
      * @return Returns {@code true} if this widget is a scrollview,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isScrollView() {
         return isVerticalScrollView() || isHorizontalScrollView();
@@ -876,7 +907,7 @@ public class Widget {
      * https://developer.android.com/reference/android/widget/ScrollView.
      *
      * @return Returns {@code true} if this widget is a vertical scrollview,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isVerticalScrollView() {
         try {
@@ -895,7 +926,7 @@ public class Widget {
      * https://developer.android.com/reference/android/support/v4/view/ViewPager.html.
      *
      * @return Returns {@code true} if this widget is a horizontal scrollview,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isHorizontalScrollView() {
         try {
@@ -915,7 +946,7 @@ public class Widget {
      * https://developer.android.com/reference/android/widget/AbsSpinner.
      *
      * @return Returns {@code true} if this widget is a spinner, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isSpinnerType() {
         try {
@@ -932,7 +963,7 @@ public class Widget {
      * Checks whether a parent widget represents an abstract list view.
      *
      * @return Returns {@code true} if a parent widget is an abstract list view,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfListView() {
         Widget parent = this.parent;
@@ -949,7 +980,7 @@ public class Widget {
      * Checks whether a parent widget represents an abstract spinner.
      *
      * @return Returns {@code true} if a parent widget is a spinner,
-     *          otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     public boolean isSonOfSpinner() {
         Widget parent = this.parent;
@@ -966,7 +997,7 @@ public class Widget {
      * Checks whether this widget represents an abstract list view.
      *
      * @return Returns {@code true} if this widget is an abstract list view, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isListViewType() {
         try {
@@ -983,7 +1014,7 @@ public class Widget {
      * Checks whether this widget represents a text view.
      *
      * @return Returns {@code true} if this widget is a text view, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isTextViewType() {
         try {
@@ -1001,7 +1032,7 @@ public class Widget {
      * https://developer.android.com/reference/android/widget/Checkable.
      *
      * @return Returns {@code true} if this widget implements checkable, otherwise {@code false}
-     *          is returned.
+     *         is returned.
      */
     public boolean isCheckableType() {
         try {
@@ -1012,6 +1043,21 @@ public class Widget {
             MATE.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
+    }
+
+    /**
+     * Checks whether this widget represents a progress bar. See:
+     * https://developer.android.com/reference/android/widget/ProgressBar for more details.
+     *
+     * @return Returns {@code true} if this widget is a progress bar, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isProgressBarType() {
+        /*
+         * There are a few sub classes of the base class ProgressBar, but those don't represent
+         * progress bars in the classical sense, i.e. they are 'abused' for primarily rating bars.
+         */
+        return getClazz().equals("android.widget.ProgressBar");
     }
 
     public boolean isPassword() {
@@ -1063,7 +1109,8 @@ public class Widget {
     }
 
     /**
-     * Compares two widgets for equality.
+     * Compares two {@link Widget}s for equality, which is given when the widgets have the same
+     * {@link #id} and are located at the same position.
      *
      * @param o The object to which we compare.
      * @return Returns {@code true} if both widgets are equal, otherwise {@code false} is returned.
@@ -1080,14 +1127,15 @@ public class Widget {
                     && getX1() == other.getX1() &&
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
-                    getY2() == other.getY2();
+                    getY2() == other.getY2() &&
+                    isVisible() == other.isVisible();
         }
     }
 
     /**
      * Computes the hash code based on attributes used for {@link #equals(Object)}.
      *
-     * @return Returns the associated hash code of the widget action.
+     * @return Returns the associated hash code of the widget.
      */
     @Override
     public int hashCode() {
@@ -1096,7 +1144,8 @@ public class Widget {
                 getX1(),
                 getX2(),
                 getY1(),
-                getY2());
+                getY2(),
+                isVisible());
     }
 
     /**

@@ -49,6 +49,13 @@ public interface IGUIModel {
     Set<Edge> getEdges(Action action);
 
     /**
+     * Returns the edges contained in the GUI model.
+     *
+     * @return Returns the edges between the GUI states.
+     */
+    Set<Edge> getEdges();
+
+    /**
      * Tries to find the shortest path between two given states.
      *
      * @param from The source state.
@@ -67,11 +74,19 @@ public interface IGUIModel {
     IScreenState getScreenStateById(String screenStateId);
 
     /**
-     * Returns the root state, i.e. the start screen of the AUT.
+     * Returns the root states, i.e. the start screens of the AUT.
      *
-     * @return Returns the start screen state.
+     * @return Returns the start screen states.
      */
-    IScreenState getRootState();
+    Set<IScreenState> getRootStates();
+
+    /**
+     * Adds a root state to the gui model. Root states are the states that can be initial states
+     * of an AUT after the AUT is restarted.
+     *
+     * @param rootState A new root state.
+     */
+    void addRootState(IScreenState rootState);
 
     /**
      * Returns the screen states describing the given activity.

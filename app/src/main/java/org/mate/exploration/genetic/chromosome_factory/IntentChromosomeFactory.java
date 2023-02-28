@@ -1,13 +1,16 @@
-package org.mate.exploration.intent;
+package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.exploration.intent.IntentProvider;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
+import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
+import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
@@ -156,7 +159,13 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
             }
         } finally {
-            // store coverage, serialize, record stats about test case if desired
+
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
+                surrogateModel.updateTestCase(testCase);
+            }
+
             if (!isTestSuiteExecution) {
                 /*
                  * If we deal with a test suite execution, the storing of coverage
@@ -166,6 +175,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
                 CoverageUtils.logChromosomeCoverage(chromosome);
             }
+
             testCase.finish();
         }
         return chromosome;
@@ -219,7 +229,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } else {
             // select a UI action
-            return super.selectAction();
+            return Randomness.randomElement(uiAbstractionLayer.getExecutableUIActions());
         }
     }
 }

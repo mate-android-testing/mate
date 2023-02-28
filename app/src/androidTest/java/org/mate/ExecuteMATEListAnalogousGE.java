@@ -9,7 +9,6 @@ import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
-import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 
@@ -28,7 +27,8 @@ public class ExecuteMATEListAnalogousGE {
                 .withChromosomeFactory(ChromosomeFactory.INTEGER_SEQUENCE_CHROMOSOME_FACTORY)
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
                 .withGEMappingFunction(GEMappingFunction.LIST_ANALOGOUS_MAPPING)
-                .withFitnessFunction(FitnessFunction.GENO_TO_PHENO_TYPE)
+                .withGenoToPhenoTypeMapping()
+                .withFitnessFunction(Properties.FITNESS_FUNCTION())
                 .withCrossoverFunction(CrossOverFunction.INTEGER_SEQUENCE_POINT_CROSS_OVER)
                 .withMutationFunction(MutationFunction.INTEGER_SEQUENCE_LENGTH_MUTATION)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())

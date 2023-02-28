@@ -49,8 +49,8 @@ public class MotifAction extends UIAction {
     }
 
     /**
-     * Saves the ui actions. Should be only used when {@link Properties#WIDGET_BASED_ACTIONS()} is
-     * turned off, i.e. when we use primitive actions. It is necessary to save the actions in order
+     * Saves the ui actions. Should be only used when {@link Properties#USE_PRIMITIVE_ACTIONS()} is
+     * turned on, i.e. when we use primitive actions. It is necessary to save the actions in order
      * to replay them if desired.
      *
      * @param uiActions The list of ui actions that represent the motif gene.

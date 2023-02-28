@@ -23,16 +23,20 @@ public class ExecuteMATESapienz {
 
         MATE mate = new MATE();
 
+        FitnessFunction[] fitnessFunctions = new FitnessFunction[]{
+                FitnessFunction.BRANCH_COVERAGE,
+                FitnessFunction.NUMBER_OF_CRASHES,
+                FitnessFunction.TEST_LENGTH
+        };
+
         final IGeneticAlgorithm sapienz =
                 new GeneticAlgorithmBuilder()
                         .withAlgorithm(Algorithm.SAPIENZ)
                         .withChromosomeFactory(ChromosomeFactory.SAPIENZ_SUITE_RANDOM_CHROMOSOME_FACTORY)
-                        .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
                         .withSelectionFunction(SelectionFunction.RANDOM_SELECTION)
                         .withMutationFunction(MutationFunction.SAPIENZ_MUTATION)
-                        .withFitnessFunction(FitnessFunction.BRANCH_COVERAGE)
-                        .withFitnessFunction(FitnessFunction.NUMBER_OF_CRASHES)
-                        .withFitnessFunction(FitnessFunction.TEST_LENGTH)
+                        .withCrossoverFunction(CrossOverFunction.TEST_SUITE_UNIFORM_CROSS_OVER)
+                        .withFitnessFunctions(fitnessFunctions)
                         .withTerminationCondition(Properties.TERMINATION_CONDITION())
                         .withPopulationSize(Properties.POPULATION_SIZE())
                         .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
