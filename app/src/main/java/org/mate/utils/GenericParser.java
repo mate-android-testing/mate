@@ -1,5 +1,6 @@
 package org.mate.utils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -24,6 +25,30 @@ public class GenericParser {
 
     @SuppressWarnings("unchecked")
     public static <T> T parse(Class<T> clazz, String s) throws Exception {
+        if (clazz.isArray()) {
+            Class<?> clazzOfArray = clazz.getComponentType();
+            return (T) parseArray(clazzOfArray, s);
+        } else {
+            return parseElement(clazz, s);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[] parseArray(Class<T> clazz, String s) throws Exception {
+
+        s = s.replace(" ", "");
+        String[] sElements = s.split(",");
+        T[] elements = (T[]) Array.newInstance(clazz, sElements.length);
+
+        for (int i = 0; i < sElements.length; i++) {
+            elements[i] = parseElement(clazz, sElements[i]);
+        }
+
+        return elements;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T parseElement(Class<T> clazz, String s) throws Exception {
         if (clazz == String.class) {
             return (T) s;
         }
@@ -57,6 +82,5 @@ public class GenericParser {
         }
         throw new UnsupportedOperationException(
                 "Parsing of class " + boxedClass.getCanonicalName() + " is not implemented yet.");
-
     }
 }

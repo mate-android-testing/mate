@@ -22,9 +22,9 @@ public class StandardGeneticAlgorithm<T> extends GeneticAlgorithm<T> {
      *
      * @param chromosomeFactory The used chromosome factory.
      * @param selectionFunction The used selection function.
-     * @param crossOverFunction The used crossover function.
-     * @param mutationFunction The used mutation function.
-     * @param fitnessFunctions The list of fitness functions. Only a single fitness function is used here.
+     * @param crossOverFunctions The used crossover functions.
+     * @param mutationFunctions The used mutation functions.
+     * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
      * @param bigPopulationSize The big population size.
@@ -33,8 +33,8 @@ public class StandardGeneticAlgorithm<T> extends GeneticAlgorithm<T> {
      */
     public StandardGeneticAlgorithm(IChromosomeFactory<T> chromosomeFactory,
                                     ISelectionFunction<T> selectionFunction,
-                                    ICrossOverFunction<T> crossOverFunction,
-                                    IMutationFunction<T> mutationFunction,
+                                    List<ICrossOverFunction<T>> crossOverFunctions,
+                                    List<IMutationFunction<T>> mutationFunctions,
                                     List<IFitnessFunction<T>> fitnessFunctions,
                                     ITerminationCondition terminationCondition,
                                     int populationSize,
@@ -43,8 +43,8 @@ public class StandardGeneticAlgorithm<T> extends GeneticAlgorithm<T> {
                                     double pMutate) {
         super(chromosomeFactory,
                 selectionFunction,
-                crossOverFunction,
-                mutationFunction,
+                crossOverFunctions,
+                mutationFunctions,
                 fitnessFunctions,
                 terminationCondition,
                 populationSize,

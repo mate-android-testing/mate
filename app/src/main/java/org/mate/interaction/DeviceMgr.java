@@ -35,8 +35,10 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
+import org.mate.utils.UIAutomatorException;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.input_generation.DataGenerator;
@@ -44,6 +46,7 @@ import org.mate.utils.input_generation.Mutation;
 import org.mate.utils.input_generation.StaticStrings;
 import org.mate.utils.input_generation.StaticStringsParser;
 import org.mate.utils.input_generation.format_types.InputFieldType;
+import org.mate.utils.manifest.element.ComponentDescription;
 import org.mate.utils.manifest.element.ComponentType;
 
 import java.io.BufferedReader;
@@ -116,6 +119,11 @@ public class DeviceMgr {
             "--bind name:s:user_rotation --bind value:i:1";
 
     /**
+     * The error message when the ui automator is disconnected.
+     */
+    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
+
+    /**
      * The device instance provided by the instrumentation class to perform various actions.
      */
     private final UiDevice device;
@@ -171,22 +179,35 @@ public class DeviceMgr {
      */
     public void executeAction(Action action) throws AUTCrashException {
 
-        if (action instanceof WidgetAction) {
-            executeAction((WidgetAction) action);
-        } else if (action instanceof PrimitiveAction) {
-            executeAction((PrimitiveAction) action);
-        } else if (action instanceof IntentBasedAction) {
-            executeAction((IntentBasedAction) action);
-        } else if (action instanceof SystemAction) {
-            executeAction((SystemAction) action);
-        } else if (action instanceof MotifAction) {
-            executeAction((MotifAction) action);
-        } else if (action instanceof UIAction) {
-            executeAction((UIAction) action);
-        } else {
-            throw new UnsupportedOperationException("Actions class "
-                    + action.getClass().getSimpleName() + " not yet supported");
+        try {
+            if (action instanceof WidgetAction) {
+                executeAction((WidgetAction) action);
+            } else if (action instanceof PrimitiveAction) {
+                executeAction((PrimitiveAction) action);
+            } else if (action instanceof IntentBasedAction) {
+                executeAction((IntentBasedAction) action);
+            } else if (action instanceof SystemAction) {
+                executeAction((SystemAction) action);
+            } else if (action instanceof MotifAction) {
+                executeAction((MotifAction) action);
+            } else if (action instanceof UIAction) {
+                executeAction((UIAction) action);
+            } else {
+                throw new UnsupportedOperationException("Actions class "
+                        + action.getClass().getSimpleName() + " not yet supported");
+            }
+        } catch (IllegalStateException e) {
+            MATE.log_debug("Couldn't execute action: " + action);
+            e.printStackTrace();
+            if (Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)) {
+                throw new UIAutomatorException("UIAutomator disconnected, couldn't execute action!");
+            } else {
+                // unexpected behaviour
+                throw e;
+            }
         }
+
+        checkForCrash();
     }
 
     /**
@@ -194,7 +215,7 @@ public class DeviceMgr {
      *
      * @param action The system event.
      */
-    private void executeAction(SystemAction action) throws AUTCrashException {
+    private void executeAction(SystemAction action) {
 
         // the inner class separator '$' needs to be escaped
         String receiver = action.getReceiver().replaceAll("\\$", Matcher.quoteReplacement("\\$"));
@@ -226,16 +247,14 @@ public class DeviceMgr {
             Registry.getEnvironmentManager().executeSystemEvent(Registry.getPackageName(),
                     action.getReceiver(), action.getAction(), action.isDynamicReceiver());
         }
-        checkForCrash();
     }
 
     /**
      * Executes the given motif action.
      *
      * @param action The given motif action.
-     * @throws AUTCrashException If the app crashes.
      */
-    private void executeAction(MotifAction action) throws AUTCrashException {
+    private void executeAction(MotifAction action) {
 
         ActionType typeOfAction = action.getActionType();
 
@@ -250,7 +269,6 @@ public class DeviceMgr {
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
-        checkForCrash();
     }
 
     /**
@@ -260,7 +278,7 @@ public class DeviceMgr {
      */
     private void handleFillFormAndSubmit(MotifAction action) {
 
-        if (Properties.WIDGET_BASED_ACTIONS()) {
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
             List<UIAction> widgetActions = action.getUIActions();
 
@@ -386,6 +404,15 @@ public class DeviceMgr {
             return;
         }
 
+        /*
+        * The subsequent call to clickAndWait() can swallow a TimeoutException, which is thrown also
+        * by our TimeoutRun class to indicate the termination of the exploration. If swallowed, our
+        * timeout run thread would never terminate. To minimise such a case, we check if an interrupt
+        * was already triggered by our shutdown procedure and abort the execution in that case.
+        * See https://gitlab.infosun.fim.uni-passau.de/se2/mate/mate/-/merge_requests/184#note_80071.
+         */
+        Utils.throwOnInterrupt();
+
         Boolean success = spinner.clickAndWait(Until.newWindow(), 500);
 
         if (success != null && success) {
@@ -432,7 +459,7 @@ public class DeviceMgr {
      */
     private void handleSpinnerScrolling(MotifAction action) {
 
-        if (Properties.WIDGET_BASED_ACTIONS()) {
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
             WidgetAction widgetAction = (WidgetAction) action.getUIActions().get(0);
 
@@ -509,9 +536,8 @@ public class DeviceMgr {
      * Executes the given ui action.
      *
      * @param action The given ui action.
-     * @throws AUTCrashException If the app crashes.
      */
-    private void executeAction(UIAction action) throws AUTCrashException {
+    private void executeAction(UIAction action) {
 
         ActionType typeOfAction = action.getActionType();
 
@@ -583,7 +609,6 @@ public class DeviceMgr {
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
-        checkForCrash();
     }
 
     /**
@@ -592,7 +617,7 @@ public class DeviceMgr {
      *
      * @param action The action which contains the Intent to be sent.
      */
-    private void executeAction(IntentBasedAction action) throws AUTCrashException {
+    private void executeAction(IntentBasedAction action) {
 
         Intent intent = action.getIntent();
 
@@ -631,16 +656,14 @@ public class DeviceMgr {
                 e.printStackTrace();
             }
         }
-        checkForCrash();
     }
 
     /**
      * Executes a primitive action, e.g. a click on a specific coordinate.
      *
      * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    private void executeAction(PrimitiveAction action) throws AUTCrashException {
+    private void executeAction(PrimitiveAction action) {
 
         switch (action.getActionType()) {
             case CLICK:
@@ -677,7 +700,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for primitive actions.");
         }
-        checkForCrash();
     }
 
     /**
@@ -791,9 +813,8 @@ public class DeviceMgr {
      * Executes a widget action, e.g. a click on a certain widget.
      *
      * @param action The action to be executed.
-     * @throws AUTCrashException Thrown when the action causes a crash of the application.
      */
-    private void executeAction(WidgetAction action) throws AUTCrashException {
+    private void executeAction(WidgetAction action) {
 
         Widget selectedWidget = action.getWidget();
         ActionType typeOfAction = action.getActionType();
@@ -822,8 +843,6 @@ public class DeviceMgr {
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for widget actions.");
         }
-
-        checkForCrash();
     }
 
     /**
@@ -1455,6 +1474,7 @@ public class DeviceMgr {
             return fragments;
         } catch (Exception e) {
             MATE.log_warn("Couldn't retrieve currently active fragments: " + e.getMessage());
+            e.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -1547,6 +1567,16 @@ public class DeviceMgr {
      * @return Returns the activities of the AUT.
      */
     public List<String> getActivities() {
+        return Registry.getManifest().getActivities().stream()
+                .map(ComponentDescription::getFullyQualifiedName)
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unused")
+    private List<String> getActivitiesFromPackageManager() {
+
+        // NOTE: This will only retrieve the exported/enabled activities, not necessarily all listed
+        // in the AndroidManifest.xml file!
 
         Instrumentation instrumentation = getInstrumentation();
 
@@ -1559,11 +1589,7 @@ public class DeviceMgr {
             return Arrays.stream(pi.activities).map(activity -> activity.name)
                     .collect(Collectors.toList());
         } catch (PackageManager.NameNotFoundException e) {
-            MATE.log_warn("Couldn't retrieve activity names!");
-            MATE.log_warn(e.getMessage());
-
-            // fallback mechanism
-            return Registry.getEnvironmentManager().getActivityNames();
+            throw new IllegalStateException("Couldn't retrieve activity names!", e);
         }
     }
 
@@ -1572,6 +1598,8 @@ public class DeviceMgr {
      * original state.
      */
     public void clearApp() {
+
+        Utils.throwOnInterrupt();
 
         try {
             device.executeShellCommand("pm clear " + packageName);
@@ -1592,15 +1620,17 @@ public class DeviceMgr {
 
             // fallback mechanism
             Registry.getEnvironmentManager().clearAppData();
-        }
-
-        if (Properties.SURROGATE_MODEL()) {
+        } finally {
             /*
-             * The execution of the 'pm clear' command also drops the runtime permissions of the
-             * AUT, thus we have to re-grant it in order to write the traces properly.
+             * The execution of the 'pm clear' command also drops the runtime permissions of the AUT,
+             * thus we have to re-grant them in order to allow the tracer to write its traces to the
+             * external storage. Otherwise, one may encounter the following situation: A reset is
+             * performed, dropping the runtime permissions. The execution of the next actions triggers
+             * dumping the traces because the cache limit of the tracer is reached. This operation would
+             * fail consequently. We need to call this operation in any case even when MATE received
+             * the timeout interrupt (only possible in the fallback mechanism!).
              */
             MATE.log("Granting runtime permissions: " + grantRuntimePermissions());
-
         }
     }
 
@@ -1639,10 +1669,220 @@ public class DeviceMgr {
      * the external storage.
      */
     private void sendBroadcastToTracer() {
+        MATE.log_debug("Sending broadcast...");
         Intent intent = new Intent("STORE_TRACES");
         intent.setComponent(new ComponentName(Registry.getPackageName(),
                 "de.uni_passau.fim.auermich.tracer.Tracer"));
         InstrumentationRegistry.getTargetContext().sendBroadcast(intent);
+    }
+
+    /**
+     * Retrieves a file handle on some file located on the external storage.
+     *
+     * @param filename The name of the file.
+     * @return Returns a file handle for the specified file on the external storage.
+     */
+    private File getFileFromExternalStorage(final String filename) {
+        final File sdCard = Environment.getExternalStorageDirectory();
+        return new File(sdCard, filename);
+    }
+
+    /**
+     * Retrieves the info.txt file from the external storage.
+     *
+     * @return Returns a file handle on the info.txt file.
+     */
+    private File getInfoFile() {
+        return getFileFromExternalStorage("info.txt");
+    }
+
+    /**
+     * Retrieves the traces.txt file from the external storage.
+     *
+     * @return Returns a file handle on the traces.txt file.
+     */
+    private File getTracesFile() {
+        return getFileFromExternalStorage("traces.txt");
+    }
+
+    /**
+     * Checks whether the info.txt file exists.
+     *
+     * @return Returns {@code true} if the info.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean infoFileExists() {
+        return getInfoFile().exists();
+    }
+
+    /**
+     * Checks whether the traces.txt file exists.
+     *
+     * @return Returns {@code true} if the traces.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean tracesFileExists() {
+        return getTracesFile().exists();
+    }
+
+    /**
+     * Deletes both the traces.txt and info.txt file from the external storage.
+     */
+    private void deleteTraceFiles() {
+
+        // delete both files in order that the next action is assigned the correct traces
+        boolean removedTracesFile = getTracesFile().delete();
+        boolean removedInfoFile = getInfoFile().delete();
+
+        if (!removedInfoFile) {
+            MATE.log_warn("Couldn't remove the info.txt file!");
+        }
+
+        if (!removedTracesFile) {
+            MATE.log_warn("Couldn't remove the traces.txt file!");
+        }
+    }
+
+    /**
+     * Requests the dumping of the traces by sending a broadcast to the tracer.
+     */
+    private void dumpTraces() {
+
+        // triggers the dumping of traces to a file called traces.txt
+        sendBroadcastToTracer();
+
+        /*
+         * We need to wait until the info.txt file is generated, once it is there, we know that all
+         * traces have been dumped.
+         */
+        MateInterruptedException interrupted = null;
+        while (!infoFileExists()) {
+            MATE.log_debug("Waiting for info.txt...");
+            try {
+                Utils.sleep(200);
+            } catch (final MateInterruptedException e) {
+                /*
+                 * We might get a timeout (signaled through an interrupt) while waiting for the
+                 * traces to be written. In that case we still want to wait for the tracer to write
+                 * its traces.
+                 */
+                interrupted = e;
+            }
+        }
+
+        /*
+         * Re-throw the interrupt exception caught while waiting for the tracer to finish dumping
+         * its traces. This is done before reading and deleting the traces.txt file, so that the
+         * traces won't be lost.
+         */
+        if (interrupted != null) {
+            MATE.log_debug("Interrupt detected during dumping traces!");
+            throw interrupted;
+        }
+    }
+
+    /**
+     * Reads the traces from the traces.txt file.
+     *
+     * @return Returns the traces from the traces.txt file.
+     */
+    private Set<String> readTracesFile() {
+
+        /*
+         * The method exists() may return 'false' if we try to access it while it is written by
+         * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
+         * only if the info.txt doesn't exist yet, this should never happen.
+         */
+        if (!tracesFileExists()) {
+            getInfoFile().delete();
+            throw new IllegalStateException("The file traces.txt doesn't exist!");
+        }
+
+        final Set<String> traces = new HashSet<>();
+
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(getTracesFile())))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                traces.add(line);
+            }
+        } catch (final IOException e) {
+            getInfoFile().delete();
+            throw new IllegalStateException("Couldn't read traces!", e);
+        }
+
+        return traces;
+    }
+
+    /**
+     * Waits for the tracer until it dumped both the traces.txt and info.txt file.
+     *
+     * @return Returns {@code true} if the waiting was successful, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean waitForTracer() {
+
+        MATE.log_debug("Waiting for info.txt/traces.txt...");
+
+        boolean tracesFileExists = tracesFileExists();
+        boolean infoFileExists = infoFileExists();
+
+        if (infoFileExists && !tracesFileExists) {
+            MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+            return false;
+        }
+
+        if (tracesFileExists && !infoFileExists) {
+            /*
+             * There are two possible states here:
+             *
+             *     1) The tracer is currently dumping its traces, and we just need to wait for it
+             *        to finish.
+             *     2) The tracer dumped the traces because its cache got full. In that case we need
+             *        to call the tracer to get the remaining traces.
+             *
+             * We have no clear method of determining in which state we are in, so we have to wait
+             * for a while to have the tracer potentially finish dumping its traces and re-check for
+             * the info.txt.
+             */
+            MateInterruptedException interrupted = null;
+            final int maxWaitTimeInSeconds = 30;
+
+            for (int i = 1; i < maxWaitTimeInSeconds; ++i) {
+
+                try {
+                    Utils.sleep(1);
+                } catch (final MateInterruptedException e) {
+                    // keep track of any interrupt
+                    interrupted = e;
+                }
+
+                tracesFileExists = tracesFileExists();
+                infoFileExists = infoFileExists();
+
+                if (tracesFileExists && infoFileExists) {
+                    // We were in case 1), now the tracer has finished dumping the traces.
+                    break;
+                }
+            }
+
+            if (interrupted != null) {
+                /*
+                 * We suspend the interrupt until the tracer hopefully completed dumping its traces.
+                 * By re-throwing, we terminate the current thread.
+                 */
+                MATE.log_debug("Interrupt detected during waiting for tracer!");
+                throw interrupted;
+            }
+
+            if (infoFileExists && !tracesFileExists) {
+                MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+                return false;
+            }
+        }
+
+        MATE.log_debug("Waiting for info.txt/traces.txt completed!");
+        return true;
     }
 
     /**
@@ -1652,93 +1892,46 @@ public class DeviceMgr {
      */
     public Set<String> getTraces() {
 
-        File sdCard = Environment.getExternalStorageDirectory();
-        File infoFile = new File(sdCard, "info.txt");
+        /*
+         * If an interrupt happened, i.e. the TimeoutRun signaled the end of the execution, we abort
+         * the execution here.
+         */
+        Utils.throwOnInterrupt();
+
+        if (!waitForTracer()) {
+            MATE.log_warn("Couldn't wait for tracer.");
+            return new HashSet<>(0);
+        }
 
         /*
          * If the AUT has been crashed, the uncaught exception handler takes over and produces both
          * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
          * every other condition, there should be no info.txt present and the broadcast is necessary.
-         *
          */
-        if (!infoFile.exists()) {
-            // triggers the dumping of traces to a file called traces.txt
-            sendBroadcastToTracer();
+        if (!infoFileExists()) {
+            dumpTraces();
         }
 
-        /*
-         * We need to wait until the info.txt file is generated, once it is there, we know that all
-         * traces have been dumped.
-         */
-        while (!infoFile.exists()) {
-            MATE.log_debug("Waiting for info.txt...");
-            Utils.sleep(200);
-        }
-
-        File traceFile = new File(sdCard, "traces.txt");
-
-        /*
-         * The method exists() may return 'false' if we try to access it while it is written by
-         * another process, i.e. the tracer class. By sending the broadcast (asynchronous operation!)
-         * only if the info.txt doesn't exist yet, this should never happen.
-         *
-         */
-        if (!traceFile.exists()) {
-            infoFile.delete();
-            throw new IllegalStateException("The file traces.txt doesn't exist!");
-        }
-
-        Set<String> traces = new HashSet<>();
-
-        try (BufferedReader reader
-                     = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile)))) {
-
-            String line = reader.readLine();
-
-            while (line != null) {
-                traces.add(line);
-                line = reader.readLine();
-            }
-
-        } catch (IOException e) {
-            infoFile.delete();
-            throw new IllegalStateException("Couldn't read traces!", e);
-        }
-
-        // delete both files in order that the next action is assigned the correct traces
-        boolean removedTracesFile = traceFile.delete();
-        boolean removedInfoFile = infoFile.delete();
-
-        if (!removedInfoFile) {
-            MATE.log_warn("Couldn't remove the info.txt file!");
-        }
-
-        if (!removedTracesFile) {
-            MATE.log_warn("Couldn't remove the traces.txt file!");
-        }
-
+        final Set<String> traces = readTracesFile();
+        deleteTraceFiles();
         return traces;
     }
 
     /**
-     * Stores the traces to a file called traces.txt on the external memory.
+     * Stores the traces to a file called traces.txt on the external memory. Also generates a file
+     * called info.txt that contains the number of written traces and indicates that the writing
+     * of the traces has been completed.
      *
      * @param traces The traces to be stored.
      */
     public void storeTraces(Set<String> traces) {
 
-        File sdCard = Environment.getExternalStorageDirectory();
-        File traceFile = new File(sdCard, "traces.txt");
-
-        try (Writer fileWriter = new FileWriter(traceFile)) {
-
-            for (String trace : traces) {
+        try (final Writer fileWriter = new FileWriter(getTracesFile())) {
+            for (final String trace : traces) {
                 fileWriter.write(trace);
                 fileWriter.write(System.lineSeparator());
             }
-
-            fileWriter.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Couldn't write to traces.txt!", e);
         }
 
@@ -1746,12 +1939,9 @@ public class DeviceMgr {
          * The info.txt indicates that the dumping of traces has been completed and it contains
          * the number of written traces.
          */
-        File infoFile = new File(sdCard, "info.txt");
-
-        try (Writer fileWriter = new FileWriter(infoFile)) {
+        try (final Writer fileWriter = new FileWriter(getInfoFile())) {
             fileWriter.write(traces.size());
-            fileWriter.flush();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Couldn't write to info.txt!", e);
         }
     }

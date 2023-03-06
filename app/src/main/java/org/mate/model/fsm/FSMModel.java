@@ -3,6 +3,9 @@ package org.mate.model.fsm;
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.StartAction;
+import org.mate.interaction.action.intent.IntentAction;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -24,6 +27,11 @@ import java.util.stream.Collectors;
 public class FSMModel implements IGUIModel {
 
     /**
+     * The id of the virtual root state.
+     */
+    public static final String VIRTUAL_ROOT_STATE_ID = "VIRTUAL_ROOT_STATE";
+
+    /**
      * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
      * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
      * screen state.
@@ -32,7 +40,7 @@ public class FSMModel implements IGUIModel {
 
         @Override
         public String getId() {
-            return "VIRTUAL_ROOT_STATE";
+            return VIRTUAL_ROOT_STATE_ID;
         }
 
         @Override
@@ -46,7 +54,27 @@ public class FSMModel implements IGUIModel {
         }
 
         @Override
-        public List<UIAction> getActions() {
+        public List<Action> getActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<UIAction> getUIActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<SystemAction> getSystemActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentBasedAction> getIntentBasedActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentAction> getIntentActions() {
             throw new UnsupportedOperationException("Do not call this method!");
         }
 

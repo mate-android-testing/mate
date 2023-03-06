@@ -127,21 +127,21 @@ public class InputFieldTypeTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "1.2.3", ".", ".,"})
     void testRegexSignedNumberFail(String text) {
-        InputFieldType type = InputFieldType.CLASS_NUMBER;
+        InputFieldType type = InputFieldType.CLASS_NUMBER_NORMAL;
         assertPatternFalse(text, type);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"1", "123", "344"})
     void testRegexClassNumberSuccessful(String text) {
-        InputFieldType type = InputFieldType.CLASS_NUMBER;
+        InputFieldType type = InputFieldType.CLASS_NUMBER_NORMAL;
         assertPatternTrue(text, type);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", "1.0", "abc"})
     void testRegexClassNumberFail(String text) {
-        InputFieldType type = InputFieldType.CLASS_NUMBER;
+        InputFieldType type = InputFieldType.CLASS_NUMBER_NORMAL;
         assertPatternFalse(text, type);
     }
 

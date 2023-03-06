@@ -12,6 +12,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="MATE"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:requestLegacyExternalStorage="true">
 
     </application>

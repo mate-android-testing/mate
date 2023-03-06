@@ -5,6 +5,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.StaleObjectException;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -12,7 +13,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import org.mate.MATE;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.action.ui.Widget;
-import org.mate.utils.Utils;
+import org.mate.utils.UIAutomatorException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,16 +55,6 @@ public class AppScreen {
     private final UiDevice device;
 
     /**
-     * The maximal number of retries (app screen information) when the ui automator is disconnected.
-     */
-    private static final int UiAutomatorDisconnectedRetries = 3;
-
-    /**
-     * The error message when the ui automator is disconnected.
-     */
-    private static final String UiAutomatorDisconnectedMessage = "UiAutomation not connected!";
-
-    /**
      * Creates a new app screen containing the widgets on it.
      */
     public AppScreen(DeviceMgr deviceMgr) {
@@ -74,15 +65,25 @@ public class AppScreen {
         this.activityName = deviceMgr.getCurrentActivity();
         this.packageName = getCurrentPackageName();
 
+        if (packageName == null) {
+            throw new UIAutomatorException("UIAutomator disconnected, couldn't retrieve package name!");
+        }
+
         final AccessibilityNodeInfo rootNode = getRootNode();
 
         if (rootNode == null) {
-            throw new IllegalStateException("UIAutomator disconnected, couldn't retrieve app screen!");
+            throw new UIAutomatorException("UIAutomator disconnected, couldn't retrieve app screen!");
         }
 
         // retrieve widgets from current screen
         MATE.log_debug("AppScreen: " + activityName);
-        parseWidgets(rootNode, null, 0, 0, 0);
+        try {
+            parseWidgets(rootNode, null, 0, 0, 0);
+        } catch (Exception e) {
+            MATE.log_debug("Couldn't parse widgets: " + e.getMessage());
+            e.printStackTrace();
+            throw new UIAutomatorException("UIAutomator disconnected, couldn't parse widgets!", e);
+        }
         MATE.log_debug("Number of widgets: " + widgets.size());
     }
 
@@ -93,23 +94,14 @@ public class AppScreen {
      */
     private AccessibilityNodeInfo getRootNode() {
 
-        AccessibilityNodeInfo rootNode = InstrumentationRegistry.getInstrumentation()
-                .getUiAutomation().getRootInActiveWindow();
+        AccessibilityNodeInfo rootNode = null;
 
-        for (int numberOfRetries = 0; numberOfRetries < UiAutomatorDisconnectedRetries
-                && rootNode == null; numberOfRetries++) {
-
-            /*
-             * It can happen that the device is in an unstable state and hence the UIAutomator
-             * connection may get lost. In this case, we should wait some time until we try to
-             * re-connect.
-             */
-            MATE.log_acc("UIAutomator disconnected, try re-connecting!");
-            Utils.sleep(3000);
-
-            // try to reconnect
+        try {
             rootNode = InstrumentationRegistry.getInstrumentation()
                     .getUiAutomation().getRootInActiveWindow();
+        } catch (Exception e) {
+            MATE.log_debug("Couldn't retrieve root node: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return rootNode;
@@ -124,19 +116,11 @@ public class AppScreen {
 
         String packageName = null;
 
-        for (int numberOfRetries = 0; numberOfRetries <= UiAutomatorDisconnectedRetries
-                && packageName == null; numberOfRetries++) {
-
-            try {
-                packageName = device.getCurrentPackageName();
-            } catch (IllegalStateException e) {
-                if (e.getMessage() != null && e.getMessage().equals(UiAutomatorDisconnectedMessage)) {
-                    MATE.log_acc("UIAutomator disconnected, try re-connecting!");
-                    Utils.sleep(3000);
-                } else {
-                    throw new IllegalStateException("Couldn't retrieve package name!", e);
-                }
-            }
+        try {
+            packageName = device.getCurrentPackageName();
+        } catch (Exception e) {
+            MATE.log_debug("Couldn't retrieve package name: " + e.getMessage());
+            e.printStackTrace();
         }
 
         // NOTE: We could also retrieve the package name via the root node!
@@ -146,11 +130,11 @@ public class AppScreen {
     /**
      * Extracts the widgets from the ui hierarchy.
      *
-     * @param node        Describes a node in the ui hierarchy. Initially, the root node.
-     * @param parent      The parent widget, {@code null} for the root node.
-     * @param depth       The depth of the node in the ui hierarchy (tree).
+     * @param node Describes a node in the ui hierarchy. Initially, the root node.
+     * @param parent The parent widget, {@code null} for the root node.
+     * @param depth The depth of the node in the ui hierarchy (tree).
      * @param globalIndex A global index based on DFS order.
-     * @param localIndex  A local index for each child widget, i.e. the child number.
+     * @param localIndex A local index for each child widget, i.e. the child number.
      * @return Returns the current global index.
      */
     private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
@@ -189,7 +173,7 @@ public class AppScreen {
     /**
      * Checks whether an editable widget displays some hint.
      *
-     * @param node   A node in the ui hierarchy.
+     * @param node A node in the ui hierarchy.
      * @param widget The widget corresponding to the node.
      */
     private void checkForHint(AccessibilityNodeInfo node, Widget widget) {
@@ -200,9 +184,7 @@ public class AppScreen {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (node.isShowingHintText()) {
-                    if(node.getHintText() instanceof String){
-                        hint = (String) node.getHintText();
-                    }
+                    hint = node.getHintText().toString(); 
                 }
             } else {
                 // fallback mechanism for older devices
@@ -244,18 +226,23 @@ public class AppScreen {
              * In order to retrieve the hint of a widget, we have to clear the
              * input, and this in turn should display the hint if we are lucky.
              */
+            try {
+                // save original input
+                String textBeforeClear = Objects.toString(uiObject.getText(), "");
 
-            // save original input
-            String textBeforeClear = Objects.toString(uiObject.getText(), "");
+                // reset input and hope that this causes a hint to be set
+                uiObject.setText("");
+                String textAfterClear = Objects.toString(uiObject.getText(), "");
 
-            // reset input and hope that this causes a hint to be set
-            uiObject.setText("");
-            String textAfterClear = Objects.toString(uiObject.getText(), "");
+                // restore original input
+                uiObject.setText(textBeforeClear);
 
-            // restore original input
-            uiObject.setText(textBeforeClear);
-
-            hint = textAfterClear;
+                hint = textAfterClear;
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+                MATE.log_warn("Couldn't derive hint for widget: " + widget);
+            }
         }
 
         return hint;
@@ -332,7 +319,7 @@ public class AppScreen {
      *
      * @param o The other app screen to compare against.
      * @return Returns {@code true} if the two app screens are identical,
-     * otherwise {@code false} is returned.
+     *         otherwise {@code false} is returned.
      */
     @Override
     public boolean equals(Object o) {

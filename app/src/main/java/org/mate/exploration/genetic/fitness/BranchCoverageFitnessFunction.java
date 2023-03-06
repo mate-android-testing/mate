@@ -21,7 +21,8 @@ public class BranchCoverageFitnessFunction<T> implements IFitnessFunction<T> {
     @Override
     public double getFitness(IChromosome<T> chromosome) {
 
-        double branchCoverage = FitnessUtils.getFitness(chromosome);
+        double branchCoverage
+                = FitnessUtils.getFitness(chromosome, FitnessFunction.BRANCH_COVERAGE);
 
         if (branchCoverage == 100.0) {
             ConditionalTerminationCondition.satisfiedCondition();

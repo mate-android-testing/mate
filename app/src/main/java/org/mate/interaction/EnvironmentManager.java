@@ -9,6 +9,8 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
+import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.message.Message;
@@ -16,12 +18,16 @@ import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Objective;
+import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageDTO;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -40,12 +46,18 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "2.8";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.1";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
+    /**
+     * The maximal number of how often a request is sent to MATE-Server in case of a fault.
+     */
+    private static final int MAX_NUMBER_OF_TRIES = 3;
+
     private String emulator = null;
-    private final Socket server;
-    private final Parser messageParser;
+    private Socket server;
+    private final int port;
+    private Parser messageParser;
     private boolean active;
 
     /**
@@ -67,8 +79,7 @@ public class EnvironmentManager {
     }
 
     /**
-     * Initialises a new environment manager communicating with
-     * the MATE server on the given port.
+     * Initialises a new environment manager communicating with the MATE server on the given port.
      *
      * @param port The MATE server port.
      * @throws IOException If no connection could be established with the MATE server.
@@ -76,7 +87,46 @@ public class EnvironmentManager {
     public EnvironmentManager(int port) throws IOException {
         active = true;
         server = new Socket(DEFAULT_SERVER_IP, port);
-        messageParser = new Parser(server.getInputStream());
+        this.port = port;
+
+        /*
+         * The input stream obtained from server.getInputStream() cannot be interrupted when
+         * waiting for a response from the server. We need to wrap the input stream around a
+         * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+         * will be thrown.
+         */
+        final InputStream interruptibleInputStream = Channels.newInputStream(
+                Channels.newChannel(server.getInputStream()));
+        messageParser = new Parser(interruptibleInputStream);
+        server.setSoTimeout(0);
+    }
+
+    /**
+     * Re-connects to Mate-Server if the connection has been closed.
+     *
+     * @throws IOException If the connection is closed and cannot be re-established.
+     */
+    public void reconnect() throws IOException {
+
+        Utils.sleep(1000);
+
+        if (server.isClosed()) {
+            MATE.log_debug("Re-connecting to MATE-Server.");
+            server = new Socket(DEFAULT_SERVER_IP, port);
+
+            /*
+             * The input stream obtained from server.getInputStream() cannot be interrupted when
+             * waiting for a response from the server. We need to wrap the input stream around a
+             * channel to make this possible. If an interrupt happens, a ClosedInterruptException
+             * will be thrown.
+             */
+            final InputStream interruptibleInputStream = Channels.newInputStream(
+                    Channels.newChannel(server.getInputStream()));
+            messageParser = new Parser(interruptibleInputStream);
+            server.setSoTimeout(0);
+        } else {
+            MATE.log_debug("No need to re-connect to MATE-Server.");
+        }
     }
 
     /**
@@ -100,35 +150,93 @@ public class EnvironmentManager {
     }
 
     /**
-     * Send a {@link org.mate.message.Message} to the server and return the response of the server
+     * Closes the socket to MATE-Server and tries to re-connect.
+     */
+    private void closeAndReconnect() {
+        try {
+            server.close();
+            reconnect();
+        } catch (final IOException e) {
+            throw new RuntimeException("Could not establish a new connection to MATE-Server!", e);
+        }
+    }
+
+    /**
+     * Sends a {@link org.mate.message.Message} to the server and returns the response of the server.
      *
-     * @param message {@link org.mate.message.Message} that will be send to the server
-     * @return Response {@link org.mate.message.Message} of the server
+     * @param message The {@link org.mate.message.Message} that will be send to the server.
+     * @return Returns the response {@link org.mate.message.Message} of the server.
      */
     public synchronized Message sendMessage(Message message) {
+
         if (!active) {
-            throw new IllegalStateException("EnvironmentManager is no longer active and can not be used for communication!");
+            throw new IllegalStateException("EnvironmentManager is no longer active and can not " +
+                    "be used for communication!");
         }
+
+        MATE.log_debug("Send message with subject " + message.getSubject());
         addMetadata(message);
 
-        try {
-            server.getOutputStream().write(Serializer.serialize(message));
-            server.getOutputStream().flush();
-        } catch (IOException e) {
-            MATE.log("socket error sending");
-            throw new IllegalStateException(e);
-        }
+        int numberOfTries = 0;
 
-        Message response = messageParser.nextMessage();
+        while (true) {
 
-        verifyMetadata(response);
-        if (response.getSubject().equals("/error")) {
-            MATE.log("Received error message from mate-server: "
-                    + response.getParameter("info"));
-            return null;
+            try {
+                server.getOutputStream().write(Serializer.serialize(message));
+                server.getOutputStream().flush();
+            } catch (IOException e) {
+
+                MATE.log_debug("socket error sending");
+                closeAndReconnect();
+
+                try {
+                    server.getOutputStream().write(Serializer.serialize(message));
+                    server.getOutputStream().flush();
+                } catch (IOException exception) {
+                    /*
+                     * If we can't send the request the second time, it's likely that we can't
+                     * recover from this fault and thus abort the execution.
+                     */
+                    MATE.log_debug("socket error sending");
+                    throw new IllegalStateException(exception);
+                }
+            }
+
+            Message response;
+
+            try {
+                response = messageParser.nextMessage();
+            } catch (IllegalStateException lexerException) {
+
+                MATE.log_debug("Lexing response failed: " + lexerException);
+
+                /*
+                 * MATE-Server might still be processing the old request and trying to send data
+                 * through the socket, so to ensure MATE-Server does not confuse the different
+                 * requests we just close the socket and open a new one.
+                 */
+                closeAndReconnect();
+
+                numberOfTries++;
+
+                if (numberOfTries < MAX_NUMBER_OF_TRIES) {
+                    continue;
+                } else {
+                    throw new IllegalStateException(lexerException);
+                }
+            }
+
+            verifyMetadata(response);
+
+            if (response.getSubject().equals("/error")) {
+                MATE.log_debug("Received error message from MATE-Server: "
+                        + response.getParameter("info"));
+                throw new IllegalStateException("MATE-Server couldn't send a successful response!");
+            }
+
+            stripMetadata(response);
+            return response;
         }
-        stripMetadata(response);
-        return response;
     }
 
     /**
@@ -230,9 +338,12 @@ public class EnvironmentManager {
      * @param sourceChromosome The source chromosome.
      * @param targetChromosome The target chromosome.
      * @param testCases The test cases belonging to the source chromosome.
+     * @param fitnessFunction The underlying fitness function.
      */
-    public void copyFitnessData(IChromosome<TestSuite> sourceChromosome,
-                                IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+    public void copyFitnessData(final IChromosome<TestSuite> sourceChromosome,
+                                final IChromosome<TestSuite> targetChromosome,
+                                final List<TestCase> testCases,
+                                final FitnessFunction fitnessFunction) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -249,7 +360,7 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/copy_fitness_data")
                 .withParameter("packageName", Registry.getPackageName())
-                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
+                .withParameter("fitnessFunction", fitnessFunction.name())
                 .withParameter("chromosome_src", sourceChromosome.getValue().getId())
                 .withParameter("chromosome_target", targetChromosome.getValue().getId())
                 .withParameter("entities", sb.toString());
@@ -270,8 +381,9 @@ public class EnvironmentManager {
      * @param targetChromosome The target chromosome.
      * @param testCases The test cases belonging to the source chromosome.
      */
-    public void copyCoverageData(IChromosome<TestSuite> sourceChromosome,
-                                 IChromosome<TestSuite> targetChromosome, List<TestCase> testCases) {
+    public void copyCoverageData(final IChromosome<TestSuite> sourceChromosome,
+                                 final IChromosome<TestSuite> targetChromosome,
+                                 final List<TestCase> testCases) {
 
         // concatenate test cases
         StringBuilder sb = new StringBuilder();
@@ -324,6 +436,7 @@ public class EnvironmentManager {
      *
      * @return Returns the list of activities of the AUT.
      */
+    @SuppressWarnings("unused")
     public List<String> getActivityNames() {
         Message.MessageBuilder messageBuilder
                 = new Message.MessageBuilder("/android/get_activities")
@@ -401,10 +514,13 @@ public class EnvironmentManager {
      *
      * @param testcaseDir The test case directory.
      * @param testCase The name of the test case file.
+     * @return Returns {@code true} if the test case could be successfully fetched and removed,
+     *         otherwise {@code false} is returned.
      */
     public boolean fetchTestCase(String testcaseDir, String testCase) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_test_case")
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder(
+                "/utility/fetch_test_case")
                 .withParameter("deviceId", emulator)
                 .withParameter("testcaseDir", testcaseDir)
                 .withParameter("testcase", testCase);
@@ -431,6 +547,27 @@ public class EnvironmentManager {
         Message response = sendMessage(messageBuilder.build());
         boolean success = Boolean.parseBoolean(response.getParameter("response"));
         MATE.log("Fetching transition system from emulator succeeded: " + success);
+        return success;
+    }
+
+    /**
+     * Fetches and removes an espresso test from the internal storage of the emulator.
+     *
+     * @param espressoDir The espresso tests directory on the emulator.
+     * @param testCase The name of the espresso test.
+     * @return Returns {@code true} if the espresso test could be successfully fetched and removed,
+     *         otherwise {@code false} is returned.
+     */
+    public boolean fetchEspressoTest(String espressoDir, String testCase) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder(
+                "/utility/fetch_espresso_test")
+                .withParameter("deviceId", emulator)
+                .withParameter("espressoDir", espressoDir)
+                .withParameter("testcase", testCase);
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching espresso test from emulator succeeded: " + success);
         return success;
     }
 
@@ -485,7 +622,33 @@ public class EnvironmentManager {
                 = new Message.MessageBuilder("/android/grant_runtime_permissions")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName);
-        Message response = sendMessage(messageBuilder.build());
+
+        Message response = null;
+        MateInterruptedException mateInterruptedException = null;
+
+        try {
+            response = sendMessage(messageBuilder.build());
+        } catch (MateInterruptedException e) {
+            /*
+             * We still need to wait for mate-server to complete the request, so we just wait for a
+             * few seconds. This is important, because if we continue immediately and try to get the
+             * coverage of the last incomplete test case by invoking the tracer, then the tracer's
+             * permissions to write to the external storage might get dropped while it tries to write,
+             * because clearing the app data also revokes the tracer's permissions. This in turn
+             * causes a failure of the tracer to write its traces.
+             */
+            mateInterruptedException = e;
+            Utils.sleepWithoutInterrupt(5000);
+        }
+
+        if (response != null && !"/android/grant_runtime_permissions".equals(response.getSubject())) {
+            MATE.log_acc("ERROR: Unable to grant runtime permissions!");
+        }
+
+        if (mateInterruptedException != null) {
+            throw mateInterruptedException;
+        }
+
         return Boolean.parseBoolean(response.getParameter("response"));
     }
 
@@ -531,15 +694,13 @@ public class EnvironmentManager {
 
     /**
      * Requests the drawing of the graph.
-     *
-     * @param raw Whether drawing the raw graph or target and visited vertices should be marked.
      */
-    public void drawGraph(boolean raw) {
+    public void drawGraph() {
 
         MATE.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
-                .withParameter("raw", String.valueOf(raw));
+                .withParameter("raw", String.valueOf(Properties.DRAW_GRAPH() == DrawType.RAW));
         sendMessage(messageBuilder.build());
     }
 
@@ -580,8 +741,10 @@ public class EnvironmentManager {
      * @param chromosome Refers either to a test case or to a test suite.
      * @param entityId Identifies the test case if chromosomeId specifies a test suite,
      *         otherwise {@code null}.
+     * @param fitnessFunction The underlying fitness function.
      */
-    public <T> void storeFitnessData(IChromosome<T> chromosome, String entityId) {
+    public <T> void storeFitnessData(final IChromosome<T> chromosome, final String entityId,
+                                     final FitnessFunction fitnessFunction) {
 
         if (entityId != null && entityId.equals("dummy")) {
             MATE.log_warn("Trying to store fitness data of dummy test case...");
@@ -604,7 +767,7 @@ public class EnvironmentManager {
         coveredTestCases.add(testcase);
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_fitness_data")
-                .withParameter("fitnessFunction", Properties.FITNESS_FUNCTION().name())
+                .withParameter("fitnessFunction", fitnessFunction.name())
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
@@ -622,7 +785,7 @@ public class EnvironmentManager {
 
     /**
      * Retrieves the branch distance for the given chromosome. Note that
-     * {@link #storeFitnessData(IChromosome, String)} has to be called previously.
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
      *
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the branch distance for the given chromosome.
@@ -1144,11 +1307,37 @@ public class EnvironmentManager {
      * Clears the app cache.
      */
     public void clearAppData() {
-        Message response = sendMessage(new Message.MessageBuilder("/android/clearApp")
+
+        Utils.throwOnInterrupt();
+
+        Message request = new Message.MessageBuilder("/android/clearApp")
                 .withParameter("deviceId", emulator)
-                .build());
-        if (!"/android/clearApp".equals(response.getSubject())) {
+                .build();
+
+        Message response = null;
+        MateInterruptedException mateInterruptedException = null;
+
+        try {
+            response = sendMessage(request);
+        } catch (MateInterruptedException e) {
+            /*
+             * We still need to wait for mate-server to complete the request, so we just wait for a
+             * few seconds. This is important, because if we continue immediately and try to get the
+             * coverage of the last incomplete test case by invoking the tracer, then the tracer's
+             * permissions to write to the external storage might get dropped while it tries to write,
+             * because clearing the app data also revokes the tracer's permissions. This in turn
+             * causes a failure of the tracer to write its traces.
+             */
+            mateInterruptedException = e;
+            Utils.sleepWithoutInterrupt(5000);
+        }
+
+        if (response != null && !"/android/clearApp".equals(response.getSubject())) {
             MATE.log_acc("ERROR: unable clear app data");
+        }
+
+        if (mateInterruptedException != null) {
+            throw mateInterruptedException;
         }
     }
 
@@ -1323,7 +1512,7 @@ public class EnvironmentManager {
 
     /**
      * Returns the novelty vector for the given chromosomes.
-     * Note that {@link #storeFitnessData(IChromosome, String)} has to be called previously.
+     * Note that {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
      *
      * @param chromosomes The list of chromosomes for which the novelty should be computed.
      * @param nearestNeighbours The number of nearest neighbours k that should be considered.
@@ -1402,5 +1591,27 @@ public class EnvironmentManager {
         }
 
         return chromosomeIds.toString();
+    }
+
+    /**
+     * Commands the server to fetch and remove the dot graph from the emulator.
+     *
+     * @param graphDir The directory on the emulator with the dot file.
+     * @param graphFile The file name of the dot graph.
+     * @return {@code true}, if the server reports that the operation was successful.
+     *         Otherwise, {@code false}.
+     */
+    public boolean fetchDotGraph(String graphDir, String graphFile) {
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/fetch_dot_graph")
+                .withParameter("deviceId", emulator)
+                .withParameter("dirName", graphDir)
+                .withParameter("fileName", graphFile);
+
+        Message response = sendMessage(messageBuilder.build());
+        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+        MATE.log("Fetching dot file from emulator succeeded: " + success);
+
+        return success;
     }
 }

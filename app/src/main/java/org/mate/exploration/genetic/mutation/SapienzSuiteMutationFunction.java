@@ -66,9 +66,9 @@ public class SapienzSuiteMutationFunction implements IMutationFunction<TestSuite
 
             if (rnd < pMutate) { // if r < q
                 /*
-                * Sapienz performs a one-point crossover on two neighbouring test cases. Since
-                * MATE only supports crossover functions that return a single offspring, we make
-                * the one-point crossover here in place.
+                 * Sapienz performs a one-point crossover on two neighbouring test cases. Since
+                 * MATE only supports crossover functions that return a single offspring, we make
+                 * the one-point crossover here in place.
                  */
                 TestCase t1 = testCases.get(i - 1);
                 TestCase t2 = testCases.get(i);

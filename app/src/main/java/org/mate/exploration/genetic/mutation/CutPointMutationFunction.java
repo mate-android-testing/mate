@@ -6,6 +6,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.UIAbstractionLayer;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.surrogate.SurrogateModel;
@@ -14,8 +15,7 @@ import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 /**
- * Provides a cut point mutation function for {@link TestCase}s. Only applicable in combination
- * with {@link UIAction}s.
+ * Provides a cut point mutation function for {@link TestCase}s.
  */
 public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
@@ -74,13 +74,15 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
         try {
             for (int i = 0; i < maxNumEvents; i++) {
-                UIAction newAction;
+                Action newAction;
                 if (i < cutPoint) {
-                    newAction = (UIAction) chromosome.getValue().getActionSequence().get(i);
+                    newAction = chromosome.getValue().getActionSequence().get(i);
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
-                if (!uiAbstractionLayer.getExecutableActions().contains(newAction)
+
+                if ((newAction instanceof UIAction // check that the ui action is actually applicable
+                        && !uiAbstractionLayer.getExecutableUIActions().contains(newAction))
                         || !mutant.updateTestCase(newAction, i)) {
                     break;
                 }

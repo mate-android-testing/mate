@@ -22,8 +22,8 @@ public class ExecuteMATEGeneticAlgorithm {
                 .withAlgorithm(Properties.ALGORITHM())
                 .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
                 .withSelectionFunction(Properties.SELECTION_FUNCTION())
-                .withCrossoverFunction(Properties.CROSSOVER_FUNCTION())
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withCrossoverFunctions(Properties.CROSSOVER_FUNCTIONS())
+                .withMutationFunctions(Properties.MUTATION_FUNCTIONS())
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
@@ -37,13 +37,11 @@ public class ExecuteMATEGeneticAlgorithm {
                     = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
 
             // we need to associate with each objective (branch, line) a fitness function
-            for (int i = 0; i < numberOfObjectives; i++) {
-                builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
-            }
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
         } else if (Properties.ALGORITHM() == Algorithm.NOVELTY_SEARCH) {
             builder = builder.withFitnessFunction(FitnessFunction.NOVELTY, Properties.OBJECTIVE().name());
         } else {
-            builder = builder.withFitnessFunction(Properties.FITNESS_FUNCTION());
+            builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTIONS());
         }
 
         final IGeneticAlgorithm genericGA = builder.build();

@@ -515,6 +515,28 @@ public class Widget {
     }
 
     /**
+     * Determines whether the parent widget is a scroll view.
+     *
+     * @return Returns {@code true} if the parent is a scroll view,
+     *         otherwise {@code false} is returned.
+     */
+    public boolean isSonOfScrollView() {
+
+        if (parent == null) {
+            return false;
+        }
+
+        try {
+            Class<?> clazz = Class.forName(parent.getClazz());
+            return android.widget.ScrollView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether the widget is either clickable, long-clickable or checkable.
      *
      * @return Returns {@code true} if this widget is actionable,
@@ -1050,7 +1072,8 @@ public class Widget {
                     && getX1() == other.getX1() &&
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
-                    getY2() == other.getY2();
+                    getY2() == other.getY2() &&
+                    isVisible() == other.isVisible();
         }
     }
 
@@ -1066,7 +1089,8 @@ public class Widget {
                 getX1(),
                 getX2(),
                 getY1(),
-                getY2());
+                getY2(),
+                isVisible());
     }
 
     /**

@@ -22,19 +22,19 @@ public class RandomWalk<T> extends GeneticAlgorithm<T> {
      * Initialises the random walk with all necessary attributes.
      *
      * @param chromosomeFactory The used chromosome factory.
-     * @param mutationFunction The used mutation function.
+     * @param mutationFunctions The used mutation functions.
      * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      */
     public RandomWalk(IChromosomeFactory<T> chromosomeFactory,
-                      IMutationFunction<T> mutationFunction,
+                      List<IMutationFunction<T>> mutationFunctions,
                       List<IFitnessFunction<T>> fitnessFunctions,
                       ITerminationCondition terminationCondition) {
         super(
                 chromosomeFactory,
                 null,
                 null,
-                mutationFunction,
+                mutationFunctions,
                 fitnessFunctions,
                 terminationCondition,
                 1,

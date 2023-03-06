@@ -9,12 +9,14 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
+import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
 import org.mate.utils.ListUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
 import org.mate.utils.testcase.TestCaseStatistics;
+import org.mate.utils.testcase.espresso.EspressoConverter;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
@@ -124,6 +126,15 @@ public class TestCase {
         // serialization of test case
         if (Properties.RECORD_TEST_CASE()) {
             TestCaseSerializer.serializeTestCase(this);
+        }
+
+        if (Properties.CONVERT_GUI_TO_DOT() == DotConverter.Option.ALL) {
+            DotConverter.convertTestcase(Registry.getUiAbstractionLayer().getGuiModel(), this);
+        }
+
+        // convert test case to reproducible espresso test
+        if (Properties.CONVERT_TEST_CASE_TO_ESPRESSO_TEST()) {
+            EspressoConverter.convert(this);
         }
 
         // record stats about a test case, in particular about intent based actions
@@ -329,7 +340,7 @@ public class TestCase {
         }
         for (; count < finalSize; count++) {
             Action action;
-            if (Properties.WIDGET_BASED_ACTIONS()) {
+            if (!Properties.USE_PRIMITIVE_ACTIONS()) {
                 action = Randomness.randomElement(Registry.getUiAbstractionLayer().getExecutableActions());
             } else {
                 action = PrimitiveAction.randomAction();
@@ -396,6 +407,13 @@ public class TestCase {
             String activityAfterAction = newState.getActivityName();
             String newStateID = newState.getId();
 
+            if (actionResult == ActionResult.FAILURE_UIAUTOMATOR
+                    || actionResult == ActionResult.FAILURE_UNKNOWN) {
+                // We couldn't derive the target state.
+                activityAfterAction = "unknown";
+                newStateID = "unknown";
+            }
+
             actionSequence.add(action);
             activitySequence.add(activityAfterAction);
             stateSequence.add(newStateID);
@@ -416,7 +434,6 @@ public class TestCase {
             case SUCCESS_NEW_STATE:
             case SUCCESS_OUTBOUND:
             case FAILURE_UNKNOWN:
-            case FAILURE_EMULATOR_CRASH:
                 break;
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. " +
@@ -445,11 +462,9 @@ public class TestCase {
             case FAILURE_APP_CRASH:
             case SUCCESS_OUTBOUND:
             case FAILURE_UNKNOWN:
-            case FAILURE_EMULATOR_CRASH:
                 return false;
             default:
-                throw new UnsupportedOperationException("Encountered an unknown action result. " +
-                        "Cannot continue.");
+                throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
     }
 }
