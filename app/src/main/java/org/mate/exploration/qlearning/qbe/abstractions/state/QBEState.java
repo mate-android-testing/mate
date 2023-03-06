@@ -45,7 +45,7 @@ public final class QBEState extends AbstractQBEState<QBEAction> implements State
     public QBEState(final IScreenState screenState) {
         Objects.requireNonNull(screenState);
         featureMap = computeFeatureMap(screenState.getWidgets());
-        actions = Collections.unmodifiableSet(screenState.getActions().stream()
+        actions = Collections.unmodifiableSet(screenState.getUIActions().stream()
                 .map(QBEAction::new)
                 .collect(toSet()));
         numberOfComponents = featureMap.values().stream().mapToInt(i -> i).sum();

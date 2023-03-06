@@ -3,6 +3,9 @@ package org.mate.model.fsm.qbe;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.StartAction;
+import org.mate.interaction.action.intent.IntentAction;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
 import org.mate.interaction.action.ui.MotifAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
@@ -46,7 +49,27 @@ public class QBEModel implements IGUIModel {
         }
 
         @Override
-        public List<UIAction> getActions() {
+        public List<Action> getActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<UIAction> getUIActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<SystemAction> getSystemActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentBasedAction> getIntentBasedActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentAction> getIntentActions() {
             throw new UnsupportedOperationException("Do not call this method!");
         }
 
