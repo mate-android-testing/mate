@@ -5,9 +5,17 @@ import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.app.Application;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
+import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystem;
 
 import java.util.Objects;
 
+/**
+ * Abstract base class for QBE based testing algorithm that might or might not record (and
+ * serialize) a {@link TransitionSystem}.
+ *
+ * @param <S> The type of state.
+ * @param <A> The type of action.
+ */
 public abstract class AbstractTester<S extends State<A>, A extends Action> implements Algorithm {
 
     protected final Application<S, A> app;

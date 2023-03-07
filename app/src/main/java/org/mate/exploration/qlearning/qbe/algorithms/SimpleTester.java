@@ -10,6 +10,10 @@ import org.mate.utils.Pair;
 
 import java.util.Optional;
 
+/**
+* A QBE testing algorithms that chooses its actions according to the given
+* {@link ExplorationStrategy}, but does not record a transition system.
+*/
 public final class SimpleTester<S extends State<A>, A extends Action> extends AbstractTester<S, A> {
 
     public SimpleTester(final Application<S, A> app,
@@ -18,6 +22,9 @@ public final class SimpleTester<S extends State<A>, A extends Action> extends Ab
         super(app, explorationStrategy, maximumNumberOfActionPerTestCase);
     }
 
+    /**
+     * Execute actions chosen by the exploration strategy.
+     */
     @Override
     public void run() {
         while (true) {

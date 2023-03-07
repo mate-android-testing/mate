@@ -23,8 +23,11 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * A QBE testing algorithms that chooses its actions according to the given
+ * {@link ExplorationStrategy} and records and serializes a {@link TransitionSystem}.
+ */
 public final class ApplicationTester<S extends State<A>, A extends Action> extends AbstractTester<S, A> {
-
     private List<List<TransitionRelation<S, A>>> testsuite = new ArrayList<>();
     private final TransitionSystem<S, A> transitionSystem;
 
@@ -58,6 +61,10 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
         }
     }
 
+    /*
+     * Execute the actions chosen by the exploration strategy and update the transition system
+     *  accordingly.
+     */
     private void test() {
         while (true) {
             app.reset();
