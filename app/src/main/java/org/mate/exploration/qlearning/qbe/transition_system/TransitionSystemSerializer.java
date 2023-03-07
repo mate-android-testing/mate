@@ -2,8 +2,6 @@ package org.mate.exploration.qlearning.qbe.transition_system;
 
 import org.mate.MATE;
 import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
-import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
-import org.mate.exploration.qlearning.qbe.abstractions.state.QBEState;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 
 import java.io.File;
