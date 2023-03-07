@@ -12,6 +12,7 @@ import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystem;
 import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystemSerializer;
 import org.mate.interaction.action.ActionResult;
 import org.mate.utils.Pair;
+import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -75,6 +76,13 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
                     final Pair<Optional<S>, ActionResult> result = app.executeAction(chosenAction.get());
                     final Optional<S> nextState = result.first;
                     MATE.log_debug("Executed action:" + chosenAction.get());
+
+                    /*
+                     * From the next line onwards the transition system could be inconsistent.
+                     * We need to make sure the algorithms checks for non-determinism and applies
+                     * the passiveLearn algorithm if needed. This process must not be interrupted.
+                     */
+                    Utils.throwOnInterrupt();
                     final TransitionRelation<S, A> transition = new TransitionRelation<>(
                             currentState, chosenAction.get(), nextState.orElse(null), result.second);
                     nonDeterministic = transitionSystem.addTransition(transition);
@@ -89,25 +97,37 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
                     if (nonDeterministic) {
                         MATE.log_debug("Executing passive learn");
                         testsuite = passiveLearn(transitionSystem, testsuite, testcase);
+
+                        // At this point can we allow the algorithm to be interrupted again.
+
                         transitionSystem.removeUnreachableStates();
                         if (!transitionSystem.isDeterministic()) {
                             throw new AssertionError(
                                     "The transition system should be deterministic after applying passiveLearn");
                         }
-                    }
 
+                        Utils.throwOnInterrupt();
+                    }
                 }
             } while (noTerminalState && noCrash && !nonDeterministic
                     && testcase.size() < maximumNumberOfActionPerTestCase);
+
             if (!nonDeterministic) testsuite.add(testcase);
         }
     }
 
-    // TODO: Ensure that this method finishes, even if the MateInterruptException is thrown.
+    /*
+     * If the app is deterministic, then the derived transition system should be deterministic as
+     * well. A non deterministic transition system can occur because of a false inference and
+     * because of the fuzzy state equivalence definition. This algorithms corrects a
+     * non-deterministic transition system, by turning it back into a deterministic one.
+     */
     private List<List<TransitionRelation<S, A>>> passiveLearn(
             final TransitionSystem<S, A> ts,
             List<List<TransitionRelation<S, A>>> testsuite,
             final List<TransitionRelation<S, A>> nonDeterministicTestcase) {
+        // FIXME: This algorithm is broken. Check the QBE paper.
+        //  Passive learn does not work for non-deterministic apps, so catch that case and abort.
 
         final int testcaseLength = nonDeterministicTestcase.size();
         MATE.log_debug("Found non-deterministic testcase of length " + testcaseLength);
