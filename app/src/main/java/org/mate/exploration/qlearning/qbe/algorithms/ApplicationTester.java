@@ -1,12 +1,15 @@
 package org.mate.exploration.qlearning.qbe.algorithms;
 
 import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.app.Application;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
 import org.mate.exploration.qlearning.qbe.transition_system.TransitionRelation;
 import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystem;
+import org.mate.exploration.qlearning.qbe.transition_system.TransitionSystemSerializer;
 import org.mate.interaction.action.ActionResult;
 import org.mate.utils.Pair;
 
@@ -43,6 +46,18 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
 
     @Override
     public void run() {
+        try {
+            test();
+        } finally {
+           if(Properties.QBE_RECORD_TRANSITION_SYSTEM()) {
+               final TransitionSystemSerializer<A, S> serializer = new TransitionSystemSerializer<>();
+               serializer.serialize(transitionSystem);
+               Registry.getEnvironmentManager().fetchTransitionSystem();
+           }
+        }
+    }
+
+    private void test() {
         while (true) {
             app.reset();
             S currentState = app.getCurrentState();
