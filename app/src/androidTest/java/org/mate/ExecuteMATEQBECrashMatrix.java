@@ -25,8 +25,7 @@ public class ExecuteMATEQBECrashMatrix {
 
             if (Properties.QBE_RECORD_TRANSITION_SYSTEM()) {
                 final ApplicationTester<QBEState, QBEAction> tester
-                        = new ApplicationTester<>(app, explorationStrategy, Registry.getTimeout(),
-                        Properties.MAX_NUMBER_EVENTS());
+                        = new ApplicationTester<>(app, explorationStrategy, Properties.MAX_NUMBER_EVENTS());
                 MATE.log_acc("Starting timeout run...");
                 tester.run();
                 MATE.log_acc("Finished run due to timeout.");
@@ -35,8 +34,7 @@ public class ExecuteMATEQBECrashMatrix {
                 Registry.getEnvironmentManager().fetchTransitionSystem();
             } else {
                 final SimpleTester<QBEState, QBEAction> tester
-                        = new SimpleTester<>(app, explorationStrategy, Registry.getTimeout(),
-                        Properties.MAX_NUMBER_EVENTS());
+                        = new SimpleTester<>(app, explorationStrategy, Properties.MAX_NUMBER_EVENTS());
                 MATE.log_acc("Starting timeout run...");
                 tester.run();
                 MATE.log_acc("Finished run due to timeout.");

@@ -14,18 +14,13 @@ public final class SimpleTester<S extends State<A>, A extends Action> extends Ab
 
     public SimpleTester(final Application<S, A> app,
                         final ExplorationStrategy<S, A> explorationStrategy,
-                        final long timeoutInMilliseconds,
                         final int maximumNumberOfActionPerTestCase) {
-        super(app, explorationStrategy, timeoutInMilliseconds, maximumNumberOfActionPerTestCase);
+        super(app, explorationStrategy, maximumNumberOfActionPerTestCase);
     }
 
     @Override
     public void run() {
-
-        final long startTime = System.currentTimeMillis();
-
-        while (!reachedTimeout(startTime)) {
-
+        while (true) {
             app.reset();
             S currentState = app.getCurrentState();
 
@@ -34,8 +29,7 @@ public final class SimpleTester<S extends State<A>, A extends Action> extends Ab
             int testcaseLength = 0;
 
             while (!reachedTerminalState && !discoveredCrash
-                    && testcaseLength < maximumNumberOfActionPerTestCase
-                    && !reachedTimeout(startTime)) {
+                    && testcaseLength < maximumNumberOfActionPerTestCase) {
 
                 final Optional<A> chosenAction = explorationStrategy.chooseAction(currentState);
                 MATE.log_debug("Choose action: " + chosenAction);

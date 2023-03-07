@@ -26,9 +26,8 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
 
     public ApplicationTester(final Application<S, A> app,
                              final ExplorationStrategy<S, A> explorationStrategy,
-                             final long timeoutInMilliseconds,
                              final int maximumNumberOfActionPerTestCase) {
-        super(app, explorationStrategy, timeoutInMilliseconds, maximumNumberOfActionPerTestCase);
+        super(app, explorationStrategy, maximumNumberOfActionPerTestCase);
 
         app.reset(); // Ensure that app.getCurrentState() is the initial state of the app.
         this.transitionSystem = new TransitionSystem<>(app.getCurrentState());
@@ -44,11 +43,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
 
     @Override
     public void run() {
-
-        final long startTime = System.currentTimeMillis();
-
-        while (!reachedTimeout(startTime)) {
-
+        while (true) {
             app.reset();
             S currentState = app.getCurrentState();
             final List<TransitionRelation<S, A>> testcase = new ArrayList<>();
@@ -88,11 +83,12 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
 
                 }
             } while (noTerminalState && noCrash && !nonDeterministic
-                    && testcase.size() < maximumNumberOfActionPerTestCase && !reachedTimeout(startTime));
+                    && testcase.size() < maximumNumberOfActionPerTestCase);
             if (!nonDeterministic) testsuite.add(testcase);
         }
     }
 
+    // TODO: Ensure that this method finishes, even if the MateInterruptException is thrown.
     private List<List<TransitionRelation<S, A>>> passiveLearn(
             final TransitionSystem<S, A> ts,
             List<List<TransitionRelation<S, A>>> testsuite,
