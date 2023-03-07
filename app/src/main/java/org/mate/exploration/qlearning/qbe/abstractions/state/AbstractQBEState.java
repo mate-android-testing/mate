@@ -64,7 +64,7 @@ public abstract class AbstractQBEState<A extends Action> implements State<A> {
      *
      * @return Returns the feature map.
      */
-    protected abstract Map<String, Integer> getFeatureMap();
+    public abstract Map<String, Integer> getFeatureMap();
 
     /**
      * Compares two {@link AbstractQBEState}s for equality. See section IV.A) for more details.

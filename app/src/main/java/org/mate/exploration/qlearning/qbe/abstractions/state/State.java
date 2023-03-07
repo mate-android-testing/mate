@@ -2,6 +2,7 @@ package org.mate.exploration.qlearning.qbe.abstractions.state;
 
 import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,4 +18,11 @@ public interface State<A extends Action> {
      * @return Returns the available actions linked to the given state.
      */
     Set<A> getActions();
+
+    /**
+     * Retrieves the feature map.
+     *
+     * @return Returns the feature map.
+     */
+    Map<String, Integer> getFeatureMap();
 }
