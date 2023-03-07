@@ -14,12 +14,11 @@ public class ExecuteMATEQBETraining {
 
         MATE.log_acc("Starting QBE Training...");
 
-        try (final MATE mate = new MATE()) {
-            final QBETraining qbeTraining
-                    = new QBETraining(Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
-            MATE.log_acc("Starting timeout run...");
-            qbeTraining.run();
-            MATE.log_acc("Finished run due to timeout.");
-        }
+        MATE mate = new MATE();
+        final QBETraining qbeTraining
+                = new QBETraining(Registry.getTimeout(), Properties.MAX_NUMBER_EVENTS());
+        MATE.log_acc("Starting timeout run...");
+        qbeTraining.run();
+        MATE.log_acc("Finished run due to timeout.");
     }
 }

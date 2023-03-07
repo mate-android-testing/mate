@@ -141,12 +141,24 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /*
+    /**
      * Whether to record (and serialize) transition systems when using any oft the ExecuteMATEQBE*
      * strategies. Has no effect for other exploration algorithms.
+     *
+     * @return Whether to record (and serialize) the transition system.
      */
     public static boolean QBE_RECORD_TRANSITION_SYSTEM() {
         return propertyOr(false);
+    }
+
+    /**
+     * Which exploration strategy to use. Can be either random, or one of the pre-defined QBE
+     * matrices. By default, the random strategy is used.
+     *
+     * @return Which exploration strategy to use for QBE.
+     */
+    public static String QBE_EXPLORATION_STRATEGY() {
+        return propertyOr(null);
     }
 
     public static int K_VALUE() {
