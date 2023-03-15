@@ -12,6 +12,7 @@ import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.utils.ChromosomeUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
@@ -53,8 +54,10 @@ public abstract class RepresentationBasedModel implements IDistributionModel {
                 }
             }
         } finally {
-            Registry.getEnvironmentManager().storeFitnessData(chromosome, Registry.getEnvironmentManager().getActionEntityId(chromosome));
-            CoverageUtils.storeTestCaseActionChromosomeCoverage(chromosome);
+            Registry.getEnvironmentManager().storeFitnessData(chromosome,
+                    ChromosomeUtils.getActionEntityId(chromosome),
+                    Properties.FITNESS_FUNCTION());
+            CoverageUtils.storeActionCoverageData(chromosome);
             CoverageUtils.logChromosomeCoverage(chromosome);
             testCase.finish();
         }

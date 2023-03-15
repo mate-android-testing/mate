@@ -6,6 +6,7 @@ import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.ChromosomeUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +98,7 @@ public final class CoverageUtils {
      *
      * @param chromosome The test case chromosome.
      */
-    public static void storeTestCaseChromosomeCoverage(IChromosome<TestCase> chromosome) {
+    public static void storeTestCaseChromosomeCoverage(final IChromosome<TestCase> chromosome) {
 
         // store data about activity coverage in any case
         visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
@@ -106,13 +107,18 @@ public final class CoverageUtils {
                 Properties.COVERAGE(), chromosome, null);
     }
 
-    public static void storeTestCaseActionChromosomeCoverage(IChromosome<TestCase> chromosome) {
+    /**
+     * Stores the coverage data of the lastly executed action of the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    public static void storeActionCoverageData(final IChromosome<TestCase> chromosome) {
 
         // store data about activity coverage in any case
         visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivities());
 
         Registry.getEnvironmentManager().storeCoverageData(
-                Properties.COVERAGE(), chromosome, Registry.getEnvironmentManager().getActionEntityId(chromosome));
+                Properties.COVERAGE(), chromosome, ChromosomeUtils.getActionEntityId(chromosome));
     }
 
     /**

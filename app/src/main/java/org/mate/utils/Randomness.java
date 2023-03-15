@@ -49,6 +49,7 @@ public class Randomness {
         return getRnd().nextInt(list.size());
     }
 
+    // TODO: Remove once outdated EDA implementation has been removed.
     public static <T> T randomIndexWithProbabilities(Map<T, Double> elementsWithProbabilities) {
         double randomNumber = getRnd().nextDouble();
         List<Map.Entry<T, Double>> sortedProbabilities = elementsWithProbabilities.entrySet().stream()

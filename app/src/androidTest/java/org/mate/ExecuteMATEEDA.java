@@ -19,7 +19,7 @@ public class ExecuteMATEEDA {
         MATE mate = new MATE();
 
         // Resetting app to make sure the root state is the same as when starting a testcase
-        Registry.getUiAbstractionLayer().resetApp();
+        Registry.getUiAbstractionLayer().resetApp(); // TODO: Move this functionality in chromosome factory
 
         EstimationOfDistribution estimationOfDistribution = new EstimationOfDistribution(
                 Collections.singletonList(new CrashDistance()),

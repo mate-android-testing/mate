@@ -11,7 +11,7 @@ import org.mate.exploration.Algorithm;
 import java.util.Collections;
 
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATERandomCrashReproduction {
+public class ExecuteMATERandomCrashReproduction { // TODO: Remove.
     @Test
     public void useAppContext() {
 

@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.Set;
 
 public interface IMultipleFitnessFunctions<T> extends IFitnessFunction<T> {
+
     Set<IFitnessFunction<T>> getInnerFitnessFunction();
 
     static <T> IMultipleFitnessFunctions<T> wrapIfNecessary(IFitnessFunction<T> fitnessFunction) {
+
         if (fitnessFunction instanceof IMultipleFitnessFunctions) {
             return (IMultipleFitnessFunctions<T>) fitnessFunction;
         } else {

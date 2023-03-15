@@ -37,7 +37,9 @@ public class PIPE extends RepresentationBasedModel {
 
     private IChromosome<TestCase> elitist;
 
-    public PIPE(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction, double learningRate, double negativeLearningRate, double epsilon, double clr, double pEl, double pMutation, double mutationRate) {
+    public PIPE(IModelRepresentation modelRepresentation, IFitnessFunction<TestCase> fitnessFunction,
+                double learningRate, double negativeLearningRate, double epsilon, double clr,
+                double pEl, double pMutation, double mutationRate) {
         super(modelRepresentation);
         if (fitnessFunction.isMaximizing()) {
             throw new IllegalArgumentException("PIPE needs a minimizing fitness function!");
@@ -194,7 +196,7 @@ public class PIPE extends RepresentationBasedModel {
             // TODO How to adapt formula 4.4 for the P_MP?, for now we simply use pMutation
 
             int z = 1;
-            double pMP = pMutation / (z * Math.sqrt(bestTestcase.getValue().getEventSequence().size()));
+            double pMP = pMutation / (z * Math.sqrt(bestTestcase.getValue().getActionSequence().size()));
 
             Iterator<NodeWithPickedAction> testCaseModelIterator = modelRepresentation.getTestcaseIterator(bestTestcase.getValue());
 

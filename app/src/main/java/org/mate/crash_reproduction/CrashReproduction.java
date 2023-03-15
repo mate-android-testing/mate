@@ -11,7 +11,9 @@ import org.mate.model.TestCase;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO: Integrate into genetic builder.
 public abstract class CrashReproduction implements Algorithm {
+
     private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
     private final List<IFitnessFunction<TestCase>> fitnessFunctions;
     protected int currentGenerationNumber = 0;
@@ -43,10 +45,10 @@ public abstract class CrashReproduction implements Algorithm {
         for (IChromosome<TestCase> testCaseIChromosome : population) {
             if (testCaseIChromosome.getValue().reachedTarget(targetStackTrace)) {
                 MATE.log("Was able to reproduce crash with " + testCaseIChromosome.getValue().getId() + "!");
-                MATE.log("Actions necessary: [" + testCaseIChromosome.getValue().getEventSequence().stream().map(Action::toString).collect(Collectors.joining(", ")) + "]");
+                MATE.log("Actions necessary: [" + testCaseIChromosome.getValue().getActionSequence().stream().map(Action::toString).collect(Collectors.joining(", ")) + "]");
 
-                for (int i = 0; i < testCaseIChromosome.getValue().getEventSequence().size(); i++) {
-                    MATE.log("  " + i + ". " + testCaseIChromosome.getValue().getEventSequence().get(i).toString());
+                for (int i = 0; i < testCaseIChromosome.getValue().getActionSequence().size(); i++) {
+                    MATE.log("  " + i + ". " + testCaseIChromosome.getValue().getActionSequence().get(i).toString());
                 }
                 return true;
             }

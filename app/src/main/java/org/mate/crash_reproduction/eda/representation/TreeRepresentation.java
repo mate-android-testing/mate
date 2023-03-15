@@ -78,7 +78,7 @@ public class TreeRepresentation implements IModelRepresentation {
         public void updatePosition(TestCase testCase, Action action, IScreenState currentScreenState) {
             state.getContent().updateActionToNextState(action, currentScreenState);
             state = state.getChild(s -> s.state.equals(currentScreenState))
-                    .orElseGet(() -> state.addChild(initializeNode(testCase.getEventSequence(), currentScreenState)));
+                    .orElseGet(() -> state.addChild(initializeNode(testCase.getActionSequence(), currentScreenState)));
         }
 
         @Override

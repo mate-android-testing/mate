@@ -1,6 +1,7 @@
 package org.mate.crash_reproduction.eda.representation;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
@@ -19,8 +20,10 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
 
     TestCaseModelIterator(ModelRepresentationIterator representationIterator, TestCase testCase) {
         this.representationIterator = representationIterator;
-        this.actionIterator = testCase.getEventSequence().iterator();
-        this.stateIterator = testCase.getStateSequence().iterator();
+        this.actionIterator = testCase.getActionSequence().iterator();
+        this.stateIterator = testCase.getStateSequence().stream()
+                .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
+                .iterator();
 
         // This skips the root node
         if (!stateIterator.next().equals(representationIterator.getState())) {

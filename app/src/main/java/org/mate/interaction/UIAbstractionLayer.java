@@ -1,16 +1,9 @@
 package org.mate.interaction;
 
-import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
-import static org.mate.interaction.action.ActionResult.FAILURE_EMULATOR_CRASH;
-import static org.mate.interaction.action.ActionResult.FAILURE_UNKNOWN;
-import static org.mate.interaction.action.ActionResult.SUCCESS;
-import static org.mate.interaction.action.ActionResult.SUCCESS_OUTBOUND;
-
 import android.os.RemoteException;
 import android.util.Log;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
@@ -39,7 +32,6 @@ import org.mate.utils.Utils;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -158,25 +150,37 @@ public class UIAbstractionLayer {
         return getLastScreenState().getUIActions();
     }
 
-    public List<WidgetAction> getPromisingActions(IScreenState state) {
-        if (Properties.TARGET().equals("stack_trace") && Properties.PROMISING_ACTIONS()) {
-            Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
-            List<WidgetAction> widgetActions = state.getWidgetActions();
-            List<WidgetAction> actionsContainingToken = widgetActions.stream()
+    /**
+     * Retrieves the list of promising widget actions from the given screen state.
+     *
+     * @param state The given screen state.
+     * @return Returns the list of promising actions for the given screen state.
+     */
+    public List<WidgetAction> getPromisingActions(final IScreenState state) {
+
+        if (Properties.PROMISING_ACTIONS()) {
+
+            final Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
+            final List<WidgetAction> widgetActions = state.getWidgetActions();
+            final List<WidgetAction> actionsContainingToken = widgetActions.stream()
                     .filter(a -> a.getWidget().containsAnyToken(tokens))
                     .collect(Collectors.toList());
-            List<WidgetAction> promisingActions = new LinkedList<>();
+            final List<WidgetAction> promisingActions = new LinkedList<>();
 
-            for (WidgetAction action : actionsContainingToken) {
-                if (action.getWidget().isTextViewType()) {
-                    // Assume this is the label to an input
+            for (final WidgetAction action : actionsContainingToken) {
+
+                if (action.getWidget().isTextViewType()) { // Assume this is the label to an input.
+
+                    // Find the closest widget that represents an input field or a spinner.
                     Optional<WidgetAction> closestEditText = widgetActions.stream()
                             .filter(a -> a.getWidget().isEditTextType() || a.getWidget().isSpinnerType())
                             .min(Comparator.comparingDouble(w -> w.getWidget().distanceTo(action.getWidget())));
 
+                    // Consider both action on label and input field as promising.
                     closestEditText.ifPresent(promisingActions::add);
                     promisingActions.add(action);
                 } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
+                    // TODO: Document. What type of widget is this?
                     promisingActions.add(action);
                 }
             }
@@ -405,6 +409,12 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for media picker
+                if (handleMediaPicker(screenState)) {
+                    change = true;
+                    continue;
+                }
+
                 // TODO: handle progress bar
 
                 // check for presence of build warnings dialog
@@ -428,22 +438,6 @@ public class UIAbstractionLayer {
                     Log.e("acc", "Unexpected exception during clearing screen: ", e);
                     throw e;
                 }
-
-                // check for media picker
-                if (handleMediaPicker(screenState)) {
-                    change = true;
-                    continue;
-                }
-
-            } catch (Exception e) {
-                if (e instanceof IllegalStateException
-                        && Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)
-                        && retryCount < UiAutomatorDisconnectedRetries) {
-                    retry = true;
-                    retryCount += 1;
-                    continue;
-                }
-                Log.e("acc", "", e);
             }
         }
         return screenState;
@@ -493,10 +487,16 @@ public class UIAbstractionLayer {
         }
     }
 
+    /**
+     * Checks whether the current screen shows a media picker. If this is the case, we press 'BACK'.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
     private boolean handleMediaPicker(IScreenState screenState) {
         if (screenState.getPackageName().equals("com.android.providers.media")) {
             MATE.log("Detected media picker!");
-            deviceMgr.pressBack(); // TODO maybe better to select 'Ok'?
+            deviceMgr.pressBack(); // TODO: Maybe better to select 'Ok'?
             return true;
         } else {
             return false;
@@ -739,16 +739,18 @@ public class UIAbstractionLayer {
         }
 
         String id = "S" + lastScreenStateNumber;
-
         screenState.setId(id);
-        screenState.setId("S" + lastScreenStateNumber);
+        lastScreenStateNumber++;
+
+        // TODO: Remove this functionality or make it property-dependent.
         Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), screenState.getId());
-        List<Widget> widgets = getPromisingActions(screenState).stream().map(WidgetAction::getWidget).collect(Collectors.toList());
+        List<Widget> widgets = getPromisingActions(screenState).stream()
+                .map(WidgetAction::getWidget)
+                .collect(Collectors.toList());
 
         if (!widgets.isEmpty()) {
             Registry.getEnvironmentManager().markOnImage(widgets, screenState.getId());
         }
-        lastScreenStateNumber++;
 
         // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)

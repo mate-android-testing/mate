@@ -12,9 +12,9 @@ import java.util.Objects;
  */
 public class Edge {
 
-    private Action action;
-    private IScreenState source;
-    private IScreenState target;
+    private final Action action;
+    private final IScreenState source;
+    private final IScreenState target;
 
     public Edge(Action action, IScreenState source, IScreenState target) {
         this.action = action;
@@ -36,10 +36,19 @@ public class Edge {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         Edge edge = (Edge) o;
-        return Objects.equals(action, edge.action) && Objects.equals(source, edge.source) && Objects.equals(target, edge.target);
+        return Objects.equals(action, edge.action)
+                && Objects.equals(source, edge.source)
+                && Objects.equals(target, edge.target);
     }
 
     @Override

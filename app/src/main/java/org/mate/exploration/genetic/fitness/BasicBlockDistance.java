@@ -17,6 +17,6 @@ public class BasicBlockDistance<T> implements IFitnessFunction<T> {
 
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome) {
-        return Registry.getEnvironmentManager().getMergedBasicBlockDistance(chromosome);
+        return Registry.getEnvironmentManager().getBasicBlockDistance(chromosome);
     }
 }

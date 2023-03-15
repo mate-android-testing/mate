@@ -66,7 +66,7 @@ public class GraphModelRepresentation<ExtraInfo> implements IModelRepresentation
             node = nextNode;
 
             if (!probabilities.containsKey(node)) {
-                probabilities.put(node, initializeNode.apply(testCase.getEventSequence(), currentScreenState));
+                probabilities.put(node, initializeNode.apply(testCase.getActionSequence(), currentScreenState));
             }
         }
 

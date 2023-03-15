@@ -1,11 +1,5 @@
 package org.mate.interaction;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.support.test.InstrumentationRegistry.getContext;
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
-import static org.mate.interaction.action.ui.ActionType.SWIPE_DOWN;
-import static org.mate.interaction.action.ui.ActionType.SWIPE_UP;
-
 import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.content.ComponentName;
@@ -90,7 +84,11 @@ public class DeviceMgr {
      * The probability for considering the hint for the input generation.
      */
     private static final double PROB_HINT = 0.5;
-    private static final double PROB_WHITESPACE = 0.5;
+
+    /**
+     * The probability for considering a whitespace as input.
+     */
+    private static final double PROB_WHITESPACE = 0.1;
 
     /**
      * The probability for mutating a given hint.
@@ -102,6 +100,9 @@ public class DeviceMgr {
      */
     private static final double PROB_STATIC_STRING = 0.5;
 
+    /**
+     * The probability for using a stack trace token as input.
+     */
     private static final double PROB_STACK_TRACE_USER_INPUT = 0.8;
 
     /**
@@ -1025,7 +1026,10 @@ public class DeviceMgr {
      */
     private void handleSwipe(Widget widget, ActionType direction) {
 
-        int pixelsmove = 300;
+        // TODO: Elaborate how good swiping is working on different scrollable views. This can largely
+        //  impact how good the exploration works.
+
+        int pixelsMove = 300;
         int X = 0;
         int Y = 0;
         int steps = 15;
@@ -1042,10 +1046,19 @@ public class DeviceMgr {
                     X = widget.getX();
                     Y = widget.getY();
                 }
-                X = obj.getVisibleBounds().centerX();
-                Y = obj.getVisibleBounds().centerY();
+
+                /*
+                * The default pixel move size is rather low, thus the change upon a swipe up or down
+                * is tiny. The preferred option is to make the pixel move size dependent on the
+                * size of the scrollable UI element.
+                 */
                 if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
-                    pixelsmove = (obj.getVisibleBounds().bottom - obj.getVisibleBounds().top) / 2;
+                    try {
+                        pixelsMove = (obj.getVisibleBounds().bottom - obj.getVisibleBounds().top) / 2;
+                    } catch (StaleObjectException e) {
+                        MATE.log_warn("Stale UiObject2!");
+                        e.printStackTrace();
+                    }
                 }
             } else {
                 X = widget.getX();
@@ -1055,24 +1068,24 @@ public class DeviceMgr {
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
             if (direction == SWIPE_DOWN || direction == SWIPE_UP)
-                pixelsmove = Y;
+                pixelsMove = Y;
             else
-                pixelsmove = X;
+                pixelsMove = X;
         }
 
         // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
             case SWIPE_DOWN:
-                device.swipe(X, Y, X, Y - pixelsmove, steps);
+                device.swipe(X, Y, X, Y - pixelsMove, steps);
                 break;
             case SWIPE_UP:
-                device.swipe(X, Y, X, Y + pixelsmove, steps);
+                device.swipe(X, Y, X, Y + pixelsMove, steps);
                 break;
             case SWIPE_LEFT:
-                device.swipe(X, Y, X + pixelsmove, Y, steps);
+                device.swipe(X, Y, X + pixelsMove, Y, steps);
                 break;
             case SWIPE_RIGHT:
-                device.swipe(X, Y, X - pixelsmove, Y, steps);
+                device.swipe(X, Y, X - pixelsMove, Y, steps);
                 break;
         }
     }
@@ -1277,7 +1290,9 @@ public class DeviceMgr {
 
         if (Properties.STACK_TRACE_USER_INPUT_SEEDING()) {
             if (random.nextDouble() < PROB_STACK_TRACE_USER_INPUT) {
-                Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
+
+                // use as input a random stack trace token
+                final Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
 
                 if (!tokens.isEmpty()) {
                     return Randomness.randomElement(tokens);
@@ -1285,6 +1300,7 @@ public class DeviceMgr {
             }
         }
 
+        // Select an empty input with a low probability.
         if (random.nextDouble() < PROB_WHITESPACE) {
             return " ";
         }
@@ -1302,6 +1318,7 @@ public class DeviceMgr {
                 }
             }
         }
+
         if (staticStrings.isInitialised()) {
             /*
              * If the static strings from the bytecode were supplied and with probability
@@ -1515,6 +1532,8 @@ public class DeviceMgr {
      */
     private List<String> extractFragments(String output) {
 
+        // TODO: Check if the command output is consistent among different APIs.
+
         /*
          * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
          *
@@ -1535,8 +1554,8 @@ public class DeviceMgr {
 
         final String[] fragmentLines = fragmentActivityState
                 .split("Added Fragments:")[1]
-                .split("FragmentManager|Fragments Created Menus")[0]
-                .split("Back Stack Index:|Back Stack:")[0] // this line is not always present
+                .split("FragmentManager")[0]
+                .split("Back Stack Index:")[0] // this line is not always present
                 .split(System.lineSeparator());
 
         return Arrays.stream(fragmentLines)
@@ -1668,16 +1687,24 @@ public class DeviceMgr {
      * @return Returns the stack trace of the last crash.
      */
     public StackTrace getLastCrashStackTrace() {
-        StackTrace stackTrace = getLastCrashStackTraceInternal();
+
+        final StackTrace stackTrace = getLastCrashStackTraceInternal();
 
         if (Properties.WRITE_STACK_TRACE_FILES()) {
-            Registry.getEnvironmentManager().writeFile("crash_" + stackTrace.hashCode() + ".txt", stackTrace.getUnprocessedLines().stream().collect(Collectors.joining("\n")));
+            Registry.getEnvironmentManager().writeFile("crash_" + stackTrace.hashCode() + ".txt",
+                    stackTrace.getRawStackTraceLines().stream().collect(Collectors.joining("\n")));
         }
 
         return stackTrace;
     }
 
+    /**
+     * Extracts the last stack trace from the logcat logs.
+     *
+     * @return Returns the extracted stack trace.
+     */
     private StackTrace getLastCrashStackTraceInternal() {
+
         try {
             String response = device.executeShellCommand("run-as " + packageName
                     + " logcat -b crash -t 2000 AndroidRuntime:E *:S");

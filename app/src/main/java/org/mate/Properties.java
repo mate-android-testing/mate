@@ -186,9 +186,6 @@ public class Properties {
         return propertyOr(1);
     }
 
-    public static int TOURNAMENT_SIZE() {
-        return propertyOr(2);
-    }
     public static double PIPE_LEARNING_RATE() { return propertyOr(0.01); }
 
     public static double PIPE_NEGATIVE_LEARNING_RATE() { return propertyOr(0.2); }
@@ -430,12 +427,10 @@ public class Properties {
     public static DrawType DRAW_GRAPH() {
         return propertyOr(null);
     }
+
     public static String STACK_TRACE_PATH() { return propertyOr("stack_trace.txt"); }
 
     public static boolean STACK_TRACE_USER_INPUT_SEEDING() { return propertyOr(false); }
-
-    // whether to draw raw graph or 'extended' graph
-    public static boolean DRAW_RAW_GRAPH() { return propertyOr(true); }
 
     /*
      * End Graph properties

@@ -7,10 +7,11 @@ import org.mate.model.TestCase;
 import java.util.Map;
 import java.util.Set;
 
-public class WeighedFitnessFunctions implements IMultipleFitnessFunctions<TestCase> {
+public class WeightedFitnessFunctions implements IMultipleFitnessFunctions<TestCase> {
+
     private final Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions;
 
-    public WeighedFitnessFunctions(Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions) {
+    public WeightedFitnessFunctions(Map<IFitnessFunction<TestCase>, Double> weightedFitnessFunctions) {
         this.weightedFitnessFunctions = weightedFitnessFunctions;
     }
 

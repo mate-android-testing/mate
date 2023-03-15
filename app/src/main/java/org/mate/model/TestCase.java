@@ -2,37 +2,28 @@ package org.mate.model;
 
 import android.support.annotation.NonNull;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.crash_reproduction.fitness.CrashDistance;
-import org.mate.exploration.genetic.chromosome.Chromosome;
-import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.ui.PrimitiveAction;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
-import org.mate.utils.FitnessUtils;
 import org.mate.utils.ListUtils;
 import org.mate.utils.Optional;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
-import org.mate.utils.coverage.CoverageUtils;
 import org.mate.utils.testcase.TestCaseStatistics;
 import org.mate.utils.testcase.espresso.EspressoConverter;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,12 +49,6 @@ public class TestCase {
      * The visited activities in the order they appeared.
      */
     private final List<String> activitySequence;
-
-    private final List<IScreenState> stateSequence = new LinkedList<>();
-
-    public List<IScreenState> getStateSequence() {
-        return stateSequence;
-    }
 
     /**
      * Whether a crash has been triggered by an action of the test case.
@@ -102,7 +87,6 @@ public class TestCase {
      */
     public TestCase(String id) {
         MATE.log("Initialising new test case!");
-        MATE.log("Testcase has the ID: " + id);
         setId(id);
         crashDetected = false;
         stateSequence = new ArrayList<>();
@@ -160,12 +144,6 @@ public class TestCase {
             TestCaseStatistics.recordStats(this);
         }
 
-        if (Properties.TARGET().equals("stack_trace")) {
-            Chromosome<TestCase> chromosome = new Chromosome<>(this);
-
-            MATE.log("Testcase fitness: " + new CrashDistance().getFitness(chromosome));
-            Registry.getEnvironmentManager().logReachedTargets(chromosome);
-        }
         // TODO: log the test case actions in a proper format
     }
 
@@ -258,9 +236,6 @@ public class TestCase {
         return getVisitedActivities().stream()
                 .filter(activity -> Registry.getUiAbstractionLayer().getActivities().contains(activity))
                 .collect(Collectors.toSet());
-    public void updateVisitedStates(IScreenState GUIState) {
-        this.visitedStates.add(GUIState.getId());
-        this.stateSequence.add(GUIState);
     }
 
     /**
@@ -378,16 +353,6 @@ public class TestCase {
         }
 
         return resultingTc;
-            return resultingTc;
-        } finally {
-            // TODO ugly hack that ensures that coverage+fitness is stored before TestCase#finish is called
-            IChromosome<TestCase> chromosome = new Chromosome<>(resultingTc);
-            FitnessUtils.storeTestCaseChromosomeFitness(chromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
-
-            // serialize test case, record test case stats, etc.
-            resultingTc.finish();
-        }
     }
 
     /**
@@ -419,7 +384,7 @@ public class TestCase {
      * @return Returns {@code true} if the given action didn't cause a crash of the app
      *         or left the AUT, otherwise {@code false} is returned.
      */
-    public boolean updateTestCase(Action action, int actionID) {
+    public boolean updateTestCase(final Action action, final int actionID) {
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
@@ -480,40 +445,57 @@ public class TestCase {
     }
 
     /**
-     * Updates the test case with the given event.
+     * Determines whether the given target stack trace has been reproduced by this test case.
      *
-     * @param event A new event, e.g. the action id.
+     * @param targetStackTrace The given target stack trace.
+     * @return Returns {@code true} if the given target stack trace could be reproduced by this test
+     *          case, otherwise {@code false} is returned.
      */
-    private void updateTestCase(String event) {
-        IScreenState currentScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
-        updateVisitedStates(currentScreenState);
-        updateVisitedActivities(currentScreenState.getActivityName());
+    // TODO: Remove, no longer required.
+    public boolean reachedTarget(final List<String> targetStackTrace) {
+        return hasCrashDetected()
+                && stackTraceMatchesTarget(getCrashStackTrace().getMethodCalls(), targetStackTrace);
     }
 
-    public boolean reachedTarget(List<String> targetStackTrace) {
-        return hasCrashDetected() && stackTraceMatchesTarget(getCrashStackTrace().getMethodCalls(), targetStackTrace);
-    }
+    /**
+     * Determines whether the two given stack traces are identical.
+     *
+     * @param stackTrace The given stack trace.
+     * @param targetStackTrace The given target stack trace.
+     * @return Returns {@code true} if the two stack traces are identical, otherwise {@code false}.
+     */
+    // TODO: Remove, no longer required.
+    private boolean stackTraceMatchesTarget(final List<String> stackTrace,
+                                            final List<String> targetStackTrace) {
 
-    private boolean stackTraceMatchesTarget(List<String> detectedStackTrace, List<String> targetStackTrace) {
-        String packageName = Registry.getPackageName();
-        List<Function<String, String>> allowedAUTTransformations = new LinkedList<>();
+        final String packageName = Registry.getPackageName();
+
+        final List<Function<String, String>> allowedAUTTransformations = new LinkedList<>();
+
         // Exact match
         allowedAUTTransformations.add(Function.identity());
-        // Match filename and line number (sometimes the name of anonymous classes is not the same)
-        allowedAUTTransformations.add(line -> !line.contains("Native Method") ? line.split("\\(")[1].split("\\)")[0] : line);
 
-        List<Function<String, String>> allowedTransformations = new LinkedList<>(allowedAUTTransformations);
-        // Match without linenumber (different java implementations)
+        // Match filename and line number (sometimes the name of anonymous classes is not the same)
+        allowedAUTTransformations.add(line -> !line.contains("Native Method")
+                ? line.split("\\(")[1].split("\\)")[0] : line);
+
+        final List<Function<String, String>> allowedTransformations
+                = new LinkedList<>(allowedAUTTransformations);
+
+        // Match without line number (different java implementations)
         allowedTransformations.add(line -> line.split("\\(")[0]);
 
-        List<String> noMatch = new LinkedList<>();
+        final List<String> noMatch = new LinkedList<>();
 
-        for (String line : targetStackTrace) {
-            List<Function<String, String>> transformationsToTry = line.contains(packageName)
+        for (final String line : targetStackTrace) {
+            final List<Function<String, String>> transformationsToTry = line.contains(packageName)
                     ? allowedAUTTransformations
                     : allowedTransformations;
 
-            if (transformationsToTry.stream().noneMatch(transformation -> detectedStackTrace.stream().map(transformation).anyMatch(l -> l.equals(transformation.apply(line))))) {
+            if (transformationsToTry.stream()
+                    .noneMatch(transformation -> stackTrace.stream()
+                            .map(transformation)
+                            .anyMatch(l -> l.equals(transformation.apply(line))))) {
                 noMatch.add(line);
             }
         }

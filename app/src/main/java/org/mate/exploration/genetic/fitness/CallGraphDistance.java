@@ -7,7 +7,7 @@ public class CallGraphDistance<T> implements IFitnessFunction<T> {
 
     @Override
     public double getFitness(IChromosome<T> chromosome) {
-        return Registry.getEnvironmentManager().getCallGraphDistance(chromosome);
+        return Registry.getEnvironmentManager().getCallTreeDistance(chromosome);
     }
 
     @Override

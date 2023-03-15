@@ -12,7 +12,8 @@ import org.mate.model.TestCase;
 import java.util.HashMap;
 import java.util.List;
 
-public class CrashDistance extends WeighedFitnessFunctions {
+public class CrashDistance extends WeightedFitnessFunctions {
+
     private final List<String> targetStackTrace = Registry.getEnvironmentManager().getStackTrace();
 
     public CrashDistance() {

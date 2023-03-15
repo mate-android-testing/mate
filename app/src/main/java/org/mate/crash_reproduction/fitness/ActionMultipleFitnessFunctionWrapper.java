@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.manual.AskUserExploration;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.utils.ChromosomeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ActionMultipleFitnessFunctionWrapper extends ActionFitnessFunctionWrapper implements IMultipleFitnessFunctions<TestCase> {
+
     private final IMultipleFitnessFunctions<TestCase> multipleFitnessFunctions;
     private final Map<IFitnessFunction<TestCase>, Map<String, Double>> actionFitnessValuesPerFunction = new HashMap<>();
 
@@ -27,14 +29,15 @@ public class ActionMultipleFitnessFunctionWrapper extends ActionFitnessFunctionW
         super.recordCurrentActionFitness(chromosome);
         for (IFitnessFunction<TestCase> fitnessFunction : multipleFitnessFunctions.getInnerFitnessFunction()) {
             actionFitnessValuesPerFunction.computeIfAbsent(fitnessFunction, f -> new HashMap<>())
-                    .put(Registry.getEnvironmentManager().getActionEntityId(chromosome), fitnessFunction.getNormalizedFitness(chromosome));
+                    .put(ChromosomeUtils.getActionEntityId(chromosome), fitnessFunction.getNormalizedFitness(chromosome));
         }
     }
 
     @Override
     protected AskUserExploration.ExplorationStep getExplorationStep(IChromosome<TestCase> chromosome, int actions) {
-        String entityId = Registry.getEnvironmentManager().getActionEntityId(chromosome, actions);
-        IScreenState state = chromosome.getValue().getStateSequence().get(actions);
+
+        final String entityId = ChromosomeUtils.getActionEntityId(chromosome, actions);
+        final IScreenState state = Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(entityId);
 
         return new AskUserExploration.ExplorationStep(
                 state,

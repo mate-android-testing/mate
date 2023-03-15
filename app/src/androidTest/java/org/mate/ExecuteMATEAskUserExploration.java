@@ -10,7 +10,7 @@ import org.mate.exploration.manual.AskUserExploration;
  * Starts a manual exploration.
  */
 @RunWith(AndroidJUnit4.class)
-public class ExecuteMATEAskUserExploration {
+public class ExecuteMATEAskUserExploration { // TODO: Remove this one.
 
     @Test
     public void useAppContext() {

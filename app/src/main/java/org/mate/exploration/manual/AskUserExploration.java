@@ -161,9 +161,8 @@ public class AskUserExploration implements Algorithm {
         Registry.getEnvironmentManager().storeActionFitnessData(chromosome);
         double fitness = fitnessFunction.getNormalizedFitness(chromosome);
 
-        String nodeId = "exp_" + chromosomeCounter + "_step_" + chromosome.getValue().getEventSequence().size();
+        String nodeId = "exp_" + chromosomeCounter + "_step_" + chromosome.getValue().getActionSequence().size();
         Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), nodeId);
-        Registry.getEnvironmentManager().drawCallGraph(nodeId + "_graph", chromosome);
         List<Widget> widgets = Registry.getUiAbstractionLayer().getPromisingActions(Registry.getUiAbstractionLayer().getLastScreenState()).stream().map(WidgetAction::getWidget).collect(Collectors.toList());
 
         if (!widgets.isEmpty()) {

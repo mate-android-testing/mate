@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RandomCrashReproduction extends CrashReproduction {
+
     private final AndroidRandomChromosomeFactory chromosomeFactory = new AndroidRandomChromosomeFactory(Properties.MAX_NUMBER_EVENTS());
 
     public RandomCrashReproduction(List<IFitnessFunction<TestCase>> fitnessFunctions) {

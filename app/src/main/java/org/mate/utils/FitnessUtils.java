@@ -44,7 +44,8 @@ public class FitnessUtils {
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
-                FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
+                FitnessFunction.NOVELTY, FitnessFunction.CRASH_DISTANCE,
+                FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
 
         for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
             if (fitnessFunctions.contains(fitnessFunction)) {
@@ -76,6 +77,15 @@ public class FitnessUtils {
     }
 
     /**
+     * Stores the coverage data of the lastly executed action of the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    public static void storeActionFitnessData(final IChromosome<TestCase> chromosome) {
+        storeFitnessData(chromosome, ChromosomeUtils.getActionEntityId(chromosome));
+    }
+
+    /**
      * Stores for the given chromosome the fitness data, e.g. the traces.
      *
      * @param chromosome The chromosome for which the fitness data should be stored.
@@ -99,7 +109,8 @@ public class FitnessUtils {
                 FitnessFunction.METHOD_COVERAGE, FitnessFunction.BRANCH_MULTI_OBJECTIVE,
                 FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, FitnessFunction.LINE_PERCENTAGE_COVERAGE,
                 FitnessFunction.BASIC_BLOCK_BRANCH_COVERAGE, FitnessFunction.BASIC_BLOCK_LINE_COVERAGE,
-                FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE);
+                FitnessFunction.NOVELTY, FitnessFunction.BASIC_BLOCK_MULTI_OBJECTIVE,
+                FitnessFunction.CRASH_DISTANCE);
 
         for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
             if (fitnessFunctions.contains(fitnessFunction)) {
@@ -171,6 +182,8 @@ public class FitnessUtils {
                 return Registry.getEnvironmentManager()
                         .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome)
                         .getBranchCoverage();
+            case CRASH_DISTANCE:
+                return Registry.getEnvironmentManager().getCrashDistance(chromosome);
             default:
                 throw new UnsupportedOperationException("Fitness function "
                         + fitnessFunction + " not yet supported!");

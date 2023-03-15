@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.manual.AskUserExploration;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.utils.ChromosomeUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,14 +36,14 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
 
     @Override
     public double getNormalizedFitness(IChromosome<TestCase> chromosome) {
-        return getFitnessAfterXActions(chromosome, chromosome.getValue().getEventSequence().size());
+        return getFitnessAfterXActions(chromosome, chromosome.getValue().getActionSequence().size());
     }
 
     public void recordCurrentActionFitness(IChromosome<TestCase> chromosome) {
         double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-        actionFitnessValues.put(Registry.getEnvironmentManager().getActionEntityId(chromosome), fitness);
+        actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome), fitness);
 
-        MATE.log("Testcase fitness after " + chromosome.getValue().getEventSequence().size() + " actions is: " + fitness);
+        MATE.log("Testcase fitness after " + chromosome.getValue().getActionSequence().size() + " actions is: " + fitness);
     }
 
     public void writeExplorationStepsToFile(IChromosome<TestCase> chromosome) {
@@ -54,7 +55,8 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     }
 
     protected AskUserExploration.ExplorationStep getExplorationStep(IChromosome<TestCase> chromosome, int actions) {
-        IScreenState state = chromosome.getValue().getStateSequence().get(actions);
+        final String stateId = chromosome.getValue().getStateSequence().get(actions);
+        final IScreenState state = Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId);
         return new AskUserExploration.ExplorationStep(
                 state,
                 "action_" + actions,
@@ -64,6 +66,6 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     }
 
     public double getFitnessAfterXActions(IChromosome<TestCase> testCase, int actions) {
-        return Objects.requireNonNull(actionFitnessValues.get(Registry.getEnvironmentManager().getActionEntityId(testCase, actions)));
+        return Objects.requireNonNull(actionFitnessValues.get(ChromosomeUtils.getActionEntityId(testCase, actions)));
     }
 }

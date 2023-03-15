@@ -6,7 +6,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
-import org.mate.crash_reproduction.CrashReproduction;
 import org.mate.exploration.Algorithm;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.EnvironmentManager;
@@ -25,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
-import java.util.Set;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 
@@ -120,7 +118,8 @@ public class MATE {
             Registry.getEnvironmentManager().initGraph();
         }
 
-        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), Registry.getUiAbstractionLayer().getLastScreenState().getId());
+        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(),
+                Registry.getUiAbstractionLayer().getLastScreenState().getId());
     }
 
     /**
