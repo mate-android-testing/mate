@@ -12,6 +12,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
@@ -37,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.mate.utils.ChromosomeUtils.getChromosomeId;
@@ -1253,13 +1253,18 @@ public class EnvironmentManager {
         return extractCoverage(response);
     }
 
-    // TODO: Remove this functionality - only required for debugging.
-    public <T> T askUserToPick(List<T> options, Function<T, String> toString) {
+    /**
+     * Asks the user to supply an action or a command.
+     *
+     * @param options The list of potential actions and commands.
+     * @return Returns the selected action or command.
+     */
+    public Action askUserToPick(List<Action> options) {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/let_user_pick")
                 .withParameter("options", String.valueOf(options.size()));
 
         for (int i = 0; i < options.size(); i++) {
-            messageBuilder.withParameter("option_" + i, toString.apply(options.get(i)));
+            messageBuilder.withParameter("option_" + i, (options.get(i).toShortString()));
         }
 
         return options.get(Integer.parseInt(sendMessage(messageBuilder.build()).getParameter("picked_option")));

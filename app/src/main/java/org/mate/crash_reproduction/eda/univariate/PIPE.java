@@ -234,9 +234,7 @@ public class PIPE extends RepresentationBasedModel {
 
     @Override
     public IChromosome<TestCase> createChromosome() {
-        IChromosome<TestCase> newChromosome = super.createChromosome();
-        fitnessFunction.writeExplorationStepsToFile(newChromosome);
-        return newChromosome;
+        return super.createChromosome();
     }
 
     @Override

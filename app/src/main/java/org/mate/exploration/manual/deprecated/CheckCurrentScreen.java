@@ -1,10 +1,10 @@
-package org.mate.exploration.manual;
+package org.mate.exploration.manual.deprecated;
 
 import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.accessibility.check.bbc.AccessibilityViolationChecker;
-import org.mate.state.IScreenState;
 import org.mate.interaction.action.ui.Widget;
+import org.mate.state.IScreenState;
 
 public class CheckCurrentScreen {
 

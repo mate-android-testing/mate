@@ -4,7 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.manual.CheckCurrentScreen;
+import org.mate.exploration.manual.deprecated.CheckCurrentScreen;
 import org.mate.interaction.DeviceMgr;
 
 
