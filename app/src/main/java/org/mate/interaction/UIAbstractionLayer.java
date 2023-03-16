@@ -742,16 +742,6 @@ public class UIAbstractionLayer {
         screenState.setId(id);
         lastScreenStateNumber++;
 
-        // TODO: Remove this functionality or make it property-dependent.
-        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(), screenState.getId());
-        List<Widget> widgets = getPromisingActions(screenState).stream()
-                .map(WidgetAction::getWidget)
-                .collect(Collectors.toList());
-
-        if (!widgets.isEmpty()) {
-            Registry.getEnvironmentManager().markOnImage(widgets, screenState.getId());
-        }
-
         // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
