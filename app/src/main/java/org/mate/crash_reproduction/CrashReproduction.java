@@ -5,11 +5,9 @@ import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 // TODO: Integrate into genetic builder.
 public abstract class CrashReproduction implements Algorithm {
@@ -42,18 +40,6 @@ public abstract class CrashReproduction implements Algorithm {
     protected abstract List<IChromosome<TestCase>> evolve(List<IChromosome<TestCase>> prevPopulation);
 
     private boolean reachedEnd(List<IChromosome<TestCase>> population) {
-        for (IChromosome<TestCase> testCaseIChromosome : population) {
-            if (testCaseIChromosome.getValue().reachedTarget(targetStackTrace)) {
-                MATE.log("Was able to reproduce crash with " + testCaseIChromosome.getValue().getId() + "!");
-                MATE.log("Actions necessary: [" + testCaseIChromosome.getValue().getActionSequence().stream().map(Action::toString).collect(Collectors.joining(", ")) + "]");
-
-                for (int i = 0; i < testCaseIChromosome.getValue().getActionSequence().size(); i++) {
-                    MATE.log("  " + i + ". " + testCaseIChromosome.getValue().getActionSequence().get(i).toString());
-                }
-                return true;
-            }
-        }
-
         return false;
     }
 

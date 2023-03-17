@@ -20,11 +20,9 @@ import org.mate.utils.testcase.espresso.EspressoConverter;
 import org.mate.utils.testcase.serialization.TestCaseSerializer;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestCase {
@@ -442,73 +440,5 @@ public class TestCase {
             default:
                 throw new UnsupportedOperationException("Encountered an unknown action result. Cannot continue.");
         }
-    }
-
-    /**
-     * Determines whether the given target stack trace has been reproduced by this test case.
-     *
-     * @param targetStackTrace The given target stack trace.
-     * @return Returns {@code true} if the given target stack trace could be reproduced by this test
-     *          case, otherwise {@code false} is returned.
-     */
-    // TODO: Remove, no longer required.
-    public boolean reachedTarget(final List<String> targetStackTrace) {
-        return hasCrashDetected()
-                && stackTraceMatchesTarget(getCrashStackTrace().getMethodCalls(), targetStackTrace);
-    }
-
-    /**
-     * Determines whether the two given stack traces are identical.
-     *
-     * @param stackTrace The given stack trace.
-     * @param targetStackTrace The given target stack trace.
-     * @return Returns {@code true} if the two stack traces are identical, otherwise {@code false}.
-     */
-    // TODO: Remove, no longer required.
-    private boolean stackTraceMatchesTarget(final List<String> stackTrace,
-                                            final List<String> targetStackTrace) {
-
-        final String packageName = Registry.getPackageName();
-
-        final List<Function<String, String>> allowedAUTTransformations = new LinkedList<>();
-
-        // Exact match
-        allowedAUTTransformations.add(Function.identity());
-
-        // Match filename and line number (sometimes the name of anonymous classes is not the same)
-        allowedAUTTransformations.add(line -> !line.contains("Native Method")
-                ? line.split("\\(")[1].split("\\)")[0] : line);
-
-        final List<Function<String, String>> allowedTransformations
-                = new LinkedList<>(allowedAUTTransformations);
-
-        // Match without line number (different java implementations)
-        allowedTransformations.add(line -> line.split("\\(")[0]);
-
-        final List<String> noMatch = new LinkedList<>();
-
-        for (final String line : targetStackTrace) {
-            final List<Function<String, String>> transformationsToTry = line.contains(packageName)
-                    ? allowedAUTTransformations
-                    : allowedTransformations;
-
-            if (transformationsToTry.stream()
-                    .noneMatch(transformation -> stackTrace.stream()
-                            .map(transformation)
-                            .anyMatch(l -> l.equals(transformation.apply(line))))) {
-                noMatch.add(line);
-            }
-        }
-
-        // Ignore internal implementation differences
-        noMatch.removeIf(line -> line.contains("at dalvik.")
-                || line.contains("at java.")
-                || line.contains("at android.os")
-                || line.contains("at android.widget")
-                || line.contains("at android.support")
-                || line.contains("at com.android.internal.")
-        );
-
-        return noMatch.size() <= 1;
     }
 }

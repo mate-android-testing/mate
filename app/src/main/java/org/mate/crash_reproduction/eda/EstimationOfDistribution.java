@@ -1,6 +1,5 @@
 package org.mate.crash_reproduction.eda;
 
-import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.crash_reproduction.CrashReproduction;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -48,11 +47,6 @@ public class EstimationOfDistribution extends CrashReproduction {
         for (int i = 0; i < prevPopulation.size(); i++) {
             IChromosome<TestCase> testCase = model.createChromosome();
             newPopulation.add(testCase);
-
-            if (testCase.getValue().reachedTarget(targetStackTrace)) {
-                MATE.log("Early exit because we reached target");
-                break;
-            }
         }
 
         return newPopulation;
