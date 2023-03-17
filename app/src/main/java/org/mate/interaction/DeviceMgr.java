@@ -1690,7 +1690,7 @@ public class DeviceMgr {
 
         final StackTrace stackTrace = getLastCrashStackTraceInternal();
 
-        if (Properties.WRITE_STACK_TRACE_FILES()) {
+        if (Properties.WRITE_STACK_TRACE_TO_FILE()) {
             Registry.getEnvironmentManager().writeFile("crash_" + stackTrace.hashCode() + ".txt",
                     stackTrace.getRawStackTraceLines().stream().collect(Collectors.joining("\n")));
         }

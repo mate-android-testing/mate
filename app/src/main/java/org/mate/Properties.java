@@ -326,6 +326,7 @@ public class Properties {
      */
     public static boolean USE_MOTIF_ACTIONS() { return propertyOr(true); }
 
+    // TODO: Remove properties once outdated EDA has been removed.
     public static DistributionModel DISTRIBUTION_MODEL() { return propertyOr(null); }
 
     public static ModelRepresentation MODEL_REPRESENTATION() { return propertyOr(null); }
@@ -428,10 +429,6 @@ public class Properties {
         return propertyOr(null);
     }
 
-    public static String STACK_TRACE_PATH() { return propertyOr("stack_trace.txt"); }
-
-    public static boolean STACK_TRACE_USER_INPUT_SEEDING() { return propertyOr(false); }
-
     /*
      * End Graph properties
      */
@@ -449,12 +446,36 @@ public class Properties {
         return propertyOr(false);
     }
 
-    // stack trace
+    /**
+     * Whether to record internally the stack trace of a discovered crash.
+     *
+     * @return Returns {@code false} by default, i.e. no stack trace is recorded.
+     */
     public static boolean RECORD_STACK_TRACE() {
         return propertyOr(false);
     }
 
-    public static boolean WRITE_STACK_TRACE_FILES() { return propertyOr(false); }
+    /**
+     * Whether a recorded stack trace should be written to file.
+     *
+     * @return Returns {@code false} by default, i.e. no stack trace is written to file.
+     */
+    public static boolean WRITE_STACK_TRACE_TO_FILE() { return propertyOr(false); }
+
+    /**
+     * The stack trace file name required for crash reproduction.
+     *
+     * @return Returns the file name of the stack trace file.
+     */
+    public static String STACK_TRACE_PATH() { return propertyOr("stack_trace.txt"); }
+
+    /**
+     * Whether some data retrieved from the stack trace should be used as input for input fields.
+     * This functionality is only relevant in the context of crash reproduction.
+     *
+     * @return Returns {@code false} by default, i.e. no user input is derived from the stack trace.
+     */
+    public static boolean STACK_TRACE_USER_INPUT_SEEDING() { return propertyOr(false); }
 
     /*
      * Begin GE properties
