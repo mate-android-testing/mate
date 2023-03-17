@@ -96,6 +96,15 @@ public class ApplicationStateTree {
     }
 
     /**
+     * Retrieves the root node of the PPT.
+     *
+     * @return Returns the root node of the PPT.
+     */
+    public TreeNode<ApplicationStateNode> getRoot() {
+        return tree.getRoot();
+    }
+
+    /**
      * Provides a textual representation of the PPT.
      *
      * @return Returns a textual representation of the PPT.
@@ -140,7 +149,7 @@ public class ApplicationStateTree {
     /**
      * A single node in the PPT.
      */
-    private static class ApplicationStateNode {
+    public static class ApplicationStateNode {
 
         /**
          * The underlying screen state.
@@ -161,7 +170,7 @@ public class ApplicationStateTree {
          * Constructs a new node in the PPT.
          *
          * @param state The underlying screen state.
-         * @param actionProbabilities The action probabilties of the state.
+         * @param actionProbabilities The action probabilities of the state.
          */
         private ApplicationStateNode(IScreenState state, Map<Action, Double> actionProbabilities) {
             this.state = state;
@@ -183,11 +192,38 @@ public class ApplicationStateTree {
          *
          * @return Returns the action with the highest assigned probability.
          */
-        private Action getActionWithBiggestProbability() {
+        public Action getActionWithBiggestProbability() {
             return actionProbabilities.entrySet().stream()
                     .max(Comparator.comparingDouble(Map.Entry::getValue))
                     .map(Map.Entry::getKey)
                     .orElseThrow(IllegalStateException::new);
+        }
+
+        /**
+         * Retrieves the action probabilities for the given state.
+         *
+         * @return Returns the action probabilities for the given state.
+         */
+        public Map<Action, Double> getActionProbabilities() {
+            return actionProbabilities;
+        }
+
+        /**
+         * Retrieves the outgoing action transitions.
+         *
+         * @return Returns the outgoing action transitions.
+         */
+        public Map<Action, IScreenState> getActionToNextState() {
+            return actionToNextState;
+        }
+
+        /**
+         * Retrieves the underlying screen state.
+         *
+         * @return Returns the underlying screen state.
+         */
+        public IScreenState getState() {
+            return state;
         }
     }
 }
