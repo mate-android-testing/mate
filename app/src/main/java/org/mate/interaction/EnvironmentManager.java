@@ -764,7 +764,7 @@ public class EnvironmentManager {
             }
         }
 
-        MATE.log("Tokens are: " + tokens);
+        MATE.log_debug("Tokens are: " + tokens);
         return Collections.unmodifiableSet(tokens);
     }
 
@@ -1416,8 +1416,8 @@ public class EnvironmentManager {
      * @param content The given content that should be written to file.
      */
     public void writeFile(final String fileName, final String content) {
-        MATE.log("Writing file " + fileName);
         sendMessage(new Message.MessageBuilder("/utility/write_file")
+                .withParameter("deviceId", emulator)
                 .withParameter("fileName", fileName)
                 .withParameter("content", content)
                 .build());
