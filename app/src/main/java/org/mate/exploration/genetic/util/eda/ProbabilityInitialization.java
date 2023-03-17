@@ -7,17 +7,12 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.ToDoubleFunction;
-import java.util.stream.Collectors;
 
 /**
  * The (default) initialization strategy of weights/probabilities for each action of a state.
@@ -85,47 +80,6 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
         }
 
         return probabilities;
-    }
-
-    // TODO: Remove.
-    private <T> Map<T, Double> fixed(final Map<T, Double> weights, final double maxProb) {
-
-        final Map<T, Double> probabilities = new HashMap<>();
-        final Queue<Set<T>> sortedEntries = getFronts(weights);
-
-        double leftToGive = 1;
-        while (!sortedEntries.isEmpty()) {
-            Set<T> entries = sortedEntries.poll();
-
-            double prob = 0;
-
-            for (int i = 0; i < entries.size(); i++) {
-                double p = leftToGive * maxProb;
-                leftToGive -= p;
-                prob += p;
-            }
-
-            double probPerEntry = prob / entries.size();
-            for (T entry : entries) {
-                probabilities.put(entry, probPerEntry);
-            }
-        }
-
-        return probabilities;
-    }
-
-    // TODO: Remove.
-    private <T> Queue<Set<T>> getFronts(final Map<T, Double> weights) {
-
-        final Map<Double, Set<T>> inverted = new HashMap<>();
-        weights.forEach((key, value) -> inverted.computeIfAbsent(value, a -> new HashSet<>()).add(key));
-
-        final ToDoubleFunction<Map.Entry<Double, Set<T>>> toDoubleFunction = Map.Entry::getKey;
-
-        return inverted.entrySet().stream()
-                .sorted(Comparator.comparingDouble(toDoubleFunction).reversed())
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     /**
