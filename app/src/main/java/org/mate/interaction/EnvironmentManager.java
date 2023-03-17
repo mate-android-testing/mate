@@ -1459,18 +1459,6 @@ public class EnvironmentManager {
                 .build());
     }
 
-    // TODO: Remove this functionality - only required for debugging.
-    public void markOnImage(List<Widget> widgets, String stateId) {
-        sendMessage(new Message.MessageBuilder("/emulator/interaction")
-                .withParameter("type", "mark_on_screenshot")
-                .withParameter("packageName", Registry.getPackageName())
-                .withParameter("state", stateId)
-                .withParameter("rectangles", widgets.stream()
-                        .map(w -> String.format("%d,%d,%d,%d", w.getX1(), w.getY1(), w.getX2(),
-                                w.getY2())).collect(Collectors.joining(";")))
-                .build());
-    }
-
     /**
      * Checks whether a flickering of a screen state can be detected.
      *
