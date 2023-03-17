@@ -1,7 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -10,7 +9,6 @@ import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
-import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.state.IScreenState;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
@@ -97,7 +95,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         // Ignore (split off from first action) the traces produced by the reset of the AUT.
-        storeFitnessData(chromosome);
+        storeCoverageAndFitnessData(chromosome);
 
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
@@ -116,7 +114,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                 }
 
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
-                storeFitnessData(chromosome);
+                storeCoverageAndFitnessData(chromosome);
 
                 final IScreenState currentState = uiAbstractionLayer.getLastScreenState();
                 probabilisticModel.updatePosition(testCase, nextAction, currentState);
@@ -127,13 +125,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             }
         } finally {
 
-            // TODO: Check if the surrogate model can be integrated, I don't believe so without further changes.
-            //  One needs to store coverage/fitness at MATE-Server after each action and do not cache it here.
-            if (Properties.SURROGATE_MODEL()) {
-                // update sequences + write traces to external storage
-                SurrogateModel surrogateModel = (SurrogateModel) uiAbstractionLayer.getGuiModel();
-                surrogateModel.updateTestCase(testCase);
-            }
+            // TODO: Check if the surrogate model can be integrated. This probably requires changes
+            //  of the surrogate model, in particular to the intermediate trace storing functionality.
 
             /*
             * Storing coverage/fitness is already handled by storeFitnessData(), we only maintain
@@ -150,12 +143,13 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
-     * Stores the intermediate fitness of the chromosome, i.e. the fitness data associated with the
-     * last executed action.
+     * Stores the intermediate coverage and fitness of the chromosome, i.e. the coverage/fitness data
+     * associated with the last executed action.
      *
-     * @param chromosome The chromosome for which the fitness should be stored.
+     * @param chromosome The chromosome for which coverage and fitness should be stored.
      */
-    private void storeFitnessData(final IChromosome<TestCase> chromosome) {
+    private void storeCoverageAndFitnessData(final IChromosome<TestCase> chromosome) {
+        CoverageUtils.storeActionCoverageData(chromosome);
         FitnessUtils.storeActionFitnessData(chromosome);
         fitnessFunction.recordCurrentActionFitness(chromosome);
     }
