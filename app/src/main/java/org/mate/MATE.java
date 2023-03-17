@@ -117,9 +117,6 @@ public class MATE {
             MATE.log_acc("Initialising graph!");
             Registry.getEnvironmentManager().initGraph();
         }
-
-        Registry.getEnvironmentManager().takeScreenshot(Registry.getPackageName(),
-                Registry.getUiAbstractionLayer().getLastScreenState().getId());
     }
 
     /**
