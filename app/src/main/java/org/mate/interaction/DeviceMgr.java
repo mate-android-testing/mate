@@ -56,6 +56,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1691,7 +1693,9 @@ public class DeviceMgr {
         final StackTrace stackTrace = getLastCrashStackTraceInternal();
 
         if (Properties.WRITE_STACK_TRACE_TO_FILE()) {
-            Registry.getEnvironmentManager().writeFile("crash_" + stackTrace.hashCode() + ".txt",
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            final String fileName = "crash_" + LocalDateTime.now().format(formatter) + ".txt";
+            Registry.getEnvironmentManager().writeFile("stack_traces/" + fileName,
                     stackTrace.getRawStackTraceLines().stream().collect(Collectors.joining("\n")));
         }
 
