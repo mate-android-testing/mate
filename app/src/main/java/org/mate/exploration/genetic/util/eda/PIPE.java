@@ -105,7 +105,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         this.pMutation = pMutation;
         this.mutationRate = mutationRate;
 
-        MATE.log(String.format(Locale.getDefault(),
+        MATE.log_acc(String.format(Locale.getDefault(),
                 "Using PIPE with {learningRate: %f, epsilon: %f, clr: %f, pEL: %f, " +
                         "pMutation: %f, mutationRate: %f}",
                 learningRate, epsilon, clr, pEl, pMutation, mutationRate
@@ -143,6 +143,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     @Override
     public void updatePositionImmutable(final IScreenState currentScreenState) {
         ppt.updatePositionImmutable(currentScreenState);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void resetPosition() {
+        ppt.resetPosition();
     }
 
     /**

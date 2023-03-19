@@ -48,15 +48,21 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
                 .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
                 .iterator();
 
-        MATE.log("PPT: ");
-        MATE.log(probabilisticModel.toString());
+        MATE.log_acc("PPT: ");
+        MATE.log_acc(probabilisticModel.toString());
 
-        MATE.log("Current cursor position in PPT: " + probabilisticModel.getState());
-        MATE.log("First state according to test case: " + testCase.getStateSequence().get(0));
+        MATE.log_acc("Current cursor position in PPT: " + probabilisticModel.getState());
+        MATE.log_acc("First state according to test case: " + testCase.getStateSequence().get(0));
 
-        probabilisticModel.updatePositionImmutable(stateIterator.next());
+        // Reset cursor to root node of PPT.
+        probabilisticModel.resetPosition();
 
-        MATE.log("Updated cursor position in PPT: " + probabilisticModel.getState());
+        // This skips the root node.
+        if (!stateIterator.next().equals(probabilisticModel.getState())) {
+            MATE.log_warn("Test case does not start at root node...");
+        }
+
+        MATE.log_acc("Updated cursor position in PPT: " + probabilisticModel.getState());
     }
 
     /**
@@ -88,10 +94,10 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
 
         if (stateIterator.hasNext()) {
             final IScreenState nextState = stateIterator.next();
-            MATE.log("Current cursor position in PPT: " + probabilisticModel.getState());
-            MATE.log("Expected state after cursor update: " + nextState);
+            MATE.log_acc("Current cursor position in PPT: " + probabilisticModel.getState());
+            MATE.log_acc("Expected state after cursor update: " + nextState);
             probabilisticModel.updatePositionImmutable(nextState);
-            MATE.log("Updated cursor position in PPT: " + probabilisticModel.getState());
+            MATE.log_acc("Updated cursor position in PPT: " + probabilisticModel.getState());
             // TODO: Seems to be dead code.
         } else if (actionIterator.hasNext()) {
             throw new IllegalStateException("Number of actions should at most be off by one!");

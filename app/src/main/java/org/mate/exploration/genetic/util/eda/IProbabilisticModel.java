@@ -51,4 +51,9 @@ public interface IProbabilisticModel<T> {
      * @param currentScreenState The new state of the probabilistic model.
      */
     void updatePositionImmutable(IScreenState currentScreenState);
+
+    /**
+     * Resets the cursor position to the root node of the probabilistic model.
+     */
+    void resetPosition();
 }

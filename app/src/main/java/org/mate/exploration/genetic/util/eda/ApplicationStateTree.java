@@ -84,15 +84,17 @@ public class ApplicationStateTree {
      */
     public void updatePositionImmutable(final IScreenState currentScreenState) {
 
+        // relative change from current position
+        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
+                .orElseThrow(() -> new IllegalStateException("Can't locate state in child nodes!"));
+    }
+
+    /**
+     * Resets the cursor position to the root node of the PPT.
+     */
+    public void resetPosition() {
         // TODO: There might be multiple root states due to the dynamic nature of Android apps.
-        if (tree.getRoot().getContent().state.equals(currentScreenState)) {
-            // reset cursor
-            cursor = tree.getRoot();
-        } else {
-            // relative change from current position
-            cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
-                    .orElseThrow(IllegalStateException::new);
-        }
+        cursor = tree.getRoot();
     }
 
     /**
