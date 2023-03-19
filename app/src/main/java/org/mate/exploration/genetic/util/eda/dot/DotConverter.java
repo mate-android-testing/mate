@@ -123,6 +123,7 @@ public final class DotConverter {
                 = node -> '"' + nodeLabelFunction.apply(node) + " "
                 + node.getParentList().map(nodeLabelFunction).collect(Collectors.joining(",")) + '"';
 
+        // Defines the node attributes.
         final Function<TreeNode<ApplicationStateTree.ApplicationStateNode>, Map<String, String>>
                 attributesFunction = node -> new HashMap<String, String>() {{
             put("image", "\"../" + SCREENSHOTS_DIR + "/" + node.getContent().getState().getId() + ".png\"");
@@ -132,6 +133,7 @@ public final class DotConverter {
             put("height", "6");
             put("fixedsize", "true");
             put("shape", "square");
+            // Show next to each node the action probabilities.
             put("xlabel", "<" + node.getContent().getActionProbabilities().keySet().stream()
                     .filter(action -> !node.getContent().getActionToNextState().containsKey(action))
                     .filter(action -> keepAction.test(node.getContent(), action))
