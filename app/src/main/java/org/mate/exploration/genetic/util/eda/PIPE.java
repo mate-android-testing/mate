@@ -1,13 +1,17 @@
 package org.mate.exploration.genetic.util.eda;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.util.eda.dot.DotConverter;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.Randomness;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -159,6 +163,12 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     @Override
     public void update(final Collection<IChromosome<TestCase>> population) {
 
+        if (Properties.PIPE_RECORD_PPT()) {
+            // Convert to dot before the model is refined.
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-before-update.dot");
+        }
+
         final List<IChromosome<TestCase>> sortedPopulation = population.stream()
                 .sorted(Comparator.comparingDouble(fitnessFunction::getNormalizedFitness))
                 .collect(Collectors.toList());
@@ -182,6 +192,12 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         adaptPPTTowards(best);
         pptMutation(best);
         pptPruning();
+
+        if (Properties.PIPE_RECORD_PPT()) {
+            // Convert to dot after the model was refined.
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-after-update.dot");
+        }
     }
 
     /**

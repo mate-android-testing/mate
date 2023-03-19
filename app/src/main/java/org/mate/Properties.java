@@ -200,6 +200,8 @@ public class Properties {
 
     public static double PIPE_MUTATION_RATE() { return propertyOr(0.4); }
 
+    public static boolean PIPE_RECORD_PPT() { return propertyOr(false); }
+
     public static boolean PROMISING_ACTIONS() { return propertyOr(true); }
 
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
