@@ -1,6 +1,6 @@
 package org.mate.exploration.genetic.util.eda;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class TreeNode<T> {
     /**
      * The children nodes.
      */
-    private final Set<TreeNode<T>> children = new HashSet<>();
+    private final Set<TreeNode<T>> children = new LinkedHashSet<>();
 
     /**
      * Constructs a new tree node.
