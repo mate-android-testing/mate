@@ -114,6 +114,8 @@ public class ApplicationStateTree {
     @Override
     public String toString() {
 
+        // TODO: Checkout https://www.geeksforgeeks.org/print-n-ary-tree-graphically/.
+
         final StringBuilder builder = new StringBuilder();
 
         final Queue<TreeNode<ApplicationStateNode>> bfsQueue = new LinkedList<>();
