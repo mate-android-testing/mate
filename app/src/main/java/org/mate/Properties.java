@@ -413,7 +413,7 @@ public class Properties {
 
     // how and which target vertex should be selected, e.g. a random branch vertex
     public static String TARGET() {
-        return propertyOr("no_target");
+        return propertyOr("all_branches");
     }
 
     // how the graph should be drawn
