@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.builder;
 
 import org.mate.exploration.genetic.algorithm.Algorithm;
+import org.mate.exploration.genetic.algorithm.EDA;
 import org.mate.exploration.genetic.algorithm.MIO;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.NSGAII;
@@ -14,6 +15,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.BitSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.EDAChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
@@ -40,6 +42,7 @@ import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
+import org.mate.exploration.genetic.fitness.CrashDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -72,11 +75,14 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
+import org.mate.exploration.genetic.util.eda.pipe.PIPE;
 import org.mate.exploration.genetic.util.ge.AndroidListAnalogousMapping;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisionBiasedMapping;
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
+import org.mate.model.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,6 +168,8 @@ public class GeneticAlgorithmProvider {
                 return initializeSapienz();
             case NOVELTY_SEARCH:
                 return initializeNoveltySearch();
+            case EDA:
+                return initializeEDA();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -355,6 +363,43 @@ public class GeneticAlgorithmProvider {
                 getPSampleRandom(),
                 getFocusedSearchStart(),
                 getMutationRate());
+    }
+
+    /**
+     * Initialises the EDA algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the EDA algorithm.
+     */
+    private <T> EDA<T> initializeEDA() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() != ChromosomeFactory.EDA_CHROMOSOME_FACTORY) {
+            throw new IllegalStateException("EDA requires the EDA chromosome factory. You have to " +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("EDA requires a fitness function. You have to " +
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("EDA requires a termination condition. You have to " +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
+        final List<IFitnessFunction<T>> fitnessFunctions = this.<T>initializeFitnessFunctions();
+        final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(fitnessFunctions);
+
+        // TODO: Hand over the probabilistic model and the fitness functions via a setter within
+        //  the EDA class. Then, we can initialise the chromosome factory the default way.
+
+        final IChromosomeFactory<T> chromosomeFactory
+                = (IChromosomeFactory<T>) new EDAChromosomeFactory(getNumEvents(),
+                probabilisticModel, fitnessFunctions);
+
+        return new EDA<>(
+                chromosomeFactory,
+                fitnessFunctions,
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                probabilisticModel);
     }
 
     /**
@@ -847,6 +892,8 @@ public class GeneticAlgorithmProvider {
                 return new BranchMultiObjectiveFitnessFunction<>(index);
             case BRANCH_DISTANCE:
                 return new BranchDistanceFitnessFunction<>();
+            case CRASH_DISTANCE:
+                return new CrashDistanceFitnessFunction<>();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
                 return new BranchDistanceMultiObjectiveFitnessFunction<>(index);
             case BASIC_BLOCK_MULTI_OBJECTIVE:
@@ -934,6 +981,9 @@ public class GeneticAlgorithmProvider {
             case NOVELTY:
                 phenoTypeFitnessFunction = new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
                 break;
+            case CRASH_DISTANCE:
+                phenoTypeFitnessFunction = new CrashDistanceFitnessFunction<>();
+                break;
             default:
                 throw new UnsupportedOperationException("GE fitness function "
                         + fitnessFunction.name() + " not yet supported!");
@@ -978,6 +1028,30 @@ public class GeneticAlgorithmProvider {
                 throw new UnsupportedOperationException("Unknown termination condition: "
                         + terminationConditionId);
         }
+    }
+
+    /**
+     * Initializes the probabilistic model for the EDA-based approach.
+     *
+     * @param fitnessFunctions The fitness function(s) used in EDA.
+     * @param <T> The type of the chromosomes.
+     * @return Returns the probabilistic model.
+     */
+    private <T> IProbabilisticModel<T> getProbabilisticModel(final List<IFitnessFunction<T>> fitnessFunctions) {
+        // default learning rate 0.01
+        // default epsilon 0.000001
+        // default clr 0.1
+        // default pEl 0.01
+        // default pMutation 0.4
+        // default mutationRate 0.4
+        return (IProbabilisticModel<T>) new PIPE((IFitnessFunction<TestCase>) fitnessFunctions.get(0),
+                org.mate.Properties.PIPE_LEARNING_RATE(),
+                org.mate.Properties.PIPE_NEGATIVE_LEARNING_RATE(),
+                org.mate.Properties.PIPE_EPSILON(),
+                org.mate.Properties.PIPE_CLR(),
+                org.mate.Properties.PIPE_PROB_ELITIST_LEARNING(),
+                org.mate.Properties.PIPE_PROB_MUTATION(),
+                org.mate.Properties.PIPE_MUTATION_RATE());
     }
 
     /**

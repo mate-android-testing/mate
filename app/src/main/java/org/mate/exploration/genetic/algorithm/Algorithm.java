@@ -12,5 +12,6 @@ public enum Algorithm {
     RANDOM_WALK,
     STANDARD_GA,
     NOVELTY_SEARCH,
+    EDA,
     SAPIENZ;
 }

@@ -4,9 +4,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.manual.ManualExploration;
-
-import java.util.Date;
+import org.mate.exploration.manual.deprecated.ManualExploration;
 
 /**
  * Starts a manual exploration. The parameter 'enableAccessibilityChecks' controls

@@ -12,12 +12,14 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.message.Message;
 import org.mate.message.serialization.Parser;
 import org.mate.message.serialization.Serializer;
 import org.mate.model.TestCase;
 import org.mate.model.TestSuite;
+import org.mate.utils.ChromosomeUtils;
 import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Objective;
 import org.mate.utils.Utils;
@@ -38,15 +40,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.mate.utils.ChromosomeUtils.getChromosomeId;
+import static org.mate.utils.ChromosomeUtils.getChromosomeIds;
+
 /**
  * Provides the interface to communicate with the MATE server.
  */
 public class EnvironmentManager {
+
     public static final String ACTIVITY_UNKNOWN = "unknown";
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "3.1";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.2";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     /**
@@ -67,6 +73,16 @@ public class EnvironmentManager {
      * the traces file for the given test case with an empty file.
      */
     private final Set<String> coveredTestCases = new HashSet<>();
+
+    /**
+     * The set of stack trace tokens. Only required for crash reproduction!
+     */
+    private Set<String> tokens = null;
+
+    /**
+     * The set of user input tokens. Only required for crash reproduction!
+     */
+    private Set<String> userInputTokens = null;
 
     /**
      * Initialises a new environment manager communicating with
@@ -667,9 +683,57 @@ public class EnvironmentManager {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
             messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
+        } else if (graphType == GraphType.CALL_TREE) {
+            messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
+            messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
+            messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
+            messageBuilder.withParameter("stack_trace_path", Properties.STACK_TRACE_PATH());
         }
 
         sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Retrieves the set of relevant stack trace tokens.
+     *
+     * @return Returns the set of stack trace tokens.
+     */
+    public Set<String> getStackTraceTokens() {
+
+        if (tokens == null) {
+            Message.MessageBuilder messageBuilder
+                    = new Message.MessageBuilder("/graph/stack_trace_tokens")
+                    .withParameter("package", Registry.getPackageName());
+
+            Message response = sendMessage(messageBuilder.build());
+            final int numTokens = Integer.parseInt(response.getParameter("tokens"));
+
+            tokens = new HashSet<>();
+            for (int i = 0; i < numTokens; i++) {
+                tokens.add(response.getParameter("token_" + i));
+            }
+        }
+
+        MATE.log_debug("Tokens are: " + tokens);
+        return Collections.unmodifiableSet(tokens);
+    }
+
+    /**
+     * Retrieves the set of user input tokens from the stack trace.
+     *
+     * @return Returns the set of user input tokens.
+     */
+    public Set<String> getStackTraceUserInput() {
+
+        if (userInputTokens == null) {
+            Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace_user_tokens")
+                    .withParameter("package", Registry.getPackageName());
+
+            Message response = sendMessage(messageBuilder.build());
+            userInputTokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
+        }
+
+        return userInputTokens;
     }
 
     /**
@@ -713,6 +777,29 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Integer.parseInt(response.getParameter("branches"));
+    }
+
+    /**
+     * Retrieves the stack trace.
+     *
+     * @return Returns the stack trace.
+     */
+    public List<String> getStackTrace() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace")
+                .withParameter("packageName", Registry.getPackageName());
+
+        Message response = sendMessage(messageBuilder.build());
+        return Arrays.asList(response.getParameter("stack_trace").split(","));
+    }
+
+    /**
+     * Stores the fitness data for the most recently executed action of the given test case.
+     *
+     * @param chromosome The given test case chromosome.
+     */
+    public void storeActionFitnessData(final IChromosome<TestCase> chromosome) {
+        storeFitnessData(chromosome, ChromosomeUtils.getActionEntityId(chromosome),
+                Properties.FITNESS_FUNCTION());
     }
 
     /**
@@ -761,6 +848,33 @@ public class EnvironmentManager {
             MATE.log_acc("Storing fitness data failed!");
             throw new IllegalStateException(response.getParameter("info"));
         }
+    }
+
+    /**
+     * Retrieves the crash distance for the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
+     *
+     * @param chromosome Refers either to a test case or to a test suite.
+     * @return Returns the crash distance for the given chromosome.
+     */
+    public <T> double getCrashDistance(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
+                // a dummy test case has a crash distance of 1.0 (worst value)
+                return 1.0;
+            }
+        }
+
+        String chromosomeId = getChromosomeId(chromosome);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_crash_distance")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", chromosomeId);
+
+        Message response = sendMessage(messageBuilder.build());
+        return Double.parseDouble(response.getParameter("crash_distance"));
     }
 
     /**
@@ -1069,7 +1183,7 @@ public class EnvironmentManager {
                         }
                         return true;
                     })
-                    .map(this::getChromosomeId)
+                    .map(ChromosomeUtils::getChromosomeId)
                     .collect(Collectors.joining("+"));
 
             if (chromosomesParam.isEmpty()) {
@@ -1087,6 +1201,23 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return extractCoverage(response);
+    }
+
+    /**
+     * Asks the user to supply an action or a command.
+     *
+     * @param options The list of potential actions and commands.
+     * @return Returns the selected action or command.
+     */
+    public Action askUserToPick(List<Action> options) {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/utility/let_user_pick")
+                .withParameter("options", String.valueOf(options.size()));
+
+        for (int i = 0; i < options.size(); i++) {
+            messageBuilder.withParameter("option_" + i, (options.get(i).toShortString()));
+        }
+
+        return options.get(Integer.parseInt(sendMessage(messageBuilder.build()).getParameter("picked_option")));
     }
 
     /**
@@ -1226,6 +1357,20 @@ public class EnvironmentManager {
 
             return coveragePercentagesVector;
         }
+    }
+
+    /**
+     * Writes the given content to the specified file.
+     *
+     * @param fileName The file name.
+     * @param content The given content that should be written to file.
+     */
+    public void writeFile(final String fileName, final String content) {
+        sendMessage(new Message.MessageBuilder("/utility/write_file")
+                .withParameter("deviceId", emulator)
+                .withParameter("fileName", fileName)
+                .withParameter("content", content)
+                .build());
     }
 
     /**
@@ -1469,28 +1614,6 @@ public class EnvironmentManager {
     }
 
     /**
-     * Returns the chromosome id of the given chromosome.
-     *
-     * @param chromosome The chromosome.
-     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
-     * @return Returns the chromosome id of the given chromosome.
-     */
-    private <T> String getChromosomeId(IChromosome<T> chromosome) {
-
-        String chromosomeId = null;
-
-        if (chromosome.getValue() instanceof TestCase) {
-            chromosomeId = ((TestCase) chromosome.getValue()).getId();
-        } else if (chromosome.getValue() instanceof TestSuite) {
-            chromosomeId = ((TestSuite) chromosome.getValue()).getId();
-        } else {
-            throw new IllegalStateException("Couldn't derive chromosome id for chromosome "
-                    + chromosome + "!");
-        }
-        return chromosomeId;
-    }
-
-    /**
      * Returns the novelty vector for the given chromosomes.
      * Note that {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
      *
@@ -1546,31 +1669,6 @@ public class EnvironmentManager {
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("novelty"));
-    }
-
-    /**
-     * Concatenates the given chromosomes separated by '+' into a single {@link String}.
-     *
-     * @param chromosomes A list of chromosomes.
-     * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
-     * @return Returns a single {@link String} containing the chromosome ids.
-     */
-    private <T> String getChromosomeIds(List<IChromosome<T>> chromosomes) {
-
-        // Java 8: String.join("+", chromosomeIds);
-        StringBuilder chromosomeIds = new StringBuilder();
-
-        for (IChromosome<T> chromosome : chromosomes) {
-            chromosomeIds.append(getChromosomeId(chromosome));
-            chromosomeIds.append("+");
-        }
-
-        // remove '+' at the end
-        if (chromosomeIds.length() > 0) {
-            chromosomeIds.setLength(chromosomeIds.length() - 1);
-        }
-
-        return chromosomeIds.toString();
     }
 
     /**
