@@ -386,8 +386,6 @@ public class TestCase {
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableUIActions().contains(action)) {
-            throw new IllegalStateException("Action not applicable to current state!");
-                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
             throw new IllegalStateException("Action not applicable in current state!");
         }
 
