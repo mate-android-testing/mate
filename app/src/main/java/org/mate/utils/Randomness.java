@@ -3,14 +3,11 @@ package org.mate.utils;
 import org.mate.Registry;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 /**
  * Provides utility functions that involve some kind of randomness, e.g. retrieving a random element
@@ -47,27 +44,6 @@ public class Randomness {
      */
     public static <T> int randomIndex(List<T> list) {
         return getRnd().nextInt(list.size());
-    }
-
-    // TODO: Remove once outdated EDA implementation has been removed.
-    public static <T> T randomIndexWithProbabilities(Map<T, Double> elementsWithProbabilities) {
-        double randomNumber = getRnd().nextDouble();
-        List<Map.Entry<T, Double>> sortedProbabilities = elementsWithProbabilities.entrySet().stream()
-                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
-                .collect(Collectors.toList());
-
-        if (sortedProbabilities.size() == 1) {
-            return sortedProbabilities.get(0).getKey();
-        }
-
-        double sum = 0;
-        int index = 0;
-        while (sum < randomNumber && index < sortedProbabilities.size()) {
-            sum += sortedProbabilities.get(index).getValue();
-            index++;
-        }
-
-        return sortedProbabilities.get(index - 1).getKey();
     }
 
     /**

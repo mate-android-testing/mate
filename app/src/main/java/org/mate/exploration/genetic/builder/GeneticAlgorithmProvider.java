@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.builder;
 
-import org.mate.Registry;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.EDA;
 import org.mate.exploration.genetic.algorithm.MIO;

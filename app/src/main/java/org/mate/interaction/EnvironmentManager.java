@@ -662,56 +662,6 @@ public class EnvironmentManager {
         return Boolean.parseBoolean(response.getParameter("response"));
     }
 
-    // TODO: Merge the fitness of crash reproduction into single request.
-
-    /**
-     * Retrieves the call tree distance for the given chromosome.
-     *
-     * @param chromosome The given chromosome.
-     * @return Returns the call tree distance for the given chromosome.
-     */
-    public double getCallTreeDistance(final IChromosome<?> chromosome) {
-        final String chromosomeId = getChromosomeId(chromosome);
-        Message.MessageBuilder messageBuilder
-                = new Message.MessageBuilder("/graph/call_tree_distance")
-                .withParameter("chromosome", chromosomeId)
-                .withParameter("packageName", Registry.getPackageName());
-        Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("distance"));
-    }
-
-    /**
-     * Retrieves the percentage of required constructors for the given chromosome.
-     *
-     * @param chromosome The given chromosome.
-     * @return Returns the percentage of required constructors.
-     */
-    public double getReachedRequiredConstructors(final IChromosome<?> chromosome) {
-        final String chromosomeId = getChromosomeId(chromosome);
-        Message.MessageBuilder messageBuilder
-                = new Message.MessageBuilder("/graph/reached_required_constructors")
-                .withParameter("chromosome", chromosomeId)
-                .withParameter("packageName", Registry.getPackageName());
-        Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("reachedConstructorsPercentage"));
-    }
-
-    /**
-     * Retrieves the basic block distance for the given chromosome.
-     *
-     * @param chromosome The given chromosome.
-     * @return Returns the basic block distance.
-     */
-    public double getBasicBlockDistance(final IChromosome<?> chromosome) {
-        final String chromosomeId = getChromosomeId(chromosome);
-        Message.MessageBuilder messageBuilder
-                = new Message.MessageBuilder("/graph/basic_block_distance")
-                .withParameter("chromosome", chromosomeId)
-                .withParameter("packageName", Registry.getPackageName());
-        Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("distance"));
-    }
-
     /**
      * Initialises a graph.
      */

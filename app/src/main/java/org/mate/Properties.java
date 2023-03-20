@@ -1,8 +1,5 @@
 package org.mate;
 
-import org.mate.crash_reproduction.eda.DistributionModel;
-import org.mate.crash_reproduction.eda.representation.ModelRepresentation;
-import org.mate.crash_reproduction.eda.representation.initializer.Initializer;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.crossover.CrossOverFunction;
@@ -327,13 +324,6 @@ public class Properties {
      * @return Returns {@code true} (default option) when a screen state should return motif actions.
      */
     public static boolean USE_MOTIF_ACTIONS() { return propertyOr(true); }
-
-    // TODO: Remove properties once outdated EDA has been removed.
-    public static DistributionModel DISTRIBUTION_MODEL() { return propertyOr(null); }
-
-    public static ModelRepresentation MODEL_REPRESENTATION() { return propertyOr(null); }
-
-    public static Initializer INITIALIZER() { return propertyOr(null); }
 
     /*
      * Begin Greybox Fuzzing properties
