@@ -76,7 +76,7 @@ import org.mate.exploration.genetic.termination.IterTerminationCondition;
 import org.mate.exploration.genetic.termination.NeverTerminationCondition;
 import org.mate.exploration.genetic.termination.TerminationCondition;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
-import org.mate.exploration.genetic.util.eda.PIPE;
+import org.mate.exploration.genetic.util.eda.pipe.PIPE;
 import org.mate.exploration.genetic.util.ge.AndroidListAnalogousMapping;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisionBiasedMapping;

@@ -1,11 +1,13 @@
-package org.mate.exploration.genetic.util.eda;
+package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
-import org.mate.exploration.genetic.util.eda.dot.DotConverter;
+import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
+import org.mate.exploration.genetic.util.eda.pipe.dot.DotConverter;
+import org.mate.exploration.genetic.util.eda.pipe.ppt.ApplicationStateTree;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;

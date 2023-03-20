@@ -1,8 +1,8 @@
-package org.mate.exploration.genetic.util.eda.dot;
+package org.mate.exploration.genetic.util.eda.pipe.dot;
 
 import org.mate.Registry;
-import org.mate.exploration.genetic.util.eda.ApplicationStateTree;
-import org.mate.exploration.genetic.util.eda.TreeNode;
+import org.mate.exploration.genetic.util.eda.pipe.ppt.ApplicationStateTree;
+import org.mate.exploration.genetic.util.eda.pipe.ppt.TreeNode;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
 import org.mate.utils.Tuple;

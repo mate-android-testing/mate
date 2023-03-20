@@ -1,4 +1,4 @@
-package org.mate.exploration.genetic.util.eda;
+package org.mate.exploration.genetic.util.eda.pipe.ppt;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;

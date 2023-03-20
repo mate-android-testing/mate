@@ -1,7 +1,8 @@
-package org.mate.exploration.genetic.util.eda;
+package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.MATE;
 import org.mate.Registry;
+import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
