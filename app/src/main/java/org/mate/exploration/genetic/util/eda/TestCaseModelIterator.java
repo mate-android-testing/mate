@@ -48,11 +48,8 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
                 .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
                 .iterator();
 
-        MATE.log_acc("PPT: ");
-        MATE.log_acc(probabilisticModel.toString());
-
-        MATE.log_acc("Current cursor position in PPT: " + probabilisticModel.getState());
-        MATE.log_acc("First state according to test case: " + testCase.getStateSequence().get(0));
+        MATE.log_debug("PPT: ");
+        MATE.log_debug(probabilisticModel.toString());
 
         // Reset cursor to root node of PPT.
         probabilisticModel.resetPosition();
@@ -62,7 +59,6 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
             MATE.log_warn("Test case does not start at root node...");
         }
 
-        MATE.log_acc("Updated cursor position in PPT: " + probabilisticModel.getState());
     }
 
     /**
@@ -92,15 +88,10 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
                 = new NodeWithPickedAction(probabilisticModel.getActionProbabilities(),
                 currentAction, returnedNodes);
 
+        // Move the cursor in the PPT to the next state.
         if (stateIterator.hasNext()) {
             final IScreenState nextState = stateIterator.next();
-            MATE.log_acc("Current cursor position in PPT: " + probabilisticModel.getState());
-            MATE.log_acc("Expected state after cursor update: " + nextState);
             probabilisticModel.updatePositionImmutable(nextState);
-            MATE.log_acc("Updated cursor position in PPT: " + probabilisticModel.getState());
-            // TODO: Seems to be dead code.
-        } else if (actionIterator.hasNext()) {
-            throw new IllegalStateException("Number of actions should at most be off by one!");
         }
 
         returnedNodes++;

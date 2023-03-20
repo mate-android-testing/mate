@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.util.eda;
 
-import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
@@ -64,13 +63,8 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
      * @param chromosome The chromosome for which the fitness should be recorded.
      */
     public void recordCurrentActionFitness(final IChromosome<TestCase> chromosome) {
-
-        MATE.log("Recording action fitness for chromosome: " + chromosome
-                + "(" + ChromosomeUtils.getActionEntityId(chromosome) + ")");
-
         final double fitness = fitnessFunction.getNormalizedFitness(chromosome);
         actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome), fitness);
-        MATE.log("Testcase fitness after " + chromosome.getValue().getActionSequence().size() + " actions is: " + fitness);
     }
 
     /**
@@ -81,8 +75,6 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
      * @return Returns the fitness value after the 'x-th' action.
      */
     public double getFitnessAfterXActions(final IChromosome<TestCase> testCase, final int actions) {
-        MATE.log("Retrieving action fitness for chromosome: "+ testCase
-                + "(" + actions + ")");
         return Objects.requireNonNull(actionFitnessValues.get(
                 ChromosomeUtils.getActionEntityId(testCase, actions)));
     }

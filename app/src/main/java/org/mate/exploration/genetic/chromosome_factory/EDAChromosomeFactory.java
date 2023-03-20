@@ -100,16 +100,12 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
-                MATE.log_acc("Current state: " + uiAbstractionLayer.getLastScreenState());
-                MATE.log_acc("Current state according to probabilistic model: " + probabilisticModel.getState());
-
                 final Action nextAction = selectAction();
 
-                MATE.log_acc("Selected action: " + nextAction);
 
                 if (nextAction instanceof UIAction // check that the ui action is actually applicable
                         && !uiAbstractionLayer.getExecutableUIActions().contains(nextAction)) {
-                    MATE.log_acc("Action not applicable in current state!");
+                    MATE.log("Action not applicable in current state!");
                     return chromosome;
                 }
 
