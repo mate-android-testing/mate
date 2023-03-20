@@ -212,6 +212,16 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
+            if (widget.isSettingsOption()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                continue;
+            }
+
+            if (widget.isSonOf(Widget::isSettingsOption)) {
+                MATE.log_debug("Ignoring children of settings option!");
+                continue;
+            }
+
             /*
             * It can happen that multiple sibling widgets are completely overlapping each other.
             *  We should define only for a single widget an action.
@@ -349,6 +359,10 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isCheckable()) {
                 // we check a widget by clicking on it
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
+
+            if (widget.isLongClickable()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
             }
 
             /*
@@ -533,13 +547,11 @@ public class ActionsScreenState extends AbstractScreenState {
         // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
         // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
         uiActions.add(new UIAction(ActionType.DELETE, activityName));
-        /*
         uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
         uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
-         */
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
     }

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exceptions.AUTCrashException;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
@@ -30,9 +31,14 @@ import org.mate.utils.StackTrace;
 import org.mate.utils.UIAutomatorException;
 import org.mate.utils.Utils;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mate.interaction.action.ActionResult.FAILURE_APP_CRASH;
 import static org.mate.interaction.action.ActionResult.FAILURE_UIAUTOMATOR;
@@ -145,6 +151,47 @@ public class UIAbstractionLayer {
      */
     public List<UIAction> getExecutableUIActions() {
         return getLastScreenState().getUIActions();
+    }
+
+    /**
+     * Retrieves the list of promising widget actions from the given screen state.
+     *
+     * @param state The given screen state.
+     * @return Returns the list of promising actions for the given screen state.
+     */
+    public List<WidgetAction> getPromisingActions(final IScreenState state) {
+
+        if (Properties.PROMISING_ACTIONS()) {
+
+            final Set<String> tokens = Registry.getEnvironmentManager().getStackTraceTokens();
+            final List<WidgetAction> widgetActions = state.getWidgetActions();
+            final List<WidgetAction> actionsContainingToken = widgetActions.stream()
+                    .filter(a -> a.getWidget().containsAnyToken(tokens))
+                    .collect(Collectors.toList());
+            final List<WidgetAction> promisingActions = new LinkedList<>();
+
+            for (final WidgetAction action : actionsContainingToken) {
+
+                if (action.getWidget().isTextViewType()) { // Assume this is the label to an input.
+
+                    // Find the closest widget that represents an input field or a spinner.
+                    Optional<WidgetAction> closestEditText = widgetActions.stream()
+                            .filter(a -> a.getWidget().isEditTextType() || a.getWidget().isSpinnerType())
+                            .min(Comparator.comparingDouble(w -> w.getWidget().distanceTo(action.getWidget())));
+
+                    // Consider both action on label and input field as promising.
+                    closestEditText.ifPresent(promisingActions::add);
+                    promisingActions.add(action);
+                } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
+                    // TODO: Document. What type of widget is this?
+                    promisingActions.add(action);
+                }
+            }
+
+            return promisingActions;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -371,6 +418,12 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for media picker
+                if (handleMediaPicker(screenState)) {
+                    change = true;
+                    continue;
+                }
+
                 // TODO: handle progress bar
 
                 // check for presence of build warnings dialog
@@ -437,6 +490,41 @@ public class UIAbstractionLayer {
         if (screenState.getPackageName().equals("com.google.android.gms")) {
             MATE.log("Detected Google SignIn Dialog!");
             deviceMgr.pressBack();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a media picker. If this is the case, we press 'BACK'.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleMediaPicker(IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.android.providers.media")) {
+            MATE.log("Detected media picker!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                Widget widget = action.getWidget();
+
+                if (action.getActionType() == ActionType.CLICK
+                        && (widget.getResourceID().equals("android:id/button1")
+                        || widget.getText().equalsIgnoreCase("OK"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on OK button of media picker!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
             return true;
         } else {
             return false;
@@ -679,7 +767,6 @@ public class UIAbstractionLayer {
         }
 
         String id = "S" + lastScreenStateNumber;
-
         screenState.setId(id);
         lastScreenStateNumber++;
 

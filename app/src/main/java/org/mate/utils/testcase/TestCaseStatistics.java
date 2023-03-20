@@ -11,11 +11,13 @@ import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
+import org.mate.state.IScreenState;
 
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class TestCaseStatistics {
 

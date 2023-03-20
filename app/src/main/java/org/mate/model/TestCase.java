@@ -385,7 +385,7 @@ public class TestCase {
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
-            throw new IllegalStateException("Action not applicable to current state!");
+            throw new IllegalStateException("Action not applicable in current state!");
         }
 
         IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();

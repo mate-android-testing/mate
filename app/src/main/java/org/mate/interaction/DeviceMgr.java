@@ -56,6 +56,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,6 +88,11 @@ public class DeviceMgr {
     private static final double PROB_HINT = 0.5;
 
     /**
+     * The probability for considering a whitespace as input.
+     */
+    private static final double PROB_WHITESPACE = 0.1;
+
+    /**
      * The probability for mutating a given hint.
      */
     private static final double PROB_HINT_MUTATION = 0.5;
@@ -94,6 +101,11 @@ public class DeviceMgr {
      * The probability for using a static string or the input generation.
      */
     private static final double PROB_STATIC_STRING = 0.5;
+
+    /**
+     * The probability for using a stack trace token as input.
+     */
+    private static final double PROB_STACK_TRACE_USER_INPUT = 0.8;
 
     /**
      * The probability for mutating a static string.
@@ -1016,7 +1028,10 @@ public class DeviceMgr {
      */
     private void handleSwipe(Widget widget, ActionType direction) {
 
-        int pixelsmove = 300;
+        // TODO: Elaborate how good swiping is working on different scrollable views. This can largely
+        //  impact how good the exploration works.
+
+        int pixelsMove = 300;
         int X = 0;
         int Y = 0;
         int steps = 15;
@@ -1033,6 +1048,20 @@ public class DeviceMgr {
                     X = widget.getX();
                     Y = widget.getY();
                 }
+
+                /*
+                * The default pixel move size is rather low, thus the change upon a swipe up or down
+                * is tiny. The preferred option is to make the pixel move size dependent on the
+                * size of the scrollable UI element.
+                 */
+                if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
+                    try {
+                        pixelsMove = (obj.getVisibleBounds().bottom - obj.getVisibleBounds().top) / 2;
+                    } catch (StaleObjectException e) {
+                        MATE.log_warn("Stale UiObject2!");
+                        e.printStackTrace();
+                    }
+                }
             } else {
                 X = widget.getX();
                 Y = widget.getY();
@@ -1041,24 +1070,24 @@ public class DeviceMgr {
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
             if (direction == SWIPE_DOWN || direction == SWIPE_UP)
-                pixelsmove = Y;
+                pixelsMove = Y;
             else
-                pixelsmove = X;
+                pixelsMove = X;
         }
 
         // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
             case SWIPE_DOWN:
-                device.swipe(X, Y, X, Y - pixelsmove, steps);
+                device.swipe(X, Y, X, Y - pixelsMove, steps);
                 break;
             case SWIPE_UP:
-                device.swipe(X, Y, X, Y + pixelsmove, steps);
+                device.swipe(X, Y, X, Y + pixelsMove, steps);
                 break;
             case SWIPE_LEFT:
-                device.swipe(X, Y, X + pixelsmove, Y, steps);
+                device.swipe(X, Y, X + pixelsMove, Y, steps);
                 break;
             case SWIPE_RIGHT:
-                device.swipe(X, Y, X - pixelsmove, Y, steps);
+                device.swipe(X, Y, X - pixelsMove, Y, steps);
                 break;
         }
     }
@@ -1261,6 +1290,23 @@ public class DeviceMgr {
         final InputFieldType inputFieldType = InputFieldType.getFieldTypeByNumber(widget.getInputType());
         final Random random = Registry.getRandom();
 
+        if (Properties.STACK_TRACE_USER_INPUT_SEEDING()) {
+            if (random.nextDouble() < PROB_STACK_TRACE_USER_INPUT) {
+
+                // use as input a random stack trace token
+                final Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
+
+                if (!tokens.isEmpty()) {
+                    return Randomness.randomElement(tokens);
+                }
+            }
+        }
+
+        // Select an empty input with a low probability.
+        if (random.nextDouble() < PROB_WHITESPACE) {
+            return " ";
+        }
+
         /*
          * If a hint is present and with probability PROB_HINT we select the hint as input. Moreover,
          * with probability PROB_HINT_MUTATION we mutate the given hint.
@@ -1274,6 +1320,7 @@ public class DeviceMgr {
                 }
             }
         }
+
         if (staticStrings.isInitialised()) {
             /*
              * If the static strings from the bytecode were supplied and with probability
@@ -1487,6 +1534,8 @@ public class DeviceMgr {
      */
     private List<String> extractFragments(String output) {
 
+        // TODO: Check if the command output is consistent among different APIs.
+
         /*
          * A typical output of the command 'dumpsys activity <activity-name>' looks as follows:
          *
@@ -1640,6 +1689,25 @@ public class DeviceMgr {
      * @return Returns the stack trace of the last crash.
      */
     public StackTrace getLastCrashStackTrace() {
+
+        final StackTrace stackTrace = getLastCrashStackTraceInternal();
+
+        if (Properties.WRITE_STACK_TRACE_TO_FILE()) {
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            final String fileName = "crash_" + LocalDateTime.now().format(formatter) + ".txt";
+            Registry.getEnvironmentManager().writeFile("stack_traces/" + fileName,
+                    stackTrace.getRawStackTraceLines().stream().collect(Collectors.joining("\n")));
+        }
+
+        return stackTrace;
+    }
+
+    /**
+     * Extracts the last stack trace from the logcat logs.
+     *
+     * @return Returns the extracted stack trace.
+     */
+    private StackTrace getLastCrashStackTraceInternal() {
 
         try {
             String response = device.executeShellCommand("run-as " + packageName
