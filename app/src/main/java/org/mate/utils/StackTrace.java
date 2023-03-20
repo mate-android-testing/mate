@@ -30,7 +30,7 @@ public class StackTrace {
     private String message;
 
     /**
-     * The list of method calls.
+     * The list of method calls, i.e. the 'at' stack trace lines.
      */
     private List<String> methodCalls;
 
@@ -48,6 +48,11 @@ public class StackTrace {
      * The pid of the process.
      */
     private int pid;
+
+    /**
+     * The raw stack trace lines without the 'FATAL EXCEPTION' and process information line.
+     */
+    private List<String> rawStackTraceLines;
 
     /**
      * Constructs a new stack trace by parsing the given log.
@@ -80,6 +85,10 @@ public class StackTrace {
         // the exception type and the message are contained in the third line
         parseExceptionLine(lines[2]);
 
+        rawStackTraceLines = Arrays.stream(lines)
+                .skip(2) // Skip preamble lines -> only keep actual stack trace lines
+                .collect(Collectors.toList());
+
         // each line starting with 'at' describes a method call
         methodCalls = Arrays.stream(lines)
                 .filter(line -> line.startsWith("at"))
@@ -87,7 +96,7 @@ public class StackTrace {
 
         // TODO: may update type and message with later type and message from 'Caused by' line
 
-        // each line starting with 'Caused by' describes a further
+        // each line starting with 'Caused by' describes a further exception
         causedByLines = Arrays.stream(lines)
                 .filter(line -> line.startsWith("Caused by"))
                 .map(this::removeObjectReferences)
@@ -173,5 +182,25 @@ public class StackTrace {
                 ", methodCalls=" + methodCalls +
                 ", causedByLines=" + causedByLines +
                 '}';
+    }
+
+    /**
+     * Returns the stack trace lines that begin with 'at'. Those lines contain the actual method
+     * invocations.
+     *
+     * @return Returns the 'at' stack trace lines.
+     */
+    public List<String> getMethodCalls() {
+        return methodCalls;
+    }
+
+    /**
+     * Returns the raw (unprocessed) stack trace lines without the preamble lines, i.e. the
+     * 'FATAL EXCEPTION' and process information line.
+     *
+     * @return Returns the raw stack trace lines.
+     */
+    public List<String> getRawStackTraceLines() {
+        return rawStackTraceLines;
     }
 }

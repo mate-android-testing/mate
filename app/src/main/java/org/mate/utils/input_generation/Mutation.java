@@ -77,7 +77,7 @@ public class Mutation {
 
             case NUMBER_VARIATION_PASSWORD:
             case NUMBER_FLAG_SIGNED:
-            case CLASS_NUMBER:
+            case CLASS_NUMBER_NORMAL:
                 return mutateNumber(string, MUTATION_DEGREE);
 
             case NUMBER_FLAG_DECIMAL:

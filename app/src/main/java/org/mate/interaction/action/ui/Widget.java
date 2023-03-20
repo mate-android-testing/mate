@@ -9,9 +9,13 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import org.mate.MATE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Represents an element in the ui hierarchy, i.e. a wrapper around a {@link AccessibilityNodeInfo}
@@ -246,6 +250,63 @@ public class Widget {
             labelBy = Objects.toString(lb.getViewIdResourceName(), "");
         }
         this.labeledBy = labelBy;
+    }
+
+    /**
+     * Computes the euclidean distance to another widget.
+     *
+     * @param other The other widget.
+     * @return Returns the euclidean distance between this widget and the other widget.
+     */
+    public double distanceTo(final Widget other) {
+
+        final int xCenter = this.x2 - this.x1;
+        final int yCenter = this.y2 - this.y1;
+        final int otherXCenter = other.x2 - other.x1;
+        final int otherYCenter = other.y2 - other.y1;
+
+        return Math.sqrt((xCenter - otherXCenter)^2 + (yCenter - otherYCenter)^2);
+    }
+
+    /**
+     * Checks whether the tokens of the widget contain any supplied token.
+     *
+     * @param tokens The given tokens.
+     * @return Returns {@code true} if the widget contains any of the given tokens, otherwise
+     *                  {@code false} is returned.
+     */
+    public boolean containsAnyToken(final Set<String> tokens) {
+
+        // TODO: Avoid (redundant) to lower case transformation(s).
+        return getTokens().map(String::toLowerCase).anyMatch(t1 -> tokens.stream()
+                .map(String::toLowerCase).anyMatch(t2 -> t1.equals(t2)
+                        // Allow minor divergence to catch plural of token for instance.
+                        || (Math.abs(t1.length() - t2.length()) == 1
+                        && (t1.contains(t2) || t2.contains(t1)))));
+    }
+
+    /**
+     * Retrieves the tokens from the widget, i.e. a collection of text attributes like the content
+     * description, the input or hint text. This also includes the tokens from the child widgets.
+     *
+     * @return Returns the tokens associated with the widget.
+     */
+    public Stream<String> getTokens() {
+        return Stream.concat(
+                Stream.of(text, contentDesc, labeledBy, errorText, labelFor, hint),
+                children.stream().flatMap(Widget::getTokens)
+        ).filter(Objects::nonNull)
+                .flatMap(token -> Stream.concat(
+                        // Split the tokens into further tokens upon common separators.
+                        Arrays.stream(token.split("\\s|,|;|:|\\.")),
+                        Stream.of(token) // Maintain the original token for an exact match.
+                ))
+                .map(String::trim)
+                .map(String::toLowerCase) // TODO: Remove this side effect.
+                .filter(token -> !token.isEmpty())
+                .distinct()
+                // TODO: Remove debug log after testing.
+                .peek(tokens -> MATE.log("Tokens of widget: " + tokens));
     }
 
     /**
@@ -1025,6 +1086,28 @@ public class Widget {
 
     public boolean isPassword() {
         return password;
+    }
+
+    // TODO: Understand and document.
+    public boolean isSettingsOption() {
+        return getClazz().equals("android.widget.LinearLayout")
+                && !getChildren().isEmpty()
+                && getChildren().get(0).getClazz().equals("android.widget.RelativeLayout")
+                && getChildren().get(0).getChildren().size() == 2
+                && getChildren().get(0).getChildren().get(0).getResourceID().equals("android:id/title")
+                && getChildren().get(0).getChildren().get(1).getResourceID().equals("android:id/summary");
+    }
+
+    /**
+     * Checks whether the widget is a son of another widget described by the given predicate.
+     *
+     * @param parentMatcher The given predicate.
+     * @return Returns {@code true} if one of the parents satisfies the given predicate, otherwise
+     *                  {@code false} is returned.
+     */
+    public boolean isSonOf(Predicate<Widget> parentMatcher) {
+        return parent != null
+                && (parentMatcher.test(parent) || parent.isSonOf(parentMatcher));
     }
 
     @Deprecated

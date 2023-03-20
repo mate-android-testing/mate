@@ -183,9 +183,25 @@ public class Properties {
         return propertyOr(1);
     }
 
-    public static int TOURNAMENT_SIZE() {
-        return propertyOr(2);
-    }
+    public static double PIPE_LEARNING_RATE() { return propertyOr(0.01); }
+
+    public static double PIPE_NEGATIVE_LEARNING_RATE() { return propertyOr(0.2); }
+
+    public static double PIPE_CLR() { return propertyOr(0.1); }
+
+    public static double PIPE_PROB_ELITIST_LEARNING() { return propertyOr(0.1); }
+
+    public static double PIPE_EPSILON() { return propertyOr(0.000001); }
+
+    public static double PIPE_PROB_MUTATION() { return propertyOr(0.4); }
+
+    public static double PIPE_MUTATION_RATE() { return propertyOr(0.4); }
+
+    public static boolean PIPE_RECORD_PPT() { return propertyOr(false); }
+
+    public static boolean PROMISING_ACTIONS() { return propertyOr(true); }
+
+    public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
     public static int DEFAULT_SELECTION_SIZE() {
         return propertyOr(2);
@@ -397,7 +413,7 @@ public class Properties {
 
     // how and which target vertex should be selected, e.g. a random branch vertex
     public static String TARGET() {
-        return propertyOr("no_target");
+        return propertyOr("all_branches");
     }
 
     // how the graph should be drawn
@@ -422,10 +438,36 @@ public class Properties {
         return propertyOr(false);
     }
 
-    // stack trace
+    /**
+     * Whether to record internally the stack trace of a discovered crash.
+     *
+     * @return Returns {@code false} by default, i.e. no stack trace is recorded.
+     */
     public static boolean RECORD_STACK_TRACE() {
         return propertyOr(false);
     }
+
+    /**
+     * Whether a recorded stack trace should be written to file.
+     *
+     * @return Returns {@code false} by default, i.e. no stack trace is written to file.
+     */
+    public static boolean WRITE_STACK_TRACE_TO_FILE() { return propertyOr(false); }
+
+    /**
+     * The stack trace file name required for crash reproduction.
+     *
+     * @return Returns the file name of the stack trace file.
+     */
+    public static String STACK_TRACE_PATH() { return propertyOr("stack_trace.txt"); }
+
+    /**
+     * Whether some data retrieved from the stack trace should be used as input for input fields.
+     * This functionality is only relevant in the context of crash reproduction.
+     *
+     * @return Returns {@code false} by default, i.e. no user input is derived from the stack trace.
+     */
+    public static boolean STACK_TRACE_USER_INPUT_SEEDING() { return propertyOr(false); }
 
     /*
      * Begin GE properties

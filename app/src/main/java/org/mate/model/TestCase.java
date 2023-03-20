@@ -382,11 +382,13 @@ public class TestCase {
      * @return Returns {@code true} if the given action didn't cause a crash of the app
      *         or left the AUT, otherwise {@code false} is returned.
      */
-    public boolean updateTestCase(Action action, int actionID) {
+    public boolean updateTestCase(final Action action, final int actionID) {
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableUIActions().contains(action)) {
             throw new IllegalStateException("Action not applicable to current state!");
+                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+            throw new IllegalStateException("Action not applicable in current state!");
         }
 
         IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
