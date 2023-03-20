@@ -494,9 +494,28 @@ public class UIAbstractionLayer {
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
     private boolean handleMediaPicker(IScreenState screenState) {
+
         if (screenState.getPackageName().equals("com.android.providers.media")) {
             MATE.log("Detected media picker!");
-            deviceMgr.pressBack(); // TODO: Maybe better to select 'Ok'?
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                Widget widget = action.getWidget();
+
+                if (action.getActionType() == ActionType.CLICK
+                        && (widget.getResourceID().equals("android:id/button1")
+                        || widget.getText().equalsIgnoreCase("OK"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on OK button of media picker!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
             return true;
         } else {
             return false;
