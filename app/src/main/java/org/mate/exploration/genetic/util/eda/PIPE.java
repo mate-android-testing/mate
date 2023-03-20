@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.util.eda;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.dot.DotConverter;
 import org.mate.interaction.action.Action;

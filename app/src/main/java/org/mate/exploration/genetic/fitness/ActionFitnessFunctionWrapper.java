@@ -1,7 +1,6 @@
-package org.mate.exploration.genetic.util.eda;
+package org.mate.exploration.genetic.fitness;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.model.TestCase;
 import org.mate.utils.ChromosomeUtils;
 
