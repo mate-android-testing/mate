@@ -43,7 +43,7 @@ import org.mate.exploration.genetic.fitness.BranchCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
-import org.mate.exploration.genetic.fitness.CrashDistance;
+import org.mate.exploration.genetic.fitness.CrashDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -894,7 +894,7 @@ public class GeneticAlgorithmProvider {
             case BRANCH_DISTANCE:
                 return new BranchDistanceFitnessFunction<>();
             case CRASH_DISTANCE:
-                return new CrashDistance<>(Registry.getEnvironmentManager().getStackTrace());
+                return new CrashDistanceFitnessFunction<>();
             case BRANCH_DISTANCE_MULTI_OBJECTIVE:
                 return new BranchDistanceMultiObjectiveFitnessFunction<>(index);
             case BASIC_BLOCK_MULTI_OBJECTIVE:
@@ -983,7 +983,7 @@ public class GeneticAlgorithmProvider {
                 phenoTypeFitnessFunction = new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
                 break;
             case CRASH_DISTANCE:
-                phenoTypeFitnessFunction = new CrashDistance<>(Registry.getEnvironmentManager().getStackTrace());
+                phenoTypeFitnessFunction = new CrashDistanceFitnessFunction<>();
                 break;
             default:
                 throw new UnsupportedOperationException("GE fitness function "

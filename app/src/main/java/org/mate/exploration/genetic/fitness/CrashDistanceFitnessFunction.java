@@ -4,16 +4,12 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.utils.FitnessUtils;
 
-import java.util.List;
-
-public class CrashDistance<T> implements IFitnessFunction<T> {
-
-    // TODO: May remove if not needed here.
-    private final List<String> targetStackTrace;
-
-    public CrashDistance(List<String> targetStackTrace) {
-        this.targetStackTrace = targetStackTrace;
-    }
+/**
+ * Provides a fitness function for crash reproduction.
+ *
+ * @param <T> The chromosomes type.
+ */
+public class CrashDistanceFitnessFunction<T> implements IFitnessFunction<T> {
 
     @Override
     public double getFitness(IChromosome<T> chromosome) {
