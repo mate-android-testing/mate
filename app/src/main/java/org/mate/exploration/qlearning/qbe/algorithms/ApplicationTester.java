@@ -1,5 +1,7 @@
 package org.mate.exploration.qlearning.qbe.algorithms;
 
+import static java.util.stream.Collectors.toList;
+
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
@@ -20,8 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * A QBE testing algorithms that chooses its actions according to the given
@@ -116,10 +116,9 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
                         Utils.throwOnInterrupt();
                     }
                 }
-            } while (noTerminalState && noCrash && !nonDeterministic
-                    && testcase.size() < maximumNumberOfActionPerTestCase);
+            } while (noTerminalState && noCrash && testcase.size() < maximumNumberOfActionPerTestCase);
 
-            if (!nonDeterministic) testsuite.add(testcase);
+            testsuite.add(testcase);
         }
     }
 
@@ -128,23 +127,20 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
      * well. A non deterministic transition system can occur because of a false inference and
      * because of the fuzzy state equivalence definition. This algorithms corrects a
      * non-deterministic transition system, by turning it back into a deterministic one.
+     *
+     * WARNING: Passive Learn can recuse infinitely, the AUT is non deterministic.
      */
     private List<List<TransitionRelation<S, A>>> passiveLearn(
             final TransitionSystem<S, A> ts,
             List<List<TransitionRelation<S, A>>> testsuite,
             final List<TransitionRelation<S, A>> nonDeterministicTestcase) {
-        // FIXME: This algorithm is broken. Check the QBE paper.
-        //  Passive learn does not work for non-deterministic apps, so catch that case and abort.
 
         final int testcaseLength = nonDeterministicTestcase.size();
-        MATE.log_debug("Found non-deterministic testcase of length " + testcaseLength);
         if (testcaseLength == 1) {
-            final TransitionRelation<S, A> tr = nonDeterministicTestcase.remove(0);
-            ts.removeTransition(tr);
-            testsuite = testsuite.stream()
-                    .filter(testcase -> testcase.isEmpty() || !tr.equals(testcase.get(0)))
-                    .collect(toList());
-            if (testsuite.contains(nonDeterministicTestcase)) throw new AssertionError();
+            throw new AssertionError(
+                    "The first action should always be deterministic," +
+                            " if the AUT is deterministic.");
+
         } else {
             final TransitionRelation<S, A> conflictingTransition
                     = nonDeterministicTestcase.remove(testcaseLength - 1);
@@ -159,6 +155,7 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
                     secondLastTransition.actionResult));
 
             testsuite.add(nonDeterministicTestcase);
+
             testsuite = testsuite.stream().map(testcase -> testcase.stream()
                     .map(tr -> tr.from.equals(secondLastTransition.from)
                             && Objects.equals(tr.to, secondLastTransition.to)
@@ -166,7 +163,6 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
                             : tr
                     ).collect(toList())).collect(toList());
 
-            outer:
             for (int testsuiteIndex = 0; testsuiteIndex < testsuite.size(); ++testsuiteIndex) {
                 final List<TransitionRelation<S, A>> testcase = testsuite.get(testsuiteIndex);
                 for (int testcaseIndex = 0; testcaseIndex < testcase.size(); ++testcaseIndex) {
@@ -179,15 +175,13 @@ public final class ApplicationTester<S extends State<A>, A extends Action> exten
                                 .map(TransitionRelation::new)
                                 .collect(toList());
                         testsuite = passiveLearn(ts, testsuite, testcaseCopy);
-                        if (testcaseCopy.size() > 1) {
-                            if (testcaseIndex + 1 < testcase.size())
-                                testcase.subList(testcaseIndex + 1, testcase.size())
-                                        .stream()
-                                        .map(TransitionRelation::new)
-                                        .forEach(testcaseCopy::add);
+                        if (testcaseCopy.size() > 1 && testcaseIndex + 1 < testcase.size()) {
+                            testcase.subList(testcaseIndex + 1, testcase.size())
+                                    .stream()
+                                    .map(TransitionRelation::new)
+                                    .forEach(testcaseCopy::add);
                             testsuite.add(testcaseCopy);
                         }
-                        break outer;
                     }
                 }
             }
