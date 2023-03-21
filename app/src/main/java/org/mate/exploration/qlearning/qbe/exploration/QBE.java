@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.mate.utils.Randomness.getDistributedRandomNumber;
+import static org.mate.utils.Randomness.getRandomlyDistributedKey;
 import static org.mate.utils.StreamUtils.distinctByKey;
 
 /**
@@ -62,7 +62,7 @@ public final class QBE<S extends State<A>, A extends Action> implements Explorat
                     .collect(
                             Collectors.toMap(abstractActions::getAbstractActionIndex,
                                     action -> qmatrix.getValue(currentState, action)));
-            final int chosenAbstractActionIndex = getDistributedRandomNumber(qMap);
+            final int chosenAbstractActionIndex = getRandomlyDistributedKey(qMap);
             final Set<A> possibleActions = currentState.getActions().stream()
                     .filter(a -> abstractActions.getAbstractActionIndex(a) == chosenAbstractActionIndex)
                     .collect(Collectors.toSet());

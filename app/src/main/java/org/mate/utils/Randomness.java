@@ -327,7 +327,7 @@ public class Randomness {
      * @param distribution The map from which a random key should be chosen.
      * @return Returns a random key in the given map proportionate to its value.
      */
-    public static <T> T getDistributedRandomNumber(final Map<T, Double> distribution) {
+    public static <T> T getRandomlyDistributedKey(final Map<T, Double> distribution) {
 
         if (distribution.isEmpty()) {
             throw new IllegalArgumentException("Distribution must not be empty.");
