@@ -320,31 +320,36 @@ public class Randomness {
     }
 
     /**
-     * Choose a key of the given map randomly , such that the probability of a particular key being
+     * Choose a key of the given map randomly such that the probability of a particular key being
      * selected is proportionally to its value.
      * Note: The distribution (the key values) need not be normalized.
+     *
+     * @param distribution The map from which a random key should be chosen.
+     * @return Returns a random key in the given map proportionate to its value.
      */
     public static <T> T getDistributedRandomNumber(final Map<T, Double> distribution) {
+
         if (distribution.isEmpty()) {
             throw new IllegalArgumentException("Distribution must not be empty.");
         }
 
+        // compute the sum over the distribution values
         double distSum = 0.0;
         for (Double d : distribution.values()) {
             if (d == null) {
-                throw new NullPointerException("The distribution may not contain null entries");
+                throw new NullPointerException("The distribution may not contain null entries.");
             } else if (d < 0) {
                 throw new IllegalArgumentException(
-                        "The distribution has to consist of non-negative doubles");
+                        "The distribution has to consist of non-negative doubles.");
             } else {
-                double v = d;
-                distSum += v;
+                distSum += d;
             }
         }
 
         if (distSum == 0.0) {
             return randomElement(distribution.keySet());
         } else {
+            // perform essentially a roulette-wheel selection
             final double ratio = 1.0 / distSum;
             final double rand = getRnd().nextDouble();
 
