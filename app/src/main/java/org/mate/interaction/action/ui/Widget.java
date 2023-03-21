@@ -368,7 +368,7 @@ public class Widget {
     /**
      * Returns the depth of the widget in the widget hierarchy. The root widget has a depth of 0.
      *
-     * @return the depth of the widget the widget hirachy.
+     * @return Returns the depth of the widget in the widget hierarchy.
      */
     public int getDepth() {
         return depth;
