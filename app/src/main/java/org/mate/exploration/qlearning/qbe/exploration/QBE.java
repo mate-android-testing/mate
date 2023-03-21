@@ -1,9 +1,6 @@
 package org.mate.exploration.qlearning.qbe.exploration;
 
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
 import org.mate.exploration.qlearning.qbe.abstractions.action.Action;
 import org.mate.exploration.qlearning.qbe.abstractions.state.State;
 import org.mate.exploration.qlearning.qbe.qmatrix.QMatrix;
@@ -52,7 +49,6 @@ public final class QBE<S extends State<A>, A extends Action> implements Explorat
      * @param currentState The current state.
      * @return Returns the action that should be applied next.
      */
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Optional<A> chooseAction(final S currentState) {
 
