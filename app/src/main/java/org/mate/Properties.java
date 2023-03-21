@@ -86,14 +86,6 @@ public class Properties {
         return propertyOr(false);
     }
 
-    /**
-     * Whether the QBE model should be used or not.
-     *
-     * @return Returns {@code true} if the QBE model should be used, otherwise {@code false}
-     *          is returned.
-     */
-    public static boolean QBE_MODEL() { return propertyOr(false); }
-
     /*
      * Intent fuzzing related properties.
      */
@@ -141,6 +133,18 @@ public class Properties {
         return propertyOr(false);
     }
 
+    /*
+     * Begin QBE properties
+     */
+
+    /**
+     * Whether the QBE model should be used or not.
+     *
+     * @return Returns {@code true} if the QBE model should be used, otherwise {@code false}
+     *          is returned.
+     */
+    public static boolean QBE_MODEL() { return propertyOr(false); }
+
     /**
      * Whether to record (and serialize) transition systems when using any oft the ExecuteMATEQBE*
      * strategies. Has no effect for other exploration algorithms.
@@ -161,23 +165,29 @@ public class Properties {
         return propertyOr(null);
     }
 
+    // TODO: Document.
     public static int K_VALUE() {
         return propertyOr(2);
     }
 
-    //10;
+    // TODO: Document.
     public static double RANK_BIAS() {
         return propertyOr(1.7);
     }
 
-    //10;
+    // TODO: Document.
     public static double GREEDY_EPSILON() {
         return propertyOr(0.7);
     }
 
-
     /*
-     * Misc properties
+     * End QBE properties
+     */
+
+    /**
+     * The initial random seed for the random number generator.
+     *
+     * @return Returns the initial random seed for the random number generator.
      */
     public static Long RANDOM_SEED() {
         return propertyOr(null);
