@@ -40,6 +40,12 @@ public class ELTS extends FSM {
         deterministic = true;
     }
 
+    /**
+     * Updates the model with a new transition. Keeps track of all actions seen so far and whether
+     * the model is still deterministic.
+     *
+     * @param transition The new transition.
+     */
     @Override
     public void addTransition(Transition transition) {
 
@@ -58,9 +64,10 @@ public class ELTS extends FSM {
         }
     }
 
+    // TODO: Document and implement.
     @Override
     public State getState(IScreenState screenState) {
-        // TODO: perform here state equivalence check as outlined in equation (1) on page 108
+        // TODO: Perform here state equivalence check as outlined in equation (1) on page 108.
         throw new UnsupportedOperationException("not yet implemented!");
     }
 
@@ -73,11 +80,13 @@ public class ELTS extends FSM {
         return deterministic;
     }
 
-    private boolean isDeterministic(QBETransition transition) {
+    // TODO: Document and implement.
+    private boolean isDeterministic(final QBETransition transition) {
         throw new UnsupportedOperationException("not yet implemented!");
     }
 
-    public void passiveLearn(List<TestCase> testCases, TestCase currentTestCase) {
+    // TODO: Document and implement.
+    public void passiveLearn(final List<TestCase> testCases, final TestCase currentTestCase) {
         throw new UnsupportedOperationException("not yet implemented!");
     }
 }
