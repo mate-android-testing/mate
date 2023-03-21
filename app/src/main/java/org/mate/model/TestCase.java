@@ -381,26 +381,26 @@ public class TestCase {
      * @param actionID The id of the action.
      * @return Returns the action result.
      */
-    public ActionResult updateTestCaseGetResult(Action action, int actionID) {
+    public ActionResult updateTestCaseAndGetResult(final Action action, final int actionID) {
 
         if (action instanceof WidgetAction
-                && !Registry.getUiAbstractionLayer().getExecutableActions().contains(action)) {
+                && !Registry.getUiAbstractionLayer().getExecutableUIActions().contains(action)) {
             throw new IllegalStateException("Action not applicable in current state!");
         }
 
-        IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
+        final IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
         if (!Properties.SURROGATE_MODEL()) {
             MATE.log("executing action " + actionID + ": " + action);
         }
 
-        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+        final ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
         // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
         if (!Properties.SURROGATE_MODEL()) {
 
-            IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
+            final IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
 
             // track the activity and state transition of each action
             String activityBeforeAction = oldState.getActivityName();
@@ -433,6 +433,7 @@ public class TestCase {
             case SUCCESS:
             case SUCCESS_NEW_STATE:
             case SUCCESS_OUTBOUND:
+            case FAILURE_UIAUTOMATOR:
             case FAILURE_UNKNOWN:
                 break;
             default:
@@ -448,12 +449,12 @@ public class TestCase {
      *
      * @param action The action to be executed.
      * @param actionID The id of the action.
-     * @return Returns {@code true} if the given action didn't cause a crash of the app
-     *         or left the AUT, otherwise {@code false} is returned.
+     * @return Returns {@code true} if the given action didn't cause a crash of the app nor left
+     *         the AUT, otherwise {@code false} is returned.
      */
-    public boolean updateTestCase(Action action, int actionID) {
+    public boolean updateTestCase(final Action action, final int actionID) {
 
-        ActionResult actionResult = updateTestCaseGetResult(action, actionID);
+        ActionResult actionResult = updateTestCaseAndGetResult(action, actionID);
 
         switch (actionResult) {
             case SUCCESS:
@@ -461,6 +462,7 @@ public class TestCase {
                 return true;
             case FAILURE_APP_CRASH:
             case SUCCESS_OUTBOUND:
+            case FAILURE_UIAUTOMATOR:
             case FAILURE_UNKNOWN:
                 return false;
             default:

@@ -64,7 +64,7 @@ public final class QBEApplication implements Application<QBEState, QBEAction> {
     @Override
     public Pair<Optional<QBEState>, ActionResult> executeAction(final QBEAction action) {
 
-        ActionResult result = currentTestCase.updateTestCaseGetResult(action.getUiAction(), testCaseLength++);
+        ActionResult result = currentTestCase.updateTestCaseAndGetResult(action.getUiAction(), testCaseLength++);
 
         if (result == SUCCESS || result == SUCCESS_NEW_STATE) {
             /*
