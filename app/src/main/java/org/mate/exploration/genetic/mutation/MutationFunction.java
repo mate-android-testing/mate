@@ -6,6 +6,7 @@ package org.mate.exploration.genetic.mutation;
 public enum MutationFunction {
 
     TEST_CASE_CUT_POINT_MUTATION,
+    TEST_CASE_BIASED_CUT_POINT_MUTATION,
     TEST_SUITE_CUT_POINT_MUTATION,
     TEST_CASE_SHUFFLE_MUTATION,
     TEST_SUITE_SHUFFLE_MUTATION,

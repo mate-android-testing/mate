@@ -157,6 +157,17 @@ public class Randomness {
     }
 
     /**
+     * Generates a random double in the range [min,max).
+     *
+     * @param min The minimal value (inclusive).
+     * @param max The maximal value (exclusive).
+     * @return Returns a random number in the range [min,max).
+     */
+    public static int getRandom(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max);
+    }
+
+    /**
      * Returns a random int in [0,range).
      *
      * @param range The maximal value (exclusive).

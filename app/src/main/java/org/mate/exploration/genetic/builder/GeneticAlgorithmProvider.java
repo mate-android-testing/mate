@@ -53,6 +53,7 @@ import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.mutation.BiasedCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.IntegerSequenceLengthMutationFunction;
@@ -796,6 +797,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
+            case TEST_CASE_BIASED_CUT_POINT_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new BiasedCutPointMutationFunction(getNumEvents());
             case TEST_SUITE_CUT_POINT_MUTATION:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
