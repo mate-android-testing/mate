@@ -1,22 +1,23 @@
 package org.mate.model.fsm.qbe;
 
-import org.mate.interaction.action.Action;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toMap;
+
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.model.fsm.State;
 import org.mate.state.IScreenState;
 import org.mate.utils.ListUtils;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
-
-public class QBEState extends State {
+public final class QBEState extends State {
 
     /**
      * A mapping from (widget type, widget depth) to its relative count.
@@ -32,6 +33,12 @@ public class QBEState extends State {
         super(id, screenState);
         featureMap = computeFeatureMap(screenState.getWidgets());
         numberOfComponents = featureMap.values().stream().mapToInt(i -> i).sum();
+    }
+
+    QBEState(final QBEState other) {
+        super(other.id, other.getScreenState());
+        featureMap = new HashMap<>(other.featureMap);
+        numberOfComponents = other.numberOfComponents;
     }
 
     /**
@@ -69,9 +76,8 @@ public class QBEState extends State {
         return Collections.unmodifiableMap(featureMap);
     }
 
-    Set<? extends Action> getActions() {
-        // TODO: Can QBE handle all types of actions or only widget-based/ui actions?
-        return ListUtils.toSet(screenState.getActions());
+    Set<UIAction> getActions() {
+        return ListUtils.toSet(screenState.getUIActions());
     }
 
     public void addDummyComponent() {

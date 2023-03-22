@@ -18,15 +18,15 @@ public class Transition {
         this.action = action;
     }
 
-    State getSource() {
+    public State getSource() {
         return source;
     }
 
-    State getTarget() {
+    public State getTarget() {
         return target;
     }
 
-    Action getAction() {
+    public Action getAction() {
         return action;
     }
 

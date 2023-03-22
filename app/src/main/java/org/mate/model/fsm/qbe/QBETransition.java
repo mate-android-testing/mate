@@ -8,7 +8,7 @@ import org.mate.model.fsm.Transition;
 /**
  * Defines a transition in the {@link ELTS}.
  */
-public class QBETransition extends Transition {
+public final class QBETransition extends Transition {
 
     /**
      * The action result associated with the execution of the action.
@@ -39,24 +39,31 @@ public class QBETransition extends Transition {
         return actionResult;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    State getSource() {
-        return source;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        final QBETransition that = (QBETransition) o;
+        return actionResult == that.actionResult;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + actionResult.hashCode();
+        return result;
     }
 
     /**
-     * {@inheritDoc}
+     * Provides a custom string representation for the transition.
+     *
+     * @return Returns the string representation of the given transition.
      */
-    State getTarget() {
-        return target;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    Action getAction() {
-        return action;
+    @Override
+    public String toString() {
+        return "{\"from\":" + getSource() + ",\"trigger\":" + getAction() + ",\"to\":" + getTarget()
+                + ",\"actionResult\":\"" + actionResult + "\"}";
     }
 }
