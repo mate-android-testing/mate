@@ -115,7 +115,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
             path.add(new Path(screenStates.get(i), actions.get(i), screenStates.get(i + 1)));
         }
 
-        MATE.log_acc("Original Path: " + path.stream()
+        MATE.log_acc("Original path: " + path.stream()
                 .map(Path::toShortString)
                 .collect(Collectors.joining(" -> ")));
 
