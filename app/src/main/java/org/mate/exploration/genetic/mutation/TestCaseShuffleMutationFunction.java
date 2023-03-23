@@ -146,28 +146,29 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
 
                 final Action action = actions.get(i);
 
+                // Check that the ui action is applicable in the current state.
                 if (action instanceof UIAction
                         && !uiAbstractionLayer.getExecutableUIActions().contains(action)) {
-                    MATE.log_warn("TestCaseShuffleMutationFunction: " +
-                            "Shuffled action not applicable in current state.");
-                    break;
+                    MATE.log_warn("TestCaseShuffleMutationFunction: Action (" + i + ") "
+                            + action.toShortString() + " not applicable!");
+                    break; // Fill up with random actions.
                 } else if (!mutant.updateTestCase(action, i)) {
-                    MATE.log_warn("TestCaseShuffleMutationFunction: Action crashed or left AUT.");
+                    MATE.log_warn("TestCaseShuffleMutationFunction: Action ( " + i + ") "
+                            + action.toShortString() + " crashed or left AUT.");
                     return mutatedChromosome;
                 }
             }
 
-            // fill up the remaining slots with random actions
+            // Fill up the remaining slots with random actions.
             final int currentTestCaseSize = mutant.getActionSequence().size();
 
             for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
                 final Action newAction
                         = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 if (!mutant.updateTestCase(newAction, i)) {
-                    MATE.log_warn("TestCaseShuffleMutationFunction: " +
-                            "Failed to fill up with random actions. " +
-                            "TestCase has only " + (i + 1) + "actions!");
-                    break;
+                    MATE.log_warn("TestCaseShuffleMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
+                    return mutatedChromosome;
                 }
             }
         } finally {

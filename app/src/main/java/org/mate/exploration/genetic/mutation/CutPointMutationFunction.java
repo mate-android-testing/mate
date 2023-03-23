@@ -67,24 +67,49 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
     public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome) {
 
         uiAbstractionLayer.resetApp();
-        int cutPoint = chooseCutPoint(chromosome.getValue());
 
-        TestCase mutant = TestCase.newInitializedTestCase();
-        IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
+        // choose an arbitrary cut point
+        final int cutPoint = chooseCutPoint(chromosome.getValue());
+
+        final TestCase mutant = TestCase.newInitializedTestCase();
+        final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
 
         try {
+
             for (int i = 0; i < maxNumEvents; i++) {
+
                 Action newAction;
+
                 if (i < cutPoint) {
+
                     newAction = chromosome.getValue().getActionSequence().get(i);
+
+                    // Check that the ui action is still applicable.
+                    if (newAction instanceof UIAction
+                            && !uiAbstractionLayer.getExecutableUIActions().contains(newAction)) {
+                        MATE.log_warn("CutPointMutationFunction: Action (" + i + ") "
+                                + newAction.toShortString() + " not applicable!");
+                        break; // Fill up with random actions.
+                    }
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
 
-                if ((newAction instanceof UIAction // check that the ui action is actually applicable
-                        && !uiAbstractionLayer.getExecutableUIActions().contains(newAction))
-                        || !mutant.updateTestCase(newAction, i)) {
-                    break;
+                if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("CutPointMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
+                    return mutatedChromosome;
+                }
+            }
+
+            // Fill up the remaining slots with random actions.
+            final int currentTestCaseSize = mutant.getActionSequence().size();
+
+            for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
+                final Action newAction
+                        = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+                if (!mutant.updateTestCase(newAction, i)) {
+                    return mutatedChromosome;
                 }
             }
         } finally {

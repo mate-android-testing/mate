@@ -70,11 +70,11 @@ public class BiasedCutPointMutationFunction implements IMutationFunction<TestCas
 
         uiAbstractionLayer.resetApp();
 
-        // chooses a cut point towards the end of the action sequence
+        // choose a cut point towards the end of the action sequence
         final int cutPoint = chooseCutPoint(chromosome.getValue());
         
-        TestCase mutant = TestCase.newInitializedTestCase();
-        IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
+        final TestCase mutant = TestCase.newInitializedTestCase();
+        final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
 
         try {
 
@@ -86,20 +86,25 @@ public class BiasedCutPointMutationFunction implements IMutationFunction<TestCas
 
                     newAction = chromosome.getValue().getActionSequence().get(i);
 
-                    if (newAction instanceof UIAction // check that the ui action is actually applicable
+                    // Check that the ui action is still applicable.
+                    if (newAction instanceof UIAction
                             && !uiAbstractionLayer.getExecutableUIActions().contains(newAction)) {
-                        break; // fill up with random actions
+                        MATE.log_warn("BiasedCutPointMutationFunction: Action (" + i + ") "
+                                + newAction.toShortString() + " not applicable!");
+                        break; // Fill up with random actions.
                     }
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
 
                 if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("BiasedCutPointMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
                     return mutatedChromosome;
                 }
             }
 
-            // fill up the remaining slots with random actions
+            // Fill up the remaining slots with random actions.
             final int currentTestCaseSize = mutant.getActionSequence().size();
 
             for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
