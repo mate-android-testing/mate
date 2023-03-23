@@ -77,18 +77,36 @@ public class BiasedCutPointMutationFunction implements IMutationFunction<TestCas
         IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
 
         try {
+
             for (int i = 0; i < maxNumEvents; i++) {
+
                 Action newAction;
+
                 if (i < cutPoint) {
+
                     newAction = chromosome.getValue().getActionSequence().get(i);
+
+                    if (newAction instanceof UIAction // check that the ui action is actually applicable
+                            && !uiAbstractionLayer.getExecutableUIActions().contains(newAction)) {
+                        break; // fill up with random actions
+                    }
                 } else {
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
 
-                if ((newAction instanceof UIAction // check that the ui action is actually applicable
-                        && !uiAbstractionLayer.getExecutableUIActions().contains(newAction))
-                        || !mutant.updateTestCase(newAction, i)) {
-                    break;
+                if (!mutant.updateTestCase(newAction, i)) {
+                    return mutatedChromosome;
+                }
+            }
+
+            // fill up the remaining slots with random actions
+            final int currentTestCaseSize = mutant.getActionSequence().size();
+
+            for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
+                final Action newAction
+                        = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+                if (!mutant.updateTestCase(newAction, i)) {
+                    return mutatedChromosome;
                 }
             }
         } finally {
