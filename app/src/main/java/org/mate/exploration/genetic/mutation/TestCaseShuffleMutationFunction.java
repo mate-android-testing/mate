@@ -90,6 +90,9 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
     @Override
     public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome) {
 
+        final TestCase testCase = chromosome.getValue();
+        MATE.log_debug("Sequence length before mutation: " + testCase.getActionSequence().size());
+
         final List<Path> path = pathFromTestCase(chromosome.getValue());
 
         if (path.isEmpty()) {
@@ -206,6 +209,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
             }
 
             mutant.finish();
+            MATE.log_debug("Sequence length after mutation: " + mutant.getActionSequence().size());
         }
 
         return mutatedChromosome;

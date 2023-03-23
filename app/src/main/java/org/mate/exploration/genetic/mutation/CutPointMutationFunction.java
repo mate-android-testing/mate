@@ -71,8 +71,11 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
         // choose an arbitrary cut point
         final int cutPoint = chooseCutPoint(chromosome.getValue());
 
+        final TestCase testCase = chromosome.getValue();
         final TestCase mutant = TestCase.newInitializedTestCase();
         final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
+
+        MATE.log_debug("Sequence length before mutation: " + testCase.getActionSequence().size());
 
         try {
 
@@ -82,7 +85,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
 
                 if (i < cutPoint) {
 
-                    newAction = chromosome.getValue().getActionSequence().get(i);
+                    newAction = testCase.getActionSequence().get(i);
 
                     // Check that the ui action is still applicable.
                     if (newAction instanceof UIAction
@@ -132,6 +135,7 @@ public class CutPointMutationFunction implements IMutationFunction<TestCase> {
             }
 
             mutant.finish();
+            MATE.log_debug("Sequence length after mutation: " + mutant.getActionSequence().size());
         }
 
         return mutatedChromosome;
