@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
  * Provides a mutation function for {@link TestCase}s that replaces the individual actions by actions
  * of the same type, e.g. a {@link MotifAction} is replaced by a {@link MotifAction}.
  */
-public class TestCaseMutateActionParameters implements IMutationFunction<TestCase> {
+public class TestCaseActionParametersMutationFunction implements IMutationFunction<TestCase> {
 
     /**
      * Provides primarily information about the current screen.
@@ -51,6 +52,11 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
     private boolean isTestSuiteExecution = false;
 
     /**
+     * The maximal number of actions per test case.
+     */
+    private final int maxNumEvents;
+
+    /**
      * Enables access to the intent generation.
      */
     private static final IntentProvider intentProvider = new IntentProvider();
@@ -58,8 +64,9 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
     /**
      * Initialises the mutation function.
      */
-    public TestCaseMutateActionParameters() {
+    public TestCaseActionParametersMutationFunction(final int maxNumEvents) {
         this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
+        this.maxNumEvents = maxNumEvents;
     }
 
     /**
@@ -83,30 +90,40 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
 
         uiAbstractionLayer.resetApp();
 
-        TestCase testCase = chromosome.getValue();
-        TestCase mutant = TestCase.newInitializedTestCase();
-        IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
+        final TestCase testCase = chromosome.getValue();
+        final TestCase mutant = TestCase.newInitializedTestCase();
+        final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
+
+        MATE.log_debug("Sequence length before mutation: " + testCase.getActionSequence().size());
 
         try {
-            for (int i = 0; i < testCase.getActionSequence().size(); i++) {
-                final Action oldAction = chromosome.getValue().getActionSequence().get(i);
-                if (oldAction instanceof UIAction) {
-                    final UIAction newAction = mutate((UIAction) oldAction);
 
-                    // check that the ui action is actually applicable
-                    if ((!uiAbstractionLayer.getExecutableUIActions().contains(newAction))
-                            || !mutant.updateTestCase(newAction, i)) {
-                        break;
-                    }
-                } else if (oldAction instanceof IntentAction) {
-                    final IntentAction newAction = mutate((IntentAction) oldAction);
-                    if (!mutant.updateTestCase(newAction, i)) {
-                        break;
-                    }
-                } else {
-                    if (!mutant.updateTestCase(oldAction, i)) {
-                        break;
-                    }
+            for (int i = 0; i < maxNumEvents; i++) {
+
+                final Action oldAction = testCase.getActionSequence().get(i);
+                final Action newAction = mutate(oldAction);
+
+                // Check that the ui action is still applicable.
+                if (newAction instanceof UIAction
+                        && !uiAbstractionLayer.getExecutableUIActions().contains(newAction)) {
+                    MATE.log_warn("TestCaseActionParametersMutationFunction: "
+                            + "Action (" + i + ") " + newAction.toShortString() + " not applicable!");
+                    break; // Fill up with random actions.
+                } else if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("TestCaseActionParametersMutationFunction: "
+                            + "Action ( " + i + ") " + newAction.toShortString()
+                            + " crashed or left AUT.");
+                    return mutatedChromosome;
+                }
+            }
+
+            // Fill up the remaining slots with random actions.
+            final int currentTestCaseSize = mutant.getActionSequence().size();
+
+            for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
+                final Action newAction = selectRandomAction();
+                if (!mutant.updateTestCase(newAction, i)) {
+                    return mutatedChromosome;
                 }
             }
         } finally {
@@ -129,9 +146,26 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
             }
 
             mutant.finish();
+            MATE.log_debug("Sequence length after mutation: " + mutant.getActionSequence().size());
         }
 
         return mutatedChromosome;
+    }
+
+    /**
+     * Selects a random action applicable in the current state. Respects the intent probability.
+     *
+     * @return Returns the selected action.
+     */
+    private Action selectRandomAction() {
+
+        final double random = Randomness.getRnd().nextDouble();
+
+        if (Properties.USE_INTENT_ACTIONS() && random < Properties.RELATIVE_INTENT_AMOUNT()) {
+            return Randomness.randomElement(uiAbstractionLayer.getExecutableIntentActions());
+        } else {
+            return Randomness.randomElement(uiAbstractionLayer.getExecutableUIActions());
+        }
     }
 
     /**
@@ -249,14 +283,16 @@ public class TestCaseMutateActionParameters implements IMutationFunction<TestCas
     }
 
     /**
-     * Mutates or actually replaces the given ui action.
+     * Mutates or actually replaces the given action.
      *
-     * @param action The ui action that should be mutated.
-     * @return Returns the mutated ui action.
+     * @param action The action that should be mutated.
+     * @return Returns the mutated action.
      */
-    private UIAction mutate(final UIAction action) {
+    private Action mutate(final Action action) {
 
-        if (action instanceof MotifAction) {
+        if (action instanceof IntentAction) {
+            return mutate((IntentAction) action);
+        } else if (action instanceof MotifAction) {
             return mutate((MotifAction) action);
         } else if (action instanceof PrimitiveAction) {
             return mutate((PrimitiveAction) action);

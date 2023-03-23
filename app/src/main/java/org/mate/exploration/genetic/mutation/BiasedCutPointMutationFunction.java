@@ -97,7 +97,7 @@ public class BiasedCutPointMutationFunction implements IMutationFunction<TestCas
                         break; // Fill up with random actions.
                     }
                 } else {
-                    newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+                    newAction = selectRandomAction();
                 }
 
                 if (!mutant.updateTestCase(newAction, i)) {
@@ -111,9 +111,10 @@ public class BiasedCutPointMutationFunction implements IMutationFunction<TestCas
             final int currentTestCaseSize = mutant.getActionSequence().size();
 
             for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
-                final Action newAction
-                        = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+                final Action newAction = selectRandomAction();
                 if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("BiasedCutPointMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
                     return mutatedChromosome;
                 }
             }
@@ -141,6 +142,22 @@ public class BiasedCutPointMutationFunction implements IMutationFunction<TestCas
         }
 
         return mutatedChromosome;
+    }
+
+    /**
+     * Selects a random action applicable in the current state. Respects the intent probability.
+     *
+     * @return Returns the selected action.
+     */
+    private Action selectRandomAction() {
+
+        final double random = Randomness.getRnd().nextDouble();
+
+        if (Properties.USE_INTENT_ACTIONS() && random < Properties.RELATIVE_INTENT_AMOUNT()) {
+            return Randomness.randomElement(uiAbstractionLayer.getExecutableIntentActions());
+        } else {
+            return Randomness.randomElement(uiAbstractionLayer.getExecutableUIActions());
+        }
     }
 
     /**
