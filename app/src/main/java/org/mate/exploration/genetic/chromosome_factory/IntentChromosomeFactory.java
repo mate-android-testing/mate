@@ -191,11 +191,11 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
     @Override
     protected Action selectAction() {
 
-        double random = Math.random();
+        final double random = Randomness.getRnd().nextDouble();
 
         if (random < relativeIntentAmount) {
             // select an intent based action
-            double rand = Math.random();
+            double rand = Randomness.getRnd().nextDouble();
 
             // select a component based on its relative occurrence in the set of components
             if (rand < relativeServiceAmount && intentProvider.hasService()) {
@@ -216,7 +216,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
                 return intentProvider.getSystemEventAction();
             } else {
                 // we select an activity (at least the main activity must be exported)
-                double rnd = Math.random();
+                double rnd = Randomness.getRnd().nextDouble();
 
                 // select with p = 1/2 either onNewIntent or OnCreate
                 if (rnd < 0.5 && intentProvider.isCurrentActivityHandlingOnNewIntent()) {

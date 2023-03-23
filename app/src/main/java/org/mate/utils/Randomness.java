@@ -74,7 +74,7 @@ public class Randomness {
      */
     public static <T> T randomElementOrNull(Set<T> set) {
 
-        double random = Math.random();
+        final double random = getRnd().nextDouble();
 
         if (random < 0.5) {
             return randomElement(set);
@@ -255,14 +255,14 @@ public class Randomness {
     public static List<Integer> getRandomIntegersWithNull(int count, int bound) {
 
         // API 28: IntStream.generate(() -> getRnd().nextInt(100)).limit(100).toArray();
-        Random random = getRnd();
-        List<Integer> result = new ArrayList<>(count);
+        final Random random = getRnd();
+        final List<Integer> result = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
             result.add(random.nextInt(bound));
 
             // insert with some probability null values between the other values
-            double rnd = Math.random();
+            final double rnd = random.nextDouble();
 
             if (rnd > 0.5) {
                 result.add(null);

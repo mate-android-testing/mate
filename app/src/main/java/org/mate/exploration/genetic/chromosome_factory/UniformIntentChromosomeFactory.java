@@ -103,7 +103,7 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
     @Override
     protected Action selectAction() {
 
-        double random = Math.random();
+        final double random = Randomness.getRnd().nextDouble();
 
         if (random < relativeIntentAmount) {
             return Randomness.randomElement(uiAbstractionLayer.getExecutableIntentActions());
