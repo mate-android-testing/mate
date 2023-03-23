@@ -66,7 +66,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
     }
 
     /**
-     * Performs a test case shuffle mutation.
+     * Mutates the test case by shuffling the path described by the action and state sequence.
      *
      * @param chromosome The chromosome to be mutated.
      * @return Returns the mutated chromosome.
