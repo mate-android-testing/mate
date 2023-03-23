@@ -205,6 +205,22 @@ public class Randomness {
     }
 
     /**
+     * Shuffles an array.
+     *
+     * @param array The array to be shuffled.
+     * @param <T> The type of the array elements.
+     */
+    public static <T> void shuffleArray(T[] array) {
+        for (int i = array.length - 1; i > 0; --i) {
+            final int index = getRnd().nextInt(i + 1);
+            final T tmp = array[index];
+            array[index] = array[i];
+            array[i] = tmp;
+        }
+    }
+
+
+    /**
      * Shuffles the given list in place.
      *
      * @param list The input list to be shuffled.
