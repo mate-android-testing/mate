@@ -56,6 +56,12 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
     private final int maxNumEvents;
 
     /**
+     * Whether we deal with a test suite execution, i.e. whether the used chromosome factory
+     * produces {@link org.mate.model.TestSuite}s or not.
+     */
+    private boolean isTestSuiteExecution = false;
+
+    /**
      * Initialises the test case shuffle mutation function.
      *
      * @param maxNumEvents The maximal number of actions per test case.
@@ -63,6 +69,16 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
     public TestCaseShuffleMutationFunction(int maxNumEvents) {
         this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
+    }
+
+    // TODO: might be replaceable with chromosome factory property in the future
+    /**
+     * Defines whether we deal with a test suite execution or not.
+     *
+     * @param testSuiteExecution Indicates if we deal with a test suite execution or not.
+     */
+    public void setTestSuiteExecution(boolean testSuiteExecution) {
+        this.isTestSuiteExecution = testSuiteExecution;
     }
 
     /**
@@ -179,9 +195,16 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
                 surrogateModel.updateTestCase(mutant);
             }
 
-            FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
-            CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
-            CoverageUtils.logChromosomeCoverage(mutatedChromosome);
+            if (!isTestSuiteExecution) {
+                /*
+                 * If we deal with a test suite execution, the storing of coverage
+                 * and fitness data is handled by the test suite mutation operator itself.
+                 */
+                FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
+                CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
+                CoverageUtils.logChromosomeCoverage(mutatedChromosome);
+            }
+
             mutant.finish();
         }
 
