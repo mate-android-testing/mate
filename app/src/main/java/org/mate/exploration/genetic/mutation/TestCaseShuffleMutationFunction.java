@@ -153,7 +153,7 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
                     break;
                 } else if (!mutant.updateTestCase(action, i)) {
                     MATE.log_warn("TestCaseShuffleMutationFunction: Action crashed or left AUT.");
-                    break;
+                    return mutatedChromosome;
                 }
             }
 
