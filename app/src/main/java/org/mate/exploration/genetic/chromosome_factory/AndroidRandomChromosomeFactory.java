@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
+import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -89,12 +90,17 @@ public class AndroidRandomChromosomeFactory implements IChromosomeFactory<TestCa
             uiAbstractionLayer.resetApp();
         }
 
-        TestCase testCase = TestCase.newInitializedTestCase();
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
+        final TestCase testCase = TestCase.newInitializedTestCase();
+        final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
-                if (!testCase.updateTestCase(selectAction(), actionsCount)) {
+
+                final Action newAction = selectAction();
+
+                if (!testCase.updateTestCase(newAction, actionsCount)) {
+                    MATE.log_warn("AndroidRandomChromosomeFactory: Action ( " + actionsCount + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
             }

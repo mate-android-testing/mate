@@ -61,12 +61,17 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
         MATE.log("Pushing custom media files: "
                 + Registry.getEnvironmentManager().pushDummyFiles());
 
-        TestCase testCase = TestCase.newInitializedTestCase();
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
+        final TestCase testCase = TestCase.newInitializedTestCase();
+        final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            for (int i = 0; i < maxNumEvents; i++) {
-                if (!testCase.updateTestCase(selectAction(), i)) {
+            for (actionsCount = 0; !finishTestCase(); actionsCount++) {
+
+                final Action newAction = selectAction();
+
+                if (!testCase.updateTestCase(newAction, actionsCount)) {
+                    MATE.log_warn("UniformIntentChromosomeFactory: Action ( " + actionsCount + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
             }
