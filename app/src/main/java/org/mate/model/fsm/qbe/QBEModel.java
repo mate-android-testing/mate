@@ -1,116 +1,51 @@
 package org.mate.model.fsm.qbe;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
+
+import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.interaction.action.StartAction;
-import org.mate.interaction.action.intent.IntentAction;
-import org.mate.interaction.action.intent.IntentBasedAction;
-import org.mate.interaction.action.intent.SystemAction;
-import org.mate.interaction.action.ui.MotifAction;
-import org.mate.interaction.action.ui.UIAction;
-import org.mate.interaction.action.ui.Widget;
-import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.Edge;
 import org.mate.model.IGUIModel;
 import org.mate.model.fsm.State;
+import org.mate.model.fsm.Transition;
 import org.mate.state.IScreenState;
-import org.mate.state.ScreenStateType;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Defines an Extended Labeled Transition System (ELTS) as described on page 107/108 in the paper
  * "QBE: QLearning-Based Exploration of Android Applications".
  */
-public class QBEModel implements IGUIModel {
+public final class QBEModel implements IGUIModel {
 
-    /**
-     * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
-     * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
-     * screen state.
-     */
-    private static final State VIRTUAL_ROOT_STATE = new QBEState(-1, new IScreenState() {
+    public final static QBEState VIRTUAL_ROOT_STATE = ELTS.VIRTUAL_ROOT_STATE;
 
-        @Override
-        public String getId() {
-            return "VIRTUAL_ROOT_STATE";
-        }
-
-        @Override
-        public void setId(String stateId) {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<Widget> getWidgets() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<Action> getActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<UIAction> getUIActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<SystemAction> getSystemActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<IntentBasedAction> getIntentBasedActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<IntentAction> getIntentActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<WidgetAction> getWidgetActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public List<MotifAction> getMotifActions() {
-            throw new UnsupportedOperationException("Do not call this method!");
-        }
-
-        @Override
-        public String getActivityName() {
-            return "VIRTUAL_ROOT_STATE_ACTIVITY";
-        }
-
-        @Override
-        public String getPackageName() {
-            return "VIRTUAL_ROOT_STATE_PACKAGE";
-        }
-
-        @Override
-        public ScreenStateType getType() {
-            return ScreenStateType.ACTION_SCREEN_STATE;
-        }
-    });
+    public final static QBEState CRASH_STATE = ELTS.CRASH_STATE;
 
     private final ELTS elts;
 
     /**
+     * The package name of the AUT.
+     */
+    private final String packageName;
+
+    /**
      * Creates a new ELTS model with a given initial state.
      *
-     * @param rootState The root or start state of the ELTS model.
+     * @param rootState   The root or start state of the ELTS model.
      * @param packageName The package name of the AUT.
      */
     public QBEModel(IScreenState rootState, String packageName) {
+        this.packageName = requireNonNull(packageName);
         elts = new ELTS(VIRTUAL_ROOT_STATE, packageName);
         elts.addTransition(new QBETransition(VIRTUAL_ROOT_STATE, new QBEState(1, rootState),
-                new StartAction(), null));
+                new StartAction(), ActionResult.SUCCESS));
     }
 
     /**
@@ -123,76 +58,111 @@ public class QBEModel implements IGUIModel {
      */
     public void update(final IScreenState source, final IScreenState target, final Action action,
                        final ActionResult actionResult) {
-
-
-        if (actionResult == ActionResult.FAILURE_APP_CRASH) {
-            // non-deterministic -> passive learning
-        }
-
+        QBEState sourceState = (QBEState) elts.getState(source);
+        QBEState targetState = actionResult.equals(ActionResult.FAILURE_APP_CRASH)
+                ? CRASH_STATE : (QBEState) elts.getState(target);
+        QBETransition transition = new QBETransition(sourceState, targetState, action, actionResult);
+        elts.addTransition(transition);
     }
 
     @Override
     public void update(IScreenState source, IScreenState target, Action action) {
-
+        throw new UnsupportedOperationException("QBEModel requires an ActionResult when updating.");
     }
 
     @Override
     public Set<IScreenState> getStates() {
-        return null;
+        return elts.getStates().stream().map(State::getScreenState).collect(toSet());
     }
 
     @Override
     public boolean reachedNewState() {
-        return false;
+        return elts.reachedNewState();
     }
 
     @Override
     public int getNumberOfStates() {
-        return 0;
+        return elts.getNumberOfStates();
     }
 
     @Override
     public Set<Edge> getEdges(Action action) {
-        return null;
+        return elts.getTransitions(action)
+                .stream()
+                .map(t -> new Edge(action, t.getSource().getScreenState(),
+                        t.getTarget().getScreenState()))
+                .collect(toSet());
     }
 
     @Override
     public Set<Edge> getEdges() {
-        return null;
+        return elts.getTransitions()
+                .stream()
+                .map(t -> new Edge(t.getAction(), t.getSource().getScreenState(),
+                        t.getTarget().getScreenState()))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Optional<List<Edge>> shortestPath(IScreenState from, IScreenState to) {
-        return Optional.empty();
+        State fromState = elts.getState(from);
+        State toState = elts.getState(to);
+
+        MATE.log_acc("Trying to find the shortest path from " + fromState + " to " + toState);
+        return elts.shortestPath(fromState, toState).map(transitions ->
+                transitions.stream()
+                        .map(t -> new Edge(t.getAction(), t.getSource().getScreenState(),
+                                t.getTarget().getScreenState()))
+                        .collect(Collectors.toList()));
     }
 
     @Override
     public IScreenState getScreenStateById(String screenStateId) {
-        return null;
+        return getStates().stream()
+                .filter(screenState -> screenState.getId().equals(screenStateId))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public Set<IScreenState> getRootStates() {
-        return null;
+        return elts.getOutgoingTransitions(elts.getRootState())
+                .stream()
+                .map(Transition::getTarget)
+                .map(State::getScreenState)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public void addRootState(IScreenState rootState) {
-
+        State root = elts.getState(rootState);
+        elts.addTransition(new QBETransition(VIRTUAL_ROOT_STATE, root, new StartAction(), ActionResult.SUCCESS));
     }
 
     @Override
     public Set<IScreenState> getActivityStates(String activity) {
-        return null;
+        return getStates().stream()
+                .filter(screenState -> screenState.getActivityName().equals(activity))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<IScreenState> getAppStates() {
-        return null;
+        return getStates().stream()
+                .filter(screenState -> screenState.getPackageName().equals(packageName))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<String> getActivityPredecessors(String activity) {
-        return null;
+        return elts.getActivityPredecessors(activity);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return elts.toString();
     }
 }

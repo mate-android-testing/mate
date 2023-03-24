@@ -1,5 +1,7 @@
 package org.mate.model.fsm.qbe;
 
+import static java.util.Objects.requireNonNull;
+
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
 import org.mate.model.fsm.State;
@@ -26,7 +28,7 @@ public final class QBETransition extends Transition {
      */
     public QBETransition(State source, State target, Action action, ActionResult actionResult) {
         super(source, target, action);
-        this.actionResult = actionResult;
+        this.actionResult = requireNonNull(actionResult);
     }
 
     /**
