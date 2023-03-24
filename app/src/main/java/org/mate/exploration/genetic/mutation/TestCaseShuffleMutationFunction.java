@@ -23,7 +23,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -471,7 +470,6 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
                     .toArray(Integer[]::new);
 
             MATE.log_debug("Number of available paths: " + availablePaths.length);
-            MATE.log_debug("Available paths: " + Arrays.toString(availablePaths));
 
             if (availablePaths.length == 0) {
                 // We have either exhausted all transition possibilities or there are no transitions
@@ -492,11 +490,6 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
                 final int pathIndex = availablePaths[i];
                 final Path path = originalPath[pathIndex];
                 result[numberOfUsedPaths] = path;
-                MATE.log_debug("Current path: " + Arrays.stream(result)
-                        .filter(Objects::nonNull)
-                        .map(Path::toShortString)
-                        .collect(Collectors.joining(" -> ")));
-
                 permutation[numberOfUsedPaths] = pathIndex;
 
                 // Memorize that we have used the given path already.
@@ -519,10 +512,6 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
             if (longestPathIndex >= 0) {
                 final Path chosen = originalPath[availablePaths[longestPathIndex]];
                 result[numberOfUsedPaths] = chosen;
-                MATE.log_debug("Current path: " + Arrays.stream(result)
-                        .filter(Objects::nonNull)
-                        .map(Path::toShortString)
-                        .collect(Collectors.joining(" -> ")));
                 return longestPathContinuation + 1;
             } else {
                 // identical path than original one
