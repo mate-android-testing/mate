@@ -98,7 +98,7 @@ public class TestCaseActionParametersMutationFunction implements IMutationFuncti
 
         try {
 
-            for (int i = 0; i < maxNumEvents; i++) {
+            for (int i = 0; i < testCase.getActionSequence().size(); i++) {
 
                 final Action oldAction = testCase.getActionSequence().get(i);
                 final Action newAction = mutate(oldAction);
