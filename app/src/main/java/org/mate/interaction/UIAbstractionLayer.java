@@ -180,7 +180,7 @@ public class UIAbstractionLayer {
                     closestEditText.ifPresent(promisingActions::add);
                     promisingActions.add(action);
                 } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
-                    // TODO: Document. What type of widget is this?
+                    // Only apply promising actions on leaf widgets.
                     promisingActions.add(action);
                 }
             }

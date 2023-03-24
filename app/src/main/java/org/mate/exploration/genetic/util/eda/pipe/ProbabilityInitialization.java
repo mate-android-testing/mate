@@ -96,7 +96,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
         // the weight depends on the action type
         double eventTypeWeight = actionLeavesAUT(state, action) ? 0.1 : getActionTypeWeight(action);
 
-        // TODO: Here is some computation missing.
+        // TODO: Here is some computation missing, lookup the Stoat paper for more details.
         int unvisitedChildren = 0;
 
         // count how often the given action has been executed so far (+1 to avoid division by zero)
@@ -150,6 +150,8 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
                 case SEARCH:
                     return 0.5;
                 case MENU:
+                case SPINNER_SCROLLING:
+                case MENU_CLICK_AND_ITEM_SELECTION:
                 case FILL_FORM_AND_SUBMIT:
                 case SWIPE_DOWN:
                     return 2;
