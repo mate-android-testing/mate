@@ -488,7 +488,7 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Checks whether the current screen shows a media picker. If this is the case, we press 'BACK'.
+     * Checks whether the current screen shows a media picker. If this is the case, we click 'OK'.
      *
      * @param screenState The current screen state.
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
@@ -501,6 +501,8 @@ public class UIAbstractionLayer {
             for (WidgetAction action : screenState.getWidgetActions()) {
 
                 Widget widget = action.getWidget();
+
+                // TODO: Select first another entry of the media picker and then click 'OK'.
 
                 if (action.getActionType() == ActionType.CLICK
                         && (widget.getResourceID().equals("android:id/button1")
