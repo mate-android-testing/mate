@@ -8,13 +8,11 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.model.fsm.State;
 import org.mate.state.IScreenState;
-import org.mate.utils.ListUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 public final class QBEState extends State {
@@ -63,7 +61,7 @@ public final class QBEState extends State {
      *
      * @return Returns the number of GUI components.
      */
-    int getNumberOfComponents() {
+    public int getNumberOfComponents() {
         return numberOfComponents;
     }
 
@@ -72,12 +70,12 @@ public final class QBEState extends State {
      *
      * @return Returns the feature map.
      */
-    Map<String, Integer> getFeatureMap() {
+    public Map<String, Integer> getFeatureMap() {
         return Collections.unmodifiableMap(featureMap);
     }
 
-    Set<UIAction> getActions() {
-        return ListUtils.toSet(screenState.getUIActions());
+    public List<UIAction> getActions() {
+        return screenState.getUIActions();
     }
 
     public void addDummyComponent() {
