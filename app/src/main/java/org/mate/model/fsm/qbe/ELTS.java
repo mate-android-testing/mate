@@ -1,6 +1,7 @@
 package org.mate.model.fsm.qbe;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import org.mate.Properties;
 import org.mate.interaction.action.Action;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -149,16 +149,38 @@ public class ELTS extends FSM {
                         && !transition.getTarget().equals(t.getTarget()));
     }
 
-    private QBEState getByScreenStateId(final String screenStateId) {
-        for (final State s : states) {
-            QBEState state = (QBEState) s;
-            if (screenStateId.equals(state.getScreenState().getId())) {
-                return state;
-            }
-        }
-
-        throw new NoSuchElementException();
+    /**
+     * Determines whether the ELTS is deterministic.
+     */
+    private boolean checkIsDeterministic() {
+        return transitions.stream().map(t -> (QBETransition) t).allMatch(this::isDeterministic);
     }
+
+    /**
+     * Removes the unreachable states.
+     */
+    private void removeUnreachableStates() {
+        final Set<Transition> reachableTransitions = new HashSet<>(transitions.size());
+        final Set<State> reachableStates = new HashSet<>(states.size());
+        reachableStates.add(VIRTUAL_ROOT_STATE);
+
+        boolean change;
+        do {
+            final Set<Transition> newTransitions = transitions.stream()
+                    .filter(transitions -> reachableStates.contains(transitions.getSource()))
+                    .collect(toSet());
+            final Set<State> newStates = newTransitions.stream()
+                    .map(Transition::getTarget)
+                    .collect(toSet());
+            change = reachableTransitions.addAll(newTransitions) || reachableStates.addAll(newStates);
+        } while (change);
+
+        states.retainAll(reachableStates);
+        transitions.retainAll(reachableTransitions);
+        // TODO: Figure out what to do with the actions.
+        // actions.retainAll(reachableStates.stream().flatMap(s -> s.getActions().stream()).collect(toSet()));
+    }
+
 
     /**
      * QBE assumes that the AUT behaves fully deterministically.
@@ -227,6 +249,9 @@ public class ELTS extends FSM {
             }
         }
 
+        removeUnreachableStates();
+        deterministic = checkIsDeterministic();
+        assert deterministic : "The ELTS should be deterministic after applying passiveLearn, but it's not.";
         return testsuite;
     }
 }

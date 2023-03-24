@@ -13,6 +13,7 @@ import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
 import org.mate.state.IScreenState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +35,9 @@ public final class QBEModel implements IGUIModel {
      * The package name of the AUT.
      */
     private final String packageName;
+
+    private final List<List<QBETransition>> testsuite = new ArrayList<>();
+    private List<QBETransition> testcase = new ArrayList<>();
 
     /**
      * Creates a new ELTS model with a given initial state.
@@ -63,6 +67,10 @@ public final class QBEModel implements IGUIModel {
                 ? CRASH_STATE : (QBEState) elts.getState(target);
         QBETransition transition = new QBETransition(sourceState, targetState, action, actionResult);
         elts.addTransition(transition);
+        if (!elts.isDeterministic()) {
+            // TODO: How do we stop passiveLearn from being interrupted with a timeout exception?
+            elts.passiveLearn(testsuite, testcase);
+        }
     }
 
     @Override
@@ -137,6 +145,10 @@ public final class QBEModel implements IGUIModel {
     public void addRootState(IScreenState rootState) {
         State root = elts.getState(rootState);
         elts.addTransition(new QBETransition(VIRTUAL_ROOT_STATE, root, new StartAction(), ActionResult.SUCCESS));
+        if (!testcase.isEmpty()) {
+            testsuite.add(testcase);
+            testcase = new ArrayList<>();
+        }
     }
 
     @Override
