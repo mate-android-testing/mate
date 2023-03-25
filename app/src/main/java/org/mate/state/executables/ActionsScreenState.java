@@ -561,7 +561,7 @@ public class ActionsScreenState extends AbstractScreenState {
         uiActions.add(new UIAction(ActionType.MENU, activityName));
         uiActions.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
         // uiActions.add(new UIAction(ActionType.HOME, activityName));
-        uiActions.add(new UIAction(ActionType.SEARCH, activityName));
+        // uiActions.add(new UIAction(ActionType.SEARCH, activityName));
         // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
         // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
         // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
