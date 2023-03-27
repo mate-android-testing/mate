@@ -304,9 +304,25 @@ public class Widget {
                 .map(String::trim)
                 .map(String::toLowerCase) // TODO: Remove this side effect.
                 .filter(token -> !token.isEmpty())
-                .distinct()
-                // TODO: Remove debug log after testing.
-                .peek(tokens -> MATE.log("Tokens of widget: " + tokens));
+                .distinct();
+    }
+
+    /**
+     * Checks whether the widget represents a leaf widget in the ui hierarchy, i.e. it has no children.
+     *
+     * @return Returns {@code true} if the widget is a leaf widget, otherwise {@code false}.
+     */
+    public boolean isLeafWidget() {
+        return !hasChildren;
+    }
+
+    /**
+     * Checks whether the widget has a non-empty text attribute.
+     *
+     * @return Returns {@code true} if the text attribute is non empty, otherwise {@code false}.
+     */
+    public boolean hasText() {
+        return !text.isEmpty();
     }
 
     /**
@@ -847,6 +863,23 @@ public class Widget {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.Button.class.isAssignableFrom(clazz)
                     || android.widget.CompoundButton.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents an image view.
+     *
+     * @return Returns {@code true} if this widget is an image view, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isImageView() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.ImageView.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
             MATE.log_warn("Class " + getClazz() + " not found!");

@@ -416,10 +416,39 @@ public class ActionsScreenState extends AbstractScreenState {
         final List<MotifAction> motifActions = new ArrayList<>();
         motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
         motifActions.addAll(extractSpinnerScrollActions(widgetActions));
+        motifActions.addAll(extractMenuAndSelectItemActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible menu and item select motif actions. A menu and select item motif action
+     * combines the clicking on the menu and selecting a not yet selected menu item.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible spinner motif actions if any.
+     */
+    private List<MotifAction> extractMenuAndSelectItemActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> menuClickAndItemSelectActions = new ArrayList<>();
+
+        // Locate the menu item, alternatively one could invoke the MENU ui action.
+        final List<WidgetAction> menuClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isImageView()
+                        && widgetAction.getActionType() == ActionType.CLICK
+                        && widgetAction.getWidget().getContentDesc().equals("More options"))
+                .collect(Collectors.toList());
+
+        menuClickActions.stream().forEach(menuClickAction -> {
+            MotifAction menuClickAndItemSelectAction
+                    = new MotifAction(ActionType.MENU_CLICK_AND_ITEM_SELECTION, activityName,
+                    Collections.singletonList(menuClickAction));
+            menuClickAndItemSelectActions.add(menuClickAndItemSelectAction);
+        });
+
+        return menuClickAndItemSelectActions;
     }
 
     /**

@@ -8,8 +8,12 @@ import org.mate.utils.Randomness;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents a motif gene, i.e. a combination of multiple widget or primitive actions, e.g.
@@ -17,6 +21,12 @@ import java.util.Objects;
  * {@link org.mate.exploration.genetic.algorithm.Sapienz} implementation for more details.
  */
 public class MotifAction extends UIAction {
+
+    /**
+     * Records which menu items have been selected so far per menu. The widget (key) refers
+     * to the menu, not the list view containing the menu items.
+     */
+    private static final Map<Widget, Set<String>> selectedMenuItems = new HashMap<>();
 
     /**
      * The list of ui actions that represent the motif gene. Depending on whether we use widget-based
@@ -46,6 +56,28 @@ public class MotifAction extends UIAction {
     public MotifAction(ActionType actionType, String activityName, List<UIAction> uiActions) {
         super(actionType, activityName);
         this.uiActions = uiActions;
+    }
+
+    /**
+     * Returns for the given menu which menu items have been selected so far.
+     *
+     * @param widget The widget identifying the menu.
+     * @return Returns the selected (already used) menu items for the given menu.
+     */
+    public Set<String> getSelectedMenuItems(final Widget widget) {
+        return selectedMenuItems.getOrDefault(widget, new HashSet<>());
+    }
+
+    /**
+     * Adds for the given menu a new menu item that has been selected.
+     *
+     * @param widget The widget identifying the menu.
+     * @param menuItem The new menu item that has been selected.
+     */
+    public void addSelectedMenuItem(final Widget widget, final String menuItem) {
+        Set<String> menuItems = getSelectedMenuItems(widget);
+        menuItems.add(menuItem);
+        selectedMenuItems.put(widget, menuItems);
     }
 
     /**

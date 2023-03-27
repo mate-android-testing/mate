@@ -35,6 +35,8 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
+import org.mate.state.ScreenStateType;
 import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
@@ -206,7 +208,7 @@ public class DeviceMgr {
                 executeAction((UIAction) action);
             } else {
                 throw new UnsupportedOperationException("Actions class "
-                        + action.getClass().getSimpleName() + " not yet supported");
+                        + action.getClass().getSimpleName() + " not yet supported!");
             }
         } catch (IllegalStateException e) {
             MATE.log_debug("Couldn't execute action: " + action);
@@ -277,9 +279,78 @@ public class DeviceMgr {
             case SPINNER_SCROLLING:
                 handleSpinnerScrolling(action);
                 break;
+            case MENU_CLICK_AND_ITEM_SELECTION:
+                handleMenuClickAndItemSelection(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'menu click and item selection' motif action, i.e. first the menu is opened by
+     * clicking on the menu symbol and then a not yet selected menu item is selected by also clicking
+     * on it.
+     *
+     * @param action The given motif action.
+     */
+    private void handleMenuClickAndItemSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // click on the menu to open the list of menu items
+            final WidgetAction menuClickAction = (WidgetAction) action.getUIActions().get(0);
+            handleClick(menuClickAction.getWidget());
+
+            /*
+            * TODO: We encountered a strange situation where the fetched screen state contained
+            *  essentially the displayed widgets but with malformed coordinates, which led to
+            *  clicking above the chosen menu item. We believe this is related to a sync issue of
+            *  UIAutomator. A small waiting time seems to remedy the issue, but it is not clear
+            *  whether such hand-crafted waiting time works across apps. We could resort to
+            *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
+             */
+            Utils.sleep(200);
+
+            // fetch the new screen state containing the list view.
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            // extract the shown menu items
+            final List<Widget> menuItems = screenState.getWidgets().stream()
+                    .filter(Widget::isLeafWidget)
+                    .filter(widget -> widget.isSonOf(Widget::isListViewType))
+                    .filter(Widget::isTextViewType)
+                    .filter(Widget::isEnabled)
+                    .filter(Widget::hasText)
+                    .collect(Collectors.toList());
+
+            if (menuItems.isEmpty()) {
+                throw new IllegalStateException("Couldn't discover any menu item!");
+            }
+
+            final Set<String> selectedMenuItems
+                    = action.getSelectedMenuItems(menuClickAction.getWidget());
+
+            // pick the first not yet selected menu item
+            final Widget notSelectedMenuItem = menuItems.stream()
+                    .filter(widget -> !selectedMenuItems.contains(widget.getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            // TODO: Record the not yet selected menu item for deterministic replaying.
+
+            if (notSelectedMenuItem == null) {
+                // All menu items have been selected at least once, pick random.
+                final Widget menuItem = Randomness.randomElement(menuItems);
+                handleClick(menuItem);
+            } else {
+                handleClick(notSelectedMenuItem);
+                action.addSelectedMenuItem(menuClickAction.getWidget(), notSelectedMenuItem.getText());
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
