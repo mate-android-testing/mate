@@ -5,10 +5,12 @@ import android.support.annotation.NonNull;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
+import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.Either;
+import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -56,6 +58,7 @@ public class ManualExploration implements Algorithm {
         Registry.getUiAbstractionLayer().resetApp();
 
         final TestCase testCase = TestCase.newInitializedTestCase();
+        final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
         IScreenState screenState = Registry.getUiAbstractionLayer().getLastScreenState();
         explorationSteps.add(createStep(screenState, null));
 
@@ -83,6 +86,8 @@ public class ManualExploration implements Algorithm {
                 }
             }
         } finally {
+            CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
+            CoverageUtils.logChromosomeCoverage(chromosome);
             testCase.finish();
         }
 
