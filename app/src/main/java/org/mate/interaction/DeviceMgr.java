@@ -65,10 +65,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -282,9 +284,118 @@ public class DeviceMgr {
             case MENU_CLICK_AND_ITEM_SELECTION:
                 handleMenuClickAndItemSelection(action);
                 break;
+            case SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION:
+                handleSortMenuClickAndSortOrderSelection(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'open sort menu and sort order selection' motif action, i.e. first the sort menu
+     * is opened by clicking on the sort symbol and then a possible different sort order is selected
+     * by clicking on it.
+     * @param action The given motif action.
+     */
+    private void handleSortMenuClickAndSortOrderSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // click on the sort menu to open the list of menu items
+            final WidgetAction menuClickAction = (WidgetAction) action.getUIActions().get(0);
+            handleClick(menuClickAction.getWidget());
+
+            /*
+             * TODO: We encountered a strange situation where the fetched screen state contained
+             *  essentially the displayed widgets but with malformed coordinates, which led to
+             *  clicking above the chosen menu item. We believe this is related to a sync issue of
+             *  UIAutomator. A small waiting time seems to remedy the issue, but it is not clear
+             *  whether such hand-crafted waiting time works across apps. We could resort to
+             *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
+             */
+            Utils.sleep(200);
+
+            // Fetch the new screen state containing the sort order possibilities.
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            /*
+            * There are basically two different layouts used for the sort order possibilities. Either
+            * we have radio groups where one can select a single entry, or we have a regular list
+            * view containing the clickable possibilities.
+             */
+            final List<Widget> radioGroups = screenState.getWidgets().stream()
+                    .filter(Widget::isRadioGroupType)
+                    .filter(Widget::isEnabled)
+                    .collect(Collectors.toList());
+
+            if (!radioGroups.isEmpty()) {
+
+                final Map<Widget, List<Widget>> radioButtonsPerGroup =
+                        radioGroups.stream().collect(Collectors.toMap(Function.identity(),
+                                (radioGroup) -> radioGroup.getChildren().stream()
+                                        .filter(Widget::isLeafWidget)
+                                        .filter(Widget::isRadioButtonType)
+                                        .filter(Widget::isEnabled)
+                                .collect(Collectors.toList())
+                        ));
+
+                // TODO: Memorize which combination of radio buttons have been selected and choose
+                //  a possible distinct sort order else pick random.
+
+                for (Map.Entry<Widget, List<Widget>> radioGroup : radioButtonsPerGroup.entrySet()) {
+
+                    final List<Widget> radioButtons = radioGroup.getValue();
+
+                    if (!radioButtons.isEmpty()) {
+                        // click on a random radio button
+                        final Widget radioButton = Randomness.randomElement(radioButtons);
+                        handleClick(radioButton);
+                    }
+                }
+
+                // click on 'OK' button
+                screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(Widget::isButtonType)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::isVisible)
+                        .filter(widget -> widget.getText().equalsIgnoreCase("OK")
+                                || widget.getText().equalsIgnoreCase("APPLY"))
+                        .findFirst().ifPresent(this::handleClick);
+            } else {
+
+                // extract the shown menu items
+                final List<Widget> menuItems = screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(widget -> widget.isSonOf(Widget::isListViewType))
+                        .filter(Widget::isTextViewType)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::hasText)
+                        .collect(Collectors.toList());
+
+                final Set<String> selectedMenuItems
+                        = action.getSelectedMenuItems(menuClickAction.getWidget());
+
+                // pick the first not yet selected menu item
+                final Widget notSelectedMenuItem = menuItems.stream()
+                        .filter(widget -> !selectedMenuItems.contains(widget.getText()))
+                        .findFirst()
+                        .orElse(null);
+
+                // TODO: Record the not yet selected menu item for deterministic replaying.
+
+                if (notSelectedMenuItem == null) {
+                    // All menu items have been selected at least once, pick random.
+                    final Widget menuItem = Randomness.randomElement(menuItems);
+                    handleClick(menuItem);
+                } else {
+                    handleClick(notSelectedMenuItem);
+                    action.addSelectedMenuItem(menuClickAction.getWidget(), notSelectedMenuItem.getText());
+                }
+            }
         }
     }
 
@@ -313,7 +424,7 @@ public class DeviceMgr {
              */
             Utils.sleep(200);
 
-            // fetch the new screen state containing the list view.
+            // fetch the new screen state containing the list view
             final IScreenState screenState
                     = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 

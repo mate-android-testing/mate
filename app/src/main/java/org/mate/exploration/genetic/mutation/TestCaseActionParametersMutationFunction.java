@@ -326,6 +326,8 @@ public class TestCaseActionParametersMutationFunction implements IMutationFuncti
      */
     private UIAction mutate(final MotifAction action) {
 
+        // TODO: Make a more fine-grained mutation depending on the concrete motif action.
+
         final List<MotifAction> candidateActions =
                 uiAbstractionLayer.getLastScreenState().getMotifActions().stream()
                         .filter(motifAction -> !motifAction.equals(action))

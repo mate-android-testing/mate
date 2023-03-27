@@ -417,6 +417,7 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
         motifActions.addAll(extractSpinnerScrollActions(widgetActions));
         motifActions.addAll(extractMenuAndSelectItemActions(widgetActions));
+        motifActions.addAll(extractSortAndSelectSortOrderActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
@@ -424,11 +425,39 @@ public class ActionsScreenState extends AbstractScreenState {
     }
 
     /**
+     * Extracts the possible open sort menu and sort order select motif actions. This motif action
+     * combines the clicking on the sort menu and selecting a possibly different sort order.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible open sort menu and select sort order motif actions if any.
+     */
+    private List<MotifAction> extractSortAndSelectSortOrderActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> sortClickAndSelectSortOrderActions = new ArrayList<>();
+
+        // Locate the sort order menu.
+        final List<WidgetAction> sortClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isTextViewType()
+                        && widgetAction.getActionType() == ActionType.CLICK
+                        && widgetAction.getWidget().getContentDesc().equals("Sort"))
+                .collect(Collectors.toList());
+
+        sortClickActions.stream().forEach(menuClickAction -> {
+            MotifAction menuClickAndItemSelectAction
+                    = new MotifAction(ActionType.SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION, activityName,
+                    Collections.singletonList(menuClickAction));
+            sortClickAndSelectSortOrderActions.add(menuClickAndItemSelectAction);
+        });
+
+        return sortClickAndSelectSortOrderActions;
+    }
+
+    /**
      * Extracts the possible menu and item select motif actions. A menu and select item motif action
      * combines the clicking on the menu and selecting a not yet selected menu item.
      *
      * @param widgetActions The list of extracted widget actions.
-     * @return Returns the possible spinner motif actions if any.
+     * @return Returns the possible extract menu and select item motif actions if any.
      */
     private List<MotifAction> extractMenuAndSelectItemActions(final List<WidgetAction> widgetActions) {
 

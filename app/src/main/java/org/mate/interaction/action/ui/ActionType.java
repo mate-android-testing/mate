@@ -29,7 +29,8 @@ public enum ActionType {
     ENTER,
     FILL_FORM_AND_SUBMIT,
     SPINNER_SCROLLING,
-    MENU_CLICK_AND_ITEM_SELECTION;
+    MENU_CLICK_AND_ITEM_SELECTION,
+    SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION;
 
     public static final ActionType[] primitiveActionTypes = {
             CLICK,
@@ -48,5 +49,6 @@ public enum ActionType {
             FILL_FORM_AND_SUBMIT,
             SPINNER_SCROLLING,
             MENU_CLICK_AND_ITEM_SELECTION,
+            SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION
     };
 }

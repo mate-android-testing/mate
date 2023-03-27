@@ -888,6 +888,40 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a radio group.
+     *
+     * @return Returns {@code true} if this widget is a radio group, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isRadioGroupType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RadioGroup.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a radio button.
+     *
+     * @return Returns {@code true} if this widget is a radio button, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isRadioButtonType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RadioButton.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents an image button.
      *
      * @return Returns {@code true} if this widget is an image button, otherwise {@code false}
