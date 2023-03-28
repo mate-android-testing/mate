@@ -429,6 +429,22 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                /*
+                * We need to close a possible opened keyboard in order to have reliable widget
+                * coordinates on which we can operate, i.e. define widget actions. In particular,
+                * the problem is as follows: If we don't close the soft keyboard upfront (which might
+                * be automatically opened on a new screen), certain widget coordinates are not valid
+                * anymore after we finally close the keyboard, e.g. due to a type text action. For
+                * instance, the final click - part of a 'fill form and submit' motif action - might
+                * be not executable because the button's coordinates are now distinct (the keyboard
+                * has been closed and the button was literally shifted).
+                 */
+                if (deviceMgr.isKeyboardOpened()) {
+                    deviceMgr.pressBack();
+                    change = true;
+                    continue;
+                }
+
             } catch (IllegalStateException e) {
                 // TODO: Check in subroutines for uiautomator issue and don't catch exceptions here.
                 if (Objects.equals(e.getMessage(), UiAutomatorDisconnectedMessage)) {

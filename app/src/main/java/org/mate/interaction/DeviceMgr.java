@@ -1064,7 +1064,7 @@ public class DeviceMgr {
      * @return Returns {@code true} if the soft keyboard is opened, otherwise {@code false} is
      *         returned.
      */
-    private boolean isKeyboardOpened() {
+    public boolean isKeyboardOpened() {
 
         // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
         UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
