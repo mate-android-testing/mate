@@ -382,6 +382,15 @@ public class Widget {
     }
 
     /**
+     * Whether the widget has a resource id defined.
+     *
+     * @return Returns {@code true} if the widget has a resource id, otherwise {@code false}.
+     */
+    public boolean hasResourceID() {
+        return !resourceID.isEmpty();
+    }
+
+    /**
      * Returns the resource id.
      *
      * @return Returns the resource id or the empty string if none is defined.
@@ -1099,6 +1108,17 @@ public class Widget {
             MATE.log_warn("Class " + getClazz() + " not found!");
             return false;
         }
+    }
+
+    /**
+     * Checks whether this widget represents a recycler view.
+     *
+     * @return Returns {@code true} if this widget is a recycler view, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isRecyclerViewType() {
+        return getClazz().equals("android.support.v7.widget.RecyclerView")
+                || getClazz().equals("androidx.recyclerview.widget.RecyclerView");
     }
 
     /**

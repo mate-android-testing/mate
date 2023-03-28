@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -418,10 +419,45 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractSpinnerScrollActions(widgetActions));
         motifActions.addAll(extractMenuAndSelectItemActions(widgetActions));
         motifActions.addAll(extractSortAndSelectSortOrderActions(widgetActions));
+        motifActions.addAll(extractOpenNavigationAndSelectOptionActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible open navigation menu and option selection motif actions. This motif action
+     * combines the clicking on the navigation menu and selecting a possibly different option.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible open navigation menu and select option motif actions if any.
+     */
+    private List<MotifAction> extractOpenNavigationAndSelectOptionActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> openNavigationAndSelectOptionActions = new ArrayList<>();
+
+        Predicate<String> contentMatcher = content -> content.toLowerCase().contains("navigation")
+                || content.toLowerCase().contains("nav")
+                || content.toLowerCase().contains("open");
+
+        // Locate the navigation menu.
+        final List<WidgetAction> navigationMenuClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isImageButtonType()
+                        && widgetAction.getActionType() == ActionType.CLICK
+                        && contentMatcher.test(widgetAction.getWidget().getContentDesc()))
+                // TODO: May add fixed coordinates of navigation menu as further restriction.
+                .collect(Collectors.toList());
+
+        navigationMenuClickActions.stream().forEach(navigationMenuClickAction -> {
+            MotifAction openNavigationAndOptionSelectAction
+                    = new MotifAction(ActionType.OPEN_NAVIGATION_AND_OPTION_SELECTION, activityName,
+                    Collections.singletonList(navigationMenuClickAction));
+            openNavigationAndSelectOptionActions.add(openNavigationAndOptionSelectAction);
+        });
+
+        return openNavigationAndSelectOptionActions;
     }
 
     /**

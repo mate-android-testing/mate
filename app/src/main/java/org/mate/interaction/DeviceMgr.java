@@ -287,6 +287,9 @@ public class DeviceMgr {
             case SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION:
                 handleSortMenuClickAndSortOrderSelection(action);
                 break;
+            case OPEN_NAVIGATION_AND_OPTION_SELECTION:
+                handleOpenNavigationAndOptionSelection(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
@@ -297,6 +300,75 @@ public class DeviceMgr {
      * Executes the 'open sort menu and sort order selection' motif action, i.e. first the sort menu
      * is opened by clicking on the sort symbol and then a possible different sort order is selected
      * by clicking on it.
+     *
+     * @param action The given motif action.
+     */
+    private void handleOpenNavigationAndOptionSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // click on the navigation menu to open the list of options
+            final WidgetAction navigationMenuClickAction = (WidgetAction) action.getUIActions().get(0);
+            handleClick(navigationMenuClickAction.getWidget());
+
+            /*
+             * TODO: We encountered a strange situation where the fetched screen state contained
+             *  essentially the displayed widgets but with malformed coordinates, which led to
+             *  clicking above the chosen menu item. We believe this is related to a sync issue of
+             *  UIAutomator. A small waiting time seems to remedy the issue, but it is not clear
+             *  whether such hand-crafted waiting time works across apps. We could resort to
+             *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
+             */
+            Utils.sleep(200);
+
+            // Fetch the new screen state containing the list view with the options.
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            // extract the shown menu items
+            final List<Widget> menuItems = screenState.getWidgets().stream()
+                    .filter(Widget::isLeafWidget)
+                    .filter(widget -> widget.isSonOf(w -> w.isListViewType() || w.isRecyclerViewType()))
+                    .filter(Widget::isTextViewType)
+                    .filter(Widget::isEnabled)
+                    .filter(Widget::hasText)
+                    .filter(Widget::hasResourceID)
+                    .collect(Collectors.toList());
+
+            if (menuItems.isEmpty()) {
+                throw new IllegalStateException("Couldn't discover any options!");
+            }
+
+            final Set<String> selectedMenuItems
+                    = action.getSelectedMenuItems(navigationMenuClickAction.getWidget());
+
+            // pick the first not yet selected menu item
+            final Widget notSelectedMenuItem = menuItems.stream()
+                    .filter(widget -> !selectedMenuItems.contains(widget.getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            // TODO: Record the not yet selected menu item for deterministic replaying.
+
+            if (notSelectedMenuItem == null) {
+                // All menu items have been selected at least once, pick random.
+                final Widget menuItem = Randomness.randomElement(menuItems);
+                handleClick(menuItem);
+            } else {
+                handleClick(notSelectedMenuItem);
+                action.addSelectedMenuItem(navigationMenuClickAction.getWidget(),
+                        notSelectedMenuItem.getText());
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'open sort menu and sort order selection' motif action, i.e. first the sort menu
+     * is opened by clicking on the sort symbol and then a possible different sort order is selected
+     * by clicking on it.
+     *
      * @param action The given motif action.
      */
     private void handleSortMenuClickAndSortOrderSelection(final MotifAction action) {
@@ -396,6 +468,8 @@ public class DeviceMgr {
                     action.addSelectedMenuItem(menuClickAction.getWidget(), notSelectedMenuItem.getText());
                 }
             }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
@@ -431,7 +505,7 @@ public class DeviceMgr {
             // extract the shown menu items
             final List<Widget> menuItems = screenState.getWidgets().stream()
                     .filter(Widget::isLeafWidget)
-                    .filter(widget -> widget.isSonOf(Widget::isListViewType))
+                    .filter(widget -> widget.isSonOf(w -> w.isListViewType() || w.isRecyclerViewType()))
                     .filter(Widget::isTextViewType)
                     .filter(Widget::isEnabled)
                     .filter(Widget::hasText)
