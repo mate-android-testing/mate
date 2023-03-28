@@ -181,8 +181,9 @@ public class ActionsScreenState extends AbstractScreenState {
 
         for (Widget widget : this.widgets) {
             /*
-             * We ignore here primarily all widgets that are not visible, not enabled and don't
-             * represent leaf widgets in the ui hierarchy. There are four exceptions to this rule:
+             * We ignore here primarily all widgets that are not visible and don't represent leaf
+             * widgets in the ui hierarchy. There are four exceptions to this rule:
+             *
              * 1) A spinner widget is not a leaf widget but represents a candidate for a widget
              * action. The other possibility would be to apply the action to the text view
              * that is the child element of the spinner.
@@ -192,11 +193,15 @@ public class ActionsScreenState extends AbstractScreenState {
              * a static analysis of event handlers can't properly match the widget otherwise.
              * 3) Likewise, it may can happen that checkable widgets are no leaf widgets.
              * 4) Same like spinner widgets, scroll views are no leaf widgets.
+             *
+             * Note that we can't rely upon certain widget attributes, e.g. clickable or enabled,
+             * to pre-exclude further widgets, because those attributes are static and may change
+             * until we define actions on them, e.g. a button might be initially not clickable until
+             * certain forms are filled out.
              */
-            if ((!widget.hasChildren() || widget.isSpinnerType() || widget.isClickable()
-                    || widget.isLongClickable() || widget.isCheckable()
+            if ((widget.isLeafWidget() || widget.isSpinnerType()
                     || widget.isScrollView() || widget.isScrollable())
-                    && widget.isVisible() && widget.isEnabled()) {
+                    && widget.isVisible()) {
                 widgets.add(widget);
             }
         }
