@@ -286,6 +286,16 @@ public class AppScreen {
     }
 
     /**
+     * Returns the bounding box of the menu bar. This depends on display width
+     * and has a fixed height of 240 - 72 pixels, e.g. [0,72][1080][240].
+     *
+     * @return Returns the bounding box of the status bar.
+     */
+    public Rect getMenuBarBoundingBox() {
+        return new Rect(0, 72, getWidth(), 240);
+    }
+
+    /**
      * Returns the bounding box of the app screen. This depends on display width
      * and the display height, e.g. [0,0][1080][1920].
      *

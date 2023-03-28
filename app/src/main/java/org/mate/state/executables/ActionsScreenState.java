@@ -571,8 +571,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 .collect(Collectors.toList());
 
         List<WidgetAction> clickableButtonActions = widgetActions.stream()
-                .filter(widgetAction -> widgetAction.getWidget().isButtonType()
-                        && widgetAction.getWidget().isClickable())
+                .filter(widgetAction -> widgetAction.getWidget().isButtonType())
+                .filter(widgetAction -> !appScreen.getMenuBarBoundingBox()
+                        .contains(widgetAction.getWidget().getBounds()))
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CLICK)
                 .collect(Collectors.toList());
 
         if (!textInsertActions.isEmpty() && !clickableButtonActions.isEmpty()) {
