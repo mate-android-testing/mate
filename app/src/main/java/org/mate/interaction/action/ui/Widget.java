@@ -871,7 +871,8 @@ public class Widget {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.Button.class.isAssignableFrom(clazz)
-                    || android.widget.CompoundButton.class.isAssignableFrom(clazz);
+                    || android.widget.CompoundButton.class.isAssignableFrom(clazz)
+                    || android.widget.ImageButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
             MATE.log_warn("Class " + getClazz() + " not found!");
