@@ -570,18 +570,33 @@ public class ActionsScreenState extends AbstractScreenState {
                 .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
                 .collect(Collectors.toList());
 
-        List<WidgetAction> clickableButtonActions = widgetActions.stream()
-                .filter(widgetAction -> widgetAction.getWidget().isButtonType())
-                .filter(widgetAction -> !appScreen.getMenuBarBoundingBox()
-                        .contains(widgetAction.getWidget().getBounds()))
+        final Predicate<WidgetAction> clickableButtons = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widget.isButtonType()
+                    // Certain buttons, e.g. CheckBoxes or RadioButtons, are checkable, but not
+                    // desired here, i.e. we want to press only a submit/save button (regular buttons).
+                    && !widget.isCheckableType()
+                    && !appScreen.getMenuBarBoundingBox().contains(widget.getBounds());
+        };
+
+        // The 'save' button might be represented as a text view in the menu bar.
+        final Predicate<WidgetAction> clickableTextView = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widget.isTextViewType()
+                    && appScreen.getMenuBarBoundingBox().contains(widget.getBounds())
+                    && widget.getContentDesc().equalsIgnoreCase("Save changes");
+        };
+
+        List<WidgetAction> clickableActions = widgetActions.stream()
+                .filter(clickableButtons.or(clickableTextView))
                 .filter(widgetAction -> widgetAction.getActionType() == ActionType.CLICK)
                 .collect(Collectors.toList());
 
-        if (!textInsertActions.isEmpty() && !clickableButtonActions.isEmpty()) {
+        if (!textInsertActions.isEmpty() && !clickableActions.isEmpty()) {
 
-            clickableButtonActions.stream().forEach(clickableButtonAction -> {
+            clickableActions.stream().forEach(clickableAction -> {
                 List<UIAction> actions = new ArrayList<>(textInsertActions);
-                actions.add(clickableButtonAction);
+                actions.add(clickableAction);
                 MotifAction fillFormAndSubmitAction
                         = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);
                 fillFormAndSubmitActions.add(fillFormAndSubmitAction);
