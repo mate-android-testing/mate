@@ -300,7 +300,12 @@ public class ActionsScreenState extends AbstractScreenState {
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
-            if (widget.isEditTextType()) {
+            /*
+            * There are edit text widgets that cannot be modified directly but via a button, e.g.
+            * when setting a date in such a field. In those cases, the edit text widget is likely
+            * not enabled.
+             */
+            if (widget.isEditTextType() && widget.isEnabled()) {
                 MATE.log_debug("Widget is an edit text instance!");
                 widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
                 widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
@@ -425,10 +430,37 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractMenuAndSelectItemActions(widgetActions));
         motifActions.addAll(extractSortAndSelectSortOrderActions(widgetActions));
         motifActions.addAll(extractOpenNavigationAndSelectOptionActions(widgetActions));
+        motifActions.addAll(extractTypeTextAndPressEnterActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible type text and press enter motif actions. This motif action
+     * combines the text insertion and pressing enter.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible type text and press enter motif actions if any.
+     */
+    private List<MotifAction> extractTypeTextAndPressEnterActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> typeTextAndPressEnterActions = new ArrayList<>();
+
+        final List<WidgetAction> typeTextActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.TYPE_TEXT)
+                .collect(Collectors.toList());
+
+        typeTextActions.stream().forEach(typeTextAction -> {
+            MotifAction typeTextAndPressEnterAction
+                    = new MotifAction(ActionType.TYPE_TEXT_AND_PRESS_ENTER, activityName,
+                    Collections.singletonList(typeTextAction));
+            typeTextAndPressEnterActions.add(typeTextAndPressEnterAction);
+        });
+
+        return typeTextAndPressEnterActions;
     }
 
     /**

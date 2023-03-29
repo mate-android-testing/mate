@@ -290,9 +290,31 @@ public class DeviceMgr {
             case OPEN_NAVIGATION_AND_OPTION_SELECTION:
                 handleOpenNavigationAndOptionSelection(action);
                 break;
+            case TYPE_TEXT_AND_PRESS_ENTER:
+                handleTypeTextAndPressEnter(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'type text and press enter' motif action, i.e. an edit text widget is filled
+     * with some content and then enter is pressed.
+     *
+     * @param action The given motif action.
+     */
+    private void handleTypeTextAndPressEnter(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // type some arbitrary text and press enter afterwards
+            final WidgetAction typeTextAction = (WidgetAction) action.getUIActions().get(0);
+            handleEdit(typeTextAction.getWidget());
+            device.pressEnter();
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
