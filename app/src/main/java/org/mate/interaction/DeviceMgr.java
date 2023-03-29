@@ -1295,6 +1295,7 @@ public class DeviceMgr {
         if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
+
                 try {
                     X = obj.getVisibleBounds().centerX();
                     Y = obj.getVisibleBounds().centerY();
@@ -1306,43 +1307,55 @@ public class DeviceMgr {
                 }
 
                 /*
-                * The default pixel move size is rather low, thus the change upon a swipe up or down
-                * is tiny. The preferred option is to make the pixel move size dependent on the
-                * size of the scrollable UI element.
+                * The default pixel move size is rather low, thus the change upon a swipe is tiny.
+                * The preferred option is to make the pixel move size dependent on the size of the
+                * scrollable UI element.
                  */
-                if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
-                    try {
+                try {
+                    if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
                         pixelsMove = (obj.getVisibleBounds().bottom - obj.getVisibleBounds().top) / 2;
-                    } catch (StaleObjectException e) {
-                        MATE.log_warn("Stale UiObject2!");
-                        e.printStackTrace();
+                    } else {
+                        pixelsMove = (obj.getVisibleBounds().right - obj.getVisibleBounds().left) / 2;
                     }
+                } catch (StaleObjectException e) {
+                    MATE.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
                 }
-            } else {
+
+            } else { // rely on the widget coordinates
+
                 X = widget.getX();
                 Y = widget.getY();
+
+                // take half of the widget size in the given direction
+                if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
+                    pixelsMove = Y; // is essentially (Y2-Y1)/2
+                } else {
+                    pixelsMove = X; // is essentially (X2-X1)/2
+                }
             }
         } else {
+
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
+
             if (direction == SWIPE_DOWN || direction == SWIPE_UP)
                 pixelsMove = Y;
             else
                 pixelsMove = X;
         }
 
-        // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
-            case SWIPE_DOWN:
+            case SWIPE_UP:
                 device.swipe(X, Y, X, Y - pixelsMove, steps);
                 break;
-            case SWIPE_UP:
+            case SWIPE_DOWN:
                 device.swipe(X, Y, X, Y + pixelsMove, steps);
                 break;
-            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
                 device.swipe(X, Y, X + pixelsMove, Y, steps);
                 break;
-            case SWIPE_RIGHT:
+            case SWIPE_LEFT:
                 device.swipe(X, Y, X - pixelsMove, Y, steps);
                 break;
         }

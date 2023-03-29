@@ -93,7 +93,7 @@ public class Widget {
      * ------------
      * y1         y2 (Y = y1 + y2 / 2)
      * top        bottom
-     * (yMax,0)   (xMax,yMax)
+     * (0,yMax)   (xMax,yMax)
      */
     private final Rect bounds;
     private final int X;
