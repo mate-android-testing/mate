@@ -429,6 +429,12 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for share message dialog
+                if (handleShareMessageDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
                 /*
                 * We need to close a possible opened keyboard in order to have reliable widget
                 * coordinates on which we can operate, i.e. define widget actions. In particular,
@@ -457,6 +463,44 @@ public class UIAbstractionLayer {
             }
         }
         return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows a share message dialog. If this is the case, we click
+     * 'CANCEL' to return to the previous screen.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleShareMessageDialog(final IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.android.messaging")) {
+            MATE.log("Detected share message dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                Widget widget = action.getWidget();
+
+                // TODO: Click on 'NEW MESSAGE' and proceed on next dialog.
+
+                if (action.getActionType() == ActionType.CLICK
+                        && (widget.getResourceID().equals("android:id/button2")
+                        || widget.getText().equalsIgnoreCase("CANCEL"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on CANCEL button on share message dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
