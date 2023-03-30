@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import org.mate.Properties;
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.Action;
 import org.mate.model.fsm.FSM;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
@@ -33,18 +33,18 @@ public class ELTS extends FSM {
      * Represents the virtual root state. In a deterministic ELTS, this state should only ever have
      * a single neighbour, which is the actual initial state of the AUT.
      */
-    public static final QBEState VIRTUAL_ROOT_STATE = QBEState.newDummyState(-1, ScreenStateFactory.newDummyState());
+    public static final QBEState VIRTUAL_ROOT_STATE = QBEState.createVirtualRootState(-1, ScreenStateFactory.newDummyState());
 
     /**
      * QBE requires state which represents a crash, such that this state is part of the serialized
      * transition system.
      */
-    public static final QBEState CRASH_STATE = QBEState.newDummyState(-2, ScreenStateFactory.newDummyState());
+    public static final QBEState CRASH_STATE = QBEState.createCrashState(-2, ScreenStateFactory.newDummyState());
 
     /**
      * The set of all actions (input alphabet) Z.
      */
-    private final Set<UIAction> actions;
+    private final Set<Action> actions;
 
     /**
      * Whether the ELTS is deterministic or not.
@@ -76,6 +76,7 @@ public class ELTS extends FSM {
         QBEState target = (QBEState) qbeTransition.getTarget();
         states.add(target);
         actions.addAll(target.getActions());
+        actions.add(transition.getAction());
         deterministic = isDeterministic(qbeTransition);
         currentState = target;
     }
@@ -125,7 +126,7 @@ public class ELTS extends FSM {
         return newState;
     }
 
-    public Set<UIAction> getActions() {
+    public Set<Action> getActions() {
         return Collections.unmodifiableSet(actions);
     }
 

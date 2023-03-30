@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
 import org.mate.MATE;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.fsm.Transition;
 
@@ -53,7 +55,7 @@ public final class ELTSSerializer {
     public void serialize(final ELTS elts) {
         requireNonNull(elts);
 
-        if (elts.getActions().stream().map(UIAction::hashCode).distinct().count() != elts.getActions().size()) {
+        if (elts.getActions().stream().map(Object::hashCode).distinct().count() != elts.getActions().size()) {
             MATE.log_warn("Found hash collision while serializing.");
             MATE.log_warn("The transition system will not be serialized!");
             return;
@@ -79,18 +81,28 @@ public final class ELTSSerializer {
         }
     }
 
-    private String actionToString(UIAction action) {
-        return String.format("{\"uiAction\":{\"actionType\":\"%s\",\"activityName\":\"%s\",\"hash\":%d}}",
-                action.getActionType(), action.getActivityName(), action.hashCode());
+    private String actionToString(Action action) {
+        if (action instanceof StartAction) {
+            final StartAction a = (StartAction) action;
+            return "{\"startAction\":{}}";
+        }
+
+        if (action instanceof UIAction) {
+            UIAction a = (UIAction) action;
+            return String.format("{\"uiAction\":{\"actionType\":\"%s\",\"activityName\":\"%s\",\"hash\":%d}}",
+                    a.getActionType(), a.getActivityName(), a.hashCode());
+        }
+
+        throw new UnsupportedOperationException("Unsupported action type: " + action);
     }
 
-    private Map<UIAction, Integer> serializeQBEActions(final Set<UIAction> actions,
-                                                       final PrintWriter writer) {
-        final Map<UIAction, Integer> map = new HashMap<>(actions.size());
+    private Map<Action, Integer> serializeQBEActions(final Set<Action> actions,
+                                                     final PrintWriter writer) {
+        final Map<Action, Integer> map = new HashMap<>(actions.size());
 
         int index = 0;
         writer.write("{");
-        for (final UIAction action : actions) {
+        for (final Action action : actions) {
             if (index > 0) writer.write(",");
             writer.printf("\"%d\":%s", index, actionToString(action));
             map.put(action, index);
@@ -102,7 +114,7 @@ public final class ELTSSerializer {
     }
 
     private Map<QBEState, Integer> serializeQBEStates(final Set<QBEState> states,
-                                                      final Map<UIAction, Integer> actionIndexes,
+                                                      final Map<Action, Integer> actionIndexes,
                                                       final PrintWriter writer) {
 
         final Map<QBEState, Integer> map = new HashMap<>(states.size());
@@ -110,6 +122,9 @@ public final class ELTSSerializer {
         writer.write("{");
 
         for (final QBEState state : states) {
+            if (state == ELTS.VIRTUAL_ROOT_STATE)
+                continue;
+
             if (index > 0) {
                 writer.write(",");
             }
@@ -117,7 +132,7 @@ public final class ELTSSerializer {
             writer.printf("\"%d\":{\"actions\":[", index);
             boolean firstEntry = true;
 
-            for (final UIAction action : state.getActions()) {
+            for (final Action action : state.getActions()) {
                 if (!firstEntry) {
                     writer.write(",");
                 } else {
@@ -149,7 +164,7 @@ public final class ELTSSerializer {
 
     private void serializeTransitionRelation(final QBETransition tr,
                                              final Map<QBEState, Integer> stateIndexes,
-                                             final Map<UIAction, Integer> actionIndexes,
+                                             final Map<Action, Integer> actionIndexes,
                                              final PrintWriter writer) {
         writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d,\"actionResult\":\"%s\"}",
                 stateIndexes.get(tr.getSource()), actionIndexes.get(tr.getAction()),
@@ -160,7 +175,7 @@ public final class ELTSSerializer {
         elts.removeUnreachableStates();
 
         writer.write("{\"actions\":");
-        final Map<UIAction, Integer> actionIndexes = serializeQBEActions(elts.getActions(), writer);
+        final Map<Action, Integer> actionIndexes = serializeQBEActions(elts.getActions(), writer);
         writer.write(",\"states\":");
         final Set<QBEState> states = elts.getStates().stream().map(s -> (QBEState) s).collect(toSet());
         final Map<QBEState, Integer> stateIndexes = serializeQBEStates(states, actionIndexes, writer);

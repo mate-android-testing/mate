@@ -4,6 +4,7 @@ import static org.mate.utils.Randomness.getRandomlyDistributedKey;
 import static org.mate.utils.StreamUtils.distinctByKey;
 
 import org.mate.exploration.rl.qlearning.qbe.qmatrix.QMatrix;
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.fsm.qbe.QBEState;
 import org.mate.utils.Randomness;
@@ -47,13 +48,13 @@ public final class QMMatrixBasedExploration implements ExplorationStrategy {
      */
     @Override
     public Optional<UIAction> chooseAction(final QBEState currentState) {
-
-        final List<UIAction> currentActions = currentState.getActions();
+        final List<Action> currentActions = currentState.getActions();
 
         if (currentActions.isEmpty()) {
             return Optional.empty();
         } else {
             final Map<Integer, Double> qMap = currentActions.stream()
+                    .map(a -> (UIAction) a)
                     .filter(distinctByKey(abstractActions::getAbstractActionIndex))
                     .collect(
                             Collectors.toMap(abstractActions::getAbstractActionIndex,
@@ -61,6 +62,7 @@ public final class QMMatrixBasedExploration implements ExplorationStrategy {
 
             final int chosenAbstractActionIndex = getRandomlyDistributedKey(qMap);
             final List<UIAction> possibleActions = currentState.getActions().stream()
+                    .map(a -> (UIAction) a)
                     .filter(a -> abstractActions.getAbstractActionIndex(a) == chosenAbstractActionIndex)
                     .collect(Collectors.toList());
             return Optional.of(Randomness.randomElement(possibleActions));

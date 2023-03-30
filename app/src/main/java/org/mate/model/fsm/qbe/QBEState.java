@@ -4,11 +4,13 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.model.fsm.State;
 import org.mate.state.IScreenState;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,26 +29,41 @@ public final class QBEState extends State {
      */
     private int numberOfComponents;
 
+    private final boolean isCrashState;
+
+    private final boolean isVirtualRootState;
+
     QBEState(int id, IScreenState screenState) {
         super(id, screenState);
         featureMap = computeFeatureMap(screenState.getWidgets());
         numberOfComponents = featureMap.values().stream().mapToInt(i -> i).sum();
+        isCrashState = false;
+        isVirtualRootState = false;
     }
 
     QBEState(final QBEState other) {
         super(other.id, other.getScreenState());
         featureMap = new HashMap<>(other.featureMap);
         numberOfComponents = other.numberOfComponents;
+        isCrashState = other.isCrashState;
+        isVirtualRootState = other.isVirtualRootState;
     }
 
-    private QBEState(int id, IScreenState screenState, boolean dummy) {
+    private QBEState(int id, IScreenState screenState, boolean isCrashState, boolean isVirtualRootState) {
         super(id, screenState);
+        assert isCrashState ^ isVirtualRootState;
         featureMap = new HashMap<>(0);
         numberOfComponents = 0;
+        this.isCrashState = isCrashState;
+        this.isVirtualRootState = isVirtualRootState;
     }
 
-    public static QBEState newDummyState(int id, IScreenState screenState) {
-        return new QBEState(id, screenState, true);
+    public static QBEState createCrashState(int id, IScreenState screenState) {
+        return new QBEState(id, screenState, true, false);
+    }
+
+    public static QBEState createVirtualRootState(int id, IScreenState screenState) {
+        return new QBEState(id, screenState, false, true);
     }
 
     /**
@@ -84,8 +101,18 @@ public final class QBEState extends State {
         return Collections.unmodifiableMap(featureMap);
     }
 
-    public List<UIAction> getActions() {
-        return screenState.getUIActions();
+    public List<Action> getActions() {
+        if (isCrashState) {
+            return Collections.emptyList();
+        }
+
+        if (isVirtualRootState) {
+            return new ArrayList<Action>() {{
+                new StartAction();
+            }};
+        }
+
+        return new ArrayList<>(screenState.getUIActions());
     }
 
     public void addDummyComponent() {

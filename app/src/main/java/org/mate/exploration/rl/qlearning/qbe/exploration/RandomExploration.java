@@ -1,5 +1,6 @@
 package org.mate.exploration.rl.qlearning.qbe.exploration;
 
+import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.fsm.qbe.QBEState;
 import org.mate.utils.Randomness;
@@ -20,8 +21,8 @@ public final class RandomExploration implements ExplorationStrategy {
      */
     @Override
     public Optional<UIAction> chooseAction(final QBEState currentState) {
-        final List<UIAction> possibleActions = currentState.getActions();
+        final List<Action> possibleActions = currentState.getActions();
         return possibleActions.isEmpty()
-                ? Optional.empty() : Optional.of(Randomness.randomElement(possibleActions));
+                ? Optional.empty() : Optional.of((UIAction) Randomness.randomElement(possibleActions));
     }
 }
