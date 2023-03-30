@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import org.mate.Properties;
-import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.fsm.FSM;
 import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
@@ -14,6 +14,7 @@ import org.mate.utils.MathUtils;
 import org.mate.utils.Pair;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class ELTS extends FSM {
     /**
      * The set of all actions (input alphabet) Z.
      */
-    private final Set<Action> actions;
+    private final Set<UIAction> actions;
 
     /**
      * Whether the ELTS is deterministic or not.
@@ -124,6 +125,10 @@ public class ELTS extends FSM {
         return newState;
     }
 
+    public Set<UIAction> getActions() {
+        return Collections.unmodifiableSet(actions);
+    }
+
     /**
      * Determines whether the ELTS is deterministic or not.
      *
@@ -159,7 +164,7 @@ public class ELTS extends FSM {
     /**
      * Removes the unreachable states.
      */
-    private void removeUnreachableStates() {
+    public void removeUnreachableStates() {
         final Set<Transition> reachableTransitions = new HashSet<>(transitions.size());
         final Set<State> reachableStates = new HashSet<>(states.size());
         reachableStates.add(VIRTUAL_ROOT_STATE);
@@ -177,6 +182,7 @@ public class ELTS extends FSM {
 
         states.retainAll(reachableStates);
         transitions.retainAll(reachableTransitions);
+
         // TODO: Figure out what to do with the actions.
         // actions.retainAll(reachableStates.stream().flatMap(s -> s.getActions().stream()).collect(toSet()));
     }

@@ -1,8 +1,11 @@
 package org.mate.exploration.rl.qlearning.qbe;
 
+import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.rl.qlearning.qbe.chromosome_factory.QBEChromosomeFactory;
 import org.mate.exploration.rl.qlearning.qbe.exploration.ExplorationStrategy;
+import org.mate.model.fsm.qbe.ELTSSerializer;
+import org.mate.model.fsm.qbe.QBEModel;
 
 /**
  * Provied the QBE Q-learning based algorithm.
@@ -28,10 +31,18 @@ public final class QBE implements Algorithm {
      * Invokes the random exploration. In an infinite loop, chromosomes are generated and executed.
      */
     public void run() {
-        while (true) {
-            randomChromosomeFactory.createChromosome();
+        try {
+            while (true) {
+                randomChromosomeFactory.createChromosome();
+            }
+        } finally {
+            serializeELTS();
         }
+    }
 
-        // TODO: Serialize ELTS.
+    private void serializeELTS() {
+        QBEModel model = (QBEModel) Registry.getUiAbstractionLayer().getGuiModel();
+        new ELTSSerializer().serialize(model.getELTS());
+        Registry.getEnvironmentManager().fetchTransitionSystem();
     }
 }

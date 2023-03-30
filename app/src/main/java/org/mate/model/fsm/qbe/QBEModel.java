@@ -174,6 +174,10 @@ public final class QBEModel implements IGUIModel {
         return elts.getActivityPredecessors(activity);
     }
 
+    public ELTS getELTS() {
+        return elts;
+    }
+
     /**
      * {@inheritDoc}
      */
