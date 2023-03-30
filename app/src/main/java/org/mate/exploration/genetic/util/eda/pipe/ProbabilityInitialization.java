@@ -152,7 +152,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
                 case MENU:
                 case SPINNER_SCROLLING:
                 case MENU_CLICK_AND_ITEM_SELECTION:
-                case FILL_FORMS_AND_SUBMIT:
+                case FILL_FORM_AND_SUBMIT:
                 case SWIPE_DOWN:
                     return 2;
                 case CLICK:

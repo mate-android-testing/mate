@@ -666,7 +666,7 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     private List<MotifAction> extractFillFormAndSubmitActions(List<WidgetAction> widgetActions) {
 
-        final List<MotifAction> fillFormsAndSubmitActions = new ArrayList<>();
+        final List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
 
         /*
          * TODO: Extract only those editable widgets and buttons that belong to the same form.
@@ -706,19 +706,19 @@ public class ActionsScreenState extends AbstractScreenState {
                 final List<UIAction> actions = new ArrayList<>(textInsertActions);
                 actions.add(clickableAction);
                 final MotifAction fillFormAndSubmitAction
-                        = new MotifAction(ActionType.FILL_FORMS_AND_SUBMIT, activityName, actions);
-                fillFormsAndSubmitActions.add(fillFormAndSubmitAction);
+                        = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);
+                fillFormAndSubmitActions.add(fillFormAndSubmitAction);
             });
         } else if (!textInsertActions.isEmpty()) { // no submit/save button discovered
             textInsertActions.stream().forEach(textInsertAction -> {
                 final List<UIAction> actions = new ArrayList<>(textInsertActions);
-                final MotifAction fillFormsAction
-                        = new MotifAction(ActionType.FILL_FORMS, activityName, actions);
-                fillFormsAndSubmitActions.add(fillFormsAction);
+                final MotifAction fillFormAction
+                        = new MotifAction(ActionType.FILL_FORM, activityName, actions);
+                fillFormAndSubmitActions.add(fillFormAction);
             });
         }
 
-        return fillFormsAndSubmitActions;
+        return fillFormAndSubmitActions;
     }
 
     @SuppressWarnings("debug")

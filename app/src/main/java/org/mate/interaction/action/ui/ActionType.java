@@ -27,8 +27,8 @@ public enum ActionType {
     DPAD_RIGHT,
     DPAD_CENTER,
     ENTER,
-    FILL_FORMS_AND_SUBMIT,
-    FILL_FORMS,
+    FILL_FORM_AND_SUBMIT,
+    FILL_FORM,
     SPINNER_SCROLLING,
     MENU_CLICK_AND_ITEM_SELECTION,
     SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION,
@@ -51,8 +51,8 @@ public enum ActionType {
     };
 
     public static final ActionType[] motifActionTypes = {
-            FILL_FORMS_AND_SUBMIT,
-            FILL_FORMS,
+            FILL_FORM_AND_SUBMIT,
+            FILL_FORM,
             SPINNER_SCROLLING,
             MENU_CLICK_AND_ITEM_SELECTION,
             SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION,

@@ -275,11 +275,11 @@ public class DeviceMgr {
         ActionType typeOfAction = action.getActionType();
 
         switch (typeOfAction) {
-            case FILL_FORMS_AND_SUBMIT:
-                handleFillFormsAndSubmit(action);
+            case FILL_FORM_AND_SUBMIT:
+                handleFillFormAndSubmit(action);
                 break;
-            case FILL_FORMS:
-                handleFillForms(action);
+            case FILL_FORM:
+                handleFillForm(action);
                 break;
             case SPINNER_SCROLLING:
                 handleSpinnerScrolling(action);
@@ -647,7 +647,7 @@ public class DeviceMgr {
      *
      * @param action The given motif action.
      */
-    private void handleFillForms(final MotifAction action) {
+    private void handleFillForm(final MotifAction action) {
 
         if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
@@ -663,7 +663,7 @@ public class DeviceMgr {
      *
      * @param action The given motif action.
      */
-    private void handleFillFormsAndSubmit(MotifAction action) {
+    private void handleFillFormAndSubmit(MotifAction action) {
 
         if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
