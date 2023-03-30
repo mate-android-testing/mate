@@ -130,7 +130,12 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
         final List<Path> path = new ArrayList<>(actions.size());
 
         for (int i = 0; i < actions.size(); ++i) {
-            path.add(new Path(screenStates.get(i), actions.get(i), screenStates.get(i + 1)));
+            // If there was an UIAutomator issue during action execution, the target state couldn't
+            // be resolved properly. This can only happen at the end of the test case sequence and
+            // we simply need to ignore that last path transition.
+            if (screenStates.get(i + 1) != null) {
+                path.add(new Path(screenStates.get(i), actions.get(i), screenStates.get(i + 1)));
+            }
         }
 
         if (!shufflePath.getStats().isEmpty()) {
