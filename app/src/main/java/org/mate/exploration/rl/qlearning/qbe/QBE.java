@@ -1,5 +1,6 @@
 package org.mate.exploration.rl.qlearning.qbe;
 
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
 import org.mate.exploration.rl.qlearning.qbe.chromosome_factory.QBEChromosomeFactory;
@@ -41,6 +42,9 @@ public final class QBE implements Algorithm {
     }
 
     private void serializeELTS() {
+        if (!Properties.QBE_RECORD_TRANSITION_SYSTEM())
+            return;
+
         QBEModel model = (QBEModel) Registry.getUiAbstractionLayer().getGuiModel();
         new ELTSSerializer().serialize(model.getELTS());
         Registry.getEnvironmentManager().fetchTransitionSystem();
