@@ -83,6 +83,10 @@ public final class QBEModel implements IGUIModel {
         return elts.getStates().stream().map(State::getScreenState).collect(toSet());
     }
 
+    public QBEState getCurrentState() {
+        return (QBEState) elts.getCurrentState();
+    }
+
     @Override
     public boolean reachedNewState() {
         return elts.reachedNewState();
