@@ -39,6 +39,16 @@ public final class QBEState extends State {
         numberOfComponents = other.numberOfComponents;
     }
 
+    private QBEState(int id, IScreenState screenState, boolean dummy) {
+        super(id, screenState);
+        featureMap = new HashMap<>(0);
+        numberOfComponents = 0;
+    }
+
+    public static QBEState newDummyState(int id, IScreenState screenState) {
+        return new QBEState(id, screenState, true);
+    }
+
     /**
      * Computes the feature map from the given list of widgets, which is constructed as follows:
      * The widgets are grouped based on their type, e.g. button, and their depth in the ui tree

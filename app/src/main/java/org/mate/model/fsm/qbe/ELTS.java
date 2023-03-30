@@ -33,13 +33,13 @@ public class ELTS extends FSM {
      * Represents the virtual root state. In a deterministic ELTS, this state should only ever have
      * a single neighbour, which is the actual initial state of the AUT.
      */
-    public static final QBEState VIRTUAL_ROOT_STATE = new QBEState(-1, ScreenStateFactory.newDummyState());
+    public static final QBEState VIRTUAL_ROOT_STATE = QBEState.newDummyState(-1, ScreenStateFactory.newDummyState());
 
     /**
      * QBE requires state which represents a crash, such that this state is part of the serialized
      * transition system.
      */
-    public static final QBEState CRASH_STATE = new QBEState(-2, ScreenStateFactory.newDummyState());
+    public static final QBEState CRASH_STATE = QBEState.newDummyState(-2, ScreenStateFactory.newDummyState());
 
     /**
      * The set of all actions (input alphabet) Z.
