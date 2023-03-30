@@ -122,9 +122,6 @@ public final class ELTSSerializer {
         writer.write("{");
 
         for (final QBEState state : states) {
-            if (state == ELTS.VIRTUAL_ROOT_STATE)
-                continue;
-
             if (index > 0) {
                 writer.write(",");
             }
