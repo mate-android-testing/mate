@@ -35,12 +35,13 @@ public class ExecuteMATEQBENew {
 
     @Test
     public void useAppContext() {
+        MATE.log_acc("Starting QBE...");
+        final MATE mate = new MATE();
         final Strategy strategy = Optional.ofNullable(Properties.QBE_EXPLORATION_STRATEGY())
                 .map(Strategy::valueOf)
                 .orElse(Strategy.RANDOM);
 
-        MATE.log_acc(String.format("Starting QBE %s...", strategy));
-        final MATE mate = new MATE();
+        MATE.log_acc(String.format("QBE strategy: %s", strategy));
         mate.testApp(new QBE(Properties.MAX_NUMBER_EVENTS(), getStrategy(strategy)));
     }
 
