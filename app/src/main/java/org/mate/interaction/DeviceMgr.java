@@ -299,10 +299,33 @@ public class DeviceMgr {
             case CHANGE_RADIO_GROUP_SELECTIONS:
                 handleChangeRadioGroupSelections(action);
                 break;
+            case CHANGE_LIST_VIEW_SELECTION:
+                handleChangeListViewSelection(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
         }
+    }
+
+    /**
+     * Executes the 'change list view selection' motif action, i.e. a click on a random list view
+     * item is performed.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeListViewSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Pick a list view item that hasn't been selected so far or pick random otherwise.
+            final WidgetAction clickAction
+                    = (WidgetAction) Randomness.randomElement(action.getUIActions());
+            handleClick(clickAction.getWidget());
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+
     }
 
     /**

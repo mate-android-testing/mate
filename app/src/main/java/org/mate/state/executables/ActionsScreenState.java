@@ -432,10 +432,49 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractOpenNavigationAndSelectOptionActions(widgetActions));
         motifActions.addAll(extractTypeTextAndPressEnterActions(widgetActions));
         motifActions.addAll(extractChangeRadioGroupSelectionActions(widgetActions));
+        motifActions.addAll(extractChangeListViewSelectionActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible change list view selection motif actions. This motif action changes
+     * the current selection of a list view / recycler view by clicking on a random list item.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible list view selection motif actions if any.
+     */
+    private List<MotifAction> extractChangeListViewSelectionActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeListViewSelectionActions = new ArrayList<>();
+
+        final Predicate<WidgetAction> listViewItemActionsMatcher = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widgetAction.getActionType() == ActionType.CLICK
+                    && widget.isEnabled()
+                    && widget.isLeafWidget()
+                    && widget.isTextViewType()
+                    && widget.hasText()
+                    && widget.hasResourceID()
+                    && (widget.isSonOf(Widget::isListViewType)
+                        || widget.isSonOf(Widget::isRecyclerViewType));
+        };
+
+        final List<WidgetAction> listViewItemActions = widgetActions.stream()
+                .filter(listViewItemActionsMatcher)
+                .collect(Collectors.toList());
+
+        if (!listViewItemActions.isEmpty()) {
+            final MotifAction changeListViewSelectionAction
+                    = new MotifAction(ActionType.CHANGE_LIST_VIEW_SELECTION, activityName,
+                    Collections.unmodifiableList(listViewItemActions));
+            changeListViewSelectionActions.add(changeListViewSelectionAction);
+        }
+
+        return changeListViewSelectionActions;
     }
 
     /**
