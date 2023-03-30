@@ -275,8 +275,11 @@ public class DeviceMgr {
         ActionType typeOfAction = action.getActionType();
 
         switch (typeOfAction) {
-            case FILL_FORM_AND_SUBMIT:
-                handleFillFormAndSubmit(action);
+            case FILL_FORMS_AND_SUBMIT:
+                handleFillFormsAndSubmit(action);
+                break;
+            case FILL_FORMS:
+                handleFillForms(action);
                 break;
             case SPINNER_SCROLLING:
                 handleSpinnerScrolling(action);
@@ -562,11 +565,28 @@ public class DeviceMgr {
     }
 
     /**
+     * Executes the motif action 'fill forms', i.e. it fills out all visible and enabled text forms
+     * on the current screen.
+     *
+     * @param action The given motif action.
+     */
+    private void handleFillForms(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            action.getUIActions().stream().forEach(textInsertAction ->
+                            handleEdit(((WidgetAction) textInsertAction).getWidget()));
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
      * Executes the motif action 'fill form and click submit' as used in the Sapienz paper.
      *
      * @param action The given motif action.
      */
-    private void handleFillFormAndSubmit(MotifAction action) {
+    private void handleFillFormsAndSubmit(MotifAction action) {
 
         if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 

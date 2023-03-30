@@ -590,14 +590,14 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     private List<MotifAction> extractFillFormAndSubmitActions(List<WidgetAction> widgetActions) {
 
-        List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
+        final List<MotifAction> fillFormsAndSubmitActions = new ArrayList<>();
 
         /*
          * TODO: Extract only those editable widgets and buttons that belong to the same form.
          *  We should exploit the characteristics of the ui tree for that purpose.
          */
 
-        List<WidgetAction> textInsertActions = widgetActions.stream()
+        final List<WidgetAction> textInsertActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
                 .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
                 .collect(Collectors.toList());
@@ -619,7 +619,7 @@ public class ActionsScreenState extends AbstractScreenState {
                     && widget.getContentDesc().equalsIgnoreCase("Save changes");
         };
 
-        List<WidgetAction> clickableActions = widgetActions.stream()
+        final List<WidgetAction> clickableActions = widgetActions.stream()
                 .filter(clickableButtons.or(clickableTextView))
                 .filter(widgetAction -> widgetAction.getActionType() == ActionType.CLICK)
                 .collect(Collectors.toList());
@@ -627,15 +627,22 @@ public class ActionsScreenState extends AbstractScreenState {
         if (!textInsertActions.isEmpty() && !clickableActions.isEmpty()) {
 
             clickableActions.stream().forEach(clickableAction -> {
-                List<UIAction> actions = new ArrayList<>(textInsertActions);
+                final List<UIAction> actions = new ArrayList<>(textInsertActions);
                 actions.add(clickableAction);
-                MotifAction fillFormAndSubmitAction
-                        = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);
-                fillFormAndSubmitActions.add(fillFormAndSubmitAction);
+                final MotifAction fillFormAndSubmitAction
+                        = new MotifAction(ActionType.FILL_FORMS_AND_SUBMIT, activityName, actions);
+                fillFormsAndSubmitActions.add(fillFormAndSubmitAction);
+            });
+        } else if (!textInsertActions.isEmpty()) { // no submit/save button discovered
+            textInsertActions.stream().forEach(textInsertAction -> {
+                final List<UIAction> actions = new ArrayList<>(textInsertActions);
+                final MotifAction fillFormsAction
+                        = new MotifAction(ActionType.FILL_FORMS, activityName, actions);
+                fillFormsAndSubmitActions.add(fillFormsAction);
             });
         }
 
-        return fillFormAndSubmitActions;
+        return fillFormsAndSubmitActions;
     }
 
     @SuppressWarnings("debug")
