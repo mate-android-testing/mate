@@ -296,6 +296,9 @@ public class DeviceMgr {
             case TYPE_TEXT_AND_PRESS_ENTER:
                 handleTypeTextAndPressEnter(action);
                 break;
+            case CHANGE_RADIO_GROUP_SELECTIONS:
+                handleChangeRadioGroupSelections(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
@@ -383,6 +386,57 @@ public class DeviceMgr {
                 handleClick(notSelectedMenuItem);
                 action.addSelectedMenuItem(navigationMenuClickAction.getWidget(),
                         notSelectedMenuItem.getText());
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'change radio group selections' motif action, i.e. a random radio button is
+     * clicked per radio group.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeRadioGroupSelections(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Store click actions on radio buttons directly in motif action.
+
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            // Extract the radio groups.
+            final List<Widget> radioGroups = screenState.getWidgets().stream()
+                    .filter(Widget::isRadioGroupType)
+                    .filter(Widget::isEnabled)
+                    .collect(Collectors.toList());
+
+            if (!radioGroups.isEmpty()) {
+
+                final Map<Widget, List<Widget>> radioButtonsPerGroup =
+                        radioGroups.stream().collect(Collectors.toMap(Function.identity(),
+                                (radioGroup) -> radioGroup.getChildren().stream()
+                                        .filter(Widget::isLeafWidget)
+                                        .filter(Widget::isRadioButtonType)
+                                        .filter(Widget::isEnabled)
+                                        .collect(Collectors.toList())
+                        ));
+
+                // TODO: Memorize which combination of radio buttons have been selected and choose
+                //  a possible distinct sort order else pick random.
+
+                for (Map.Entry<Widget, List<Widget>> radioGroup : radioButtonsPerGroup.entrySet()) {
+
+                    final List<Widget> radioButtons = radioGroup.getValue();
+
+                    if (!radioButtons.isEmpty()) {
+                        // click on a random radio button
+                        final Widget radioButton = Randomness.randomElement(radioButtons);
+                        handleClick(radioButton);
+                    }
+                }
             }
         } else {
             throw new UnsupportedOperationException("Not yet implemented!");

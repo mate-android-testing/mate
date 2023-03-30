@@ -431,10 +431,47 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractSortAndSelectSortOrderActions(widgetActions));
         motifActions.addAll(extractOpenNavigationAndSelectOptionActions(widgetActions));
         motifActions.addAll(extractTypeTextAndPressEnterActions(widgetActions));
+        motifActions.addAll(extractChangeRadioGroupSelectionActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible change radio group selections motif actions. This motif action changes
+     * the different radio group selections by clicking on a random radio button per radio group.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change radio group selections motif actions if any.
+     */
+    private List<MotifAction> extractChangeRadioGroupSelectionActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeRadioGroupSelectionActions = new ArrayList<>();
+
+        final Predicate<WidgetAction> radioButtonActionMatcher = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widgetAction.getActionType() == ActionType.CLICK
+                    && widget.isEnabled()
+                    && widget.isLeafWidget()
+                    && widget.isRadioButtonType()
+                    && widget.isSonOf(Widget::isRadioGroupType);
+        };
+
+        final List<WidgetAction> radioButtonActions = widgetActions.stream()
+                .filter(radioButtonActionMatcher)
+                .collect(Collectors.toList());
+        
+        // TODO: Store the radio button action per radio group in the motif action.
+
+        if (!radioButtonActions.isEmpty()) {
+            final MotifAction changeRadioGroupSelectionAction
+                    = new MotifAction(ActionType.CHANGE_RADIO_GROUP_SELECTIONS, activityName);
+            changeRadioGroupSelectionActions.add(changeRadioGroupSelectionAction);
+        }
+
+        return changeRadioGroupSelectionActions;
     }
 
     /**
