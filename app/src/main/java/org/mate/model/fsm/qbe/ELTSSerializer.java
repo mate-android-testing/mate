@@ -134,7 +134,7 @@ public final class ELTSSerializer {
                 } else {
                     firstEntry = false;
                 }
-                writer.write(actionIndexes.get(action));
+                writer.write(actionIndexes.get(action).toString());
             }
 
             writer.write("],\"featureMap\":{");
