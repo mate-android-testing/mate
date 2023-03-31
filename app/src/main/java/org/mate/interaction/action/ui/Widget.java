@@ -685,6 +685,22 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a seek bar.
+     *
+     * @return Returns {@code true} if this widget is a seek bar, otherwise {@code false} is returned.
+     */
+    public boolean isSeekBar() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.SeekBar.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents an edit text widget.
      *
      * @return Returns {@code true} if this widget is an edit text widget, otherwise {@code false}

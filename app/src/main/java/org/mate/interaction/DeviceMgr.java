@@ -1226,6 +1226,9 @@ public class DeviceMgr {
             case SWIPE_RIGHT:
                 handleSwipe(selectedWidget, typeOfAction);
                 break;
+            case CHANGE_SEEK_BAR:
+                handleSeekBar(selectedWidget);
+                break;
             default:
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for widget actions.");
@@ -1362,6 +1365,50 @@ public class DeviceMgr {
      */
     private void handleClick(Widget widget) {
         device.click(widget.getX(), widget.getY());
+    }
+
+    /**
+     * Tries to move the seek bar (special kind of progress bar) in a random direction.
+     *
+     * @param widget The seek bar widget.
+     */
+    private void handleSeekBar(final Widget widget) {
+
+        // TODO: Handle vertically laid-out seek bars.
+
+        final UiObject2 uiObject = findObject(widget);
+
+        if (uiObject != null) {
+
+            /*
+            * NOTE: We tried out different low-level actions like swipe, drag, scroll and fling but
+            * all of them had their limitations or didn't function as expected. In the end, clicking
+            * directly on a random X coordinate appeared to be the most reliable option. One
+            * alternative to below approach is to use DPAD_RIGHT and DPAD_LEFT (this works reliably
+            * and has the advantage that it moves the seek bar exactly one 'step' in either direction.
+            * However, the problem here was that to use those two actions, one has to first move the
+            * DPAD 'cursor' to the correct location and this didn't seem feasible.
+             */
+
+            try {
+                // Click on a random X coordinate.
+                final int X1 = uiObject.getVisibleBounds().left;
+                final int X2 = uiObject.getVisibleBounds().right;
+                final int Y = uiObject.getVisibleBounds().centerY();
+                int randomX = Randomness.getRandom(X1, X2);
+                device.click(randomX, Y);
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+
+                // fall back mechanism
+                final int X1 = widget.getX1();
+                final int X2 = widget.getX2();
+                final int Y = widget.getY();
+                int randomX = Randomness.getRandom(X1, X2);
+                device.click(randomX, Y);
+            }
+        }
     }
 
     /**

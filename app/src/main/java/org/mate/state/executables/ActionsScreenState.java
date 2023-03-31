@@ -377,6 +377,13 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
+            if (widget.isSeekBar()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SEEK_BAR));
+
+                // it doesn't make sense to add another action to scrollable widgets
+                continue;
+            }
+
             /*
              * The elements in a list view are typically of type android.widget.TextView
              * and not clickable according to the underlying AccessibilityNodeInfo object,
