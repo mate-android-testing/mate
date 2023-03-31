@@ -592,8 +592,9 @@ public class ActionsScreenState extends AbstractScreenState {
         final List<WidgetAction> navigationMenuClickActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isImageButtonType()
                         && widgetAction.getActionType() == ActionType.CLICK
-                        && contentMatcher.test(widgetAction.getWidget().getContentDesc()))
-                // TODO: May add fixed coordinates of navigation menu as further restriction.
+                        && contentMatcher.test(widgetAction.getWidget().getContentDesc())
+                        && appScreen.getMenuBarBoundingBox().contains(
+                                widgetAction.getWidget().getBounds()))
                 .collect(Collectors.toList());
 
         navigationMenuClickActions.stream().forEach(navigationMenuClickAction -> {
