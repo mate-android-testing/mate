@@ -257,9 +257,31 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            if (widget.isSonOfSpinner()) {
+            if (widget.isSpinnerType()) {
 
-                MATE.log_debug("Spinner widget defines scrolling action itself!");
+                /*
+                 * Although there is a proper motif action for spinner widgets in the meantime, we
+                 * keep the click action as kind of fallback mechanism and when motif actions
+                 * shouldn't be allowed.
+                 *
+                 */
+
+                if (widget.isClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                // it doesn't make sense to add another action to spinner instance
+                continue;
+            }
+
+            // NOTE: It seems rather so that children of a spinner are bare text views that should
+            // not convey any action, only the list view that is spanned by the spinner contains
+            // clickable items, but there might be exceptions from this rule.
+            if (widget.isLeafWidget() && widget.isSonOfSpinner()) {
 
                 /*
                 * A spinner typically hosts text views as entries, but it could happen
@@ -279,17 +301,73 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
+            // There are scroll views that are not scrollable at all, but the property 'isScrollable'
+            // is more reliable in such cases.
+            if (widget.isScrollable() && !widget.isSpinnerType() && !widget.isSonOfScrollable()) {
+
+                /*
+                 * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
+                 * a horizontal scroll view like android.support.v4.view.ViewPager is used for
+                 * vertical scrolling by nesting layouts, so it is not possible to determine
+                 * the direction of the scroll view. Thus, we add swipes for all directions.
+                 */
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
+                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
+
+                // it doesn't make sense to add another action to scrollable widgets
+                continue;
+            }
+
+            /*
+             * The elements in a list view are typically of type android.widget.TextView
+             * and not clickable according to the underlying AccessibilityNodeInfo object,
+             * however those elements represent in most cases clickable widgets.
+             */
+            if (widget.isLeafWidget() && widget.isSonOfListView()) {
+
+                if (widget.isClickable() || widget.isCheckable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                Widget parent = widget.getParent();
+
+                while (!parent.isListViewType()) {
+                    parent = parent.getParent();
+                }
+
+                // inherit the clickable properties of the list view
+                if (parent.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                // make widget in any case clickable
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+
+                continue;
+            }
+
             /*
              * It can happen that leaf widgets actually represent containers like
              * a linear layout in order to fill or introduce a gap.
              */
-            if (widget.isContainer()) {
+            if (widget.isLeafWidget() && widget.isContainer()) {
                 MATE.log_debug("Container as a leaf widget!");
                 continue;
             }
 
-            if ((widget.isSonOfLongClickable() || widget.isSonOfClickable()
-                    || widget.isSonOfCheckable()) && !widget.isSonOfActionableContainer()) {
+            /*
+            * This happens for instance for androidx.appcompat.app.ActionBar$Tab. It seems like
+            * this type of widget is used for navigation and the underlying text view is merely
+            * defining the text. We can save here defining a click action for both the text view
+            * and the overlying navigation widget.
+             */
+            if (widget.isSonOf(Widget::isActionable) && !widget.isSonOfActionableContainer()) {
                 MATE.log_debug("Parent widget defines the action!");
                 // we define the action directly on the parent widget
                 continue;
@@ -301,79 +379,22 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             /*
-            * There are edit text widgets that cannot be modified directly but via a button, e.g.
-            * when setting a date in such a field. In those cases, the edit text widget is likely
-            * not enabled.
+             * There are edit text widgets that cannot be modified directly but via a button, e.g.
+             * when setting a date in such a field. In those cases, the edit text widget is likely
+             * not enabled.
              */
             if (widget.isEditTextType() && widget.isEnabled()) {
-                MATE.log_debug("Widget is an edit text instance!");
                 widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
                 widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
 
-               /*
-               * TODO: Use static analysis to detect whether an onclick handler is registered.
-               * Editable widgets are by default also clickable and long-clickable, but
-               * it is untypical to define such action as well. What should happen?
-               * We can only imagine that some sort of pop up appears showing some additional
-               * hint. Since it's uncommon that editable widgets define an onclick listener,
-               * we ignore such action right now.
-                */
-               continue;
-            }
-
-            if (widget.isButtonType()) {
-                MATE.log_debug("Widget is a button instance!");
-
-                // TODO: Use static analysis to detect whether click/long click refer to the same
-                //  event handler.
-                if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
-                }
-
-                if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
-                }
-            }
-
-            if (widget.isSpinnerType()) {
-                MATE.log_debug("Widget is a spinner instance!");
-
                 /*
-                * Although there is a proper motif action for spinner widgets in the meantime, we
-                * keep the click action as kind of fallback mechanism and when motif actions
-                * shouldn't be allowed.
-                * 
+                 * TODO: Use static analysis to detect whether an onclick handler is registered.
+                 * Editable widgets are by default also clickable and long-clickable, but
+                 * it is untypical to define such action as well. What should happen?
+                 * We can only imagine that some sort of pop up appears showing some additional
+                 * hint. Since it's uncommon that editable widgets define an onclick listener,
+                 * we ignore such action right now.
                  */
-
-                if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
-                    // it doesn't make sense to add another action to spinner instance
-                    continue;
-                }
-
-                if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
-                    // it doesn't make sense to add another action to spinner instance
-                    continue;
-                }
-            }
-
-            if (widget.isScrollable() && !widget.isSpinnerType() && !widget.isSonOfScrollable()) {
-
-                MATE.log_debug("Widget is a scrollview!");
-
-                /*
-                * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
-                * a horizontal scroll view like android.support.v4.view.ViewPager is used for
-                * vertical scrolling by nesting layouts, so it is not possible to determine
-                * the direction of the scroll view. Thus, we add swipes for all directions.
-                 */
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_LEFT));
-                widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_RIGHT));
-
-                // it doesn't make sense to add another action to scrollable widgets
                 continue;
             }
 
@@ -384,18 +405,14 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            /*
-             * The elements in a list view are typically of type android.widget.TextView
-             * and not clickable according to the underlying AccessibilityNodeInfo object,
-             * however those elements represent in most cases clickable widgets.
-             */
-            if (widget.isSonOfListView()) {
+            if (widget.isCheckable() || widget.isCheckableType()) {
+                // we check a widget by clicking on it
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
-            // TODO: might be redundant with isCheckableType()
-            if (widget.isCheckable()) {
-                // we check a widget by clicking on it
+            // TODO: Use static analysis to detect whether click/long click refer to the same
+            //  event handler.
+            if (widget.isClickable()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
@@ -403,14 +420,16 @@ public class ActionsScreenState extends AbstractScreenState {
                 widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
             }
 
-            /*
-             * Right now, we can't tell whether any kind of view widget should be clickable
-             * or not, thus we assign to each leaf widget the click action. In the future,
-             * we should rely on an additional static analysis of the byte code to verify
-             * which leaf widget, in particular which text view, defines an event handler
-             * and thus should be clickable.
-             */
-            widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            if (widget.isLeafWidget()) {
+                /*
+                 * Right now, we can't tell whether any kind of view widget should be clickable
+                 * or not, thus we assign to each leaf widget the click action. In the future,
+                 * we should rely on an additional static analysis of the byte code to verify
+                 * which leaf widget, in particular which text view, defines an event handler
+                 * and thus should be clickable.
+                 */
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
         }
 
         MATE.log_debug("Number of widget actions: " + widgetActions.size());
