@@ -67,6 +67,7 @@ public final class QBEModel implements IGUIModel {
                 ? CRASH_STATE : (QBEState) elts.getState(target);
         QBETransition transition = new QBETransition(sourceState, targetState, action, actionResult);
         elts.addTransition(transition);
+        testcase.add(transition);
         if (!elts.isDeterministic()) {
             elts.passiveLearn(testsuite, testcase);
         }
