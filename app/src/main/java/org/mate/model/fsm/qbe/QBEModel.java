@@ -68,7 +68,6 @@ public final class QBEModel implements IGUIModel {
         QBETransition transition = new QBETransition(sourceState, targetState, action, actionResult);
         elts.addTransition(transition);
         if (!elts.isDeterministic()) {
-            // TODO: How do we stop passiveLearn from being interrupted with a timeout exception?
             elts.passiveLearn(testsuite, testcase);
         }
     }
