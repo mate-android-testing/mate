@@ -302,9 +302,27 @@ public class DeviceMgr {
             case CHANGE_LIST_VIEW_SELECTION:
                 handleChangeListViewSelection(action);
                 break;
+            case CHANGE_SEEK_BARS:
+                handleChangeSeekBars(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'change seek bars' motif action, i.e. multiple seek bars are changed at once.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeSeekBars(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+            action.getUIActions().stream().forEach(changeSeekBarAction ->
+                    handleChangeSeekBar(((WidgetAction) changeSeekBarAction).getWidget()));
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
@@ -325,7 +343,6 @@ public class DeviceMgr {
         } else {
             throw new UnsupportedOperationException("Not yet implemented!");
         }
-
     }
 
     /**
@@ -1227,7 +1244,7 @@ public class DeviceMgr {
                 handleSwipe(selectedWidget, typeOfAction);
                 break;
             case CHANGE_SEEK_BAR:
-                handleSeekBar(selectedWidget);
+                handleChangeSeekBar(selectedWidget);
                 break;
             default:
                 throw new IllegalArgumentException("Action type " + action.getActionType()
@@ -1372,7 +1389,7 @@ public class DeviceMgr {
      *
      * @param widget The seek bar widget.
      */
-    private void handleSeekBar(final Widget widget) {
+    private void handleChangeSeekBar(final Widget widget) {
 
         // TODO: Handle vertically laid-out seek bars.
 

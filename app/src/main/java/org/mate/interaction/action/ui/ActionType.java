@@ -36,7 +36,8 @@ public enum ActionType {
     OPEN_NAVIGATION_AND_OPTION_SELECTION,
     TYPE_TEXT_AND_PRESS_ENTER,
     CHANGE_RADIO_GROUP_SELECTIONS,
-    CHANGE_LIST_VIEW_SELECTION;
+    CHANGE_LIST_VIEW_SELECTION,
+    CHANGE_SEEK_BARS;
 
     public static final ActionType[] primitiveActionTypes = {
             CLICK,
@@ -60,6 +61,7 @@ public enum ActionType {
             OPEN_NAVIGATION_AND_OPTION_SELECTION,
             TYPE_TEXT_AND_PRESS_ENTER,
             CHANGE_RADIO_GROUP_SELECTIONS,
-            CHANGE_LIST_VIEW_SELECTION
+            CHANGE_LIST_VIEW_SELECTION,
+            CHANGE_SEEK_BARS
     };
 }

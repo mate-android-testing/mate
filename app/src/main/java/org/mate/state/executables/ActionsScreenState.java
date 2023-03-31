@@ -440,10 +440,36 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractTypeTextAndPressEnterActions(widgetActions));
         motifActions.addAll(extractChangeRadioGroupSelectionActions(widgetActions));
         motifActions.addAll(extractChangeListViewSelectionActions(widgetActions));
+        motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible change seek bars motif actions. This motif action changes multiple
+     * seek bars at once.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change seek bars motif actions if any.
+     */
+    private List<MotifAction> extractChangeSeekBarsActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeSeekBarsActions = new ArrayList<>();
+
+        final List<WidgetAction> changeSeekBarActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_SEEK_BAR)
+                .collect(Collectors.toList());
+
+        if (changeSeekBarActions.size() > 1) { // there are at least two seek bars
+            final MotifAction changeSeekBarsAction
+                    = new MotifAction(ActionType.CHANGE_SEEK_BARS, activityName,
+                    Collections.unmodifiableList(changeSeekBarActions));
+            changeSeekBarsActions.add(changeSeekBarsAction);
+        }
+
+        return changeSeekBarsActions;
     }
 
     /**
