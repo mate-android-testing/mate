@@ -55,7 +55,7 @@ public final class ELTSSerializer {
     public void serialize(final ELTS elts) {
         requireNonNull(elts);
 
-        if (elts.getActions().stream().map(Object::hashCode).distinct().count() != elts.getActions().size()) {
+        if (elts.getAllActions().stream().map(Object::hashCode).distinct().count() != elts.getAllActions().size()) {
             MATE.log_warn("Found hash collision while serializing.");
             MATE.log_warn("The transition system will not be serialized!");
             return;
@@ -116,7 +116,6 @@ public final class ELTSSerializer {
     private Map<QBEState, Integer> serializeQBEStates(final Set<QBEState> states,
                                                       final Map<Action, Integer> actionIndexes,
                                                       final PrintWriter writer) {
-
         final Map<QBEState, Integer> map = new HashMap<>(states.size());
         int index = 0;
         writer.write("{");
@@ -135,7 +134,7 @@ public final class ELTSSerializer {
                 } else {
                     firstEntry = false;
                 }
-                writer.write(actionIndexes.get(action).toString());
+                writer.write(actionIndexes.get(action));
             }
 
             writer.write("],\"featureMap\":{");
@@ -168,16 +167,7 @@ public final class ELTSSerializer {
                 stateIndexes.get(tr.getTarget()), tr.getActionResult());
     }
 
-    private void serializeTransitionSystem(final ELTS elts, final PrintWriter writer) {
-        elts.removeUnreachableStates();
-
-        writer.write("{\"actions\":");
-        final Map<Action, Integer> actionIndexes = serializeQBEActions(elts.getActions(), writer);
-        writer.write(",\"states\":");
-        final Set<QBEState> states = elts.getStates().stream().map(s -> (QBEState) s).collect(toSet());
-        final Map<QBEState, Integer> stateIndexes = serializeQBEStates(states, actionIndexes, writer);
-        writer.printf(",\"initialState\":%d,\"transitionRelations\":[", stateIndexes.get(ELTS.VIRTUAL_ROOT_STATE));
-
+    private void serializeTransitionRelations(ELTS elts, Map<Action, Integer> actionIndexes, Map<QBEState, Integer> stateIndexes, PrintWriter writer) {
         boolean firstEntry = true;
 
         for (Transition tr : elts.getTransitions()) {
@@ -189,5 +179,18 @@ public final class ELTSSerializer {
             serializeTransitionRelation((QBETransition) tr, stateIndexes, actionIndexes, writer);
         }
         writer.write("]}");
+    }
+
+    private void serializeTransitionSystem(final ELTS elts, final PrintWriter writer) {
+        elts.removeUnreachableStates();
+
+        writer.write("{\"actions\":");
+        final Map<Action, Integer> actionIndexes = serializeQBEActions(elts.getAllActions(), writer);
+        writer.write(",\"states\":");
+        final Set<QBEState> states = elts.getStates().stream().map(s -> (QBEState) s).collect(toSet());
+        final Map<QBEState, Integer> stateIndexes = serializeQBEStates(states, actionIndexes, writer);
+        writer.printf(",\"initialState\":%d,\"transitionRelations\":[", stateIndexes.get(ELTS.VIRTUAL_ROOT_STATE));
+
+        serializeTransitionRelations(elts, actionIndexes, stateIndexes, writer);
     }
 }

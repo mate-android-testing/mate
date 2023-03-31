@@ -42,9 +42,14 @@ public class ELTS extends FSM {
     public static final QBEState CRASH_STATE = QBEState.createCrashState(-2, ScreenStateFactory.newDummyState());
 
     /**
-     * The set of all actions (input alphabet) Z.
+     * The set of all actions used in QBETransitions in the ELTS.
      */
-    private final Set<Action> actions;
+    private final Set<Action> transitionActions;
+
+    /**
+     * The set of all actions that can be taken in states that are in the ELTS.
+     */
+    private final Set<Action> followUpActions;
 
     /**
      * Whether the ELTS is deterministic or not.
@@ -54,13 +59,16 @@ public class ELTS extends FSM {
     /**
      * Creates a new ELTS with an initial start state.
      *
-     * @param root The start or root state.
+     * @param root        The start or root state.
      * @param packageName The package name of the AUT.
      */
-    public ELTS(State root, String packageName) {
+    public ELTS(QBEState root, String packageName) {
         super(root, packageName);
-        actions = new HashSet<>();
+        transitionActions = new HashSet<>();
+        followUpActions = new HashSet<>();
         deterministic = true;
+
+        followUpActions.addAll(root.getActions());
     }
 
     /**
@@ -75,8 +83,8 @@ public class ELTS extends FSM {
         transitions.add(qbeTransition);
         QBEState target = (QBEState) qbeTransition.getTarget();
         states.add(target);
-        actions.addAll(target.getActions());
-        actions.add(transition.getAction());
+        transitionActions.add(transition.getAction());
+        followUpActions.addAll(target.getActions());
         deterministic = isDeterministic(qbeTransition);
         currentState = target;
     }
@@ -126,8 +134,19 @@ public class ELTS extends FSM {
         return newState;
     }
 
-    public Set<Action> getActions() {
-        return Collections.unmodifiableSet(actions);
+    public Set<Action> getTransitionActions() {
+        return Collections.unmodifiableSet(transitionActions);
+    }
+
+    public Set<Action> getFollowUpActions() {
+        return Collections.unmodifiableSet(followUpActions);
+    }
+
+    public Set<Action> getAllActions() {
+        final Set<Action> all = new HashSet<>(transitionActions.size() + followUpActions.size());
+        all.addAll(transitionActions);
+        all.addAll(followUpActions);
+        return Collections.unmodifiableSet(all);
     }
 
     /**
@@ -183,9 +202,8 @@ public class ELTS extends FSM {
 
         states.retainAll(reachableStates);
         transitions.retainAll(reachableTransitions);
-
-        // TODO: Figure out what to do with the actions.
-        // actions.retainAll(reachableStates.stream().flatMap(s -> s.getActions().stream()).collect(toSet()));
+        transitionActions.retainAll(transitions.stream().map(Transition::getAction).collect(toList()));
+        followUpActions.retainAll(states.stream().map(s -> (QBEState) s).flatMap(s -> s.getActions().stream()).collect(toList()));
     }
 
 
