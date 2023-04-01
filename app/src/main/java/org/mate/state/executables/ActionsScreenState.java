@@ -398,7 +398,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            if (widget.isSeekBar()) {
+            if (widget.isSeekBar() || widget.isRatingBar()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SEEK_BAR));
 
                 // it doesn't make sense to add another action to scrollable widgets

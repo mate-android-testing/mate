@@ -685,9 +685,25 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a rating bar.
+     *
+     * @return Returns {@code true} if this widget is a rating bar, otherwise {@code false}.
+     */
+    public boolean isRatingBar() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RatingBar.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents a seek bar.
      *
-     * @return Returns {@code true} if this widget is a seek bar, otherwise {@code false} is returned.
+     * @return Returns {@code true} if this widget is a seek bar, otherwise {@code false}.
      */
     public boolean isSeekBar() {
         try {
