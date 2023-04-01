@@ -305,9 +305,86 @@ public class DeviceMgr {
             case CHANGE_SEEK_BARS:
                 handleChangeSeekBars(action);
                 break;
+            case CHANGE_DATE:
+                handleChangeDate(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'change date' motif action, i.e. a date is selected from a date picker.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeDate(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Enable changing the year by clicking on the year text view at the top.
+            // TODO: Enable the selection of an arbitrary date of the current year.
+
+            // the click action on the previous week/month/year image button
+            final WidgetAction prev = (WidgetAction) action.getUIActions().get(0);
+
+            // the click action on the next week/month/year image button
+            final WidgetAction next = (WidgetAction) action.getUIActions().get(1);
+
+            final double rnd = Randomness.getRnd().nextDouble();
+
+            if (rnd <= 0.33) {
+                // pick date after clicking on previous week/month/year
+                handleClick(prev.getWidget());
+                Utils.sleep(300); // sleep a while to get a stable screen state returned
+            } else if (rnd <= 0.66) {
+                // pick date after clicking on next week/month/year
+                handleClick(next.getWidget());
+                Utils.sleep(300); // sleep a while to get a stable screen state returned
+            } // else pick date on current week/month/year
+
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            /*
+            * NOTE: Unfortunately here the UIAutomator API has major problems to return only those
+            * widgets that represent selectable (i.e. visible) dates. Without the bounds check on
+            * the view pager, the list of dates also includes dates from the previous/next month
+            * that are in no way selectable. Also checking for existence of the bare ui object
+            * exhibits the same limitation, hence we opted for the bounds checking approach. The
+            * dates of the previous month have negative x-coordinates while the dates of the next
+            * month have x-coordinates that are outside of view pager's visible area.
+             */
+            final Widget viewPager = screenState.getWidgets().stream()
+                    .filter(widget ->
+                            widget.getClazz().equals("com.android.internal.widget.ViewPager"))
+                    .findFirst().orElse(null);
+
+            if (viewPager != null) {
+
+                final List<Widget> dates = screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(widget -> widget.getClazz().equals("android.view.View"))
+                        .filter(widget -> widget.isSonOf(parent -> parent.equals(viewPager)))
+                        .filter(widget -> viewPager.getBounds().contains(widget.getBounds()))
+                        .collect(Collectors.toList());
+
+                // pick a random date
+                final Widget date = Randomness.randomElement(dates);
+                handleClick(date);
+
+                // click on OK button
+                screenState.getWidgets().stream()
+                        .filter(Widget::isButtonType)
+                        .filter(widget -> widget.getText().equalsIgnoreCase("OK")
+                                || widget.getResourceID().equals("android:id/button1"))
+                        .findFirst().ifPresent(this::handleClick);
+            } else {
+                MATE.log_warn("ViewPager couldn't be located on date picker!");
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 

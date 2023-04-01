@@ -460,10 +460,45 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractChangeRadioGroupSelectionActions(widgetActions));
         motifActions.addAll(extractChangeListViewSelectionActions(widgetActions));
         motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
+        motifActions.addAll(extractDatePickerActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible change date motif actions. This motif action changes the selected date
+     * of a date picker.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change date motif actions if any.
+     */
+    private List<MotifAction> extractDatePickerActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> datePickerActions = new ArrayList<>();
+
+        if (widgets.stream().anyMatch(Widget::isDatePicker)) {
+
+            final Predicate<WidgetAction> prevAndNextButtonMatcher = widgetAction -> {
+                final Widget widget = widgetAction.getWidget();
+                return widget.isImageButtonType()
+                        && (widget.getContentDesc().toLowerCase().contains("next")
+                        || widget.getContentDesc().toLowerCase().contains("previous"));
+            };
+
+            final List<WidgetAction> prevAndNextButtonClickActions = widgetActions.stream()
+                    .filter(prevAndNextButtonMatcher)
+                    .filter(widgetAction -> widgetAction.getActionType() == ActionType.CLICK)
+                    .collect(Collectors.toList());
+
+            final MotifAction datePickerAction
+                    = new MotifAction(ActionType.CHANGE_DATE, activityName,
+                    Collections.unmodifiableList(prevAndNextButtonClickActions));
+            datePickerActions.add(datePickerAction);
+        }
+
+        return datePickerActions;
     }
 
     /**
