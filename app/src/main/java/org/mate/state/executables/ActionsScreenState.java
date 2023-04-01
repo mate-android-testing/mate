@@ -383,9 +383,12 @@ public class ActionsScreenState extends AbstractScreenState {
              * when setting a date in such a field. In those cases, the edit text widget is likely
              * not enabled.
              */
-            if (widget.isEditTextType() && widget.isEnabled()) {
-                widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
-                widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
+            if (widget.isEditTextType()) {
+
+                if (widget.isEnabled()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
+                }
 
                 /*
                  * TODO: Use static analysis to detect whether an onclick handler is registered.
