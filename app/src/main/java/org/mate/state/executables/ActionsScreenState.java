@@ -212,7 +212,7 @@ public class ActionsScreenState extends AbstractScreenState {
              * until we define actions on them, e.g. a button might be initially not clickable until
              * certain forms are filled out.
              */
-            if ((widget.isLeafWidget() || widget.isSpinnerType()
+            if ((widget.isLeafWidget() || widget.isSpinnerType() || widget.isActionable()
                     || widget.isScrollView() || widget.isScrollable())
                     && widget.isVisible()) {
                 widgets.add(widget);
