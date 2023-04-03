@@ -309,9 +309,32 @@ public class DeviceMgr {
             case CHANGE_DATE:
                 handleChangeDate(action);
                 break;
+            case CHANGE_CHECK_BOXES:
+                handleChangeCheckBoxes(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'change check boxes' motif action, i.e. multiple check boxes are changed at once.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeCheckBoxes(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            action.getUIActions().stream().forEach(checkBoxAction -> {
+                // Only check/uncheck with a probability of 1/2 to enable different combinations.
+                if (Randomness.getRnd().nextDouble() < 0.5) {
+                    handleClick(((WidgetAction) checkBoxAction).getWidget());
+                }
+            });
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 

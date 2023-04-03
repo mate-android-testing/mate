@@ -39,7 +39,8 @@ public enum ActionType {
     CHANGE_RADIO_GROUP_SELECTIONS,
     CHANGE_LIST_VIEW_SELECTION,
     CHANGE_SEEK_BARS,
-    CHANGE_DATE;
+    CHANGE_DATE,
+    CHANGE_CHECK_BOXES;
 
     public static final ActionType[] primitiveActionTypes = {
             CLICK,
@@ -65,6 +66,7 @@ public enum ActionType {
             CHANGE_RADIO_GROUP_SELECTIONS,
             CHANGE_LIST_VIEW_SELECTION,
             CHANGE_SEEK_BARS,
-            CHANGE_DATE
+            CHANGE_DATE,
+            CHANGE_CHECK_BOXES
     };
 }

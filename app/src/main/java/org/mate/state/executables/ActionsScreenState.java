@@ -513,10 +513,37 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractChangeListViewSelectionActions(widgetActions));
         motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
         motifActions.addAll(extractDatePickerActions(widgetActions));
+        motifActions.addAll(extractChangeCheckBoxActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible change check boxes motif actions. This motif action changes multiple
+     * check boxes visible on the current screen.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change check boxes motif actions if any.
+     */
+    private List<MotifAction> extractChangeCheckBoxActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeCheckBoxActions = new ArrayList<>();
+
+        final List<WidgetAction> changeCheckBoxClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_CHECK_BOX)
+                .collect(Collectors.toList());
+
+        if (changeCheckBoxClickActions.size() > 1) { // at least two check boxes need to be present
+
+            final MotifAction changeCheckBoxAction = new MotifAction(ActionType.CHANGE_CHECK_BOXES,
+                    activityName, Collections.unmodifiableList(changeCheckBoxClickActions));
+
+            changeCheckBoxActions.add(changeCheckBoxAction);
+        }
+
+        return changeCheckBoxActions;
     }
 
     /**
