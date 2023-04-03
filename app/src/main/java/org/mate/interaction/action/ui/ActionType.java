@@ -28,6 +28,7 @@ public enum ActionType {
     DPAD_CENTER,
     ENTER,
     CHANGE_SEEK_BAR,
+    CHANGE_CHECK_BOX,
     FILL_FORM_AND_SUBMIT,
     FILL_FORM,
     SPINNER_SCROLLING,

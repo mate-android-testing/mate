@@ -453,8 +453,7 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             if (widget.isCheckable() || widget.isCheckableType()) {
-                // we check a widget by clicking on it
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECK_BOX));
             }
 
             // TODO: Use static analysis to detect whether click/long click refer to the same

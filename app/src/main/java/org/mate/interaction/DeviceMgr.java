@@ -1354,6 +1354,7 @@ public class DeviceMgr {
 
         switch (typeOfAction) {
             case CLICK:
+            case CHANGE_CHECK_BOX: // we check a widget by clicking on it
                 handleClick(selectedWidget);
                 break;
             case LONG_CLICK:
