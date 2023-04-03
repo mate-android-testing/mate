@@ -483,9 +483,14 @@ public class DeviceMgr {
                     return true;
                 }
 
-                // By convention, the first child contains the navigation elements
-                final Widget navigationElementContainer = drawerLayout.getChildren().get(0);
-
+                // Although there is a convention that the first child should refer to the main content
+                // view and the second child to the navigation menu, this rule is not followed by all
+                // apps. To circumvent this problem, we consider the size of the widgets and assume
+                // that the smaller widget in width refers to the navigation menu.
+                final Widget firstChild = drawerLayout.getChildren().get(0);
+                final Widget secondChild = drawerLayout.getChildren().get(1);
+                final Widget navigationElementContainer = firstChild.getWidth() < secondChild.getWidth()
+                        ? firstChild : secondChild;
                 return widget.isSonOf(parent -> parent.equals(navigationElementContainer));
             };
 

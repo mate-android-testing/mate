@@ -185,8 +185,14 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // See https://developer.android.com/reference/androidx/drawerlayout/widget/DrawerLayout.
         final Predicate<Widget> isNavigationWidget = w -> {
-            // By convention, the first child contains the navigation elements.
-            final Widget navigationElementContainer = drawerLayout.getChildren().get(0);
+            // Although there is a convention that the first child should refer to the main content
+            // view and the second child to the navigation menu, this rule is not followed by all
+            // apps. To circumvent this problem, we consider the size of the widgets and assume
+            // that the smaller widget in width refers to the navigation menu.
+            final Widget firstChild = drawerLayout.getChildren().get(0);
+            final Widget secondChild = drawerLayout.getChildren().get(1);
+            final Widget navigationElementContainer = firstChild.getWidth() < secondChild.getWidth()
+                    ? firstChild : secondChild;
             return w.isSonOf(parent -> parent.equals(navigationElementContainer));
         };
 
@@ -272,14 +278,16 @@ public class ActionsScreenState extends AbstractScreenState {
 
             /*
              * NOTE: For a navigation menu a drawer layout might be used. A drawer stores in its
-             * child nodes the navigation menu and the content of the current screen. By adjusting
-             * the so-called 'layout gravity' (nothing else than an opacity) either the navigation
-             * menu or the content of the current screen is shown. However, the UIAutomator API isn't
-             * aware of this and returns the widgets of both views, while we can only interact with
-             * one set of widgets at a time. By convention, the navigation menu widgets are stored in
-             * the first child, but only if the navigation menu is open. If the navigation menu is
-             * not open, the drawer layout stores only the content of the current screen. We can
-             * simply ignore the widgets of the underlying screen if the navigation menu is shown.
+             * child nodes the navigation menu and the content of the current screen and shows
+             * depending on the state either the navigation menu or the content of the current screen.
+             * However, the UIAutomator API isn't aware of this and returns the widgets of both views,
+             * while we can only interact with one set of widgets at a time. Although there is a
+             * convention that states that the main content view should be stored in the first child
+             * and the navigation menu in the second child, there are apps that don't follow this
+             * rule, thus we can't rely on this to determine which widgets belong to the navigation
+             * view. Instead, we consider the widths of children. The child widget that spans over
+             * the entire screen refers to the main content view, while the smaller widget refers to
+             * the navigation menu.
              */
             if (drawerLayout != null && drawerLayout.getChildren().size() > 1
                     && !isNavigationWidget.test(widget)) {
