@@ -635,14 +635,21 @@ public class DeviceMgr {
                         .findFirst().ifPresent(this::handleClick);
             } else {
 
+                // TODO: The sorting order might be defined through a sortable list (drag & drop).
+
                 // extract the shown menu items
                 final List<Widget> menuItems = screenState.getWidgets().stream()
                         .filter(Widget::isLeafWidget)
-                        .filter(widget -> widget.isSonOf(Widget::isListViewType))
+                        .filter(widget -> widget.isSonOf(Widget::isListViewType)
+                                        || widget.isSonOf(Widget::isRecyclerViewType))
                         .filter(Widget::isTextViewType)
                         .filter(Widget::isEnabled)
-                        .filter(Widget::hasText)
+                        .filter(widget -> widget.hasText() || widget.hasContentDescription())
                         .collect(Collectors.toList());
+
+                if (menuItems.isEmpty()) {
+                    throw new IllegalStateException("Couldn't discover any options!");
+                }
 
                 final Set<String> selectedMenuItems
                         = action.getSelectedMenuItems(menuClickAction.getWidget());
@@ -663,6 +670,26 @@ public class DeviceMgr {
                     handleClick(notSelectedMenuItem);
                     action.addSelectedMenuItem(menuClickAction.getWidget(), notSelectedMenuItem.getText());
                 }
+
+                // There might be an (optional) OK button.
+                screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(Widget::isButtonType)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::isVisible)
+                        .filter(widget -> widget.getText().equalsIgnoreCase("OK")
+                                || widget.getText().equalsIgnoreCase("APPLY"))
+                        .findFirst().ifPresent(this::handleClick);
+
+                // Or there might be an (optional) save text view in the menu bar.
+                screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::isTextViewType)
+                        .filter(Widget::isVisible)
+                        .filter(widget -> widget.getText().toLowerCase().contains("save")
+                                || widget.getContentDesc().toLowerCase().contains("save"))
+                        .findFirst().ifPresent(this::handleClick);
             }
         } else {
             throw new UnsupportedOperationException("Not yet implemented!");
