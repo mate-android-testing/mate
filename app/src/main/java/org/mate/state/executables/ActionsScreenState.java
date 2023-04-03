@@ -402,9 +402,16 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            if (widget.isCheckableType()) {
-                MATE.log_debug("Widget implements checkable interface!");
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            /*
+            * There might be leaf widgets like a combination of a image view (symbol) and a text
+            * view that are part of a common actionable layout. Instead of propagating the actions
+            * of the shared layout to the individual leaf widgets, we apply the actions directly on
+            * the parent. This should reduce the number of redundant actions.
+             */
+            if (widget.isLeafWidget() && widget.isSonOfActionableContainer()) {
+                MATE.log_debug("Parent widget defines the action!");
+                // we define the action directly on the parent widget
+                continue;
             }
 
             /*
