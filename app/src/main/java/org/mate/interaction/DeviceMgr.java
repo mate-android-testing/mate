@@ -71,6 +71,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -470,9 +471,28 @@ public class DeviceMgr {
             final IScreenState screenState
                     = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
+            // Check whether there is a drawer layout used for the navigation.
+            final Widget drawerLayout = screenState.getWidgets().stream()
+                    .filter(Widget::isDrawerLayout)
+                    .findAny()
+                    .orElse(null);
+
+            final Predicate<Widget> isNavigationWidget = widget -> {
+
+                if (drawerLayout == null || drawerLayout.getChildren().size() <= 1) {
+                    return true;
+                }
+
+                // By convention, the first child contains the navigation elements
+                final Widget navigationElementContainer = drawerLayout.getChildren().get(0);
+
+                return widget.isSonOf(parent -> parent.equals(navigationElementContainer));
+            };
+
             // extract the shown menu items
             final List<Widget> menuItems = screenState.getWidgets().stream()
                     .filter(Widget::isLeafWidget)
+                    .filter(isNavigationWidget)
                     .filter(widget -> widget.isSonOf(w -> w.isListViewType() || w.isRecyclerViewType()))
                     .filter(Widget::isTextViewType)
                     .filter(Widget::isEnabled)

@@ -177,6 +177,19 @@ public class ActionsScreenState extends AbstractScreenState {
         MATE.log_debug("Retrieving widget actions for screen state...");
         MATE.log_debug("Number of all widgets: " + this.widgets.size());
 
+        // Check whether there is a drawer layout used for the navigation.
+        final Widget drawerLayout = getWidgets().stream()
+                .filter(Widget::isDrawerLayout)
+                .findAny()
+                .orElse(null);
+
+        // See https://developer.android.com/reference/androidx/drawerlayout/widget/DrawerLayout.
+        final Predicate<Widget> isNavigationWidget = w -> {
+            // By convention, the first child contains the navigation elements.
+            final Widget navigationElementContainer = drawerLayout.getChildren().get(0);
+            return w.isSonOf(parent -> parent.equals(navigationElementContainer));
+        };
+
         List<Widget> widgets = new ArrayList<>();
 
         for (Widget widget : this.widgets) {
@@ -254,6 +267,22 @@ public class ActionsScreenState extends AbstractScreenState {
              */
             if (hasOverlappingSiblingWidgetAction(widget, widgetActions)) {
                 MATE.log_debug("Overlapping sibling action!");
+                continue;
+            }
+
+            /*
+             * NOTE: For a navigation menu a drawer layout might be used. A drawer stores in its
+             * child nodes the navigation menu and the content of the current screen. By adjusting
+             * the so-called 'layout gravity' (nothing else than an opacity) either the navigation
+             * menu or the content of the current screen is shown. However, the UIAutomator API isn't
+             * aware of this and returns the widgets of both views, while we can only interact with
+             * one set of widgets at a time. By convention, the navigation menu widgets are stored in
+             * the first child, but only if the navigation menu is open. If the navigation menu is
+             * not open, the drawer layout stores only the content of the current screen. We can
+             * simply ignore the widgets of the underlying screen if the navigation menu is shown.
+             */
+            if (drawerLayout != null && drawerLayout.getChildren().size() > 1
+                    && !isNavigationWidget.test(widget)) {
                 continue;
             }
 

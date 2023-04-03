@@ -317,6 +317,15 @@ public class Widget {
     }
 
     /**
+     * Checks whether the widget has a non-empty content description attribute.
+     *
+     * @return Returns {@code true} if the content desc is non empty, otherwise {@code false}.
+     */
+    public boolean hasContentDescription() {
+        return !contentDesc.isEmpty();
+    }
+
+    /**
      * Checks whether the widget has a non-empty text attribute.
      *
      * @return Returns {@code true} if the text attribute is non empty, otherwise {@code false}.
@@ -907,6 +916,16 @@ public class Widget {
 
     public boolean isFocused() {
         return focused;
+    }
+
+    /**
+     * Checks whether this widget represents a drawer layout.
+     *
+     * @return Returns {@code true} if this widget is a drawer layout, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isDrawerLayout() {
+        return getClazz().equals("androidx.drawerlayout.widget.DrawerLayout");
     }
 
     /**
