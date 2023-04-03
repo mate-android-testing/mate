@@ -82,11 +82,6 @@ public final class ELTSSerializer {
     }
 
     private String actionToString(Action action) {
-        if (action instanceof StartAction) {
-            final StartAction a = (StartAction) action;
-            return "{\"startAction\":{}}";
-        }
-
         if (action instanceof UIAction) {
             UIAction a = (UIAction) action;
             return String.format("{\"uiAction\":{\"actionType\":\"%s\",\"activityName\":\"%s\",\"hash\":%d}}",
@@ -103,6 +98,9 @@ public final class ELTSSerializer {
         int index = 0;
         writer.write("{");
         for (final Action action : actions) {
+            // Ignore the start action.
+            if (action instanceof StartAction) continue;
+
             if (index > 0) writer.write(",");
             writer.printf("\"%d\":%s", index, actionToString(action));
             map.put(action, index);
@@ -121,6 +119,9 @@ public final class ELTSSerializer {
         writer.write("{");
 
         for (final QBEState state : states) {
+            // Ignore the virtual root state.
+            if (state == ELTS.VIRTUAL_ROOT_STATE) continue;
+
             if (index > 0) {
                 writer.write(",");
             }
@@ -162,9 +163,16 @@ public final class ELTSSerializer {
                                              final Map<QBEState, Integer> stateIndexes,
                                              final Map<Action, Integer> actionIndexes,
                                              final PrintWriter writer) {
-        writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d,\"actionResult\":\"%s\"}",
-                stateIndexes.get(tr.getSource()), actionIndexes.get(tr.getAction()),
-                stateIndexes.get(tr.getTarget()), tr.getActionResult());
+        // Ignore the crash state.
+        if (tr.getTarget() == ELTS.CRASH_STATE) {
+            writer.printf("{\"from\":%d,\"trigger\":%d,\"actionResult\":\"%s\"}",
+                    stateIndexes.get(tr.getSource()), actionIndexes.get(tr.getAction()),
+                    tr.getActionResult());
+        } else {
+            writer.printf("{\"from\":%d,\"trigger\":%d,\"to\":%d,\"actionResult\":\"%s\"}",
+                    stateIndexes.get(tr.getSource()), actionIndexes.get(tr.getAction()),
+                    stateIndexes.get(tr.getTarget()), tr.getActionResult());
+        }
     }
 
     private void serializeTransitionRelations(ELTS elts, Map<Action, Integer> actionIndexes, Map<QBEState, Integer> stateIndexes, PrintWriter writer) {
