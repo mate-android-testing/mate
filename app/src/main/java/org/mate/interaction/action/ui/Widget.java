@@ -960,7 +960,8 @@ public class Widget {
      *         is returned.
      */
     public boolean isDrawerLayout() {
-        return getClazz().equals("androidx.drawerlayout.widget.DrawerLayout");
+        return getClazz().equals("androidx.drawerlayout.widget.DrawerLayout")
+                || getClazz().equals("android.support.v4.widget.DrawerLayout");
     }
 
     /**

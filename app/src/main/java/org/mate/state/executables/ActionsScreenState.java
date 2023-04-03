@@ -180,7 +180,7 @@ public class ActionsScreenState extends AbstractScreenState {
         // Check whether there is a drawer layout used for the navigation.
         final Widget drawerLayout = getWidgets().stream()
                 .filter(Widget::isDrawerLayout)
-                .findAny()
+                .findFirst()
                 .orElse(null);
 
         // See https://developer.android.com/reference/androidx/drawerlayout/widget/DrawerLayout.
@@ -460,7 +460,6 @@ public class ActionsScreenState extends AbstractScreenState {
 
             // These comprises any widget that is checkable from check boxes to checkable text views.
             if (widget.isCheckable() || widget.isCheckableType() || widget.isSwitch()) {
-                MATE.log_acc("Checkable widget...");
                 widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECKABLE));
 
                 // it doesn't make sense to add another action to a checkable widget
