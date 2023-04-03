@@ -436,6 +436,24 @@ public class Widget {
     }
 
     /**
+     * Returns the width of the widget.
+     *
+     * @return Returns the widget of the widget.
+     */
+    public int getWidth() {
+        return x2 - x1;
+    }
+
+    /**
+     * Returns the height of the widget.
+     *
+     * @return Returns the height of the widget.
+     */
+    public int getHeight() {
+        return y2 - y1;
+    }
+
+    /**
      * Returns the siblings of this widget. If there are no siblings, an empty list is returned.
      *
      * @return Returns the siblings of the widget.

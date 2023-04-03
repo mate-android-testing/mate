@@ -467,7 +467,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
             }
 
-            if (widget.isLeafWidget()) {
+            if (widget.isLeafWidget()
+                    // ignore placeholder widgets
+                    && widget.getHeight() > 5
+                    && (widget.hasText() || widget.hasContentDescription())) {
                 /*
                  * Right now, we can't tell whether any kind of view widget should be clickable
                  * or not, thus we assign to each leaf widget the click action. In the future,
