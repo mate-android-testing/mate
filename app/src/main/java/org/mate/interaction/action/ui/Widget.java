@@ -728,6 +728,23 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a switch, see
+     * https://developer.android.com/reference/android/widget/Switch.
+     *
+     * @return Returns {@code true} if this widget is a switch otherwise {@code false}.
+     */
+    public boolean isSwitch() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.Switch.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents a rating bar.
      *
      * @return Returns {@code true} if this widget is a rating bar, otherwise {@code false}.

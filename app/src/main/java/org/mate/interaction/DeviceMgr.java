@@ -309,8 +309,8 @@ public class DeviceMgr {
             case CHANGE_DATE:
                 handleChangeDate(action);
                 break;
-            case CHANGE_CHECK_BOXES:
-                handleChangeCheckBoxes(action);
+            case CHANGE_CHECKABLES:
+                handleChangeCheckables(action);
                 break;
             default:
                 throw new UnsupportedOperationException("UI action "
@@ -319,18 +319,18 @@ public class DeviceMgr {
     }
 
     /**
-     * Executes the 'change check boxes' motif action, i.e. multiple check boxes are changed at once.
+     * Executes the 'change checkables' motif action, i.e. multiple checkables are changed at once.
      *
      * @param action The given motif action.
      */
-    private void handleChangeCheckBoxes(final MotifAction action) {
+    private void handleChangeCheckables(final MotifAction action) {
 
         if (!Properties.USE_PRIMITIVE_ACTIONS()) {
 
-            action.getUIActions().stream().forEach(checkBoxAction -> {
+            action.getUIActions().stream().forEach(checkableAction -> {
                 // Only check/uncheck with a probability of 1/2 to enable different combinations.
                 if (Randomness.getRnd().nextDouble() < 0.5) {
-                    handleClick(((WidgetAction) checkBoxAction).getWidget());
+                    handleClick(((WidgetAction) checkableAction).getWidget());
                 }
             });
         } else {
@@ -1377,7 +1377,7 @@ public class DeviceMgr {
 
         switch (typeOfAction) {
             case CLICK:
-            case CHANGE_CHECK_BOX: // we check a widget by clicking on it
+            case CHANGE_CHECKABLE:
                 handleClick(selectedWidget);
                 break;
             case LONG_CLICK:

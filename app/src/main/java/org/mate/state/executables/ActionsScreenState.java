@@ -454,14 +454,16 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isSeekBar() || widget.isRatingBar()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SEEK_BAR));
 
-                // it doesn't make sense to add another action to scrollable widgets
+                // it doesn't make sense to add another action to seek or rating bars
                 continue;
             }
 
-            if (widget.isCheckable() || widget.isCheckableType()) {
-                widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECK_BOX));
+            // These comprises any widget that is checkable from check boxes to checkable text views.
+            if (widget.isCheckable() || widget.isCheckableType() || widget.isSwitch()) {
+                MATE.log_acc("Checkable widget...");
+                widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECKABLE));
 
-                // it doesn't make sense to add another action to a check box
+                // it doesn't make sense to add another action to a checkable widget
                 continue;
             }
 
@@ -519,7 +521,7 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractChangeListViewSelectionActions(widgetActions));
         motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
         motifActions.addAll(extractDatePickerActions(widgetActions));
-        motifActions.addAll(extractChangeCheckBoxActions(widgetActions));
+        motifActions.addAll(extractChangeCheckableActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
@@ -527,29 +529,29 @@ public class ActionsScreenState extends AbstractScreenState {
     }
 
     /**
-     * Extracts the possible change check boxes motif actions. This motif action changes multiple
-     * check boxes visible on the current screen.
+     * Extracts the possible change checkables motif actions. This motif action changes multiple
+     * checkables visible on the current screen.
      *
      * @param widgetActions The list of extracted widget actions.
-     * @return Returns the possible change check boxes motif actions if any.
+     * @return Returns the possible change checkables motif actions if any.
      */
-    private List<MotifAction> extractChangeCheckBoxActions(final List<WidgetAction> widgetActions) {
+    private List<MotifAction> extractChangeCheckableActions(final List<WidgetAction> widgetActions) {
 
-        final List<MotifAction> changeCheckBoxActions = new ArrayList<>();
+        final List<MotifAction> changeCheckableActions = new ArrayList<>();
 
-        final List<WidgetAction> changeCheckBoxClickActions = widgetActions.stream()
-                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_CHECK_BOX)
+        final List<WidgetAction> changeCheckableWidgetActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_CHECKABLE)
                 .collect(Collectors.toList());
 
-        if (changeCheckBoxClickActions.size() > 1) { // at least two check boxes need to be present
+        if (changeCheckableWidgetActions.size() > 1) { // at least two checkables need to be present
 
-            final MotifAction changeCheckBoxAction = new MotifAction(ActionType.CHANGE_CHECK_BOXES,
-                    activityName, Collections.unmodifiableList(changeCheckBoxClickActions));
+            final MotifAction changeCheckBoxAction = new MotifAction(ActionType.CHANGE_CHECKABLES,
+                    activityName, Collections.unmodifiableList(changeCheckableWidgetActions));
 
-            changeCheckBoxActions.add(changeCheckBoxAction);
+            changeCheckableActions.add(changeCheckBoxAction);
         }
 
-        return changeCheckBoxActions;
+        return changeCheckableActions;
     }
 
     /**
