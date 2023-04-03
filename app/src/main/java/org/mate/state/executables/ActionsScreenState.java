@@ -257,13 +257,19 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
+            /*
+            * There is a specific combinations of two text views that describe a setting with a
+            * headline and a summary. Instead of defining the click on both text views, it is
+            * sufficient to define it on the parent widget. This should simply reduce the number of
+            * redundant actions.
+             */
             if (widget.isSettingsOption()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                 continue;
             }
 
             if (widget.isSonOf(Widget::isSettingsOption)) {
-                MATE.log_debug("Ignoring children of settings option!");
+                // we define the click action directly on the parent widget
                 continue;
             }
 

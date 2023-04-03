@@ -1261,7 +1261,14 @@ public class Widget {
         return password;
     }
 
-    // TODO: Understand and document.
+    /**
+     * Checks whether this widget represent a 'settings' option. This is a particular combination
+     * of two text views one below the other, where the top text view represents the headline/title
+     * of the option and the bottom text view provides a summary about the option.
+     *
+     * @return Returns {@code true} if this widget represents a 'settings' option, otherwise
+     *          {@code false} is returned.
+     */
     public boolean isSettingsOption() {
         return getClazz().equals("android.widget.LinearLayout")
                 && !getChildren().isEmpty()
