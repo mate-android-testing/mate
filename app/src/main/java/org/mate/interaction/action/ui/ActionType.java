@@ -41,7 +41,8 @@ public enum ActionType {
     CHANGE_LIST_VIEW_SELECTION,
     CHANGE_SEEK_BARS,
     CHANGE_DATE,
-    CHANGE_CHECKABLES;
+    CHANGE_CHECKABLES,
+    SWAP_LIST_ITEMS;
 
     public static final ActionType[] primitiveActionTypes = {
             CLICK,
@@ -69,6 +70,7 @@ public enum ActionType {
             CHANGE_LIST_VIEW_SELECTION,
             CHANGE_SEEK_BARS,
             CHANGE_DATE,
-            CHANGE_CHECKABLES
+            CHANGE_CHECKABLES,
+            SWAP_LIST_ITEMS
     };
 }

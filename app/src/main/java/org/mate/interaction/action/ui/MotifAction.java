@@ -35,6 +35,12 @@ public class MotifAction extends UIAction {
     private List<UIAction> uiActions;
 
     /**
+     * Stores a list of widgets that are relevant for the motif action, e.g. the list items that
+     * can be swapped.
+     */
+    private List<Widget> widgets;
+
+    /**
      * Constructs a new motif action as used in the
      * {@link org.mate.exploration.genetic.algorithm.Sapienz} implementation, i.e. the individual
      * alleles represent actions that are not directly backed by a widget.
@@ -78,6 +84,24 @@ public class MotifAction extends UIAction {
         Set<String> menuItems = getSelectedMenuItems(widget);
         menuItems.add(menuItem);
         selectedMenuItems.put(widget, menuItems);
+    }
+
+    /**
+     * Sets the relevant widgets for the motif action.
+     *
+     * @param widgets The new widgets.
+     */
+    public void setWidgets(List<Widget> widgets) {
+        this.widgets = widgets;
+    }
+
+    /**
+     * Returns the relevant widgets of the motif action.
+     *
+     * @return Returns the relevant widgets.
+     */
+    public List<Widget> getWidgets() {
+        return widgets;
     }
 
     /**

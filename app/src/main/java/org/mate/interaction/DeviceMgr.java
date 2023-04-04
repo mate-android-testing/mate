@@ -315,9 +315,33 @@ public class DeviceMgr {
             case CHANGE_CHECKABLES:
                 handleChangeCheckables(action);
                 break;
+            case SWAP_LIST_ITEMS:
+                handleSwapListItems(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'swap list items' motif action, i.e. two arbitrary list items are swapped.
+     *
+     * @param action The given motif action.
+     */
+    private void handleSwapListItems(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Select two arbitrary list items that should be swapped.
+            final Widget source = action.getWidgets().get(0);
+            final Widget target = action.getWidgets().get(1);
+
+            // TODO: Fix target y-coordinate if swapping from bottom to top.
+            device.drag(source.getX(), source.getY(), target.getX(), target.getY2(), 100);
+
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 

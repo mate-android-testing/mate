@@ -522,10 +522,47 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractDatePickerActions(widgetActions));
         motifActions.addAll(extractChangeCheckableActions(widgetActions));
         motifActions.addAll(extractFillFormAndScrollActions(widgetActions));
-
-        // TODO: add further motif genes, e.g. scrolling on list views
-
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible swap list items motif actions. This motif action swaps two list items.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible swap list items motif actions if any.
+     */
+    @SuppressWarnings("unused")
+    private List<MotifAction> extractSwapListItemsActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> swapListItemsActions = new ArrayList<>();
+
+        /*
+        * TODO: Unfortunately there is no proper way to detect whether list items are swappable.
+        *  Although most implementations use an image view positioned at the right of a list view
+        *  item that can be dragged and dropped, there is no common name such that we could identify
+        *  these swappable widgets. The only viable option right now would be to overapproximate
+        *  and define for each list view such an action even if not applicable.
+         */
+
+        // TODO: There might be multiple list views visible, thus we should group the list view items
+        //  accordingly and allow only swapping between two items of the same list view.
+        final List<Widget> listItems = getWidgets().stream()
+                .filter(Widget::isLeafWidget)
+                .filter(Widget::isImageView)
+                // TODO: Find proper identifier for swappable widgets.
+                .filter(widget -> widget.getContentDesc().equalsIgnoreCase("swap"))
+                // TODO: In most cases it is the right-most (last) child.
+                .filter(widget -> widget.isSonOf(Widget::isRecyclerViewType)
+                        || widget.isSonOf(Widget::isListViewType))
+                .collect(Collectors.toList());
+
+        if (listItems.size() > 1) { // there are at least two list items
+            final MotifAction swapListItems = new MotifAction(ActionType.SWAP_LIST_ITEMS, activityName);
+            swapListItems.setWidgets(listItems);
+            swapListItemsActions.add(swapListItems);
+        }
+
+        return swapListItemsActions;
     }
 
     /**
