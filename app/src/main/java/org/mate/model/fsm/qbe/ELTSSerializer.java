@@ -14,8 +14,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -189,6 +191,16 @@ public final class ELTSSerializer {
         writer.write("]}");
     }
 
+    private QBEState getInitialState(final ELTS elts) {
+        List<QBEState> initialStates = elts.getTransitions().stream().filter(t -> t.getSource() == ELTS.VIRTUAL_ROOT_STATE).map(t -> (QBEState) t.getTarget()).collect(Collectors.toList());
+        if (initialStates.isEmpty())
+            throw new IllegalStateException("Got no initial state.");
+        if (initialStates.size() >= 2)
+            throw new IllegalStateException("Got more than one initial state.");
+
+        return initialStates.get(0);
+    }
+
     private void serializeTransitionSystem(final ELTS elts, final PrintWriter writer) {
         elts.removeUnreachableStates();
 
@@ -197,7 +209,7 @@ public final class ELTSSerializer {
         writer.write(",\"states\":");
         final Set<QBEState> states = elts.getStates().stream().map(s -> (QBEState) s).collect(toSet());
         final Map<QBEState, Integer> stateIndexes = serializeQBEStates(states, actionIndexes, writer);
-        writer.printf(",\"initialState\":%d,\"transitionRelations\":[", stateIndexes.get(ELTS.VIRTUAL_ROOT_STATE));
+        writer.printf(",\"initialState\":%d,\"transitionRelations\":[", stateIndexes.get(getInitialState(elts)));
 
         serializeTransitionRelations(elts, actionIndexes, stateIndexes, writer);
     }
