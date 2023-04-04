@@ -31,6 +31,7 @@ public enum ActionType {
     CHANGE_CHECKABLE,
     FILL_FORM_AND_SUBMIT,
     FILL_FORM,
+    FILL_FORM_AND_SCROLL,
     SPINNER_SCROLLING,
     MENU_CLICK_AND_ITEM_SELECTION,
     SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION,
@@ -58,6 +59,7 @@ public enum ActionType {
     public static final ActionType[] motifActionTypes = {
             FILL_FORM_AND_SUBMIT,
             FILL_FORM,
+            FILL_FORM_AND_SCROLL,
             SPINNER_SCROLLING,
             MENU_CLICK_AND_ITEM_SELECTION,
             SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION,

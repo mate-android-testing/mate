@@ -521,10 +521,42 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
         motifActions.addAll(extractDatePickerActions(widgetActions));
         motifActions.addAll(extractChangeCheckableActions(widgetActions));
+        motifActions.addAll(extractFillFormAndScrollActions(widgetActions));
 
         // TODO: add further motif genes, e.g. scrolling on list views
 
         return Collections.unmodifiableList(motifActions);
+    }
+
+    /**
+     * Extracts the possible fill form and scroll motif actions. This motif action combines filling
+     * out a form and scrolling down until in a repeated manner until the end of the page is reached.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible fill form and scroll motif actions if any.
+     */
+    private List<MotifAction> extractFillFormAndScrollActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> fillFormAndScrollActions = new ArrayList<>();
+
+        final List<WidgetAction> textInsertActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
+                .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
+                .collect(Collectors.toList());
+
+        final WidgetAction scrollAction = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.SWIPE_UP)
+                // the scrolling view should span over the entire screen
+                .filter(widgetAction -> appScreen.getWidth() == widgetAction.getWidget().getWidth())
+                .findFirst().orElse(null);
+
+        if (!textInsertActions.isEmpty() && scrollAction != null) {
+            final MotifAction fillFormAndScrollAction = new MotifAction(ActionType.FILL_FORM_AND_SCROLL,
+                    activityName, Collections.singletonList(scrollAction));
+            fillFormAndScrollActions.add(fillFormAndScrollAction);
+        }
+
+        return fillFormAndScrollActions;
     }
 
     /**

@@ -282,6 +282,9 @@ public class DeviceMgr {
             case FILL_FORM:
                 handleFillForm(action);
                 break;
+            case FILL_FORM_AND_SCROLL:
+                handleFillFormAndScroll(action);
+                break;
             case SPINNER_SCROLLING:
                 handleSpinnerScrolling(action);
                 break;
@@ -315,6 +318,59 @@ public class DeviceMgr {
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'fill form and scroll' motif action, i.e. a scrollable form is filled out.
+     *
+     * @param action The given motif action.
+     */
+    private void handleFillFormAndScroll(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            final WidgetAction scrollAction = (WidgetAction) action.getUIActions().get(0);
+
+            IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            boolean change = true;
+
+            // TODO: Remove this constraint if a change of the screen state can be reliably detected
+            //  and there are no changes caused by filling out the edit text fields (endless loop).
+            final int maxSwipes = 5;
+            int swipes = 0;
+
+            while (change && swipes < maxSwipes) {
+
+                // fill out the currently visible edit text fields
+                final List<Widget> editTextWidgets = screenState.getWidgets().stream()
+                        .filter(Widget::isEditTextType)
+                        .collect(Collectors.toList());
+
+                editTextWidgets.stream().forEach(this::handleEdit);
+
+                // TODO: Toggle checkboxes, radio buttons, switches, etc.
+
+                // scroll down
+                handleSwipe(scrollAction.getWidget(), scrollAction.getActionType());
+
+                Utils.sleep(300);
+
+                IScreenState newScreenState
+                        = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+                // TODO: Ensure that the equals() check is actually comparing the widgets.
+                change = !screenState.equals(newScreenState);
+                swipes++;
+                screenState = newScreenState;
+            }
+
+            // TODO: Click on a submit/save button if present.
+
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
