@@ -884,12 +884,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 fillFormAndSubmitActions.add(fillFormAndSubmitAction);
             });
         } else if (!textInsertActions.isEmpty()) { // no submit/save button discovered
-            textInsertActions.stream().forEach(textInsertAction -> {
-                final List<UIAction> actions = new ArrayList<>(textInsertActions);
-                final MotifAction fillFormAction
-                        = new MotifAction(ActionType.FILL_FORM, activityName, actions);
-                fillFormAndSubmitActions.add(fillFormAction);
-            });
+            final List<UIAction> actions = new ArrayList<>(textInsertActions);
+            final MotifAction fillFormAction
+                    = new MotifAction(ActionType.FILL_FORM, activityName, actions);
+            fillFormAndSubmitActions.add(fillFormAction);
         }
 
         return fillFormAndSubmitActions;
