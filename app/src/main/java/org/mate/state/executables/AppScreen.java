@@ -140,10 +140,6 @@ public class AppScreen {
     private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
                              int globalIndex, final int localIndex) {
 
-        MATE.log_debug("Node: " + node.getViewIdResourceName() + ", depth: " + depth
-                + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
-        MATE.log_debug("Node class: " + node.getClassName());
-
         Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
         widgets.add(widget);
 

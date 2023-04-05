@@ -169,7 +169,6 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         if (activityName.contains("GoogleOAuthActivity")) {
-            MATE.log_acc("Reached GoogleOAuthActivity!");
             // we can't authenticate here, so only allow to press 'BACK'
             return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
         }
@@ -236,9 +235,6 @@ public class ActionsScreenState extends AbstractScreenState {
 
         for (Widget widget : widgets) {
 
-            MATE.log_debug("Widget: " + widget);
-            logWidgetProperties(widget);
-
             /*
             * TODO: We assign a clickable and long-clickable action if
             *  a widget defines both attributes as true. However, in most cases
@@ -253,7 +249,6 @@ public class ActionsScreenState extends AbstractScreenState {
              * resolution of 1080x1920 this represents the area [0,0][1080,72].
              */
             if (appScreen.getStatusBarBoundingBox().contains(widget.getBounds())) {
-                MATE.log_debug("Widget within status bar: " + widget.getBounds());
                 continue;
             }
 
@@ -278,7 +273,6 @@ public class ActionsScreenState extends AbstractScreenState {
             *  We should define only for a single widget an action.
              */
             if (hasOverlappingSiblingWidgetAction(widget, widgetActions)) {
-                MATE.log_debug("Overlapping sibling action!");
                 continue;
             }
 
@@ -400,7 +394,6 @@ public class ActionsScreenState extends AbstractScreenState {
              * a linear layout in order to fill or introduce a gap.
              */
             if (widget.isLeafWidget() && widget.isContainer()) {
-                MATE.log_debug("Container as a leaf widget!");
                 continue;
             }
 
@@ -411,7 +404,6 @@ public class ActionsScreenState extends AbstractScreenState {
             * and the overlying navigation widget.
              */
             if (widget.isSonOf(Widget::isActionable) && !widget.isSonOfActionableContainer()) {
-                MATE.log_debug("Parent widget defines the action!");
                 // we define the action directly on the parent widget
                 continue;
             }
@@ -423,7 +415,6 @@ public class ActionsScreenState extends AbstractScreenState {
             * the parent. This should reduce the number of redundant actions.
              */
             if (widget.isLeafWidget() && widget.isSonOfActionableContainer()) {
-                MATE.log_debug("Parent widget defines the action!");
                 // we define the action directly on the parent widget
                 continue;
             }
@@ -492,7 +483,6 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         MATE.log_debug("Number of widget actions: " + widgetActions.size());
-        MATE.log_debug("Derived the following widget actions: " + widgetActions);
 
         List<UIAction> uiActions = new ArrayList<>(widgetActions);
         uiActions.addAll(getIndependentUIActions());
@@ -1011,7 +1001,6 @@ public class ActionsScreenState extends AbstractScreenState {
                 // check whether any sibling overlaps with the current widget
                 for (Widget sibling : siblings) {
                     if (sibling.getBounds().equals(widget.getBounds())) {
-                        MATE.log_debug("Widget " + widget + " overlaps with " + sibling + "!");
                         return true;
                     }
                 }
