@@ -129,7 +129,23 @@ public class UIAbstractionLayer {
      * @return Returns the list of executable (ui and intent) actions.
      */
     public List<Action> getExecutableActions() {
-        return getLastScreenState().getActions();
+
+        final List<Action> actions = getLastScreenState().getActions();
+
+        /*
+        * We disable the 'BACK' action whenever this action would close the AUT. This happens when
+        * only the (main) activity is open and when there is only a single visible window. Note that
+        * certain UI parts, e.g. the navigation drawer list view, doesn't represent an own window
+        * and hence a 'BACK' action would close the AUT. In contrast, the pop up menu shown by
+        * clicking on the 'more options' symbol (right-most symbol in menu bar) constitutes an own
+        * window and a 'BACK' action would only close the menu not the AUT.
+         */
+        if (getActivityStackSize() == 1 && getNumberOfWindows() == 1) {
+            actions.removeIf(action -> action instanceof UIAction
+                    && ((UIAction) action).getActionType() == ActionType.BACK);
+        }
+
+        return Collections.unmodifiableList(actions);
     }
 
     /**
@@ -147,7 +163,22 @@ public class UIAbstractionLayer {
      * @return Returns the list of executable ui actions.
      */
     public List<UIAction> getExecutableUIActions() {
-        return getLastScreenState().getUIActions();
+
+        final List<UIAction> uiActions = getLastScreenState().getUIActions();
+
+        /*
+         * We disable the 'BACK' action whenever this action would close the AUT. This happens when
+         * only the (main) activity is open and when there is only a single visible window. Note that
+         * certain UI parts, e.g. the navigation drawer list view, doesn't represent an own window
+         * and hence a 'BACK' action would close the AUT. In contrast, the pop up menu shown by
+         * clicking on the 'more options' symbol (right-most symbol in menu bar) constitutes an own
+         * window and a 'BACK' action would only close the menu not the AUT.
+         */
+        if (getActivityStackSize() == 1 && getNumberOfWindows() == 1) {
+            uiActions.removeIf(uiAction -> uiAction.getActionType() == ActionType.BACK);
+        }
+
+        return Collections.unmodifiableList(uiActions);
     }
 
     /**
@@ -850,6 +881,24 @@ public class UIAbstractionLayer {
     public String getCurrentActivity() {
         // TODO: check whether we can use the cached activity -> getLastScreenState().getActivityName();
         return deviceMgr.getCurrentActivity();
+    }
+
+    /**
+     * Retrieves the activity stack size of the AUT.
+     *
+     * @return Returns the activity stack size.
+     */
+    public int getActivityStackSize() {
+        return deviceMgr.getActivityStackSize();
+    }
+
+    /**
+     * Retrieves the number of opened windows for the current activity.
+     *
+     * @return Returns the number of displayed windows for the current activity.
+     */
+    public int getNumberOfWindows() {
+        return deviceMgr.getNumberOfWindows();
     }
 
     /**

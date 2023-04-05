@@ -73,6 +73,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -134,6 +135,16 @@ public class DeviceMgr {
      */
     private final String LANDSCAPE_MODE_CMD = "content insert --uri content://settings/system " +
             "--bind name:s:user_rotation --bind value:i:1";
+
+    /**
+     * The ADB command to retrieve information about the activity stack.
+     */
+    private final String GET_ACTIVITY_STACK_CMD = "dumpsys activity activities";
+
+    /**
+     * The ADB command to retrieve information about currently visible windows.
+     */
+    private final String GET_WINDOWS_CMD = "dumpsys window displays";
 
     /**
      * The error message when the ui automator is disconnected.
@@ -988,6 +999,66 @@ public class DeviceMgr {
                 }
             }
         }
+    }
+
+    /**
+     * Retrieves the number of opened windows for the current activity.
+     *
+     * @return Returns the number of displayed windows for the current activity.
+     */
+    public int getNumberOfWindows() {
+
+        int numberOfWindows = 1; // at least one window is opened
+
+        final Pattern windowsRecordPattern
+                = Pattern.compile("allAppWindows=\\[.*" + getCurrentActivity() + ".*\\]");
+
+        try {
+            final String output = device.executeShellCommand(GET_WINDOWS_CMD);
+            Matcher matcher = windowsRecordPattern.matcher(output);
+
+            if (matcher.find()) {
+                // allAppWindows=[Window{75cbfe7 u0 de.rampro.activitydiary.ui.generic.EditActivity},
+                // Window{37d3e2 u0 de.rampro.activitydiary.ui.generic.EditActivity}]
+                final String windowsRecord = matcher.group();
+                numberOfWindows = windowsRecord.split(",").length;
+            }
+
+        } catch (IOException e) {
+            MATE.log_error("Couldn't retrieve number of windows!");
+            throw new IllegalStateException(e);
+        }
+
+        return numberOfWindows;
+    }
+
+    /**
+     * Retrieves the activity stack size of the AUT.
+     *
+     * @return Returns the activity stack size.
+     */
+    public int getActivityStackSize() {
+
+        int activityStackSize = 1; // at least one activity is on the stack
+        final Pattern taskRecordPattern = Pattern.compile("TaskRecord.*" + packageName + ".*");
+
+        try {
+            final String output = device.executeShellCommand(GET_ACTIVITY_STACK_CMD);
+            Matcher matcher = taskRecordPattern.matcher(output);
+
+            if (matcher.find()) {
+                // TaskRecord{30e9ab6 #9 A=com.oriondev.moneywallet U=0 StackId=1 sz=1}
+                final String taskRecord = matcher.group();
+                activityStackSize = Integer.parseInt(taskRecord.split("sz=")[1]
+                        .split("\\}")[0]);
+            }
+
+        } catch (IOException e) {
+            MATE.log_error("Couldn't retrieve size of activity stack!");
+            throw new IllegalStateException(e);
+        }
+
+        return activityStackSize;
     }
 
     /**

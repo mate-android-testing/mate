@@ -56,13 +56,13 @@ public class ActionsScreenState extends AbstractScreenState {
         // intent actions are applicable independent of the underlying screen state
         if (Properties.USE_INTENT_ACTIONS()) {
             final IntentProvider intentProvider = new IntentProvider();
-            intentBasedActions = Collections.unmodifiableList(intentProvider.getIntentBasedActions());
-            systemActions = Collections.unmodifiableList(intentProvider.getSystemActions());
-            dynamicReceiverIntentActions = Collections.unmodifiableList(intentProvider.getDynamicReceiverIntentActions());
+            intentBasedActions = intentProvider.getIntentBasedActions();
+            systemActions = intentProvider.getSystemActions();
+            dynamicReceiverIntentActions = intentProvider.getDynamicReceiverIntentActions();
         } else {
-            intentBasedActions = Collections.emptyList();
-            systemActions = Collections.emptyList();
-            dynamicReceiverIntentActions = Collections.emptyList();
+            intentBasedActions = new ArrayList<>();
+            systemActions = new ArrayList<>();
+            dynamicReceiverIntentActions = new ArrayList<>();
         }
     }
 
@@ -96,7 +96,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 widgetActions.add((WidgetAction) uiAction);
             }
         }
-        return Collections.unmodifiableList(widgetActions);
+        return widgetActions;
     }
 
     /**
@@ -496,7 +496,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         List<UIAction> uiActions = new ArrayList<>(widgetActions);
         uiActions.addAll(getIndependentUIActions());
-        actions = Collections.unmodifiableList(uiActions);
+        actions = uiActions;
         return actions;
     }
 
@@ -522,7 +522,7 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractDatePickerActions(widgetActions));
         motifActions.addAll(extractChangeCheckableActions(widgetActions));
         motifActions.addAll(extractFillFormAndScrollActions(widgetActions));
-        return Collections.unmodifiableList(motifActions);
+        return motifActions;
     }
 
     /**
