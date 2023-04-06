@@ -301,16 +301,12 @@ public class TestCaseActionParametersMutationFunction implements IMutationFuncti
         } else {
             // replace with a random ui action
             final List<UIAction> candidateActions = uiAbstractionLayer
-                    .getLastScreenState()
-                    .getUIActions()
+                    .getExecutableUIActions()
                     .stream()
                     .filter(a -> !action.equals(a)
                             && !(a instanceof MotifAction)
                             && !(a instanceof PrimitiveAction)
-                            && !(a instanceof WidgetAction)
-                            // prevent possible shortening of action sequence
-                            && a.getActionType() != ActionType.HOME
-                            && a.getActionType() != ActionType.BACK)
+                            && !(a instanceof WidgetAction))
                     .collect(Collectors.toList());
 
             if (!candidateActions.isEmpty()) {
