@@ -334,6 +334,8 @@ public class UIAbstractionLayer {
             return FAILURE_APP_CRASH;
         }
 
+        // We need to sleep a while such that the state's package name is up-to-date.
+        Utils.sleep(200);
         state = clearScreen();
 
         // get the package name of the app currently running
