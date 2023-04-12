@@ -4,30 +4,30 @@ import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mate.exploration.qlearning.qbe.abstractions.action.QBEAction;
-import org.mate.exploration.qlearning.qbe.abstractions.app.QBEApplication;
-import org.mate.exploration.qlearning.qbe.abstractions.state.QBEState;
-import org.mate.exploration.qlearning.qbe.algorithms.QBETesterFactory;
-import org.mate.exploration.qlearning.qbe.exploration.ExplorationStrategy;
-import org.mate.exploration.qlearning.qbe.exploration.QBE;
-import org.mate.exploration.qlearning.qbe.exploration.RandomExploration;
-import org.mate.exploration.qlearning.qbe.qmatrix.QBEMatrixFactory;
+import org.mate.exploration.rl.qlearning.qbe.QBE;
+import org.mate.exploration.rl.qlearning.qbe.exploration.ExplorationStrategy;
+import org.mate.exploration.rl.qlearning.qbe.exploration.QMMatrixBasedExploration;
+import org.mate.exploration.rl.qlearning.qbe.exploration.RandomExploration;
+import org.mate.exploration.rl.qlearning.qbe.qmatrix.QBEMatrixFactory;
+
+import java.util.Optional;
+
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEQBE {
 
-    private ExplorationStrategy<QBEState, QBEAction> getStrategy(final Strategy strategy) {
+    private ExplorationStrategy getStrategy(final Strategy strategy) {
         final QBEMatrixFactory factory = new QBEMatrixFactory();
 
         switch (strategy) {
             case RANDOM:
-                return new RandomExploration<>();
+                return new RandomExploration();
             case ACTIVITY_MATRIX:
-                return new QBE<>(factory.getMaximizeActivityCoverageQMatrix());
+                return new QMMatrixBasedExploration(factory.getMaximizeActivityCoverageQMatrix());
             case CRASH_MATRIX:
-                return new QBE<>(factory.getMaximizesNumberOfCrashesQMatrix());
+                return new QMMatrixBasedExploration(factory.getMaximizesNumberOfCrashesQMatrix());
             case CUSTOM_MATRIX:
-                return new QBE<>(factory.getCustomNewCoverageMatrix());
+                return new QMMatrixBasedExploration(factory.getCustomNewCoverageMatrix());
             default:
                 throw new AssertionError("unreachable");
         }
@@ -35,15 +35,14 @@ public class ExecuteMATEQBE {
 
     @Test
     public void useAppContext() {
-        final String strategy = Properties.QBE_EXPLORATION_STRATEGY();
-        final Strategy s = strategy != null ? Strategy.valueOf(strategy) : Strategy.RANDOM;
-
-        MATE.log_acc(String.format("Starting QBE %s...", s));
-
+        MATE.log_acc("Starting QBE...");
         final MATE mate = new MATE();
-        final QBEApplication app = new QBEApplication(Registry.getUiAbstractionLayer());
-        final QBETesterFactory<QBEState, QBEAction> factory = new QBETesterFactory<>(app, getStrategy(s));
-        mate.testApp(factory.get());
+        final Strategy strategy = Optional.ofNullable(Properties.QBE_EXPLORATION_STRATEGY())
+                .map(Strategy::valueOf)
+                .orElse(Strategy.RANDOM);
+
+        MATE.log_acc(String.format("QBE strategy: %s", strategy));
+        mate.testApp(new QBE(Properties.MAX_NUMBER_EVENTS(), getStrategy(strategy)));
     }
 
     private enum Strategy {
