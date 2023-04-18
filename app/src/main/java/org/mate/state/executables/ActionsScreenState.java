@@ -783,27 +783,36 @@ public class ActionsScreenState extends AbstractScreenState {
 
         final List<MotifAction> openNavigationAndSelectOptionActions = new ArrayList<>();
 
-        Predicate<String> contentMatcher = content -> (content.toLowerCase().contains("navigation")
+        final Predicate<String> contentMatcher = content -> (content.toLowerCase().contains("navigation")
                 || content.toLowerCase().contains("nav")
                 || content.toLowerCase().contains("open"))
                 && !content.toLowerCase().contains("close");
 
-        // Locate the navigation menu.
-        final List<WidgetAction> navigationMenuClickActions = widgetActions.stream()
-                // TODO: Check for drawer layout that has exactly one child (nav bar is closed).
-                .filter(widgetAction -> widgetAction.getWidget().isImageButtonType()
-                        && widgetAction.getActionType() == ActionType.CLICK
-                        && contentMatcher.test(widgetAction.getWidget().getContentDesc())
-                        && appScreen.getMenuBarBoundingBox().contains(
-                                widgetAction.getWidget().getBounds()))
-                .collect(Collectors.toList());
+        final Widget drawerLayout = widgets.stream()
+                .filter(Widget::isDrawerLayout)
+                // The navigation menu has exactly one child when not opened.
+                .filter(widget -> widget.getChildren().size() == 1)
+                .findFirst()
+                .orElse(null);
 
-        navigationMenuClickActions.stream().forEach(navigationMenuClickAction -> {
-            MotifAction openNavigationAndOptionSelectAction
-                    = new MotifAction(ActionType.OPEN_NAVIGATION_AND_OPTION_SELECTION, activityName,
-                    Collections.singletonList(navigationMenuClickAction));
-            openNavigationAndSelectOptionActions.add(openNavigationAndOptionSelectAction);
-        });
+        if (drawerLayout != null) {
+
+            // Locate the navigation menu.
+            final List<WidgetAction> navigationMenuClickActions = widgetActions.stream()
+                    .filter(widgetAction -> widgetAction.getWidget().isImageButtonType()
+                            && widgetAction.getActionType() == ActionType.CLICK
+                            && contentMatcher.test(widgetAction.getWidget().getContentDesc())
+                            && appScreen.getMenuBarBoundingBox().contains(
+                            widgetAction.getWidget().getBounds()))
+                    .collect(Collectors.toList());
+
+            navigationMenuClickActions.stream().forEach(navigationMenuClickAction -> {
+                MotifAction openNavigationAndOptionSelectAction
+                        = new MotifAction(ActionType.OPEN_NAVIGATION_AND_OPTION_SELECTION, activityName,
+                        Collections.singletonList(navigationMenuClickAction));
+                openNavigationAndSelectOptionActions.add(openNavigationAndOptionSelectAction);
+            });
+        }
 
         return openNavigationAndSelectOptionActions;
     }
