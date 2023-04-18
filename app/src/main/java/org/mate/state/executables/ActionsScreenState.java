@@ -1061,7 +1061,6 @@ public class ActionsScreenState extends AbstractScreenState {
         intentActions.addAll(getSystemActions());
         intentActions.addAll(dynamicReceiverIntentActions);
         return intentActions;
-
     }
 
     /**
