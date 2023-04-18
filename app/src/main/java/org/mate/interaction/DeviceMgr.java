@@ -591,12 +591,13 @@ public class DeviceMgr {
                     .findAny()
                     .orElse(null);
 
+            // The navigation menu (drawer layout) when opened has exactly two children.
+            if (drawerLayout == null || drawerLayout.getChildren().size() <= 1) {
+                MATE.log_warn("Couldn't locate the navigation menu.");
+                return;
+            }
+
             final Predicate<Widget> isNavigationWidget = widget -> {
-
-                if (drawerLayout == null || drawerLayout.getChildren().size() <= 1) {
-                    return true;
-                }
-
                 // Although there is a convention that the first child should refer to the main content
                 // view and the second child to the navigation menu, this rule is not followed by all
                 // apps. To circumvent this problem, we consider the size of the widgets and assume
