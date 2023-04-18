@@ -783,12 +783,14 @@ public class ActionsScreenState extends AbstractScreenState {
 
         final List<MotifAction> openNavigationAndSelectOptionActions = new ArrayList<>();
 
-        Predicate<String> contentMatcher = content -> content.toLowerCase().contains("navigation")
+        Predicate<String> contentMatcher = content -> (content.toLowerCase().contains("navigation")
                 || content.toLowerCase().contains("nav")
-                || content.toLowerCase().contains("open");
+                || content.toLowerCase().contains("open"))
+                && !content.toLowerCase().contains("close");
 
         // Locate the navigation menu.
         final List<WidgetAction> navigationMenuClickActions = widgetActions.stream()
+                // TODO: Check for drawer layout that has exactly one child (nav bar is closed).
                 .filter(widgetAction -> widgetAction.getWidget().isImageButtonType()
                         && widgetAction.getActionType() == ActionType.CLICK
                         && contentMatcher.test(widgetAction.getWidget().getContentDesc())
