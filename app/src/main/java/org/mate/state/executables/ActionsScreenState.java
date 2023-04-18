@@ -936,7 +936,8 @@ public class ActionsScreenState extends AbstractScreenState {
             final Widget widget = widgetAction.getWidget();
             return widget.isTextViewType()
                     && appScreen.getMenuBarBoundingBox().contains(widget.getBounds())
-                    && widget.getContentDesc().equalsIgnoreCase("Save changes");
+                    && (widget.getContentDesc().equalsIgnoreCase("Save changes")
+                        || widget.getContentDesc().equalsIgnoreCase("Save"));
         };
 
         final List<WidgetAction> clickableActions = widgetActions.stream()
