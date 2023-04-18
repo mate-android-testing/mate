@@ -437,27 +437,19 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
          */
         private int buildPath(final IScreenState source) {
 
-            MATE.log_debug("Building path from source state: " + source);
-
             // Tracks how many paths have been already tried out.
             final int numberOfUsedPaths = usedPaths.cardinality();
 
-            MATE.log_debug("Number of used paths: " + numberOfUsedPaths);
-
             // Corresponds to the length of the original path.
             final int numberOfPossiblePaths = originalPath.length;
-
-            MATE.log_debug("Original path length: " + numberOfPossiblePaths);
 
             // Check if we reached the maximal path length.
             if (numberOfUsedPaths == numberOfPossiblePaths) {
                 if (Arrays.equals(originalPath, result)) {
                     // Discovered path is identical to original path, use random sequence instead.
-                    MATE.log_debug("Path is identical to original path!");
                     return -1;
                 } else {
                     // Abort recursion and use discovered path.
-                    MATE.log_debug("Discovered distinct path of maximal length!");
                     throw new MaxLenPathException();
                 }
             }
@@ -469,8 +461,6 @@ public class TestCaseShuffleMutationFunction implements IMutationFunction<TestCa
                             && stateEquivalence.checkEquivalence(originalPath[i].getSource(), source))
                     .boxed()
                     .toArray(Integer[]::new);
-
-            MATE.log_debug("Number of available paths: " + availablePaths.length);
 
             if (availablePaths.length == 0) {
                 // We have either exhausted all transition possibilities or there are no transitions
