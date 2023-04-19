@@ -10,14 +10,13 @@ import org.mate.model.fsm.State;
 import org.mate.model.fsm.Transition;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateFactory;
-import org.mate.utils.MathUtils;
-import org.mate.utils.Pair;
+import org.mate.state.equivalence.IStateEquivalence;
+import org.mate.state.equivalence.StateEquivalenceFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,8 +25,6 @@ import java.util.Set;
  * "QBE: QLearning-Based Exploration of Android Applications".
  */
 public class ELTS extends FSM {
-
-    public static final double COSINE_SIMILARITY_THRESHOLD = Properties.COSINE_SIMILARITY_THRESHOLD();
 
     /**
      * Represents the virtual root state. In a deterministic ELTS, this state should only ever have
@@ -55,6 +52,8 @@ public class ELTS extends FSM {
      * Whether the ELTS is deterministic or not.
      */
     private boolean deterministic;
+
+    private final IStateEquivalence stateEquivalence = StateEquivalenceFactory.getStateEquivalenceCheck(Properties.STATE_EQUIVALENCE_LEVEL());
 
     /**
      * Creates a new ELTS with an initial start state.
@@ -89,28 +88,9 @@ public class ELTS extends FSM {
         currentState = target;
     }
 
-    private Pair<List<Double>, List<Double>> featureMapToContentVectors(
-            final Map<String, Integer> features1, final Map<String, Integer> features2) {
-
-        final Set<String> keys = new HashSet<>(features1.size() + features2.size());
-        keys.addAll(features1.keySet());
-        keys.addAll(features2.keySet());
-
-        final List<Double> vector1 = new ArrayList<>(keys.size());
-        final List<Double> vector2 = new ArrayList<>(keys.size());
-
-        for (final String key : keys) {
-            vector1.add((double) features1.getOrDefault(key, 0));
-            vector2.add((double) features2.getOrDefault(key, 0));
-        }
-
-        return new Pair<>(vector1, vector2);
-    }
-
     private boolean isEquivalent(final QBEState s1, final QBEState s2) {
-        final Pair<List<Double>, List<Double>> contentVectors = featureMapToContentVectors(s1.getFeatureMap(), s2.getFeatureMap());
-        return MathUtils.cosineSimilarity(contentVectors.first, contentVectors.second)
-                > COSINE_SIMILARITY_THRESHOLD;
+        if (s1.getWidgetCount() != s2.getWidgetCount()) return false;
+        return stateEquivalence.checkEquivalence(s1.getScreenState(), s2.getScreenState());
     }
 
     @Override
