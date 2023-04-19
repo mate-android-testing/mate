@@ -140,19 +140,7 @@ public final class ELTSSerializer {
                 writer.write(actionIndexes.get(action).toString());
             }
 
-            writer.write("],\"featureMap\":{");
-            firstEntry = true;
 
-            for (final Map.Entry<String, Integer> entry : state.getFeatureMap().entrySet()) {
-                if (!firstEntry) {
-                    writer.write(",");
-                } else {
-                    firstEntry = false;
-                }
-                writer.printf("\"%s\":\"%d\"", entry.getKey(), entry.getValue());
-            }
-
-            writer.write("}}");
             map.put(state, index);
             ++index;
         }
