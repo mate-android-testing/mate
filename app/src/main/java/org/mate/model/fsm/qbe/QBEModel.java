@@ -69,7 +69,7 @@ public final class QBEModel implements IGUIModel {
         elts.addTransition(transition);
         testcase.add(transition);
         if (!elts.isDeterministic()) {
-            elts.passiveLearn(testsuite, testcase);
+                elts.passiveLearn(testsuite, testcase);
         }
     }
 
