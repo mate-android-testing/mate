@@ -48,8 +48,9 @@ public final class QBEModel implements IGUIModel {
     public QBEModel(IScreenState rootState, String packageName) {
         this.packageName = requireNonNull(packageName);
         elts = new ELTS(VIRTUAL_ROOT_STATE, packageName);
-        elts.addTransition(new QBETransition(VIRTUAL_ROOT_STATE, new QBEState(1, rootState),
-                new StartAction(), ActionResult.SUCCESS));
+        QBETransition first = new QBETransition(VIRTUAL_ROOT_STATE, new QBEState(1, rootState), new StartAction(), ActionResult.SUCCESS);
+        elts.addTransition(first);
+        testcase.add(first);
     }
 
     /**
@@ -148,10 +149,12 @@ public final class QBEModel implements IGUIModel {
     @Override
     public void addRootState(IScreenState rootState) {
         State root = elts.getState(rootState);
-        elts.addTransition(new QBETransition(VIRTUAL_ROOT_STATE, root, new StartAction(), ActionResult.SUCCESS));
+        QBETransition first = new QBETransition(VIRTUAL_ROOT_STATE, root, new StartAction(), ActionResult.SUCCESS);
+        elts.addTransition(first);
         if (!testcase.isEmpty()) {
             testsuite.add(testcase);
             testcase = new ArrayList<>();
+            testcase.add(first);
         }
     }
 
