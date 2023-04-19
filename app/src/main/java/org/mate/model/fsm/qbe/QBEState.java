@@ -63,6 +63,7 @@ public final class QBEState extends State {
     }
 
     public int getWidgetCount() {
-        return numberOfDummyComponents + screenState.getWidgets().size();
+        int widgetCount = isCrashState || isVirtualRootState ? 0 : screenState.getWidgets().size();
+        return numberOfDummyComponents + widgetCount;
     }
 }
