@@ -94,6 +94,15 @@ public class Properties {
     }
 
     /**
+     * The relative amount of motif actions in contrast to regular ui actions.
+     *
+     * @return Returns the relative amount of motif actions.
+     */
+    public static float RELATIVE_MOTIF_ACTION_AMOUNT() {
+        return propertyOr(0.0f);
+    }
+
+    /**
      * The optimisation strategy that should be applied.
      *
      * @return Returns the applied optimisation strategy.
