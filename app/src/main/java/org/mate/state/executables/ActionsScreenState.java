@@ -216,6 +216,11 @@ public class ActionsScreenState extends AbstractScreenState {
              * to pre-exclude further widgets, because those attributes are static and may change
              * until we define actions on them, e.g. a button might be initially not clickable until
              * certain forms are filled out.
+             *
+             * Note that certain widgets can be already parsed but are not visible at that time.
+             * For instance, items in a scroll view can fall below the visible screen. It is not
+             * necessary to check for the bounds (Y coordinates), the 'visible' property seems to be
+             * stable in that case.
              */
             if ((widget.isLeafWidget() || widget.isSpinnerType() || widget.isActionable()
                     || widget.isScrollView() || widget.isScrollable())

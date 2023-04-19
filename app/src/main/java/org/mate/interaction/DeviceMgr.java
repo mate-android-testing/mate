@@ -401,6 +401,7 @@ public class DeviceMgr {
                 // fill out the currently visible edit text fields
                 final List<Widget> editTextWidgets = screenState.getWidgets().stream()
                         .filter(Widget::isEditTextType)
+                        .filter(Widget::isVisible)
                         .collect(Collectors.toList());
 
                 editTextWidgets.stream().forEach(this::handleEdit);
@@ -637,6 +638,7 @@ public class DeviceMgr {
                     .filter(Widget::isEnabled)
                     .filter(Widget::hasText)
                     .filter(Widget::hasResourceID)
+                    .filter(Widget::isVisible)
                     .collect(Collectors.toList());
 
             if (menuItems.isEmpty()) {
@@ -891,6 +893,7 @@ public class DeviceMgr {
                     .filter(Widget::isTextViewType)
                     .filter(Widget::isEnabled)
                     .filter(Widget::hasText)
+                    .filter(Widget::isVisible)
                     .collect(Collectors.toList());
 
             if (menuItems.isEmpty()) {
