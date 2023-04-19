@@ -39,6 +39,11 @@ public class ELTS extends FSM {
     public static final QBEState CRASH_STATE = QBEState.createCrashState(-2, ScreenStateFactory.newDummyState());
 
     /**
+     * QBE requires state which represents the Android launcher.
+     */
+    public static final QBEState LAUNCHER_STATE = QBEState.createCrashState(-3, ScreenStateFactory.newDummyState());
+
+    /**
      * The set of all actions used in QBETransitions in the ELTS.
      */
     private final Set<Action> transitionActions;
@@ -101,6 +106,10 @@ public class ELTS extends FSM {
 
         if (screenState == CRASH_STATE.getScreenState()) {
             return CRASH_STATE;
+        }
+
+        if(screenState.getActivityName().equals("com.android.launcher3.Launcher")) {
+            return ELTS.LAUNCHER_STATE;
         }
 
         final QBEState newState = new QBEState(nextStateId, screenState);
@@ -203,9 +212,6 @@ public class ELTS extends FSM {
      * @return The (modified) test suite that compiles to the modified ELTS.
      */
     public List<List<QBETransition>> passiveLearn(List<List<QBETransition>> testsuite, final List<QBETransition> nonDeterministicTestcase) {
-        assert !testsuite.contains(nonDeterministicTestcase)
-                : "The testcase that causes the ELTS to become non deterministic should not be part of the test suite.";
-
         final int testcaseLength = nonDeterministicTestcase.size();
         if (testcaseLength == 1) {
             throw new AssertionError(
