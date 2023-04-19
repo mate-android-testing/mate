@@ -296,9 +296,6 @@ public class DeviceMgr {
             case FILL_FORM_AND_SCROLL:
                 handleFillFormAndScroll(action);
                 break;
-            case SPINNER_SCROLLING:
-                handleSpinnerScrolling(action);
-                break;
             case MENU_CLICK_AND_ITEM_SELECTION:
                 handleMenuClickAndItemSelection(action);
                 break;
@@ -329,9 +326,31 @@ public class DeviceMgr {
             case SWAP_LIST_ITEMS:
                 handleSwapListItems(action);
                 break;
+            case CHANGE_SPINNERS:
+                handleChangeSpinners(action);
+                break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'change spinners' motif action, i.e. multiple spinners are changed at once.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeSpinners(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            action.getUIActions().stream().forEach(spinnerAction -> {
+                final Widget spinner = ((WidgetAction) spinnerAction).getWidget();
+                final Widget selectedWidget = spinner.getChildren().get(0);
+                handleSpinnerScrolling(spinner, selectedWidget);
+            });
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
@@ -1159,12 +1178,16 @@ public class DeviceMgr {
     }
 
     /**
+     * NOTE: This motif action have been replaced by a widget action for a single spinner and a
+     * motif action for changing multiple spinners at once.
+     *
      * Performs a scrolling action on a spinner, i.e. one combines the clicking on the spinner to
      * open the drop-down menu (list view) and the selection of a (different) entry from the
      * drop-down menu.
      *
      * @param action The given motif action.
      */
+    @SuppressWarnings("unused")
     private void handleSpinnerScrolling(MotifAction action) {
 
         if (!Properties.USE_PRIMITIVE_ACTIONS()) {
@@ -1551,6 +1574,9 @@ public class DeviceMgr {
             case CHANGE_SEEK_BAR:
                 handleChangeSeekBar(selectedWidget);
                 break;
+            case CHANGE_SPINNER:
+                handleChangeSpinner(selectedWidget);
+                break;
             default:
                 throw new IllegalArgumentException("Action type " + action.getActionType()
                         + " not implemented for widget actions.");
@@ -1687,6 +1713,16 @@ public class DeviceMgr {
      */
     private void handleClick(Widget widget) {
         device.click(widget.getX(), widget.getY());
+    }
+
+    /**
+     * Changes the entry of a spinner.
+     *
+     * @param widget The spinner widget.
+     */
+    private void handleChangeSpinner(final Widget widget) {
+        Widget selectedWidget = widget.getChildren().get(0);
+        handleSpinnerScrolling(widget, selectedWidget);
     }
 
     /**

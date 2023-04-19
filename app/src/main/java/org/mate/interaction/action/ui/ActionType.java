@@ -29,6 +29,7 @@ public enum ActionType {
     ENTER,
     CHANGE_SEEK_BAR,
     CHANGE_CHECKABLE,
+    CHANGE_SPINNER,
     FILL_FORM_AND_SUBMIT,
     FILL_FORM,
     FILL_FORM_AND_SCROLL,
@@ -42,6 +43,7 @@ public enum ActionType {
     CHANGE_SEEK_BARS,
     CHANGE_DATE,
     CHANGE_CHECKABLES,
+    CHANGE_SPINNERS,
     SWAP_LIST_ITEMS;
 
     public static final ActionType[] primitiveActionTypes = {
@@ -71,6 +73,7 @@ public enum ActionType {
             CHANGE_SEEK_BARS,
             CHANGE_DATE,
             CHANGE_CHECKABLES,
+            CHANGE_SPINNERS,
             SWAP_LIST_ITEMS
     };
 }

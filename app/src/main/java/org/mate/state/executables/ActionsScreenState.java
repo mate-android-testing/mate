@@ -294,21 +294,10 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            if (widget.isSpinnerType()) {
+            if (widget.isSpinnerType() && widget.hasChildren()) {
 
-                /*
-                 * Although there is a proper motif action for spinner widgets in the meantime, we
-                 * keep the click action as kind of fallback mechanism and when motif actions
-                 * shouldn't be allowed.
-                 *
-                 */
-
-                if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
-                }
-
-                if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                if (widget.isClickable() || widget.isLongClickable() || widget.isScrollable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SPINNER));
                 }
 
                 // it doesn't make sense to add another action to spinner instance
@@ -501,7 +490,6 @@ public class ActionsScreenState extends AbstractScreenState {
 
         final List<MotifAction> motifActions = new ArrayList<>();
         motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
-        motifActions.addAll(extractSpinnerScrollActions(widgetActions));
         motifActions.addAll(extractMenuAndSelectItemActions(widgetActions));
         motifActions.addAll(extractSortAndSelectSortOrderActions(widgetActions));
         motifActions.addAll(extractOpenNavigationAndSelectOptionActions(widgetActions));
@@ -511,6 +499,7 @@ public class ActionsScreenState extends AbstractScreenState {
         motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
         motifActions.addAll(extractDatePickerActions(widgetActions));
         motifActions.addAll(extractChangeCheckableActions(widgetActions));
+        motifActions.addAll(extractChangeSpinnerActions(widgetActions));
         motifActions.addAll(extractFillFormAndScrollActions(widgetActions));
         return motifActions;
     }
@@ -610,6 +599,32 @@ public class ActionsScreenState extends AbstractScreenState {
         }
 
         return changeCheckableActions;
+    }
+
+    /**
+     * Extracts the possible change spinners motif actions. This motif action changes multiple
+     * entries of spinners at once.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change spinners motif actions if any.
+     */
+    private List<MotifAction> extractChangeSpinnerActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeSpinnerActions = new ArrayList<>();
+
+        final List<WidgetAction> changeSpinnerWidgetActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_SPINNER)
+                .collect(Collectors.toList());
+
+        if (changeSpinnerWidgetActions.size() > 1) { // at least two spinners need to be present
+
+            final MotifAction changeSpinnerAction = new MotifAction(ActionType.CHANGE_SPINNERS,
+                    activityName, Collections.unmodifiableList(changeSpinnerWidgetActions));
+
+            changeSpinnerActions.add(changeSpinnerAction);
+        }
+
+        return changeSpinnerActions;
     }
 
     /**
@@ -874,6 +889,9 @@ public class ActionsScreenState extends AbstractScreenState {
     }
 
     /**
+     * NOTE: This motif action have been replaced by a widget action for a single spinner and a
+     * motif action for changing multiple spinners at once.
+     *
      * Extracts the possible spinner scroll motif actions. A scroll motif action combines the
      * clicking and scrolling on a spinner. Without this motif action, one has to click first on a
      * spinner, which in turn opens the drop-down menu, and click or scroll to select a different
@@ -882,6 +900,7 @@ public class ActionsScreenState extends AbstractScreenState {
      * @param widgetActions The list of extracted widget actions.
      * @return Returns the possible spinner motif actions if any.
      */
+    @SuppressWarnings("unused")
     private List<MotifAction> extractSpinnerScrollActions(List<WidgetAction> widgetActions) {
 
         List<MotifAction> spinnerScrollActions = new ArrayList<>();
