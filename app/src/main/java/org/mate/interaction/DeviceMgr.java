@@ -490,6 +490,9 @@ public class DeviceMgr {
             * exhibits the same limitation, hence we opted for the bounds checking approach. The
             * dates of the previous month have negative x-coordinates while the dates of the next
             * month have x-coordinates that are outside of view pager's visible area.
+            *
+            * UPDATE: Checking the visible attribute seems to be sufficient to exclude dates from
+            * the previous or next month.
              */
             final Widget viewPager = screenState.getWidgets().stream()
                     .filter(widget ->
@@ -502,6 +505,7 @@ public class DeviceMgr {
                         .filter(Widget::isLeafWidget)
                         .filter(widget -> widget.getClazz().equals("android.view.View"))
                         .filter(widget -> widget.isSonOf(parent -> parent.equals(viewPager)))
+                        .filter(Widget::isVisible)
                         .filter(widget -> viewPager.getBounds().contains(widget.getBounds()))
                         .collect(Collectors.toList());
 
