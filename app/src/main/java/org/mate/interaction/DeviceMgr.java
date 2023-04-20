@@ -1819,6 +1819,16 @@ public class DeviceMgr {
         int Y = 0;
         int steps = 15;
 
+        /*
+        * The steps parameter controls the speed of the swipe, where a higher number slows down the
+        * swipe and vice versa. We noted that a too fast swiping up/down (low step size) can cause
+        * some rebounding effect, thus we adjust the step size to 25, which seems to be the most
+        * reliable setting.
+         */
+        if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
+            steps = 25;
+        }
+
         if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
@@ -1836,7 +1846,7 @@ public class DeviceMgr {
                 /*
                 * The default pixel move size is rather low, thus the change upon a swipe is tiny.
                 * The preferred option is to make the pixel move size dependent on the size of the
-                * scrollable UI element.
+                * scrollable UI element. We take half of the widget size in the given direction.
                  */
                 try {
                     if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
@@ -1866,15 +1876,18 @@ public class DeviceMgr {
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
 
-            if (direction == SWIPE_DOWN || direction == SWIPE_UP)
+            if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
                 pixelsMove = Y;
-            else
+            } else {
                 pixelsMove = X;
+            }
         }
 
         switch (direction) {
             case SWIPE_UP:
-                device.swipe(X, Y, X, Y - pixelsMove, steps);
+                // Avoid opening the status bar through the swipe.
+                final int statusBarHeight = 72;
+                device.swipe(X, Y, X, Math.max(Y - pixelsMove, statusBarHeight), steps);
                 break;
             case SWIPE_DOWN:
                 device.swipe(X, Y, X, Y + pixelsMove, steps);
