@@ -342,7 +342,8 @@ public class ComponentDescription {
 
         if (name.startsWith(".")) {
             return Registry.getPackageName() + name;
-        } else if (!name.startsWith(Registry.getPackageName())) {
+        } else if (!name.contains(".")) {
+            // Sometimes solely the blank activity class name is given.
             return Registry.getPackageName() + "." + name;
         } else {
             return name;
