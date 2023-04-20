@@ -342,6 +342,8 @@ public class ComponentDescription {
 
         if (name.startsWith(".")) {
             return Registry.getPackageName() + name;
+        } else if (!name.startsWith(Registry.getPackageName())) {
+            return Registry.getPackageName() + "." + name;
         } else {
             return name;
         }
