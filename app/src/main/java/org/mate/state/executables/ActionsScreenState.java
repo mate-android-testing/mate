@@ -419,6 +419,9 @@ public class ActionsScreenState extends AbstractScreenState {
              * not enabled.
              */
             if (widget.isEditTextType()) {
+                
+                // TODO: Certain edit text fields are intended to be clicked and select a
+                //  pre-defined text instead of inserting some hand-crafted input.
 
                 if (widget.isEnabled()) {
                     widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
