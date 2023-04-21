@@ -712,6 +712,17 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents an action bar tab.
+     *
+     * @return Returns {@code true} if this widget is an action bar tab, otherwise {@code false}.
+     */
+    public boolean isActionBarTab() {
+        return getClazz().equals("androidx.appcompat.app.ActionBar$Tab")
+                || getClazz().equals("android.support.v4.app.ActionBar$Tab")
+                || getClazz().equals("android.support.v7.app.ActionBar$Tab");
+    }
+
+    /**
      * Checks whether this widget represents a date picker.
      *
      * @return Returns {@code true} if this widget is a date picker, otherwise {@code false}.

@@ -397,7 +397,7 @@ public class ActionsScreenState extends AbstractScreenState {
             * defining the text. We can save here defining a click action for both the text view
             * and the overlying navigation widget.
              */
-            if (widget.isSonOf(Widget::isActionable) && !widget.isSonOfActionableContainer()) {
+            if (widget.isSonOf(Widget::isActionBarTab)) {
                 // we define the action directly on the parent widget
                 continue;
             }
