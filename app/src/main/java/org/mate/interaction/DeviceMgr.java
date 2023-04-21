@@ -139,7 +139,7 @@ public class DeviceMgr {
     /**
      * The ADB command to retrieve information about the activity stack.
      */
-    private final String GET_ACTIVITY_STACK_CMD = "dumpsys activity activities";
+    private final String GET_ACTIVITY_STACK_CMD = "dumpsys activity recents";
 
     /**
      * The ADB command to retrieve information about currently visible windows.
@@ -1066,8 +1066,16 @@ public class DeviceMgr {
      */
     public int getActivityStackSize() {
 
+        // https://stackoverflow.com/a/28789624/6110448
+
         int activityStackSize = 1; // at least one activity is on the stack
-        final Pattern taskRecordPattern = Pattern.compile("TaskRecord.*" + packageName + ".*");
+
+        // Certain apps use the abbreviated form (no package name prefix) to denote the activity
+        // name. Although there is no guarantee that this activity belongs to the AUT, we can still
+        // base our decision whether to enable/disable the BACK action on this information, i.e.
+        // we don't care whether the BACK action would be enabled on a non-AUT screen state.
+        final Pattern taskRecordPattern
+                = Pattern.compile("Recent #0: TaskRecord.*A=" + "(" + packageName + "|\\." + ")" + ".*");
 
         try {
             final String output = device.executeShellCommand(GET_ACTIVITY_STACK_CMD);
