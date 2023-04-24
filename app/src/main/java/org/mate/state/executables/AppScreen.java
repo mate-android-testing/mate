@@ -175,7 +175,7 @@ public class AppScreen {
         Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
         widgets.add(widget);
 
-        if (widget.isEditable()) {
+        if (widget.isEditable() && widget.isVisible()) {
             checkForHint(node, widget);
         }
 
