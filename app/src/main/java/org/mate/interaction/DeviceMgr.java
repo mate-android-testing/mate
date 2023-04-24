@@ -411,8 +411,6 @@ public class DeviceMgr {
                 // scroll down
                 handleSwipe(scrollAction.getWidget(), scrollAction.getActionType());
 
-                Utils.sleep(300);
-
                 IScreenState newScreenState
                         = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
 
@@ -472,11 +470,9 @@ public class DeviceMgr {
             if (rnd <= 0.33) {
                 // pick date after clicking on previous week/month/year
                 handleClick(prev.getWidget());
-                Utils.sleep(300); // sleep a while to get a stable screen state returned
             } else if (rnd <= 0.66) {
                 // pick date after clicking on next week/month/year
                 handleClick(next.getWidget());
-                Utils.sleep(300); // sleep a while to get a stable screen state returned
             } // else pick date on current week/month/year
 
             final IScreenState screenState
@@ -603,7 +599,6 @@ public class DeviceMgr {
              *  whether such hand-crafted waiting time works across apps. We could resort to
              *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
              */
-            Utils.sleep(200);
 
             // Fetch the new screen state containing the list view with the options.
             final IScreenState screenState
@@ -748,7 +743,6 @@ public class DeviceMgr {
              *  whether such hand-crafted waiting time works across apps. We could resort to
              *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
              */
-            Utils.sleep(200);
 
             // Fetch the new screen state containing the sort order possibilities.
             final IScreenState screenState
@@ -884,7 +878,6 @@ public class DeviceMgr {
             *  whether such hand-crafted waiting time works across apps. We could resort to
             *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
              */
-            Utils.sleep(200);
 
             // fetch the new screen state containing the list view
             final IScreenState screenState
@@ -1691,7 +1684,7 @@ public class DeviceMgr {
              * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
              * minimal waiting time to avoid this problem.
              */
-            Utils.sleep(100);
+            Utils.sleep(200);
         }
     }
 

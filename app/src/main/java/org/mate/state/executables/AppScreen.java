@@ -14,6 +14,7 @@ import org.mate.MATE;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.utils.UIAutomatorException;
+import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,12 +56,21 @@ public class AppScreen {
     private final UiDevice device;
 
     /**
+     * The waiting time for a stable screen state. If this time interval is chosen too short, we
+     * may end up getting outdated information, e.g. a wrong package or activity name, and decide
+     * to abort the current test case. Unfortunately there is no deterministic way to choose the
+     * waiting time, but 200 ms seems to be the best compromise between accuracy and performance.
+     */
+    private static final int WAIT_FOR_STABLE_STATE = 200;
+
+    /**
      * Creates a new app screen containing the widgets on it.
      */
     public AppScreen(DeviceMgr deviceMgr) {
 
-        this.device = deviceMgr.getDevice();
+        Utils.sleep(WAIT_FOR_STABLE_STATE);
 
+        this.device = deviceMgr.getDevice();
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
         this.packageName = getCurrentPackageName();

@@ -454,8 +454,6 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
-                // TODO: handle progress bar
-
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
                     change = true;
