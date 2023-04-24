@@ -1367,7 +1367,8 @@ public class Widget {
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
                     getY2() == other.getY2() &&
-                    isVisible() == other.isVisible();
+                    isVisible() == other.isVisible() &&
+                    isEnabled() == other.isEnabled();
         }
     }
 

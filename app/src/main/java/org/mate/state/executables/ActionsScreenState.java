@@ -212,19 +212,19 @@ public class ActionsScreenState extends AbstractScreenState {
              * 3) Likewise, it may can happen that checkable widgets are no leaf widgets.
              * 4) Same like spinner widgets, scroll views are no leaf widgets.
              *
-             * Note that we can't rely upon certain widget attributes, e.g. clickable or enabled,
-             * to pre-exclude further widgets, because those attributes are static and may change
-             * until we define actions on them, e.g. a button might be initially not clickable until
-             * certain forms are filled out.
+             * Note that certain widget attributes change over time, e.g. a button might be visible
+             * once scrolled to it or enabled once the editable fields have been filled out. We can
+             * only rely upon them, if our state equivalence function considers those attributes as
+             * well, otherwise we may use a cached screen state that has outdated widget attributes.
              *
              * Note that certain widgets can be already parsed but are not visible at that time.
              * For instance, items in a scroll view can fall below the visible screen. It is not
-             * necessary to check for the bounds (Y coordinates), the 'visible' property seems to be
-             * stable in that case.
+             * necessary to check for the bounds (Y coordinates), the 'visible' and 'enabled'
+             * properties seems to be sufficient to check.
              */
             if ((widget.isLeafWidget() || widget.isSpinnerType() || widget.isActionable()
                     || widget.isScrollView() || widget.isScrollable())
-                    && widget.isVisible()) {
+                    && widget.isVisible() && widget.isEnabled()) {
                 widgets.add(widget);
             }
         }

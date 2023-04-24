@@ -512,6 +512,7 @@ public class DeviceMgr {
                         .filter(widget -> widget.getClazz().equals("android.view.View"))
                         .filter(widget -> widget.isSonOf(parent -> parent.equals(viewPager)))
                         .filter(Widget::isVisible)
+                        .filter(Widget::isEnabled)
                         .filter(widget -> viewPager.getBounds().contains(widget.getBounds()))
                         .collect(Collectors.toList());
 
