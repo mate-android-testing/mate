@@ -459,20 +459,30 @@ public class DeviceMgr {
             // TODO: Enable changing the year by clicking on the year text view at the top.
             // TODO: Enable the selection of an arbitrary date of the current year.
 
-            // the click action on the previous week/month/year image button
-            final WidgetAction prev = (WidgetAction) action.getUIActions().get(0);
-
-            // the click action on the next week/month/year image button
-            final WidgetAction next = (WidgetAction) action.getUIActions().get(1);
-
             final double rnd = Randomness.getRnd().nextDouble();
 
             if (rnd <= 0.33) {
-                // pick date after clicking on previous week/month/year
-                handleClick(prev.getWidget());
+
+                // The prev button might be disabled if only dates in the future can be selected.
+                if (!action.getUIActions().isEmpty()) {
+
+                    // the click action on the previous week/month/year image button
+                    final WidgetAction prev = (WidgetAction) action.getUIActions().get(0);
+
+                    // pick date after clicking on previous week/month/year
+                    handleClick(prev.getWidget());
+                }
             } else if (rnd <= 0.66) {
-                // pick date after clicking on next week/month/year
-                handleClick(next.getWidget());
+
+                // The next button might be disabled if only dates in the past can be selected.
+                if (action.getUIActions().size() >= 2) {
+
+                    // the click action on the next week/month/year image button
+                    final WidgetAction next = (WidgetAction) action.getUIActions().get(1);
+
+                    // pick date after clicking on next week/month/year
+                    handleClick(next.getWidget());
+                }
             } // else pick date on current week/month/year
 
             final IScreenState screenState
