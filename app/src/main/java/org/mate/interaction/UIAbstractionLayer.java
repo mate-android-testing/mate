@@ -442,6 +442,12 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for presence of a progress bar
+                if (handleProgressBar(screenState)) {
+                    change = true;
+                    continue;
+                }
+
                 // check for media picker
                 if (handleMediaPicker(screenState)) {
                     change = true;
@@ -537,26 +543,19 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Checks whether the current screen shows a progress bar. If this is the case, we wait 10 seconds.
+     * Checks whether the current screen shows a progress bar. If this is the case, we wait 3 seconds.
      * This may take several iterations until the progress bar is gone.
      *
      * @param screenState The current screen.
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
-    @SuppressWarnings("unused")
     private boolean handleProgressBar(IScreenState screenState) {
-
-        /*
-         * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
-         *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
-         *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
-         */
 
         // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
 
         if (deviceMgr.checkForProgressBar(screenState)) {
             MATE.log("Detected progress bar! Waiting...");
-            Utils.sleep(10000);
+            Utils.sleep(3000);
             return true;
         } else {
             return false;

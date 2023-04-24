@@ -1636,9 +1636,30 @@ public class DeviceMgr {
      */
     public boolean checkForProgressBar(IScreenState screenState) {
 
+        boolean foundProgressBar = false;
+        boolean foundProgressBarPercent = false;
+        boolean foundProgressBarNumber = false;
+
+        /*
+        * There are certain apps that misuse a progress bar as a rating bar. Thus, we need to watch
+        * out for a specific combination of widgets to distinguish a regular progress bar from a
+        * progress bar that is used as a rating bar.
+         */
+
         for (Widget widget : screenState.getWidgets()) {
+
             if (widget.isProgressBarType() && widget.isEnabled() && widget.isVisible()) {
-                return true;
+                foundProgressBar = true;
+            } else if (widget.getResourceID().equals("android:id/progress_number")
+                    && widget.isEnabled() && widget.isVisible()) {
+                foundProgressBarNumber = true;
+            } else if (widget.getResourceID().equals("android:id/progress_percent")
+                    && widget.isEnabled() && widget.isVisible()) {
+                foundProgressBarPercent = true;
+            }
+
+            if (foundProgressBar && foundProgressBarPercent && foundProgressBarNumber) {
+                return true; // early termination
             }
         }
 
