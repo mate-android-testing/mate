@@ -335,7 +335,6 @@ public class UIAbstractionLayer {
         }
 
         // We need to sleep a while such that the state's package name is up-to-date.
-        Utils.sleep(200);
         state = clearScreen();
 
         // get the package name of the app currently running
@@ -448,6 +447,11 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                if (handleDeviceAdministratorDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
                 // check for media picker
                 if (handleMediaPicker(screenState)) {
                     change = true;
@@ -500,6 +504,47 @@ public class UIAbstractionLayer {
             }
         }
         return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows a device administrator dialog. If this is the case,
+     * we click on the activate button.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleDeviceAdministratorDialog(final IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.android.settings")
+                && screenState.getActivityName().equals("com.android.settings.DeviceAdminAdd")) {
+
+            MATE.log("Detected device administrator dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                final Widget widget = action.getWidget();
+
+                if (action.getActionType() == ActionType.CLICK
+                        && ((widget.isButtonType()
+                        && widget.getResourceID().equals("com.android.settings:id/action_button"))
+                        || widget.getText()
+                            .equalsIgnoreCase("Activate this device administrator"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on ACTIVATE button on " +
+                                "device administrator dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
