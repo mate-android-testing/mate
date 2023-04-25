@@ -563,7 +563,7 @@ public class UIAbstractionLayer {
     private boolean handleDeviceAdministratorDialog(final IScreenState screenState) {
 
         if (screenState.getPackageName().equals("com.android.settings")
-                && screenState.getActivityName().equals("com.android.settings.DeviceAdminAdd")) {
+                && screenState.getActivityName().endsWith("DeviceAdminAdd")) {
 
             MATE.log("Detected device administrator dialog!");
 
@@ -571,9 +571,10 @@ public class UIAbstractionLayer {
 
                 final Widget widget = action.getWidget();
 
-                if (action.getActionType() == ActionType.CLICK
-                        && ((widget.isButtonType()
-                        && widget.getResourceID().equals("com.android.settings:id/action_button"))
+                if (action.getActionType() == ActionType.CLICK && widget.isButtonType()
+                         && (widget.getResourceID().equals("com.android.settings:id/action_button")
+                        || widget.getText()
+                            .equalsIgnoreCase("Activate this device admin app")
                         || widget.getText()
                             .equalsIgnoreCase("Activate this device administrator"))) {
                     try {
