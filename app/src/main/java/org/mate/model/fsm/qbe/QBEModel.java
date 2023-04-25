@@ -1,8 +1,5 @@
 package org.mate.model.fsm.qbe;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toSet;
-
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ActionResult;
@@ -18,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Defines an Extended Labeled Transition System (ELTS) as described on page 107/108 in the paper
@@ -70,7 +70,7 @@ public final class QBEModel implements IGUIModel {
         elts.addTransition(transition);
         testcase.add(transition);
         if (!elts.isDeterministic()) {
-                elts.passiveLearn(testsuite, testcase);
+            elts.passiveLearn(testsuite, testcase);
         }
     }
 
