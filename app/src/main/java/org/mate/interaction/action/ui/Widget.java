@@ -391,15 +391,6 @@ public class Widget {
     }
 
     /**
-     * Returns the depth of the widget in the widget hierarchy. The root widget has a depth of 0.
-     *
-     * @return Returns the depth of the widget in the widget hierarchy.
-     */
-    public int getDepth() {
-        return depth;
-    }
-
-    /**
      * Whether the widget has a resource id defined.
      *
      * @return Returns {@code true} if the widget has a resource id, otherwise {@code false}.
@@ -436,9 +427,9 @@ public class Widget {
     }
 
     /**
-     * Returns the depth of the widget in the ui hierarchy.
+     * Returns the depth of the widget in the widget hierarchy. The root widget has a depth of 0.
      *
-     * @return Returns the widgets' depth in the ui hierarchy.
+     * @return Returns the depth of the widget in the widget hierarchy.
      */
     public int getDepth() {
         return depth;

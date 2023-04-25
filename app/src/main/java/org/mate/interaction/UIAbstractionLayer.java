@@ -379,6 +379,9 @@ public class UIAbstractionLayer {
                     SurrogateModel surrogateModel = (SurrogateModel) guiModel;
                     Set<String> traces = deviceMgr.getTraces();
                     surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+                } else if (Properties.QBE_MODEL()) {
+                    QBEModel qbeModel = (QBEModel) guiModel;
+                    qbeModel.update(lastScreenState, state, action, FAILURE_APP_CRASH);
                 } else {
                     guiModel.update(lastScreenState, state, action);
                 }
