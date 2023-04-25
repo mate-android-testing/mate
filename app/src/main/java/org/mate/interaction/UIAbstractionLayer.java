@@ -740,29 +740,33 @@ public class UIAbstractionLayer {
          */
 
         // API 25, 28:
-        if (screenState.getPackageName().equals("com.google.android.packageinstaller")
+        if ((screenState.getPackageName().equals("com.google.android.packageinstaller")
                 || screenState.getPackageName().equals("com.android.packageinstaller")
                 || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")
                 // API 29:
                 || screenState.getPackageName().equals("com.android.permissioncontroller")
-                || screenState.getPackageName().equals("com.google.android.permissioncontroller")) {
+                || screenState.getPackageName().equals("com.google.android.permissioncontroller"))
+                && screenState.getActivityName().endsWith("GrantPermissionsActivity")) {
 
             MATE.log("Detected permission dialog!");
 
             for (WidgetAction action : screenState.getWidgetActions()) {
 
-                Widget widget = action.getWidget();
+                final Widget widget = action.getWidget();
 
                 /*
                  * The resource id of the allow button may differ as well between different API levels.
                  */
                 if (action.getActionType() == ActionType.CLICK
+                        && widget.isButtonType()
                         // API 25, 28:
                         && (widget.getResourceID()
                         .equals("com.android.packageinstaller:id/permission_allow_button")
                         // API: 29
                         || widget.getResourceID().equals(
                         "com.android.permissioncontroller:id/permission_allow_button")
+                        || widget.getResourceID().equals(
+                        "com.android.permissioncontroller:id/continue_button")
                         || widget.getResourceID().equals(
                         "com.android.packageinstaller:id/continue_button")
                         || widget.getText().equalsIgnoreCase("continue")
