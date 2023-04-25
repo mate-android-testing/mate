@@ -10,6 +10,7 @@ import org.mate.interaction.action.ui.UIAction;
  * 2018, pp. 105-115, doi: 10.1109/ICST.2018.00020.
  */
 public final class QBEAbstractAction implements QMatrix.AbstractActions {
+
     @Override
     public int getAbstractActionIndex(final UIAction action) {
         switch (action.getActionType()) {
@@ -45,9 +46,13 @@ public final class QBEAbstractAction implements QMatrix.AbstractActions {
             case WAKE_UP:
             case DELETE:
             case ENTER:
+            case CHANGE_SEEK_BAR:
+            case CHANGE_CHECKABLE:
+            case CHANGE_SPINNER:
                 return 6;
             default:
-                throw new AssertionError("Unreachable!");
+                throw new UnsupportedOperationException("Not yet supported action type: "
+                        + action.getActionType());
         }
     }
 

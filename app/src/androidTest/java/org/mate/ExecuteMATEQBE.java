@@ -49,7 +49,7 @@ public class ExecuteMATEQBE {
             case CUSTOM_MATRIX:
                 return new QMMatrixBasedExploration(factory.getCustomNewCoverageMatrix());
             default:
-                throw new AssertionError("unreachable");
+                throw new UnsupportedOperationException("Unknown exploration strategy: " + strategy);
         }
     }
 }
