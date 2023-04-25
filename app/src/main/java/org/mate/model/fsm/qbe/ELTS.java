@@ -1,8 +1,5 @@
 package org.mate.model.fsm.qbe;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
 import org.mate.Properties;
 import org.mate.interaction.action.Action;
 import org.mate.model.fsm.FSM;
@@ -20,6 +17,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
 /**
  * Defines an Extended Labeled Transition System (ELTS) as described on page 107/108 in the paper
  * "QBE: QLearning-Based Exploration of Android Applications".
@@ -30,18 +30,21 @@ public class ELTS extends FSM {
      * Represents the virtual root state. In a deterministic ELTS, this state should only ever have
      * a single neighbour, which is the actual initial state of the AUT.
      */
-    public static final QBEState VIRTUAL_ROOT_STATE = QBEState.createVirtualRootState(-1, ScreenStateFactory.newDummyState());
+    public static final QBEState VIRTUAL_ROOT_STATE
+            = QBEState.createVirtualRootState(-1, ScreenStateFactory.newDummyState());
 
     /**
      * QBE requires state which represents a crash, such that this state is part of the serialized
      * transition system.
      */
-    public static final QBEState CRASH_STATE = QBEState.createCrashState(-2, ScreenStateFactory.newDummyState());
+    public static final QBEState CRASH_STATE
+            = QBEState.createCrashState(-2, ScreenStateFactory.newDummyState());
 
     /**
      * QBE requires state which represents the Android launcher.
      */
-    public static final QBEState LAUNCHER_STATE = QBEState.createCrashState(-3, ScreenStateFactory.newDummyState());
+    public static final QBEState LAUNCHER_STATE
+            = QBEState.createCrashState(-3, ScreenStateFactory.newDummyState());
 
     /**
      * The set of all actions used in QBETransitions in the ELTS.
@@ -58,12 +61,16 @@ public class ELTS extends FSM {
      */
     private boolean deterministic;
 
-    private final IStateEquivalence stateEquivalence = StateEquivalenceFactory.getStateEquivalenceCheck(Properties.STATE_EQUIVALENCE_LEVEL());
+    /**
+     * The employed state equivalence function.
+     */
+    private final IStateEquivalence stateEquivalence
+            = StateEquivalenceFactory.getStateEquivalenceCheck(Properties.STATE_EQUIVALENCE_LEVEL());
 
     /**
      * Creates a new ELTS with an initial start state.
      *
-     * @param root        The start or root state.
+     * @param root The start or root state.
      * @param packageName The package name of the AUT.
      */
     public ELTS(QBEState root, String packageName) {
@@ -71,7 +78,6 @@ public class ELTS extends FSM {
         transitionActions = new HashSet<>();
         followUpActions = new HashSet<>();
         deterministic = true;
-
         followUpActions.addAll(root.getActions());
     }
 
@@ -93,13 +99,30 @@ public class ELTS extends FSM {
         currentState = target;
     }
 
+    /**
+     * Checks whether the given two states are considered equal.
+     *
+     * @param s1 The first state.
+     * @param s2 The second state.
+     * @return Returns {@code true} if the two states are considered equal, otherwise {@code false}.
+     */
     private boolean isEquivalent(final QBEState s1, final QBEState s2) {
-        if (s1.getWidgetCount() != s2.getWidgetCount()) return false;
-        return stateEquivalence.checkEquivalence(s1.getScreenState(), s2.getScreenState());
+        if (s1.getWidgetCount() != s2.getWidgetCount()) {
+            return false;
+        } else {
+            return stateEquivalence.checkEquivalence(s1.getScreenState(), s2.getScreenState());
+        }
     }
 
+    /**
+     * Returns the state in the ELTS mapping to the given screen state.
+     *
+     * @param screenState The given screen state.
+     * @return Returns the corresponding ELTS state.
+     */
     @Override
     public State getState(IScreenState screenState) {
+
         if (screenState == VIRTUAL_ROOT_STATE.getScreenState()) {
             return VIRTUAL_ROOT_STATE;
         }
@@ -108,14 +131,15 @@ public class ELTS extends FSM {
             return CRASH_STATE;
         }
 
-        if(screenState.getActivityName().equals("com.android.launcher3.Launcher")) {
+        // TODO: This is API level and image dependent.
+        if (screenState.getActivityName().equals("com.android.launcher3.Launcher")) {
             return ELTS.LAUNCHER_STATE;
         }
 
         final QBEState newState = new QBEState(nextStateId, screenState);
-        for (final State s : states) {
-            if (isEquivalent((QBEState) s, newState)) {
-                return s;
+        for (final State state : states) {
+            if (isEquivalent((QBEState) state, newState)) {
+                return state;
             }
         }
 
@@ -132,7 +156,8 @@ public class ELTS extends FSM {
     }
 
     public Set<Action> getAllActions() {
-        final Set<Action> all = new HashSet<>(transitionActions.size() + followUpActions.size());
+        final Set<Action> all
+                = new HashSet<>(transitionActions.size() + followUpActions.size());
         all.addAll(transitionActions);
         all.addAll(followUpActions);
         return Collections.unmodifiableSet(all);
@@ -174,6 +199,7 @@ public class ELTS extends FSM {
      * Removes the unreachable states.
      */
     public void removeUnreachableStates() {
+
         final Set<Transition> reachableTransitions = new HashSet<>(transitions.size());
         final Set<State> reachableStates = new HashSet<>(states.size());
         reachableStates.add(VIRTUAL_ROOT_STATE);
@@ -191,8 +217,10 @@ public class ELTS extends FSM {
 
         states.retainAll(reachableStates);
         transitions.retainAll(reachableTransitions);
-        transitionActions.retainAll(transitions.stream().map(Transition::getAction).collect(toList()));
-        followUpActions.retainAll(states.stream().map(s -> (QBEState) s).flatMap(s -> s.getActions().stream()).collect(toList()));
+        transitionActions.retainAll(transitions.stream()
+                .map(Transition::getAction).collect(toList()));
+        followUpActions.retainAll(states.stream()
+                .map(s -> (QBEState) s).flatMap(s -> s.getActions().stream()).collect(toList()));
     }
 
 
@@ -204,40 +232,44 @@ public class ELTS extends FSM {
      * the ELTS does not comply to the AUT.
      * This algorithms corrects a non-deterministic ELTS and turns it back into a deterministic one.
      * <p>
-     * WARNING: Passive Learn can recuse infinitely, the AUT is non deterministic!
+     * WARNING: Passive Learn can recurse infinitely if AUT is non deterministic!
      *
-     * @param testsuite                The tests that have been executed so far. The corrected ELTS should contain
-     *                                 contain every path thats described by a test case.
+     * @param testsuite The tests that have been executed so far. The corrected ELTS should contain
+     *         every path that is described by a test case.
      * @param nonDeterministicTestcase The test case that caused the ELTS to become non deterministic.
-     * @return The (modified) test suite that compiles to the modified ELTS.
+     * @return The (modified) test suite that complies to the modified ELTS.
      */
-    public List<List<QBETransition>> passiveLearn(List<List<QBETransition>> testsuite, final List<QBETransition> nonDeterministicTestcase) {
+    public List<List<QBETransition>> passiveLearn(List<List<QBETransition>> testsuite,
+                                                  final List<QBETransition> nonDeterministicTestcase) {
+
         final int testcaseLength = nonDeterministicTestcase.size();
+
         if (testcaseLength == 1) {
             throw new AssertionError(
                     "The first action should always be deterministic," +
                             " if the AUT is deterministic.");
-
         } else {
             final QBETransition conflictingTransition
                     = nonDeterministicTestcase.remove(testcaseLength - 1);
             final QBETransition secondLastTransition
                     = nonDeterministicTestcase.get(testcaseLength - 2);
 
-
             final QBEState stateWithDummy = new QBEState((QBEState) secondLastTransition.getTarget());
             stateWithDummy.addDummyComponent();
 
             transitions.remove(conflictingTransition);
             transitions.remove(secondLastTransition);
-            transitions.add(new QBETransition(secondLastTransition.getSource(), stateWithDummy, secondLastTransition.getAction(), secondLastTransition.getActionResult()));
+            transitions.add(new QBETransition(secondLastTransition.getSource(),
+                    stateWithDummy, secondLastTransition.getAction(),
+                    secondLastTransition.getActionResult()));
 
             testsuite.add(nonDeterministicTestcase);
 
             testsuite = testsuite.stream().map(testcase -> testcase.stream()
                     .map(tr -> tr.getSource().equals(secondLastTransition.getSource())
                             && Objects.equals(tr.getTarget(), secondLastTransition.getTarget())
-                            ? new QBETransition(tr.getSource(), stateWithDummy, tr.getAction(), tr.getActionResult())
+                            ? new QBETransition(tr.getSource(), stateWithDummy,
+                                tr.getAction(), tr.getActionResult())
                             : tr
                     ).collect(toList())).collect(toList());
 

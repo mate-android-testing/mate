@@ -200,7 +200,7 @@ public class FSMModel implements IGUIModel {
     public Optional<List<Edge>> shortestPath(IScreenState from, IScreenState to) {
         State fromState = fsm.getState(from);
         State toState = fsm.getState(to);
-        MATE.log_acc("Trying to find the shortest path from " + fromState + " to " + toState);
+        MATE.log_debug("Trying to find the shortest path from " + fromState + " to " + toState);
         return fsm.shortestPath(fromState, toState)
                 .map(transitions -> transitions.stream()
                         .map(transition -> new Edge(transition.getAction(),

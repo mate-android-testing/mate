@@ -9,7 +9,7 @@ import org.mate.model.fsm.qbe.ELTSSerializer;
 import org.mate.model.fsm.qbe.QBEModel;
 
 /**
- * Provied the QBE Q-learning based algorithm.
+ * Provides the QBE Q-learning based algorithm.
  */
 public final class QBE implements Algorithm {
 
@@ -41,12 +41,14 @@ public final class QBE implements Algorithm {
         }
     }
 
+    /**
+     * Serializes the ELTS.
+     */
     private void serializeELTS() {
-        if (!Properties.QBE_RECORD_TRANSITION_SYSTEM())
-            return;
-
-        QBEModel model = (QBEModel) Registry.getUiAbstractionLayer().getGuiModel();
-        new ELTSSerializer().serialize(model.getELTS());
-        Registry.getEnvironmentManager().fetchTransitionSystem();
+        if (Properties.QBE_RECORD_TRANSITION_SYSTEM()) {
+            QBEModel model = (QBEModel) Registry.getUiAbstractionLayer().getGuiModel();
+            new ELTSSerializer().serialize(model.getELTS());
+            Registry.getEnvironmentManager().fetchTransitionSystem();
+        }
     }
 }

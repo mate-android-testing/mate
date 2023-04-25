@@ -1,8 +1,5 @@
 package org.mate.exploration.rl.qlearning.qbe.exploration;
 
-import static org.mate.utils.Randomness.getRandomlyDistributedKey;
-import static org.mate.utils.StreamUtils.distinctByKey;
-
 import org.mate.exploration.rl.qlearning.qbe.qmatrix.QMatrix;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
@@ -14,6 +11,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.mate.utils.Randomness.getRandomlyDistributedKey;
+import static org.mate.utils.StreamUtils.distinctByKey;
 
 /**
  * Provides a simple Q-Learning based exploration strategy as outlined in Algorithm 3.
@@ -48,6 +48,7 @@ public final class QMMatrixBasedExploration implements ExplorationStrategy {
      */
     @Override
     public Optional<UIAction> chooseAction(final QBEState currentState) {
+
         final List<Action> currentActions = currentState.getActions();
 
         if (currentActions.isEmpty()) {

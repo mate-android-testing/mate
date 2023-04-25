@@ -42,13 +42,14 @@ public final class QBEModel implements IGUIModel {
     /**
      * Creates a new ELTS model with a given initial state.
      *
-     * @param rootState   The root or start state of the ELTS model.
+     * @param rootState The root or start state of the ELTS model.
      * @param packageName The package name of the AUT.
      */
     public QBEModel(IScreenState rootState, String packageName) {
         this.packageName = requireNonNull(packageName);
         elts = new ELTS(VIRTUAL_ROOT_STATE, packageName);
-        QBETransition first = new QBETransition(VIRTUAL_ROOT_STATE, new QBEState(1, rootState), new StartAction(), ActionResult.SUCCESS);
+        QBETransition first = new QBETransition(VIRTUAL_ROOT_STATE, new QBEState(1, rootState),
+                new StartAction(), ActionResult.SUCCESS);
         elts.addTransition(first);
         testcase.add(first);
     }
@@ -149,7 +150,8 @@ public final class QBEModel implements IGUIModel {
     @Override
     public void addRootState(IScreenState rootState) {
         State root = elts.getState(rootState);
-        QBETransition first = new QBETransition(VIRTUAL_ROOT_STATE, root, new StartAction(), ActionResult.SUCCESS);
+        QBETransition first
+                = new QBETransition(VIRTUAL_ROOT_STATE, root, new StartAction(), ActionResult.SUCCESS);
         elts.addTransition(first);
         if (!testcase.isEmpty()) {
             testsuite.add(testcase);

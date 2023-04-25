@@ -1,8 +1,5 @@
 package org.mate.model.fsm.qbe;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toSet;
-
 import org.mate.MATE;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.StartAction;
@@ -19,6 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Provides a serialization mechanism for the ELTS.
@@ -57,7 +57,8 @@ public final class ELTSSerializer {
     public void serialize(final ELTS elts) {
         requireNonNull(elts);
 
-        if (elts.getAllActions().stream().map(Object::hashCode).distinct().count() != elts.getAllActions().size()) {
+        if (elts.getAllActions().stream()
+                .map(Object::hashCode).distinct().count() != elts.getAllActions().size()) {
             MATE.log_warn("Found hash collision while serializing.");
             MATE.log_warn("The transition system will not be serialized!");
             return;
@@ -140,7 +141,6 @@ public final class ELTSSerializer {
                 writer.write(actionIndexes.get(action).toString());
             }
 
-
             map.put(state, index);
             ++index;
         }
@@ -165,7 +165,8 @@ public final class ELTSSerializer {
         }
     }
 
-    private void serializeTransitionRelations(ELTS elts, Map<Action, Integer> actionIndexes, Map<QBEState, Integer> stateIndexes, PrintWriter writer) {
+    private void serializeTransitionRelations(ELTS elts, Map<Action, Integer> actionIndexes,
+                                              Map<QBEState, Integer> stateIndexes, PrintWriter writer) {
         boolean firstEntry = true;
 
         for (Transition tr : elts.getTransitions()) {
@@ -180,7 +181,10 @@ public final class ELTSSerializer {
     }
 
     private QBEState getInitialState(final ELTS elts) {
-        List<QBEState> initialStates = elts.getTransitions().stream().filter(t -> t.getSource() == ELTS.VIRTUAL_ROOT_STATE).map(t -> (QBEState) t.getTarget()).collect(Collectors.toList());
+        List<QBEState> initialStates = elts.getTransitions().stream()
+                .filter(t -> t.getSource() == ELTS.VIRTUAL_ROOT_STATE)
+                .map(t -> (QBEState) t.getTarget())
+                .collect(Collectors.toList());
         if (initialStates.isEmpty())
             throw new IllegalStateException("Got no initial state.");
         if (initialStates.size() >= 2)

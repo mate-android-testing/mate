@@ -165,21 +165,6 @@ public class Properties {
         return propertyOr(null);
     }
 
-    // TODO: Document.
-    public static int K_VALUE() {
-        return propertyOr(2);
-    }
-
-    // TODO: Document.
-    public static double RANK_BIAS() {
-        return propertyOr(1.7);
-    }
-
-    // TODO: Document.
-    public static double GREEDY_EPSILON() {
-        return propertyOr(0.7);
-    }
-
     /*
      * End QBE properties
      */

@@ -42,7 +42,11 @@ public class ScreenStateFactory {
         }
     }
 
-
+    /**
+     * Constructs a dummy screen state. This is primarily used as a virtual root state for instance.
+     *
+     * @return Returns the dummy screen state.
+     */
     public static IScreenState newDummyState() {
         return new IScreenState() {
             @Override

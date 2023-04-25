@@ -431,7 +431,6 @@ public class TestCase {
                 }
                 break;
             case SUCCESS:
-            case SUCCESS_NEW_STATE:
             case SUCCESS_OUTBOUND:
             case FAILURE_UIAUTOMATOR:
             case FAILURE_UNKNOWN:
@@ -458,7 +457,6 @@ public class TestCase {
 
         switch (actionResult) {
             case SUCCESS:
-            case SUCCESS_NEW_STATE:
                 return true;
             case FAILURE_APP_CRASH:
             case SUCCESS_OUTBOUND:

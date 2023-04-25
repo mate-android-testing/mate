@@ -16,23 +16,6 @@ import java.util.Optional;
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEQBE {
 
-    private ExplorationStrategy getStrategy(final Strategy strategy) {
-        final QBEMatrixFactory factory = new QBEMatrixFactory();
-
-        switch (strategy) {
-            case RANDOM:
-                return new RandomExploration();
-            case ACTIVITY_MATRIX:
-                return new QMMatrixBasedExploration(factory.getMaximizeActivityCoverageQMatrix());
-            case CRASH_MATRIX:
-                return new QMMatrixBasedExploration(factory.getMaximizesNumberOfCrashesQMatrix());
-            case CUSTOM_MATRIX:
-                return new QMMatrixBasedExploration(factory.getCustomNewCoverageMatrix());
-            default:
-                throw new AssertionError("unreachable");
-        }
-    }
-
     @Test
     public void useAppContext() {
         MATE.log_acc("Starting QBE...");
@@ -50,5 +33,23 @@ public class ExecuteMATEQBE {
         ACTIVITY_MATRIX,
         CRASH_MATRIX,
         CUSTOM_MATRIX,
+    }
+
+    private ExplorationStrategy getStrategy(final Strategy strategy) {
+
+        final QBEMatrixFactory factory = new QBEMatrixFactory();
+
+        switch (strategy) {
+            case RANDOM:
+                return new RandomExploration();
+            case ACTIVITY_MATRIX:
+                return new QMMatrixBasedExploration(factory.getMaximizeActivityCoverageQMatrix());
+            case CRASH_MATRIX:
+                return new QMMatrixBasedExploration(factory.getMaximizesNumberOfCrashesQMatrix());
+            case CUSTOM_MATRIX:
+                return new QMMatrixBasedExploration(factory.getCustomNewCoverageMatrix());
+            default:
+                throw new AssertionError("unreachable");
+        }
     }
 }
