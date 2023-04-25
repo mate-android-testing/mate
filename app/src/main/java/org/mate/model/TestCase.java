@@ -379,28 +379,29 @@ public class TestCase {
      *
      * @param action The action to be executed.
      * @param actionID The id of the action.
-     * @return Returns the action result.
+     * @return Returns {@code true} if the given action didn't cause a crash of the app
+     *         or left the AUT, otherwise {@code false} is returned.
      */
-    public ActionResult updateTestCaseAndGetResult(final Action action, final int actionID) {
+    public boolean updateTestCase(final Action action, final int actionID) {
 
         if (action instanceof WidgetAction
                 && !Registry.getUiAbstractionLayer().getExecutableUIActions().contains(action)) {
             throw new IllegalStateException("Action not applicable in current state!");
         }
 
-        final IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
+        IScreenState oldState = Registry.getUiAbstractionLayer().getLastScreenState();
 
         // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
         if (!Properties.SURROGATE_MODEL()) {
             MATE.log("executing action " + actionID + ": " + action);
         }
 
-        final ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+        ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
 
         // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
         if (!Properties.SURROGATE_MODEL()) {
 
-            final IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
+            IScreenState newState = Registry.getUiAbstractionLayer().getLastScreenState();
 
             // track the activity and state transition of each action
             String activityBeforeAction = oldState.getActivityName();
@@ -424,42 +425,15 @@ public class TestCase {
         }
 
         switch (actionResult) {
+            case SUCCESS:
+                return true;
             case FAILURE_APP_CRASH:
                 setCrashDetected();
                 if (Properties.RECORD_STACK_TRACE()) {
                     crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
                 }
-                break;
-            case SUCCESS:
             case SUCCESS_OUTBOUND:
-            case FAILURE_UIAUTOMATOR:
-            case FAILURE_UNKNOWN:
-                break;
-            default:
-                throw new UnsupportedOperationException("Encountered an unknown action result. " +
-                        "Cannot continue.");
-        }
-
-        return actionResult;
-    }
-
-    /**
-     * Executes the given action and updates the test case accordingly.
-     *
-     * @param action The action to be executed.
-     * @param actionID The id of the action.
-     * @return Returns {@code true} if the given action didn't cause a crash of the app nor left
-     *         the AUT, otherwise {@code false} is returned.
-     */
-    public boolean updateTestCase(final Action action, final int actionID) {
-
-        ActionResult actionResult = updateTestCaseAndGetResult(action, actionID);
-
-        switch (actionResult) {
-            case SUCCESS:
-                return true;
-            case FAILURE_APP_CRASH:
-            case SUCCESS_OUTBOUND:
+                return false;
             case FAILURE_UIAUTOMATOR:
             case FAILURE_UNKNOWN:
                 return false;
