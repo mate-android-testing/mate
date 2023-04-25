@@ -447,12 +447,19 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
+                // check for presence of a device administrator dialog
                 if (handleDeviceAdministratorDialog(screenState)) {
                     change = true;
                     continue;
                 }
 
-                // check for media picker
+                // check for presence of an uninstaller dialog
+                if (handleUninstallDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                // check for presence of a media picker dialog
                 if (handleMediaPicker(screenState)) {
                     change = true;
                     continue;
@@ -504,6 +511,46 @@ public class UIAbstractionLayer {
             }
         }
         return screenState;
+    }
+
+    /**
+     * Checks whether the current screen shows an uninstaller dialog. If this is the case, we click
+     * on the cancel button.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleUninstallDialog(final IScreenState screenState) {
+
+        if ((screenState.getPackageName().equals("com.android.packageinstaller")
+                || screenState.getPackageName().equals("com.google.android.packageinstaller"))
+            && screenState.getActivityName().endsWith("UninstallerActivity")) {
+
+            MATE.log("Detected uninstaller dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                final Widget widget = action.getWidget();
+
+                if (action.getActionType() == ActionType.CLICK
+                        && ((widget.isButtonType()
+                            && widget.getResourceID().equals("android:id/button2"))
+                        || widget.getText().equalsIgnoreCase("CANCEL"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on CANCEL button on uninstaller dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
