@@ -330,15 +330,57 @@ public class UIAbstractionLayer {
             }
 
             lastScreenState = state;
-
             return FAILURE_APP_CRASH;
         }
 
-        // We need to sleep a while such that the state's package name is up-to-date.
         state = clearScreen();
 
         // get the package name of the app currently running
         String currentPackageName = state.getPackageName();
+
+        /*
+        * We try to step back whenever an app transition happens. This is a mere heuristic and
+        * should discourage short test case sequences.
+         */
+        if (!currentPackageName.equals(this.packageName)) {
+
+            MATE.log("App transition to: " + getCurrentActivity()
+                    + " [" + currentPackageName + "]");
+
+            try {
+                deviceMgr.executeAction(new UIAction(ActionType.BACK, getCurrentActivity()));
+                state = clearScreen();
+                currentPackageName = state.getPackageName();
+                MATE.log("Returned to: " + getCurrentActivity()
+                        + " [" + currentPackageName + "]");
+            } catch (AUTCrashException e) {
+
+                MATE.log_acc("CRASH MESSAGE " + e.getMessage());
+                /*
+                 * TODO: Evaluate whether pressing the home button makes sense, i.e. whether the gui
+                 *  model is updated correctly. By pressing home, we switch to the home screen but the
+                 *  crash dialog still appears. As a result, could it happen that actually two different
+                 *  crashes / crash dialogs are considered equal, because they appear on the same
+                 *  underlying home screen?
+                 */
+                deviceMgr.pressHome();
+
+                // update gui model
+                state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+                state = toRecordedScreenState(state);
+
+                if (Properties.SURROGATE_MODEL()) {
+                    SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+                    Set<String> traces = deviceMgr.getTraces();
+                    surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+                } else {
+                    guiModel.update(lastScreenState, state, action);
+                }
+
+                lastScreenState = state;
+                return FAILURE_APP_CRASH;
+            }
+        }
 
         ActionResult result;
 
