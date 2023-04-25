@@ -49,6 +49,11 @@ public class Message {
         return Objects.hash(subject, parameters);
     }
 
+    @Override
+    public String toString() {
+        return String.format("Message{subject='%s', parameters=%s}", subject, parameters);
+    }
+
     public static class MessageBuilder {
         private Message message;
 
