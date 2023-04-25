@@ -31,7 +31,8 @@ import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunct
 import org.mate.exploration.genetic.crossover.PrimitiveOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
-import org.mate.exploration.genetic.crossover.UniformSuiteCrossoverFunction;
+import org.mate.exploration.genetic.crossover.TestSuiteOnePointCrossOverFunction;
+import org.mate.exploration.genetic.crossover.UniformSuiteCrossOverFunction;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
@@ -52,6 +53,7 @@ import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
+import org.mate.exploration.genetic.mutation.BiasedCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.IntegerSequenceLengthMutationFunction;
@@ -60,7 +62,9 @@ import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.TestCaseActionParametersMutationFunction;
 import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.mutation.TestSuiteShuffleMutationFunction;
 import org.mate.exploration.genetic.selection.CrowdedTournamentSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessProportionateSelectionFunction;
 import org.mate.exploration.genetic.selection.FitnessSelectionFunction;
@@ -739,7 +743,9 @@ public class GeneticAlgorithmProvider {
                 // different T for their chromosomes
                 return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
             case TEST_SUITE_UNIFORM_CROSS_OVER:
-                return (ICrossOverFunction<T>) new UniformSuiteCrossoverFunction();
+                return (ICrossOverFunction<T>) new UniformSuiteCrossOverFunction();
+            case TEST_SUITE_ONE_POINT_CROSS_OVER:
+                return (ICrossOverFunction<T>) new TestSuiteOnePointCrossOverFunction();
             case PRIMITIVE_TEST_CASE_MERGE_CROSS_OVER:
                 return (ICrossOverFunction<T>) new PrimitiveTestCaseMergeCrossOverFunction();
             case INTEGER_SEQUENCE_POINT_CROSS_OVER:
@@ -791,6 +797,10 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (IMutationFunction<T>) new CutPointMutationFunction(getNumEvents());
+            case TEST_CASE_BIASED_CUT_POINT_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new BiasedCutPointMutationFunction(getNumEvents());
             case TEST_SUITE_CUT_POINT_MUTATION:
                 // Force cast. Only works if T is TestSuite. This fails if other properties expect a
                 // different T for their chromosomes
@@ -807,7 +817,13 @@ public class GeneticAlgorithmProvider {
             case TEST_CASE_SHUFFLE_MUTATION:
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
-                return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(false);
+                return (IMutationFunction<T>) new TestCaseShuffleMutationFunction(getNumEvents());
+            case TEST_SUITE_SHUFFLE_MUTATION:
+                return (IMutationFunction<T>) new TestSuiteShuffleMutationFunction();
+            case TEST_CASE_ACTION_PARAMETERS_MUTATION:
+                // Force cast. Only works if T is TestCase. This fails if other properties expect a
+                // different T for their chromosomes
+                return (IMutationFunction<T>) new TestCaseActionParametersMutationFunction(getNumEvents());
             case INTEGER_SEQUENCE_POINT_MUTATION:
                 return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
             case INTEGER_SEQUENCE_LENGTH_MUTATION:

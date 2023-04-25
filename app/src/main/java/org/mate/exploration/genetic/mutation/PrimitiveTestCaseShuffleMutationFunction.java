@@ -22,6 +22,28 @@ import java.util.List;
 public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFunction<TestCase> {
 
     /**
+     * Whether to directly execute the actions during mutation or not.
+     */
+    private boolean executeActions;
+
+    /**
+     * Initialises a new mutation function that is used for test cases produced by the primitive
+     * chromosome factory.
+     */
+    public PrimitiveTestCaseShuffleMutationFunction() {
+        executeActions = true;
+    }
+
+    /**
+     * Sets whether the actions should be directly executed or not.
+     *
+     * @param executeActions Whether the actions should be directly executed.
+     */
+    public void setExecuteActions(boolean executeActions) {
+        this.executeActions = executeActions;
+    }
+
+    /**
      * Performs a test case shuffle mutation. This is possible since the underlying primitive
      * actions are not associated with any widget.
      *
@@ -35,23 +57,28 @@ public class PrimitiveTestCaseShuffleMutationFunction implements IMutationFuncti
         Randomness.shuffleList(actions);
         TestCase testCase = TestCase.newDummy();
         testCase.getActionSequence().addAll(actions);
-        TestCase executedTestCase = TestCase.fromDummy(testCase);
-        IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
 
-        if (Properties.SURROGATE_MODEL()) {
-            // update sequences + write traces to external storage
-            SurrogateModel surrogateModel
-                    = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
-            surrogateModel.updateTestCase(executedTestCase);
+        if (executeActions) {
+
+            TestCase executedTestCase = TestCase.fromDummy(testCase);
+            IChromosome<TestCase> mutatedChromosome = new Chromosome<>(executedTestCase);
+
+            if (Properties.SURROGATE_MODEL()) {
+                // update sequences + write traces to external storage
+                SurrogateModel surrogateModel
+                        = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
+                surrogateModel.updateTestCase(executedTestCase);
+            }
+
+            FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
+            CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
+            CoverageUtils.logChromosomeCoverage(mutatedChromosome);
+            MATE.log_acc("Found crash: " + chromosome.getValue().hasCrashDetected());
+
+            executedTestCase.finish();
+            return mutatedChromosome;
         }
 
-        FitnessUtils.storeTestCaseChromosomeFitness(mutatedChromosome);
-        CoverageUtils.storeTestCaseChromosomeCoverage(mutatedChromosome);
-        CoverageUtils.logChromosomeCoverage(mutatedChromosome);
-        MATE.log_acc("Found crash: " + chromosome.getValue().hasCrashDetected());
-
-        executedTestCase.finish();
-
-        return mutatedChromosome;
+        return new Chromosome<>(testCase);
     }
 }

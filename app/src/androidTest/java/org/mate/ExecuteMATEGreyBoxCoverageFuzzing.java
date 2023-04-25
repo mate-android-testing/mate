@@ -9,12 +9,18 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFa
 import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.IntentChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.UniformIntentChromosomeFactory;
+import org.mate.exploration.genetic.mutation.BiasedCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.CutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.TestCaseActionParametersMutationFunction;
+import org.mate.exploration.genetic.mutation.TestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.mutation.TestSuiteShuffleMutationFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.termination.IterTerminationCondition;
@@ -51,6 +57,12 @@ public class ExecuteMATEGreyBoxCoverageFuzzing {
             case ANDROID_SUITE_RANDOM_CHROMOSOME_FACTORY:
                 return new AndroidSuiteRandomChromosomeFactory(Properties.NUMBER_TESTCASES(),
                         Properties.MAX_NUMBER_EVENTS());
+            case INTENT_CHROMOSOME_FACTORY:
+                return new IntentChromosomeFactory(Properties.MAX_NUMBER_EVENTS(),
+                        Properties.RELATIVE_INTENT_AMOUNT());
+            case UNIFORM_INTENT_CHROMOSOME_FACTORY:
+                return new UniformIntentChromosomeFactory(Properties.MAX_NUMBER_EVENTS(),
+                        Properties.RELATIVE_INTENT_AMOUNT());
             case PRIMITIVE_ANDROID_RANDOM_CHROMOSOME_FACTORY:
                 return new PrimitiveAndroidRandomChromosomeFactory(true, Properties.MAX_NUMBER_EVENTS());
             default:
@@ -63,8 +75,16 @@ public class ExecuteMATEGreyBoxCoverageFuzzing {
         switch (mutationFunction) {
             case TEST_CASE_CUT_POINT_MUTATION:
                 return new CutPointMutationFunction(Properties.MAX_NUMBER_EVENTS());
+            case TEST_CASE_BIASED_CUT_POINT_MUTATION:
+                return new BiasedCutPointMutationFunction(Properties.MAX_NUMBER_EVENTS());
+            case TEST_CASE_SHUFFLE_MUTATION:
+                return new TestCaseShuffleMutationFunction(Properties.MAX_NUMBER_EVENTS());
+            case TEST_CASE_ACTION_PARAMETERS_MUTATION:
+                return new TestCaseActionParametersMutationFunction(Properties.MAX_NUMBER_EVENTS());
             case TEST_SUITE_CUT_POINT_MUTATION:
                 return new SuiteCutPointMutationFunction(Properties.MAX_NUMBER_EVENTS());
+            case TEST_SUITE_SHUFFLE_MUTATION:
+                return new TestSuiteShuffleMutationFunction();
             case PRIMITIVE_SHUFFLE_MUTATION:
                 return new PrimitiveTestCaseShuffleMutationFunction();
             default:

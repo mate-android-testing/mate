@@ -3,6 +3,7 @@ package org.mate.utils;
 import org.mate.Registry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class Randomness {
      */
     public static <T> T randomElementOrNull(Set<T> set) {
 
-        double random = Math.random();
+        final double random = getRnd().nextDouble();
 
         if (random < 0.5) {
             return randomElement(set);
@@ -118,6 +119,34 @@ public class Randomness {
     }
 
     /**
+     * Returns a non-empty sub set generated in a random fashion. The given set must be not empty.
+     *
+     * @param set The non-empty set from which a random sub set should be derived.
+     * @param <T> The type of the elements in the set.
+     * @return Returns a non-empty sub set.
+     */
+    public static <T> Set<T> randomSubset(Set<T> set) {
+
+        if (set.isEmpty()) {
+            throw new IllegalArgumentException("Empty set supplied!");
+        }
+
+        final Set<T> subset = new HashSet<>();
+
+        final int size = Math.max(1, getInRangeStd(set.size() + 1)); // avoid empty sub set
+
+        for (int i = 0; i < size; i++) {
+            T randomElement = randomElement(set);
+            while (subset.contains(randomElement)) { // select until we get a new element
+                randomElement = randomElement(set);
+            }
+            subset.add(randomElement);
+        }
+
+        return subset;
+    }
+
+    /**
      * Generates a random double in the range [min,max).
      *
      * @param min The minimal value (inclusive).
@@ -126,6 +155,17 @@ public class Randomness {
      */
     public static double getRandom(double min, double max) {
         return ThreadLocalRandom.current().nextDouble(min, max);
+    }
+
+    /**
+     * Generates a random double in the range [min,max).
+     *
+     * @param min The minimal value (inclusive).
+     * @param max The maximal value (exclusive).
+     * @return Returns a random number in the range [min,max).
+     */
+    public static int getRandom(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max);
     }
 
     /**
@@ -140,7 +180,7 @@ public class Randomness {
             throw new IllegalArgumentException("Range must be greater than zero!");
         }
 
-        return getInRangeStd(range, 2.0/15.0 * range);
+        return getInRangeStd(range, 2.0 / 15.0 * range);
     }
 
     /**
@@ -164,6 +204,22 @@ public class Randomness {
         } while (x < 0 || x >= range);
         return x;
     }
+
+    /**
+     * Shuffles an array.
+     *
+     * @param array The array to be shuffled.
+     * @param <T> The type of the array elements.
+     */
+    public static <T> void shuffleArray(T[] array) {
+        for (int i = array.length - 1; i > 0; --i) {
+            final int index = getRnd().nextInt(i + 1);
+            final T tmp = array[index];
+            array[index] = array[i];
+            array[i] = tmp;
+        }
+    }
+
 
     /**
      * Shuffles the given list in place.
@@ -190,8 +246,7 @@ public class Randomness {
         Random random = getRnd();
         List<Integer> result = new ArrayList<>(count);
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result.add(random.nextInt(bound));
         }
 
@@ -201,15 +256,14 @@ public class Randomness {
     public static List<Integer> getRandomIntegersWithNull(int count, int bound) {
 
         // API 28: IntStream.generate(() -> getRnd().nextInt(100)).limit(100).toArray();
-        Random random = getRnd();
-        List<Integer> result = new ArrayList<>(count);
+        final Random random = getRnd();
+        final List<Integer> result = new ArrayList<>(count);
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result.add(random.nextInt(bound));
 
             // insert with some probability null values between the other values
-            double rnd = Math.random();
+            final double rnd = random.nextDouble();
 
             if (rnd > 0.5) {
                 result.add(null);
@@ -224,8 +278,7 @@ public class Randomness {
         Random random = getRnd();
         int[] result = new int[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextInt(bound);
         }
 
@@ -237,8 +290,7 @@ public class Randomness {
         Random random = getRnd();
         float[] result = new float[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextFloat();
         }
 
@@ -250,8 +302,7 @@ public class Randomness {
         Random random = getRnd();
         double[] result = new double[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextDouble();
         }
 
@@ -263,8 +314,7 @@ public class Randomness {
         Random random = getRnd();
         long[] result = new long[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextLong();
         }
 
@@ -276,9 +326,8 @@ public class Randomness {
         Random random = getRnd();
         short[] result = new short[count];
 
-        for (int i = 0; i < count; i++)
-        {
-            https://stackoverflow.com/a/10189329/6110448
+        for (int i = 0; i < count; i++) {
+            // https://stackoverflow.com/a/10189329/6110448
             result[i] = (short) random.nextInt(1 << 16);
         }
 
@@ -298,8 +347,7 @@ public class Randomness {
         Random random = getRnd();
         boolean[] result = new boolean[count];
 
-        for (int i = 0; i < count; i++)
-        {
+        for (int i = 0; i < count; i++) {
             result[i] = random.nextBoolean();
         }
 

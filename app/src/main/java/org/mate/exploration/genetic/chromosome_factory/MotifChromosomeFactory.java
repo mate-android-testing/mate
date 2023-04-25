@@ -2,49 +2,50 @@ package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
 import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Provides a chromosome factory that produces {@link TestCase}s consisting of a combination of
- * {@link org.mate.interaction.action.ui.UIAction}, {@link org.mate.interaction.action.intent.IntentBasedAction}
- * and {@link org.mate.interaction.action.intent.SystemAction} actions. In contrast to
- * {@link IntentChromosomeFactory}, an intent is uniformly selected from the pre-computed intent
- * actions.
+ * motif and regular ui actions.
  */
-public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFactory {
+public class MotifChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
-     * The relative amount of intent and system actions.
+     * The relative amount of motif actions in contrast to regular ui actions.
      */
-    private final float relativeIntentAmount;
+    private final float relativeMotifActionAmount;
 
     /**
      * Initialises the chromosome factory with the maximal number of actions and the probability
-     * for generating an intent-based or system action instead of a ui action.
+     * for generating a motif action instead of a ui action.
      *
      * @param maxNumEvents The maximal number of actions per test case.
-     * @param relativeIntentAmount The probability in [0,1] for generating an intent-based or
-     *                             system action.
+     * @param relativeMotifActionAmount The probability in [0,1] for generating a motif action in
+     *              favor of a regular ui action.
      */
-    public UniformIntentChromosomeFactory(int maxNumEvents, float relativeIntentAmount) {
+    public MotifChromosomeFactory(int maxNumEvents, float relativeMotifActionAmount) {
 
         super(maxNumEvents);
 
-        assert relativeIntentAmount >= 0.0 && relativeIntentAmount <= 1.0;
-        this.relativeIntentAmount = relativeIntentAmount;
+        assert relativeMotifActionAmount >= 0.0 && relativeMotifActionAmount <= 1.0;
+        this.relativeMotifActionAmount = relativeMotifActionAmount;
     }
 
     /**
      * Creates a new chromosome wrapping a test case which in turn consists of a combination of
-     * intent-based, system and ui actions.
+     * motif and ui actions.
      *
      * @return Returns the generated chromosome.
      */
@@ -55,12 +56,6 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
             uiAbstractionLayer.resetApp();
         }
 
-        // TODO: If we can ensure that sdcard files are not touched by the app, then pushing
-        //  those files is redundant and we could do this once before creating the first chromosome
-        // push dummy files onto sd card
-        MATE.log("Pushing custom media files: "
-                + Registry.getEnvironmentManager().pushDummyFiles());
-
         final TestCase testCase = TestCase.newInitializedTestCase();
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
@@ -70,7 +65,7 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
                 final Action newAction = selectAction();
 
                 if (!testCase.updateTestCase(newAction, actionsCount)) {
-                    MATE.log_warn("UniformIntentChromosomeFactory: Action ( " + actionsCount + ") "
+                    MATE.log_warn("MotifChromosomeFactory: Action ( " + actionsCount + ") "
                             + newAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
@@ -99,9 +94,8 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
     }
 
     /**
-     * Selects the next action to be executed. This can be either an an intent-based action,
-     * a system event notification or a ui action depending on the probability specified by
-     * {@link #relativeIntentAmount}.
+     * Selects the next action to be executed. This can be either a motif action or a regular ui
+     * action depending on the probability specified by {@link #relativeMotifActionAmount}.
      *
      * @return Returns the action to be performed next.
      */
@@ -110,10 +104,30 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
 
         final double random = Randomness.getRnd().nextDouble();
 
-        if (random < relativeIntentAmount) {
-            return Randomness.randomElement(uiAbstractionLayer.getExecutableIntentActions());
+        final List<UIAction> uiActions = uiAbstractionLayer.getExecutableUIActions();
+
+        if (random < relativeMotifActionAmount) {
+
+            // select a motif action if applicable
+            final List<UIAction> motifActions = uiActions.stream()
+                    .filter(uiAction -> uiAction instanceof MotifAction)
+                    .collect(Collectors.toList());
+
+            if (!motifActions.isEmpty()) {
+                return Randomness.randomElement(motifActions);
+            } else {
+                MATE.log_warn("No motif action applicable in current state!");
+                return Randomness.randomElement(uiActions);
+            }
+
         } else {
-            return Randomness.randomElement(uiAbstractionLayer.getExecutableUIActions());
+
+            // select a plain UI action
+            final List<UIAction> plainUIActions = uiActions.stream()
+                    .filter(uiAction -> !(uiAction instanceof MotifAction))
+                    .collect(Collectors.toList());
+
+            return Randomness.randomElement(plainUIActions);
         }
     }
 }

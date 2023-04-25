@@ -127,6 +127,17 @@ public class IntentProvider {
     }
 
     /**
+     * Checks whether the given action describes a system event.
+     *
+     * @param action The action to be checked.
+     * @return Returns {@code true} if the given action refers to a system event, otherwise
+     *         {@code false} is returned.
+     */
+    public boolean describesSystemEvent(final String action) {
+        return systemEventActions.contains(action);
+    }
+
+    /**
      * Extracts the system event receivers by inspecting the intent filters of the components.
      * Note that broadcast receivers solely reacting to system events are removed from the component
      * list.

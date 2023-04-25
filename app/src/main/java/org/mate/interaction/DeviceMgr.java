@@ -35,6 +35,8 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateFactory;
+import org.mate.state.ScreenStateType;
 import org.mate.utils.MateInterruptedException;
 import org.mate.utils.Randomness;
 import org.mate.utils.StackTrace;
@@ -63,11 +65,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -129,6 +135,16 @@ public class DeviceMgr {
      */
     private final String LANDSCAPE_MODE_CMD = "content insert --uri content://settings/system " +
             "--bind name:s:user_rotation --bind value:i:1";
+
+    /**
+     * The ADB command to retrieve information about the activity stack.
+     */
+    private final String GET_ACTIVITY_STACK_CMD = "dumpsys activity recents";
+
+    /**
+     * The ADB command to retrieve information about currently visible windows.
+     */
+    private final String GET_WINDOWS_CMD = "dumpsys window displays";
 
     /**
      * The error message when the ui automator is disconnected.
@@ -206,7 +222,7 @@ public class DeviceMgr {
                 executeAction((UIAction) action);
             } else {
                 throw new UnsupportedOperationException("Actions class "
-                        + action.getClass().getSimpleName() + " not yet supported");
+                        + action.getClass().getSimpleName() + " not yet supported!");
             }
         } catch (IllegalStateException e) {
             MATE.log_debug("Couldn't execute action: " + action);
@@ -274,12 +290,662 @@ public class DeviceMgr {
             case FILL_FORM_AND_SUBMIT:
                 handleFillFormAndSubmit(action);
                 break;
-            case SPINNER_SCROLLING:
-                handleSpinnerScrolling(action);
+            case FILL_FORM:
+                handleFillForm(action);
+                break;
+            case FILL_FORM_AND_SCROLL:
+                handleFillFormAndScroll(action);
+                break;
+            case MENU_CLICK_AND_ITEM_SELECTION:
+                handleMenuClickAndItemSelection(action);
+                break;
+            case SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION:
+                handleSortMenuClickAndSortOrderSelection(action);
+                break;
+            case OPEN_NAVIGATION_AND_OPTION_SELECTION:
+                handleOpenNavigationAndOptionSelection(action);
+                break;
+            case TYPE_TEXT_AND_PRESS_ENTER:
+                handleTypeTextAndPressEnter(action);
+                break;
+            case CHANGE_RADIO_GROUP_SELECTIONS:
+                handleChangeRadioGroupSelections(action);
+                break;
+            case CHANGE_LIST_VIEW_SELECTION:
+                handleChangeListViewSelection(action);
+                break;
+            case CHANGE_SEEK_BARS:
+                handleChangeSeekBars(action);
+                break;
+            case CHANGE_DATE:
+                handleChangeDate(action);
+                break;
+            case CHANGE_CHECKABLES:
+                handleChangeCheckables(action);
+                break;
+            case SWAP_LIST_ITEMS:
+                handleSwapListItems(action);
+                break;
+            case CHANGE_SPINNERS:
+                handleChangeSpinners(action);
                 break;
             default:
                 throw new UnsupportedOperationException("UI action "
                         + action.getActionType() + " not yet supported!");
+        }
+    }
+
+    /**
+     * Executes the 'change spinners' motif action, i.e. multiple spinners are changed at once.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeSpinners(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            action.getUIActions().stream().forEach(spinnerAction -> {
+                final Widget spinner = ((WidgetAction) spinnerAction).getWidget();
+                final Widget selectedWidget = spinner.getChildren().get(0);
+                handleSpinnerScrolling(spinner, selectedWidget);
+            });
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'swap list items' motif action, i.e. two arbitrary list items are swapped.
+     *
+     * @param action The given motif action.
+     */
+    private void handleSwapListItems(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Select two arbitrary list items that should be swapped.
+            final Widget source = action.getWidgets().get(0);
+            final Widget target = action.getWidgets().get(1);
+
+            // TODO: Fix target y-coordinate if swapping from bottom to top.
+            device.drag(source.getX(), source.getY(), target.getX(), target.getY2(), 100);
+
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'fill form and scroll' motif action, i.e. a scrollable form is filled out.
+     *
+     * @param action The given motif action.
+     */
+    private void handleFillFormAndScroll(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            final WidgetAction scrollAction = (WidgetAction) action.getUIActions().get(0);
+
+            IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            boolean change = true;
+
+            // TODO: Remove this constraint if a change of the screen state can be reliably detected
+            //  and there are no changes caused by filling out the edit text fields (endless loop).
+            final int maxSwipes = 5;
+            int swipes = 0;
+
+            while (change && swipes < maxSwipes) {
+
+                // fill out the currently visible edit text fields
+                final List<Widget> editTextWidgets = screenState.getWidgets().stream()
+                        .filter(Widget::isEditTextType)
+                        .filter(Widget::isVisible)
+                        .collect(Collectors.toList());
+
+                editTextWidgets.stream().forEach(this::handleEdit);
+
+                // TODO: Toggle checkboxes, radio buttons, switches, etc.
+
+                // scroll down
+                handleSwipe(scrollAction.getWidget(), scrollAction.getActionType());
+
+                IScreenState newScreenState
+                        = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+                // TODO: Ensure that the equals() check is actually comparing the widgets.
+                change = !screenState.equals(newScreenState);
+                swipes++;
+                screenState = newScreenState;
+            }
+
+            // TODO: Click on a submit/save button if present.
+
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'change checkables' motif action, i.e. multiple checkables are changed at once.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeCheckables(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            action.getUIActions().stream().forEach(checkableAction -> {
+                // Only check/uncheck with a probability of 1/2 to enable different combinations.
+                if (Randomness.getRnd().nextDouble() < 0.5) {
+                    handleClick(((WidgetAction) checkableAction).getWidget());
+                }
+            });
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'change date' motif action, i.e. a date is selected from a date picker.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeDate(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Enable changing the year by clicking on the year text view at the top.
+            // TODO: Enable the selection of an arbitrary date of the current year.
+
+            final double rnd = Randomness.getRnd().nextDouble();
+
+            if (rnd <= 0.33) {
+
+                // The prev button might be disabled if only dates in the future can be selected.
+                if (!action.getUIActions().isEmpty()) {
+
+                    // the click action on the previous week/month/year image button
+                    final WidgetAction prev = (WidgetAction) action.getUIActions().get(0);
+
+                    // pick date after clicking on previous week/month/year
+                    handleClick(prev.getWidget());
+                }
+            } else if (rnd <= 0.66) {
+
+                // The next button might be disabled if only dates in the past can be selected.
+                if (action.getUIActions().size() >= 2) {
+
+                    // the click action on the next week/month/year image button
+                    final WidgetAction next = (WidgetAction) action.getUIActions().get(1);
+
+                    // pick date after clicking on next week/month/year
+                    handleClick(next.getWidget());
+                }
+            } // else pick date on current week/month/year
+
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            /*
+            * NOTE: Unfortunately here the UIAutomator API has major problems to return only those
+            * widgets that represent selectable (i.e. visible) dates. Without the bounds check on
+            * the view pager, the list of dates also includes dates from the previous/next month
+            * that are in no way selectable. Also checking for existence of the bare ui object
+            * exhibits the same limitation, hence we opted for the bounds checking approach. The
+            * dates of the previous month have negative x-coordinates while the dates of the next
+            * month have x-coordinates that are outside of view pager's visible area.
+            *
+            * UPDATE: Checking the visible attribute seems to be sufficient to exclude dates from
+            * the previous or next month.
+             */
+            final Widget viewPager = screenState.getWidgets().stream()
+                    .filter(widget ->
+                            widget.getClazz().equals("com.android.internal.widget.ViewPager"))
+                    .findFirst().orElse(null);
+
+            if (viewPager != null) {
+
+                final List<Widget> dates = screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(widget -> widget.getClazz().equals("android.view.View"))
+                        .filter(widget -> widget.isSonOf(parent -> parent.equals(viewPager)))
+                        .filter(Widget::isVisible)
+                        .filter(Widget::isEnabled)
+                        .filter(widget -> viewPager.getBounds().contains(widget.getBounds()))
+                        .collect(Collectors.toList());
+
+                // pick a random date
+                final Widget date = Randomness.randomElement(dates);
+                handleClick(date);
+
+                // click on OK button
+                screenState.getWidgets().stream()
+                        .filter(Widget::isButtonType)
+                        .filter(widget -> widget.getText().equalsIgnoreCase("OK")
+                                || widget.getResourceID().equals("android:id/button1"))
+                        .findFirst().ifPresent(this::handleClick);
+            } else {
+                MATE.log_warn("ViewPager couldn't be located on date picker!");
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'change seek bars' motif action, i.e. multiple seek bars are changed at once.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeSeekBars(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+            action.getUIActions().stream().forEach(changeSeekBarAction ->
+                    handleChangeSeekBar(((WidgetAction) changeSeekBarAction).getWidget()));
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'change list view selection' motif action, i.e. a click on a random list view
+     * item is performed.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeListViewSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Pick a list view item that hasn't been selected so far or pick random otherwise.
+            final WidgetAction clickAction
+                    = (WidgetAction) Randomness.randomElement(action.getUIActions());
+            handleClick(clickAction.getWidget());
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'type text and press enter' motif action, i.e. an edit text widget is filled
+     * with some content and then enter is pressed.
+     *
+     * @param action The given motif action.
+     */
+    private void handleTypeTextAndPressEnter(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // type some arbitrary text and press enter afterwards
+            final WidgetAction typeTextAction = (WidgetAction) action.getUIActions().get(0);
+            handleEdit(typeTextAction.getWidget());
+            device.pressEnter();
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'open sort menu and sort order selection' motif action, i.e. first the sort menu
+     * is opened by clicking on the sort symbol and then a possible different sort order is selected
+     * by clicking on it.
+     *
+     * @param action The given motif action.
+     */
+    private void handleOpenNavigationAndOptionSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // click on the navigation menu to open the list of options
+            final WidgetAction navigationMenuClickAction = (WidgetAction) action.getUIActions().get(0);
+            handleClick(navigationMenuClickAction.getWidget());
+
+            /*
+             * TODO: We encountered a strange situation where the fetched screen state contained
+             *  essentially the displayed widgets but with malformed coordinates, which led to
+             *  clicking above the chosen menu item. We believe this is related to a sync issue of
+             *  UIAutomator. A small waiting time seems to remedy the issue, but it is not clear
+             *  whether such hand-crafted waiting time works across apps. We could resort to
+             *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
+             */
+
+            // Fetch the new screen state containing the list view with the options.
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            // Check whether there is a drawer layout used for the navigation.
+            final Widget drawerLayout = screenState.getWidgets().stream()
+                    .filter(Widget::isDrawerLayout)
+                    .findAny()
+                    .orElse(null);
+
+            // The navigation menu (drawer layout) when opened has exactly two children.
+            if (drawerLayout == null || drawerLayout.getChildren().size() <= 1) {
+                MATE.log_warn("Couldn't locate the navigation menu.");
+                return;
+            }
+
+            final Predicate<Widget> isNavigationWidget = widget -> {
+                // Although there is a convention that the first child should refer to the main content
+                // view and the second child to the navigation menu, this rule is not followed by all
+                // apps. To circumvent this problem, we consider the size of the widgets and assume
+                // that the smaller widget in width refers to the navigation menu.
+                final Widget firstChild = drawerLayout.getChildren().get(0);
+                final Widget secondChild = drawerLayout.getChildren().get(1);
+                final Widget navigationElementContainer = firstChild.getWidth() < secondChild.getWidth()
+                        ? firstChild : secondChild;
+                return widget.isSonOf(parent -> parent.equals(navigationElementContainer));
+            };
+
+            // extract the shown menu items
+            final List<Widget> menuItems = screenState.getWidgets().stream()
+                    .filter(Widget::isLeafWidget)
+                    .filter(isNavigationWidget)
+                    .filter(widget -> widget.isSonOf(w -> w.isListViewType() || w.isRecyclerViewType()))
+                    .filter(Widget::isTextViewType)
+                    .filter(Widget::isEnabled)
+                    .filter(Widget::hasText)
+                    .filter(Widget::hasResourceID)
+                    .filter(Widget::isVisible)
+                    .collect(Collectors.toList());
+
+            if (menuItems.isEmpty()) {
+                throw new IllegalStateException("Couldn't discover any options!");
+            }
+
+            final Set<String> selectedMenuItems
+                    = action.getSelectedMenuItems(navigationMenuClickAction.getWidget());
+
+            // pick the first not yet selected menu item
+            final Widget notSelectedMenuItem = menuItems.stream()
+                    .filter(widget -> !selectedMenuItems.contains(widget.getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            // TODO: Record the not yet selected menu item for deterministic replaying.
+
+            if (notSelectedMenuItem == null) {
+                // All menu items have been selected at least once, pick random.
+                final Widget menuItem = Randomness.randomElement(menuItems);
+                handleClick(menuItem);
+            } else {
+                handleClick(notSelectedMenuItem);
+                action.addSelectedMenuItem(navigationMenuClickAction.getWidget(),
+                        notSelectedMenuItem.getText());
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'change radio group selections' motif action, i.e. a random radio button is
+     * clicked per radio group.
+     *
+     * @param action The given motif action.
+     */
+    private void handleChangeRadioGroupSelections(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // TODO: Store click actions on radio buttons directly in motif action.
+
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            // Extract the radio groups.
+            final List<Widget> radioGroups = screenState.getWidgets().stream()
+                    .filter(Widget::isRadioGroupType)
+                    .filter(Widget::isEnabled)
+                    .collect(Collectors.toList());
+
+            if (!radioGroups.isEmpty()) {
+
+                final Map<Widget, List<Widget>> radioButtonsPerGroup =
+                        radioGroups.stream().collect(Collectors.toMap(Function.identity(),
+                                (radioGroup) -> radioGroup.getChildren().stream()
+                                        .filter(Widget::isLeafWidget)
+                                        .filter(Widget::isRadioButtonType)
+                                        .filter(Widget::isEnabled)
+                                        .collect(Collectors.toList())
+                        ));
+
+                // TODO: Memorize which combination of radio buttons have been selected and choose
+                //  a possible distinct sort order else pick random.
+
+                for (Map.Entry<Widget, List<Widget>> radioGroup : radioButtonsPerGroup.entrySet()) {
+
+                    final List<Widget> radioButtons = radioGroup.getValue();
+
+                    if (!radioButtons.isEmpty()) {
+                        // click on a random radio button
+                        final Widget radioButton = Randomness.randomElement(radioButtons);
+                        handleClick(radioButton);
+                    }
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'open sort menu and sort order selection' motif action, i.e. first the sort menu
+     * is opened by clicking on the sort symbol and then a possible different sort order is selected
+     * by clicking on it.
+     *
+     * @param action The given motif action.
+     */
+    private void handleSortMenuClickAndSortOrderSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // click on the sort menu to open the list of menu items
+            final WidgetAction menuClickAction = (WidgetAction) action.getUIActions().get(0);
+            handleClick(menuClickAction.getWidget());
+
+            /*
+             * TODO: We encountered a strange situation where the fetched screen state contained
+             *  essentially the displayed widgets but with malformed coordinates, which led to
+             *  clicking above the chosen menu item. We believe this is related to a sync issue of
+             *  UIAutomator. A small waiting time seems to remedy the issue, but it is not clear
+             *  whether such hand-crafted waiting time works across apps. We could resort to
+             *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
+             */
+
+            // Fetch the new screen state containing the sort order possibilities.
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            /*
+            * There are basically two different layouts used for the sort order possibilities. Either
+            * we have radio groups where one can select a single entry, or we have a regular list
+            * view containing the clickable possibilities.
+             */
+            final List<Widget> radioGroups = screenState.getWidgets().stream()
+                    .filter(Widget::isRadioGroupType)
+                    .filter(Widget::isEnabled)
+                    .collect(Collectors.toList());
+
+            if (!radioGroups.isEmpty()) {
+
+                final Map<Widget, List<Widget>> radioButtonsPerGroup =
+                        radioGroups.stream().collect(Collectors.toMap(Function.identity(),
+                                (radioGroup) -> radioGroup.getChildren().stream()
+                                        .filter(Widget::isLeafWidget)
+                                        .filter(Widget::isRadioButtonType)
+                                        .filter(Widget::isEnabled)
+                                .collect(Collectors.toList())
+                        ));
+
+                // TODO: Memorize which combination of radio buttons have been selected and choose
+                //  a possible distinct sort order else pick random.
+
+                for (Map.Entry<Widget, List<Widget>> radioGroup : radioButtonsPerGroup.entrySet()) {
+
+                    final List<Widget> radioButtons = radioGroup.getValue();
+
+                    if (!radioButtons.isEmpty()) {
+                        // click on a random radio button
+                        final Widget radioButton = Randomness.randomElement(radioButtons);
+                        handleClick(radioButton);
+                    }
+                }
+
+                // click on 'OK' button
+                screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(Widget::isButtonType)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::isVisible)
+                        .filter(widget -> widget.getText().equalsIgnoreCase("OK")
+                                || widget.getText().equalsIgnoreCase("APPLY"))
+                        .findFirst().ifPresent(this::handleClick);
+            } else {
+
+                // TODO: The sorting order might be defined through a sortable list (drag & drop).
+
+                // extract the shown menu items
+                final List<Widget> menuItems = screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(widget -> widget.isSonOf(Widget::isListViewType)
+                                        || widget.isSonOf(Widget::isRecyclerViewType))
+                        .filter(Widget::isTextViewType)
+                        .filter(Widget::isEnabled)
+                        .filter(widget -> widget.hasText() || widget.hasContentDescription())
+                        .collect(Collectors.toList());
+
+                if (menuItems.isEmpty()) {
+                    throw new IllegalStateException("Couldn't discover any options!");
+                }
+
+                final Set<String> selectedMenuItems
+                        = action.getSelectedMenuItems(menuClickAction.getWidget());
+
+                // pick the first not yet selected menu item
+                final Widget notSelectedMenuItem = menuItems.stream()
+                        .filter(widget -> !selectedMenuItems.contains(widget.getText()))
+                        .findFirst()
+                        .orElse(null);
+
+                // TODO: Record the not yet selected menu item for deterministic replaying.
+
+                if (notSelectedMenuItem == null) {
+                    // All menu items have been selected at least once, pick random.
+                    final Widget menuItem = Randomness.randomElement(menuItems);
+                    handleClick(menuItem);
+                } else {
+                    handleClick(notSelectedMenuItem);
+                    action.addSelectedMenuItem(menuClickAction.getWidget(), notSelectedMenuItem.getText());
+                }
+
+                // There might be an (optional) OK button.
+                screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(Widget::isButtonType)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::isVisible)
+                        .filter(widget -> widget.getText().equalsIgnoreCase("OK")
+                                || widget.getText().equalsIgnoreCase("APPLY"))
+                        .findFirst().ifPresent(this::handleClick);
+
+                // Or there might be an (optional) save text view in the menu bar.
+                screenState.getWidgets().stream()
+                        .filter(Widget::isLeafWidget)
+                        .filter(Widget::isEnabled)
+                        .filter(Widget::isTextViewType)
+                        .filter(Widget::isVisible)
+                        .filter(widget -> widget.getText().toLowerCase().contains("save")
+                                || widget.getContentDesc().toLowerCase().contains("save"))
+                        .findFirst().ifPresent(this::handleClick);
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the 'menu click and item selection' motif action, i.e. first the menu is opened by
+     * clicking on the menu symbol and then a not yet selected menu item is selected by also clicking
+     * on it.
+     *
+     * @param action The given motif action.
+     */
+    private void handleMenuClickAndItemSelection(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            // click on the menu to open the list of menu items
+            final WidgetAction menuClickAction = (WidgetAction) action.getUIActions().get(0);
+            handleClick(menuClickAction.getWidget());
+
+            /*
+            * TODO: We encountered a strange situation where the fetched screen state contained
+            *  essentially the displayed widgets but with malformed coordinates, which led to
+            *  clicking above the chosen menu item. We believe this is related to a sync issue of
+            *  UIAutomator. A small waiting time seems to remedy the issue, but it is not clear
+            *  whether such hand-crafted waiting time works across apps. We could resort to
+            *  UIDevice#waitForIdle(); but the idle time varies largely between two consecutive calls.
+             */
+
+            // fetch the new screen state containing the list view
+            final IScreenState screenState
+                    = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+
+            // extract the shown menu items
+            final List<Widget> menuItems = screenState.getWidgets().stream()
+                    .filter(Widget::isLeafWidget)
+                    .filter(widget -> widget.isSonOf(w -> w.isListViewType() || w.isRecyclerViewType()))
+                    .filter(Widget::isTextViewType)
+                    .filter(Widget::isEnabled)
+                    .filter(Widget::hasText)
+                    .filter(Widget::isVisible)
+                    .collect(Collectors.toList());
+
+            if (menuItems.isEmpty()) {
+                throw new IllegalStateException("Couldn't discover any menu item!");
+            }
+
+            final Set<String> selectedMenuItems
+                    = action.getSelectedMenuItems(menuClickAction.getWidget());
+
+            // pick the first not yet selected menu item
+            final Widget notSelectedMenuItem = menuItems.stream()
+                    .filter(widget -> !selectedMenuItems.contains(widget.getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            // TODO: Record the not yet selected menu item for deterministic replaying.
+
+            if (notSelectedMenuItem == null) {
+                // All menu items have been selected at least once, pick random.
+                final Widget menuItem = Randomness.randomElement(menuItems);
+                handleClick(menuItem);
+            } else {
+                handleClick(notSelectedMenuItem);
+                action.addSelectedMenuItem(menuClickAction.getWidget(), notSelectedMenuItem.getText());
+            }
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
+        }
+    }
+
+    /**
+     * Executes the motif action 'fill forms', i.e. it fills out all visible and enabled text forms
+     * on the current screen.
+     *
+     * @param action The given motif action.
+     */
+    private void handleFillForm(final MotifAction action) {
+
+        if (!Properties.USE_PRIMITIVE_ACTIONS()) {
+
+            action.getUIActions().stream().forEach(textInsertAction ->
+                            handleEdit(((WidgetAction) textInsertAction).getWidget()));
+        } else {
+            throw new UnsupportedOperationException("Not yet implemented!");
         }
     }
 
@@ -364,6 +1030,74 @@ public class DeviceMgr {
                 }
             }
         }
+    }
+
+    /**
+     * Retrieves the number of opened windows for the current activity.
+     *
+     * @return Returns the number of displayed windows for the current activity.
+     */
+    public int getNumberOfWindows() {
+
+        int numberOfWindows = 1; // at least one window is opened
+
+        final Pattern windowsRecordPattern
+                = Pattern.compile("allAppWindows=\\[.*" + getCurrentActivity() + ".*\\]");
+
+        try {
+            final String output = device.executeShellCommand(GET_WINDOWS_CMD);
+            Matcher matcher = windowsRecordPattern.matcher(output);
+
+            if (matcher.find()) {
+                // allAppWindows=[Window{75cbfe7 u0 de.rampro.activitydiary.ui.generic.EditActivity},
+                // Window{37d3e2 u0 de.rampro.activitydiary.ui.generic.EditActivity}]
+                final String windowsRecord = matcher.group();
+                numberOfWindows = windowsRecord.split(",").length;
+            }
+
+        } catch (IOException e) {
+            MATE.log_error("Couldn't retrieve number of windows!");
+            throw new IllegalStateException(e);
+        }
+
+        return numberOfWindows;
+    }
+
+    /**
+     * Retrieves the activity stack size of the AUT.
+     *
+     * @return Returns the activity stack size.
+     */
+    public int getActivityStackSize() {
+
+        // https://stackoverflow.com/a/28789624/6110448
+
+        int activityStackSize = 1; // at least one activity is on the stack
+
+        // Certain apps use the abbreviated form (no package name prefix) to denote the activity
+        // name. Although there is no guarantee that this activity belongs to the AUT, we can still
+        // base our decision whether to enable/disable the BACK action on this information, i.e.
+        // we don't care whether the BACK action would be enabled on a non-AUT screen state.
+        final Pattern taskRecordPattern
+                = Pattern.compile("Recent #0: TaskRecord.*A=" + "(" + packageName + "|\\." + ")" + ".*");
+
+        try {
+            final String output = device.executeShellCommand(GET_ACTIVITY_STACK_CMD);
+            Matcher matcher = taskRecordPattern.matcher(output);
+
+            if (matcher.find()) {
+                // TaskRecord{30e9ab6 #9 A=com.oriondev.moneywallet U=0 StackId=1 sz=1}
+                final String taskRecord = matcher.group();
+                activityStackSize = Integer.parseInt(taskRecord.split("sz=")[1]
+                        .split("\\}")[0]);
+            }
+
+        } catch (IOException e) {
+            MATE.log_error("Couldn't retrieve size of activity stack!");
+            throw new IllegalStateException(e);
+        }
+
+        return activityStackSize;
     }
 
     /**
@@ -463,12 +1197,16 @@ public class DeviceMgr {
     }
 
     /**
+     * NOTE: This motif action have been replaced by a widget action for a single spinner and a
+     * motif action for changing multiple spinners at once.
+     *
      * Performs a scrolling action on a spinner, i.e. one combines the clicking on the spinner to
      * open the drop-down menu (list view) and the selection of a (different) entry from the
      * drop-down menu.
      *
      * @param action The given motif action.
      */
+    @SuppressWarnings("unused")
     private void handleSpinnerScrolling(MotifAction action) {
 
         if (!Properties.USE_PRIMITIVE_ACTIONS()) {
@@ -808,7 +1546,7 @@ public class DeviceMgr {
      * @return Returns {@code true} if the soft keyboard is opened, otherwise {@code false} is
      *         returned.
      */
-    private boolean isKeyboardOpened() {
+    public boolean isKeyboardOpened() {
 
         // https://stackoverflow.com/questions/17223305/suppress-keyboard-after-setting-text-with-android-uiautomator
         UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
@@ -833,6 +1571,7 @@ public class DeviceMgr {
 
         switch (typeOfAction) {
             case CLICK:
+            case CHANGE_CHECKABLE:
                 handleClick(selectedWidget);
                 break;
             case LONG_CLICK:
@@ -850,6 +1589,12 @@ public class DeviceMgr {
             case SWIPE_LEFT:
             case SWIPE_RIGHT:
                 handleSwipe(selectedWidget, typeOfAction);
+                break;
+            case CHANGE_SEEK_BAR:
+                handleChangeSeekBar(selectedWidget);
+                break;
+            case CHANGE_SPINNER:
+                handleChangeSpinner(selectedWidget);
                 break;
             default:
                 throw new IllegalArgumentException("Action type " + action.getActionType()
@@ -895,9 +1640,30 @@ public class DeviceMgr {
      */
     public boolean checkForProgressBar(IScreenState screenState) {
 
+        boolean foundProgressBar = false;
+        boolean foundProgressBarPercent = false;
+        boolean foundProgressBarNumber = false;
+
+        /*
+        * There are certain apps that misuse a progress bar as a rating bar. Thus, we need to watch
+        * out for a specific combination of widgets to distinguish a regular progress bar from a
+        * progress bar that is used as a rating bar.
+         */
+
         for (Widget widget : screenState.getWidgets()) {
+
             if (widget.isProgressBarType() && widget.isEnabled() && widget.isVisible()) {
-                return true;
+                foundProgressBar = true;
+            } else if (widget.getResourceID().equals("android:id/progress_number")
+                    && widget.isEnabled() && widget.isVisible()) {
+                foundProgressBarNumber = true;
+            } else if (widget.getResourceID().equals("android:id/progress_percent")
+                    && widget.isEnabled() && widget.isVisible()) {
+                foundProgressBarPercent = true;
+            }
+
+            if (foundProgressBar && foundProgressBarPercent && foundProgressBarNumber) {
+                return true; // early termination
             }
         }
 
@@ -929,7 +1695,7 @@ public class DeviceMgr {
              * If we proceed too fast, the UIAutomator loses its connection. Thus, we insert a
              * minimal waiting time to avoid this problem.
              */
-            Utils.sleep(100);
+            Utils.sleep(200);
         }
     }
 
@@ -990,6 +1756,60 @@ public class DeviceMgr {
     }
 
     /**
+     * Changes the entry of a spinner.
+     *
+     * @param widget The spinner widget.
+     */
+    private void handleChangeSpinner(final Widget widget) {
+        Widget selectedWidget = widget.getChildren().get(0);
+        handleSpinnerScrolling(widget, selectedWidget);
+    }
+
+    /**
+     * Tries to move the seek bar (special kind of progress bar) in a random direction.
+     *
+     * @param widget The seek bar widget.
+     */
+    private void handleChangeSeekBar(final Widget widget) {
+
+        // TODO: Handle vertically laid-out seek bars.
+
+        final UiObject2 uiObject = findObject(widget);
+
+        if (uiObject != null) {
+
+            /*
+            * NOTE: We tried out different low-level actions like swipe, drag, scroll and fling but
+            * all of them had their limitations or didn't function as expected. In the end, clicking
+            * directly on a random X coordinate appeared to be the most reliable option. One
+            * alternative to below approach is to use DPAD_RIGHT and DPAD_LEFT (this works reliably
+            * and has the advantage that it moves the seek bar exactly one 'step' in either direction.
+            * However, the problem here was that to use those two actions, one has to first move the
+            * DPAD 'cursor' to the correct location and this didn't seem feasible.
+             */
+
+            try {
+                // Click on a random X coordinate.
+                final int X1 = uiObject.getVisibleBounds().left;
+                final int X2 = uiObject.getVisibleBounds().right;
+                final int Y = uiObject.getVisibleBounds().centerY();
+                int randomX = Randomness.getRandom(X1, X2);
+                device.click(randomX, Y);
+            } catch (StaleObjectException e) {
+                MATE.log_warn("Stale UiObject2!");
+                e.printStackTrace();
+
+                // fall back mechanism
+                final int X1 = widget.getX1();
+                final int X2 = widget.getX2();
+                final int Y = widget.getY();
+                int randomX = Randomness.getRandom(X1, X2);
+                device.click(randomX, Y);
+            }
+        }
+    }
+
+    /**
      * Clears the widget's text.
      *
      * @param widget The widget whose input should be cleared.
@@ -1036,9 +1856,20 @@ public class DeviceMgr {
         int Y = 0;
         int steps = 15;
 
+        /*
+        * The steps parameter controls the speed of the swipe, where a higher number slows down the
+        * swipe and vice versa. We noted that a too fast swiping up/down (low step size) can cause
+        * some rebounding effect, thus we adjust the step size to 25, which seems to be the most
+        * reliable setting.
+         */
+        if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
+            steps = 25;
+        }
+
         if (widget != null && !widget.getClazz().isEmpty()) {
             UiObject2 obj = findObject(widget);
             if (obj != null) {
+
                 try {
                     X = obj.getVisibleBounds().centerX();
                     Y = obj.getVisibleBounds().centerY();
@@ -1050,43 +1881,58 @@ public class DeviceMgr {
                 }
 
                 /*
-                * The default pixel move size is rather low, thus the change upon a swipe up or down
-                * is tiny. The preferred option is to make the pixel move size dependent on the
-                * size of the scrollable UI element.
+                * The default pixel move size is rather low, thus the change upon a swipe is tiny.
+                * The preferred option is to make the pixel move size dependent on the size of the
+                * scrollable UI element. We take half of the widget size in the given direction.
                  */
-                if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
-                    try {
+                try {
+                    if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
                         pixelsMove = (obj.getVisibleBounds().bottom - obj.getVisibleBounds().top) / 2;
-                    } catch (StaleObjectException e) {
-                        MATE.log_warn("Stale UiObject2!");
-                        e.printStackTrace();
+                    } else {
+                        pixelsMove = (obj.getVisibleBounds().right - obj.getVisibleBounds().left) / 2;
                     }
+                } catch (StaleObjectException e) {
+                    MATE.log_warn("Stale UiObject2!");
+                    e.printStackTrace();
                 }
-            } else {
+
+            } else { // rely on the widget coordinates
+
                 X = widget.getX();
                 Y = widget.getY();
+
+                // take half of the widget size in the given direction
+                if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
+                    pixelsMove = Y; // is essentially (Y2-Y1)/2
+                } else {
+                    pixelsMove = X; // is essentially (X2-X1)/2
+                }
             }
         } else {
+
             X = device.getDisplayWidth() / 2;
             Y = device.getDisplayHeight() / 2;
-            if (direction == SWIPE_DOWN || direction == SWIPE_UP)
+
+            if (direction == SWIPE_DOWN || direction == SWIPE_UP) {
                 pixelsMove = Y;
-            else
+            } else {
                 pixelsMove = X;
+            }
         }
 
-        // 50 pixels has been arbitrarily selected - create a properties file in the future
         switch (direction) {
-            case SWIPE_DOWN:
-                device.swipe(X, Y, X, Y - pixelsMove, steps);
-                break;
             case SWIPE_UP:
+                // Avoid opening the status bar through the swipe.
+                final int statusBarHeight = 72;
+                device.swipe(X, Y, X, Math.max(Y - pixelsMove, statusBarHeight), steps);
+                break;
+            case SWIPE_DOWN:
                 device.swipe(X, Y, X, Y + pixelsMove, steps);
                 break;
-            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
                 device.swipe(X, Y, X + pixelsMove, Y, steps);
                 break;
-            case SWIPE_RIGHT:
+            case SWIPE_LEFT:
                 device.swipe(X, Y, X - pixelsMove, Y, steps);
                 break;
         }

@@ -132,7 +132,23 @@ public class UIAbstractionLayer {
      * @return Returns the list of executable (ui and intent) actions.
      */
     public List<Action> getExecutableActions() {
-        return getLastScreenState().getActions();
+
+        final List<Action> actions = getLastScreenState().getActions();
+
+        /*
+        * We disable the 'BACK' action whenever this action would close the AUT. This happens when
+        * only the (main) activity is open and when there is only a single visible window. Note that
+        * certain UI parts, e.g. the navigation drawer list view, doesn't represent an own window
+        * and hence a 'BACK' action would close the AUT. In contrast, the pop up menu shown by
+        * clicking on the 'more options' symbol (right-most symbol in menu bar) constitutes an own
+        * window and a 'BACK' action would only close the menu not the AUT.
+         */
+        if (getActivityStackSize() == 1 && getNumberOfWindows() == 1) {
+            actions.removeIf(action -> action instanceof UIAction
+                    && ((UIAction) action).getActionType() == ActionType.BACK);
+        }
+
+        return Collections.unmodifiableList(actions);
     }
 
     /**
@@ -150,7 +166,22 @@ public class UIAbstractionLayer {
      * @return Returns the list of executable ui actions.
      */
     public List<UIAction> getExecutableUIActions() {
-        return getLastScreenState().getUIActions();
+
+        final List<UIAction> uiActions = getLastScreenState().getUIActions();
+
+        /*
+         * We disable the 'BACK' action whenever this action would close the AUT. This happens when
+         * only the (main) activity is open and when there is only a single visible window. Note that
+         * certain UI parts, e.g. the navigation drawer list view, doesn't represent an own window
+         * and hence a 'BACK' action would close the AUT. In contrast, the pop up menu shown by
+         * clicking on the 'more options' symbol (right-most symbol in menu bar) constitutes an own
+         * window and a 'BACK' action would only close the menu not the AUT.
+         */
+        if (getActivityStackSize() == 1 && getNumberOfWindows() == 1) {
+            uiActions.removeIf(uiAction -> uiAction.getActionType() == ActionType.BACK);
+        }
+
+        return Collections.unmodifiableList(uiActions);
     }
 
     /**
@@ -183,7 +214,7 @@ public class UIAbstractionLayer {
                     closestEditText.ifPresent(promisingActions::add);
                     promisingActions.add(action);
                 } else if (!action.getWidget().isScrollView() && !action.getWidget().isListViewType()) {
-                    // TODO: Document. What type of widget is this?
+                    // Only apply promising actions on leaf widgets.
                     promisingActions.add(action);
                 }
             }
@@ -305,7 +336,6 @@ public class UIAbstractionLayer {
             }
 
             lastScreenState = state;
-
             return FAILURE_APP_CRASH;
         }
 
@@ -313,6 +343,50 @@ public class UIAbstractionLayer {
 
         // get the package name of the app currently running
         String currentPackageName = state.getPackageName();
+
+        /*
+        * We try to step back whenever an app transition happens. This is a mere heuristic and
+        * should discourage short test case sequences.
+         */
+        if (!currentPackageName.equals(this.packageName)) {
+
+            MATE.log("App transition to: " + getCurrentActivity()
+                    + " [" + currentPackageName + "]");
+
+            try {
+                deviceMgr.executeAction(new UIAction(ActionType.BACK, getCurrentActivity()));
+                state = clearScreen();
+                currentPackageName = state.getPackageName();
+                MATE.log("Returned to: " + getCurrentActivity()
+                        + " [" + currentPackageName + "]");
+            } catch (AUTCrashException e) {
+
+                MATE.log_acc("CRASH MESSAGE " + e.getMessage());
+                /*
+                 * TODO: Evaluate whether pressing the home button makes sense, i.e. whether the gui
+                 *  model is updated correctly. By pressing home, we switch to the home screen but the
+                 *  crash dialog still appears. As a result, could it happen that actually two different
+                 *  crashes / crash dialogs are considered equal, because they appear on the same
+                 *  underlying home screen?
+                 */
+                deviceMgr.pressHome();
+
+                // update gui model
+                state = ScreenStateFactory.getScreenState(ScreenStateType.ACTION_SCREEN_STATE);
+                state = toRecordedScreenState(state);
+
+                if (Properties.SURROGATE_MODEL()) {
+                    SurrogateModel surrogateModel = (SurrogateModel) guiModel;
+                    Set<String> traces = deviceMgr.getTraces();
+                    surrogateModel.update(lastScreenState, state, action, FAILURE_APP_CRASH, traces);
+                } else {
+                    guiModel.update(lastScreenState, state, action);
+                }
+
+                lastScreenState = state;
+                return FAILURE_APP_CRASH;
+            }
+        }
 
         ActionResult result;
 
@@ -418,13 +492,29 @@ public class UIAbstractionLayer {
                     continue;
                 }
 
-                // check for media picker
-                if (handleMediaPicker(screenState)) {
+                // check for presence of a progress bar
+                if (handleProgressBar(screenState)) {
                     change = true;
                     continue;
                 }
 
-                // TODO: handle progress bar
+                // check for presence of a device administrator dialog
+                if (handleDeviceAdministratorDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                // check for presence of an uninstaller dialog
+                if (handleUninstallDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                // check for presence of a media picker dialog
+                if (handleMediaPicker(screenState)) {
+                    change = true;
+                    continue;
+                }
 
                 // check for presence of build warnings dialog
                 if (handleBuildWarnings(screenState)) {
@@ -434,6 +524,28 @@ public class UIAbstractionLayer {
 
                 // check for google sign in dialog
                 if (handleGoogleSignInDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                // check for share message dialog
+                if (handleShareMessageDialog(screenState)) {
+                    change = true;
+                    continue;
+                }
+
+                /*
+                * We need to close a possible opened keyboard in order to have reliable widget
+                * coordinates on which we can operate, i.e. define widget actions. In particular,
+                * the problem is as follows: If we don't close the soft keyboard upfront (which might
+                * be automatically opened on a new screen), certain widget coordinates are not valid
+                * anymore after we finally close the keyboard, e.g. due to a type text action. For
+                * instance, the final click - part of a 'fill form and submit' motif action - might
+                * be not executable because the button's coordinates are now distinct (the keyboard
+                * has been closed and the button was literally shifted).
+                 */
+                if (deviceMgr.isKeyboardOpened()) {
+                    deviceMgr.pressBack();
                     change = true;
                     continue;
                 }
@@ -453,26 +565,139 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Checks whether the current screen shows a progress bar. If this is the case, we wait 10 seconds.
+     * Checks whether the current screen shows an uninstaller dialog. If this is the case, we click
+     * on the cancel button.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleUninstallDialog(final IScreenState screenState) {
+
+        if ((screenState.getPackageName().equals("com.android.packageinstaller")
+                || screenState.getPackageName().equals("com.google.android.packageinstaller"))
+            && screenState.getActivityName().endsWith("UninstallerActivity")) {
+
+            MATE.log("Detected uninstaller dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                final Widget widget = action.getWidget();
+
+                if (action.getActionType() == ActionType.CLICK
+                        && ((widget.isButtonType()
+                            && widget.getResourceID().equals("android:id/button2"))
+                        || widget.getText().equalsIgnoreCase("CANCEL"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on CANCEL button on uninstaller dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a device administrator dialog. If this is the case,
+     * we click on the activate button.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleDeviceAdministratorDialog(final IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.android.settings")
+                && screenState.getActivityName().endsWith("DeviceAdminAdd")) {
+
+            MATE.log("Detected device administrator dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                final Widget widget = action.getWidget();
+
+                if (action.getActionType() == ActionType.CLICK && widget.isButtonType()
+                         && (widget.getResourceID().equals("com.android.settings:id/action_button")
+                        || widget.getText()
+                            .equalsIgnoreCase("Activate this device admin app")
+                        || widget.getText()
+                            .equalsIgnoreCase("Activate this device administrator"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on ACTIVATE button on " +
+                                "device administrator dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a share message dialog. If this is the case, we click
+     * 'CANCEL' to return to the previous screen.
+     *
+     * @param screenState The current screen state.
+     * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
+     */
+    private boolean handleShareMessageDialog(final IScreenState screenState) {
+
+        if (screenState.getPackageName().equals("com.android.messaging")) {
+            MATE.log("Detected share message dialog!");
+
+            for (WidgetAction action : screenState.getWidgetActions()) {
+
+                Widget widget = action.getWidget();
+
+                // TODO: Click on 'NEW MESSAGE' and proceed on next dialog.
+
+                if (action.getActionType() == ActionType.CLICK
+                        && (widget.getResourceID().equals("android:id/button2")
+                        || widget.getText().equalsIgnoreCase("CANCEL"))) {
+                    try {
+                        deviceMgr.executeAction(action);
+                        return true;
+                    } catch (AUTCrashException e) {
+                        MATE.log_warn("Couldn't click on CANCEL button on share message dialog!");
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+
+            deviceMgr.pressBack(); // fall back mechanism
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the current screen shows a progress bar. If this is the case, we wait 3 seconds.
      * This may take several iterations until the progress bar is gone.
      *
      * @param screenState The current screen.
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
      */
-    @SuppressWarnings("unused")
     private boolean handleProgressBar(IScreenState screenState) {
-
-        /*
-         * FIXME: The progress bar is often misused as a rating bar, at least certain sub classes of it.
-         *  Moreover, the progress bar is not reliably detected and we faced a real odd issue during
-         *  experiments: the progress bar was stucking at 99% forever for the app de.tap.easy_xkcd.
-         */
 
         // TODO: handle a progress dialog https://developer.android.com/reference/android/app/ProgressDialog
 
         if (deviceMgr.checkForProgressBar(screenState)) {
             MATE.log("Detected progress bar! Waiting...");
-            Utils.sleep(10000);
+            Utils.sleep(3000);
             return true;
         } else {
             return false;
@@ -497,7 +722,7 @@ public class UIAbstractionLayer {
     }
 
     /**
-     * Checks whether the current screen shows a media picker. If this is the case, we press 'BACK'.
+     * Checks whether the current screen shows a media picker. If this is the case, we click 'OK'.
      *
      * @param screenState The current screen state.
      * @return Returns {@code true} if the screen may change, otherwise {@code false} is returned.
@@ -510,6 +735,8 @@ public class UIAbstractionLayer {
             for (WidgetAction action : screenState.getWidgetActions()) {
 
                 Widget widget = action.getWidget();
+
+                // TODO: Select first another entry of the media picker and then click 'OK'.
 
                 if (action.getActionType() == ActionType.CLICK
                         && (widget.getResourceID().equals("android:id/button1")
@@ -564,29 +791,33 @@ public class UIAbstractionLayer {
          */
 
         // API 25, 28:
-        if (screenState.getPackageName().equals("com.google.android.packageinstaller")
+        if ((screenState.getPackageName().equals("com.google.android.packageinstaller")
                 || screenState.getPackageName().equals("com.android.packageinstaller")
                 || screenState.getPackageName().startsWith("com.android.packageinstaller.permission")
                 // API 29:
                 || screenState.getPackageName().equals("com.android.permissioncontroller")
-                || screenState.getPackageName().equals("com.google.android.permissioncontroller")) {
+                || screenState.getPackageName().equals("com.google.android.permissioncontroller"))
+                && screenState.getActivityName().endsWith("GrantPermissionsActivity")) {
 
             MATE.log("Detected permission dialog!");
 
             for (WidgetAction action : screenState.getWidgetActions()) {
 
-                Widget widget = action.getWidget();
+                final Widget widget = action.getWidget();
 
                 /*
                  * The resource id of the allow button may differ as well between different API levels.
                  */
                 if (action.getActionType() == ActionType.CLICK
+                        && widget.isButtonType()
                         // API 25, 28:
                         && (widget.getResourceID()
                         .equals("com.android.packageinstaller:id/permission_allow_button")
                         // API: 29
                         || widget.getResourceID().equals(
                         "com.android.permissioncontroller:id/permission_allow_button")
+                        || widget.getResourceID().equals(
+                        "com.android.permissioncontroller:id/continue_button")
                         || widget.getResourceID().equals(
                         "com.android.packageinstaller:id/continue_button")
                         || widget.getText().equalsIgnoreCase("continue")
@@ -797,6 +1028,24 @@ public class UIAbstractionLayer {
     public String getCurrentActivity() {
         // TODO: check whether we can use the cached activity -> getLastScreenState().getActivityName();
         return deviceMgr.getCurrentActivity();
+    }
+
+    /**
+     * Retrieves the activity stack size of the AUT.
+     *
+     * @return Returns the activity stack size.
+     */
+    public int getActivityStackSize() {
+        return deviceMgr.getActivityStackSize();
+    }
+
+    /**
+     * Retrieves the number of opened windows for the current activity.
+     *
+     * @return Returns the number of displayed windows for the current activity.
+     */
+    public int getNumberOfWindows() {
+        return deviceMgr.getNumberOfWindows();
     }
 
     /**

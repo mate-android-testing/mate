@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -55,13 +56,13 @@ public class ActionsScreenState extends AbstractScreenState {
         // intent actions are applicable independent of the underlying screen state
         if (Properties.USE_INTENT_ACTIONS()) {
             final IntentProvider intentProvider = new IntentProvider();
-            intentBasedActions = Collections.unmodifiableList(intentProvider.getIntentBasedActions());
-            systemActions = Collections.unmodifiableList(intentProvider.getSystemActions());
-            dynamicReceiverIntentActions = Collections.unmodifiableList(intentProvider.getDynamicReceiverIntentActions());
+            intentBasedActions = intentProvider.getIntentBasedActions();
+            systemActions = intentProvider.getSystemActions();
+            dynamicReceiverIntentActions = intentProvider.getDynamicReceiverIntentActions();
         } else {
-            intentBasedActions = Collections.emptyList();
-            systemActions = Collections.emptyList();
-            dynamicReceiverIntentActions = Collections.emptyList();
+            intentBasedActions = new ArrayList<>();
+            systemActions = new ArrayList<>();
+            dynamicReceiverIntentActions = new ArrayList<>();
         }
     }
 
@@ -86,7 +87,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
         // actions get init lazily
         if (actions == null) {
-            actions = getUIActions();
+            actions = getWidgetAndUIActions();
         }
 
         List<WidgetAction> widgetActions = new ArrayList<>();
@@ -95,7 +96,7 @@ public class ActionsScreenState extends AbstractScreenState {
                 widgetActions.add((WidgetAction) uiAction);
             }
         }
-        return Collections.unmodifiableList(widgetActions);
+        return widgetActions;
     }
 
     /**
@@ -120,7 +121,7 @@ public class ActionsScreenState extends AbstractScreenState {
         final List<Action> actions = new ArrayList<>();
 
         if (Properties.USE_UI_ACTIONS()) {
-            actions.addAll(getUIActions());
+            actions.addAll(getWidgetAndUIActions());
         }
 
         if (Properties.USE_INTENT_ACTIONS()) {
@@ -142,13 +143,32 @@ public class ActionsScreenState extends AbstractScreenState {
     @Override
     public List<UIAction> getUIActions() {
 
+        final List<UIAction> actions = new ArrayList<>();
+
+        if (Properties.USE_UI_ACTIONS()) {
+            actions.addAll(getWidgetAndUIActions());
+        }
+
+        if (Properties.USE_MOTIF_ACTIONS()) {
+            actions.addAll(getMotifActions());
+        }
+
+        return actions;
+    }
+
+    /**
+     * Extracts the list of applicable widget and ui actions on the underlying screen.
+     *
+     * @return Returns the list of widget and ui actions.
+     */
+    private List<UIAction> getWidgetAndUIActions() {
+
         // check whether the actions have been requested once
         if (actions != null) {
             return actions;
         }
 
         if (activityName.contains("GoogleOAuthActivity")) {
-            MATE.log_acc("Reached GoogleOAuthActivity!");
             // we can't authenticate here, so only allow to press 'BACK'
             return Collections.singletonList(new UIAction(ActionType.BACK, activityName));
         }
@@ -156,12 +176,32 @@ public class ActionsScreenState extends AbstractScreenState {
         MATE.log_debug("Retrieving widget actions for screen state...");
         MATE.log_debug("Number of all widgets: " + this.widgets.size());
 
+        // Check whether there is a drawer layout used for the navigation.
+        final Widget drawerLayout = getWidgets().stream()
+                .filter(Widget::isDrawerLayout)
+                .findFirst()
+                .orElse(null);
+
+        // See https://developer.android.com/reference/androidx/drawerlayout/widget/DrawerLayout.
+        final Predicate<Widget> isNavigationWidget = w -> {
+            // Although there is a convention that the first child should refer to the main content
+            // view and the second child to the navigation menu, this rule is not followed by all
+            // apps. To circumvent this problem, we consider the size of the widgets and assume
+            // that the smaller widget in width refers to the navigation menu.
+            final Widget firstChild = drawerLayout.getChildren().get(0);
+            final Widget secondChild = drawerLayout.getChildren().get(1);
+            final Widget navigationElementContainer = firstChild.getWidth() < secondChild.getWidth()
+                    ? firstChild : secondChild;
+            return w.isSonOf(parent -> parent.equals(navigationElementContainer));
+        };
+
         List<Widget> widgets = new ArrayList<>();
 
         for (Widget widget : this.widgets) {
             /*
-             * We ignore here primarily all widgets that are not visible, not enabled and don't
-             * represent leaf widgets in the ui hierarchy. There are four exceptions to this rule:
+             * We ignore here primarily all widgets that are not visible and don't represent leaf
+             * widgets in the ui hierarchy. There are four exceptions to this rule:
+             *
              * 1) A spinner widget is not a leaf widget but represents a candidate for a widget
              * action. The other possibility would be to apply the action to the text view
              * that is the child element of the spinner.
@@ -171,9 +211,18 @@ public class ActionsScreenState extends AbstractScreenState {
              * a static analysis of event handlers can't properly match the widget otherwise.
              * 3) Likewise, it may can happen that checkable widgets are no leaf widgets.
              * 4) Same like spinner widgets, scroll views are no leaf widgets.
+             *
+             * Note that certain widget attributes change over time, e.g. a button might be visible
+             * once scrolled to it or enabled once the editable fields have been filled out. We can
+             * only rely upon them, if our state equivalence function considers those attributes as
+             * well, otherwise we may use a cached screen state that has outdated widget attributes.
+             *
+             * Note that certain widgets can be already parsed but are not visible at that time.
+             * For instance, items in a scroll view can fall below the visible screen. It is not
+             * necessary to check for the bounds (Y coordinates), the 'visible' and 'enabled'
+             * properties seems to be sufficient to check.
              */
-            if ((!widget.hasChildren() || widget.isSpinnerType() || widget.isClickable()
-                    || widget.isLongClickable() || widget.isCheckable()
+            if ((widget.isLeafWidget() || widget.isSpinnerType() || widget.isActionable()
                     || widget.isScrollView() || widget.isScrollable())
                     && widget.isVisible() && widget.isEnabled()) {
                 widgets.add(widget);
@@ -191,9 +240,6 @@ public class ActionsScreenState extends AbstractScreenState {
 
         for (Widget widget : widgets) {
 
-            MATE.log_debug("Widget: " + widget);
-            logWidgetProperties(widget);
-
             /*
             * TODO: We assign a clickable and long-clickable action if
             *  a widget defines both attributes as true. However, in most cases
@@ -208,17 +254,22 @@ public class ActionsScreenState extends AbstractScreenState {
              * resolution of 1080x1920 this represents the area [0,0][1080,72].
              */
             if (appScreen.getStatusBarBoundingBox().contains(widget.getBounds())) {
-                MATE.log_debug("Widget within status bar: " + widget.getBounds());
                 continue;
             }
 
+            /*
+            * There is a specific combinations of two text views that describe a setting with a
+            * headline and a summary. Instead of defining the click on both text views, it is
+            * sufficient to define it on the parent widget. This should simply reduce the number of
+            * redundant actions.
+             */
             if (widget.isSettingsOption()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                 continue;
             }
 
             if (widget.isSonOf(Widget::isSettingsOption)) {
-                MATE.log_debug("Ignoring children of settings option!");
+                // we define the click action directly on the parent widget
                 continue;
             }
 
@@ -227,13 +278,41 @@ public class ActionsScreenState extends AbstractScreenState {
             *  We should define only for a single widget an action.
              */
             if (hasOverlappingSiblingWidgetAction(widget, widgetActions)) {
-                MATE.log_debug("Overlapping sibling action!");
                 continue;
             }
 
-            if (widget.isSonOfSpinner()) {
+            /*
+             * NOTE: For a navigation menu a drawer layout might be used. A drawer stores in its
+             * child nodes the navigation menu and the content of the current screen and shows
+             * depending on the state either the navigation menu or the content of the current screen.
+             * However, the UIAutomator API isn't aware of this and returns the widgets of both views,
+             * while we can only interact with one set of widgets at a time. Although there is a
+             * convention that states that the main content view should be stored in the first child
+             * and the navigation menu in the second child, there are apps that don't follow this
+             * rule, thus we can't rely on this to determine which widgets belong to the navigation
+             * view. Instead, we consider the widths of children. The child widget that spans over
+             * the entire screen refers to the main content view, while the smaller widget refers to
+             * the navigation menu.
+             */
+            if (drawerLayout != null && drawerLayout.getChildren().size() > 1
+                    && !isNavigationWidget.test(widget)) {
+                continue;
+            }
 
-                MATE.log_debug("Spinner widget defines scrolling action itself!");
+            if (widget.isSpinnerType() && widget.hasChildren()) {
+
+                if (widget.isClickable() || widget.isLongClickable() || widget.isScrollable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SPINNER));
+                }
+
+                // it doesn't make sense to add another action to spinner instance
+                continue;
+            }
+
+            // NOTE: It seems rather so that children of a spinner are bare text views that should
+            // not convey any action, only the list view that is spanned by the spinner contains
+            // clickable items, but there might be exceptions from this rule.
+            if (widget.isLeafWidget() && widget.isSonOfSpinner()) {
 
                 /*
                 * A spinner typically hosts text views as entries, but it could happen
@@ -253,89 +332,15 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            /*
-             * It can happen that leaf widgets actually represent containers like
-             * a linear layout in order to fill or introduce a gap.
-             */
-            if (widget.isContainer()) {
-                MATE.log_debug("Container as a leaf widget!");
-                continue;
-            }
-
-            if ((widget.isSonOfLongClickable() || widget.isSonOfClickable()
-                    || widget.isSonOfCheckable()) && !widget.isSonOfActionableContainer()) {
-                MATE.log_debug("Parent widget defines the action!");
-                // we define the action directly on the parent widget
-                continue;
-            }
-
-            if (widget.isCheckableType()) {
-                MATE.log_debug("Widget implements checkable interface!");
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
-            }
-
-            if (widget.isEditTextType()) {
-                MATE.log_debug("Widget is an edit text instance!");
-                widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
-                widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
-
-               /*
-               * TODO: Use static analysis to detect whether an onclick handler is registered.
-               * Editable widgets are by default also clickable and long-clickable, but
-               * it is untypical to define such action as well. What should happen?
-               * We can only imagine that some sort of pop up appears showing some additional
-               * hint. Since it's uncommon that editable widgets define an onclick listener,
-               * we ignore such action right now.
-                */
-               continue;
-            }
-
-            if (widget.isButtonType()) {
-                MATE.log_debug("Widget is a button instance!");
-
-                // TODO: Use static analysis to detect whether click/long click refer to the same
-                //  event handler.
-                if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
-                }
-
-                if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
-                }
-            }
-
-            if (widget.isSpinnerType()) {
-                MATE.log_debug("Widget is a spinner instance!");
-
-                /*
-                * Although there is a proper motif action for spinner widgets in the meantime, we
-                * keep the click action as kind of fallback mechanism and when motif actions
-                * shouldn't be allowed.
-                * 
-                 */
-
-                if (widget.isClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
-                    // it doesn't make sense to add another action to spinner instance
-                    continue;
-                }
-
-                if (widget.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
-                    // it doesn't make sense to add another action to spinner instance
-                    continue;
-                }
-            }
-
+            // There are scroll views that are not scrollable at all, but the property 'isScrollable'
+            // is more reliable in such cases.
             if (widget.isScrollable() && !widget.isSpinnerType() && !widget.isSonOfScrollable()) {
 
-                MATE.log_debug("Widget is a scrollview!");
-
                 /*
-                * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
-                * a horizontal scroll view like android.support.v4.view.ViewPager is used for
-                * vertical scrolling by nesting layouts, so it is not possible to determine
-                * the direction of the scroll view. Thus, we add swipes for all directions.
+                 * Unfortunately, some apps misuse the intended scrolling mechanism, e.g.
+                 * a horizontal scroll view like android.support.v4.view.ViewPager is used for
+                 * vertical scrolling by nesting layouts, so it is not possible to determine
+                 * the direction of the scroll view. Thus, we add swipes for all directions.
                  */
                 widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_UP));
                 widgetActions.add(new WidgetAction(widget, ActionType.SWIPE_DOWN));
@@ -351,13 +356,107 @@ public class ActionsScreenState extends AbstractScreenState {
              * and not clickable according to the underlying AccessibilityNodeInfo object,
              * however those elements represent in most cases clickable widgets.
              */
-            if (widget.isSonOfListView()) {
+            if (widget.isLeafWidget() && widget.isSonOfListView()) {
+
+                if (widget.isClickable() || widget.isCheckable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
+
+                if (widget.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                Widget parent = widget.getParent();
+
+                while (!parent.isListViewType()) {
+                    parent = parent.getParent();
+                }
+
+                // inherit the clickable properties of the list view
+                if (parent.isLongClickable()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                }
+
+                // make widget in any case clickable
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+
+                continue;
             }
 
-            // TODO: might be redundant with isCheckableType()
-            if (widget.isCheckable()) {
-                // we check a widget by clicking on it
+            /*
+             * It can happen that leaf widgets actually represent containers like
+             * a linear layout in order to fill or introduce a gap.
+             */
+            if (widget.isLeafWidget() && widget.isContainer()) {
+                continue;
+            }
+
+            /*
+            * This happens for instance for androidx.appcompat.app.ActionBar$Tab. It seems like
+            * this type of widget is used for navigation and the underlying text view is merely
+            * defining the text. We can save here defining a click action for both the text view
+            * and the overlying navigation widget.
+             */
+            if (widget.isSonOf(Widget::isActionBarTab)) {
+                // we define the action directly on the parent widget
+                continue;
+            }
+
+            /*
+            * There might be leaf widgets like a combination of a image view (symbol) and a text
+            * view that are part of a common actionable layout. Instead of propagating the actions
+            * of the shared layout to the individual leaf widgets, we apply the actions directly on
+            * the parent. This should reduce the number of redundant actions.
+             */
+            if (widget.isLeafWidget() && widget.isSonOfActionableContainer()) {
+                // we define the action directly on the parent widget
+                continue;
+            }
+
+            /*
+             * There are edit text widgets that cannot be modified directly but via a button, e.g.
+             * when setting a date in such a field. In those cases, the edit text widget is likely
+             * not enabled.
+             */
+            if (widget.isEditTextType()) {
+                
+                // TODO: Certain edit text fields are intended to be clicked and select a
+                //  pre-defined text instead of inserting some hand-crafted input.
+
+                if (widget.isEnabled()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.TYPE_TEXT));
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLEAR_TEXT));
+                }
+
+                /*
+                 * TODO: Use static analysis to detect whether an onclick handler is registered.
+                 * Editable widgets are by default also clickable and long-clickable, but
+                 * it is untypical to define such action as well. What should happen?
+                 * We can only imagine that some sort of pop up appears showing some additional
+                 * hint. Since it's uncommon that editable widgets define an onclick listener,
+                 * we ignore such action right now.
+                 */
+                continue;
+            }
+
+            if (widget.isSeekBar() || widget.isRatingBar()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SEEK_BAR));
+
+                // it doesn't make sense to add another action to seek or rating bars
+                continue;
+            }
+
+            // These comprises any widget that is checkable from check boxes to checkable text views.
+            if (widget.isCheckable() || widget.isCheckableType() || widget.isSwitch()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECKABLE));
+
+                // it doesn't make sense to add another action to a checkable widget
+                continue;
+            }
+
+            // TODO: Use static analysis to detect whether click/long click refer to the same
+            //  event handler.
+            if (widget.isClickable()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
@@ -365,22 +464,26 @@ public class ActionsScreenState extends AbstractScreenState {
                 widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
             }
 
-            /*
-             * Right now, we can't tell whether any kind of view widget should be clickable
-             * or not, thus we assign to each leaf widget the click action. In the future,
-             * we should rely on an additional static analysis of the byte code to verify
-             * which leaf widget, in particular which text view, defines an event handler
-             * and thus should be clickable.
-             */
-            widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            if (widget.isLeafWidget()
+                    // ignore placeholder widgets
+                    && widget.getHeight() > 5
+                    && (widget.hasText() || widget.hasContentDescription())) {
+                /*
+                 * Right now, we can't tell whether any kind of view widget should be clickable
+                 * or not, thus we assign to each leaf widget the click action. In the future,
+                 * we should rely on an additional static analysis of the byte code to verify
+                 * which leaf widget, in particular which text view, defines an event handler
+                 * and thus should be clickable.
+                 */
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+            }
         }
 
         MATE.log_debug("Number of widget actions: " + widgetActions.size());
-        MATE.log_debug("Derived the following widget actions: " + widgetActions);
 
         List<UIAction> uiActions = new ArrayList<>(widgetActions);
         uiActions.addAll(getIndependentUIActions());
-        actions = Collections.unmodifiableList(uiActions);
+        actions = uiActions;
         return actions;
     }
 
@@ -395,14 +498,408 @@ public class ActionsScreenState extends AbstractScreenState {
 
         final List<MotifAction> motifActions = new ArrayList<>();
         motifActions.addAll(extractFillFormAndSubmitActions(widgetActions));
-        motifActions.addAll(extractSpinnerScrollActions(widgetActions));
-
-        // TODO: add further motif genes, e.g. scrolling on list views
-
-        return Collections.unmodifiableList(motifActions);
+        motifActions.addAll(extractMenuAndSelectItemActions(widgetActions));
+        motifActions.addAll(extractSortAndSelectSortOrderActions(widgetActions));
+        motifActions.addAll(extractOpenNavigationAndSelectOptionActions(widgetActions));
+        motifActions.addAll(extractTypeTextAndPressEnterActions(widgetActions));
+        motifActions.addAll(extractChangeRadioGroupSelectionActions(widgetActions));
+        motifActions.addAll(extractChangeListViewSelectionActions(widgetActions));
+        motifActions.addAll(extractChangeSeekBarsActions(widgetActions));
+        motifActions.addAll(extractDatePickerActions(widgetActions));
+        motifActions.addAll(extractChangeCheckableActions(widgetActions));
+        motifActions.addAll(extractChangeSpinnerActions(widgetActions));
+        motifActions.addAll(extractFillFormAndScrollActions(widgetActions));
+        return motifActions;
     }
 
     /**
+     * Extracts the possible swap list items motif actions. This motif action swaps two list items.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible swap list items motif actions if any.
+     */
+    @SuppressWarnings("unused")
+    private List<MotifAction> extractSwapListItemsActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> swapListItemsActions = new ArrayList<>();
+
+        /*
+        * TODO: Unfortunately there is no proper way to detect whether list items are swappable.
+        *  Although most implementations use an image view positioned at the right of a list view
+        *  item that can be dragged and dropped, there is no common name such that we could identify
+        *  these swappable widgets. The only viable option right now would be to overapproximate
+        *  and define for each list view such an action even if not applicable.
+         */
+
+        // TODO: There might be multiple list views visible, thus we should group the list view items
+        //  accordingly and allow only swapping between two items of the same list view.
+        final List<Widget> listItems = getWidgets().stream()
+                .filter(Widget::isLeafWidget)
+                .filter(Widget::isImageView)
+                // TODO: Find proper identifier for swappable widgets.
+                .filter(widget -> widget.getContentDesc().equalsIgnoreCase("swap"))
+                // TODO: In most cases it is the right-most (last) child.
+                .filter(widget -> widget.isSonOf(Widget::isRecyclerViewType)
+                        || widget.isSonOf(Widget::isListViewType))
+                .collect(Collectors.toList());
+
+        if (listItems.size() > 1) { // there are at least two list items
+            final MotifAction swapListItems = new MotifAction(ActionType.SWAP_LIST_ITEMS, activityName);
+            swapListItems.setWidgets(listItems);
+            swapListItemsActions.add(swapListItems);
+        }
+
+        return swapListItemsActions;
+    }
+
+    /**
+     * Extracts the possible fill form and scroll motif actions. This motif action combines filling
+     * out a form and scrolling down until in a repeated manner until the end of the page is reached.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible fill form and scroll motif actions if any.
+     */
+    private List<MotifAction> extractFillFormAndScrollActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> fillFormAndScrollActions = new ArrayList<>();
+
+        final List<WidgetAction> textInsertActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
+                .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
+                .collect(Collectors.toList());
+
+        final WidgetAction scrollAction = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.SWIPE_UP)
+                // the scrolling view should span over the entire screen
+                .filter(widgetAction -> appScreen.getWidth() == widgetAction.getWidget().getWidth())
+                .findFirst().orElse(null);
+
+        if (!textInsertActions.isEmpty() && scrollAction != null) {
+            final MotifAction fillFormAndScrollAction = new MotifAction(ActionType.FILL_FORM_AND_SCROLL,
+                    activityName, Collections.singletonList(scrollAction));
+            fillFormAndScrollActions.add(fillFormAndScrollAction);
+        }
+
+        return fillFormAndScrollActions;
+    }
+
+    /**
+     * Extracts the possible change checkables motif actions. This motif action changes multiple
+     * checkables visible on the current screen.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change checkables motif actions if any.
+     */
+    private List<MotifAction> extractChangeCheckableActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeCheckableActions = new ArrayList<>();
+
+        final List<WidgetAction> changeCheckableWidgetActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_CHECKABLE)
+                .collect(Collectors.toList());
+
+        if (changeCheckableWidgetActions.size() > 1) { // at least two checkables need to be present
+
+            final MotifAction changeCheckBoxAction = new MotifAction(ActionType.CHANGE_CHECKABLES,
+                    activityName, Collections.unmodifiableList(changeCheckableWidgetActions));
+
+            changeCheckableActions.add(changeCheckBoxAction);
+        }
+
+        return changeCheckableActions;
+    }
+
+    /**
+     * Extracts the possible change spinners motif actions. This motif action changes multiple
+     * entries of spinners at once.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change spinners motif actions if any.
+     */
+    private List<MotifAction> extractChangeSpinnerActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeSpinnerActions = new ArrayList<>();
+
+        final List<WidgetAction> changeSpinnerWidgetActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_SPINNER)
+                .collect(Collectors.toList());
+
+        if (changeSpinnerWidgetActions.size() > 1) { // at least two spinners need to be present
+
+            final MotifAction changeSpinnerAction = new MotifAction(ActionType.CHANGE_SPINNERS,
+                    activityName, Collections.unmodifiableList(changeSpinnerWidgetActions));
+
+            changeSpinnerActions.add(changeSpinnerAction);
+        }
+
+        return changeSpinnerActions;
+    }
+
+    /**
+     * Extracts the possible change date motif actions. This motif action changes the selected date
+     * of a date picker.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change date motif actions if any.
+     */
+    private List<MotifAction> extractDatePickerActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> datePickerActions = new ArrayList<>();
+
+        if (widgets.stream().anyMatch(Widget::isDatePicker)) {
+
+            final Predicate<WidgetAction> prevAndNextButtonMatcher = widgetAction -> {
+                final Widget widget = widgetAction.getWidget();
+                return widget.isImageButtonType()
+                        && (widget.getContentDesc().toLowerCase().contains("next")
+                        || widget.getContentDesc().toLowerCase().contains("previous"));
+            };
+
+            final List<WidgetAction> prevAndNextButtonClickActions = widgetActions.stream()
+                    .filter(prevAndNextButtonMatcher)
+                    .filter(widgetAction -> widgetAction.getActionType() == ActionType.CLICK)
+                    .collect(Collectors.toList());
+
+            final MotifAction datePickerAction
+                    = new MotifAction(ActionType.CHANGE_DATE, activityName,
+                    Collections.unmodifiableList(prevAndNextButtonClickActions));
+            datePickerActions.add(datePickerAction);
+        }
+
+        return datePickerActions;
+    }
+
+    /**
+     * Extracts the possible change seek bars motif actions. This motif action changes multiple
+     * seek bars at once.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change seek bars motif actions if any.
+     */
+    private List<MotifAction> extractChangeSeekBarsActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeSeekBarsActions = new ArrayList<>();
+
+        final List<WidgetAction> changeSeekBarActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CHANGE_SEEK_BAR)
+                .collect(Collectors.toList());
+
+        if (changeSeekBarActions.size() > 1) { // there are at least two seek bars
+            final MotifAction changeSeekBarsAction
+                    = new MotifAction(ActionType.CHANGE_SEEK_BARS, activityName,
+                    Collections.unmodifiableList(changeSeekBarActions));
+            changeSeekBarsActions.add(changeSeekBarsAction);
+        }
+
+        return changeSeekBarsActions;
+    }
+
+    /**
+     * Extracts the possible change list view selection motif actions. This motif action changes
+     * the current selection of a list view / recycler view by clicking on a random list item.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible list view selection motif actions if any.
+     */
+    private List<MotifAction> extractChangeListViewSelectionActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeListViewSelectionActions = new ArrayList<>();
+
+        final Predicate<WidgetAction> listViewItemActionsMatcher = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widgetAction.getActionType() == ActionType.CLICK
+                    && widget.isEnabled()
+                    && widget.isLeafWidget()
+                    && widget.isTextViewType()
+                    && widget.hasText()
+                    && widget.hasResourceID()
+                    && (widget.isSonOf(Widget::isListViewType)
+                        || widget.isSonOf(Widget::isRecyclerViewType));
+        };
+
+        final List<WidgetAction> listViewItemActions = widgetActions.stream()
+                .filter(listViewItemActionsMatcher)
+                .collect(Collectors.toList());
+
+        if (!listViewItemActions.isEmpty()) {
+            final MotifAction changeListViewSelectionAction
+                    = new MotifAction(ActionType.CHANGE_LIST_VIEW_SELECTION, activityName,
+                    Collections.unmodifiableList(listViewItemActions));
+            changeListViewSelectionActions.add(changeListViewSelectionAction);
+        }
+
+        return changeListViewSelectionActions;
+    }
+
+    /**
+     * Extracts the possible change radio group selections motif actions. This motif action changes
+     * the different radio group selections by clicking on a random radio button per radio group.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible change radio group selections motif actions if any.
+     */
+    private List<MotifAction> extractChangeRadioGroupSelectionActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> changeRadioGroupSelectionActions = new ArrayList<>();
+
+        final Predicate<WidgetAction> radioButtonActionMatcher = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widgetAction.getActionType() == ActionType.CLICK
+                    && widget.isEnabled()
+                    && widget.isLeafWidget()
+                    && widget.isRadioButtonType()
+                    && widget.isSonOf(Widget::isRadioGroupType);
+        };
+
+        final List<WidgetAction> radioButtonActions = widgetActions.stream()
+                .filter(radioButtonActionMatcher)
+                .collect(Collectors.toList());
+        
+        // TODO: Store the radio button action per radio group in the motif action.
+
+        if (!radioButtonActions.isEmpty()) {
+            final MotifAction changeRadioGroupSelectionAction
+                    = new MotifAction(ActionType.CHANGE_RADIO_GROUP_SELECTIONS, activityName);
+            changeRadioGroupSelectionActions.add(changeRadioGroupSelectionAction);
+        }
+
+        return changeRadioGroupSelectionActions;
+    }
+
+    /**
+     * Extracts the possible type text and press enter motif actions. This motif action
+     * combines the text insertion and pressing enter.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible type text and press enter motif actions if any.
+     */
+    private List<MotifAction> extractTypeTextAndPressEnterActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> typeTextAndPressEnterActions = new ArrayList<>();
+
+        final List<WidgetAction> typeTextActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.TYPE_TEXT)
+                .collect(Collectors.toList());
+
+        typeTextActions.stream().forEach(typeTextAction -> {
+            MotifAction typeTextAndPressEnterAction
+                    = new MotifAction(ActionType.TYPE_TEXT_AND_PRESS_ENTER, activityName,
+                    Collections.singletonList(typeTextAction));
+            typeTextAndPressEnterActions.add(typeTextAndPressEnterAction);
+        });
+
+        return typeTextAndPressEnterActions;
+    }
+
+    /**
+     * Extracts the possible open navigation menu and option selection motif actions. This motif action
+     * combines the clicking on the navigation menu and selecting a possibly different option.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible open navigation menu and select option motif actions if any.
+     */
+    private List<MotifAction> extractOpenNavigationAndSelectOptionActions(
+            final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> openNavigationAndSelectOptionActions = new ArrayList<>();
+
+        final Predicate<String> contentMatcher = content -> (content.toLowerCase().contains("navigation")
+                || content.toLowerCase().contains("nav")
+                || content.toLowerCase().contains("open"))
+                && !content.toLowerCase().contains("close");
+
+        final Widget drawerLayout = widgets.stream()
+                .filter(Widget::isDrawerLayout)
+                // The navigation menu has exactly one child when not opened.
+                .filter(widget -> widget.getChildren().size() == 1)
+                .findFirst()
+                .orElse(null);
+
+        if (drawerLayout != null) {
+
+            // Locate the navigation menu.
+            final List<WidgetAction> navigationMenuClickActions = widgetActions.stream()
+                    .filter(widgetAction -> widgetAction.getWidget().isImageButtonType()
+                            && widgetAction.getActionType() == ActionType.CLICK
+                            && contentMatcher.test(widgetAction.getWidget().getContentDesc())
+                            && appScreen.getMenuBarBoundingBox().contains(
+                            widgetAction.getWidget().getBounds()))
+                    .collect(Collectors.toList());
+
+            navigationMenuClickActions.stream().forEach(navigationMenuClickAction -> {
+                MotifAction openNavigationAndOptionSelectAction
+                        = new MotifAction(ActionType.OPEN_NAVIGATION_AND_OPTION_SELECTION, activityName,
+                        Collections.singletonList(navigationMenuClickAction));
+                openNavigationAndSelectOptionActions.add(openNavigationAndOptionSelectAction);
+            });
+        }
+
+        return openNavigationAndSelectOptionActions;
+    }
+
+    /**
+     * Extracts the possible open sort menu and sort order select motif actions. This motif action
+     * combines the clicking on the sort menu and selecting a possibly different sort order.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible open sort menu and select sort order motif actions if any.
+     */
+    private List<MotifAction> extractSortAndSelectSortOrderActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> sortClickAndSelectSortOrderActions = new ArrayList<>();
+
+        // Locate the sort order menu.
+        final List<WidgetAction> sortClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isTextViewType()
+                        && widgetAction.getActionType() == ActionType.CLICK
+                        && widgetAction.getWidget().getContentDesc().equals("Sort"))
+                .collect(Collectors.toList());
+
+        sortClickActions.stream().forEach(menuClickAction -> {
+            MotifAction menuClickAndItemSelectAction
+                    = new MotifAction(ActionType.SORT_MENU_CLICK_AND_SORT_ORDER_SELECTION, activityName,
+                    Collections.singletonList(menuClickAction));
+            sortClickAndSelectSortOrderActions.add(menuClickAndItemSelectAction);
+        });
+
+        return sortClickAndSelectSortOrderActions;
+    }
+
+    /**
+     * Extracts the possible menu and item select motif actions. A menu and select item motif action
+     * combines the clicking on the menu and selecting a not yet selected menu item.
+     *
+     * @param widgetActions The list of extracted widget actions.
+     * @return Returns the possible extract menu and select item motif actions if any.
+     */
+    private List<MotifAction> extractMenuAndSelectItemActions(final List<WidgetAction> widgetActions) {
+
+        final List<MotifAction> menuClickAndItemSelectActions = new ArrayList<>();
+
+        // Locate the menu item, alternatively one could invoke the MENU ui action.
+        final List<WidgetAction> menuClickActions = widgetActions.stream()
+                .filter(widgetAction -> widgetAction.getWidget().isImageView()
+                        && widgetAction.getActionType() == ActionType.CLICK
+                        && widgetAction.getWidget().getContentDesc().equals("More options"))
+                .collect(Collectors.toList());
+
+        menuClickActions.stream().forEach(menuClickAction -> {
+            MotifAction menuClickAndItemSelectAction
+                    = new MotifAction(ActionType.MENU_CLICK_AND_ITEM_SELECTION, activityName,
+                    Collections.singletonList(menuClickAction));
+            menuClickAndItemSelectActions.add(menuClickAndItemSelectAction);
+        });
+
+        return menuClickAndItemSelectActions;
+    }
+
+    /**
+     * NOTE: This motif action have been replaced by a widget action for a single spinner and a
+     * motif action for changing multiple spinners at once.
+     *
      * Extracts the possible spinner scroll motif actions. A scroll motif action combines the
      * clicking and scrolling on a spinner. Without this motif action, one has to click first on a
      * spinner, which in turn opens the drop-down menu, and click or scroll to select a different
@@ -411,6 +908,7 @@ public class ActionsScreenState extends AbstractScreenState {
      * @param widgetActions The list of extracted widget actions.
      * @return Returns the possible spinner motif actions if any.
      */
+    @SuppressWarnings("unused")
     private List<MotifAction> extractSpinnerScrollActions(List<WidgetAction> widgetActions) {
 
         List<MotifAction> spinnerScrollActions = new ArrayList<>();
@@ -439,32 +937,55 @@ public class ActionsScreenState extends AbstractScreenState {
      */
     private List<MotifAction> extractFillFormAndSubmitActions(List<WidgetAction> widgetActions) {
 
-        List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
+        final List<MotifAction> fillFormAndSubmitActions = new ArrayList<>();
 
         /*
          * TODO: Extract only those editable widgets and buttons that belong to the same form.
          *  We should exploit the characteristics of the ui tree for that purpose.
          */
 
-        List<WidgetAction> textInsertActions = widgetActions.stream()
+        final List<WidgetAction> textInsertActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isEditTextType())
                 .filter(widgetAction -> widgetAction.getActionType() != ActionType.CLEAR_TEXT)
                 .collect(Collectors.toList());
 
-        List<WidgetAction> clickableButtonActions = widgetActions.stream()
-                .filter(widgetAction -> widgetAction.getWidget().isButtonType()
-                        && widgetAction.getWidget().isClickable())
+        final Predicate<WidgetAction> clickableButtons = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widget.isButtonType()
+                    // Certain buttons, e.g. CheckBoxes or RadioButtons, are checkable, but not
+                    // desired here, i.e. we want to press only a submit/save button (regular buttons).
+                    && !widget.isCheckableType()
+                    && !appScreen.getMenuBarBoundingBox().contains(widget.getBounds());
+        };
+
+        // The 'save' button might be represented as a text view in the menu bar.
+        final Predicate<WidgetAction> clickableTextView = widgetAction -> {
+            final Widget widget = widgetAction.getWidget();
+            return widget.isTextViewType()
+                    && appScreen.getMenuBarBoundingBox().contains(widget.getBounds())
+                    && (widget.getContentDesc().equalsIgnoreCase("Save changes")
+                        || widget.getContentDesc().equalsIgnoreCase("Save"));
+        };
+
+        final List<WidgetAction> clickableActions = widgetActions.stream()
+                .filter(clickableButtons.or(clickableTextView))
+                .filter(widgetAction -> widgetAction.getActionType() == ActionType.CLICK)
                 .collect(Collectors.toList());
 
-        if (!textInsertActions.isEmpty() && !clickableButtonActions.isEmpty()) {
+        if (!textInsertActions.isEmpty() && !clickableActions.isEmpty()) {
 
-            clickableButtonActions.stream().forEach(clickableButtonAction -> {
-                List<UIAction> actions = new ArrayList<>(textInsertActions);
-                actions.add(clickableButtonAction);
-                MotifAction fillFormAndSubmitAction
+            clickableActions.stream().forEach(clickableAction -> {
+                final List<UIAction> actions = new ArrayList<>(textInsertActions);
+                actions.add(clickableAction);
+                final MotifAction fillFormAndSubmitAction
                         = new MotifAction(ActionType.FILL_FORM_AND_SUBMIT, activityName, actions);
                 fillFormAndSubmitActions.add(fillFormAndSubmitAction);
             });
+        } else if (!textInsertActions.isEmpty()) { // no submit/save button discovered
+            final List<UIAction> actions = new ArrayList<>(textInsertActions);
+            final MotifAction fillFormAction
+                    = new MotifAction(ActionType.FILL_FORM, activityName, actions);
+            fillFormAndSubmitActions.add(fillFormAction);
         }
 
         return fillFormAndSubmitActions;
@@ -519,7 +1040,6 @@ public class ActionsScreenState extends AbstractScreenState {
                 // check whether any sibling overlaps with the current widget
                 for (Widget sibling : siblings) {
                     if (sibling.getBounds().equals(widget.getBounds())) {
-                        MATE.log_debug("Widget " + widget + " overlaps with " + sibling + "!");
                         return true;
                     }
                 }
@@ -541,17 +1061,17 @@ public class ActionsScreenState extends AbstractScreenState {
         uiActions.add(new UIAction(ActionType.MENU, activityName));
         uiActions.add(new UIAction(ActionType.TOGGLE_ROTATION, activityName));
         // uiActions.add(new UIAction(ActionType.HOME, activityName));
-        uiActions.add(new UIAction(ActionType.SEARCH, activityName));
+        // uiActions.add(new UIAction(ActionType.SEARCH, activityName));
         // uiActions.add(new UIAction(ActionType.QUICK_SETTINGS, activityName));
         // uiActions.add(new UIAction(ActionType.NOTIFICATIONS, activityName));
         // uiActions.add(new UIAction(ActionType.SLEEP, activityName));
         // uiActions.add(new UIAction(ActionType.WAKE_UP, activityName));
         uiActions.add(new UIAction(ActionType.DELETE, activityName));
-        uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
-        uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
-        uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
-        uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
-        uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
+        // uiActions.add(new UIAction(ActionType.DPAD_CENTER, activityName));
+        // uiActions.add(new UIAction(ActionType.DPAD_DOWN, activityName));
+        // uiActions.add(new UIAction(ActionType.DPAD_UP, activityName));
+        // uiActions.add(new UIAction(ActionType.DPAD_LEFT, activityName));
+        // uiActions.add(new UIAction(ActionType.DPAD_RIGHT, activityName));
         uiActions.add(new UIAction(ActionType.ENTER, activityName));
         return uiActions;
     }
@@ -568,7 +1088,6 @@ public class ActionsScreenState extends AbstractScreenState {
         intentActions.addAll(getSystemActions());
         intentActions.addAll(dynamicReceiverIntentActions);
         return intentActions;
-
     }
 
     /**

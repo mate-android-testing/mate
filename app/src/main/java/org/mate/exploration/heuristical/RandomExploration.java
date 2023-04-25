@@ -61,6 +61,7 @@ public class RandomExploration implements Algorithm {
     /**
      * Invokes the random exploration. In an infinite loop, chromosomes are generated and executed.
      */
+    @Override
     public void run() {
 
         if (!alwaysReset) {
