@@ -146,8 +146,7 @@ public class IntentChromosomeFactory extends AndroidRandomChromosomeFactory {
         // TODO: If we can ensure that sdcard files are not touched by the app, then pushing
         //  those files is redundant and we could do this once before creating the first chromosome
         // push dummy files onto sd card
-        MATE.log("Pushing custom media files: "
-                + Registry.getEnvironmentManager().pushDummyFiles());
+        Registry.getEnvironmentManager().pushDummyFiles();
 
         final TestCase testCase = TestCase.newInitializedTestCase();
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);

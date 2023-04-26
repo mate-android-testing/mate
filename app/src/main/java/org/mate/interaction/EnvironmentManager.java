@@ -580,8 +580,8 @@ public class EnvironmentManager {
                 .withParameter("deviceId", emulator)
                 .withParameter("transitionSystemDir", transitionSystemDir)
                 .withParameter("transitionSystemFile", fileName);
-        Message response = sendMessage(messageBuilder.build());
-        boolean success = Boolean.parseBoolean(response.getParameter("response"));
+
+        boolean success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
         MATE.log("Fetching transition system from emulator succeeded: " + success);
         return success;
     }
@@ -619,13 +619,17 @@ public class EnvironmentManager {
      */
     public boolean executeSystemEvent(String packageName, String receiver, String action, boolean dynamic) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/execute_system_event")
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/fuzzer/execute_system_event")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName)
                 .withParameter("receiver", receiver)
                 .withParameter("action", action)
                 .withParameter("dynamic", String.valueOf(dynamic));
-        return sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+
+        boolean success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+        MATE.log("Executing system event succeeded: " + success);
+        return success;
     }
 
     /**
@@ -662,6 +666,7 @@ public class EnvironmentManager {
 
         try {
             success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+            MATE.log("Granting runtime permissions succeeded: " + success);
         } catch (MateInterruptedException e) {
             /*
              * We still need to wait for mate-server to complete the request, so we just wait for a
@@ -688,7 +693,10 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/push_dummy_files")
                 .withParameter("deviceId", emulator);
-        return sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+
+        boolean success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+        MATE.log("Pushing custom media files succeeded: " + success);
+        return success;
     }
 
     /**
