@@ -102,10 +102,12 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
                 final Action nextAction = selectAction();
 
+                // TODO: Fill up with random actions if selected action is not applicable.
 
                 if (nextAction instanceof UIAction // check that the ui action is actually applicable
                         && !uiAbstractionLayer.getExecutableUIActions().contains(nextAction)) {
-                    MATE.log("Action not applicable in current state!");
+                    MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
+                            + nextAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
 
@@ -116,6 +118,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                 probabilisticModel.updatePosition(testCase, nextAction, currentState);
 
                 if (stop) {
+                    MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
+                            + nextAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
             }

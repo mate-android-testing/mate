@@ -93,7 +93,7 @@ public class Widget {
      * ------------
      * y1         y2 (Y = y1 + y2 / 2)
      * top        bottom
-     * (yMax,0)   (xMax,yMax)
+     * (0,yMax)   (xMax,yMax)
      */
     private final Rect bounds;
     private final int X;
@@ -304,9 +304,34 @@ public class Widget {
                 .map(String::trim)
                 .map(String::toLowerCase) // TODO: Remove this side effect.
                 .filter(token -> !token.isEmpty())
-                .distinct()
-                // TODO: Remove debug log after testing.
-                .peek(tokens -> MATE.log("Tokens of widget: " + tokens));
+                .distinct();
+    }
+
+    /**
+     * Checks whether the widget represents a leaf widget in the ui hierarchy, i.e. it has no children.
+     *
+     * @return Returns {@code true} if the widget is a leaf widget, otherwise {@code false}.
+     */
+    public boolean isLeafWidget() {
+        return !hasChildren;
+    }
+
+    /**
+     * Checks whether the widget has a non-empty content description attribute.
+     *
+     * @return Returns {@code true} if the content desc is non empty, otherwise {@code false}.
+     */
+    public boolean hasContentDescription() {
+        return !contentDesc.isEmpty();
+    }
+
+    /**
+     * Checks whether the widget has a non-empty text attribute.
+     *
+     * @return Returns {@code true} if the text attribute is non empty, otherwise {@code false}.
+     */
+    public boolean hasText() {
+        return !text.isEmpty();
     }
 
     /**
@@ -366,6 +391,15 @@ public class Widget {
     }
 
     /**
+     * Whether the widget has a resource id defined.
+     *
+     * @return Returns {@code true} if the widget has a resource id, otherwise {@code false}.
+     */
+    public boolean hasResourceID() {
+        return !resourceID.isEmpty();
+    }
+
+    /**
      * Returns the resource id.
      *
      * @return Returns the resource id or the empty string if none is defined.
@@ -393,12 +427,30 @@ public class Widget {
     }
 
     /**
-     * Returns the depth of the widget in the ui hierarchy.
+     * Returns the depth of the widget in the widget hierarchy. The root widget has a depth of 0.
      *
-     * @return Returns the widgets' depth in the ui hierarchy.
+     * @return Returns the depth of the widget in the widget hierarchy.
      */
     public int getDepth() {
         return depth;
+    }
+
+    /**
+     * Returns the width of the widget.
+     *
+     * @return Returns the widget of the widget.
+     */
+    public int getWidth() {
+        return x2 - x1;
+    }
+
+    /**
+     * Returns the height of the widget.
+     *
+     * @return Returns the height of the widget.
+     */
+    public int getHeight() {
+        return y2 - y1;
     }
 
     /**
@@ -660,6 +712,82 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents an action bar tab.
+     *
+     * @return Returns {@code true} if this widget is an action bar tab, otherwise {@code false}.
+     */
+    public boolean isActionBarTab() {
+        return getClazz().equals("androidx.appcompat.app.ActionBar$Tab")
+                || getClazz().equals("android.support.v4.app.ActionBar$Tab")
+                || getClazz().equals("android.support.v7.app.ActionBar$Tab");
+    }
+
+    /**
+     * Checks whether this widget represents a date picker.
+     *
+     * @return Returns {@code true} if this widget is a date picker, otherwise {@code false}.
+     */
+    public boolean isDatePicker() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.DatePicker.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a switch, see
+     * https://developer.android.com/reference/android/widget/Switch.
+     *
+     * @return Returns {@code true} if this widget is a switch otherwise {@code false}.
+     */
+    public boolean isSwitch() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.Switch.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a rating bar.
+     *
+     * @return Returns {@code true} if this widget is a rating bar, otherwise {@code false}.
+     */
+    public boolean isRatingBar() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RatingBar.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a seek bar.
+     *
+     * @return Returns {@code true} if this widget is a seek bar, otherwise {@code false}.
+     */
+    public boolean isSeekBar() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.SeekBar.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents an edit text widget.
      *
      * @return Returns {@code true} if this widget is an edit text widget, otherwise {@code false}
@@ -837,6 +965,17 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a drawer layout.
+     *
+     * @return Returns {@code true} if this widget is a drawer layout, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isDrawerLayout() {
+        return getClazz().equals("androidx.drawerlayout.widget.DrawerLayout")
+                || getClazz().equals("android.support.v4.widget.DrawerLayout");
+    }
+
+    /**
      * Checks whether this widget represents a button.
      *
      * @return Returns {@code true} if this widget is a button, otherwise {@code false}
@@ -846,7 +985,59 @@ public class Widget {
         try {
             Class<?> clazz = Class.forName(this.getClazz());
             return android.widget.Button.class.isAssignableFrom(clazz)
-                    || android.widget.CompoundButton.class.isAssignableFrom(clazz);
+                    || android.widget.CompoundButton.class.isAssignableFrom(clazz)
+                    || android.widget.ImageButton.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents an image view.
+     *
+     * @return Returns {@code true} if this widget is an image view, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isImageView() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.ImageView.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a radio group.
+     *
+     * @return Returns {@code true} if this widget is a radio group, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isRadioGroupType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RadioGroup.class.isAssignableFrom(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a radio button.
+     *
+     * @return Returns {@code true} if this widget is a radio button, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isRadioButtonType() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RadioButton.class.isAssignableFrom(clazz);
         } catch (ClassNotFoundException e) {
             // classes from androidx package fail for instance (no dependency defined)
             MATE.log_warn("Class " + getClazz() + " not found!");
@@ -892,9 +1083,7 @@ public class Widget {
     public boolean mightBeImage() {
         // android.widget.TextView components are drawables - they can contain images
         if (this.getClazz().contains("android.widget.TextView") && this.isClickable()) {
-            if (this.getText().isEmpty()) {
-                return true;
-            }
+            return this.getText().isEmpty();
         }
         return false;
     }
@@ -1035,6 +1224,17 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a recycler view.
+     *
+     * @return Returns {@code true} if this widget is a recycler view, otherwise {@code false}
+     *         is returned.
+     */
+    public boolean isRecyclerViewType() {
+        return getClazz().equals("android.support.v7.widget.RecyclerView")
+                || getClazz().equals("androidx.recyclerview.widget.RecyclerView");
+    }
+
+    /**
      * Checks whether this widget represents a text view.
      *
      * @return Returns {@code true} if this widget is a text view, otherwise {@code false}
@@ -1088,7 +1288,14 @@ public class Widget {
         return password;
     }
 
-    // TODO: Understand and document.
+    /**
+     * Checks whether this widget represent a 'settings' option. This is a particular combination
+     * of two text views one below the other, where the top text view represents the headline/title
+     * of the option and the bottom text view provides a summary about the option.
+     *
+     * @return Returns {@code true} if this widget represents a 'settings' option, otherwise
+     *          {@code false} is returned.
+     */
     public boolean isSettingsOption() {
         return getClazz().equals("android.widget.LinearLayout")
                 && !getChildren().isEmpty()
@@ -1128,7 +1335,7 @@ public class Widget {
     @Deprecated
     public void setColor(String color) {
 
-        String parts[] = color.split("#");
+        String[] parts = color.split("#");
         if (parts.length == 2) {
             this.color = parts[0];
             setMaxminLum(parts[1]);
@@ -1158,7 +1365,8 @@ public class Widget {
                     getX2() == other.getX2() &&
                     getY1() == other.getY1() &&
                     getY2() == other.getY2() &&
-                    isVisible() == other.isVisible();
+                    isVisible() == other.isVisible() &&
+                    isEnabled() == other.isEnabled();
         }
     }
 

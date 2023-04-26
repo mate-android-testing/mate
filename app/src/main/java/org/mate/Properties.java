@@ -94,6 +94,15 @@ public class Properties {
     }
 
     /**
+     * The relative amount of motif actions in contrast to regular ui actions.
+     *
+     * @return Returns the relative amount of motif actions.
+     */
+    public static float RELATIVE_MOTIF_ACTION_AMOUNT() {
+        return propertyOr(0.0f);
+    }
+
+    /**
      * The optimisation strategy that should be applied.
      *
      * @return Returns the applied optimisation strategy.
@@ -134,7 +143,45 @@ public class Properties {
     }
 
     /*
-     * Misc properties
+     * Begin QBE properties
+     */
+
+    /**
+     * Whether the QBE model should be used or not.
+     *
+     * @return Returns {@code true} if the QBE model should be used, otherwise {@code false}
+     *          is returned.
+     */
+    public static boolean QBE_MODEL() { return propertyOr(false); }
+
+    /**
+     * Whether to record (and serialize) transition systems when using any oft the ExecuteMATEQBE*
+     * strategies. Has no effect for other exploration algorithms.
+     *
+     * @return Whether to record (and serialize) the transition system.
+     */
+    public static boolean QBE_RECORD_TRANSITION_SYSTEM() {
+        return propertyOr(false);
+    }
+
+    /**
+     * Which exploration strategy to use. Can be either random, or one of the pre-defined QBE
+     * matrices. By default, the random strategy is used.
+     *
+     * @return Which exploration strategy to use for QBE.
+     */
+    public static String QBE_EXPLORATION_STRATEGY() {
+        return propertyOr(null);
+    }
+
+    /*
+     * End QBE properties
+     */
+
+    /**
+     * The initial random seed for the random number generator.
+     *
+     * @return Returns the initial random seed for the random number generator.
      */
     public static Long RANDOM_SEED() {
         return propertyOr(null);

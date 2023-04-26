@@ -55,7 +55,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "3.3";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.4";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -567,6 +567,26 @@ public class EnvironmentManager {
     }
 
     /**
+     * Fetches a serialized transition system from the internal storage of the emulator. Also
+     * removes the serialized transition system afterwards.
+     */
+    public boolean fetchTransitionSystem() {
+
+        final String transitionSystemDir = "/data/data/org.mate/transition_systems";
+        final String fileName = "transition_system.gz";
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/utility/fetch_transition_system")
+                .withParameter("deviceId", emulator)
+                .withParameter("transitionSystemDir", transitionSystemDir)
+                .withParameter("transitionSystemFile", fileName);
+
+        boolean success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+        MATE.log("Fetching transition system from emulator succeeded: " + success);
+        return success;
+    }
+
+    /**
      * Fetches and removes an Espresso test from the internal storage of the emulator.
      *
      * @param espressoDir The Espresso tests directory on the emulator.
@@ -599,13 +619,17 @@ public class EnvironmentManager {
      */
     public boolean executeSystemEvent(String packageName, String receiver, String action, boolean dynamic) {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/execute_system_event")
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/fuzzer/execute_system_event")
                 .withParameter("deviceId", emulator)
                 .withParameter("packageName", packageName)
                 .withParameter("receiver", receiver)
                 .withParameter("action", action)
                 .withParameter("dynamic", String.valueOf(dynamic));
-        return sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+
+        boolean success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+        MATE.log("Executing system event succeeded: " + success);
+        return success;
     }
 
     /**
@@ -642,6 +666,7 @@ public class EnvironmentManager {
 
         try {
             success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+            MATE.log("Granting runtime permissions succeeded: " + success);
         } catch (MateInterruptedException e) {
             /*
              * We still need to wait for mate-server to complete the request, so we just wait for a
@@ -668,7 +693,10 @@ public class EnvironmentManager {
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fuzzer/push_dummy_files")
                 .withParameter("deviceId", emulator);
-        return sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+
+        boolean success = sendMessageSignalSuccess(messageBuilder.build()).isPresent();
+        MATE.log("Pushing custom media files succeeded: " + success);
+        return success;
     }
 
     /**

@@ -29,37 +29,37 @@ public class FSM {
     /**
      * The (virtual) root state.
      */
-    private final State root;
+    protected final State root;
 
     /**
      * The states of the FSM.
      */
-    private final Set<State> states;
+    protected final Set<State> states;
 
     /**
      * The transitions of the FSM.
      */
-    private final Set<Transition> transitions;
+    protected final Set<Transition> transitions;
 
     /**
      * The id of the next new state.
      */
-    private int nextStateId;
+    protected int nextStateId;
 
     /**
      * Whether we reached a new state with the last transition.
      */
-    private boolean reachedNewState;
+    protected boolean reachedNewState;
 
     /**
      * The package name of the AUT.
      */
-    private final String packageName;
+    protected final String packageName;
 
     /**
      * The current state in the FSM.
      */
-    private State currentState;
+    protected State currentState;
 
     /**
      * The current state equivalence level that defines how two {@link State}s are compared for

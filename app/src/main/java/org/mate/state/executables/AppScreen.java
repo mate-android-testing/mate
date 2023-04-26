@@ -14,6 +14,7 @@ import org.mate.MATE;
 import org.mate.interaction.DeviceMgr;
 import org.mate.interaction.action.ui.Widget;
 import org.mate.utils.UIAutomatorException;
+import org.mate.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,12 +56,21 @@ public class AppScreen {
     private final UiDevice device;
 
     /**
+     * The waiting time for a stable screen state. If this time interval is chosen too short, we
+     * may end up getting outdated information, e.g. a wrong package or activity name, and decide
+     * to abort the current test case. Unfortunately there is no deterministic way to choose the
+     * waiting time, but 200 ms seems to be the best compromise between accuracy and performance.
+     */
+    private static final int WAIT_FOR_STABLE_STATE = 200;
+
+    /**
      * Creates a new app screen containing the widgets on it.
      */
     public AppScreen(DeviceMgr deviceMgr) {
 
-        this.device = deviceMgr.getDevice();
+        Utils.sleep(WAIT_FOR_STABLE_STATE);
 
+        this.device = deviceMgr.getDevice();
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
         this.packageName = getCurrentPackageName();
@@ -99,6 +109,28 @@ public class AppScreen {
         try {
             rootNode = InstrumentationRegistry.getInstrumentation()
                     .getUiAutomation().getRootInActiveWindow();
+
+            /*
+            * A certain combination of actions that bring the AUT in a state where uiautomator
+            * fetches a ui hierarchy (window) consisting of a single widget and the actual window
+            * is labeled as inactive at that moment. Although we could access the widgets of the
+            * inactive window as well, performing an action on them fails without first introducing
+            * some dummy action like clicking in the middle of the screen. It seems like we need to
+            * bring back the focus to the correct window by injecting some dummy action.
+             */
+            if (rootNode.getChildCount() == 0) {
+                MATE.log_warn("Fetched wrong active window.");
+
+                device.click(device.getDisplayWidth() / 2, device.getDisplayHeight() / 2);
+
+                rootNode = InstrumentationRegistry.getInstrumentation()
+                        .getUiAutomation().getRootInActiveWindow();
+
+                if (rootNode.getChildCount() == 0) {
+                    MATE.log_warn("Couldn't fetch correct root node!");
+                }
+            }
+
         } catch (Exception e) {
             MATE.log_debug("Couldn't retrieve root node: " + e.getMessage());
             e.printStackTrace();
@@ -140,14 +172,10 @@ public class AppScreen {
     private int parseWidgets(final AccessibilityNodeInfo node, Widget parent, int depth,
                              int globalIndex, final int localIndex) {
 
-        MATE.log_debug("Node: " + node.getViewIdResourceName() + ", depth: " + depth
-                + ", globalIndex: " + globalIndex + ", localIndex: " + localIndex);
-        MATE.log_debug("Node class: " + node.getClassName());
-
         Widget widget = new Widget(parent, node, activityName, depth, globalIndex, localIndex);
         widgets.add(widget);
 
-        if (widget.isEditable()) {
+        if (widget.isEditable() && widget.isVisible()) {
             checkForHint(node, widget);
         }
 
@@ -283,6 +311,16 @@ public class AppScreen {
      */
     public Rect getStatusBarBoundingBox() {
         return new Rect(0, 0, getWidth(), 72);
+    }
+
+    /**
+     * Returns the bounding box of the menu bar. This depends on display width
+     * and has a fixed height of 240 - 72 pixels, e.g. [0,72][1080][240].
+     *
+     * @return Returns the bounding box of the status bar.
+     */
+    public Rect getMenuBarBoundingBox() {
+        return new Rect(0, 72, getWidth(), 240);
     }
 
     /**

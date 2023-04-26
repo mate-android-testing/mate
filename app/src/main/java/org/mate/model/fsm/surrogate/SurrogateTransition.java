@@ -72,21 +72,21 @@ public class SurrogateTransition extends Transition {
     /**
      * {@inheritDoc}
      */
-    State getSource() {
+    public State getSource() {
         return source;
     }
 
     /**
      * {@inheritDoc}
      */
-    State getTarget() {
+    public State getTarget() {
         return target;
     }
 
     /**
      * {@inheritDoc}
      */
-    Action getAction() {
+    public Action getAction() {
         return action;
     }
 

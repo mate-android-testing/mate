@@ -4,9 +4,9 @@ package org.mate.interaction.action;
  * The possible outcomes of applying an action.
  */
 public enum ActionResult {
-    FAILURE_APP_CRASH,
     SUCCESS,
     SUCCESS_OUTBOUND,
+    FAILURE_APP_CRASH,
     FAILURE_UIAUTOMATOR,
     FAILURE_UNKNOWN;
 }

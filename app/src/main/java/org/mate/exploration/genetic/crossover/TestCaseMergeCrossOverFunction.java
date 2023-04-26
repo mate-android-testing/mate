@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Provides a crossover function for {@link TestCase}s produced by the
+ * Provides a essentially a single-point crossover function for {@link TestCase}s produced by the
  * {@link org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory}.
  */
 public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCase> {
@@ -50,10 +50,14 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
     }
 
     /**
-     * Performs a crossover on the given parents.
+     * Performs essentially a single-point crossover on the given parents. A random cut point is
+     * chosen in the first chromosome and a merge with the second chromosome at this position is
+     * tried out. If not successful (because the screen states don't match at the cut point),
+     * another cut point is chosen in alternating fashion from the original point. If all cut points
+     * are exhausted (no match found), the first chromosome is returned.
      *
      * @param parents The parents that undergo crossover.
-     * @return Returns the generated offsprings.
+     * @return Returns the generated offspring.
      */
     @Override
     public List<IChromosome<TestCase>> cross(List<IChromosome<TestCase>> parents) {
@@ -63,6 +67,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             return Collections.singletonList(parents.get(0));
         }
 
+        // shorter action sequence comes first
         List<Action> l1 = parents.get(0).getValue().getActionSequence();
         List<Action> l2 = parents.get(1).getValue().getActionSequence();
         if (l2.size() < l1.size()) {
@@ -80,6 +85,7 @@ public class TestCaseMergeCrossOverFunction implements ICrossOverFunction<TestCa
             return Collections.singletonList(parents.get(0));
         }
 
+        // pick a random cut point in the first chromosome
         int choice = Randomness.getInRangeStd(l1.size());
         boolean right = choice != l1.size() - 1;
         int d = 0;

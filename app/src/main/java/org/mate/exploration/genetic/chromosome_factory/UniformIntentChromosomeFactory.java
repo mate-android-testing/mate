@@ -58,15 +58,19 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
         // TODO: If we can ensure that sdcard files are not touched by the app, then pushing
         //  those files is redundant and we could do this once before creating the first chromosome
         // push dummy files onto sd card
-        MATE.log("Pushing custom media files: "
-                + Registry.getEnvironmentManager().pushDummyFiles());
+        Registry.getEnvironmentManager().pushDummyFiles();
 
-        TestCase testCase = TestCase.newInitializedTestCase();
-        Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
+        final TestCase testCase = TestCase.newInitializedTestCase();
+        final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         try {
-            for (int i = 0; i < maxNumEvents; i++) {
-                if (!testCase.updateTestCase(selectAction(), i)) {
+            for (actionsCount = 0; !finishTestCase(); actionsCount++) {
+
+                final Action newAction = selectAction();
+
+                if (!testCase.updateTestCase(newAction, actionsCount)) {
+                    MATE.log_warn("UniformIntentChromosomeFactory: Action ( " + actionsCount + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
             }
@@ -103,7 +107,7 @@ public class UniformIntentChromosomeFactory extends AndroidRandomChromosomeFacto
     @Override
     protected Action selectAction() {
 
-        double random = Math.random();
+        final double random = Randomness.getRnd().nextDouble();
 
         if (random < relativeIntentAmount) {
             return Randomness.randomElement(uiAbstractionLayer.getExecutableIntentActions());
