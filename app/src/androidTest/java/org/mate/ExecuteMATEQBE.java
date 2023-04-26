@@ -16,6 +16,11 @@ import java.util.Optional;
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEQBE {
 
+    // TODO: Support motif actions and make them deterministic.
+
+    /**
+     * Note that QBE can be only executed with ui actions, intent actions aren't supported yet.
+     */
     @Test
     public void useAppContext() {
         MATE.log_acc("Starting QBE...");
