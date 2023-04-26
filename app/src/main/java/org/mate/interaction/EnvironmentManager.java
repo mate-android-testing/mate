@@ -87,8 +87,13 @@ public class EnvironmentManager {
      */
     private static final class MateServerResponseError extends IllegalStateException {
 
-        MateServerResponseError(String s) {
-            super(s);
+        /**
+         * Constructs a new mate server response error.
+         *
+         * @param errorMessage The error message.
+         */
+        MateServerResponseError(String errorMessage) {
+            super(errorMessage);
         }
     }
 
@@ -190,9 +195,11 @@ public class EnvironmentManager {
     }
 
     /**
-     * Sends a {@link org.mate.message.Message} to the server and returns the response of the server.
+     * Sends a {@link org.mate.message.Message} to the server and returns the response of the server
+     * or throws an exception otherwise. Use this method if you don't intend to react to a faulty
+     * response.
      *
-     * @param message The {@link org.mate.message.Message} that will be send to the server.
+     * @param message The {@link org.mate.message.Message} that will be sent to the server.
      * @return Returns the response {@link org.mate.message.Message} of the server.
      * @throws IllegalStateException If the server responds with an error.
      */
@@ -207,8 +214,9 @@ public class EnvironmentManager {
 
     /**
      * Sends a {@link org.mate.message.Message} to the server and returns the response of the server.
+     * Use this method if you intend to react to a possible faulty response.
      *
-     * @param message The {@link org.mate.message.Message} that will be send to the server.
+     * @param message The {@link org.mate.message.Message} that will be sent to the server.
      * @return Returns the response {@link org.mate.message.Message} of the server if not erroneous.
      */
     private synchronized Optional<Message> sendMessageSignalSuccess(Message message) {
@@ -249,12 +257,15 @@ public class EnvironmentManager {
         verifyMetadata(response);
 
         if (response.getSubject().equals("/error")) {
+
             final String subject = response.getParameter("info");
+
+            // Check whether the response belongs to the original request.
             if (Objects.equals(subject, message.getSubject())) {
                 MATE.log_warn(String.format("Received an error from Mate-Server: " +
                         "'%s' when sending message '%s'.", response, message));
-            } else {
-                MATE.log_warn(String.format("Expected an response for subject '%s', " +
+            } else { // Response not belonging to original request.
+                MATE.log_warn(String.format("Expected a response for subject '%s', " +
                         "but got an error for subject '%s'.", response.getSubject(), subject));
             }
 
