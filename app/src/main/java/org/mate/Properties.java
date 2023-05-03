@@ -472,6 +472,44 @@ public class Properties {
      * End Graph properties
      */
 
+    /*
+     * Begin Subjective Logic (SOSM) properties
+     */
+
+    /**
+     * Whether the Subjective Opinion State Machine (SOSM) model should be used.
+     *
+     * @return Returns {@code true} if the SOSM model should be used, otherwise {@code false}.
+     */
+    public static boolean SOSM_MODEL() { return propertyOr(false); }
+
+    /**
+     * Determines the number of times a state has to be traversed for the SOSM probabilities to be
+     * deemed certain.
+     *
+     * @return The uncertainty threshold for SOSM based Novelty Search.
+     */
+    public static double SOSM_UNCERTAINTY_THRESHOLD() {
+        return propertyOr(10.0);
+    }
+
+    /**
+     * Determines how much weight should be placed on uncertainty when computing the SOSM-based
+     * novelty function.
+     */
+    public static double SOSM_NOVELTY_DISBELIEF_WEIGHT() {
+        return propertyOr(0.0);
+    }
+
+
+    public static double NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT() {
+        return propertyOr(0.5);
+    }
+
+    /*
+     * End Subjective Logic (SOSM) properties
+     */
+
     /**
      * Whether {@link org.mate.interaction.action.ui.PrimitiveAction}s should be used instead of
      * {@link org.mate.interaction.action.ui.WidgetAction}s. This is only necessary when using an
