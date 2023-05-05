@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
@@ -70,8 +69,6 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
     // TODO: Add documentation.
     @Override
     public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome, Trace trace) {
-
-        MATE.log_acc("Applying mutation...");
 
         uiAbstractionLayer.resetApp();
 
