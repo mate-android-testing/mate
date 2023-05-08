@@ -408,7 +408,18 @@ public class ActionsScreenState extends AbstractScreenState {
             * of the shared layout to the individual leaf widgets, we apply the actions directly on
             * the parent. This should reduce the number of redundant actions.
              */
-            if (widget.isLeafWidget() && widget.isSonOfActionableContainer()) {
+            if (widget.isLeafWidget() && widget.isSonOfActionableContainer()
+                    /*
+                    * Although checkable widgets can be unchecked/checked by clicking on the
+                    * surrounding layout in most cases, we define here the specific action on the
+                    * leaf widget as well in order to enable the motif action 'CHANGE_CHECKABLES'
+                    * if there are multiple of those checkable widgets. Similarly, we define the
+                    * specific action 'CHANGE_SEEK_BAR' in order to enable the motif action
+                    * 'CHANGE_SEEK_BARS' if there are multiple rating or seekbars. Moreover, a seek
+                    * or rating bar is typically not controllable by clicking on the surrounding
+                    * layout, thus those widgets should be ignored by 'heuristic' anyways.
+                     */
+                    && !widget.isCheckable() && !widget.isSeekBar() && !widget.isRatingBar()) {
                 // we define the action directly on the parent widget
                 continue;
             }
