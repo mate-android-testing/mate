@@ -643,7 +643,12 @@ public class DeviceMgr {
             final List<Widget> menuItems = screenState.getWidgets().stream()
                     .filter(Widget::isLeafWidget)
                     .filter(isNavigationWidget)
-                    .filter(widget -> widget.isSonOf(w -> w.isListViewType() || w.isRecyclerViewType()))
+                    .filter(widget -> widget.isSonOf(w -> w.isListViewType()
+                            || w.isRecyclerViewType()
+                            // Unfortunately, it can happen that the returned class name is either
+                            // corrupted (?) or partially obfuscated. Luckily, the package name
+                            // seems to be present in its intended form.
+                            || w.getClazz().startsWith("androidx.recyclerview.widget")))
                     .filter(Widget::isTextViewType)
                     .filter(Widget::isEnabled)
                     .filter(Widget::hasText)
