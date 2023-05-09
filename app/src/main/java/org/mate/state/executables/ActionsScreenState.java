@@ -912,7 +912,9 @@ public class ActionsScreenState extends AbstractScreenState {
         final List<WidgetAction> sortClickActions = widgetActions.stream()
                 .filter(widgetAction -> widgetAction.getWidget().isTextViewType()
                         && widgetAction.getActionType() == ActionType.CLICK
-                        && widgetAction.getWidget().getContentDesc().equals("Sort"))
+                        && widgetAction.getWidget().getContentDesc().toLowerCase().contains("sort")
+                        && appScreen.getMenuBarBoundingBox().contains(
+                        widgetAction.getWidget().getBounds()))
                 .collect(Collectors.toList());
 
         sortClickActions.stream().forEach(menuClickAction -> {
