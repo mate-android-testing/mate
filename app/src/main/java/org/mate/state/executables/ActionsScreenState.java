@@ -359,6 +359,7 @@ public class ActionsScreenState extends AbstractScreenState {
             if (widget.isLeafWidget() && (widget.isSonOfListView()
                     || widget.isSonOf(Widget::isRecyclerViewType))) {
 
+                // Consider the actions of the leaf widget in any case.
                 if (widget.isClickable() || widget.isCheckable()) {
                     widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
                 }
@@ -367,19 +368,58 @@ public class ActionsScreenState extends AbstractScreenState {
                     widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
                 }
 
+                // The list view may contain seek or rating bars.
+                if (widget.isSeekBar() || widget.isRatingBar()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_SEEK_BAR));
+                }
+
+                // The list view may contain checkboxes or switches. We ignore here CheckedTextViews
+                // since those in a navigation menu can't be changed simultaneously by the motif
+                // action 'CHANGE_CHECKABLES'.
+                if (widget.isCheckBox() || widget.isSwitch()
+                        || widget.isRadioButton() || widget.isToggleButton()) {
+                    widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECKABLE));
+                }
+
+                // Take care of the highest actionable widget.
+                Widget actionableParentWidget = null;
+
                 Widget parent = widget.getParent();
 
                 while (!parent.isListViewType() && !parent.isRecyclerViewType()) {
+
+                    if (parent.isActionable()) {
+                        actionableParentWidget = parent;
+                    }
+
                     parent = parent.getParent();
                 }
 
-                // inherit the clickable properties of the list view
-                if (parent.isLongClickable()) {
-                    widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
-                }
+                // Define the action on the 'highest' interactable list view item. This should
+                // reduce the number of 'redundant' actions.
+                if (actionableParentWidget != null) {
 
-                // make widget in any case clickable
-                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                    // inherit the clickable properties of the list view
+                    if (actionableParentWidget.isClickable() || actionableParentWidget.isCheckable()
+                                || parent.isClickable() || parent.isCheckable()) {
+                        widgetActions.add(new WidgetAction(actionableParentWidget, ActionType.CLICK));
+                    }
+
+                    // inherit the clickable properties of the list view
+                    if (actionableParentWidget.isLongClickable() || parent.isLongClickable()) {
+                        widgetActions.add(new WidgetAction(actionableParentWidget, ActionType.LONG_CLICK));
+                    }
+
+                } else {
+
+                    // inherit the clickable properties of the list view
+                    if (parent.isLongClickable()) {
+                        widgetActions.add(new WidgetAction(widget, ActionType.LONG_CLICK));
+                    }
+
+                    // make widget in any case clickable
+                    widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
+                }
 
                 continue;
             }
@@ -418,7 +458,7 @@ public class ActionsScreenState extends AbstractScreenState {
                     * specific action 'CHANGE_SEEK_BAR' in order to enable the motif action
                     * 'CHANGE_SEEK_BARS' if there are multiple rating or seekbars. Moreover, a seek
                     * or rating bar is typically not controllable by clicking on the surrounding
-                    * layout, thus those widgets should be ignored by 'heuristic' anyways.
+                    * layout, thus those widgets should be ignored by this 'heuristic' anyways.
                      */
                     && !widget.isCheckable() && !widget.isSeekBar() && !widget.isRatingBar()) {
                 // we define the action directly on the parent widget
@@ -458,12 +498,20 @@ public class ActionsScreenState extends AbstractScreenState {
                 continue;
             }
 
-            // These comprises any widget that is checkable from check boxes to checkable text views.
-            if (widget.isCheckable() || widget.isCheckableType() || widget.isSwitch()) {
+            // We ignore here CheckedTextViews since the motif action 'CHANGE_CHECKABLES' can't
+            // change multiple simultaneously if those checked text views are used in a navigation
+            // menu.
+            if (widget.isCheckBox() || widget.isSwitch()
+                    || widget.isRadioButton() || widget.isToggleButton()) {
                 widgetActions.add(new WidgetAction(widget, ActionType.CHANGE_CHECKABLE));
 
                 // it doesn't make sense to add another action to a checkable widget
                 continue;
+            }
+
+            // On all other checkable instances, e.g. CheckedTextViews, we define a click action.
+            if (widget.isCheckable()) {
+                widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
             }
 
             // TODO: Use static analysis to detect whether click/long click refer to the same
@@ -722,10 +770,7 @@ public class ActionsScreenState extends AbstractScreenState {
             final Widget widget = widgetAction.getWidget();
             return widgetAction.getActionType() == ActionType.CLICK
                     && widget.isEnabled()
-                    && widget.isLeafWidget()
-                    && widget.isTextViewType()
-                    && widget.hasText()
-                    && widget.hasResourceID()
+                    && widget.isVisible()
                     && (widget.isSonOf(Widget::isListViewType)
                         || widget.isSonOf(Widget::isRecyclerViewType));
         };
