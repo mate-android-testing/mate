@@ -352,11 +352,12 @@ public class ActionsScreenState extends AbstractScreenState {
             }
 
             /*
-             * The elements in a list view are typically of type android.widget.TextView
+             * The elements in a list/recycler view are typically of type android.widget.TextView
              * and not clickable according to the underlying AccessibilityNodeInfo object,
              * however those elements represent in most cases clickable widgets.
              */
-            if (widget.isLeafWidget() && widget.isSonOfListView()) {
+            if (widget.isLeafWidget() && (widget.isSonOfListView()
+                    || widget.isSonOf(Widget::isRecyclerViewType))) {
 
                 if (widget.isClickable() || widget.isCheckable()) {
                     widgetActions.add(new WidgetAction(widget, ActionType.CLICK));
@@ -368,7 +369,7 @@ public class ActionsScreenState extends AbstractScreenState {
 
                 Widget parent = widget.getParent();
 
-                while (!parent.isListViewType()) {
+                while (!parent.isListViewType() && !parent.isRecyclerViewType()) {
                     parent = parent.getParent();
                 }
 
