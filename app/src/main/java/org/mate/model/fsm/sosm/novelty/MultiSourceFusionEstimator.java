@@ -11,6 +11,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+// weighted average fusion (WAF)
 public final class MultiSourceFusionEstimator implements NoveltyEstimator {
 
     private final SOSMModel sosmModel;

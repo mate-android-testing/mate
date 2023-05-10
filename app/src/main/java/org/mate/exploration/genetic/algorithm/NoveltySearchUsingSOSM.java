@@ -3,7 +3,6 @@ package org.mate.exploration.genetic.algorithm;
 import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
@@ -25,8 +24,6 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 
 public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
@@ -171,15 +168,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         newGeneration = tmp;
     }
 
-    // TODO: Can we remove this?
-    private void addElites() {
-        newGeneration.addAll(
-                population.stream()
-                        .filter(cnt -> cnt.novelty() == 1.0)
-                        .map(cnt -> new ChromosomeNoveltyTrace(cnt.chromosome(), 0.9, cnt.trace()))
-                        .collect(toList()));
-    }
-
     /**
      * // TODO: Adjust comment.
      * Represents the evolution process. In the context of novelty search, we stick here to
@@ -188,6 +176,8 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
      */
     @Override
     public void evolve() {
+
+        // TODO: Implement like regular genetic algorithm including crossover, etc.
 
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
@@ -198,7 +188,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
             newGeneration.add(cnt);
         }
 
-        // addElites();
         population.clear();
         swapPopulationAndNewGeneration();
 
@@ -206,23 +195,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         printSOSM();
         logCurrentFitness();
         ++currentGenerationNumber;
-    }
-
-    private void updateCoverage(final Chromosome<TestCase> chromosome) {
-        CoverageUtils.storeTestCaseChromosomeCoverage(chromosome);
-        CoverageUtils.logChromosomeCoverage(chromosome);
-    }
-
-    // TODO: Can we remove this?
-    private IChromosome<TestCase> execute(final TestCase testcase) {
-        final TestCase executedTestCase = TestCase.fromDummy(testcase);
-        final Chromosome<TestCase> chromosome = new Chromosome<>(executedTestCase);
-
-        // TODO: Update Surrogate model
-
-        updateCoverage(chromosome);
-        executedTestCase.finish();
-        return chromosome;
     }
 
     /**

@@ -32,7 +32,7 @@ public final class MaxNovelPrefix implements NoveltyEstimator {
         RawBinomialOpinion opinion = BinomialOpinion.multiply(opinions.subList(0, Math.min(opinions.size(), 5))).getRawOpinion();
         RawBinomialOpinion bestOpinion = opinion;
         double bestScore = opinion.getDisbelief() * alpha + opinion.getUncertainty();
-        int bestLength = 5;
+        int bestLength = 5; // TODO: Use constant 'MIN_LENGTH'.
 
         for (int i = 5; i < opinions.size(); ++i) {
             opinion = opinion.multiply(opinions.get(i).getRawOpinion());

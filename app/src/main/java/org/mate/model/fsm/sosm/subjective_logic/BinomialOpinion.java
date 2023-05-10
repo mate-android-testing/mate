@@ -6,9 +6,6 @@ import static java.util.stream.Collectors.toList;
 
 public final class BinomialOpinion implements SubjectiveOpinion<Double, BinomialOpinion> {
 
-    public final static BinomialOpinion DISBELIEF
-            = new BinomialOpinion(new RawBinomialOpinion(0.0, 1.0, 0.0, 0.0));
-
     private final RawBinomialOpinion opinion;
 
     public BinomialOpinion(final RawBinomialOpinion rawBinomialOpinion) {

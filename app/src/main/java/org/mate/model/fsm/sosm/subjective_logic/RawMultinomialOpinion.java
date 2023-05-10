@@ -10,12 +10,13 @@ import java.util.Objects;
 
 public final class RawMultinomialOpinion {
 
-    private static final double MEPS = -MathUtils.EPS;
+    private static final double NEGATIVE_EPS = -MathUtils.EPS;
 
     private final double[] beliefs, aprioris;
     private final double uncertainty;
 
-    public RawMultinomialOpinion(final double[] beliefs, final double uncertainty, final double[] aprioris) {
+    public RawMultinomialOpinion(final double[] beliefs, final double uncertainty,
+                                 final double[] aprioris) {
         this.beliefs = beliefs;
         this.aprioris = aprioris;
         this.uncertainty = uncertainty;
@@ -45,9 +46,9 @@ public final class RawMultinomialOpinion {
 
     private boolean verifySelf() {
         return beliefs.length == aprioris.length
-                && uncertainty >= MEPS
-                && Arrays.stream(beliefs).allMatch(b -> b >= MEPS)
-                && Arrays.stream(aprioris).allMatch(a -> a >= MEPS)
+                && uncertainty >= NEGATIVE_EPS
+                && Arrays.stream(beliefs).allMatch(b -> b >= NEGATIVE_EPS)
+                && Arrays.stream(aprioris).allMatch(a -> a >= NEGATIVE_EPS)
                 && MathUtils.isEpsEq(sum(beliefs) + uncertainty, 1.0)
                 && MathUtils.isEpsEq(sum(aprioris), 1.0);
     }

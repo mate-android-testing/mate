@@ -187,7 +187,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
                 .getActions()
                 .stream()
                 .filter(uiAbstractionLayer.getExecutableActions()::contains)
-                .map(action -> new Tuple<>(actionsAndOpinion.optionOfAction(action)
+                .map(action -> new Tuple<>(actionsAndOpinion.opinionOfAction(action)
                         .getDisbelief(), action))
                 .collect(Collectors.toList());
 

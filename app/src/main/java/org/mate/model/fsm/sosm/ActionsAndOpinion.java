@@ -16,12 +16,12 @@ import static java.util.Objects.requireNonNull;
 public final class ActionsAndOpinion {
 
     private final Map<Action, Integer> actionsMap;
-    private final MultinomialOpinion option;
+    private final MultinomialOpinion opinion;
 
     public ActionsAndOpinion(final List<? extends Action> actions,
                              final List<? extends Action> additionalActions,
-                             final MultinomialOpinion option) {
-        this.option = requireNonNull(option);
+                             final MultinomialOpinion opinion) {
+        this.opinion = requireNonNull(opinion);
 
         final int size = actions.size() + additionalActions.size();
         actionsMap = new HashMap<>(size);
@@ -35,12 +35,12 @@ public final class ActionsAndOpinion {
     }
 
     public double getUncertainty() {
-        return option.getUncertainty();
+        return opinion.getUncertainty();
     }
 
-    public BinomialOpinion optionOfAction(final Action action) {
+    public BinomialOpinion opinionOfAction(final Action action) {
         final Integer index = actionsMap.get(action);
-        return index != null ? option.coarsenToOpinion(index) : null;
+        return index != null ? opinion.coarsenToOpinion(index) : null;
     }
 
     public Set<Action> getActions() {
@@ -55,18 +55,18 @@ public final class ActionsAndOpinion {
             return false;
         } else {
             final ActionsAndOpinion that = (ActionsAndOpinion) o;
-            return option.equals(that.option) && actionsMap.keySet().equals(that.actionsMap.keySet());
+            return opinion.equals(that.opinion) && actionsMap.keySet().equals(that.actionsMap.keySet());
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(actionsMap.keySet(), option);
+        return Objects.hash(actionsMap.keySet(), opinion);
     }
 
     @Override
     public String toString() {
-        return String.format("ActionsAndOpinion{actionsMap=%s, option=%s}", actionsMap, option);
+        return String.format("ActionsAndOpinion{actionsMap=%s, option=%s}", actionsMap, opinion);
     }
 }
 

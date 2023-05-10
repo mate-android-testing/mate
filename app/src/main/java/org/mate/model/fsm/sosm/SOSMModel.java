@@ -26,7 +26,6 @@ import static java.util.stream.Collectors.toList;
 
 public final class SOSMModel extends FSMModel {
 
-    // TODO: We could calculate the multinomial opinion for any given state lazily.
     public static final BinomialOpinion UNKNOWN_STATE_OPINION = new BinomialOpinion(
             new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
 
@@ -35,7 +34,7 @@ public final class SOSMModel extends FSMModel {
 
     private final SOSMInference inference;
 
-    private Map<State, ActionsAndOpinion> s;
+    private Map<State, ActionsAndOpinion> opinionPerState;
 
     private final List<Transition> recordedTransitions = new ArrayList<>();
 
@@ -52,11 +51,11 @@ public final class SOSMModel extends FSMModel {
         recordedTransitions.add(new Transition(VIRTUAL_ROOT_STATE, new State(0, rootState),
                 new StartAction()));
         this.inference = new SOSMInference(fsm, Properties.SOSM_UNCERTAINTY_THRESHOLD());
-        s = new HashMap<>(0);
+        opinionPerState = new HashMap<>(0);
     }
 
     public void updateSOSM(final List<Trace> traces) {
-        s = inference.inferSOSM(traces);
+        opinionPerState = inference.inferSOSM(traces);
     }
 
     /**
@@ -104,7 +103,7 @@ public final class SOSMModel extends FSMModel {
      */
     public List<ActionsAndOpinion> getMultinomialOpinionsFor(final Trace trace) {
         return trace.stream()
-                .map(t -> s.get(t.getSource()))
+                .map(t -> opinionPerState.get(t.getSource()))
                 .collect(toList());
     }
 
@@ -117,14 +116,15 @@ public final class SOSMModel extends FSMModel {
 
         for (Transition transition : trace) {
             final State state = transition.getSource();
-            final ActionsAndOpinion actionsAndOpinion = s.get(state);
+            final ActionsAndOpinion actionsAndOpinion = opinionPerState.get(state);
+
             if (actionsAndOpinion == null) {
                 opinions.add(UNKNOWN_STATE_OPINION);
                 continue;
             }
 
             final Action triggeredAction = transition.getAction();
-            BinomialOpinion opinion = actionsAndOpinion.optionOfAction(triggeredAction);
+            BinomialOpinion opinion = actionsAndOpinion.opinionOfAction(triggeredAction);
 
             if (opinion == null) {
                 // Unknown actions can occur, because of a fuzzy state equivalence definition.
@@ -140,7 +140,7 @@ public final class SOSMModel extends FSMModel {
     }
 
     public ActionsAndOpinion getActionsAndOpinionOn(final State state) {
-        return s.get(state);
+        return opinionPerState.get(state);
     }
 
     private String actionAndOpinionToStr(final Action action, final BinomialOpinion opinion) {
@@ -207,8 +207,8 @@ public final class SOSMModel extends FSMModel {
             }
 
             final Action action = t.getAction();
-            final Optional<BinomialOpinion> opinion = Optional.ofNullable(s.get(t.getSource()))
-                    .map(a -> a.optionOfAction(t.getAction()))
+            final Optional<BinomialOpinion> opinion = Optional.ofNullable(opinionPerState.get(t.getSource()))
+                    .map(a -> a.opinionOfAction(t.getAction()))
                     .filter(op -> op.getUncertainty() != 1.0);
 
             if (opinion.isPresent()) {
@@ -249,8 +249,8 @@ public final class SOSMModel extends FSMModel {
         final String formatAsBox = "\",shape=\"box\",style=\"filled\",fillcolor=\"#E6E6E6\",color=\"#FFFFFF\"];";
         for (final Transition t : fsm.getTransitions()) {
             final Action action = t.getAction();
-            Optional.ofNullable(s.get(t.getSource()))
-                    .map(a -> a.optionOfAction(t.getAction()))
+            Optional.ofNullable(opinionPerState.get(t.getSource()))
+                    .map(a -> a.opinionOfAction(t.getAction()))
                     .filter(op -> op.getUncertainty() != 1.0)
                     .ifPresent(op -> {
                         final String str = actionAndOpinionToStr(action, op);
@@ -295,7 +295,7 @@ public final class SOSMModel extends FSMModel {
 
     @Override
     public String toString() {
-        return String.format("Sosm{inference=%s, s=%s}", inference, s);
+        return String.format("Sosm{inference=%s, s=%s}", inference, opinionPerState);
     }
 
 }

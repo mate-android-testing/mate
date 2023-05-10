@@ -13,6 +13,7 @@ public final class MultinomialOpinion implements SubjectiveOpinion<List<Double>,
         this.opinion = opinion;
     }
 
+    @SuppressWarnings("unused")
     public RawMultinomialOpinion getRawOpinion() {
         return opinion;
     }

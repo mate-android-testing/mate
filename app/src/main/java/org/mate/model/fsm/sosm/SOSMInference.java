@@ -40,26 +40,26 @@ public final class SOSMInference {
         final Map<Action, Integer> frequencies = frequenciesPerState.get(state);
 
         final List<? extends Action> screenStateActions = state.getScreenState().getActions();
-        final int ssa = screenStateActions.size();
+        final int numberOfActions = screenStateActions.size();
         final List<? extends Action> additional = additionalActions.getOrDefault(state, empty);
-        final int aa = additional.size();
+        final int numberOfAdditionalActions = additional.size();
 
-        final int size = ssa + aa;
+        final int size = numberOfActions + numberOfAdditionalActions;
         final double[] actionFrequencies = new double[size];
 
         // Calculate actions frequency, total
         int total = 0;
         if (frequencies != null) {
-            for (int i = 0; i < ssa; ++i) {
+            for (int i = 0; i < numberOfActions; ++i) {
                 final Action action = screenStateActions.get(i);
                 final int occurrences = frequencies.getOrDefault(action, 0);
                 actionFrequencies[i] = occurrences;
                 total += occurrences;
             }
-            for (int i = 0; i < aa; ++i) {
+            for (int i = 0; i < numberOfAdditionalActions; ++i) {
                 final Action action = additional.get(i);
                 final int occurrences = frequencies.getOrDefault(action, 0);
-                actionFrequencies[i + ssa] = occurrences;
+                actionFrequencies[i + numberOfActions] = occurrences;
                 total += occurrences;
             }
         }
@@ -90,7 +90,6 @@ public final class SOSMInference {
 
         Trace.countFrequencies(frequenciesPerState, traces);
 
-        // TODO: parallelize?
         return fsm.getStates().stream()
                 .filter(s -> s.getId() != -1)
                 .collect(Collectors.toMap(s -> s, this::optionForState));

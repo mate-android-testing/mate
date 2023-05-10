@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Objects;
 
 public final class RawBinomialOpinion {
-    private static final double MEPS = -MathUtils.EPS;
+
+    private static final double NEGATIVE_EPS = -MathUtils.EPS;
 
     private final double belief, disbelief, apriori, uncertainty;
 
@@ -35,9 +36,9 @@ public final class RawBinomialOpinion {
     }
 
     private boolean selfValid() {
-        return belief >= MEPS
-                && disbelief >= MEPS
-                && uncertainty >= MEPS
+        return belief >= NEGATIVE_EPS
+                && disbelief >= NEGATIVE_EPS
+                && uncertainty >= NEGATIVE_EPS
                 && MathUtils.isEpsEq(belief + disbelief + uncertainty, 1.0)
                 && apriori >= 0.0
                 && apriori <= 1.0;
@@ -47,13 +48,14 @@ public final class RawBinomialOpinion {
      * Weighted Average Fusion (WAF) operator.
      */
     public static RawBinomialOpinion multiSourceFusion(final List<RawBinomialOpinion> sources) {
+
         if (sources.isEmpty()) {
             throw new IllegalArgumentException("Require at least one opinion for fusion.");
         }
 
         boolean hasNonOneUncertainty = false;
         boolean hasZeroUncertainty = false;
-        int zeroUncertainyOpinonCount = 0;
+        int zeroUncertaintyOpinionCount = 0;
         double uncertaintySum = 0.0;
         double uncertaintyProduct = 1.0;
         double zeroUncertaintyBeliefSum = 0.0;
@@ -64,7 +66,7 @@ public final class RawBinomialOpinion {
         for (final RawBinomialOpinion opinion : sources) {
             final double uncertainty = opinion.uncertainty;
             if (MathUtils.isEpsEq(uncertainty)) {
-                ++zeroUncertainyOpinonCount;
+                ++zeroUncertaintyOpinionCount;
                 zeroUncertaintyBeliefSum += opinion.belief;
                 zeroUncertaintyDisbeliefSum += opinion.disbelief;
                 zeroUncertaintyAprioriSum += opinion.apriori;
@@ -84,7 +86,7 @@ public final class RawBinomialOpinion {
 
         if (hasZeroUncertainty) {
             // Case 2: There exists a uncertainty value that is 0.0.
-            final double zuoc = zeroUncertainyOpinonCount;
+            final double zuoc = zeroUncertaintyOpinionCount;
             final double newBelief = zeroUncertaintyBeliefSum / zuoc;
             final double newDisbelief = zeroUncertaintyDisbeliefSum / zuoc;
             final double newApriori = zeroUncertaintyAprioriSum / zuoc;
