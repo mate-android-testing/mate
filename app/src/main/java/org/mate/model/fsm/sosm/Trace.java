@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A Trace is a sequence of transitions taken by a test case.
+ * Essentially a fancy warper for a {@code List<Transition>}.
+ */
 public final class Trace implements Iterable<Transition> {
 
     private final List<Transition> transitions;
@@ -37,6 +41,13 @@ public final class Trace implements Iterable<Transition> {
         return transitions;
     }
 
+    /**
+     * For each state visited in the trace, count how often each action was executed in that state
+     * and add the counts to the frequency map.
+     *
+     * @param freq The map that holds the total acummulated action counts.
+     * @param traces The traces which actions should be counted.
+     */
     public static void countFrequencies(final Map<State, Map<Action, Integer>> freq,
                                         final Collection<Trace> traces) {
         requireNonNull(freq);

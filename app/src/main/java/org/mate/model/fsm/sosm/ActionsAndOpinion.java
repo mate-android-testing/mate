@@ -13,6 +13,14 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * This class associates the opinions of a {@link MultinomialOpinion} with the corresponding
+ * actions.
+ *
+ * The problem is that a {@link MultinomialOpinion} only has a first, second, third, etc. opinion,
+ * but we want an opinion on an action a, b, c etc. This class bridges the gap between actions and
+ * the indexes of a multinomial opinion.
+ */
 public final class ActionsAndOpinion {
 
     private final Map<Action, Integer> actionsMap;
