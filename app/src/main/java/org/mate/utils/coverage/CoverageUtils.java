@@ -108,8 +108,19 @@ public final class CoverageUtils {
             // store data about activity coverage in any case
             visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
 
-            Registry.getEnvironmentManager().storeCoverageData(
-                    Properties.COVERAGE(), chromosome, null);
+            switch (Properties.COVERAGE()) {
+                case BRANCH_COVERAGE:
+                case LINE_COVERAGE:
+                case METHOD_COVERAGE:
+                case BASIC_BLOCK_LINE_COVERAGE:
+                case BASIC_BLOCK_BRANCH_COVERAGE:
+                case ALL_COVERAGE:
+                    Registry.getEnvironmentManager().storeCoverageData(
+                            Properties.COVERAGE(), chromosome, null);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -124,8 +135,19 @@ public final class CoverageUtils {
 
             visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
 
-            Registry.getEnvironmentManager().storeCoverageData(
-                    Properties.COVERAGE(), chromosome, ChromosomeUtils.getActionEntityId(chromosome));
+            switch (Properties.COVERAGE()) {
+                case BRANCH_COVERAGE:
+                case LINE_COVERAGE:
+                case METHOD_COVERAGE:
+                case BASIC_BLOCK_LINE_COVERAGE:
+                case BASIC_BLOCK_BRANCH_COVERAGE:
+                case ALL_COVERAGE:
+                    Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                            chromosome, ChromosomeUtils.getActionEntityId(chromosome));
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
