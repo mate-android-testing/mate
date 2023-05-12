@@ -5,6 +5,15 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * A binomial opion is a opions on a domain with two or more possible outcomes b1, b2, ..., bn.
+ * Defining property is {@code b1 + b2 + ... + bn == 1.0}.
+ *
+ * This class is a wrapper around a {@link RawMultinomialOpinion} that implements the
+ * {@link SubjectiveOpinion} interface. This split is done, to prevent unneccessary boxing and
+ * uboxing for performance, but still allow to implement a generic interface without breaking static
+ * type safty.
+ */
 public final class MultinomialOpinion implements SubjectiveOpinion<List<Double>, MultinomialOpinion> {
 
     private final RawMultinomialOpinion opinion;

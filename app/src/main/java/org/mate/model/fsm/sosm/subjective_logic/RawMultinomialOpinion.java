@@ -8,6 +8,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+
+/**
+ * This class implements the logic of a multinomial opinion using only unboxed values for
+ * performance. Class {@link MultinomialOpinion} implements a generic interface for Subjective
+ * Opinions, but requires boxing all values.
+ */
 public final class RawMultinomialOpinion {
 
     private static final double NEGATIVE_EPS = -MathUtils.EPS;
@@ -15,6 +21,14 @@ public final class RawMultinomialOpinion {
     private final double[] beliefs, aprioris;
     private final double uncertainty;
 
+    /**
+     * Constructs a new multinomial opinion.
+     *
+     * @param beliefs The belief in the differnt outcomes.
+     * @param uncertainty The degree to which the opnion is not sure about how likely each outcome is.
+     * @param aprioris The prior belief in each outcome when no observations have been made yet.
+     * @throws IllegalArgumentException If the given values do not form a valid multinomial opinion.
+     */
     public RawMultinomialOpinion(final double[] beliefs, final double uncertainty,
                                  final double[] aprioris) {
         this.beliefs = beliefs;
@@ -26,6 +40,13 @@ public final class RawMultinomialOpinion {
         }
     }
 
+    /**
+     * Constructs a new multinomial opinion where the uncertainty is inferred.
+     *
+     * @param beliefs The belief in the differnt outcomes.
+     * @param aprioris The prior belief in each outcome when no observations have been made yet.
+     * @throws IllegalArgumentException If the given values do not form a valid multinomial opinion.
+     */
     public RawMultinomialOpinion(final double[] beliefs, final double[] aprioris) {
         this(beliefs, 1.0 - sum(beliefs), aprioris);
     }

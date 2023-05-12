@@ -4,6 +4,16 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * A binomial opion is a opions on a binary domain. You belief in some event with a certain
+ * probability, you disblief that event with another probability, or your are not sure about it.
+ * Defining property of a Binomial opinion is that {@code belief + disblief + uncertainty == 1.0}.
+ *
+ * This class is a wrapper around a {@link RawBinomialOpinion} that implements the
+ * {@link SubjectiveOpinion} interface. This split is done, to prevent unneccessary boxing and
+ * uboxing for performance, but still allow to implement a generic interface without breaking static
+ * type safty.
+ */
 public final class BinomialOpinion implements SubjectiveOpinion<Double, BinomialOpinion> {
 
     private final RawBinomialOpinion opinion;

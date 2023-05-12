@@ -5,12 +5,26 @@ import org.mate.utils.MathUtils;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This class implements the logic of a binomial opinion using only unboxed values for performance.
+ * Class {@link BinomialOpinion} implements a generic interface for Subjective Opinions, but
+ * requires boxing all values.
+ */
 public final class RawBinomialOpinion {
 
     private static final double NEGATIVE_EPS = -MathUtils.EPS;
 
     private final double belief, disbelief, apriori, uncertainty;
 
+    /**
+     * Construct a new binomial opinion.
+     *
+     * @param belief The belief of the opinion in some event.
+     * @param disbelief The disbelief of the opinion in some event.
+     * @param uncertainty The degree to which the opinion is not certain about the event.
+     * @param apriori A belief in the event, given that no observations have been made yet.
+     * @throws IllegalArgumentException If the values do not form a valid binomial opinion.
+     */
     public RawBinomialOpinion(final double belief, final double disbelief, final double uncertainty,
                               final double apriori) {
         this(belief, disbelief, uncertainty, apriori, true);
@@ -20,6 +34,14 @@ public final class RawBinomialOpinion {
         }
     }
 
+    /**
+     * Construct a new binomial opinion with a default apriori of 0.5.
+     *
+     * @param belief The belief of the opinion in some event.
+     * @param disbelief The disbelief of the opinion in some event.
+     * @param uncertainty The degree to which the opinion is not certain about the event.
+     * @throws IllegalArgumentException If the values do not form a valid binomial opinion.
+     */
     public RawBinomialOpinion(final double belief, final double disbelief, final double uncertainty) {
         this(belief, disbelief, uncertainty, 0.5);
     }
