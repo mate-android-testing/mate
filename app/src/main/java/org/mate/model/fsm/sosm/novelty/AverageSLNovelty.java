@@ -10,6 +10,13 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A novelty estimator that estimates novelty by combing all coarsend binomial opinions of a trace
+ * into single binomial opinion on that trace.
+ *
+ * Combines the binomial opinions by taking the average of belief, disbelief, uncertainty and
+ * apriori.
+ */
 public final class AverageSLNovelty implements NoveltyEstimator {
 
     private final SOSMModel sosmModel;

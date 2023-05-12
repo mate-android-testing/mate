@@ -11,7 +11,13 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-// weighted average fusion (WAF)
+/**
+ * A novelty estimator that estimates novelty by combing all coarsende binomial opinions of a trace
+ * into single binomial opinion on that trace.
+ *
+ * The binomial opinion is computed by taking the weighted average fusion (WAF) of all coarsened
+ * binomial opinions.
+ */
 public final class MultiSourceFusionEstimator implements NoveltyEstimator {
 
     private final SOSMModel sosmModel;

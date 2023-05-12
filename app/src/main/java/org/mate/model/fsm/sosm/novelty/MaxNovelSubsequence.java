@@ -10,6 +10,16 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A novelty estimator that estimates novelty by combing all coarsened binomial opinions of a trace
+ * into single binomial opinion on that trace.
+ *
+ * Computes many binomial opinions by computing all subsquence of coarsened binomial opinions that
+ * have a length of at least 3 and a length of at least 20% of the total number of coarsened
+ * binomial opinions. The opinions in each sequence are multiplied to get a candidate best opinion.
+ * For each candidate best opinion the novetlty is computed and the candidate best opinion that
+ * yields the highest is used.
+ */
 public final class MaxNovelSubsequence implements NoveltyEstimator {
 
     private final static double SEQUENCE_FRACTION = 0.2;

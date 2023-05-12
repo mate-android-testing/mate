@@ -10,6 +10,12 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A novelty estimator that estimates novelty by combing all coarsened binomial opinions of a trace
+ * into single binomial opinion on that trace.
+ *
+ * The binomial opinion is computed by multiplying all coarsened binomial opinions.
+ */
 public final class SOSMNovelty implements NoveltyEstimator {
 
     private final SOSMModel sosmModel;
