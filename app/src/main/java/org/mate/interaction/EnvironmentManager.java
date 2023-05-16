@@ -247,7 +247,7 @@ public class EnvironmentManager {
 
             /*
              * Mate-Server might still be processing the old request and trying to send data
-             * trough the socket, so to ensure Mate-Server does not confuse the different
+             * through the socket, so to ensure Mate-Server does not confuse the different
              * requests we just close the socket and open a new one.
              */
             closeAndReconnect();

@@ -230,10 +230,10 @@ public final class CoverageUtils {
     }
 
     /**
-     * Log the coverage value of the given chromosome
+     * Logs the coverage of the given chromosome.
      *
-     * @param chromosome log coverage for this chromosome
-     * @param <T>        type of the chromosome
+     * @param chromosome The chromosome for which the coverage should be logged.
+     * @param <T>        The type wrapped by the chromosome.
      */
     public static <T> void logChromosomeCoverage(IChromosome<T> chromosome) {
 
