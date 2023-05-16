@@ -290,6 +290,27 @@ public final class CoverageUtils {
     }
 
     /**
+     * Logs the coverage of the lastly executed action from the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    public static void logActionChromosomeCoverage(final IChromosome<TestCase> chromosome) {
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
+            final int actionID = chromosome.getValue().getActionSequence().size() - 1;
+
+            final CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                    .getCoverage(Properties.COVERAGE(), chromosome.getValue().getId(),
+                            ChromosomeUtils.getActionEntityId(chromosome));
+            coverageDTO.setActivityCoverage(getActivityCoverage(chromosome.getValue(), actionID));
+
+            MATE.log("Coverage of chromosome " + chromosome.getValue().toString()
+                    + " for action " + actionID + ": " + coverageDTO);
+        }
+    }
+
+    /**
      * Logs the total coverage at the end of a run. As a side effect, the coverage of the last
      * test case is stored.
      */
@@ -472,6 +493,39 @@ public final class CoverageUtils {
      */
     private static double getActivityCoverage(TestCase testCase) {
         return (double) testCase.getVisitedActivitiesOfApp().size() / getActivities().size() * 100;
+    }
+
+    /**
+     * Computes the activity coverage for the specified action of the given test case. Only actions
+     * causing an activity transition have a positive activity coverage.
+     *
+     * @param testCase The given test case.
+     * @param actionID The action for which the activity coverage should be evaluated.
+     * @return Returns the activity coverage for the action of the given test case.
+     */
+    private static double getActivityCoverage(final TestCase testCase, final int actionID) {
+
+        if (actionID == -1) {
+            // The restart operation causes an activity transition.
+            return (double) 1 / getActivities().size() * 100;
+        } else {
+
+            final String previousActivity = testCase.getActivityBeforeAction(actionID);
+            final String currentActivity = testCase.getActivityAfterAction(actionID);
+
+            if (!previousActivity.equals(currentActivity)) {
+                // there was an activity transition
+                if (getActivities().contains(currentActivity)) {
+                    return (double) 1 / getActivities().size() * 100;
+                } else {
+                    // activity transition to different app or launcher activity
+                    return 0.0d;
+                }
+            } else {
+                // no activity transition implies zero activity coverage
+                return 0.0d;
+            }
+        }
     }
 
     /**
