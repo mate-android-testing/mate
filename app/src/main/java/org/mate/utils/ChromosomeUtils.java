@@ -19,7 +19,7 @@ public final class ChromosomeUtils {
      * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
      * @return Returns a single {@link String} containing the chromosome ids.
      */
-    public static  <T> String getChromosomeIds(List<IChromosome<T>> chromosomes) {
+    public static <T> String getChromosomeIds(List<IChromosome<T>> chromosomes) {
 
         // Java 8: String.join("+", chromosomeIds);
         StringBuilder chromosomeIds = new StringBuilder();
@@ -44,7 +44,7 @@ public final class ChromosomeUtils {
      * @param <T> Refers either to a {@link TestCase} or a {@link TestSuite}.
      * @return Returns the chromosome id of the given chromosome.
      */
-    public static  <T> String getChromosomeId(IChromosome<T> chromosome) {
+    public static <T> String getChromosomeId(IChromosome<T> chromosome) {
 
         String chromosomeId = null;
 
