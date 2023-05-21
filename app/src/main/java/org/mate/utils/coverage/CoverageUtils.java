@@ -300,13 +300,23 @@ public final class CoverageUtils {
 
             final int actionID = chromosome.getValue().getActionSequence().size() - 1;
 
-            final CoverageDTO coverageDTO = Registry.getEnvironmentManager()
-                    .getCoverage(Properties.COVERAGE(), chromosome.getValue().getId(),
-                            ChromosomeUtils.getActionEntityId(chromosome));
-            coverageDTO.setActivityCoverage(getActivityCoverage(chromosome.getValue(), actionID));
+            if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
 
-            MATE.log("Coverage of chromosome " + chromosome.getValue().toString()
-                    + " for action " + actionID + ": " + coverageDTO);
+                final CoverageDTO coverageDTO = new CoverageDTO();
+                coverageDTO.setActivityCoverage(getActivityCoverage(chromosome.getValue(), actionID));
+
+                MATE.log("Coverage of chromosome " + chromosome.getValue().toString()
+                        + " for action " + actionID + ": " + coverageDTO);
+            } else {
+
+                final CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                        .getCoverage(Properties.COVERAGE(), chromosome.getValue().getId(),
+                                ChromosomeUtils.getActionEntityId(chromosome));
+                coverageDTO.setActivityCoverage(getActivityCoverage(chromosome.getValue(), actionID));
+
+                MATE.log("Coverage of chromosome " + chromosome.getValue().toString()
+                        + " for action " + actionID + ": " + coverageDTO);
+            }
         }
     }
 
