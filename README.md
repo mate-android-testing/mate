@@ -16,7 +16,8 @@ We have tested MATE on the following devices:
 
 You have to employ on the emulator a *x86* image that is not provided by *Google*, i.e. don't use
 neither a *Google Play* nor a *Google API* image. This is due to recent changes that otherwise lead
-to permission issues.
+to permission issues. Moreover, the AVD name, e.g. Nexus_5_API_25, needs to encode the device type,
+i.e. Nexus_5, Pixel_XL or Pixel_C, in order to properly derive the size of the menu bar.
 
 ## How to run MATE
 
