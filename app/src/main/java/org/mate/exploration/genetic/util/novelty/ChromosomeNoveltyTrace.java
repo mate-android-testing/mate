@@ -8,12 +8,33 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Associates with a test case chromosome its novelty and its traces.
+ */
 public final class ChromosomeNoveltyTrace {
 
+    /**
+     * The test case chromosome.
+     */
     private final IChromosome<TestCase> chromosome;
+
+    /**
+     * The novelty of the test case chromosome.
+     */
     private final double novelty;
+
+    /**
+     * The traversed transitions of the chromosome.
+     */
     private final Trace trace;
 
+    /**
+     * Initialises a new chromosome novelty trace linkage.
+     *
+     * @param chromosome The test case chromosome.
+     * @param novelty The novelty of the chromosome.
+     * @param trace The traversed transitions of the chromosome.
+     */
     public ChromosomeNoveltyTrace(final IChromosome<TestCase> chromosome,
                                   final double novelty, final Trace trace) {
         this.chromosome = requireNonNull(chromosome);
@@ -21,15 +42,30 @@ public final class ChromosomeNoveltyTrace {
         this.trace = requireNonNull(trace);
     }
 
-    public IChromosome<TestCase> chromosome() {
+    /**
+     * Returns the test case chromosome.
+     *
+     * @return Returns the test case chromosome.
+     */
+    public IChromosome<TestCase> getChromosome() {
         return chromosome;
     }
 
-    public double novelty() {
+    /**
+     * Returns the novelty associated with the chromosome.
+     *
+     * @return Returns the novelty associated with the chromosome.
+     */
+    public double getNovelty() {
         return novelty;
     }
 
-    public Trace trace() {
+    /**
+     * Returns the trace associated with the chromosome.
+     *
+     * @return Returns the trace associated with the chromosome.
+     */
+    public Trace getTrace() {
         return trace;
     }
 
@@ -55,7 +91,8 @@ public final class ChromosomeNoveltyTrace {
 
     @Override
     public String toString() {
-        return String.format("C{chromosome=%s, novelty=%s, trace=%s}", chromosome, novelty, trace);
+        return String.format("ChromosomeNoveltyTrace{chromosome=%s, novelty=%s, trace=%s}",
+                chromosome, novelty, trace);
     }
 }
 

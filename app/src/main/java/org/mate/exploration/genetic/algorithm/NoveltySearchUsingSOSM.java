@@ -25,7 +25,10 @@ import org.mate.utils.coverage.CoverageUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * This algorithm combines novelty search with subjective logic or also called second order uncertainty,
+ * see https://ieeexplore.ieee.org/document/10057480.
+ */
 public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
 
     /**
@@ -139,7 +142,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     private ChromosomeNoveltyTrace newOffspring() {
         final ChromosomeNoveltyTrace parent = noveltySelectionFunction.select(population).get(0);
         sosmModel.resetRecordedTransitions();
-        final IChromosome<TestCase> offspring = mutate(parent.chromosome(), parent.trace());
+        final IChromosome<TestCase> offspring = mutate(parent.getChromosome(), parent.getTrace());
         final Trace trace = new Trace(sosmModel.getRecordedTransitions());
 
         traces.add(trace);
@@ -218,7 +221,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         MATE.log_acc("Novelty of chromosomes in population: ");
 
         for (final ChromosomeNoveltyTrace cnt : population) {
-            MATE.log_acc("Chromosome " + cnt.chromosome() + ": " + cnt.novelty());
+            MATE.log_acc("Chromosome " + cnt.getChromosome() + ": " + cnt.getNovelty());
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {

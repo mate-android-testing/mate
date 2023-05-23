@@ -14,6 +14,12 @@ public interface ISOSMMutationFunction extends IMutationFunction<TestCase> {
         throw new UnsupportedOperationException("Do not call this method!");
     }
 
-    // TODO: Add documentation.
+    /**
+     * Mutates the given test case chromosome.
+     *
+     * @param chromosome The test cases chromosome that should be mutated.
+     * @param trace Describes which transitions have been taken by the test case chromosome.
+     * @return Returns the mutated test case chromosome.
+     */
     IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome, Trace trace);
 }

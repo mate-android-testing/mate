@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Provides a guided mutation function for {@link TestCase}s.
+ * Provides a guided mutation function for {@link TestCase}s based on the SOSM model.
  */
 public class SOSMGuidedMutation implements ISOSMMutationFunction {
 
@@ -43,10 +43,13 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
      */
     private boolean isTestSuiteExecution = false;
 
+    /**
+     * The underlying SOSM model.
+     */
     private final SOSMModel sosmModel = (SOSMModel) Registry.getUiAbstractionLayer().getGuiModel();
 
     /**
-     * Initialises the cut point mutation function.
+     * Initialises the guided mutation function.
      *
      * @param maxNumEvents The maximal number of actions per test case.
      */
@@ -110,6 +113,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         return mutatedChromosome;
     }
 
+    // TODO: Add documentation.
     private int chooseCutPoint(final Trace trace) {
 
         if (trace.isEmpty()) {

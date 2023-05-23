@@ -14,7 +14,8 @@ import java.util.List;
 
 /**
  * A selection function for {@link org.mate.exploration.genetic.algorithm.NoveltySearchUsingSOSM}
- * that is based on rank selection.
+ * that is based on rank selection and considers the novelty for determining the rank of the
+ * individual chromosomes.
  */
 public class SOSMNoveltyRankSelection implements ISelectionFunction<TestCase> {
 
@@ -30,10 +31,14 @@ public class SOSMNoveltyRankSelection implements ISelectionFunction<TestCase> {
         throw new UnsupportedOperationException("Do not call this method!");
     }
 
-    // TODO: Add documentation.
+    /**
+     * Performs a rank-based selection using the novelty of the given candidate chromosomes.
+     *
+     * @param chromosomeNoveltyTraces The candidates that undergo rank-based selection.
+     * @return Returns the selected chromosomes that potentially undergo mutation and crossover.
+     */
     public List<ChromosomeNoveltyTrace> select(final List<ChromosomeNoveltyTrace> chromosomeNoveltyTraces) {
 
-        // initially all chromosomes represent candidates
         List<ChromosomeNoveltyTrace> candidates = new ArrayList<>(chromosomeNoveltyTraces);
         final int size = Math.min(Properties.DEFAULT_SELECTION_SIZE(), candidates.size());
 
@@ -43,13 +48,15 @@ public class SOSMNoveltyRankSelection implements ISelectionFunction<TestCase> {
          * order they are handed-in to this method.
          */
         Collections.shuffle(candidates, Randomness.getRnd());
-        Collections.sort(candidates, Comparator.comparingDouble(ChromosomeNoveltyTrace::novelty));
+        Collections.sort(candidates, Comparator.comparingDouble(ChromosomeNoveltyTrace::getNovelty));
 
         int sum = (candidates.size() + 1) * candidates.size() / 2; // = 1 + ... + candidates.size()
 
-        // assign each chromosome in the population its rank and perform roulette-wheel selection
+        // Assign each chromosome in the population its rank and perform roulette-wheel selection.
         final List<ChromosomeNoveltyTrace> selection = new ArrayList<>();
+
         for (int i = 0; i < size; ++i) {
+
             final int rnd = Randomness.getRnd().nextInt(sum);
 
             ChromosomeNoveltyTrace selected = null;
@@ -67,7 +74,6 @@ public class SOSMNoveltyRankSelection implements ISelectionFunction<TestCase> {
                 }
             }
 
-            assert selected != null;
             selection.add(selected);
             sum -= candidates.size();
             candidates.remove(selected);

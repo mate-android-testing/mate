@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Provides a cut point mutation function for {@link TestCase}s.
+ * Provides a SOSM-based cut point mutation function for {@link TestCase}s.
  */
 public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
 
@@ -44,6 +44,9 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
      */
     private boolean isTestSuiteExecution = false;
 
+    /**
+     * The underlying SOSM model.
+     */
     private final SOSMModel sosmModel = (SOSMModel) Registry.getUiAbstractionLayer().getGuiModel();
 
     /**
@@ -67,14 +70,13 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
         this.isTestSuiteExecution = testSuiteExecution;
     }
 
-    // TODO: Adjust documentation.
     /**
      * Performs a cut point mutation. First, the given test case is split at a chosen cut point.
      * Then, the mutated test case is filled with the original actions up to the cut point and
      * from the cut point onwards with random actions.
      *
-     * @param chromosome The chromosome to be mutated.
-     * @param trace
+     * @param chromosome The given test case chromosome that should be mutated.
+     * @param trace Describes which transitions have been taken by the test case chromosome.
      * @return Returns the mutated chromosome.
      */
     @Override
@@ -82,7 +84,7 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
 
         uiAbstractionLayer.resetApp();
 
-        int cutPoint = chooseCutPoint(trace);
+        final int cutPoint = chooseCutPoint(trace);
 
         final TestCase testCase = chromosome.getValue();
         final TestCase mutant = TestCase.newInitializedTestCase();
@@ -128,8 +130,10 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
     }
 
     /**
-     * Chooses a random cut point in the action sequence of the given test case.
+     * Chooses a cut point by performing a rank-based selection on the uncertainty values of the
+     * traversed transitions of the given test case chromosome.
      *
+     * @param trace Describes which transitions have been taken by the test case chromosome.
      * @return Returns the selected cut point.
      */
     private int chooseCutPoint(final Trace trace) {
@@ -138,6 +142,7 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
                 .map(BinomialOpinion::getUncertainty)
                 .collect(Collectors.toList());
 
+        // If we have no uncertainty, we should completely replace the given chromosome.
         if (uncertainties.isEmpty()) {
             return 0;
         }
@@ -146,16 +151,21 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
                 .mapToObj(i -> new Tuple<>(uncertainties.get(i), i))
                 .collect(Collectors.toList());
 
+        // Shuffling ensures that there is no bias caused by the insertion order of candidates with
+        // the same uncertainty.
         Randomness.shuffleList(candidates);
         Collections.sort(candidates, Comparator.comparingDouble(Tuple::getX));
 
+        // Perform a rank-based selection.
         int sum = (candidates.size() + 1) * candidates.size() / 2; // = 1 + ... + candidates.size()
 
         final int rnd = Randomness.getRnd().nextInt(sum);
         Tuple<Double, Integer> selected = null;
         int start = 0;
         int rank = 1;
+
         for (final Tuple<Double, Integer> candidate : candidates) {
+
             final int end = start + rank;
 
             if (rnd < end) {
@@ -167,7 +177,6 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
             }
         }
 
-        assert selected != null;
         return selected.getY();
     }
 }

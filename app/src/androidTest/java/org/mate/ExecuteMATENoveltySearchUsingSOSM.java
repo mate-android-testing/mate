@@ -15,7 +15,7 @@ public class ExecuteMATENoveltySearchUsingSOSM {
     @Test
     public void useAppContext() {
 
-        MATE.log_acc("Starting Novelty Search...");
+        MATE.log_acc("Starting Novelty Search using SOSM...");
 
         MATE mate = new MATE();
 

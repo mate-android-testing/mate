@@ -501,7 +501,12 @@ public class Properties {
         return propertyOr(0.0);
     }
 
-
+    /**
+     * Determines the weight factor for novelty in the combined novelty and coverage fitness function.
+     *
+     * @return Returns the weight factor for novelty in the combined novelty and coverage fitness
+     *         function.
+     */
     public static double NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT() {
         return propertyOr(0.5);
     }
