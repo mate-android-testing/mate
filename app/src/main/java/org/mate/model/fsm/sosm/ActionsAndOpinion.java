@@ -14,8 +14,7 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class associates the opinions of a {@link MultinomialOpinion} with the corresponding
- * actions.
+ * Associates the opinions of a {@link MultinomialOpinion} with the corresponding actions.
  *
  * The problem is that a {@link MultinomialOpinion} only has a first, second, third, etc. opinion,
  * but we want an opinion on an action a, b, c etc. This class bridges the gap between actions and
@@ -23,16 +22,32 @@ import static java.util.Objects.requireNonNull;
  */
 public final class ActionsAndOpinion {
 
+    /**
+     * Associates with each action an action index.
+     */
     private final Map<Action, Integer> actionsMap;
+
+    /**
+     * The multinomial opinion.
+     */
     private final MultinomialOpinion opinion;
 
+    /**
+     * Constructs a new association between actions and a multinomial opinion.
+     *
+     * @param actions The actions of a screen state.
+     * @param additionalActions The additional actions that have been discovered in the screen state.
+     * @param opinion The multinomial opinion.
+     */
     public ActionsAndOpinion(final List<? extends Action> actions,
                              final List<? extends Action> additionalActions,
                              final MultinomialOpinion opinion) {
+
         this.opinion = requireNonNull(opinion);
 
         final int size = actions.size() + additionalActions.size();
         actionsMap = new HashMap<>(size);
+
         for (int i = 0; i < actions.size(); ++i) {
             actionsMap.put(actions.get(i), i);
         }
@@ -42,15 +57,32 @@ public final class ActionsAndOpinion {
         }
     }
 
+    /**
+     * Retrieves the uncertainty of the multinomial opinion.
+     *
+     * @return Returns the uncertainty of the multinomial opinion.
+     */
     public double getUncertainty() {
         return opinion.getUncertainty();
     }
 
+    /**
+     * Computes the binomial opinion of the given action.
+     *
+     * @param action The action for which the binomial opinion should be computed.
+     * @return Returns the binomial opinion of the given action or {@code null} if no opinion is
+     *         present.
+     */
     public BinomialOpinion opinionOfAction(final Action action) {
         final Integer index = actionsMap.get(action);
         return index != null ? opinion.coarsenToOpinion(index) : null;
     }
 
+    /**
+     * Returns the actions associated with the multinomial opinion.
+     *
+     * @return Returns the actions associated with the multinomial opinion.
+     */
     public Set<Action> getActions() {
         return Collections.unmodifiableSet(actionsMap.keySet());
     }
@@ -63,7 +95,8 @@ public final class ActionsAndOpinion {
             return false;
         } else {
             final ActionsAndOpinion that = (ActionsAndOpinion) o;
-            return opinion.equals(that.opinion) && actionsMap.keySet().equals(that.actionsMap.keySet());
+            return opinion.equals(that.opinion)
+                    && actionsMap.keySet().equals(that.actionsMap.keySet());
         }
     }
 

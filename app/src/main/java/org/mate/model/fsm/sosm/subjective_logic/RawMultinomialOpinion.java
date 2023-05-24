@@ -16,21 +16,31 @@ import java.util.Objects;
  */
 public final class RawMultinomialOpinion {
 
+    /**
+     * A small negative epsilon.
+     */
     private static final double NEGATIVE_EPS = -MathUtils.EPS;
 
+    /**
+     * The beliefs and apriori beliefs of the multinomial opinion.
+     */
     private final double[] beliefs, aprioris;
+
+    /**
+     * The uncertainty of the multinomial opinion.
+     */
     private final double uncertainty;
 
     /**
      * Constructs a new multinomial opinion.
      *
-     * @param beliefs The belief in the differnt outcomes.
-     * @param uncertainty The degree to which the opnion is not sure about how likely each outcome is.
+     * @param beliefs The belief in the different outcomes.
+     * @param uncertainty The degree to which the opinion is not sure about how likely each outcome is.
      * @param aprioris The prior belief in each outcome when no observations have been made yet.
-     * @throws IllegalArgumentException If the given values do not form a valid multinomial opinion.
      */
     public RawMultinomialOpinion(final double[] beliefs, final double uncertainty,
                                  final double[] aprioris) {
+
         this.beliefs = beliefs;
         this.aprioris = aprioris;
         this.uncertainty = uncertainty;
@@ -43,28 +53,32 @@ public final class RawMultinomialOpinion {
     /**
      * Constructs a new multinomial opinion where the uncertainty is inferred.
      *
-     * @param beliefs The belief in the differnt outcomes.
+     * @param beliefs The belief in the different outcomes.
      * @param aprioris The prior belief in each outcome when no observations have been made yet.
-     * @throws IllegalArgumentException If the given values do not form a valid multinomial opinion.
      */
     public RawMultinomialOpinion(final double[] beliefs, final double[] aprioris) {
         this(beliefs, 1.0 - sum(beliefs), aprioris);
     }
 
     /**
-     * Create multinomial opinion with uninformative priors.
+     * Creates a multinomial opinion with uninformative apriori beliefs.
      */
     public RawMultinomialOpinion(final double[] beliefs, final double uncertainty) {
         this(beliefs, uncertainty, uniformApriori(beliefs.length));
     }
 
     /**
-     * Create multinomial opinion with uninformative priors.
+     * Creates a multinomial opinion with uninformative apriori beliefs.
      */
     public RawMultinomialOpinion(final double[] beliefs) {
         this(beliefs, uniformApriori(beliefs.length));
     }
 
+    /**
+     * Checks whether the specified properties form a valid multinomial opinion.
+     *
+     * @return Returns {@code true} if the multinomial opinion is valid, otherwise {@code false}.
+     */
     private boolean verifySelf() {
         return beliefs.length == aprioris.length
                 && uncertainty >= NEGATIVE_EPS
@@ -74,20 +88,38 @@ public final class RawMultinomialOpinion {
                 && MathUtils.isEpsEq(sum(aprioris), 1.0);
     }
 
-    private static double sum(final double[] doubles) {
+    /**
+     * Computes the sum over the given values.
+     *
+     * @param values The values that should be summed up.
+     * @return Returns the sum over the given values.
+     */
+    private static double sum(final double[] values) {
         double sum = 0.0;
-        for (final double aDouble : doubles) {
+        for (final double aDouble : values) {
             sum += aDouble;
         }
         return sum;
     }
 
+    /**
+     * Constructs uniform apriori beliefs.
+     *
+     * @param size The number of apriori beliefs.
+     * @return Returns the uniform apriori beliefs.
+     */
     private static double[] uniformApriori(final int size) {
         final double[] aprioris = new double[size];
         Arrays.fill(aprioris, 1.0 / (double) size);
         return aprioris;
     }
 
+    /**
+     * Computes the coarsened binomial opinion.
+     *
+     * @param index The index of the binomial opinion encoded in the multinomial opinion.
+     * @return Returns the coarsened binomial opinion.
+     */
     public RawBinomialOpinion coarsenToOpinion(final int index) {
         final double targetBelief = beliefs[index];
         final double targetDisbelieve = 1.0 - uncertainty - targetBelief;
@@ -95,23 +127,48 @@ public final class RawMultinomialOpinion {
         return new RawBinomialOpinion(targetBelief, targetDisbelieve, uncertainty, apriori);
     }
 
+    /**
+     * Returns the beliefs in the multinomial opinion.
+     *
+     * @return Returns the beliefs in the multinomial opinion.
+     */
     public double[] getBeliefs() {
         return beliefs;
     }
 
+    /**
+     * Returns the apriori beliefs in the multinomial opinion.
+     *
+     * @return Returns the apriori beliefs in the multinomial opinion.
+     */
     public double[] getAprioris() {
         return aprioris;
     }
 
+    /**
+     * Returns the uncertainty in the multinomial opinion.
+     *
+     * @return Returns the uncertainty in the multinomial opinion.
+     */
     public double getUncertainty() {
         return uncertainty;
     }
 
+    // TODO: Perform a code review.
     private double uXY(double bx, double ux, double ax, double by, double uy, double ay, double bxyS) {
         return (((((bx + ax * ux) * (by + ay * uy)) - bxyS) / (ax * ay)));
     }
 
+    /**
+     * Multiplies this opinion with another multinomial opinion.
+     *
+     * @param operand The other multinomial opinion.
+     * @return Returns the resulting multinomial opinion.
+     */
     public RawMultinomialOpinion multiply(final RawMultinomialOpinion operand) {
+
+        // TODO: Perform a code review.
+
         // TODO: This method can certainly be optimized a lot further.
         final int thisSize = size();
         final int otherSize = operand.size();
@@ -121,6 +178,7 @@ public final class RawMultinomialOpinion {
         final double[] otherBelief = operand.beliefs;
 
         final List<double[]> singletonBeliefs = new ArrayList<>(thisSize);
+
         for (int i = 0; i < thisSize; i++) {
             final double currentBelief = thisBelief[i];
             final double[] sbeliefs = new double[otherSize];
@@ -131,11 +189,13 @@ public final class RawMultinomialOpinion {
         }
 
         final double[] brows = new double[thisSize];
+
         for (int i = 0; i < thisSize; i++) {
             brows[i] = thisBelief[i] * operand.uncertainty;
         }
 
         final double[] bcols = new double[otherSize];
+
         for (int i = 0; i < otherSize; i++) {
             bcols[i] = otherBelief[i] * uncertainty;
         }
@@ -144,6 +204,7 @@ public final class RawMultinomialOpinion {
         System.arraycopy(operand.aprioris, 0, aprioriB, 0, otherSize);
 
         final double[] aprioriBeliefs = new double[resultSize];
+
         for (int i = 0; i < thisSize; i++) {
             final double currentApriori = aprioris[i];
             for (int j = 0; j < otherSize; j++) {
@@ -159,6 +220,7 @@ public final class RawMultinomialOpinion {
         final double minU = uDomain;
 
         double minUxys = maxU;
+
         for (int i = 0; i < thisSize; i++) {
             final double bx = thisBelief[i];
             double ax = aprioris[i];
@@ -175,13 +237,15 @@ public final class RawMultinomialOpinion {
         }
 
         final double[] productBeliefs = new double[resultSize];
+
         for (int i = 0; i < thisSize; i++) {
             final double bx = thisBelief[i];
             final double ax = aprioris[i];
             for (int j = 0; j < otherSize; j++) {
                 final double by = otherBelief[j];
                 final double ay = aprioriB[j];
-                final double bxy = (bx + ax * uncertainty) * (by + ay * operand.uncertainty) - ax * ay * minUxys;
+                final double bxy = (bx + ax * uncertainty) * (by + ay * operand.uncertainty)
+                        - ax * ay * minUxys;
                 productBeliefs[i * otherSize + j] = bxy;
             }
         }
@@ -189,7 +253,18 @@ public final class RawMultinomialOpinion {
         return new RawMultinomialOpinion(productBeliefs, aprioriBeliefs);
     }
 
-    public static RawMultinomialOpinion averagingFusion(final Collection<RawMultinomialOpinion> opinions) {
+    /**
+     * Fuses multiple multinomial opinions.
+     *
+     * @param opinions The multinomial opinions that should be fused.
+     * @return Returns the resulting multinomial opinion.
+     */
+    @SuppressWarnings("unused")
+    public static RawMultinomialOpinion averagingFusion(
+            final Collection<RawMultinomialOpinion> opinions) {
+
+        // TODO: Perform a code review.
+
         // TODO: This method can certainly be optimized a lot further.
         final List<RawMultinomialOpinion> opList = new ArrayList<>(opinions);
         final boolean nonZeroUncertainty = opList.stream().allMatch(op -> op.uncertainty != 0.0);
@@ -223,16 +298,27 @@ public final class RawMultinomialOpinion {
         return new RawMultinomialOpinion(fusedBeliefs);
     }
 
-    private static double getUncertaintyProduct(final List<RawMultinomialOpinion> opList) {
-        final double product = opList.stream()
+    /**
+     * Computes the product over the uncertainties of the given multinomial opinions.
+     *
+     * @param multinomialOpinions The multinomial opinions.
+     * @return Returns the uncertainty product over the given multinomial opinions.
+     */
+    private static double getUncertaintyProduct(final List<RawMultinomialOpinion> multinomialOpinions) {
+        final double product = multinomialOpinions.stream()
                 .mapToDouble(opinion -> opinion.uncertainty)
                 .reduce(1.0, (a, b) -> a * b);
 
-        return opList.stream()
+        return multinomialOpinions.stream()
                 .mapToDouble(multinomialOpinion -> product / multinomialOpinion.uncertainty)
                 .sum();
     }
 
+    /**
+     * Returns the number of beliefs.
+     *
+     * @return Returns the number of beliefs.
+     */
     public int size() {
         return beliefs.length;
     }

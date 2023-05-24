@@ -7,13 +7,19 @@ import java.util.Objects;
 
 /**
  * This class implements the logic of a binomial opinion using only unboxed values for performance.
- * Class {@link BinomialOpinion} implements a generic interface for Subjective Opinions, but
+ * Class {@link BinomialOpinion} implements a generic interface for subjective opinions, but
  * requires boxing all values.
  */
 public final class RawBinomialOpinion {
 
+    /**
+     * A small negative epsilon.
+     */
     private static final double NEGATIVE_EPS = -MathUtils.EPS;
 
+    /**
+     * The belief, disbelief, apriori and uncertainty of the raw binomial opinion.
+     */
     private final double belief, disbelief, apriori, uncertainty;
 
     /**
@@ -23,10 +29,10 @@ public final class RawBinomialOpinion {
      * @param disbelief The disbelief of the opinion in some event.
      * @param uncertainty The degree to which the opinion is not certain about the event.
      * @param apriori A belief in the event, given that no observations have been made yet.
-     * @throws IllegalArgumentException If the values do not form a valid binomial opinion.
      */
-    public RawBinomialOpinion(final double belief, final double disbelief, final double uncertainty,
-                              final double apriori) {
+    public RawBinomialOpinion(final double belief, final double disbelief,
+                              final double uncertainty, final double apriori) {
+
         this(belief, disbelief, uncertainty, apriori, true);
 
         if (!selfValid()) {
@@ -40,7 +46,6 @@ public final class RawBinomialOpinion {
      * @param belief The belief of the opinion in some event.
      * @param disbelief The disbelief of the opinion in some event.
      * @param uncertainty The degree to which the opinion is not certain about the event.
-     * @throws IllegalArgumentException If the values do not form a valid binomial opinion.
      */
     public RawBinomialOpinion(final double belief, final double disbelief, final double uncertainty) {
         this(belief, disbelief, uncertainty, 0.5);
@@ -57,6 +62,11 @@ public final class RawBinomialOpinion {
         this.apriori = apriori;
     }
 
+    /**
+     * Checks whether the specified properties form a valid binomial opinion.
+     *
+     * @return Returns {@code true} if the binomial opinion is valid, otherwise {@code false}.
+     */
     private boolean selfValid() {
         return belief >= NEGATIVE_EPS
                 && disbelief >= NEGATIVE_EPS
@@ -67,7 +77,9 @@ public final class RawBinomialOpinion {
     }
 
     /**
-     * Weighted Average Fusion (WAF) operator.
+     * Represents the Weighted Average Fusion (WAF) operator.
+     *
+     * @param sources The list of binomial opinions that should be fused.
      */
     public static RawBinomialOpinion multiSourceFusion(final List<RawBinomialOpinion> sources) {
 
@@ -86,7 +98,9 @@ public final class RawBinomialOpinion {
         double aprioriSum = 0.0;
 
         for (final RawBinomialOpinion opinion : sources) {
+
             final double uncertainty = opinion.uncertainty;
+
             if (MathUtils.isEpsEq(uncertainty)) {
                 ++zeroUncertaintyOpinionCount;
                 zeroUncertaintyBeliefSum += opinion.belief;
@@ -148,27 +162,61 @@ public final class RawBinomialOpinion {
         return new RawBinomialOpinion(newBelief, newDisbelief, newUncertainty, newApriori);
     }
 
+    /**
+     * Returns the belief in the binomial opinion.
+     *
+     * @return Returns the belief in the binomial opinion.
+     */
     public double getBelief() {
         return belief;
     }
 
+    /**
+     * Returns the disbelief in the binomial opinion.
+     *
+     * @return Returns the disbelief in the binomial opinion.
+     */
     public double getDisbelief() {
         return disbelief;
     }
 
+    /**
+     * Returns the uncertainty in the binomial opinion.
+     *
+     * @return Returns the uncertainty in the binomial opinion.
+     */
     public double getUncertainty() {
         return uncertainty;
     }
 
+    /**
+     * Returns the apriori belief in the binomial opinion.
+     *
+     * @return Returns the apriori belief in the binomial opinion.
+     */
     public double getApriori() {
         return apriori;
     }
 
-    public RawBinomialOpinion multiply(final RawBinomialOpinion sub) {
-        return multiply(this, sub);
+    /**
+     * Multiplies this opinion with another binomial opinion.
+     *
+     * @param operand The other binomial opinion.
+     * @return Returns the resulting binomial opinion after applying multiplication.
+     */
+    public RawBinomialOpinion multiply(final RawBinomialOpinion operand) {
+        return multiply(this, operand);
     }
 
+    /**
+     * Multiplies two binomial opinions.
+     *
+     * @param a The first binomial opinion.
+     * @param b The second binomial opinion.
+     * @return Returns the resulting binomial opinion.
+     */
     public static RawBinomialOpinion multiply(final RawBinomialOpinion a, final RawBinomialOpinion b) {
+
         final double newApriori = a.apriori * b.apriori;
         final double newDisbelief = a.disbelief + b.disbelief - (a.disbelief * b.disbelief);
 
@@ -185,6 +233,12 @@ public final class RawBinomialOpinion {
         return new RawBinomialOpinion(newBelief, newDisbelief, newUncertainty, newApriori, true);
     }
 
+    /**
+     * Multiplies multiple binomial opinions.
+     *
+     * @param opinions The multinomial opinions that should be multiplied.
+     * @return Returns the resulting multinomial opinion.
+     */
     public static RawBinomialOpinion multiply(final List<RawBinomialOpinion> opinions) {
         return opinions.stream().reduce((a, b) -> multiply(a, b)).get();
     }
