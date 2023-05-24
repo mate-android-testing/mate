@@ -17,59 +17,95 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A Trace is a sequence of transitions taken by a test case.
- * Essentially a fancy warper for a {@code List<Transition>}.
+ * Describes a sequence of transitions taken by a test case.
  */
 public final class Trace implements Iterable<Transition> {
 
+    /**
+     * The list of transitions traversed by the test case.
+     */
     private final List<Transition> transitions;
 
+    /**
+     * Creates a new empty trace.
+     */
     public Trace() {
         this.transitions = new ArrayList<>();
     }
 
+    /**
+     * Creates a new trace with the given transitions.
+     *
+     * @param transitions The list of of transitions.
+     */
     public Trace(final List<Transition> transitions) {
         this.transitions = new ArrayList<>(transitions);
     }
 
+    /**
+     * Adds a new transition to the existing trace.
+     *
+     * @param transition The new transition.
+     * @return Returns the resulting trace.
+     */
     public Trace enqueue(final Transition transition) {
         transitions.add(requireNonNull(transition));
         return this;
     }
 
+    /**
+     * Returns the list of transitions taken by the test case.
+     *
+     * @return Returns the list of transitions taken by the test case.
+     */
     public List<Transition> getTransitions() {
         return transitions;
     }
 
     /**
-     * For each state visited in the trace, count how often each action was executed in that state
-     * and add the counts to the frequency map.
+     * Counts how often an action has been executed in a particular state.
      *
-     * @param freq The map that holds the total acummulated action counts.
+     * @param frequencies The map that holds the total accumulated action counts per state.
      * @param traces The traces which actions should be counted.
      */
-    public static void countFrequencies(final Map<State, Map<Action, Integer>> freq,
+    public static void countFrequencies(final Map<State, Map<Action, Integer>> frequencies,
                                         final Collection<Trace> traces) {
-        requireNonNull(freq);
+        requireNonNull(frequencies);
 
         for (Trace trace : traces) {
             for (Transition transition : trace) {
                 final State source = transition.getSource();
                 final Action action = transition.getAction();
-                final Map<Action, Integer> actions = freq.computeIfAbsent(source, ignored -> new HashMap<>());
+                final Map<Action, Integer> actions
+                        = frequencies.computeIfAbsent(source, ignored -> new HashMap<>());
                 actions.merge(action, 1, Integer::sum);
             }
         }
     }
 
+    /**
+     * Returns the trace as a stream of transitions.
+     *
+     * @return Returns the trace as a stream of transitions.
+     */
     public Stream<Transition> stream() {
         return transitions.stream();
     }
 
+    /**
+     * Returns the the length of the trace, i.e. the number of transitions.
+     *
+     * @return Returns the trace' size.
+     */
     public int size() {
         return transitions.size();
     }
 
+    /**
+     * Checks whether the trace is empty, i.e. no transitions have been added yet.
+     *
+     * @return Returns {@code true} if empty, otherwise {@code false}.
+     */
     public boolean isEmpty() {
         return size() == 0;
     }
@@ -96,6 +132,11 @@ public final class Trace implements Iterable<Transition> {
         return transitions.hashCode();
     }
 
+    /**
+     * Returns an iterator over the transitions.
+     *
+     * @return Returns an iterator over the transitions.
+     */
     @NonNull
     @Override
     public Iterator<Transition> iterator() {
