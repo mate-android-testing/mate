@@ -122,10 +122,12 @@ public final class RawBinomialOpinion {
 
         if (hasZeroUncertainty) {
             // Case 2: There exists a uncertainty value that is 0.0.
-            final double zuoc = zeroUncertaintyOpinionCount;
-            final double newBelief = zeroUncertaintyBeliefSum / zuoc;
-            final double newDisbelief = zeroUncertaintyDisbeliefSum / zuoc;
-            final double newApriori = zeroUncertaintyAprioriSum / zuoc;
+            final double newBelief = zeroUncertaintyBeliefSum
+                    / (double) zeroUncertaintyOpinionCount;
+            final double newDisbelief = zeroUncertaintyDisbeliefSum
+                    / (double) zeroUncertaintyOpinionCount;
+            final double newApriori = zeroUncertaintyAprioriSum
+                    / (double) zeroUncertaintyOpinionCount;
             final double norm = newBelief + newDisbelief;
             return new RawBinomialOpinion(newBelief / norm, newDisbelief / norm,
                     0.0, newApriori);
@@ -141,7 +143,7 @@ public final class RawBinomialOpinion {
         double newBelief = 0.0;
         double newDisbelief = 0.0;
         double newApriori = 0.0;
-        double den = 0.0;
+        double denominator = 0.0;
 
         for (final RawBinomialOpinion opinion : sources) {
             final double uncertainty = opinion.uncertainty;
@@ -150,14 +152,14 @@ public final class RawBinomialOpinion {
             newBelief += opinion.belief * negUncertainty * negUncertaintyProduct;
             newDisbelief += opinion.disbelief * negUncertainty * negUncertaintyProduct;
             newApriori += opinion.apriori * negUncertainty;
-            den += negUncertaintyProduct;
+            denominator += negUncertaintyProduct;
         }
 
         final double n = sources.size();
-        den -= n * uncertaintyProduct;
-        newBelief /= den;
-        newDisbelief /= den;
-        final double newUncertainty = (n - uncertaintySum) * uncertaintyProduct / den;
+        denominator -= n * uncertaintyProduct;
+        newBelief /= denominator;
+        newDisbelief /= denominator;
+        final double newUncertainty = (n - uncertaintySum) * uncertaintyProduct / denominator;
         newApriori /= n - uncertaintySum;
         return new RawBinomialOpinion(newBelief, newDisbelief, newUncertainty, newApriori);
     }

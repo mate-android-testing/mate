@@ -3,14 +3,15 @@ package org.mate.model.fsm.sosm.novelty;
 import org.mate.model.fsm.sosm.Trace;
 
 /**
- * Functional intface for classes that estimate the novetly of a trace using Subjetive Logic.
+ * Functional interface for classes that estimate the novelty of a trace using subjective logic.
  */
 public interface NoveltyEstimator {
 
     /**
-     * Return the novelty of the "test".
+     * Estimates the novelty of a given test case.
      *
-     * @return Returns the novelty of the test.
+     * @param trace Describes the taken transitions by the test case.
+     * @return Returns the novelty of the test case.
      */
     double estimateNovelty(final Trace trace);
 }

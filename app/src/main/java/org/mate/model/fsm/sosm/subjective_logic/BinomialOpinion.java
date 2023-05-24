@@ -52,6 +52,12 @@ public final class BinomialOpinion implements SubjectiveOpinion<Double, Binomial
         return new BinomialOpinion(RawBinomialOpinion.multiply(rawBinomialOpinions));
     }
 
+    /**
+     * Fuses the given binomial opinions into a single binomial opinion.
+     *
+     * @param opinions The binomial opinions.
+     * @return Returns the resulting binomial opinion.
+     */
     public static BinomialOpinion multiSourceFusion(final List<BinomialOpinion> opinions) {
         return new BinomialOpinion(
                 RawBinomialOpinion.multiSourceFusion(

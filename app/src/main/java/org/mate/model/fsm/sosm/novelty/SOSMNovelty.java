@@ -1,5 +1,7 @@
 package org.mate.model.fsm.sosm.novelty;
 
+import android.annotation.SuppressLint;
+
 import org.mate.MATE;
 import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.sosm.Trace;
@@ -12,13 +14,19 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * A novelty estimator that estimates novelty by combing all coarsened binomial opinions of a trace
- * into single binomial opinion on that trace.
+ * into a single binomial opinion.
  *
- * The binomial opinion is computed by multiplying all coarsened binomial opinions.
  */
 public final class SOSMNovelty implements NoveltyEstimator {
 
+    /**
+     * The underlying SOSM model.
+     */
     private final SOSMModel sosmModel;
+
+    /**
+     * A weight factor.
+     */
     private final double alpha;
 
     public SOSMNovelty(final SOSMModel sosmModel, final double alpha) {
@@ -26,6 +34,13 @@ public final class SOSMNovelty implements NoveltyEstimator {
         this.alpha = alpha;
     }
 
+    /**
+     * The novelty is computed by multiplying all coarsened binomial opinions.
+     *
+     * @param trace Describes the taken transitions by the test case.
+     * @return Returns the estimated novelty.
+     */
+    @SuppressLint("DefaultLocale")
     @Override
     public double estimateNovelty(final Trace trace) {
         final List<BinomialOpinion> opinions = sosmModel.getCoarsenedBinomialOpinionsFor(trace);

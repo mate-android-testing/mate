@@ -1,5 +1,7 @@
 package org.mate.model.fsm.sosm.novelty;
 
+import android.annotation.SuppressLint;
+
 import org.mate.MATE;
 import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.sosm.Trace;
@@ -11,15 +13,19 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A novelty estimator that estimates novelty by combing all coarsend binomial opinions of a trace
- * into single binomial opinion on that trace.
- *
- * Combines the binomial opinions by taking the average of belief, disbelief, uncertainty and
- * apriori.
+ * A novelty estimator that estimates novelty by combing all coarsened binomial opinions of a trace
+ * into a single binomial opinion.
  */
 public final class AverageSLNovelty implements NoveltyEstimator {
 
+    /**
+     * The underlying SOSM model.
+     */
     private final SOSMModel sosmModel;
+
+    /**
+     * A weight factor.
+     */
     private final double alpha;
 
     public AverageSLNovelty(final SOSMModel sosmModel, final double alpha) {
@@ -27,6 +33,14 @@ public final class AverageSLNovelty implements NoveltyEstimator {
         this.alpha = alpha;
     }
 
+    /**
+     * Combines the binomial opinions by taking the average of belief, disbelief, uncertainty and
+     * apriori belief.
+     *
+     * @param trace Describes the taken transitions by the test case.
+     * @return Returns the estimated novelty.
+     */
+    @SuppressLint("DefaultLocale")
     @Override
     public double estimateNovelty(final Trace trace) {
 
@@ -53,7 +67,8 @@ public final class AverageSLNovelty implements NoveltyEstimator {
         uncertainty /= size;
 
         final double score = alpha * disbelief + uncertainty;
-        MATE.log_debug(String.format("Opinion on trace: (%f, %f, %f,%f)", belief, disbelief, uncertainty, score));
+        MATE.log_debug(String.format("Opinion on trace: (%f, %f, %f,%f)", belief, disbelief,
+                uncertainty, score));
         return score;
     }
 }
