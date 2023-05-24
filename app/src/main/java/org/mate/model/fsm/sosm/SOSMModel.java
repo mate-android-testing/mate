@@ -26,37 +26,33 @@ import static java.util.stream.Collectors.toList;
 
 
 /**
- * A FSM model of the AUT, that enhances the {@link FSMModel} by addtion an
- * {@link MultinomialOpinion} to each state. The {@link MultinomialOpinion} decribes how the
- * likelihood of any specific action being executed in that state.
+ * A FSM model of the AUT, that enhances the {@link FSMModel} by adding an
+ * {@link MultinomialOpinion} to each state. The {@link MultinomialOpinion} describes the likelihood
+ * of any specific action being executed in that state.
  */
 public final class SOSMModel extends FSMModel {
 
     /**
-     * When getting a subjective optinion on a trace, we might encounter a state for which no
-     * subjective opinion has been calculated yet. In that case, this subistute opinion is used to
-     * represent the opinion on that state.
+     * The initial subjective opinion for states that we haven't seen.
      */
     public static final BinomialOpinion UNKNOWN_STATE_OPINION = new BinomialOpinion(
             new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
 
     /**
-     * When getting a subjective optinion on a trace, we might encounter an action, that can not be
-     * executed in the recoreded state. This can happen due to an imprecise state equivalence, e.g.
-     * Cosine Similarity. In this case there is no opinion on the executed action, so this
-     * substitiute opinion is used instead.
+     * We may encounter the situation that an action is not applicable in a given state due to
+     * impreciseness of the underlying state equivalence function. In this case we assign an opinion
+     * with an uncertainty of {@code 1.0}.
      */
     public final static BinomialOpinion UNKNOWN_ACTION_OPINION = new BinomialOpinion(
             new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
 
     /**
-     * The object used to incrementally infer the SOSM from set of traces.
+     * Enables to incrementally infer the SOSM from a set of traces.
      */
     private final SOSMInference inference;
 
     /**
-     * This map stores the subjetive opinion on each state. If there is a state for which no opinion
-     * has been calcuated yet, then that state is not present in this map.
+     * Stores the subjective opinion for each state.
      */
     private Map<State, ActionsAndOpinion> opinionPerState;
 
@@ -79,8 +75,9 @@ public final class SOSMModel extends FSMModel {
 
     /**
      * Creates a new {@code SOSMModel} which is a {@link FSMModel} of the AUT, enhanced with a
-     * subjetive opinion on each state.
-     * @param rootState The unique initial state of the AUT.
+     * subjective opinion for each state.
+     *
+     * @param rootState The root state of the AUT.
      * @param packageName The package name of the AUT.
      */
     public SOSMModel(IScreenState rootState, String packageName) {
@@ -92,8 +89,9 @@ public final class SOSMModel extends FSMModel {
     }
 
     /**
-     * Update the subjective opinions of the SOSM, by including the given traces in addition to all
+     * Update the subjective opinions of the SOSM by including the given traces in addition to all
      * previous given traces in the inference.
+     *
      * @param traces The list of traces that that should additionally be included in the inference.
      */
     public void updateSOSM(final List<Trace> traces) {
@@ -133,30 +131,28 @@ public final class SOSMModel extends FSMModel {
     }
 
     /**
-     * Returns all transitions that have been recored since the last time the recorded transitions
-     * have been reset.
+     * Returns all transitions that have been recorded since the last time the recorded transitions
+     * have been reset. Transitions are recoded whenever a test case executes an action.
      *
-     * Transitions are recoded whenever a test case executes an action.
-     *
-     * @return All recoded transitions.
+     * @return Returns all recorded transitions since the last reset.
      */
     public List<Transition> getRecordedTransitions() {
         return Collections.unmodifiableList(recordedTransitions);
     }
 
     /**
-     * Clears the list of recorded transitiions.
+     * Clears the list of recorded transitions.
      */
     public void resetRecordedTransitions() {
         recordedTransitions.clear();
     }
 
     /**
-     * Get a multinomial opinion for each state visited in the trace in which a action has been
-     * executed.
+     * Retrieves a multinomial opinion for each state described by the trace. May contain
+     * {@code null} entries for states that haven't assigned any subjective opinion so far.
      *
-     * May contain null entries that correspond to states, for which no opinion has been calculated
-     * before.
+     * @param trace Describes the transitions of a test case.
+     * @return Returns a list of action opinion pairs for the actions inferred from the trace.
      */
     public List<ActionsAndOpinion> getMultinomialOpinionsFor(final Trace trace) {
         return trace.stream()
@@ -165,34 +161,31 @@ public final class SOSMModel extends FSMModel {
     }
 
     /**
-     * Get a binomal opnion on the likelyhoold that that action was executed, for each action in
-     * the trace.
+     * Retrieves a coarsened binomial opinion for the executed actions according to the given trace.
      *
-     * @param trace The trace denoting a sequnces of actions executed and states visited.
-     * @return A list of coarsend binomial opnions on the likelyhood that each actions of the trace
-     * is executed in the state the AUT is in when executing the action.
+     * @param trace Describes the transitions of a test case.
+     * @return Returns a list of coarsened binomial opinions for the actions described by the trace.
      */
     public List<BinomialOpinion> getCoarsenedBinomialOpinionsFor(final Trace trace) {
-        /*
-         * What opinion should be returned if asked for an opinion on a state that has not been
-         * seen by the SOSM before? This can happen if a new state is discovered in a generation.
-         */
+
         final List<BinomialOpinion> opinions = new ArrayList<>(trace.size());
 
         for (Transition transition : trace) {
+
             final State state = transition.getSource();
             final ActionsAndOpinion actionsAndOpinion = opinionPerState.get(state);
 
             if (actionsAndOpinion == null) {
+                // No subjective opinion has been computed for the state so far.
                 opinions.add(UNKNOWN_STATE_OPINION);
                 continue;
             }
 
             final Action triggeredAction = transition.getAction();
-            BinomialOpinion opinion = actionsAndOpinion.opinionOfAction(triggeredAction);
+            final BinomialOpinion opinion = actionsAndOpinion.opinionOfAction(triggeredAction);
 
             if (opinion == null) {
-                // Unknown actions can occur, because of a fuzzy state equivalence definition.
+                // Unknown actions can occur because of a imprecise state equivalence function.
                 inference.addUnknownAction(state, triggeredAction);
                 opinions.add(UNKNOWN_ACTION_OPINION);
                 continue;
@@ -205,15 +198,23 @@ public final class SOSMModel extends FSMModel {
     }
 
     /**
-     * Get a subjective opinion on which actions are likely to be executed in the given state.
+     * Retrieves the subjective opinion for the give state.
      *
-     * @param state The state to get an subjective opinion on.
-     * @return The subjective opnion on that state.
+     * @param state The state for which the subjective opinion should be retrieved.
+     * @return Returns the subjective opinion for the given state.
      */
     public ActionsAndOpinion getActionsAndOpinionOn(final State state) {
         return opinionPerState.get(state);
     }
 
+    /**
+     * A helper function that constructs a DOT conform string representation for an action and the
+     * associated subjective opinion.
+     *
+     * @param action The given action.
+     * @param opinion The given opinion.
+     * @return Returns a DOT representation for the given action and opinion.
+     */
     private String actionAndOpinionToStr(final Action action, final BinomialOpinion opinion) {
 
         final RawBinomialOpinion op = opinion.getRawOpinion();
@@ -232,114 +233,138 @@ public final class SOSMModel extends FSMModel {
     }
 
     /**
-     * Converts the SOSM to the DOT format.
+     * Converts the SOSM to DOT format.
      *
-     * @return The SOSM as a DOT format, line-by-line as a list.
+     * @return Returns the SOSM in DOT format line-by-line.
      */
-    public List<String> toDOT() {
+    public List<String> convertToDOT() {
+
         final List<String> lines = new ArrayList<>();
         lines.add("digraph {");
 
-        final StringBuilder b = new StringBuilder();
-        dotListStates(b, lines);
-        final Map<String, Integer> actionIndex = dotListActions(b, lines);
-        dotListTransitions(b, actionIndex, lines);
-        b.append("}");
-        lines.add(b.toString());
-        b.setLength(0);
+        final StringBuilder builder = new StringBuilder();
+        convertStatesToDOT(builder, lines);
+        final Map<String, Integer> actionIndex = convertActionsToDOT(builder, lines);
+        convertTransitionsToDOT(builder, actionIndex, lines);
+        builder.append("}");
+        lines.add(builder.toString());
+        builder.setLength(0);
         return lines;
     }
 
-    private void dotListTransitions(final StringBuilder b, final Map<String, Integer> actionIndex,
-                                    List<String> lines) {
-        requireNonNull(b);
+    /**
+     * Converts transitions to DOT format.
+     *
+     * @param builder The current string builder.
+     * @param actionIndex A mapping of actions to its index.
+     * @param lines The current line-by-line DOT representation.
+     */
+    private void convertTransitionsToDOT(final StringBuilder builder,
+                                         final Map<String, Integer> actionIndex,
+                                         final List<String> lines) {
+        requireNonNull(builder);
         requireNonNull(actionIndex);
         requireNonNull(lines);
 
-        final int transitions_per_line = 8;
+        final int transitionsPerLine = 8;
         int newlineCount = 1;
 
-        b.append('\t');
-        for (final Transition t : fsm.getTransitions()) {
+        builder.append('\t');
+        for (final Transition transition : fsm.getTransitions()) {
+
             /* The virtual root state has id '-1', but 'S-1' is not a valid identifier
              * in DOT, so we just print 'SS' instead.
              */
-            final int sourceId = t.getSource().getId();
+            final int sourceId = transition.getSource().getId();
+
             if (sourceId == -1) {
-                b.append("SS -> S")
-                        .append(t.getTarget().getId())
+                builder.append("SS -> S")
+                        .append(transition.getTarget().getId())
                         .append(";");
 
-                if (newlineCount % transitions_per_line == 0) {
-                    lines.add(b.toString());
-                    b.setCharAt(0, '\t');
-                    b.setLength(1);
+                if (newlineCount % transitionsPerLine == 0) {
+                    lines.add(builder.toString());
+                    builder.setCharAt(0, '\t');
+                    builder.setLength(1);
                 } else {
-                    b.append(" ");
+                    builder.append(" ");
                 }
 
                 ++newlineCount;
                 continue;
             }
 
-            final Action action = t.getAction();
-            final Optional<BinomialOpinion> opinion = Optional.ofNullable(opinionPerState.get(t.getSource()))
-                    .map(a -> a.opinionOfAction(t.getAction()))
+            final Action action = transition.getAction();
+            final Optional<BinomialOpinion> opinion
+                    = Optional.ofNullable(opinionPerState.get(transition.getSource()))
+                    .map(a -> a.opinionOfAction(transition.getAction()))
                     .filter(op -> op.getUncertainty() != 1.0);
 
             if (opinion.isPresent()) {
-                final String str = actionAndOpinionToStr(action, opinion.get());
-                final Integer index = actionIndex.get(str);
+                final String actionAndOpinionStr = actionAndOpinionToStr(action, opinion.get());
+                final Integer index = actionIndex.get(actionAndOpinionStr);
                 if (index != null) {
-                    b.append("S")
+                    builder.append("S")
                             .append(sourceId)
                             .append(" -> A")
                             .append(index)
                             .append(" -> S")
-                            .append(t.getTarget().getId())
+                            .append(transition.getTarget().getId())
                             .append(";");
 
-                    if (newlineCount % transitions_per_line == 0) {
-                        lines.add(b.toString());
-                        b.setCharAt(0, '\t');
-                        b.setLength(1);
+                    if (newlineCount % transitionsPerLine == 0) {
+                        lines.add(builder.toString());
+                        builder.setCharAt(0, '\t');
+                        builder.setLength(1);
                     } else {
-                        b.append(" ");
+                        builder.append(" ");
                     }
 
                     ++newlineCount;
                 } else {
-                    MATE.log_warn(String.format("Action '%s' not found.", str));
+                    MATE.log_warn(String.format("Action '%s' not found.", actionAndOpinionStr));
                 }
             }
         }
     }
 
-    private Map<String, Integer> dotListActions(final StringBuilder b, List<String> lines) {
+    /**
+     * Converts actions to DOT format.
+     *
+     * @param builder The current string builder.
+     * @param lines The current line-by-line DOT representation.
+     * @return Returns a mapping of actions to its index.
+     */
+    private Map<String, Integer> convertActionsToDOT(final StringBuilder builder,
+                                                     List<String> lines) {
 
-        requireNonNull(b);
+        requireNonNull(builder);
         requireNonNull(lines);
 
         final Map<String, Integer> actionsIndex = new HashMap<>();
 
-        final String formatAsBox = "\",shape=\"box\",style=\"filled\",fillcolor=\"#E6E6E6\",color=\"#FFFFFF\"];";
-        for (final Transition t : fsm.getTransitions()) {
-            final Action action = t.getAction();
-            Optional.ofNullable(opinionPerState.get(t.getSource()))
-                    .map(a -> a.opinionOfAction(t.getAction()))
+        final String formatAsBox = "\",shape=\"box\",style=\"filled\",fillcolor=\"#E6E6E6\"," +
+                "color=\"#FFFFFF\"];";
+
+        for (final Transition transition : fsm.getTransitions()) {
+
+            final Action action = transition.getAction();
+
+            Optional.ofNullable(opinionPerState.get(transition.getSource()))
+                    .map(actionAndOpinion -> actionAndOpinion.opinionOfAction(transition.getAction()))
                     .filter(op -> op.getUncertainty() != 1.0)
                     .ifPresent(op -> {
-                        final String str = actionAndOpinionToStr(action, op);
-                        if (!actionsIndex.containsKey(str)) {
-                            actionsIndex.put(str, actionsIndex.size());
-                            final int index = actionsIndex.get(str);
-                            b.append("\tA")
+                        final String actionAndOpinionStr = actionAndOpinionToStr(action, op);
+                        if (!actionsIndex.containsKey(actionAndOpinionStr)) {
+                            actionsIndex.put(actionAndOpinionStr, actionsIndex.size());
+                            final int index = actionsIndex.get(actionAndOpinionStr);
+                            builder.append("\tA")
                                     .append(index)
                                     .append(" [label=\"")
-                                    .append(str)
+                                    .append(actionAndOpinionStr)
                                     .append(formatAsBox);
-                            lines.add(b.toString());
-                            b.setLength(0);
+                            lines.add(builder.toString());
+                            builder.setLength(0);
                         }
                     });
         }
@@ -347,25 +372,31 @@ public final class SOSMModel extends FSMModel {
         return actionsIndex;
     }
 
-    private void dotListStates(final StringBuilder b, List<String> lines) {
+    /**
+     * Converts states to DOT format.
+     *
+     * @param builder The current string builder.
+     * @param lines The current line-by-line DOT representation.
+     */
+    private void convertStatesToDOT(final StringBuilder builder, List<String> lines) {
 
-        requireNonNull(b);
+        requireNonNull(builder);
         requireNonNull(lines);
 
         for (final State state : fsm.getStates()) {
+
             /* The virtual root state has id '-1', but 'S-1' is not a valid identifier in DOT, so we
              * just print 'SS' instead.
              */
             final int id = state.getId();
-            b.append("\tS").append(id != -1 ? Integer.toString(id) : "S");
+            builder.append("\tS").append(id != -1 ? Integer.toString(id) : "S");
             Optional.ofNullable(state.getScreenState())
-                    .ifPresent(screenState -> b.append(" [label=\"")
-                            .append(state.getScreenState()
-                                    .getActivityName())
+                    .ifPresent(screenState -> builder.append(" [label=\"")
+                            .append(state.getScreenState().getActivityName())
                             .append("\"]"));
-            b.append(";");
-            lines.add(b.toString());
-            b.setLength(0);
+            builder.append(";");
+            lines.add(builder.toString());
+            builder.setLength(0);
         }
     }
 
@@ -373,6 +404,5 @@ public final class SOSMModel extends FSMModel {
     public String toString() {
         return String.format("Sosm{inference=%s, s=%s}", inference, opinionPerState);
     }
-
 }
 
