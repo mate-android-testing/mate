@@ -108,7 +108,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     }
 
     /**
-     * Creates the initial population consisting of random chromosomes. Also updates the archive.
+     * Creates the initial population consisting of random chromosomes. Updates the SOSM afterwards.
      */
     @Override
     public void createInitialPopulation() {
@@ -116,6 +116,8 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         MATE.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
 
         for (int i = 0; i < populationSize; i++) {
+
+            // Record the transitions, i.e. a trace, that are taken by the test case.
             sosmModel.resetRecordedTransitions();
             final IChromosome<TestCase> chromosome = chromosomeFactory.createChromosome();
             final Trace trace = new Trace(sosmModel.getRecordedTransitions());
@@ -131,51 +133,73 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         currentGenerationNumber++;
     }
 
+    /**
+     * Updates the SOSM with new traces.
+     */
     private void updateSOSM() {
         sosmModel.updateSOSM(traces);
     }
 
-    private IChromosome<TestCase> mutate(IChromosome<TestCase> parent, Trace trace) {
-        return noveltyMutationFunction.mutate(parent, trace);
+    /**
+     * Mutates the given test case chromosome.
+     *
+     * @param testCase The test case that should be mutated.
+     * @param trace The trace belonging to the test case.
+     * @return Returns the mutated test case.
+     */
+    private IChromosome<TestCase> mutate(final IChromosome<TestCase> testCase, final Trace trace) {
+        return noveltyMutationFunction.mutate(testCase, trace);
     }
 
+    /**
+     * Creates a new offspring from the current population.
+     *
+     * @return Returns the newly generated offspring.
+     */
     private ChromosomeNoveltyTrace newOffspring() {
+
         final ChromosomeNoveltyTrace parent = noveltySelectionFunction.select(population).get(0);
+
+        // Record the taken transitions of the newly generated offspring.
         sosmModel.resetRecordedTransitions();
         final IChromosome<TestCase> offspring = mutate(parent.getChromosome(), parent.getTrace());
         final Trace trace = new Trace(sosmModel.getRecordedTransitions());
-
         traces.add(trace);
+
         final double novelty = noveltyFitnessFunction.getNovelty(offspring, trace);
         return new ChromosomeNoveltyTrace(offspring, novelty, trace);
     }
 
+    /**
+     * Prints the SOSM to logcat.
+     */
     private void printSOSM() {
         /*
-         * The logcat has a limited number of log, that is able to handle at once.
-         * If the amount of message is too large, message will get silently dropped.
+         * The logcat buffer can store only a limited number of logs. If the number of log messages
+         * is too large in a particular time frame, some messages get dropped silently.
          * We wait a bit before flooding the logcat with DOT logs, such that the logcat can handle
          * all the logs.
          */
         Utils.sleep(200);
         MATE.log_debug("SOSM print graph start");
-        for (final String line : sosmModel.toDOT())
+        for (final String line : sosmModel.convertToDOT())
             MATE.log_debug(line);
         MATE.log_debug("SOSM print graph stop");
         Utils.sleep(200);
     }
 
+    /**
+     * Swaps the current population with the new generation.
+     */
     private void swapPopulationAndNewGeneration() {
-        final List<ChromosomeNoveltyTrace>  tmp = population;
+        final List<ChromosomeNoveltyTrace> tmp = population;
         population = newGeneration;
         newGeneration = tmp;
     }
 
     /**
-     * // TODO: Adjust comment.
-     * Represents the evolution process. In the context of novelty search, we stick here to
-     * the procedure of a standard genetic algorithm. The only difference is that we update our
-     * archive accordingly and that we use a specialised selection as well as fitness function.
+     * Generates a new population following the procedure of a standard genetic algorithm. Updates
+     * the SOSM after each generation.
      */
     @Override
     public void evolve() {
@@ -198,17 +222,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         printSOSM();
         logCurrentFitness();
         ++currentGenerationNumber;
-    }
-
-    /**
-     * Determines the survivors of the current generation. By default, the newly created offsprings
-     * constitute the survivors.
-     *
-     * @return Returns a population of size {@link #populationSize} that is used in the next generation.
-     */
-    @Override
-    public List<IChromosome<TestCase>> getGenerationSurvivors() {
-        throw new UnsupportedOperationException("Unsupported");
     }
 
     /**
