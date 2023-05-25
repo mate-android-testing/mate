@@ -1,8 +1,11 @@
 package org.mate.exploration.heuristical;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.Algorithm;
+import org.mate.exploration.genetic.chromosome_factory.AndroidRandomChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.MotifAlphaChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.MotifChromosomeFactory;
 
 /**
@@ -14,7 +17,7 @@ public class RandomMotifExploration implements Algorithm {
     /**
      * The chromosome factory used to generate test case chromosomes.
      */
-    private final MotifChromosomeFactory motifChromosomeFactory;
+    private final AndroidRandomChromosomeFactory motifChromosomeFactory;
 
     /**
      * Whether to reset the app before/after generating a new chromosome.
@@ -31,6 +34,18 @@ public class RandomMotifExploration implements Algorithm {
     public RandomMotifExploration(boolean alwaysReset, int maxNumEvents, float relativeMotifActionAmount) {
         this.alwaysReset = alwaysReset;
         motifChromosomeFactory = new MotifChromosomeFactory(maxNumEvents, relativeMotifActionAmount);
+    }
+
+    /**
+     * Initialises the random exploration with the specified alpha that controls the likelihood of
+     * motif actions.
+     *
+     * @param alwaysReset Whether to reset the app after each creation and execution of a chromosome.
+     * @param maxNumEvents The maximal number of actions per test case.
+     */
+    public RandomMotifExploration(boolean alwaysReset, int maxNumEvents) {
+        this.alwaysReset = alwaysReset;
+        motifChromosomeFactory = new MotifAlphaChromosomeFactory(maxNumEvents, Properties.MOTIF_ALPHA());
     }
 
     /**

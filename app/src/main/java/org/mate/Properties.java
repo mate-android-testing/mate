@@ -103,6 +103,20 @@ public class Properties {
     }
 
     /**
+     * Controls the likelihood of motif actions in contrast to regular UI actions. The formula is
+     * as follows:
+     *
+     * P_motif_action = relative_motif_action_amount ^ alpha where 0 <= alpha <= 1
+     *
+     * If alpha = 1, then we have essentially a uniform distribution among all actions. In contrast,
+     * alpha = 0 means that only motif actions are selected in favor of regular UI actions. In
+     * summary, the smaller alpha has been chosen, the likely a motif action is chosen.
+     *
+     * @return Returns the alpha used in above formula.
+     */
+    public static float MOTIF_ALPHA() { return propertyOr(1.0f); }
+
+    /**
      * The optimisation strategy that should be applied.
      *
      * @return Returns the applied optimisation strategy.
