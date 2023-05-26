@@ -6,8 +6,8 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.sosm.Trace;
-import org.mate.model.fsm.sosm.novelty.MaxNovelSubsequence;
-import org.mate.model.fsm.sosm.novelty.NoveltyEstimator;
+import org.mate.model.fsm.sosm.novelty.INoveltyEstimator;
+import org.mate.model.fsm.sosm.novelty.NoveltyEstimatorFactory;
 import org.mate.utils.coverage.CoverageUtils;
 
 /**
@@ -23,7 +23,7 @@ public final class SOSMNoveltyWithCoverageFitnessFunction implements ISOSMNovelt
     /**
      * The currently employed novelty estimator function.
      */
-    private final NoveltyEstimator noveltyEstimator;
+    private final INoveltyEstimator noveltyEstimator;
 
     /**
      * A weight factor that controls the influence of novelty and coverage for the fitness value.
@@ -35,7 +35,8 @@ public final class SOSMNoveltyWithCoverageFitnessFunction implements ISOSMNovelt
      */
     public SOSMNoveltyWithCoverageFitnessFunction() {
         final double uncertaintyThreshold = Properties.SOSM_NOVELTY_DISBELIEF_WEIGHT();
-        noveltyEstimator = new MaxNovelSubsequence(sosmModel, uncertaintyThreshold);
+        noveltyEstimator = new NoveltyEstimatorFactory(sosmModel, uncertaintyThreshold)
+                .getNoveltyEstimator(Properties.SOSM_NOVELTY_ESTIMATOR());
     }
 
     /**

@@ -16,7 +16,7 @@ import static java.util.Objects.requireNonNull;
  * A novelty estimator that estimates novelty by combing all coarsened binomial opinions of a trace
  * into a single binomial opinion.
  */
-public final class MaxNovelPrefix implements NoveltyEstimator {
+public final class MaxNovelPrefix implements INoveltyEstimator {
 
     /**
      * The minimal length of considered binomial opinions.

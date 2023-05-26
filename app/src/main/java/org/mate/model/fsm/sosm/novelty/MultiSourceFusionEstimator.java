@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
  * into a single binomial opinion.
  *
  */
-public final class MultiSourceFusionEstimator implements NoveltyEstimator {
+public final class MultiSourceFusionEstimator implements INoveltyEstimator {
 
     /**
      * The underlying SOSM model.

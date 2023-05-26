@@ -6,8 +6,8 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.sosm.Trace;
-import org.mate.model.fsm.sosm.novelty.MultiSourceFusionEstimator;
-import org.mate.model.fsm.sosm.novelty.NoveltyEstimator;
+import org.mate.model.fsm.sosm.novelty.INoveltyEstimator;
+import org.mate.model.fsm.sosm.novelty.NoveltyEstimatorFactory;
 
 /**
  * A novelty fitness function that queries the SOSM model for determining the novelty of a test
@@ -23,14 +23,15 @@ public class SOSMNoveltyFitnessFunction implements ISOSMNoveltyFitnessFunction {
     /**
      * The currently employed novelty estimator function.
      */
-    private final NoveltyEstimator estimator;
+    private final INoveltyEstimator noveltyEstimator;
 
     /**
      * Initialises the SOSM-based novelty fitness function.
      */
     public SOSMNoveltyFitnessFunction() {
         final double uncertaintyThreshold = Properties.SOSM_NOVELTY_DISBELIEF_WEIGHT();
-        estimator = new MultiSourceFusionEstimator(sosmModel, uncertaintyThreshold);
+        noveltyEstimator = new NoveltyEstimatorFactory(sosmModel, uncertaintyThreshold)
+                .getNoveltyEstimator(Properties.SOSM_NOVELTY_ESTIMATOR());
     }
 
     /**
@@ -44,7 +45,7 @@ public class SOSMNoveltyFitnessFunction implements ISOSMNoveltyFitnessFunction {
             return 1.0;
         }
 
-        return estimator.estimateNovelty(trace);
+        return noveltyEstimator.estimateNovelty(trace);
     }
 }
 

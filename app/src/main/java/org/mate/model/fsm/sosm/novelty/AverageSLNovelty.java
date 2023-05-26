@@ -16,7 +16,7 @@ import static java.util.Objects.requireNonNull;
  * A novelty estimator that estimates novelty by combing all coarsened binomial opinions of a trace
  * into a single binomial opinion.
  */
-public final class AverageSLNovelty implements NoveltyEstimator {
+public final class AverageSLNovelty implements INoveltyEstimator {
 
     /**
      * The underlying SOSM model.

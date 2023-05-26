@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
  * into a single binomial opinion.
  *
  */
-public final class SOSMNovelty implements NoveltyEstimator {
+public final class SOSMNovelty implements INoveltyEstimator {
 
     /**
      * The underlying SOSM model.

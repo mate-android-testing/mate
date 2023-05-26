@@ -8,14 +8,14 @@ import static java.util.Objects.requireNonNull;
  * This class extends the basic (SOSM) novelty estimator by dividing the achieved novelty by the
  * trace length (number of actions) of the test to avoid promoting long tests or tests with cycles.
  */
-public final class DiscountedSumNoveltyEstimator implements NoveltyEstimator {
+public final class DiscountedSumNoveltyEstimator implements INoveltyEstimator {
 
     /**
      * The core novelty estimator function.
      */
-    private final NoveltyEstimator estimator;
+    private final INoveltyEstimator estimator;
 
-    public DiscountedSumNoveltyEstimator(final NoveltyEstimator estimator) {
+    public DiscountedSumNoveltyEstimator(final INoveltyEstimator estimator) {
         this.estimator = requireNonNull(estimator);
     }
 

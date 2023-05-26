@@ -11,6 +11,7 @@ import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
+import org.mate.model.fsm.sosm.novelty.NoveltyEstimator;
 import org.mate.model.util.DotConverter;
 import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
@@ -509,6 +510,15 @@ public class Properties {
      */
     public static double NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT() {
         return propertyOr(0.5);
+    }
+
+    /**
+     * Determines which novelty estimator function should be used.
+     *
+     * @return Returns the name of the selected novelty estimator function.
+     */
+    public static NoveltyEstimator SOSM_NOVELTY_ESTIMATOR() {
+        return propertyOr(NoveltyEstimator.MAX_NOVEL_SUBSEQUENCE);
     }
 
     /*
