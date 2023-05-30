@@ -488,9 +488,9 @@ public class Properties {
      * Determines the number of times a state has to be traversed for the SOSM probabilities to be
      * deemed certain.
      *
-     * @return The uncertainty threshold for SOSM based Novelty Search.
+     * @return Returns the certainty threshold alpha using during SOSM inference.
      */
-    public static double SOSM_UNCERTAINTY_THRESHOLD() {
+    public static double SOSM_CERTAINTY_THRESHOLD() {
         return propertyOr(10.0);
     }
 

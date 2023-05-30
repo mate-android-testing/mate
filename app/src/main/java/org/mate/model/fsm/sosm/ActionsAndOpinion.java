@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
  *
  * The problem is that a {@link MultinomialOpinion} only has a first, second, third, etc. opinion,
  * but we want an opinion on an action a, b, c etc. This class bridges the gap between actions and
- * the indexes of a multinomial opinion.
+ * the indices of a multinomial opinion.
  */
 public final class ActionsAndOpinion {
 

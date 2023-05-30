@@ -58,7 +58,7 @@ public final class SOSMInference {
      * Creates a new SOSMInference with initially no trace information.
      *
      * @param fsm The FSM describing the AUT.
-     * @param alpha The certainty threshold.
+     * @param alpha The certainty threshold alpha.
      */
     public SOSMInference(final FSM fsm, double alpha) {
         this.fsm = requireNonNull(fsm);
@@ -126,13 +126,16 @@ public final class SOSMInference {
 
         if (total > 0) {
 
+            // Unlike in the original algorithm, we choose a certainty threshold that is state
+            // dependent, i.e. we consider the number of actions in the given state along with the
+            // constant certainty threshold alpha.
             final double div = 1.0 / Math.max(total, alpha * size);
 
             for (int i = 0; i < size; ++i) {
                 actionFrequencies[i] *= div;
             }
 
-            uncertainty = 1.0 - ((double) total) * div;
+            uncertainty = 1.0 - ((double) total) * div; // line 11
         } else {
             uncertainty = 1.0;
         }

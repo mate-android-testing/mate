@@ -122,9 +122,9 @@ public final class RawMultinomialOpinion {
      */
     public RawBinomialOpinion coarsenToOpinion(final int index) {
         final double targetBelief = beliefs[index];
-        final double targetDisbelieve = 1.0 - uncertainty - targetBelief;
+        final double targetDisbelief = 1.0 - uncertainty - targetBelief;
         final double apriori = aprioris[index];
-        return new RawBinomialOpinion(targetBelief, targetDisbelieve, uncertainty, apriori);
+        return new RawBinomialOpinion(targetBelief, targetDisbelief, uncertainty, apriori);
     }
 
     /**
@@ -167,7 +167,7 @@ public final class RawMultinomialOpinion {
      */
     public RawMultinomialOpinion multiply(final RawMultinomialOpinion operand) {
 
-        // TODO: Perform a code review.
+        // TODO: Perform a code review, see: https://shorturl.at/anqS1.
 
         // TODO: This method can certainly be optimized a lot further.
         final int thisSize = size();
@@ -263,7 +263,7 @@ public final class RawMultinomialOpinion {
     public static RawMultinomialOpinion averagingFusion(
             final Collection<RawMultinomialOpinion> opinions) {
 
-        // TODO: Perform a code review.
+        // TODO: Perform a code review, see https://shorturl.at/uwABE.
 
         // TODO: This method can certainly be optimized a lot further.
         final List<RawMultinomialOpinion> opList = new ArrayList<>(opinions);
@@ -290,7 +290,8 @@ public final class RawMultinomialOpinion {
             final double weight = 1.0 / opList.size();
             for (int i = 0; i < size; i++) {
                 final int finalI = i;
-                final double beliefSum = opList.stream().mapToDouble(op -> op.beliefs[finalI]).sum() * weight;
+                final double beliefSum = opList.stream()
+                        .mapToDouble(op -> op.beliefs[finalI]).sum() * weight;
                 fusedBeliefs[i] = beliefSum;
             }
         }

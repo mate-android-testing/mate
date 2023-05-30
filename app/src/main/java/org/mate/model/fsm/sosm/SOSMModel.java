@@ -84,7 +84,7 @@ public final class SOSMModel extends FSMModel {
         super(rootState, packageName);
         recordedTransitions.add(new Transition(VIRTUAL_ROOT_STATE, new State(0, rootState),
                 new StartAction()));
-        this.inference = new SOSMInference(fsm, Properties.SOSM_UNCERTAINTY_THRESHOLD());
+        this.inference = new SOSMInference(fsm, Properties.SOSM_CERTAINTY_THRESHOLD());
         opinionPerState = new HashMap<>(0);
     }
 
