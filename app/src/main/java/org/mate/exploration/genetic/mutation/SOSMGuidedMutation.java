@@ -69,9 +69,17 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         this.isTestSuiteExecution = testSuiteExecution;
     }
 
-    // TODO: Add documentation.
+    /**
+     * Performs a cut point mutation. First, the given test case is split at a chosen cut point.
+     * Then, the mutated test case is filled with the original actions up to the cut point and
+     * from the cut point onwards with actions based on the underlying subjective opinion.
+     *
+     * @param chromosome The given test case chromosome that should be mutated.
+     * @param trace Describes which transitions have been taken by the test case chromosome.
+     * @return Returns the mutated chromosome.
+     */
     @Override
-    public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome, Trace trace) {
+    public IChromosome<TestCase> mutate(final IChromosome<TestCase> chromosome, final Trace trace) {
 
         uiAbstractionLayer.resetApp();
 
@@ -83,7 +91,8 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         try {
             for (int i = 0; i < maxNumEvents; i++) {
                 final Action newAction
-                        = chooseNextAction(actionSequence, cutPoint, sosmModel.getCurrentState(), i);
+                        = chooseNextAction(actionSequence, cutPoint,
+                        sosmModel.getCurrentState(), i);
                 if (!mutant.updateTestCase(newAction, i)) {
                     break;
                 }
@@ -113,7 +122,14 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         return mutatedChromosome;
     }
 
-    // TODO: Add documentation.
+    /**
+     * Determines a cut point, i.e. the point from which on actions are selected based on the
+     * subjective opinion. Considers the uncertainties along the taken path and performs a roulette
+     * wheel selection.
+     *
+     * @param trace Describes the transitions taken by the test case.
+     * @return Returns the chosen cut point.
+     */
     private int chooseCutPoint(final Trace trace) {
 
         if (trace.isEmpty()) {
@@ -123,7 +139,9 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         final List<Transition> transitions = trace.getTransitions();
         final double[] uncertainties = new double[transitions.size() + 1];
 
+        // Perform a roulette-wheel selection over the uncertainties along the taken transitions.
         double sum = 0.0;
+
         for (int i = 0; i < transitions.size(); ++i) {
             final State state = transitions.get(i).getSource();
             final ActionsAndOpinion actionsAndOpinion = sosmModel.getActionsAndOpinionOn(state);
@@ -156,10 +174,20 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         throw new AssertionError("Unreachable");
     }
 
+    /**
+     * Chooses the action to be executed next.
+     *
+     * @param actionSequence The action sequence of the original chromosome.
+     * @param cutPoint The chosen cut point.
+     * @param state The current state according to the SOSM.
+     * @param actionCount The action id of the next action.
+     * @return Returns the chosen action.
+     */
     private Action chooseNextAction(final List<? extends Action> actionSequence,
                                     final int cutPoint, final State state, final int actionCount) {
 
         if (actionCount + 1 >= cutPoint) {
+            // Consider the subjective opinions for selecting an action from the cut point onwards.
             return chooseNextActionBasedOnState(state);
         }
 
@@ -174,6 +202,12 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         }
     }
 
+    /**
+     * Chooses a new action based on the subjective opinion associated with the current state.
+     *
+     * @param state The current state according to the SOSM.
+     * @return Returns the chosen action.
+     */
     private Action chooseNextActionBasedOnState(final State state) {
 
         ActionsAndOpinion actionsAndOpinion = sosmModel.getActionsAndOpinionOn(state);
@@ -182,9 +216,11 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
             return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
         }
 
-//        if (Randomness.getRnd().nextDouble() < actionsAndOpinion.getUncertainty()) {
-//            return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
-//        }
+        // If there is a high uncertainty associated with the current state, we favour a random
+        // action in order to increase belief over time.
+        if (Randomness.getRnd().nextDouble() < actionsAndOpinion.getUncertainty()) {
+            return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
+        }
 
         final List<Tuple<Double, Action>> candidates
                 = actionsAndOpinion
@@ -199,6 +235,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
             return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
         }
 
+        // Perform a roulette-wheel selection over the disbelief of the candidate actions.
         final double sum = candidates.stream().mapToDouble(Tuple::getX).sum();
 
         if (sum <= 0.0) {
@@ -207,6 +244,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
 
         final double chosen = Randomness.getRandom(0.0, sum);
         double start = 0;
+
         for (Tuple<Double, Action> candidate : candidates) {
             final double end = start + candidate.getX();
             if (chosen < end)
