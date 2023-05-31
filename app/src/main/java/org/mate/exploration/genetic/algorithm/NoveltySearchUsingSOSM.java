@@ -7,6 +7,7 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.crossover.ICrossOverFunction;
+import org.mate.exploration.genetic.crossover.ISOSMCrossOverFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.ISOSMNoveltyFitnessFunction;
 import org.mate.exploration.genetic.mutation.IMutationFunction;
@@ -18,6 +19,8 @@ import org.mate.exploration.genetic.util.novelty.ChromosomeNoveltyTrace;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.sosm.Trace;
+import org.mate.utils.Randomness;
+import org.mate.utils.Tuple;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
@@ -34,12 +37,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     /**
      * The current population.
      */
-    private List<ChromosomeNoveltyTrace> population;
-
-    /**
-     * The new (next) generation.
-     */
-    private List<ChromosomeNoveltyTrace> newGeneration;
+    private final List<ChromosomeNoveltyTrace> population;
 
     /**
      * Stores traces about the current population.
@@ -65,6 +63,11 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
      * The SOSM-based selection function.
      */
     private final SOSMNoveltyRankSelection noveltySelectionFunction;
+
+    /**
+     * The SOSM-based crossover function.
+     */
+    private final ISOSMCrossOverFunction noveltyCrossOverFunction;
 
     /**
      * Initializes the genetic algorithm with all the necessary attributes.
@@ -96,15 +99,13 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
                 pCrossover, pMutate);
 
         this.population = new ArrayList<>(populationSize);
-        this.newGeneration = new ArrayList<>(populationSize);
 
-        // TODO: Provide this argument as regular parameter.
         sosmModel = (SOSMModel) Registry.getUiAbstractionLayer().getGuiModel();
 
         this.noveltyFitnessFunction = (ISOSMNoveltyFitnessFunction) fitnessFunctions.get(0);
         this.noveltySelectionFunction = (SOSMNoveltyRankSelection) selectionFunction;
         this.noveltyMutationFunction = (ISOSMMutationFunction) mutationFunction;
-
+        this.noveltyCrossOverFunction = (ISOSMCrossOverFunction) crossOverFunction;
     }
 
     /**
@@ -141,36 +142,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     }
 
     /**
-     * Mutates the given test case chromosome.
-     *
-     * @param testCase The test case that should be mutated.
-     * @param trace The trace belonging to the test case.
-     * @return Returns the mutated test case.
-     */
-    private IChromosome<TestCase> mutate(final IChromosome<TestCase> testCase, final Trace trace) {
-        return noveltyMutationFunction.mutate(testCase, trace);
-    }
-
-    /**
-     * Creates a new offspring from the current population.
-     *
-     * @return Returns the newly generated offspring.
-     */
-    private ChromosomeNoveltyTrace newOffspring() {
-
-        final ChromosomeNoveltyTrace parent = noveltySelectionFunction.select(population).get(0);
-
-        // Record the taken transitions of the newly generated offspring.
-        sosmModel.resetRecordedTransitions();
-        final IChromosome<TestCase> offspring = mutate(parent.getChromosome(), parent.getTrace());
-        final Trace trace = new Trace(sosmModel.getRecordedTransitions());
-        traces.add(trace);
-
-        final double novelty = noveltyFitnessFunction.getNovelty(offspring, trace);
-        return new ChromosomeNoveltyTrace(offspring, novelty, trace);
-    }
-
-    /**
      * Prints the SOSM to logcat.
      */
     private void printSOSM() {
@@ -189,39 +160,84 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     }
 
     /**
-     * Swaps the current population with the new generation.
-     */
-    private void swapPopulationAndNewGeneration() {
-        final List<ChromosomeNoveltyTrace> tmp = population;
-        population = newGeneration;
-        newGeneration = tmp;
-    }
-
-    /**
      * Generates a new population following the procedure of a standard genetic algorithm. Updates
      * the SOSM after each generation.
      */
     @Override
     public void evolve() {
 
-        // TODO: Implement like regular genetic algorithm including crossover, etc.
-
         MATE.log_acc("Creating population #" + (currentGenerationNumber + 1));
 
         traces.clear();
 
-        for (int i = 0; i < populationSize; ++i) {
-            final ChromosomeNoveltyTrace cnt = newOffspring();
-            newGeneration.add(cnt);
+        List<ChromosomeNoveltyTrace> newGeneration = new ArrayList<>(population);
+
+        while (newGeneration.size() < bigPopulationSize) {
+
+            List<ChromosomeNoveltyTrace> parents = noveltySelectionFunction.select(population);
+
+            List<ChromosomeNoveltyTrace> offsprings = new ArrayList<>();
+
+            if (Randomness.getRnd().nextDouble() < pCrossover) {
+
+                List<Tuple<IChromosome<TestCase>, Trace>> offspringTuples
+                        = noveltyCrossOverFunction.crossover(parents);
+
+                for (Tuple<IChromosome<TestCase>, Trace> offspringTuple : offspringTuples) {
+                    final IChromosome<TestCase> crossedChromosome = offspringTuple.getX();
+                    final Trace trace = offspringTuple.getY();
+                    traces.add(trace);
+                    final double novelty
+                            = noveltyFitnessFunction.getNovelty(crossedChromosome, trace);
+                    offsprings.add(new ChromosomeNoveltyTrace(crossedChromosome, novelty, trace));
+                }
+            } else {
+                offsprings = parents;
+            }
+
+            for (ChromosomeNoveltyTrace offspring : offsprings) {
+
+                if (Randomness.getRnd().nextDouble() < pMutate) {
+
+                    final Tuple<IChromosome<TestCase>, Trace> mutatedChromosomeAndTrace
+                            = noveltyMutationFunction.mutate(offspring.getChromosome(), offspring.getTrace());
+
+                    final IChromosome<TestCase> mutatedChromosome = mutatedChromosomeAndTrace.getX();
+                    final Trace trace = mutatedChromosomeAndTrace.getY();
+
+                    traces.add(trace);
+                    final double novelty = noveltyFitnessFunction.getNovelty(mutatedChromosome, trace);
+                    offspring = new ChromosomeNoveltyTrace(mutatedChromosome, novelty, trace);
+                }
+
+                if (newGeneration.size() < bigPopulationSize) {
+                    newGeneration.add(offspring);
+                } else {
+                    // big population size reached -> early abort
+                    break;
+                }
+            }
         }
 
         population.clear();
-        swapPopulationAndNewGeneration();
+        population.addAll(newGeneration);
+        List<ChromosomeNoveltyTrace> survivors = getSurvivors();
+        population.clear();
+        population.addAll(survivors);
 
         updateSOSM();
         printSOSM();
         logCurrentFitness();
         ++currentGenerationNumber;
+    }
+
+    /**
+     * Returns the generation survivors, i.e. the lastly added chromosomes.
+     *
+     * @return Returns the generation survivors.
+     */
+    public List<ChromosomeNoveltyTrace> getSurvivors() {
+        return new ArrayList<>(population.subList(population.size() - populationSize, population.size()));
     }
 
     /**

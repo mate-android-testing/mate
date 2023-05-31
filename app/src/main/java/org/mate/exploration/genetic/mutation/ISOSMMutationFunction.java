@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.mutation;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.sosm.Trace;
+import org.mate.utils.Tuple;
 
 /**
  * The interface for SOSM-based mutation functions.
@@ -19,7 +20,7 @@ public interface ISOSMMutationFunction extends IMutationFunction<TestCase> {
      *
      * @param chromosome The test cases chromosome that should be mutated.
      * @param trace Describes which transitions have been taken by the test case chromosome.
-     * @return Returns the mutated test case chromosome.
+     * @return Returns the mutated test case chromosome along with the generated trace.
      */
-    IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome, Trace trace);
+    Tuple<IChromosome<TestCase>, Trace> mutate(IChromosome<TestCase> chromosome, Trace trace);
 }

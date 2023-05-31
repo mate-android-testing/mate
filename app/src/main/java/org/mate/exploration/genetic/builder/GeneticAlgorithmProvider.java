@@ -475,9 +475,24 @@ public class GeneticAlgorithmProvider {
     /**
      * Initialises the NoveltySearchUsingSOSM algorithm.
      *
-     * @return Returns an instance o the NoveltySearch algorithm.
+     * @return Returns an instance of the NoveltySearchUsingSOSM algorithm.
      */
     private NoveltySearchUsingSOSM initializeNoveltySearchUsingSOSM() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("NoveltySearchUsingSOSM requires a chromosome factory. " +
+                    "You have to define the property org.mate.Properties.CHROMOSOME_FACTORY() " +
+                    "appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("NoveltySearchUsingSOSM requires a fitness function. " +
+                    "You have to define the property org.mate.Properties.FITNESS_FUNCTIONS() " +
+                    "appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("NoveltySearchUsingSOSM requires a termination condition. " +
+                    "You have to define the property org.mate.Properties.TERMINATION_CONDITION() " +
+                    "appropriately!");
+        }
+
         return new NoveltySearchUsingSOSM(
                 initializeChromosomeFactory(),
                 initializeSelectionFunction(),

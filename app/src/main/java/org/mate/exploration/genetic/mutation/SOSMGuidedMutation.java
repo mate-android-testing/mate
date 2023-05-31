@@ -76,12 +76,16 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
      *
      * @param chromosome The given test case chromosome that should be mutated.
      * @param trace Describes which transitions have been taken by the test case chromosome.
-     * @return Returns the mutated chromosome.
+     * @return Returns the mutated chromosome along with the generated trace.
      */
     @Override
-    public IChromosome<TestCase> mutate(final IChromosome<TestCase> chromosome, final Trace trace) {
+    public Tuple<IChromosome<TestCase>, Trace> mutate(final IChromosome<TestCase> chromosome,
+                                                      final Trace trace) {
 
         uiAbstractionLayer.resetApp();
+
+        // Record the taken transitions of the newly generated offspring.
+        sosmModel.resetRecordedTransitions();
 
         final TestCase mutant = TestCase.newInitializedTestCase();
         final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
@@ -119,7 +123,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
             mutant.finish();
         }
 
-        return mutatedChromosome;
+        return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
     }
 
     /**

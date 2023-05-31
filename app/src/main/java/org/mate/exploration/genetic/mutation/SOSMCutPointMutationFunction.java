@@ -77,14 +77,18 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
      *
      * @param chromosome The given test case chromosome that should be mutated.
      * @param trace Describes which transitions have been taken by the test case chromosome.
-     * @return Returns the mutated chromosome.
+     * @return Returns the mutated chromosome along with the generated trace.
      */
     @Override
-    public IChromosome<TestCase> mutate(IChromosome<TestCase> chromosome, Trace trace) {
+    public Tuple<IChromosome<TestCase>, Trace> mutate(final IChromosome<TestCase> chromosome,
+                                                      final Trace trace) {
 
         uiAbstractionLayer.resetApp();
 
         final int cutPoint = chooseCutPoint(trace);
+
+        // Record the taken transitions of the newly generated offspring.
+        sosmModel.resetRecordedTransitions();
 
         final TestCase testCase = chromosome.getValue();
         final TestCase mutant = TestCase.newInitializedTestCase();
@@ -126,7 +130,7 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
             mutant.finish();
         }
 
-        return mutatedChromosome;
+        return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
     }
 
     /**
