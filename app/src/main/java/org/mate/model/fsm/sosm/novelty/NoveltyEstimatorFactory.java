@@ -15,7 +15,8 @@ public final class NoveltyEstimatorFactory {
     private final SOSMModel sosmModel;
 
     /**
-     * A weight factor.
+     * A weight factor controlling how much influence the disbelief mass should have in the novelty
+     * computation.
      */
     private final double alpha;
 
@@ -24,7 +25,8 @@ public final class NoveltyEstimatorFactory {
      * alpha.
      *
      * @param sosmModel The SOSM model.
-     * @param alpha The weight factor alpha.
+     * @param alpha The weight factor alpha controlling the influence of disbelief in the novelty
+     *         computation.
      */
     public NoveltyEstimatorFactory(final SOSMModel sosmModel, final double alpha) {
         this.sosmModel = requireNonNull(sosmModel);

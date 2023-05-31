@@ -29,8 +29,8 @@ public class SOSMNoveltyFitnessFunction implements ISOSMNoveltyFitnessFunction {
      * Initialises the SOSM-based novelty fitness function.
      */
     public SOSMNoveltyFitnessFunction() {
-        final double uncertaintyThreshold = Properties.SOSM_NOVELTY_DISBELIEF_WEIGHT();
-        noveltyEstimator = new NoveltyEstimatorFactory(sosmModel, uncertaintyThreshold)
+        final double disbeliefWeight = Properties.SOSM_NOVELTY_DISBELIEF_WEIGHT();
+        noveltyEstimator = new NoveltyEstimatorFactory(sosmModel, disbeliefWeight)
                 .getNoveltyEstimator(Properties.SOSM_NOVELTY_ESTIMATOR());
     }
 

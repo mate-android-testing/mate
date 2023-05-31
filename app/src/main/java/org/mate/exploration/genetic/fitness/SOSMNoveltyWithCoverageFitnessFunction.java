@@ -34,8 +34,8 @@ public final class SOSMNoveltyWithCoverageFitnessFunction implements ISOSMNovelt
      * Initialises the novelty fitness function.
      */
     public SOSMNoveltyWithCoverageFitnessFunction() {
-        final double uncertaintyThreshold = Properties.SOSM_NOVELTY_DISBELIEF_WEIGHT();
-        noveltyEstimator = new NoveltyEstimatorFactory(sosmModel, uncertaintyThreshold)
+        final double disbeliefWeight = Properties.SOSM_NOVELTY_DISBELIEF_WEIGHT();
+        noveltyEstimator = new NoveltyEstimatorFactory(sosmModel, disbeliefWeight)
                 .getNoveltyEstimator(Properties.SOSM_NOVELTY_ESTIMATOR());
     }
 

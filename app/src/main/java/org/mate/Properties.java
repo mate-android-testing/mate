@@ -495,8 +495,13 @@ public class Properties {
     }
 
     /**
-     * Determines how much weight should be placed on uncertainty when computing the SOSM-based
-     * novelty function.
+     * Determines how much weight should be placed on the disbelief when computing the SOSM-based
+     * novelty. We compute novelty as follows:
+     *
+     * novelty = disbelief * alpha + uncertainty
+     *
+     * This property represents the factor alpha in above formula. With the default value of
+     * {@code 0.0} for alpha, we disregard the disbelief completely.
      */
     public static double SOSM_NOVELTY_DISBELIEF_WEIGHT() {
         return propertyOr(0.0);
