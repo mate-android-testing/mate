@@ -132,7 +132,7 @@ public final class SOSMInference {
             final double div = 1.0 / Math.max(total, alpha * size);
 
             for (int i = 0; i < size; ++i) {
-                actionFrequencies[i] *= div;
+                actionFrequencies[i] *= div; // line 15 and 16
             }
 
             uncertainty = 1.0 - ((double) total) * div; // line 11
