@@ -20,6 +20,7 @@ import org.mate.model.IGUIModel;
 import org.mate.model.TestCase;
 import org.mate.model.fsm.FSMModel;
 import org.mate.model.fsm.qbe.QBEModel;
+import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.model.util.DotConverter;
 import org.mate.state.IScreenState;
@@ -118,6 +119,8 @@ public class UIAbstractionLayer {
             guiModel = new SurrogateModel(lastScreenState, packageName);
         } else if (Properties.QBE_MODEL()) {
             guiModel = new QBEModel(lastScreenState, packageName);
+        } else if (Properties.SOSM_MODEL()) {
+            guiModel = new SOSMModel(lastScreenState, packageName);
         } else {
             guiModel = new FSMModel(lastScreenState, packageName);
         }

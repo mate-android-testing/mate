@@ -11,6 +11,7 @@ import org.mate.exploration.genetic.util.ge.AndroidListBasedBiasedMapping;
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.graph.DrawType;
 import org.mate.graph.GraphType;
+import org.mate.model.fsm.sosm.novelty.NoveltyEstimator;
 import org.mate.model.util.DotConverter;
 import org.mate.state.equivalence.StateEquivalenceLevel;
 import org.mate.utils.GenericParser;
@@ -484,6 +485,63 @@ public class Properties {
 
     /*
      * End Graph properties
+     */
+
+    /*
+     * Begin Subjective Logic (SOSM) properties
+     */
+
+    /**
+     * Whether the Subjective Opinion State Machine (SOSM) model should be used.
+     *
+     * @return Returns {@code true} if the SOSM model should be used, otherwise {@code false}.
+     */
+    public static boolean SOSM_MODEL() { return propertyOr(false); }
+
+    /**
+     * Determines the number of times a state has to be traversed for the SOSM probabilities to be
+     * deemed certain.
+     *
+     * @return Returns the certainty threshold alpha using during SOSM inference.
+     */
+    public static double SOSM_CERTAINTY_THRESHOLD() {
+        return propertyOr(10.0);
+    }
+
+    /**
+     * Determines how much weight should be placed on the disbelief when computing the SOSM-based
+     * novelty. We compute novelty as follows:
+     *
+     * novelty = disbelief * alpha + uncertainty
+     *
+     * This property represents the factor alpha in above formula. With the default value of
+     * {@code 0.0} for alpha, we disregard the disbelief completely.
+     */
+    public static double SOSM_NOVELTY_DISBELIEF_WEIGHT() {
+        return propertyOr(0.0);
+    }
+
+    /**
+     * Determines the weight factor for novelty in the combined novelty and coverage fitness function.
+     *
+     * @return Returns the weight factor for novelty in the combined novelty and coverage fitness
+     *         function.
+     */
+    public static double NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT() {
+        return propertyOr(0.5);
+    }
+
+    /**
+     * Determines which novelty estimator function should be used.
+     *
+     * @return Returns the name of the selected novelty estimator function.
+     */
+    public static NoveltyEstimator SOSM_NOVELTY_ESTIMATOR() {
+        return propertyOr(NoveltyEstimator.MAX_NOVEL_SUBSEQUENCE);
+    }
+
+    /*
+     * End Subjective Logic (SOSM) properties
      */
 
     /**

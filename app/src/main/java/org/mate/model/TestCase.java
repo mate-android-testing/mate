@@ -66,6 +66,11 @@ public class TestCase {
     private StackTrace crashStackTrace = null;
 
     /**
+     * Stores whether a new state has been reached while executing the test case.
+     */
+    private boolean reachedNewState = false;
+
+    /**
      * Should be used for the creation of dummy test cases.
      * This suppresses the log that indicates a new test case
      * for the AndroidAnalysis framework.
@@ -92,13 +97,23 @@ public class TestCase {
         activitySequence = new ArrayList<>();
 
         /*
-        * In rare circumstances, test cases without any action are created. This, however, means
-        * that updateTestCase() was never called, thus the state and activity sequence is empty,
-        * which in turn may falsify activity coverage and the gui model.
+         * In rare circumstances, test cases without any action are created. This, however, means
+         * that updateTestCase() was never called, thus the state and activity sequence is empty,
+         * which in turn may falsify activity coverage and the gui model.
          */
         IScreenState lastScreenState = Registry.getUiAbstractionLayer().getLastScreenState();
         stateSequence.add(lastScreenState.getId());
         activitySequence.add(lastScreenState.getActivityName());
+    }
+
+    /**
+     * Determines whether a new state has been reached while executing this test case.
+     *
+     * @return Returns {@code true} if a new state has been reached while executing this test case,
+     *         otherwise {@code false}.
+     */
+    public boolean reachedNewState() {
+        return reachedNewState;
     }
 
     /**
@@ -397,6 +412,7 @@ public class TestCase {
         }
 
         ActionResult actionResult = Registry.getUiAbstractionLayer().executeAction(action);
+        reachedNewState |= Registry.getUiAbstractionLayer().reachedNewState();
 
         // If we use a surrogate model, we need to postpone the logging as we might predict wrong.
         if (!Properties.SURROGATE_MODEL()) {

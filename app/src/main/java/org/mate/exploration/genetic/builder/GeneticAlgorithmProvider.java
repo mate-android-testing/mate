@@ -6,6 +6,7 @@ import org.mate.exploration.genetic.algorithm.MIO;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.NoveltySearch;
+import org.mate.exploration.genetic.algorithm.NoveltySearchUsingSOSM;
 import org.mate.exploration.genetic.algorithm.OnePlusOne;
 import org.mate.exploration.genetic.algorithm.RandomSearch;
 import org.mate.exploration.genetic.algorithm.RandomWalk;
@@ -30,6 +31,7 @@ import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.crossover.SOSMTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestSuiteOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossOverFunction;
@@ -51,6 +53,8 @@ import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
 import org.mate.exploration.genetic.fitness.MethodCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.NoveltyFitnessFunction;
+import org.mate.exploration.genetic.fitness.SOSMNoveltyFitnessFunction;
+import org.mate.exploration.genetic.fitness.SOSMNoveltyWithCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.SpecificActivityCoveredFitnessFunction;
 import org.mate.exploration.genetic.fitness.TestLengthFitnessFunction;
 import org.mate.exploration.genetic.mutation.BiasedCutPointMutationFunction;
@@ -60,6 +64,8 @@ import org.mate.exploration.genetic.mutation.IntegerSequenceLengthMutationFuncti
 import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunction;
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
+import org.mate.exploration.genetic.mutation.SOSMCutPointMutationFunction;
+import org.mate.exploration.genetic.mutation.SOSMGuidedMutation;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.TestCaseActionParametersMutationFunction;
@@ -72,6 +78,7 @@ import org.mate.exploration.genetic.selection.ISelectionFunction;
 import org.mate.exploration.genetic.selection.NoveltyRankSelectionFunction;
 import org.mate.exploration.genetic.selection.RandomSelectionFunction;
 import org.mate.exploration.genetic.selection.RankSelectionFunction;
+import org.mate.exploration.genetic.selection.SOSMNoveltyRankSelection;
 import org.mate.exploration.genetic.selection.SelectionFunction;
 import org.mate.exploration.genetic.selection.TournamentSelectionFunction;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
@@ -172,6 +179,8 @@ public class GeneticAlgorithmProvider {
                 return initializeSapienz();
             case NOVELTY_SEARCH:
                 return initializeNoveltySearch();
+            case NOVELTY_SEARCH_USING_SOSM:
+                return (GeneticAlgorithm<T>) initializeNoveltySearchUsingSOSM();
             case EDA:
                 return initializeEDA();
             default:
@@ -465,6 +474,40 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
+     * Initialises the NoveltySearchUsingSOSM algorithm.
+     *
+     * @return Returns an instance of the NoveltySearchUsingSOSM algorithm.
+     */
+    private NoveltySearchUsingSOSM initializeNoveltySearchUsingSOSM() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() == null) {
+            throw new IllegalStateException("NoveltySearchUsingSOSM requires a chromosome factory. " +
+                    "You have to define the property org.mate.Properties.CHROMOSOME_FACTORY() " +
+                    "appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("NoveltySearchUsingSOSM requires a fitness function. " +
+                    "You have to define the property org.mate.Properties.FITNESS_FUNCTIONS() " +
+                    "appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("NoveltySearchUsingSOSM requires a termination condition. " +
+                    "You have to define the property org.mate.Properties.TERMINATION_CONDITION() " +
+                    "appropriately!");
+        }
+
+        return new NoveltySearchUsingSOSM(
+                initializeChromosomeFactory(),
+                initializeSelectionFunction(),
+                initializeCrossOverFunctions(),
+                initializeMutationFunctions(),
+                initializeFitnessFunctions(),
+                initializeTerminationCondition(),
+                getPopulationSize(),
+                getBigPopulationSize(),
+                getPCrossOver(),
+                getPMutate());
+    }
+
+    /**
      * Initialises the NoveltySearch algorithm. Ensures that the mandatory properties are defined.
      *
      * @param <T> The type o the chromosomes.
@@ -696,6 +739,8 @@ public class GeneticAlgorithmProvider {
                     return new CrowdedTournamentSelectionFunction<>();
                 case NOVELTY_RANK_SELECTION:
                     return new NoveltyRankSelectionFunction<>();
+                case SOSM_NOVELTY_RANK_SELECTION:
+                    return (ISelectionFunction<T>) new SOSMNoveltyRankSelection();
                 default:
                     throw new UnsupportedOperationException("Unknown selection function: "
                             + selectionFunctionId);
@@ -742,6 +787,8 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
+            case SOSM_TEST_CASE_MERGE_CROSS_OVER:
+                return (ICrossOverFunction<T>) new SOSMTestCaseMergeCrossOverFunction(getNumEvents());
             case TEST_SUITE_UNIFORM_CROSS_OVER:
                 return (ICrossOverFunction<T>) new UniformSuiteCrossOverFunction();
             case TEST_SUITE_ONE_POINT_CROSS_OVER:
@@ -828,6 +875,10 @@ public class GeneticAlgorithmProvider {
                 return (IMutationFunction<T>) new IntegerSequencePointMutationFunction();
             case INTEGER_SEQUENCE_LENGTH_MUTATION:
                 return (IMutationFunction<T>) new IntegerSequenceLengthMutationFunction(getMutationCount());
+            case SOSM_CUT_POINT_MUTATION:
+                return (IMutationFunction<T>) new SOSMCutPointMutationFunction(getNumEvents());
+            case SOSM_GUIDED_MUTATION:
+                return (IMutationFunction<T>) new SOSMGuidedMutation(getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown mutation function: "
                         + mutationFunctionId);
@@ -924,6 +975,10 @@ public class GeneticAlgorithmProvider {
                 return new BasicBlockBranchCoverageFitnessFunction<>();
             case NOVELTY:
                 return new NoveltyFitnessFunction<>(getFitnessFunctionArgument(index));
+            case SOSM_NOVELTY:
+                return (IFitnessFunction<T>) new SOSMNoveltyFitnessFunction();
+            case SOSM_NOVELTY_WITH_COVERAGE:
+                return (IFitnessFunction<T>) new SOSMNoveltyWithCoverageFitnessFunction();
             default:
                 throw new UnsupportedOperationException("Unknown fitness function: "
                         + fitnessFunction.name());
