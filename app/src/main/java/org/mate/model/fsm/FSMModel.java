@@ -36,7 +36,7 @@ public class FSMModel implements IGUIModel {
      * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
      * screen state.
      */
-    private static final State VIRTUAL_ROOT_STATE = new State(-1, new IScreenState() {
+    protected static final State VIRTUAL_ROOT_STATE = new State(-1, new IScreenState() {
 
         @Override
         public String getId() {

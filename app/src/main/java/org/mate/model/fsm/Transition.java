@@ -12,7 +12,7 @@ public class Transition {
     protected final State target;
     protected final Action action;
 
-    protected Transition(State source, State target, Action action) {
+    public Transition(State source, State target, Action action) {
         this.source = source;
         this.target = target;
         this.action = action;

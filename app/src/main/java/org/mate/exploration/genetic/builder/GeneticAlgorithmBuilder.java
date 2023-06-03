@@ -61,6 +61,8 @@ public class GeneticAlgorithmBuilder {
         properties = new Properties();
         properties.setProperty(USE_DEFAULTS_KEY, TRUE_STRING);
         properties.setProperty(AMOUNT_FITNESS_FUNCTIONS_KEY, "0");
+        properties.setProperty(AMOUNT_CROSSOVER_FUNCTIONS_KEY, "0");
+        properties.setProperty(AMOUNT_MUTATION_FUNCTIONS_KEY, "0");
     }
 
     /**
