@@ -31,6 +31,7 @@ import org.mate.exploration.genetic.crossover.ICrossOverFunction;
 import org.mate.exploration.genetic.crossover.IntegerSequencePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.PrimitiveTestCaseMergeCrossOverFunction;
+import org.mate.exploration.genetic.crossover.SOSMTestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestSuiteOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossOverFunction;
@@ -786,6 +787,8 @@ public class GeneticAlgorithmProvider {
                 // Force cast. Only works if T is TestCase. This fails if other properties expect a
                 // different T for their chromosomes
                 return (ICrossOverFunction<T>) new TestCaseMergeCrossOverFunction();
+            case SOSM_TEST_CASE_MERGE_CROSS_OVER:
+                return (ICrossOverFunction<T>) new SOSMTestCaseMergeCrossOverFunction(getNumEvents());
             case TEST_SUITE_UNIFORM_CROSS_OVER:
                 return (ICrossOverFunction<T>) new UniformSuiteCrossOverFunction();
             case TEST_SUITE_ONE_POINT_CROSS_OVER:

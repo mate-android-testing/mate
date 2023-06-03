@@ -1,6 +1,5 @@
 package org.mate.exploration.genetic.mutation;
 
-import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -11,7 +10,6 @@ import org.mate.model.TestCase;
 import org.mate.model.fsm.sosm.SOSMModel;
 import org.mate.model.fsm.sosm.Trace;
 import org.mate.model.fsm.sosm.subjective_logic.BinomialOpinion;
-import org.mate.model.fsm.surrogate.SurrogateModel;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.Tuple;
@@ -109,13 +107,6 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
                 }
             }
         } finally {
-
-            if (Properties.SURROGATE_MODEL()) {
-                // update sequences + write traces to external storage
-                SurrogateModel surrogateModel
-                        = (SurrogateModel) Registry.getUiAbstractionLayer().getGuiModel();
-                surrogateModel.updateTestCase(mutant);
-            }
 
             if (!isTestSuiteExecution) {
                 /*
