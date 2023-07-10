@@ -739,6 +739,57 @@ public class Widget {
     }
 
     /**
+     * Checks whether this widget represents a toggle button, see
+     * https://developer.android.com/reference/android/widget/ToogleButton.
+     *
+     * @return Returns {@code true} if this widget is a toggle button otherwise {@code false}.
+     */
+    public boolean isToggleButton() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.ToggleButton.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a radio button, see
+     * https://developer.android.com/reference/android/widget/RadioButton.
+     *
+     * @return Returns {@code true} if this widget is a radio button otherwise {@code false}.
+     */
+    public boolean isRadioButton() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.RadioButton.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether this widget represents a checkbox, see
+     * https://developer.android.com/reference/android/widget/CheckBox.
+     *
+     * @return Returns {@code true} if this widget is a checkbox otherwise {@code false}.
+     */
+    public boolean isCheckBox() {
+        try {
+            Class<?> clazz = Class.forName(this.getClazz());
+            return android.widget.CheckBox.class.equals(clazz);
+        } catch (ClassNotFoundException e) {
+            // classes from androidx package fail for instance (no dependency defined)
+            MATE.log_warn("Class " + getClazz() + " not found!");
+            return false;
+        }
+    }
+
+    /**
      * Checks whether this widget represents a switch, see
      * https://developer.android.com/reference/android/widget/Switch.
      *

@@ -19,27 +19,26 @@ import java.util.stream.Collectors;
  * Provides a chromosome factory that produces {@link TestCase}s consisting of a combination of
  * motif and regular ui actions.
  */
-public class MotifChromosomeFactory extends AndroidRandomChromosomeFactory {
+public class MotifAlphaChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
-     * The relative amount of motif actions in contrast to regular ui actions.
+     * Controls the likelihood of motif actions, must be between 0 and 1 (inclusive).
      */
-    private final float relativeMotifActionAmount;
+    private final float alpha;
 
     /**
-     * Initialises the chromosome factory with the maximal number of actions and the probability
-     * for generating a motif action instead of a ui action.
+     * Initialises the chromosome factory with the maximal number of actions and an alpha that
+     * controls the likelihood of motif actions.
      *
      * @param maxNumEvents The maximal number of actions per test case.
-     * @param relativeMotifActionAmount The probability in [0,1] for generating a motif action in
-     *              favor of a regular ui action.
+     * @param alpha A factor in [0,1] that controls the likelihood of motif action.
      */
-    public MotifChromosomeFactory(int maxNumEvents, float relativeMotifActionAmount) {
+    public MotifAlphaChromosomeFactory(int maxNumEvents, float alpha) {
 
         super(maxNumEvents);
 
-        assert relativeMotifActionAmount >= 0.0 && relativeMotifActionAmount <= 1.0;
-        this.relativeMotifActionAmount = relativeMotifActionAmount;
+        assert alpha >= 0.0 && alpha <= 1.0;
+        this.alpha = alpha;
     }
 
     /**
@@ -69,7 +68,7 @@ public class MotifChromosomeFactory extends AndroidRandomChromosomeFactory {
                 storeAndLogActionCoverage(chromosome);
 
                 if (stop) {
-                    MATE.log_warn("MotifChromosomeFactory: Action ( " + actionsCount + ") "
+                    MATE.log_warn("MotifAlphaChromosomeFactory: Action ( " + actionsCount + ") "
                             + newAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
@@ -106,38 +105,66 @@ public class MotifChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
      * Selects the next action to be executed. This can be either a motif action or a regular ui
-     * action depending on the probability specified by {@link #relativeMotifActionAmount}.
+     * action depending on the relative amount of motif actions and the weight factor specified by
+     * {@link #alpha}.
      *
      * @return Returns the action to be performed next.
      */
     @Override
     protected Action selectAction() {
 
+        /*
+        * We employ the following formula for selecting a motif action instead of a regular UI action:
+        *
+        * P_motif = (#motif_actions / (#motif_actions + #ui_actions))^alpha, where 0 <= alpha <= 1
+        * This implies that:
+        * P_ui = 1 - P_motif
+        *
+        * A lower value for alpha favours the selection of a motif action, while with increasing
+        * alpha this effect is diminished.
+         */
+
         final double random = Randomness.getRnd().nextDouble();
         final List<UIAction> uiActions = uiAbstractionLayer.getExecutableUIActions();
 
-        if (random < relativeMotifActionAmount) {
+        final List<UIAction> motifActions = uiActions.stream()
+                .filter(uiAction -> uiAction instanceof MotifAction)
+                .collect(Collectors.toList());
 
-            // select a motif action if applicable
-            final List<UIAction> motifActions = uiActions.stream()
-                    .filter(uiAction -> uiAction instanceof MotifAction)
-                    .collect(Collectors.toList());
-
-            if (!motifActions.isEmpty()) {
-                return Randomness.randomElement(motifActions);
-            } else {
-                MATE.log_warn("No motif action applicable in current state!");
-                return Randomness.randomElement(uiActions);
-            }
-
+        if (motifActions.isEmpty()) { // P_motif = 0.0
+            MATE.log_warn("No motif action applicable in current state!");
+            return Randomness.randomElement(uiActions);
         } else {
 
-            // select a plain UI action
-            final List<UIAction> plainUIActions = uiActions.stream()
-                    .filter(uiAction -> !(uiAction instanceof MotifAction))
-                    .collect(Collectors.toList());
+            final int numberOfMotifActions = motifActions.size();
+            final double relativeMotifActionAmount = (double) numberOfMotifActions / uiActions.size();
 
-            return Randomness.randomElement(plainUIActions);
+            /*
+            * Assuming that the relative amount of motif actions in contrast to ui actions is in the
+            * range of 5-20%, a low alpha favours the selection of a motif action, while with
+            * increasing alpha this preference towards selecting a motif action is minimised. There
+            * are two special cases for alpha:
+            *
+            * alpha = 0 -> Only motif actions are selected.
+            * alpha = 1 -> Leads to a uniform distribution as employed in the default random exploration.
+            *
+            * One could alternatively use a self-regulating alpha by setting it as follows:
+            * alpha = (#motif_actions / (#motif_actions + #ui_actions)
+            *
+             */
+            final double probabilitySelectMotifAction
+                    = Math.pow(relativeMotifActionAmount, alpha);
+
+            if (random < probabilitySelectMotifAction) {
+                return Randomness.randomElement(motifActions);
+            } else {
+                // select a plain UI action
+                final List<UIAction> plainUIActions = uiActions.stream()
+                        .filter(uiAction -> !(uiAction instanceof MotifAction))
+                        .collect(Collectors.toList());
+
+                return Randomness.randomElement(plainUIActions);
+            }
         }
     }
 }

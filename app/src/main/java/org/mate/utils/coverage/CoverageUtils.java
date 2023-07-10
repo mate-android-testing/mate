@@ -108,8 +108,19 @@ public final class CoverageUtils {
             // store data about activity coverage in any case
             visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
 
-            Registry.getEnvironmentManager().storeCoverageData(
-                    Properties.COVERAGE(), chromosome, null);
+            switch (Properties.COVERAGE()) {
+                case BRANCH_COVERAGE:
+                case LINE_COVERAGE:
+                case METHOD_COVERAGE:
+                case BASIC_BLOCK_LINE_COVERAGE:
+                case BASIC_BLOCK_BRANCH_COVERAGE:
+                case ALL_COVERAGE:
+                    Registry.getEnvironmentManager().storeCoverageData(
+                            Properties.COVERAGE(), chromosome, null);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -124,8 +135,19 @@ public final class CoverageUtils {
 
             visitedActivities.put(chromosome, chromosome.getValue().getVisitedActivitiesOfApp());
 
-            Registry.getEnvironmentManager().storeCoverageData(
-                    Properties.COVERAGE(), chromosome, ChromosomeUtils.getActionEntityId(chromosome));
+            switch (Properties.COVERAGE()) {
+                case BRANCH_COVERAGE:
+                case LINE_COVERAGE:
+                case METHOD_COVERAGE:
+                case BASIC_BLOCK_LINE_COVERAGE:
+                case BASIC_BLOCK_BRANCH_COVERAGE:
+                case ALL_COVERAGE:
+                    Registry.getEnvironmentManager().storeCoverageData(Properties.COVERAGE(),
+                            chromosome, ChromosomeUtils.getActionEntityId(chromosome));
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -208,10 +230,10 @@ public final class CoverageUtils {
     }
 
     /**
-     * Log the coverage value of the given chromosome
+     * Logs the coverage of the given chromosome.
      *
-     * @param chromosome log coverage for this chromosome
-     * @param <T>        type of the chromosome
+     * @param chromosome The chromosome for which the coverage should be logged.
+     * @param <T>        The type wrapped by the chromosome.
      */
     public static <T> void logChromosomeCoverage(IChromosome<T> chromosome) {
 
@@ -263,6 +285,37 @@ public final class CoverageUtils {
 
             if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
                 MATE.log_acc("Intermediate coverage: " + getCombinedCoverage(Properties.COVERAGE()));
+            }
+        }
+    }
+
+    /**
+     * Logs the coverage of the lastly executed action from the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    public static void logActionChromosomeCoverage(final IChromosome<TestCase> chromosome) {
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
+            final int actionID = chromosome.getValue().getActionSequence().size() - 1;
+
+            if (Properties.COVERAGE() == Coverage.ACTIVITY_COVERAGE) {
+
+                final CoverageDTO coverageDTO = new CoverageDTO();
+                coverageDTO.setActivityCoverage(getActivityCoverage(chromosome.getValue(), actionID));
+
+                MATE.log("Coverage of chromosome " + chromosome.getValue().toString()
+                        + " for action " + actionID + ": " + coverageDTO);
+            } else {
+
+                final CoverageDTO coverageDTO = Registry.getEnvironmentManager()
+                        .getCoverage(Properties.COVERAGE(), chromosome.getValue().getId(),
+                                ChromosomeUtils.getActionEntityId(chromosome));
+                coverageDTO.setActivityCoverage(getActivityCoverage(chromosome.getValue(), actionID));
+
+                MATE.log("Coverage of chromosome " + chromosome.getValue().toString()
+                        + " for action " + actionID + ": " + coverageDTO);
             }
         }
     }
@@ -450,6 +503,39 @@ public final class CoverageUtils {
      */
     private static double getActivityCoverage(TestCase testCase) {
         return (double) testCase.getVisitedActivitiesOfApp().size() / getActivities().size() * 100;
+    }
+
+    /**
+     * Computes the activity coverage for the specified action of the given test case. Only actions
+     * causing an activity transition have a positive activity coverage.
+     *
+     * @param testCase The given test case.
+     * @param actionID The action for which the activity coverage should be evaluated.
+     * @return Returns the activity coverage for the action of the given test case.
+     */
+    private static double getActivityCoverage(final TestCase testCase, final int actionID) {
+
+        if (actionID == -1) {
+            // The restart operation causes an activity transition.
+            return (double) 1 / getActivities().size() * 100;
+        } else {
+
+            final String previousActivity = testCase.getActivityBeforeAction(actionID);
+            final String currentActivity = testCase.getActivityAfterAction(actionID);
+
+            if (!previousActivity.equals(currentActivity)) {
+                // there was an activity transition
+                if (getActivities().contains(currentActivity)) {
+                    return (double) 1 / getActivities().size() * 100;
+                } else {
+                    // activity transition to different app or launcher activity
+                    return 0.0d;
+                }
+            } else {
+                // no activity transition implies zero activity coverage
+                return 0.0d;
+            }
+        }
     }
 
     /**

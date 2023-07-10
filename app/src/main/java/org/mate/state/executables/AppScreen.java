@@ -16,6 +16,7 @@ import org.mate.interaction.action.ui.Widget;
 import org.mate.utils.UIAutomatorException;
 import org.mate.utils.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -64,6 +65,11 @@ public class AppScreen {
     private static final int WAIT_FOR_STABLE_STATE = 200;
 
     /**
+     * The AVD name, e.g. Nexus_5_API_25.
+     */
+    private final String avdName;
+
+    /**
      * Creates a new app screen containing the widgets on it.
      */
     public AppScreen(DeviceMgr deviceMgr) {
@@ -71,6 +77,7 @@ public class AppScreen {
         Utils.sleep(WAIT_FOR_STABLE_STATE);
 
         this.device = deviceMgr.getDevice();
+        this.avdName = getAVDName();
         this.widgets = new ArrayList<>();
         this.activityName = deviceMgr.getCurrentActivity();
         this.packageName = getCurrentPackageName();
@@ -314,13 +321,48 @@ public class AppScreen {
     }
 
     /**
-     * Returns the bounding box of the menu bar. This depends on display width
-     * and has a fixed height of 240 - 72 pixels, e.g. [0,72][1080][240].
+     * Returns the bounding box of the menu bar. This depends on display width and has a variable
+     * height depending on the used AVD, e.g. for a Nexus 5: 240 - 72 pixels, i.e. [0,72][1080][240].
      *
      * @return Returns the bounding box of the status bar.
      */
     public Rect getMenuBarBoundingBox() {
+
+        // TODO: The AVD name can be chosen arbitrarily and may not encode the real device name.
+
+        if (avdName == null) {
+            // We assume that we run on a Nexus 5.
+            return new Rect(0, 72, getWidth(), 240);
+        }
+
+        if (avdName.contains("Pixel_XL")) {
+            return new Rect(0, 84, getWidth(), 280);
+        } else if (avdName.contains("Nexus_5")) {
+            return new Rect(0, 72, getWidth(), 240);
+        } else if (avdName.contains("Pixel_C")) {
+            return new Rect(0, 48, getWidth(), 176);
+        }
+
+        // We assume that we run on a Nexus 5.
         return new Rect(0, 72, getWidth(), 240);
+    }
+
+    /**
+     * Retrieves the AVD name, e.g. Nexus_5_API_25 from the emulator properties.
+     *
+     * @return Returns the AVD name or {@code null} if the property is not available.
+     */
+    private String getAVDName() {
+
+        String avdName = null;
+
+        try {
+            avdName = device.executeShellCommand("getprop ro.kernel.qemu.avd_name").trim();
+        } catch (IOException e) {
+            MATE.log_warn("Couldn't derive AVD name!");
+            e.printStackTrace();
+        }
+        return avdName;
     }
 
     /**
