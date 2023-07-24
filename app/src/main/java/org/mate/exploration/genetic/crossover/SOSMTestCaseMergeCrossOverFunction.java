@@ -119,6 +119,8 @@ public class SOSMTestCaseMergeCrossOverFunction implements ISOSMCrossOverFunctio
             return Collections.singletonList(new Tuple<>(chromosome, trace));
         }
 
+        MATE.log_debug("Sequence length before crossover: " + l1.size() + " and " + l2.size());
+
         // pick a random cut point in the first chromosome
         int choice = Randomness.getInRangeStd(l1.size());
         boolean right = choice != l1.size() - 1;
