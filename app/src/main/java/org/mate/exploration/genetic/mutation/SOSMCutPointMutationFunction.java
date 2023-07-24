@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -92,18 +93,45 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
         final TestCase mutant = TestCase.newInitializedTestCase();
         final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
 
+        MATE.log_debug("Sequence length before mutation: " + testCase.getActionSequence().size());
+
         try {
             for (int i = 0; i < maxNumEvents; i++) {
+
                 Action newAction;
+
                 if (i < cutPoint) {
+
                     newAction = testCase.getActionSequence().get(i);
+
+                    // Check that the ui action is still applicable.
+                    if (newAction instanceof UIAction
+                            && !uiAbstractionLayer.getExecutableUIActions().contains(newAction)) {
+                        MATE.log_warn("SOSMCutPointMutationFunction: Action (" + i + ") "
+                                + newAction.toShortString() + " not applicable!");
+                        break; // Fill up with random actions.
+                    }
                 } else {
+                    // select random action
                     newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
                 }
-                if ((newAction instanceof UIAction
-                        && !uiAbstractionLayer.getExecutableUIActions().contains(newAction))
-                        || !mutant.updateTestCase(newAction, i)) {
-                    break;
+
+                if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("SOSMCutPointMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
+                    return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
+                }
+            }
+
+            // Fill up the remaining slots with random actions.
+            final int currentTestCaseSize = mutant.getActionSequence().size();
+
+            for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
+                final Action newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());;
+                if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("SOSMCutPointMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
+                    return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
                 }
             }
         } finally {
@@ -119,6 +147,7 @@ public class SOSMCutPointMutationFunction implements ISOSMMutationFunction {
             }
 
             mutant.finish();
+            MATE.log_debug("Sequence length after mutation: " + mutant.getActionSequence().size());
         }
 
         return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
