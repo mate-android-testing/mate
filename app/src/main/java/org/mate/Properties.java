@@ -527,7 +527,7 @@ public class Properties {
      * @return Returns the weight factor for novelty in the combined novelty and coverage fitness
      *         function.
      */
-    public static double NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT() {
+    public static double SOSM_NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT() {
         return propertyOr(0.5);
     }
 

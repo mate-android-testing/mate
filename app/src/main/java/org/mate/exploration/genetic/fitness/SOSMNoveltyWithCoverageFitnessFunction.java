@@ -28,7 +28,7 @@ public final class SOSMNoveltyWithCoverageFitnessFunction implements ISOSMNovelt
     /**
      * A weight factor that controls the influence of novelty and coverage for the fitness value.
      */
-    private final double weight = Properties.NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT();
+    private final double weight = Properties.SOSM_NOVELTY_AND_COVERAGE_COMBINATION_WEIGHT();
 
     /**
      * Initialises the novelty fitness function.
