@@ -205,7 +205,7 @@ public class NoveltySearch<T> extends GeneticAlgorithm<T> {
     @Override
     protected void logCurrentFitness() {
 
-        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
+        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + ":");
 
         MATE.log_acc("Novelty of chromosomes in population: ");
         for (Pair<IChromosome<T>, Double> chromosome : noveltyPairs) {

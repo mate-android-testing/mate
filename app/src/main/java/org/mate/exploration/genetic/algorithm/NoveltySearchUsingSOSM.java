@@ -246,7 +246,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     @Override
     protected void logCurrentFitness() {
 
-        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
+        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + ":");
         MATE.log_acc("Novelty of chromosomes in population: ");
 
         for (final ChromosomeNoveltyTrace cnt : population) {

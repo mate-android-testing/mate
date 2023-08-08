@@ -77,7 +77,7 @@ public class RandomSearch<T> extends GeneticAlgorithm<T> {
     @Override
     protected void logCurrentFitness() {
 
-        MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
+        MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + ":");
 
         for (int i = 0; i < Math.min(fitnessFunctions.size(), 5); i++) {
             MATE.log_acc("Fitness function " + (i + 1) + ":");

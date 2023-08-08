@@ -253,7 +253,7 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     protected <S> void logCurrentFitness() {
 
-        MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
+        MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + ":");
 
         if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
             /*
