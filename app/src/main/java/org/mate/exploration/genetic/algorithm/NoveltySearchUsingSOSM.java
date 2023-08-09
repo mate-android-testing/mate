@@ -123,7 +123,16 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
             final IChromosome<TestCase> chromosome = chromosomeFactory.createChromosome();
             final Trace trace = new Trace(sosmModel.getRecordedTransitions());
 
-            final ChromosomeNoveltyTrace cnt = new ChromosomeNoveltyTrace(chromosome, 0.0, trace);
+            /*
+            * Initially all chromosomes are novel, thus we assign the highest possible novelty. This
+            * sounds reasonable as long as we ensure that the initial population gets quickly replaced
+            * by new chromosomes, otherwise the chromosomes of the initial population are preferred
+            * in the selection process over and over again as we don't re-evaluate the novelty of
+            * any chromosome. In the case we intend to introduce an archive or use some form of
+            * elitism when selecting the chromosomes for the next generation, we need to re-evaluate
+            * the novelty of the chromosomes in any case.
+             */
+            final ChromosomeNoveltyTrace cnt = new ChromosomeNoveltyTrace(chromosome, 1.0, trace);
             traces.add(trace);
             population.add(cnt);
         }
