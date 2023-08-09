@@ -36,7 +36,7 @@ public final class SOSMModel extends FSMModel {
      * The initial subjective opinion for states that we haven't seen.
      */
     public static final BinomialOpinion UNKNOWN_STATE_OPINION = new BinomialOpinion(
-            new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
+            new RawBinomialOpinion(0.0, 0.0, 1.0, 1.0));
 
     /**
      * We may encounter the situation that an action is not applicable in a given state due to
@@ -44,7 +44,7 @@ public final class SOSMModel extends FSMModel {
      * with an uncertainty of {@code 1.0}.
      */
     public final static BinomialOpinion UNKNOWN_ACTION_OPINION = new BinomialOpinion(
-            new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
+            new RawBinomialOpinion(0.0, 0.0, 1.0, 1.0));
 
     /**
      * Enables to incrementally infer the SOSM from a set of traces.
