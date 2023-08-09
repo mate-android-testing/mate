@@ -234,6 +234,12 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         population.clear();
         population.addAll(survivors);
 
+        /*
+        * TODO: We only update SOSM after each generation, this might happen too rarely. Right now,
+        *  this implies that two or chromosomes formed out of the current population with a similar
+        *  action sequence receive similar/identical novelty values, although the latter chromosomes
+        *  should receive a lower novelty.
+         */
         updateSOSM();
         printSOSM();
         logCurrentFitness();
