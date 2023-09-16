@@ -67,7 +67,7 @@ public final class AverageNovelty implements INoveltyEstimator {
         uncertainty /= size;
 
         final double score = alpha * disbelief + uncertainty;
-        MATE.log_debug(String.format("Opinion on trace: (%f, %f, %f,%f)", belief, disbelief,
+        MATE.log_acc(String.format("Opinion on trace: (%f, %f, %f,%f)", belief, disbelief,
                 uncertainty, score));
         return score;
     }
