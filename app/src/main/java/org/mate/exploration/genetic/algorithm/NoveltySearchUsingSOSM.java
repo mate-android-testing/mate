@@ -26,6 +26,7 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -132,13 +133,14 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
             * elitism when selecting the chromosomes for the next generation, we need to re-evaluate
             * the novelty of the chromosomes in any case.
              */
-            final ChromosomeNoveltyTrace cnt = new ChromosomeNoveltyTrace(chromosome, 1.0, trace);
+            final double novelty
+                    = noveltyFitnessFunction.getNovelty(chromosome, trace);
+            final ChromosomeNoveltyTrace cnt = new ChromosomeNoveltyTrace(chromosome, novelty, trace);
             traces.add(trace);
+            sosmModel.updateSOSM(Collections.singletonList(trace));
             population.add(cnt);
         }
 
-        updateSOSM();
-        printSOSM();
         logCurrentFitness();
         currentGenerationNumber++;
     }
@@ -146,6 +148,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     /**
      * Updates the SOSM with new traces.
      */
+    @SuppressWarnings("unused")
     private void updateSOSM() {
         sosmModel.updateSOSM(traces);
     }
@@ -153,6 +156,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     /**
      * Prints the SOSM to logcat.
      */
+    @SuppressWarnings("debug")
     private void printSOSM() {
         /*
          * The logcat buffer can store only a limited number of logs. If the number of log messages
@@ -198,6 +202,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
                     traces.add(trace);
                     final double novelty
                             = noveltyFitnessFunction.getNovelty(crossedChromosome, trace);
+                    sosmModel.updateSOSM(Collections.singletonList(trace));
                     offsprings.add(new ChromosomeNoveltyTrace(crossedChromosome, novelty, trace));
                 }
             } else {
@@ -216,6 +221,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
 
                     traces.add(trace);
                     final double novelty = noveltyFitnessFunction.getNovelty(mutatedChromosome, trace);
+                    sosmModel.updateSOSM(Collections.singletonList(trace));
                     offspring = new ChromosomeNoveltyTrace(mutatedChromosome, novelty, trace);
                 }
 
@@ -233,15 +239,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         List<ChromosomeNoveltyTrace> survivors = getSurvivors();
         population.clear();
         population.addAll(survivors);
-
-        /*
-        * TODO: We only update SOSM after each generation, this might happen too rarely. Right now,
-        *  this implies that two or chromosomes formed out of the current population with a similar
-        *  action sequence receive similar/identical novelty values, although the latter chromosomes
-        *  should receive a lower novelty.
-         */
-        updateSOSM();
-        printSOSM();
         logCurrentFitness();
         ++currentGenerationNumber;
     }
