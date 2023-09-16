@@ -255,6 +255,9 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
 
         MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + ":");
 
+        // TODO: Use chromosome id in logs instead of natural index + find a better solution for
+        //  multi-objective algorithms + a fix for MIO/MOSA/NSGA-II used in combination with GE.
+
         if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
             /*
             * We need to force the evaluation of all chromosomes such that the fitness and coverage
