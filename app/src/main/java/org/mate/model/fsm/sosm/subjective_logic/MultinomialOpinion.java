@@ -6,8 +6,8 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 /**
- * A multinomial opinion is a opinion on a domain with two or more possible outcomes b1, b2, ..., bn,
- * where the property {@code b1 + b2 + ... + bn == 1.0} holds.
+ * A multinomial opinion is a opinion on a domain with two or more possible outcomes x1, x2, ..., xn,
+ * where the property {@code uX + bX(x1) + bX(b2) + ... + bX(xn) == 1.0} holds.
  *
  * This class is a wrapper around a {@link RawMultinomialOpinion} that implements the
  * {@link SubjectiveOpinion} interface. This split is done, to prevent unnecessary boxing and

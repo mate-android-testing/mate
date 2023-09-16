@@ -110,7 +110,9 @@ public class IntentBasedAction extends IntentAction {
                      */
                     && Objects.equals(intent.getAction(), that.intent.getAction())
                     && Objects.equals(intent.getCategories(), that.intent.getCategories())
-                    && Objects.equals(intent.getData(), that.intent.getData())
+                    // equals() on Data compares only the reference
+                    && Objects.equals(Objects.toString(intent.getData(), null),
+                    Objects.toString(that.intent.getData(), null))
                     && Objects.equals(intent.getComponent(), that.intent.getComponent())
                     // equals() on Bundle compares only the reference
                     && Objects.equals(Objects.toString(intent.getExtras(), null),
@@ -121,7 +123,8 @@ public class IntentBasedAction extends IntentAction {
     @Override
     public int hashCode() {
         return Objects.hash(component, intentFilter, intent.getAction(), intent.getCategories(),
-                intent.getData(), intent.getComponent(), intent.getExtras());
+                Objects.toString(intent.getData(), null), intent.getComponent(),
+                Objects.toString(intent.getExtras(), null));
     }
 
     @NonNull

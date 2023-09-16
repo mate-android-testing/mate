@@ -26,6 +26,7 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -123,13 +124,23 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
             final IChromosome<TestCase> chromosome = chromosomeFactory.createChromosome();
             final Trace trace = new Trace(sosmModel.getRecordedTransitions());
 
-            final ChromosomeNoveltyTrace cnt = new ChromosomeNoveltyTrace(chromosome, 0.0, trace);
+            /*
+            * Initially all chromosomes are novel, thus we assign the highest possible novelty. This
+            * sounds reasonable as long as we ensure that the initial population gets quickly replaced
+            * by new chromosomes, otherwise the chromosomes of the initial population are preferred
+            * in the selection process over and over again as we don't re-evaluate the novelty of
+            * any chromosome. In the case we intend to introduce an archive or use some form of
+            * elitism when selecting the chromosomes for the next generation, we need to re-evaluate
+            * the novelty of the chromosomes in any case.
+             */
+            final double novelty
+                    = noveltyFitnessFunction.getNovelty(chromosome, trace);
+            final ChromosomeNoveltyTrace cnt = new ChromosomeNoveltyTrace(chromosome, novelty, trace);
             traces.add(trace);
+            sosmModel.updateSOSM(Collections.singletonList(trace));
             population.add(cnt);
         }
 
-        updateSOSM();
-        printSOSM();
         logCurrentFitness();
         currentGenerationNumber++;
     }
@@ -137,6 +148,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     /**
      * Updates the SOSM with new traces.
      */
+    @SuppressWarnings("unused")
     private void updateSOSM() {
         sosmModel.updateSOSM(traces);
     }
@@ -144,6 +156,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     /**
      * Prints the SOSM to logcat.
      */
+    @SuppressWarnings("debug")
     private void printSOSM() {
         /*
          * The logcat buffer can store only a limited number of logs. If the number of log messages
@@ -189,6 +202,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
                     traces.add(trace);
                     final double novelty
                             = noveltyFitnessFunction.getNovelty(crossedChromosome, trace);
+                    sosmModel.updateSOSM(Collections.singletonList(trace));
                     offsprings.add(new ChromosomeNoveltyTrace(crossedChromosome, novelty, trace));
                 }
             } else {
@@ -207,6 +221,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
 
                     traces.add(trace);
                     final double novelty = noveltyFitnessFunction.getNovelty(mutatedChromosome, trace);
+                    sosmModel.updateSOSM(Collections.singletonList(trace));
                     offspring = new ChromosomeNoveltyTrace(mutatedChromosome, novelty, trace);
                 }
 
@@ -224,9 +239,6 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
         List<ChromosomeNoveltyTrace> survivors = getSurvivors();
         population.clear();
         population.addAll(survivors);
-
-        updateSOSM();
-        printSOSM();
         logCurrentFitness();
         ++currentGenerationNumber;
     }
@@ -246,7 +258,7 @@ public class NoveltySearchUsingSOSM extends GeneticAlgorithm<TestCase> {
     @Override
     protected void logCurrentFitness() {
 
-        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + " :");
+        MATE.log_acc("Novelty of generation #" + (currentGenerationNumber + 1) + ":");
         MATE.log_acc("Novelty of chromosomes in population: ");
 
         for (final ChromosomeNoveltyTrace cnt : population) {

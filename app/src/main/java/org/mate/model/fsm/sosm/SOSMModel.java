@@ -36,15 +36,16 @@ public final class SOSMModel extends FSMModel {
      * The initial subjective opinion for states that we haven't seen.
      */
     public static final BinomialOpinion UNKNOWN_STATE_OPINION = new BinomialOpinion(
-            new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
+            new RawBinomialOpinion(0.0, 0.0, 1.0, 1.0));
 
     /**
      * We may encounter the situation that an action is not applicable in a given state due to
      * impreciseness of the underlying state equivalence function. In this case we assign an opinion
-     * with an uncertainty of {@code 1.0}.
+     * with an uncertainty of {@code 1.0}. In combination with an apriori of {@code 1.0} this opinion
+     * behaves as the neutral element when being multiplied.
      */
     public final static BinomialOpinion UNKNOWN_ACTION_OPINION = new BinomialOpinion(
-            new RawBinomialOpinion(0.0, 0.0, 1.0, 0.0));
+            new RawBinomialOpinion(0.0, 0.0, 1.0, 1.0));
 
     /**
      * Enables to incrementally infer the SOSM from a set of traces.

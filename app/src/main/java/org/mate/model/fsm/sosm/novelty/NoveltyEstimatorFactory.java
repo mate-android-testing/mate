@@ -41,8 +41,8 @@ public final class NoveltyEstimatorFactory {
      */
     public INoveltyEstimator getNoveltyEstimator(final NoveltyEstimator noveltyEstimator) {
         switch (noveltyEstimator) {
-            case AVERAGE_SL_NOVELTY:
-                return new AverageSLNovelty(sosmModel, alpha);
+            case AVERAGE_NOVELTY:
+                return new AverageNovelty(sosmModel, alpha);
             case DISCOUNTED_SUM_NOVELTY:
                 // TODO: Avoid hardcoding inner novelty estimator function.
                 return new DiscountedSumNoveltyEstimator(new MaxNovelSubsequence(sosmModel, alpha));
@@ -52,8 +52,8 @@ public final class NoveltyEstimatorFactory {
                 return new MaxNovelSubsequence(sosmModel, alpha);
             case MULTI_SOURCE_FUSION:
                 return new MultiSourceFusionEstimator(sosmModel, alpha);
-            case SOSM_NOVELTY:
-                return new SOSMNovelty(sosmModel, alpha);
+            case MULTIPLY_ALL_OPINIONS:
+                return new MultiplyAllOpinions(sosmModel, alpha);
             default:
                 throw new UnsupportedOperationException("Novelty Estimator Function "
                         + noveltyEstimator + " not yet supported!");

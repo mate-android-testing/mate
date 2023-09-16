@@ -48,7 +48,7 @@ public final class MultiSourceFusionEstimator implements INoveltyEstimator {
         final List<BinomialOpinion> opinions = sosmModel.getCoarsenedBinomialOpinionsFor(trace);
         final BinomialOpinion combined = BinomialOpinion.multiSourceFusion(opinions);
         final RawBinomialOpinion raw = combined.getRawOpinion();
-        MATE.log_debug(String.format("Opinion on trace: (%f, %f, %f, %f)", raw.getBelief(),
+        MATE.log_acc(String.format("Opinion on trace: (%f, %f, %f, %f)", raw.getBelief(),
                 raw.getDisbelief(), raw.getUncertainty(), raw.getApriori()));
         return raw.getDisbelief() * alpha + raw.getUncertainty();
     }

@@ -65,7 +65,7 @@ import org.mate.exploration.genetic.mutation.IntegerSequencePointMutationFunctio
 import org.mate.exploration.genetic.mutation.MutationFunction;
 import org.mate.exploration.genetic.mutation.PrimitiveTestCaseShuffleMutationFunction;
 import org.mate.exploration.genetic.mutation.SOSMCutPointMutationFunction;
-import org.mate.exploration.genetic.mutation.SOSMGuidedMutation;
+import org.mate.exploration.genetic.mutation.SOSMGuidedMutationFunction;
 import org.mate.exploration.genetic.mutation.SapienzSuiteMutationFunction;
 import org.mate.exploration.genetic.mutation.SuiteCutPointMutationFunction;
 import org.mate.exploration.genetic.mutation.TestCaseActionParametersMutationFunction;
@@ -878,7 +878,7 @@ public class GeneticAlgorithmProvider {
             case SOSM_CUT_POINT_MUTATION:
                 return (IMutationFunction<T>) new SOSMCutPointMutationFunction(getNumEvents());
             case SOSM_GUIDED_MUTATION:
-                return (IMutationFunction<T>) new SOSMGuidedMutation(getNumEvents());
+                return (IMutationFunction<T>) new SOSMGuidedMutationFunction(getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown mutation function: "
                         + mutationFunctionId);

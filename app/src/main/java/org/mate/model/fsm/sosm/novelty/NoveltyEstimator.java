@@ -5,10 +5,10 @@ package org.mate.model.fsm.sosm.novelty;
  */
 public enum NoveltyEstimator {
 
-    AVERAGE_SL_NOVELTY,
+    AVERAGE_NOVELTY,
     DISCOUNTED_SUM_NOVELTY,
     MAX_NOVEL_PREFIX,
     MAX_NOVEL_SUBSEQUENCE,
     MULTI_SOURCE_FUSION,
-    SOSM_NOVELTY;
+    MULTIPLY_ALL_OPINIONS;
 }

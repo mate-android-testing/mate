@@ -1,5 +1,6 @@
 package org.mate.exploration.genetic.mutation;
 
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Provides a guided mutation function for {@link TestCase}s based on the SOSM model.
  */
-public class SOSMGuidedMutation implements ISOSMMutationFunction {
+public class SOSMGuidedMutationFunction implements ISOSMMutationFunction {
 
     /**
      * Provides primarily information about the current screen.
@@ -51,7 +52,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
      *
      * @param maxNumEvents The maximal number of actions per test case.
      */
-    public SOSMGuidedMutation(int maxNumEvents) {
+    public SOSMGuidedMutationFunction(int maxNumEvents) {
         this.uiAbstractionLayer = Registry.getUiAbstractionLayer();
         this.maxNumEvents = maxNumEvents;
     }
@@ -87,16 +88,47 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
 
         final TestCase mutant = TestCase.newInitializedTestCase();
         final IChromosome<TestCase> mutatedChromosome = new Chromosome<>(mutant);
-        final List<Action> actionSequence = chromosome.getValue().getActionSequence();
+        final TestCase testCase = chromosome.getValue();
         final int cutPoint = chooseCutPoint(trace);
+
+        MATE.log_debug("Sequence length before mutation: " + testCase.getActionSequence().size());
 
         try {
             for (int i = 0; i < maxNumEvents; i++) {
-                final Action newAction
-                        = chooseNextAction(actionSequence, cutPoint,
-                        sosmModel.getCurrentState(), i);
+
+                Action newAction;
+
+                if (i < cutPoint) {
+                    newAction = testCase.getActionSequence().get(i);
+
+                    // Check that the ui action is still applicable.
+                    if (newAction instanceof UIAction
+                            && !uiAbstractionLayer.getExecutableUIActions().contains(newAction)) {
+                        MATE.log_warn("SOSMGuidedMutationFunction: Action (" + i + ") "
+                                + newAction.toShortString() + " not applicable!");
+                        break; // Fill up with random actions.
+                    }
+                } else {
+                    // SOSM-based selection
+                    newAction = chooseNextActionBasedOnState(sosmModel.getCurrentState());
+                }
+
                 if (!mutant.updateTestCase(newAction, i)) {
-                    break;
+                    MATE.log_warn("SOSMGuidedMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
+                    return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
+                }
+            }
+
+            // Fill up the remaining slots with random actions.
+            final int currentTestCaseSize = mutant.getActionSequence().size();
+
+            for (int i = currentTestCaseSize; i < maxNumEvents; ++i) {
+                final Action newAction = Randomness.randomElement(uiAbstractionLayer.getExecutableActions());;
+                if (!mutant.updateTestCase(newAction, i)) {
+                    MATE.log_warn("SOSMGuidedMutationFunction: Action ( " + i + ") "
+                            + newAction.toShortString() + " crashed or left AUT.");
+                    return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
                 }
             }
         } finally {
@@ -112,6 +144,7 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
             }
 
             mutant.finish();
+            MATE.log_debug("Sequence length after mutation: " + mutant.getActionSequence().size());
         }
 
         return new Tuple<>(mutatedChromosome, new Trace(sosmModel.getRecordedTransitions()));
@@ -167,34 +200,6 @@ public class SOSMGuidedMutation implements ISOSMMutationFunction {
         }
 
         throw new AssertionError("Unreachable");
-    }
-
-    /**
-     * Chooses the action to be executed next.
-     *
-     * @param actionSequence The action sequence of the original chromosome.
-     * @param cutPoint The chosen cut point.
-     * @param state The current state according to the SOSM.
-     * @param actionCount The action id of the next action.
-     * @return Returns the chosen action.
-     */
-    private Action chooseNextAction(final List<? extends Action> actionSequence,
-                                    final int cutPoint, final State state, final int actionCount) {
-
-        if (actionCount + 1 >= cutPoint) {
-            // Consider the subjective opinions for selecting an action from the cut point onwards.
-            return chooseNextActionBasedOnState(state);
-        }
-
-        final Action action = actionSequence.get(actionCount);
-
-        // Apply UI action only if executable in current state, otherwise pick a random action.
-        if (action instanceof UIAction
-                && uiAbstractionLayer.getExecutableUIActions().contains(action)) {
-            return action;
-        } else {
-            return Randomness.randomElement(uiAbstractionLayer.getExecutableActions());
-        }
     }
 
     /**

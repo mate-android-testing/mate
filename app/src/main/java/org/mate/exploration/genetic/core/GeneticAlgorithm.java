@@ -253,13 +253,17 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
      */
     protected <S> void logCurrentFitness() {
 
+        MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + ":");
+
+        // TODO: Use chromosome id in logs instead of natural index + find a better solution for
+        //  multi-objective algorithms + a fix for MIO/MOSA/NSGA-II used in combination with GE.
+
         if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
             /*
             * We need to force the evaluation of all chromosomes such that the fitness and coverage
             * data are produced.
              */
             for (int i = 0; i < this.fitnessFunctions.size(); i++) {
-                MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
                 final IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);
                 for (int j = 0; j < population.size(); j++) {
@@ -270,7 +274,6 @@ public abstract class GeneticAlgorithm<T> implements IGeneticAlgorithm<T> {
         }
 
         if (population.size() <= 10 && !Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
-            MATE.log_acc("Fitness of generation #" + (currentGenerationNumber + 1) + " :");
             for (int i = 0; i < Math.min(this.fitnessFunctions.size(), 5); i++) {
                 MATE.log_acc("Fitness function " + (i + 1) + ":");
                 final IFitnessFunction<T> fitnessFunction = this.fitnessFunctions.get(i);

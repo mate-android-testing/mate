@@ -102,7 +102,7 @@ public final class MaxNovelSubsequence implements INoveltyEstimator {
             }
         }
 
-        MATE.log_debug(String.format("Opinion on trace: (%f, %f, %f, %f)", bestOpinion.getBelief(),
+        MATE.log_acc(String.format("Opinion on trace: (%f, %f, %f, %f)", bestOpinion.getBelief(),
                 bestOpinion.getDisbelief(), bestOpinion.getUncertainty(), bestOpinion.getApriori()));
         MATE.log_debug(String.format("Best score: %f, best start: %d, best len: %d", bestScore,
                 bestStart, bestLength));

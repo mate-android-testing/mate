@@ -73,7 +73,7 @@ public final class MaxNovelPrefix implements INoveltyEstimator {
             }
         }
 
-        MATE.log_debug(String.format("Opinion on trace: (%f, %f, %f, %f)", bestOpinion.getBelief(),
+        MATE.log_acc(String.format("Opinion on trace: (%f, %f, %f, %f)", bestOpinion.getBelief(),
                 bestOpinion.getDisbelief(), bestOpinion.getUncertainty(), bestOpinion.getApriori()));
         MATE.log_debug(String.format("Best opinion length: %d", bestLength));
         return bestScore;
