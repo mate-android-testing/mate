@@ -716,7 +716,9 @@ public class EnvironmentManager {
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
-        } else if (graphType == GraphType.INTER_CFG) {
+        } else if (graphType == GraphType.INTER_CFG
+                || graphType == GraphType.INTER_CDG
+                || graphType == GraphType.MODULAR_CDG) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
             messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
