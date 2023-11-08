@@ -1,6 +1,8 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
+import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
@@ -136,6 +138,10 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             CoverageUtils.storeActionCoverageData(chromosome);
 
             CoverageUtils.logChromosomeCoverage(chromosome);
+
+            if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
+                Registry.getEnvironmentManager().drawGraph(chromosome);
+            }
 
             testCase.finish();
         }

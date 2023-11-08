@@ -780,11 +780,24 @@ public class EnvironmentManager {
      * Requests the drawing of the graph.
      */
     public void drawGraph() {
+        drawGraph(null);
+    }
+
+    /**
+     * Requests the drawing of the graph where the specified chromosome gets highlighted if desired.
+     *
+     * @param chromosome The chromosome that should be potentially highlighted.
+     * @param <T> The type of the chromosome.
+     */
+    public <T> void drawGraph(IChromosome<T> chromosome) {
 
         MATE.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(Properties.DRAW_GRAPH() == DrawType.RAW));
+        if (chromosome != null) {
+            messageBuilder = messageBuilder.withParameter("chromosome", getChromosomeId(chromosome));
+        }
         sendMessage(messageBuilder.build());
     }
 
