@@ -774,7 +774,8 @@ public class EnvironmentManager {
             userInputTokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
         }
 
-        return userInputTokens;
+        MATE.log_debug("User input tokens are: " + userInputTokens);
+        return Collections.unmodifiableSet(userInputTokens);
     }
 
     /**
