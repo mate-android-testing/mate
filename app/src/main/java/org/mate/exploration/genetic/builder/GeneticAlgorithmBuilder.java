@@ -119,6 +119,11 @@ public class GeneticAlgorithmBuilder {
      */
     public GeneticAlgorithmBuilder withSelectionFunction(SelectionFunction selectionFunction) {
 
+        if (selectionFunction == null) {
+            // there might be no selection function required
+            return this;
+        }
+
         properties.setProperty(SELECTION_FUNCTION_KEY, selectionFunction.name());
 
         // TODO: Remove once all properties are enforced via the mate.properties file!

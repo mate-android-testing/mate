@@ -716,7 +716,9 @@ public class EnvironmentManager {
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
-        } else if (graphType == GraphType.INTER_CFG) {
+        } else if (graphType == GraphType.INTER_CFG
+                || graphType == GraphType.INTER_CDG
+                || graphType == GraphType.MODULAR_CDG) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
             messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
@@ -731,13 +733,14 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the set of relevant stack trace tokens.
+     * Retrieves the set of relevant stack trace tokens which are necessary to determine promising
+     * actions.
      *
      * @return Returns the set of stack trace tokens.
      */
     public Set<String> getStackTraceTokens() {
 
-        if (tokens == null) {
+        if (tokens == null) { // only compute tokens once
             Message.MessageBuilder messageBuilder
                     = new Message.MessageBuilder("/graph/stack_trace_tokens")
                     .withParameter("package", Registry.getPackageName());
@@ -756,13 +759,13 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the set of user input tokens from the stack trace.
+     * Retrieves the set of user input tokens from the stack trace which are used as text inputs.
      *
      * @return Returns the set of user input tokens.
      */
     public Set<String> getStackTraceUserInput() {
 
-        if (userInputTokens == null) {
+        if (userInputTokens == null) { // only compute once
             Message.MessageBuilder messageBuilder
                     = new Message.MessageBuilder("/graph/stack_trace_user_tokens")
                     .withParameter("package", Registry.getPackageName());
@@ -771,18 +774,32 @@ public class EnvironmentManager {
             userInputTokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
         }
 
-        return userInputTokens;
+        MATE.log_debug("User input tokens are: " + userInputTokens);
+        return Collections.unmodifiableSet(userInputTokens);
     }
 
     /**
      * Requests the drawing of the graph.
      */
     public void drawGraph() {
+        drawGraph(null);
+    }
+
+    /**
+     * Requests the drawing of the graph where the specified chromosome gets highlighted if desired.
+     *
+     * @param chromosome The chromosome that should be potentially highlighted.
+     * @param <T> The type of the chromosome.
+     */
+    public <T> void drawGraph(IChromosome<T> chromosome) {
 
         MATE.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(Properties.DRAW_GRAPH() == DrawType.RAW));
+        if (chromosome != null) {
+            messageBuilder = messageBuilder.withParameter("chromosome", getChromosomeId(chromosome));
+        }
         sendMessage(messageBuilder.build());
     }
 
@@ -818,10 +835,11 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the stack trace.
+     * Retrieves the 'at' stack trace.
      *
      * @return Returns the stack trace.
      */
+    @SuppressWarnings("unused")
     public List<String> getStackTrace() {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace")
                 .withParameter("packageName", Registry.getPackageName());

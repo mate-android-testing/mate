@@ -567,13 +567,6 @@ public class Properties {
     }
 
     /**
-     * Whether a recorded stack trace should be written to file.
-     *
-     * @return Returns {@code false} by default, i.e. no stack trace is written to file.
-     */
-    public static boolean WRITE_STACK_TRACE_TO_FILE() { return propertyOr(false); }
-
-    /**
      * The stack trace file name required for crash reproduction.
      *
      * @return Returns the file name of the stack trace file.
