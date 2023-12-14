@@ -56,8 +56,10 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
         probabilisticModel.resetPosition();
 
         // This skips the root node.
-        if (!stateIterator.next().equals(probabilisticModel.getState())) {
-            MATE.log_warn("Test case does not start at root node...");
+        final IScreenState rootState = stateIterator.next();
+        if (!rootState.equals(probabilisticModel.getState())) {
+            MATE.log_warn("Test case does not start at root node but at: "
+                    + rootState.getId() + "[" + rootState.getActivityName() + "]");
         }
 
     }
