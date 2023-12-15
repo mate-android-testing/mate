@@ -81,7 +81,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * The probabilistic prototype tree (PPT).
      */
     private final ApplicationStateTree ppt
-            = new ApplicationStateTree(new ProbabilityInitialization(0.6));
+            = new ApplicationStateTree(new ProbabilityInitialization(Properties.PROMISING_ACTION_WEIGHT()));
 
     /**
      * Initialises the PIPE algorithm with the given properties.

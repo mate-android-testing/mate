@@ -263,6 +263,8 @@ public class Properties {
 
     public static boolean PROMISING_ACTIONS() { return propertyOr(true); }
 
+    public static double PROMISING_ACTION_WEIGHT() { return propertyOr(0.6); }
+
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
     public static int DEFAULT_SELECTION_SIZE() {
