@@ -1,8 +1,6 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
@@ -176,13 +174,13 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                 .sorted(Comparator.comparingDouble(Map.Entry::getValue))
                 .collect(Collectors.toList());
 
-        if (sortedProbabilities.size() == 1) {
+        if (sortedProbabilities.size() == 1) { // there is only a single action that can be taken
             return sortedProbabilities.get(0).getKey();
         }
 
-        double sum = 0;
+        double sum = 0.0;
         int index = 0;
-        while (sum < randomNumber && index < sortedProbabilities.size()) {
+        while (sum <= randomNumber && index < sortedProbabilities.size()) {
             sum += sortedProbabilities.get(index).getValue();
             index++;
         }
