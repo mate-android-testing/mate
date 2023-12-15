@@ -101,16 +101,6 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
                 final Action nextAction = selectAction();
-
-                // TODO: Fill up with random actions if selected action is not applicable.
-
-                if (nextAction instanceof UIAction // check that the ui action is actually applicable
-                        && !uiAbstractionLayer.getExecutableUIActions().contains(nextAction)) {
-                    MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
-                            + nextAction.toShortString() + " crashed or left AUT.");
-                    return chromosome;
-                }
-
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
                 storeCoverageAndFitnessData(chromosome);
 
@@ -174,17 +164,31 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                 .sorted(Comparator.comparingDouble(Map.Entry::getValue))
                 .collect(Collectors.toList());
 
+        Action chosenAction;
+
         if (sortedProbabilities.size() == 1) { // there is only a single action that can be taken
-            return sortedProbabilities.get(0).getKey();
+            chosenAction = sortedProbabilities.get(0).getKey();
+        } else {
+
+            double sum = 0.0;
+            int index = 0;
+            while (sum <= randomNumber && index < sortedProbabilities.size()) {
+                sum += sortedProbabilities.get(index).getValue();
+                index++;
+            }
+
+            chosenAction = sortedProbabilities.get(index - 1).getKey();
         }
 
-        double sum = 0.0;
-        int index = 0;
-        while (sum <= randomNumber && index < sortedProbabilities.size()) {
-            sum += sortedProbabilities.get(index).getValue();
-            index++;
+        // Check that the chosen (ui) action is actually applicable.
+        if (chosenAction instanceof UIAction
+                && !uiAbstractionLayer.getExecutableUIActions().contains(chosenAction)) {
+            MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
+                    + chosenAction.toShortString() + " not applicable!");
+            // TODO: Remove this candidate action from the current state of the probabilistic model?
+            return super.selectAction(); // select random action
         }
 
-        return sortedProbabilities.get(index - 1).getKey();
+        return chosenAction;
     }
 }
