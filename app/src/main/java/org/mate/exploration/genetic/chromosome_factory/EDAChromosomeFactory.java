@@ -132,7 +132,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
             /*
             * Storing coverage/fitness is already handled by storeFitnessData(), we only maintain
-            * these calls to store coverage/fitness in case of a fault.
+            * these calls to store coverage/fitness in case of a fault. Since the traces aren't
+            * fetched twice for the same chromosome / action id, those calls do not corrupt anything.
              */
             FitnessUtils.storeActionFitnessData(chromosome);
             CoverageUtils.storeActionCoverageData(chromosome);
