@@ -170,6 +170,23 @@ public final class CoverageUtils {
     }
 
     /**
+     * Updates the activity coverage for the given test case chromosome. 
+     *
+     * @param chromosome The test case chromosome.
+     * @param activities The activities that have been visited.
+     */
+    public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
+                                                                    List<String> activities) {
+
+        if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
+
+            Set<String> visited = visitedActivities.getOrDefault(chromosome, new HashSet<>());
+            visited.addAll(activities);
+            visitedActivities.put(chromosome, visited);
+        }
+    }
+
+    /**
      * Stores the coverage data of a single test case within a test suite.
      *
      * @param chromosome The test suite.
