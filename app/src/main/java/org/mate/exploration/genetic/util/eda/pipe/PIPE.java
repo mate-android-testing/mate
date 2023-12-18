@@ -4,7 +4,6 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.exploration.genetic.util.eda.pipe.dot.DotConverter;
 import org.mate.exploration.genetic.util.eda.pipe.ppt.ApplicationStateTree;
@@ -86,7 +85,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * Initialises the PIPE algorithm with the given properties.
      *
-     * @param fitnessFunction The used fitness function.
+     * @param fitnessFunction The used per action-based fitness function.
      * @param learningRate The used learning rate for good nodes.
      * @param negativeLearningRate The used negative learning rate for bad nodes.
      * @param epsilon The used epsilon (small user defined constant).
@@ -95,11 +94,11 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @param pMutation The used probability for mutation.
      * @param mutationRate The used mutation rate (degree of mutation).
      */
-    public PIPE(IFitnessFunction<TestCase> fitnessFunction, double learningRate,
+    public PIPE(ActionFitnessFunctionWrapper fitnessFunction, double learningRate,
                 double negativeLearningRate, double epsilon, double clr,
                 double pEl, double pMutation, double mutationRate) {
 
-        this.fitnessFunction = new ActionFitnessFunctionWrapper(fitnessFunction);
+        this.fitnessFunction = fitnessFunction;
         this.learningRate = learningRate;
         this.negativeLearningRate = negativeLearningRate;
         this.epsilon = epsilon;

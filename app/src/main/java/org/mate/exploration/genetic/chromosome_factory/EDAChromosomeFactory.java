@@ -4,19 +4,23 @@ import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
+import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.utils.ChromosomeUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +43,11 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     private final ActionFitnessFunctionWrapper fitnessFunction;
 
     /**
+     * Records the traces on a per action-basis.
+     */
+    private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
+
+    /**
      * Initialises the chromosome factory with the given properties.
      *
      * @param maxNumEvents The maximal number of actions of a test.
@@ -53,7 +62,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         super(maxNumEvents);
         assert fitnessFunctions.size() == 1;
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction = new ActionFitnessFunctionWrapper((IFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        this.fitnessFunction
+                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
     }
 
     /**
@@ -72,7 +82,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         super(resetApp, maxNumEvents);
         assert fitnessFunctions.size() == 1;
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction = new ActionFitnessFunctionWrapper((IFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        this.fitnessFunction
+                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
     }
 
     /**
@@ -95,14 +106,14 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         // Ignore (split off from first action) the traces produced by the reset of the AUT.
-        storeCoverageAndFitnessData(chromosome);
+        recordFitnessData(chromosome);
 
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
                 final Action nextAction = selectAction();
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
-                storeCoverageAndFitnessData(chromosome);
+                recordFitnessData(chromosome);
 
                 final IScreenState currentState = uiAbstractionLayer.getLastScreenState();
                 probabilisticModel.updatePosition(testCase, nextAction, currentState);
@@ -118,19 +129,14 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             // TODO: Check if the surrogate model can be integrated. This probably requires changes
             //  of the surrogate model, in particular to the intermediate trace storing functionality.
 
-            /*
-            * Storing coverage/fitness is already handled by storeFitnessData(), we only maintain
-            * these calls to store coverage/fitness in case of a fault. Since the traces aren't
-            * fetched twice for the same chromosome / action id, those calls do not corrupt anything.
-             */
-            FitnessUtils.storeActionFitnessData(chromosome);
-            CoverageUtils.storeActionCoverageData(chromosome);
+            // We need to write out the recorded fitness data and inherently coverage data before we
+            // can evaluate the fitness or coverage.
+            storeFitnessData(chromosome);
 
+            // We need to update the activity coverage manually here.
+            CoverageUtils.updateTestCaseChromosomeActivityCoverage(chromosome,
+                    testCase.getVisitedActivitiesOfApp());
             CoverageUtils.logChromosomeCoverage(chromosome);
-
-            if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
-                Registry.getEnvironmentManager().drawGraph(chromosome);
-            }
 
             testCase.finish();
         }
@@ -141,12 +147,40 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      * Stores the intermediate coverage and fitness of the chromosome, i.e. the coverage/fitness data
      * associated with the last executed action.
      *
+     * NOTE: This implementation has been replaced in favour of a faster implementation that directly
+     * retrieves the traces (coverage/fitness data) from the external storage and stores them to disk
+     * in one pass upon test case completion, see {@link #recordFitnessData(IChromosome)} and
+     * {@link #storeFitnessData(IChromosome)}.
+     *
      * @param chromosome The chromosome for which coverage and fitness should be stored.
      */
+    @SuppressWarnings("unused")
     private void storeCoverageAndFitnessData(final IChromosome<TestCase> chromosome) {
         CoverageUtils.storeActionCoverageData(chromosome);
         FitnessUtils.storeActionFitnessData(chromosome);
         fitnessFunction.recordCurrentActionFitness(chromosome);
+    }
+
+    /**
+     * Records the fitness data and inherently coverage data on a per action-basis for the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    private void recordFitnessData(final IChromosome<TestCase> chromosome) {
+        final String actionID = ChromosomeUtils.getActionEntityId(chromosome);
+        final Set<String> traces = uiAbstractionLayer.getTraces();
+        tracesPerAction.put(actionID, traces);
+    }
+
+    /**
+     * Stores the recorded fitness data and inherently coverage data to disk for the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    private void storeFitnessData(final IChromosome<TestCase> chromosome) {
+        FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
+        fitnessFunction.recordActionFitness(chromosome, tracesPerAction);
+        tracesPerAction.clear(); // clear traces for next chromosome
     }
 
     /**

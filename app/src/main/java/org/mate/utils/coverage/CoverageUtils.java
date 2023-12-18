@@ -176,7 +176,7 @@ public final class CoverageUtils {
      * @param activities The activities that have been visited.
      */
     public static <T> void updateTestCaseChromosomeActivityCoverage(IChromosome<T> chromosome,
-                                                                    List<String> activities) {
+                                                                    Set<String> activities) {
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
 

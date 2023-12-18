@@ -913,13 +913,57 @@ public class EnvironmentManager {
     }
 
     /**
+     * Stores the complete action fitness data for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     * @param tracesPerAction The traces recorded per action.
+     * @param fitnessFunction The given fitness function.
+     */
+    public void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                       final Map<String, Set<String>> tracesPerAction,
+                                       final FitnessFunction fitnessFunction) {
+
+        // there is no fitness data to store for dummy test cases
+        if (chromosome.getValue().isDummy()) {
+            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            return;
+        }
+
+        final String testcase = getChromosomeId(chromosome);
+
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_action_fitness_data")
+                .withParameter("fitnessFunction", fitnessFunction.name())
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", testcase)
+                .withParameter("actions", String.valueOf(tracesPerAction.size()));
+
+        for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
+            messageBuilder.withParameter(entry.getKey(), entry.getValue().stream()
+                    .collect(Collectors.joining("+")));
+        }
+
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
      * Retrieves the crash distance for the given chromosome. Note that
-     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
+     * {@link #storeActionFitnessData(IChromosome)} or
+     * {@link #storeActionFitnessData(IChromosome, Map, FitnessFunction)} has to be called previously.
      *
      * @param chromosome Refers either to a test case or to a test suite.
+     * @param actions If not {@code null} then the crash distance is only derived for the given
+     *                  action range of the test case, e.g., for the first three actions.
      * @return Returns the crash distance for the given chromosome.
      */
-    public <T> double getCrashDistance(IChromosome<T> chromosome) {
+    public <T> double getCrashDistance(IChromosome<T> chromosome, Integer actions) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
@@ -935,7 +979,14 @@ public class EnvironmentManager {
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
 
+        if (actions != null) {
+                messageBuilder = messageBuilder.withParameter("actions", String.valueOf(actions));
+        }
+
+        long start = System.currentTimeMillis();
         Message response = sendMessage(messageBuilder.build());
+        long end = System.currentTimeMillis();
+        MATE.log_acc("Computing crash distance took: " + (end - start) + "ms");
         return Double.parseDouble(response.getParameter("crash_distance"));
     }
 
