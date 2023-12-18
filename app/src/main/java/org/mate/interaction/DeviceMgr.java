@@ -2792,6 +2792,8 @@ public class DeviceMgr {
      */
     public Set<String> getTraces() {
 
+        // TODO: Adapt functionality to respect new 'running.txt' file produced by the tracer.
+
         /*
          * If an interrupt happened, i.e. the TimeoutRun signaled the end of the execution, we abort
          * the execution here.

@@ -425,6 +425,15 @@ public class UIAbstractionLayer {
     }
 
     /**
+     * Reads the traces directly from the external memory.
+     *
+     * @return Returns the set of traces.
+     */
+    public Set<String> getTraces() {
+        return deviceMgr.getTraces();
+    }
+
+    /**
      * Executes the cached actions as long as an action doesn't leave the AUT.
      *
      * @param actions The list of actions to be executed, might be empty.
