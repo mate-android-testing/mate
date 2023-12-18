@@ -902,6 +902,17 @@ public class EnvironmentManager {
     }
 
     /**
+     * Invalidates the traces cache which stores the traces read per file to speed up subsequent
+     * read operations. However, to keep the cache size small we should invalidate the cache when
+     * we are sure that certain traces are no longer needed. Typically this is the case when a new
+     * population is formed.
+     */
+    public void invalidateTracesCache() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/invalidate_cache");
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
      * Retrieves the crash distance for the given chromosome. Note that
      * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
      *

@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
@@ -54,6 +55,7 @@ public class EDA<T> extends GeneticAlgorithm<T> {
 
         probabilisticModel.update(population);
         logCurrentFitness();
+        Registry.getEnvironmentManager().invalidateTracesCache();
         currentGenerationNumber++;
     }
 
@@ -73,6 +75,7 @@ public class EDA<T> extends GeneticAlgorithm<T> {
 
         probabilisticModel.update(population);
         logCurrentFitness();
+        Registry.getEnvironmentManager().invalidateTracesCache();
         currentGenerationNumber++;
     }
 }
