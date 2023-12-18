@@ -941,9 +941,9 @@ public class UIAbstractionLayer {
         }
 
         deviceMgr.reinstallApp();
-        Utils.sleep(5000);
-        deviceMgr.restartApp();
         Utils.sleep(2000);
+        deviceMgr.restartApp();
+        Utils.sleep(5000);
 
         /*
          * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
