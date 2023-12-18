@@ -2702,7 +2702,9 @@ public class DeviceMgr {
                 new FileInputStream(getTracesFile())))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                traces.add(line);
+                if (!line.isEmpty()) {
+                    traces.add(line);
+                }
             }
         } catch (final IOException e) {
             getInfoFile().delete();
