@@ -980,13 +980,10 @@ public class EnvironmentManager {
                 .withParameter("chromosome", chromosomeId);
 
         if (actions != null) {
-                messageBuilder = messageBuilder.withParameter("actions", String.valueOf(actions));
+            messageBuilder = messageBuilder.withParameter("actions", String.valueOf(actions));
         }
 
-        long start = System.currentTimeMillis();
         Message response = sendMessage(messageBuilder.build());
-        long end = System.currentTimeMillis();
-        MATE.log_acc("Computing crash distance took: " + (end - start) + "ms");
         return Double.parseDouble(response.getParameter("crash_distance"));
     }
 
