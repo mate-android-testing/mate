@@ -2746,7 +2746,7 @@ public class DeviceMgr {
              * the info.txt.
              */
             MateInterruptedException interrupted = null;
-            final int maxWaitTimeInSeconds = 30;
+            final int maxWaitTimeInSeconds = 10;
 
             for (int i = 1; i < maxWaitTimeInSeconds; ++i) {
 
