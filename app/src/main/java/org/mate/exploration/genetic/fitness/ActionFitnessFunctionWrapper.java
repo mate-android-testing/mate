@@ -83,6 +83,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
         for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
             // NOTE: The linked hashset guarantees traversing using the insertion order.
             final int actions = Integer.parseInt(entry.getKey().split("_")[0]);
+            // TODO: We could use a single request that returns all individual fitness values at once.
             actionFitnessValues.put(entry.getKey(), fitnessFunction.getNormalizedFitness(chromosome, actions));
         }
     }
