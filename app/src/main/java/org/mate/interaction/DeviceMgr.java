@@ -2751,7 +2751,7 @@ public class DeviceMgr {
             for (int i = 1; i < maxWaitTimeInSeconds; ++i) {
 
                 try {
-                    Utils.sleep(1);
+                    Utils.sleep(1000);
                 } catch (final MateInterruptedException e) {
                     // keep track of any interrupt
                     interrupted = e;
