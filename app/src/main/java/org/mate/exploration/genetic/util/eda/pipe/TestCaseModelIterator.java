@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
@@ -49,8 +50,10 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
                 .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
                 .iterator();
 
-        MATE.log_debug("PPT: ");
-        MATE.log_debug(probabilisticModel.toString());
+        if (Properties.PIPE_RECORD_PPT()) {
+            MATE.log_debug("PPT: ");
+            MATE.log_debug(probabilisticModel.toString());
+        }
 
         // Reset cursor to root node of PPT.
         probabilisticModel.resetPosition();
