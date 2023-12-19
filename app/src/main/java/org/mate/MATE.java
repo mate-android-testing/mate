@@ -163,6 +163,8 @@ public class MATE {
                 DotConverter.convertFinal(Registry.getUiAbstractionLayer().getGuiModel());
             }
 
+            // TODO: Log the model iteratively since this string is typically too large to be held
+            //  in a single log message, i.e. Logcat truncates the string at some point.
             MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());
 
             try {
