@@ -2670,21 +2670,30 @@ public class DeviceMgr {
      */
     private void dumpTraces() {
 
-        // triggers the dumping of traces to a file called traces.txt
+        // Send the broadcast to the tracer to request the dumping of the traces.
         sendBroadcastToTracer();
 
+        // TODO: We could track the receiving of the broadcast by listening for the running.txt file,
+        //  but since the tracer can operate very fast, there is a chance that we miss the generation
+        //  of this file (it is removed by the tracer after the dumping is done) and hence there is
+        //  reliable option of detect that event. We would need some additional file that is generated
+        //  by the tracer upon receiving a broadcast.
+
         /*
-         * We need to wait until the info.txt file is generated, once it is there, we know that all
-         * traces have been dumped.
+         * We need to wait until the broadcast is received and the info.txt file is generated,
+         * once it is there, we know that all traces have been dumped.
          */
         MateInterruptedException interrupted = null;
-        final int maxIterations = 200; // wait at max: 200 * 50 ms = 10 secs
+        final int maxIterations = 1800; // wait at max: 1800 * 50 ms = 90 secs
         MATE.log_debug("Waiting for info.txt...");
 
         for (int i = 0; i < maxIterations && !infoFileExists(); i++) {
             try {
-                // The info.txt file can be generated relatively fast in most cases, thus a small
-                // polling interval is preferred.
+                // The broadcast is typically received very fast (within a few ms) but in very rare
+                // cases receiving the broadcast can take up to roughly one minute. The only possible
+                // explanation is the fact that broadcasts are sent from the UI thread and this thread
+                // might be under heavy load at the moment of sending. Also the info.txt file can be
+                // generated relatively fast in most cases, thus a small polling interval is preferred.
                 Utils.sleep(50);
             } catch (final MateInterruptedException e) {
                 /*
@@ -2707,7 +2716,30 @@ public class DeviceMgr {
         }
 
         if (!infoFileExists()) {
+            logBroadcastStats();
             throw new IllegalStateException("Waiting for info.txt exceeded max wait time.");
+        }
+    }
+
+    /**
+     * Logs some stats about the already sent broadcasts to the tracer.
+     */
+    @SuppressWarnings("debug")
+    private void logBroadcastStats() {
+        // adb shell dumpsys activity broadcast-stats | grep "STORE_TRACES" -A 2
+        try {
+            final String output = device.executeShellCommand("dumpsys activity broadcast-stats");
+            final List<String> lines = Arrays.stream(output.split("\n"))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+            int index = lines.indexOf("STORE_TRACES:");
+            if (index != -1) {
+                MATE.log_debug("Broadcast stats: ");
+                MATE.log_debug(lines.get(index + 1));
+                MATE.log_debug(lines.get(index + 2));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't retrieve broadcast stats!", e);
         }
     }
 
