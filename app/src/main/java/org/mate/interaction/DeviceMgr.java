@@ -2654,10 +2654,14 @@ public class DeviceMgr {
          * traces have been dumped.
          */
         MateInterruptedException interrupted = null;
-        while (!infoFileExists()) {
-            MATE.log_debug("Waiting for info.txt...");
+        final int maxIterations = 200; // wait at max: 200 * 50 ms = 10 secs
+        MATE.log_debug("Waiting for info.txt...");
+
+        for (int i = 0; i < maxIterations && !infoFileExists(); i++) {
             try {
-                Utils.sleep(200);
+                // The info.txt file can be generated relatively fast in most cases, thus a small
+                // polling interval is preferred.
+                Utils.sleep(50);
             } catch (final MateInterruptedException e) {
                 /*
                  * We might get a timeout (signaled through an interrupt) while waiting for the
@@ -2676,6 +2680,10 @@ public class DeviceMgr {
         if (interrupted != null) {
             MATE.log_debug("Interrupt detected during dumping traces!");
             throw interrupted;
+        }
+
+        if (!infoFileExists()) {
+            throw new IllegalStateException("Waiting for info.txt exceeded max wait time.");
         }
     }
 
