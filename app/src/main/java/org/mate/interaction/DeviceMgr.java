@@ -205,6 +205,11 @@ public class DeviceMgr {
      */
     public void executeAction(Action action) throws AUTCrashException {
 
+        // It looks like the execution of certain actions could swallow the interrupt generated when
+        // terminating the exploration thread, thus we should check for the interrupt right before
+        // the action execution.
+        Utils.throwOnInterrupt();
+
         try {
             if (action instanceof WidgetAction) {
                 executeAction((WidgetAction) action);
