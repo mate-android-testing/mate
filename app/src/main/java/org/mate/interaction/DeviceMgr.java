@@ -2604,6 +2604,15 @@ public class DeviceMgr {
     }
 
     /**
+     * Retrieves the running.txt file from the external storage.
+     *
+     * @return Returns a file handle on the running.txt file.
+     */
+    private File getRunningFile() {
+        return getFileFromExternalStorage("running.txt");
+    }
+
+    /**
      * Checks whether the info.txt file exists.
      *
      * @return Returns {@code true} if the info.txt file exists, otherwise {@code false} is
@@ -2621,6 +2630,16 @@ public class DeviceMgr {
      */
     private boolean tracesFileExists() {
         return getTracesFile().exists();
+    }
+
+    /**
+     * Checks whether the running.txt file exists.
+     *
+     * @return Returns {@code true} if the running.txt file exists, otherwise {@code false} is
+     *         returned.
+     */
+    private boolean runningFileExists() {
+        return getRunningFile().exists();
     }
 
     /**
@@ -2730,47 +2749,47 @@ public class DeviceMgr {
      */
     private boolean waitForTracer() {
 
-        MATE.log_debug("Waiting for info.txt/traces.txt...");
+        MATE.log_debug("Waiting for tracer...");
 
         boolean tracesFileExists = tracesFileExists();
         boolean infoFileExists = infoFileExists();
+        boolean runningFileExists = runningFileExists();
 
-        if (infoFileExists && !tracesFileExists) {
-            MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
-            return false;
+        if (!runningFileExists && tracesFileExists && infoFileExists) {
+            // The uncaught exception handler dumped the traces or someone else sent a broadcast to
+            // the tracer or forgot/failed to clean up the files. Since we can't differentiate between
+            // these cases, we assume the first case and proceed.
+            MATE.log_debug("Waiting for tracer completed!");
+            return true;
+        } else if (!runningFileExists && tracesFileExists && !infoFileExists) {
+            // The tracer dumped the traces because it hit the cache size limit. We need to call the
+            // tracer again to retrieve the remaining traces.
+            MATE.log_debug("Waiting for tracer completed!");
+            return true;
+        } else if (!runningFileExists && !tracesFileExists && !infoFileExists) {
+            // This is the most expected case since we did not call the tracer so far, there should
+            // be no files present. We need to call the tracer first to get the traces.
+            MATE.log_debug("Waiting for tracer completed!");
+            return true;
         }
 
-        if (tracesFileExists && !infoFileExists) {
-            /*
-             * There are two possible states here:
-             *
-             *     1) The tracer is currently dumping its traces, and we just need to wait for it
-             *        to finish.
-             *     2) The tracer dumped the traces because its cache got full. In that case we need
-             *        to call the tracer to get the remaining traces.
-             *
-             * We have no clear method of determining in which state we are in, so we have to wait
-             * for a while to have the tracer potentially finish dumping its traces and re-check for
-             * the info.txt.
-             */
+        if (runningFileExists) {
+            // The tracer might be currently running because it hit the cache size limit or the uncaught
+            // exception handler forced the dumping of the traces. We simply need to wait a bit.
+
             MateInterruptedException interrupted = null;
-            final int maxWaitTimeInSeconds = 10;
+            final int maxIterations = 200; // wait at max: 200 * 50 ms = 10 secs
+            MATE.log_debug("Tracer is currently running...");
 
-            for (int i = 1; i < maxWaitTimeInSeconds; ++i) {
-
+            // Wait until the running.txt file is removed by the tracer itself.
+            for (int i = 0; i < maxIterations && runningFileExists(); i++) {
                 try {
-                    Utils.sleep(1000);
+                    // Producing the traces and removing the running.txt file is a relative fast
+                    // operation, thus a small polling interval is preferable.
+                    Utils.sleep(50);
                 } catch (final MateInterruptedException e) {
                     // keep track of any interrupt
                     interrupted = e;
-                }
-
-                tracesFileExists = tracesFileExists();
-                infoFileExists = infoFileExists();
-
-                if (tracesFileExists && infoFileExists) {
-                    // We were in case 1), now the tracer has finished dumping the traces.
-                    break;
                 }
             }
 
@@ -2783,14 +2802,42 @@ public class DeviceMgr {
                 throw interrupted;
             }
 
-            if (infoFileExists && !tracesFileExists) {
-                MATE.log_error("info.txt exists, but not traces.txt, this should not happen.");
+            if (runningFileExists()) { // the running.txt still exists
+                Utils.throwOnInterrupt();
+                MATE.log_warn("Waiting for tracer exceeded max wait time.");
                 return false;
             }
         }
 
-        MATE.log_debug("Waiting for info.txt/traces.txt completed!");
-        return true;
+        /*
+         * If an interrupt happened, i.e. the TimeoutRun signaled the end of the execution, we abort
+         * the execution here.
+         */
+        Utils.throwOnInterrupt();
+
+        tracesFileExists = tracesFileExists();
+        infoFileExists = infoFileExists();
+
+        if (tracesFileExists && infoFileExists) {
+            // The uncaught exception handler dumped the traces.
+            MATE.log_debug("Waiting for tracer completed!");
+            return true;
+        } else if (tracesFileExists && !infoFileExists) {
+            // The tracer dumped the traces because its cache got full. We need to call the tracer
+            // again to get the remaining traces.
+            MATE.log_debug("Waiting for tracer completed!");
+            return true;
+        } else {
+            // The tracer could not write at least the traces to file. This should not happen since
+            // both files are always produced even in the case of no available traces! The only explainable
+            // case is a race condition happening when MATE requested the termination and started
+            // retrieving the coverage of the last test case at the same time. Typically this scenario
+            // should be prevented by checking for an interrupt regularly but there might be some API
+            // methods that can swallow interrupts.
+            Utils.throwOnInterrupt();
+            MATE.log_warn("The tracer couldn't write the traces to file!");
+            return false;
+        }
     }
 
     /**
@@ -2800,27 +2847,36 @@ public class DeviceMgr {
      */
     public Set<String> getTraces() {
 
-        // TODO: Adapt functionality to respect new 'running.txt' file produced by the tracer.
-
         /*
          * If an interrupt happened, i.e. the TimeoutRun signaled the end of the execution, we abort
-         * the execution here.
+         * the execution here to let the termination procedure retrieve the traces in a regular way.
          */
         Utils.throwOnInterrupt();
 
         if (!waitForTracer()) {
-            MATE.log_warn("Couldn't wait for tracer.");
-            return new HashSet<>(0);
+            // The tracer exceeded either the maximal wait timeout or failed to write the traces.
+            // NOTE: Both outcomes represent a fault actually and the better option would be to throw
+            // an exception since the traces couldn't be assigned or might even get assigned wrongly
+            // if the tracer eventually finishes (former fault).
+            throw new IllegalStateException("Couldn't wait for tracer.");
         }
 
+        // Terminate the exploration thread upon an interrupt before dumping the traces, then the
+        // termination procedure can dump them the regular way when storing the coverage of the last
+        // incomplete test case.
+        Utils.throwOnInterrupt();
+
         /*
-         * If the AUT has been crashed, the uncaught exception handler takes over and produces both
-         * an info.txt and traces.txt file, thus sending the broadcast would be redundant. Under
-         * every other condition, there should be no info.txt present and the broadcast is necessary.
+        * The info.txt is only not present if the tracer dumped the traces because the cache size
+        * limit was reached. In this case we need to call the tracer to get the remaining traces.
          */
         if (!infoFileExists()) {
             dumpTraces();
         }
+
+        // Terminate the exploration thread upon an interrupt before removing the traces, otherwise
+        // they are lost.
+        Utils.throwOnInterrupt();
 
         final Set<String> traces = readTracesFile();
         deleteTraceFiles();
