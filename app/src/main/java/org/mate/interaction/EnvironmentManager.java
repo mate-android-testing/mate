@@ -1460,13 +1460,15 @@ public class EnvironmentManager {
      *
      * @param fileName The file name.
      * @param content The given content that should be written to file.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false}.
      */
-    public void writeFile(final String fileName, final String content) {
-        sendMessage(new Message.MessageBuilder("/utility/write_file")
+    public boolean writeFile(final String fileName, final String content) {
+        final Message request = new Message.MessageBuilder("/utility/write_file")
                 .withParameter("deviceId", emulator)
                 .withParameter("fileName", fileName)
                 .withParameter("content", content)
-                .build());
+                .build();
+        return sendMessageSignalSuccess(request).isPresent();
     }
 
     /**
