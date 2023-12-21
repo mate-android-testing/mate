@@ -151,8 +151,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * {@inheritDoc}
      */
     @Override
-    public void resetPosition() {
-        ppt.resetPosition();
+    public void resetPosition(final IScreenState currentScreenState) {
+        ppt.resetPosition(currentScreenState);
     }
 
     /**

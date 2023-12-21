@@ -128,4 +128,9 @@ public class TreeNode<T> {
     public int hashCode() {
         return Objects.hash(content, parent);
     }
+
+    @Override
+    public String toString() {
+        return content.toString();
+    }
 }

@@ -53,6 +53,8 @@ public final class DotConverter {
         final List<Tuple<TreeNode<ApplicationStateTree.ApplicationStateNode>,
                 TreeNode<ApplicationStateTree.ApplicationStateNode>>> path = new LinkedList<>();
 
+        // NOTE: The virtual root node might be connected to multiple real root nodes. The current
+        // implementation picks the transition to the lastly inserted real root node.
         TreeNode<ApplicationStateTree.ApplicationStateNode> prevNode = ppt.getRoot();
         Optional<TreeNode<ApplicationStateTree.ApplicationStateNode>> nextNode;
 
@@ -126,6 +128,7 @@ public final class DotConverter {
         // Defines the node attributes.
         final Function<TreeNode<ApplicationStateTree.ApplicationStateNode>, Map<String, String>>
                 attributesFunction = node -> new HashMap<String, String>() {{
+            // TODO: There is no image for the virtual root node.
             put("image", "\"../" + SCREENSHOTS_DIR + "/" + node.getContent().getState().getId() + ".png\"");
             put("imagescale", "true");
             put("imagepos", "tc");
@@ -146,9 +149,9 @@ public final class DotConverter {
                 TreeNode<ApplicationStateTree.ApplicationStateNode>, Map<String, String>>
                 edgeAttributeFunction = (source, target) -> new HashMap<String, String>() {{
             put("label", "<" + source.getContent().getActionToNextState().entrySet().stream()
-                    .filter(e -> e.getValue().equals(target.getContent().getState()))
-                    .filter(e -> keepAction.test(source.getContent(), e.getKey()))
-                    .map(e -> printActionProb.apply(source.getContent(), e.getKey()))
+                    .filter(entry -> entry.getValue().equals(target.getContent().getState()))
+                    .filter(entry -> keepAction.test(source.getContent(), entry.getKey()))
+                    .map(entry -> printActionProb.apply(source.getContent(), entry.getKey()))
                     .collect(Collectors.joining("<BR/>")) + ">");
 
             if (isOnMostLikelyPath.test(source, target)) {
@@ -159,7 +162,7 @@ public final class DotConverter {
         final Function<Map<String, String>, String> attributesToString
                 = attributes -> (attributes == null || attributes.isEmpty()) ? ""
                 : " [" + attributes.entrySet().stream()
-                        .map(e -> e.getKey() + "=" + e.getValue())
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
                         .collect(Collectors.joining(", ")) + "]";
 
         final Queue<TreeNode<ApplicationStateTree.ApplicationStateNode>> nodes = new LinkedList<>();

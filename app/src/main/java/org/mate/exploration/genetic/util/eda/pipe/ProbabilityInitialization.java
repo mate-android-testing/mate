@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.IGUIModel;
@@ -44,6 +45,12 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
     public Map<Action, Double> apply(final List<Action> prevActions, final IScreenState state) {
 
         final Map<Action, Double> probabilities = new HashMap<>();
+
+        if (state.getId().equals("VIRTUAL_ROOT_STATE")) {
+            probabilities.put(new StartAction(), 1.0d);
+            return probabilities;
+        }
+
         final Set<Action> promisingActions
                 = new HashSet<>(Registry.getUiAbstractionLayer().getPromisingActions(state));
 

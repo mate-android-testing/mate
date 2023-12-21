@@ -1,9 +1,21 @@
 package org.mate.exploration.genetic.util.eda.pipe.ppt;
 
+import android.support.annotation.NonNull;
+
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
+import org.mate.interaction.action.intent.IntentAction;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateType;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,15 +47,106 @@ public class ApplicationStateTree {
     private TreeNode<ApplicationStateNode> cursor;
 
     /**
+     * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
+     * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
+     * screen state.
+     */
+    private static final IScreenState VIRTUAL_ROOT_STATE = new IScreenState() {
+
+        @Override
+        public String getId() {
+            return "VIRTUAL_ROOT_STATE";
+        }
+
+        @Override
+        public void setId(String stateId) {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<Widget> getWidgets() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<Action> getActions() {
+            return Collections.singletonList(new StartAction());
+        }
+
+        @Override
+        public List<UIAction> getUIActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<SystemAction> getSystemActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentBasedAction> getIntentBasedActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentAction> getIntentActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<WidgetAction> getWidgetActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<MotifAction> getMotifActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public String getActivityName() {
+            return "VIRTUAL_ROOT_STATE_ACTIVITY";
+        }
+
+        @Override
+        public String getPackageName() {
+            return "VIRTUAL_ROOT_STATE_PACKAGE";
+        }
+
+        @Override
+        public ScreenStateType getType() {
+            return ScreenStateType.ACTION_SCREEN_STATE;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return getId() + " [" + getActivityName() + "]";
+        }
+    };
+
+    /**
      * Initialises a new PPT.
      *
      * @param initializeNodeFunction The initialization function for the action weights of a state.
      */
     public ApplicationStateTree(BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNodeFunction) {
         this.initializeNodeFunction = initializeNodeFunction;
-        tree = new Tree<>(initializeNode(Collections.emptyList(),
-                Registry.getUiAbstractionLayer().getLastScreenState()));
-        cursor = tree.getRoot();
+        tree = new Tree<>(initializeNode(Collections.emptyList(), VIRTUAL_ROOT_STATE));
+        cursor = addRootState(Registry.getUiAbstractionLayer().getLastScreenState());
+    }
+
+    /**
+     * Adds a new root state below the virtual root state.
+     *
+     * @param rootState The new root state.
+     * @return Returns the newly added root state in the tree.
+     */
+    private TreeNode<ApplicationStateNode> addRootState(IScreenState rootState) {
+        final ApplicationStateNode rootNode
+                = initializeNode(Collections.singletonList(new StartAction()), rootState);
+        getRoot().getContent().actionToNextState.put(new StartAction(), rootState);
+        return getRoot().addChild(rootNode);
     }
 
     /**
@@ -90,11 +193,16 @@ public class ApplicationStateTree {
     }
 
     /**
-     * Resets the cursor position to the root node of the PPT.
+     * Resets the cursor position to the given root node of the PPT.
+     *
+     * @param currentScreenState The new root state.
      */
-    public void resetPosition() {
-        // TODO: There might be multiple root states due to the dynamic nature of Android apps.
+    public void resetPosition(final IScreenState currentScreenState) {
+
+        // create new root state if not yet existent
         cursor = tree.getRoot();
+        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
+                .orElseGet(() -> addRootState(currentScreenState));
     }
 
     /**
@@ -228,6 +336,11 @@ public class ApplicationStateTree {
          */
         public IScreenState getState() {
             return state;
+        }
+
+        @Override
+        public String toString() {
+            return state.toString();
         }
     }
 }

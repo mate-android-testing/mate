@@ -99,7 +99,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             uiAbstractionLayer.resetApp();
 
             // reset the model cursor to the root state
-            probabilisticModel.resetPosition();
+            probabilisticModel.resetPosition(uiAbstractionLayer.getLastScreenState());
         }
 
         final TestCase testCase = TestCase.newInitializedTestCase();
