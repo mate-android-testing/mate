@@ -150,8 +150,10 @@ public final class DotConverter {
             put("shape", "square");
             // Show next to each node the action probabilities.
             put("xlabel", "<" + node.getContent().getActionProbabilities().keySet().stream()
-                    .filter(action -> !node.getContent().getActionToNextState().containsKey(action))
+                    // Only show not yet triggered actions.
+                    .filter(action -> node.getContent().getActionToNextState().containsKey(action))
                     // TODO: Display only the best k actions since the label is getting somewhat too big.
+                    // Skip actions with a very low action probability.
                     .filter(action -> keepAction.test(node.getContent(), action))
                     .map(action -> printActionProb.apply(node.getContent(), action))
                     .collect(Collectors.joining("<BR/>")) + ">"
