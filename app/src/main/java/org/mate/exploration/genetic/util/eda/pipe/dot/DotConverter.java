@@ -108,7 +108,7 @@ public final class DotConverter {
 
             final Double actionProbability = node.getActionProbabilities().get(action);
 
-            String label = action.toShortString() + ": " + actionProbability;
+            String label = action.toShortString() + ": " + String.format("%.3f", actionProbability);
 
             // label in bold if action with highest probability
             if (node.getActionWithBiggestProbability().equals(action)) {
