@@ -94,7 +94,7 @@ public final class DotConverter {
         final BiPredicate<TreeNode<ApplicationStateTree.ApplicationStateNode>,
                 TreeNode<ApplicationStateTree.ApplicationStateNode>> isOnMostLikelyPath
                 = (source, target) -> mostLikelyPath.stream()
-                .anyMatch(edge -> edge.getX() == source && edge.getY() == target);
+                .anyMatch(edge -> edge.getX().equals(source) && edge.getY().equals(target));
 
         // Ignore showing actions that have a very low probability.
         final BiPredicate<ApplicationStateTree.ApplicationStateNode, Action> keepAction
