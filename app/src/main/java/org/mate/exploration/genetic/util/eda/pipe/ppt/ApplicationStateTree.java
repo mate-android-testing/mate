@@ -145,6 +145,9 @@ public class ApplicationStateTree {
     private TreeNode<ApplicationStateNode> addRootState(IScreenState rootState) {
         final ApplicationStateNode rootNode
                 = initializeNode(Collections.singletonList(new StartAction()), rootState);
+        // TODO: Enable 'non-deterministic' actions in the PPT. Right now, this overwrites the
+        //  outgoing action transition to a previous root state. In turn, the action will not be
+        //  attached to all root states in the PPT when drawn.
         getRoot().getContent().actionToNextState.put(new StartAction(), rootState);
         return getRoot().addChild(rootNode);
     }
