@@ -39,7 +39,11 @@ public final class DotConverter {
     }
 
     /**
-     * Retrieves the most likely path through the PPT, i.e the path with the highest action probabilities.
+     * Retrieves the most likely (highest possible rewarded) path through the PPT, i.e., the path
+     * through the nodes with the highest action probabilities. If the action with the highest probability
+     * in the current node have not been taken so far the path ends at this location. In summary, this
+     * is not the path through the actions with the highest probabilities that has been actually
+     * traversed.
      *
      * @param ppt The given PPT.
      * @return Returns the most likely path through the PPT.
