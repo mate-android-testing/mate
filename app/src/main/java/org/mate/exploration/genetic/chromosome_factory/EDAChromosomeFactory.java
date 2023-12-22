@@ -14,6 +14,7 @@ import org.mate.state.IScreenState;
 import org.mate.utils.ChromosomeUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.Utils;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Comparator;
@@ -129,6 +130,9 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             // TODO: Check if the surrogate model can be integrated. This probably requires changes
             //  of the surrogate model, in particular to the intermediate trace storing functionality.
 
+            // It is safe to terminate the exploration thread at this place.
+            Utils.throwOnInterrupt();
+
             // We need to write out the recorded fitness data and inherently coverage data before we
             // can evaluate the fitness or coverage.
             storeFitnessData(chromosome);
@@ -138,7 +142,11 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                     testCase.getVisitedActivitiesOfApp());
             CoverageUtils.logChromosomeCoverage(chromosome);
 
+            // Since the finish() method can be an expensive operation, we should terminate the
+            // exploration thread upon receiving an interrupt ideally now or afterwards otherwise.
+            Utils.throwOnInterrupt();
             testCase.finish();
+            Utils.throwOnInterrupt();
         }
         return chromosome;
     }
