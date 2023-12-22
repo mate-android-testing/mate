@@ -8,7 +8,7 @@ import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.ChromosomeUtils;
@@ -214,8 +214,9 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             chosenAction = sortedProbabilities.get(index - 1).getKey();
         }
 
-        // Check that the chosen (ui) action is actually applicable.
-        if (chosenAction instanceof UIAction
+        // Check that the chosen widget action is actually applicable. Since the 'BACK' action is a
+        // plain UI action this action is inherently allowed.
+        if (chosenAction instanceof WidgetAction
                 && !uiAbstractionLayer.getExecutableUIActions().contains(chosenAction)) {
             MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
                     + chosenAction.toShortString() + " not applicable!");
