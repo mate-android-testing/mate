@@ -305,13 +305,15 @@ public class ApplicationStateTree {
         /**
          * Retrieves the action with the highest action probability.
          *
-         * @return Returns the action with the highest assigned probability.
+         * @return Returns the action with the highest assigned probability if possible, otherwise
+         *          {@code null} is returned.
          */
         public Action getActionWithBiggestProbability() {
             return actionProbabilities.entrySet().stream()
                     .max(Comparator.comparingDouble(Map.Entry::getValue))
                     .map(Map.Entry::getKey)
-                    .orElseThrow(IllegalStateException::new);
+                    // States that don't belong to the AUT do not have any outgoing actions.
+                    .orElse(null);
         }
 
         /**

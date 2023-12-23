@@ -64,6 +64,13 @@ public final class DotConverter {
 
         do {
             final Action nextAction = prevNode.getContent().getActionWithBiggestProbability();
+
+            if (nextAction == null) {
+                // We reached a state that doesn't belong to the AUT and thus doesn't have any
+                // outgoing actions.
+                break;
+            }
+
             final IScreenState nextState = prevNode.getContent().getActionToNextState().get(nextAction);
             nextNode = prevNode.getChild(node -> node.getState().equals(nextState));
 

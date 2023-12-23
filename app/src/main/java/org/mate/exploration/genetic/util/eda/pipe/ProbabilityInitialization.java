@@ -50,6 +50,9 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
         if (state.getId().equals("VIRTUAL_ROOT_STATE")) {
             probabilities.put(new StartAction(), 1.0d);
             return probabilities;
+        } else if (!state.getPackageName().equals(Registry.getPackageName())) {
+            // The state doesn't belong to the AUT, thus there is no reason to initialise any probabilities.
+            return probabilities;
         }
 
         final Set<Action> promisingActions
