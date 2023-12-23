@@ -175,7 +175,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot before the model is refined.
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
             DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-before-update.dot");
         }
 
@@ -205,7 +205,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot after the model was refined.
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
             DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-after-update.dot");
         }
     }
