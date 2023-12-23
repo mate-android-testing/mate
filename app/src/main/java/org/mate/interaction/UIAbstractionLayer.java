@@ -112,7 +112,7 @@ public class UIAbstractionLayer {
         // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
-            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
+            DotConverter.takeScreenshot(id, packageName);
         }
 
         if (Properties.SURROGATE_MODEL()) {
@@ -1019,7 +1019,7 @@ public class UIAbstractionLayer {
         // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
-            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
+            DotConverter.takeScreenshot(id, packageName);
         }
 
         return screenState;
