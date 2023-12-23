@@ -343,6 +343,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             final double fitness = fitnessFunction.getFitnessAfterXActions(bestTestCase,
                     nodeWithPickedAction.actionIndex + 1);
 
+            // TODO: Check whether fitness function is maximising or minimising.
             // check if fitness is getting better (decreases)
             if (prevFitness - fitness > 0.002) { // TODO: Seems to be an epsilon, may use Double.compare()!
                 indexOfLastFitnessDecrease = i;
