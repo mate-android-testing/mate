@@ -218,7 +218,7 @@ public class FSMModel implements IGUIModel {
         return getStates().stream()
                 .filter(screenState -> screenState.getId().equals(screenStateId))
                 .findFirst()
-                .orElse(null);
+                .orElse(null); // e.g., for the 'unknown' state
     }
 
     /**
