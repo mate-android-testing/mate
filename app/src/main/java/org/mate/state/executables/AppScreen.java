@@ -117,15 +117,26 @@ public class AppScreen {
             rootNode = InstrumentationRegistry.getInstrumentation()
                     .getUiAutomation().getRootInActiveWindow();
 
-            /*
-            * A certain combination of actions that bring the AUT in a state where uiautomator
-            * fetches a ui hierarchy (window) consisting of a single widget and the actual window
-            * is labeled as inactive at that moment. Although we could access the widgets of the
-            * inactive window as well, performing an action on them fails without first introducing
-            * some dummy action like clicking in the middle of the screen. It seems like we need to
-            * bring back the focus to the correct window by injecting some dummy action.
-             */
-            if (rootNode.getChildCount() == 0) {
+            if (rootNode == null) {
+                MATE.log_warn("Fetched empty root node!");
+                // We probably fetched the screen at the moment the underlying activity was dying
+                // due some fault. The only option is here to wait some additional time and re-try
+                // fetching the screen state.
+                Utils.sleep(WAIT_FOR_STABLE_STATE);
+                rootNode = InstrumentationRegistry.getInstrumentation()
+                        .getUiAutomation().getRootInActiveWindow();
+                if (rootNode == null) {
+                    MATE.log_warn("Couldn't fetch correct root node!");
+                }
+            } else if (rootNode.getChildCount() == 0) {
+                /*
+                 * A certain combination of actions that bring the AUT in a state where uiautomator
+                 * fetches a ui hierarchy (window) consisting of a single widget and the actual window
+                 * is labeled as inactive at that moment. Although we could access the widgets of the
+                 * inactive window as well, performing an action on them fails without first introducing
+                 * some dummy action like clicking in the middle of the screen. It seems like we need to
+                 * bring back the focus to the correct window by injecting some dummy action.
+                 */
                 MATE.log_warn("Fetched wrong active window.");
 
                 device.click(device.getDisplayWidth() / 2, device.getDisplayHeight() / 2);
