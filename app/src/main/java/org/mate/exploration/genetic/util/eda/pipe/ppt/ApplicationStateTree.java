@@ -192,6 +192,15 @@ public class ApplicationStateTree {
      * @param currentScreenState The current screen state.
      */
     public void updatePosition(final TestCase testCase, final Action action, final IScreenState currentScreenState) {
+
+        if (testCase.getVisitedStates().contains("unknown")) {
+            // We couldn't retrieve the correct screen state for the last action, thus we simply
+            // ignore this transition in the PPT.
+            MATE.log_warn("Ignoring transition to unknown state in PPT!");
+            return;
+        }
+
+
         cursor.getContent().updateActionToNextState(action, currentScreenState);
         cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
                 .orElseGet(() -> cursor.addChild(initializeNode(testCase.getActionSequence(), currentScreenState)));

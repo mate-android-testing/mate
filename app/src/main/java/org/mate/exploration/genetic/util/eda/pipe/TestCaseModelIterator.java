@@ -10,6 +10,7 @@ import org.mate.state.IScreenState;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Provides an iterator over the nodes in the PPT described by a test case.
@@ -45,9 +46,14 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     TestCaseModelIterator(IProbabilisticModel<TestCase> probabilisticModel, TestCase testCase) {
 
         this.probabilisticModel = probabilisticModel;
-        this.actionIterator = testCase.getActionSequence().iterator();
+        this.actionIterator = testCase.getVisitedStates().contains("unkown")
+                // A transition to the 'unknown' state can only happen at the very end, thus we
+                // simply cut off the last action in such a case.
+                ? testCase.getActionSequence().subList(0, testCase.getActionSequence().size() - 1).iterator()
+                : testCase.getActionSequence().iterator();
         this.stateIterator = testCase.getStateSequence().stream()
                 .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
+                .filter(Objects::nonNull) // ignore a transition to the 'unknown' state
                 .iterator();
 
         if (Properties.PIPE_RECORD_PPT()) {
