@@ -314,6 +314,18 @@ public class FitnessUtils {
     }
 
     /**
+     * Retrieves the crash distance vector for the given chromosome, i.e., a vector consisting of
+     * the individual action fitness values in action order.
+     *
+     * @param chromosome The chromosome for which the crash distance vector should be evaluated.
+     * @param <T> The type wrapped by the chromosome.
+     * @return Returns the crash distance vector for the given chromosome.
+     */
+    public static <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+        return Registry.getEnvironmentManager().getCrashDistanceVector(chromosome);
+    }
+
+    /**
      * Retrieves the novelty vector for the given chromosomes.
      *
      * @param chromosomes The list of chromosomes for which the novelty should be computed.

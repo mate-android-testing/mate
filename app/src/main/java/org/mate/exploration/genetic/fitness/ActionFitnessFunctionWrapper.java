@@ -5,6 +5,7 @@ import org.mate.model.TestCase;
 import org.mate.utils.ChromosomeUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -74,17 +75,39 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
 
     /**
      * Records the fitness values for the given actions of the given chromosome.
+     * NOTE: One should use {@link #recordActionFitness(IChromosome, Map)} instead which sends a
+     * single request to MATE-Server and consequently retrieves the individual fitness values in one
+     * batch.
+     *
+     * @param chromosome The chromosome for which the fitness should be recorded.
+     * @param tracesPerAction The traces per action.
+     */
+    @SuppressWarnings("unused")
+    public void recordActionFitnessOld(final IChromosome<TestCase> chromosome,
+                                    final Map<String, Set<String>> tracesPerAction) {
+        for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
+            // NOTE: The linked hashset guarantees traversing using the insertion order.
+            final int actions = Integer.parseInt(entry.getKey().split("_")[0]);
+            actionFitnessValues.put(entry.getKey(),
+                    fitnessFunction.getNormalizedFitness(chromosome, actions));
+        }
+    }
+
+    /**
+     * Records the fitness values for the given actions of the given chromosome.
      *
      * @param chromosome The chromosome for which the fitness should be recorded.
      * @param tracesPerAction The traces per action.
      */
     public void recordActionFitness(final IChromosome<TestCase> chromosome,
                                     final Map<String, Set<String>> tracesPerAction) {
+
+        final List<Double> crashDistances = fitnessFunction.getNormalizedFitnessVector(chromosome);
+
         for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
             // NOTE: The linked hashset guarantees traversing using the insertion order.
             final int actions = Integer.parseInt(entry.getKey().split("_")[0]);
-            // TODO: We could use a single request that returns all individual fitness values at once.
-            actionFitnessValues.put(entry.getKey(), fitnessFunction.getNormalizedFitness(chromosome, actions));
+            actionFitnessValues.put(entry.getKey(), crashDistances.get(actions));
         }
     }
 

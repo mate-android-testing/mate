@@ -4,6 +4,8 @@ import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.utils.FitnessUtils;
 
+import java.util.List;
+
 /**
  * Provides a fitness function for crash reproduction.
  *
@@ -55,5 +57,21 @@ public class CrashDistanceFitnessFunction<T> implements IActionFitnessFunction<T
         }
 
         return crashDistance;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Double> getNormalizedFitnessVector(IChromosome<T> chromosome) {
+
+        final List<Double> crashDistances = FitnessUtils.getCrashDistanceVector(chromosome);
+
+        if (crashDistances.contains(0.0d)) {
+            // We can terminate the search once we have reproduced the crash.
+            ConditionalTerminationCondition.satisfiedCondition();
+        }
+
+        return crashDistances;
     }
 }

@@ -953,6 +953,48 @@ public class EnvironmentManager {
     }
 
     /**
+     * Retrieves the crash distance vector for the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
+     * {@link #storeActionFitnessData(IChromosome)} or
+     * {@link #storeActionFitnessData(IChromosome, Map, FitnessFunction)} has to be called previously.
+     *
+     * @param chromosome Refers either to a test case or to a test suite.
+     * @return Returns the crash distance vector for the given chromosome.
+     */
+    public <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
+                // a dummy test case has a crash distance of 1.0 (worst value)
+                return Collections.nCopies(((TestCase) chromosome.getValue())
+                        .getActionSequence().size(), 1.0d);
+            }
+        }
+
+        String chromosomeId = getChromosomeId(chromosome);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_crash_distance_vector")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", chromosomeId);
+
+        long start = System.currentTimeMillis();
+        Message response = sendMessage(messageBuilder.build());
+        long end = System.currentTimeMillis();
+        MATE.log_debug("Computing crash distance vector took: " + (end - start) + "ms");
+        final String[] crashDistances
+                = response.getParameter("crash_distance_vector").split("\\+");
+
+        final List<Double> crashDistanceVector = new ArrayList<>();
+
+        for (String crashDistance : crashDistances) {
+            crashDistanceVector.add(Double.parseDouble(crashDistance));
+        }
+
+        return crashDistanceVector;
+    }
+
+    /**
      * Retrieves the crash distance for the given chromosome. Note that
      * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
      * {@link #storeActionFitnessData(IChromosome)} or
