@@ -978,10 +978,7 @@ public class EnvironmentManager {
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
 
-        long start = System.currentTimeMillis();
         Message response = sendMessage(messageBuilder.build());
-        long end = System.currentTimeMillis();
-        MATE.log_debug("Computing crash distance vector took: " + (end - start) + "ms");
         final String[] crashDistances
                 = response.getParameter("crash_distance_vector").split("\\+");
 
