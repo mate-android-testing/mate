@@ -60,6 +60,23 @@ public class Properties {
     }
 
     /**
+     * The waiting time for idle state timeout used by the underlying
+     * {@link android.support.test.uiautomator.UiDevice} instance. The default timeout is 10 seconds.
+     * In most cases this timeout is never exhausted but there are certain apps that can't detect
+     * an idle state reliably and consequently the timeout is exhausted multiple times, which makes
+     * the action execution extremely show.
+     *
+     * NOTE: It remains unclear why a multiple of the default 10 seconds timeout can be reached when
+     * executing a single action. The only possible explanation might be that actions like a long click
+     * are internally represented by compound actions, which in turn wait multiple times for the
+     * idle timeout. The only reliable option seems to set the timeout to 0 for apps that fail to
+     * detect an idle state reliably.
+     *
+     * @return Returns the wait for idle timeout (in ms) used by UIAutomator.
+     */
+    public static long WAIT_FOR_IDLE_TIMEOUT() { return propertyOr(10000); }
+
+    /**
      * Defines the equivalence check for two screen states.
      *
      * @return Returns the selected state equivalence check.
