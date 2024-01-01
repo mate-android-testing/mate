@@ -202,7 +202,7 @@ public class ApplicationStateTree {
 
 
         cursor.getContent().updateActionToNextState(action, currentScreenState);
-        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
+        cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
                 .orElseGet(() -> cursor.addChild(initializeNode(testCase.getActionSequence(), currentScreenState)));
     }
 
@@ -214,8 +214,9 @@ public class ApplicationStateTree {
     public void updatePositionImmutable(final IScreenState currentScreenState) {
 
         // relative change from current position
-        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
-                .orElseThrow(() -> new IllegalStateException("Can't locate state in child nodes!"));
+        cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
+                .orElseThrow(() -> new IllegalStateException("Can't locate state in child nodes: "
+                + cursor.getContent() + " --> " + currentScreenState));
     }
 
     /**
@@ -227,7 +228,7 @@ public class ApplicationStateTree {
 
         // create new root state if not yet existent
         cursor = tree.getRoot();
-        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
+        cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
                 .orElseGet(() -> addRootState(currentScreenState));
     }
 
