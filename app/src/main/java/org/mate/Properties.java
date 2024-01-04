@@ -74,8 +74,8 @@ public class Properties {
      *
      * @return Returns the wait for idle timeout (in ms) used by UIAutomator.
      */
-    public static long WAIT_FOR_IDLE_TIMEOUT() { return propertyOr(10000); }
-
+    public static Long WAIT_FOR_IDLE_TIMEOUT() { return propertyOr(10000L); }
+    
     /**
      * Defines the equivalence check for two screen states.
      *
