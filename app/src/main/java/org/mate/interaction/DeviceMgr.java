@@ -109,7 +109,7 @@ public class DeviceMgr {
     /**
      * The probability for using a stack trace token as input.
      */
-    private static final double PROB_STACK_TRACE_USER_INPUT = 0.8;
+    private static final double PROB_STACK_TRACE_USER_INPUT = 0.5;
 
     /**
      * The probability for mutating a static string.
