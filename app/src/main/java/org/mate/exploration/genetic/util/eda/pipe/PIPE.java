@@ -250,8 +250,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
         final double fitElitist = fitnessFunction.getFitness(elitist);
-        return probBestTestCase + (1 - probBestTestCase) * learningRate
-                * ((epsilon + fitElitist) / (epsilon + fitBestTestCase));
+        return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
+                * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
 
     /**
@@ -263,8 +263,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         final double fitElitist = fitnessFunction.getFitness(elitist);
-        return probBestTestCase - probBestTestCase * negativeLearningRate
-                * ((epsilon + fitBestTestCase) / (epsilon + fitElitist));
+        return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
+                * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
 
     /**
