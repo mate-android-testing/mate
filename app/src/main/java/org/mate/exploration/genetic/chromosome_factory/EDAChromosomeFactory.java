@@ -1,24 +1,27 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.Properties;
-import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
+import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
-import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.utils.ChromosomeUtils;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
+import org.mate.utils.Utils;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +44,11 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     private final ActionFitnessFunctionWrapper fitnessFunction;
 
     /**
+     * Records the traces on a per action-basis.
+     */
+    private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
+
+    /**
      * Initialises the chromosome factory with the given properties.
      *
      * @param maxNumEvents The maximal number of actions of a test.
@@ -55,7 +63,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         super(maxNumEvents);
         assert fitnessFunctions.size() == 1;
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction = new ActionFitnessFunctionWrapper((IFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        this.fitnessFunction
+                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
     }
 
     /**
@@ -74,7 +83,8 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         super(resetApp, maxNumEvents);
         assert fitnessFunctions.size() == 1;
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction = new ActionFitnessFunctionWrapper((IFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        this.fitnessFunction
+                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
     }
 
     /**
@@ -90,31 +100,21 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             uiAbstractionLayer.resetApp();
 
             // reset the model cursor to the root state
-            probabilisticModel.resetPosition();
+            probabilisticModel.resetPosition(uiAbstractionLayer.getLastScreenState());
         }
 
         final TestCase testCase = TestCase.newInitializedTestCase();
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         // Ignore (split off from first action) the traces produced by the reset of the AUT.
-        storeCoverageAndFitnessData(chromosome);
+        recordFitnessData(chromosome);
 
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
                 final Action nextAction = selectAction();
-
-                // TODO: Fill up with random actions if selected action is not applicable.
-
-                if (nextAction instanceof UIAction // check that the ui action is actually applicable
-                        && !uiAbstractionLayer.getExecutableUIActions().contains(nextAction)) {
-                    MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
-                            + nextAction.toShortString() + " crashed or left AUT.");
-                    return chromosome;
-                }
-
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
-                storeCoverageAndFitnessData(chromosome);
+                recordFitnessData(chromosome);
 
                 final IScreenState currentState = uiAbstractionLayer.getLastScreenState();
                 probabilisticModel.updatePosition(testCase, nextAction, currentState);
@@ -130,20 +130,23 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             // TODO: Check if the surrogate model can be integrated. This probably requires changes
             //  of the surrogate model, in particular to the intermediate trace storing functionality.
 
-            /*
-            * Storing coverage/fitness is already handled by storeFitnessData(), we only maintain
-            * these calls to store coverage/fitness in case of a fault.
-             */
-            FitnessUtils.storeActionFitnessData(chromosome);
-            CoverageUtils.storeActionCoverageData(chromosome);
+            // It is safe to terminate the exploration thread at this place.
+            Utils.throwOnInterrupt();
 
+            // We need to write out the recorded fitness data and inherently coverage data before we
+            // can evaluate the fitness or coverage.
+            storeFitnessData(chromosome);
+
+            // We need to update the activity coverage manually here.
+            CoverageUtils.updateTestCaseChromosomeActivityCoverage(chromosome,
+                    testCase.getVisitedActivitiesOfApp());
             CoverageUtils.logChromosomeCoverage(chromosome);
 
-            if (Properties.GRAPH_TYPE() != null && Properties.DRAW_GRAPH() != null) {
-                Registry.getEnvironmentManager().drawGraph(chromosome);
-            }
-
+            // Since the finish() method can be an expensive operation, we should terminate the
+            // exploration thread upon receiving an interrupt ideally now or afterwards otherwise.
+            Utils.throwOnInterrupt();
             testCase.finish();
+            Utils.throwOnInterrupt();
         }
         return chromosome;
     }
@@ -152,12 +155,40 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      * Stores the intermediate coverage and fitness of the chromosome, i.e. the coverage/fitness data
      * associated with the last executed action.
      *
+     * NOTE: This implementation has been replaced in favour of a faster implementation that directly
+     * retrieves the traces (coverage/fitness data) from the external storage and stores them to disk
+     * in one pass upon test case completion, see {@link #recordFitnessData(IChromosome)} and
+     * {@link #storeFitnessData(IChromosome)}.
+     *
      * @param chromosome The chromosome for which coverage and fitness should be stored.
      */
+    @SuppressWarnings("unused")
     private void storeCoverageAndFitnessData(final IChromosome<TestCase> chromosome) {
         CoverageUtils.storeActionCoverageData(chromosome);
         FitnessUtils.storeActionFitnessData(chromosome);
         fitnessFunction.recordCurrentActionFitness(chromosome);
+    }
+
+    /**
+     * Records the fitness data and inherently coverage data on a per action-basis for the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    private void recordFitnessData(final IChromosome<TestCase> chromosome) {
+        final String actionID = ChromosomeUtils.getActionEntityId(chromosome);
+        final Set<String> traces = uiAbstractionLayer.getTraces();
+        tracesPerAction.put(actionID, traces);
+    }
+
+    /**
+     * Stores the recorded fitness data and inherently coverage data to disk for the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     */
+    private void storeFitnessData(final IChromosome<TestCase> chromosome) {
+        FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
+        fitnessFunction.recordActionFitness(chromosome, tracesPerAction);
+        tracesPerAction.clear(); // clear traces for next chromosome
     }
 
     /**
@@ -175,17 +206,32 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                 .sorted(Comparator.comparingDouble(Map.Entry::getValue))
                 .collect(Collectors.toList());
 
-        if (sortedProbabilities.size() == 1) {
-            return sortedProbabilities.get(0).getKey();
+        Action chosenAction;
+
+        if (sortedProbabilities.size() == 1) { // there is only a single action that can be taken
+            chosenAction = sortedProbabilities.get(0).getKey();
+        } else {
+
+            double sum = 0.0;
+            int index = 0;
+            while (sum <= randomNumber && index < sortedProbabilities.size()) {
+                sum += sortedProbabilities.get(index).getValue();
+                index++;
+            }
+
+            chosenAction = sortedProbabilities.get(index - 1).getKey();
         }
 
-        double sum = 0;
-        int index = 0;
-        while (sum < randomNumber && index < sortedProbabilities.size()) {
-            sum += sortedProbabilities.get(index).getValue();
-            index++;
+        // Check that the chosen widget action is actually applicable. Since the 'BACK' action is a
+        // plain UI action this action is inherently allowed.
+        if (chosenAction instanceof WidgetAction
+                && !uiAbstractionLayer.getExecutableUIActions().contains(chosenAction)) {
+            MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
+                    + chosenAction.toShortString() + " not applicable!");
+            // TODO: Remove this candidate action from the current state of the probabilistic model?
+            return super.selectAction(); // select random action
         }
 
-        return sortedProbabilities.get(index - 1).getKey();
+        return chosenAction;
     }
 }

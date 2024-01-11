@@ -86,7 +86,7 @@ public class TreeNode<T> {
     public Optional<TreeNode<T>> getChild(final Predicate<T> predicate) {
 
         final List<TreeNode<T>> matchingChildren = children.stream()
-                .filter(n -> predicate.test(n.content)).collect(Collectors.toList());
+                .filter(node -> predicate.test(node.content)).collect(Collectors.toList());
 
         if (matchingChildren.size() > 1) {
             throw new IllegalStateException("More than one child matched predicate!");
@@ -127,5 +127,10 @@ public class TreeNode<T> {
     @Override
     public int hashCode() {
         return Objects.hash(content, parent);
+    }
+
+    @Override
+    public String toString() {
+        return content.toString();
     }
 }

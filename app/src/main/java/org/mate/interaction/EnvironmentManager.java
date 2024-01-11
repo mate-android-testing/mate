@@ -902,13 +902,107 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the crash distance for the given chromosome. Note that
-     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
+     * Invalidates the traces cache which stores the traces read per file to speed up subsequent
+     * read operations. However, to keep the cache size small we should invalidate the cache when
+     * we are sure that certain traces are no longer needed. Typically this is the case when a new
+     * population is formed.
+     */
+    public void invalidateTracesCache() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/invalidate_cache");
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Stores the complete action fitness data for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     * @param tracesPerAction The traces recorded per action.
+     * @param fitnessFunction The given fitness function.
+     */
+    public void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                       final Map<String, Set<String>> tracesPerAction,
+                                       final FitnessFunction fitnessFunction) {
+
+        // there is no fitness data to store for dummy test cases
+        if (chromosome.getValue().isDummy()) {
+            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            return;
+        }
+
+        final String testcase = getChromosomeId(chromosome);
+
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_action_fitness_data")
+                .withParameter("fitnessFunction", fitnessFunction.name())
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", testcase)
+                .withParameter("actions", String.valueOf(tracesPerAction.size()));
+
+        for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
+            messageBuilder.withParameter(entry.getKey(), entry.getValue().stream()
+                    .collect(Collectors.joining("+")));
+        }
+
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Retrieves the crash distance vector for the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
+     * {@link #storeActionFitnessData(IChromosome)} or
+     * {@link #storeActionFitnessData(IChromosome, Map, FitnessFunction)} has to be called previously.
      *
      * @param chromosome Refers either to a test case or to a test suite.
+     * @return Returns the crash distance vector for the given chromosome.
+     */
+    public <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
+                // a dummy test case has a crash distance of 1.0 (worst value)
+                return Collections.nCopies(((TestCase) chromosome.getValue())
+                        .getActionSequence().size(), 1.0d);
+            }
+        }
+
+        String chromosomeId = getChromosomeId(chromosome);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_crash_distance_vector")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", chromosomeId);
+
+        Message response = sendMessage(messageBuilder.build());
+        final String[] crashDistances
+                = response.getParameter("crash_distance_vector").split("\\+");
+
+        final List<Double> crashDistanceVector = new ArrayList<>();
+
+        for (String crashDistance : crashDistances) {
+            crashDistanceVector.add(Double.parseDouble(crashDistance));
+        }
+
+        return crashDistanceVector;
+    }
+
+    /**
+     * Retrieves the crash distance for the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
+     * {@link #storeActionFitnessData(IChromosome)} or
+     * {@link #storeActionFitnessData(IChromosome, Map, FitnessFunction)} has to be called previously.
+     *
+     * @param chromosome Refers either to a test case or to a test suite.
+     * @param actions If not {@code null} then the crash distance is only derived for the given
+     *                  action range of the test case, e.g., for the first three actions.
      * @return Returns the crash distance for the given chromosome.
      */
-    public <T> double getCrashDistance(IChromosome<T> chromosome) {
+    public <T> double getCrashDistance(IChromosome<T> chromosome, Integer actions) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
@@ -923,6 +1017,10 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_crash_distance")
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
+
+        if (actions != null) {
+            messageBuilder = messageBuilder.withParameter("actions", String.valueOf(actions));
+        }
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("crash_distance"));
@@ -1401,13 +1499,15 @@ public class EnvironmentManager {
      *
      * @param fileName The file name.
      * @param content The given content that should be written to file.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false}.
      */
-    public void writeFile(final String fileName, final String content) {
-        sendMessage(new Message.MessageBuilder("/utility/write_file")
+    public boolean writeFile(final String fileName, final String content) {
+        final Message request = new Message.MessageBuilder("/utility/write_file")
                 .withParameter("deviceId", emulator)
                 .withParameter("fileName", fileName)
                 .withParameter("content", content)
-                .build());
+                .build();
+        return sendMessageSignalSuccess(request).isPresent();
     }
 
     /**

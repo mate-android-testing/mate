@@ -4,7 +4,6 @@ import org.mate.MATE;
 import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.exploration.genetic.util.eda.pipe.dot.DotConverter;
 import org.mate.exploration.genetic.util.eda.pipe.ppt.ApplicationStateTree;
@@ -81,12 +80,12 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * The probabilistic prototype tree (PPT).
      */
     private final ApplicationStateTree ppt
-            = new ApplicationStateTree(new ProbabilityInitialization(0.6));
+            = new ApplicationStateTree(new ProbabilityInitialization(Properties.PROMISING_ACTION_WEIGHT()));
 
     /**
      * Initialises the PIPE algorithm with the given properties.
      *
-     * @param fitnessFunction The used fitness function.
+     * @param fitnessFunction The used per action-based fitness function.
      * @param learningRate The used learning rate for good nodes.
      * @param negativeLearningRate The used negative learning rate for bad nodes.
      * @param epsilon The used epsilon (small user defined constant).
@@ -95,11 +94,11 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @param pMutation The used probability for mutation.
      * @param mutationRate The used mutation rate (degree of mutation).
      */
-    public PIPE(IFitnessFunction<TestCase> fitnessFunction, double learningRate,
+    public PIPE(ActionFitnessFunctionWrapper fitnessFunction, double learningRate,
                 double negativeLearningRate, double epsilon, double clr,
                 double pEl, double pMutation, double mutationRate) {
 
-        this.fitnessFunction = new ActionFitnessFunctionWrapper(fitnessFunction);
+        this.fitnessFunction = fitnessFunction;
         this.learningRate = learningRate;
         this.negativeLearningRate = negativeLearningRate;
         this.epsilon = epsilon;
@@ -152,8 +151,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * {@inheritDoc}
      */
     @Override
-    public void resetPosition() {
-        ppt.resetPosition();
+    public void resetPosition(final IScreenState currentScreenState) {
+        ppt.resetPosition(currentScreenState);
     }
 
     /**
@@ -176,7 +175,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot before the model is refined.
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
             DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-before-update.dot");
         }
 
@@ -206,7 +205,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot after the model was refined.
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_hh-mm-ss");
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
             DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-after-update.dot");
         }
     }
@@ -251,8 +250,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
         final double fitElitist = fitnessFunction.getFitness(elitist);
-        return probBestTestCase + (1 - probBestTestCase) * learningRate
-                * ((epsilon + fitElitist) / (epsilon + fitBestTestCase));
+        return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
+                * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
 
     /**
@@ -264,8 +263,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         final double fitElitist = fitnessFunction.getFitness(elitist);
-        return probBestTestCase - probBestTestCase * negativeLearningRate
-                * ((epsilon + fitBestTestCase) / (epsilon + fitElitist));
+        return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
+                * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
 
     /**
@@ -344,6 +343,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             final double fitness = fitnessFunction.getFitnessAfterXActions(bestTestCase,
                     nodeWithPickedAction.actionIndex + 1);
 
+            // TODO: Check whether fitness function is maximising or minimising.
             // check if fitness is getting better (decreases)
             if (prevFitness - fitness > 0.002) { // TODO: Seems to be an epsilon, may use Double.compare()!
                 indexOfLastFitnessDecrease = i;

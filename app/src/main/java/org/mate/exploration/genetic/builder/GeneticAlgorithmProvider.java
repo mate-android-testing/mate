@@ -35,6 +35,7 @@ import org.mate.exploration.genetic.crossover.SOSMTestCaseMergeCrossOverFunction
 import org.mate.exploration.genetic.crossover.TestCaseMergeCrossOverFunction;
 import org.mate.exploration.genetic.crossover.TestSuiteOnePointCrossOverFunction;
 import org.mate.exploration.genetic.crossover.UniformSuiteCrossOverFunction;
+import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.fitness.ActivityFitnessFunction;
 import org.mate.exploration.genetic.fitness.AmountCrashesFitnessFunction;
 import org.mate.exploration.genetic.fitness.AndroidStateFitnessFunction;
@@ -48,6 +49,7 @@ import org.mate.exploration.genetic.fitness.BranchMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.CrashDistanceFitnessFunction;
 import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
+import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoverageFitnessFunction;
 import org.mate.exploration.genetic.fitness.LineCoveredPercentageFitnessFunction;
@@ -1115,7 +1117,9 @@ public class GeneticAlgorithmProvider {
         // default pEl 0.01
         // default pMutation 0.4
         // default mutationRate 0.4
-        return (IProbabilisticModel<T>) new PIPE((IFitnessFunction<TestCase>) fitnessFunctions.get(0),
+        final ActionFitnessFunctionWrapper fitnessFunction
+                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        return (IProbabilisticModel<T>) new PIPE(fitnessFunction,
                 org.mate.Properties.PIPE_LEARNING_RATE(),
                 org.mate.Properties.PIPE_NEGATIVE_LEARNING_RATE(),
                 org.mate.Properties.PIPE_EPSILON(),

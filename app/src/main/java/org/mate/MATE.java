@@ -3,6 +3,7 @@ package org.mate;
 import android.os.Debug;
 import android.os.StrictMode;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
@@ -92,6 +93,7 @@ public class MATE {
         MATE.log_acc("Main activity: " + Registry.getMainActivity());
 
         final UiDevice device = UiDevice.getInstance(getInstrumentation());
+        Configurator.getInstance().setWaitForIdleTimeout(Properties.WAIT_FOR_IDLE_TIMEOUT());
         final DeviceMgr deviceMgr = new DeviceMgr(device, Registry.getPackageName());
         Registry.registerDeviceMgr(deviceMgr);
 
@@ -163,6 +165,8 @@ public class MATE {
                 DotConverter.convertFinal(Registry.getUiAbstractionLayer().getGuiModel());
             }
 
+            // TODO: Log the model iteratively since this string is typically too large to be held
+            //  in a single log message, i.e. Logcat truncates the string at some point.
             MATE.log_debug(Registry.getUiAbstractionLayer().getGuiModel().toString());
 
             try {

@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.Registry;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
@@ -9,6 +10,7 @@ import org.mate.state.IScreenState;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Provides an iterator over the nodes in the PPT described by a test case.
@@ -44,22 +46,26 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     TestCaseModelIterator(IProbabilisticModel<TestCase> probabilisticModel, TestCase testCase) {
 
         this.probabilisticModel = probabilisticModel;
-        this.actionIterator = testCase.getActionSequence().iterator();
+        this.actionIterator = testCase.getVisitedStates().contains("unkown")
+                // A transition to the 'unknown' state can only happen at the very end, thus we
+                // simply cut off the last action in such a case.
+                ? testCase.getActionSequence().subList(0, testCase.getActionSequence().size() - 1).iterator()
+                : testCase.getActionSequence().iterator();
         this.stateIterator = testCase.getStateSequence().stream()
                 .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
+                .filter(Objects::nonNull) // ignore a transition to the 'unknown' state
                 .iterator();
 
-        MATE.log_debug("PPT: ");
-        MATE.log_debug(probabilisticModel.toString());
-
-        // Reset cursor to root node of PPT.
-        probabilisticModel.resetPosition();
-
-        // This skips the root node.
-        if (!stateIterator.next().equals(probabilisticModel.getState())) {
-            MATE.log_warn("Test case does not start at root node...");
+        if (Properties.PIPE_RECORD_PPT()) {
+            MATE.log_debug("PPT: ");
+            MATE.log_debug(probabilisticModel.toString());
         }
 
+        // This skips the root node.
+        final IScreenState rootState = stateIterator.next();
+
+        // Reset cursor to root node of PPT.
+        probabilisticModel.resetPosition(rootState);
     }
 
     /**

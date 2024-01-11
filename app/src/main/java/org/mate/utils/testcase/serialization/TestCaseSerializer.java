@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 
 /**
  * Provides the functionality to serialize and de-serialize a {@link org.mate.model.TestCase}.
@@ -25,6 +24,9 @@ public final class TestCaseSerializer {
 
     // the location where test cases are stored
     private static final String TEST_CASES_DIR = "/data/data/org.mate/test-cases";
+
+    // the location where the test cases are stored locally by MATE-Server
+    private static final String LOCAL_TEST_CASES_DIR = "test-cases";
 
     // tracks the number of recorded test cases
     private static int recordCounter = 0;
@@ -66,44 +68,37 @@ public final class TestCaseSerializer {
             fileWriter.flush();
         } catch (IOException e) {
 
-            MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-            MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
+            // Retry by transmitting content directly over the wire.
+            MATE.log("Retry sending test case...");
+            boolean success = Registry.getEnvironmentManager().writeFile(
+                    LOCAL_TEST_CASES_DIR + "/" + "TestCase" + recordCounter + ".xml", testCaseXML);
 
-            MATE.log("Retry serialization...!");
-
-            try (Writer fileWriter = new FileWriter(testCaseFile)) {
-
-                fileWriter.write(testCaseXML);
-                fileWriter.flush();
-            } catch (IOException e1) {
+            if (!success) {
                 MATE.log("Serializing TestCase " + recordCounter + " failed!");
-                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!", e1);
+                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!", e);
             }
+
+            // Maybe the file couldn't be generated at all and this call might be superfluous.
+            MATE.log("Removing original test case file: " + testCaseFile.delete());
         }
 
         // fetch serialized test case from emulator + clean up
         boolean success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
                 "TestCase" + recordCounter + ".xml");
 
-        // retry on failure
         if (!success) {
-            MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-            MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
-            MATE.log("Retry fetching test case...!");
+            // Retry by transmitting content directly over the wire.
+            MATE.log("Retry sending test case...");
+            success = Registry.getEnvironmentManager().writeFile(
+                    LOCAL_TEST_CASES_DIR + "/" + "TestCase" + recordCounter + ".xml", testCaseXML);
 
-            /*
-            * Typically, one should wait a couple of seconds before re-sending the request.
-            * However, to avoid dealing with a possible interrupt, we sleep on MATE-Server side.
-             */
-            success = Registry.getEnvironmentManager().fetchTestCase(TEST_CASES_DIR,
-                    "TestCase" + recordCounter + ".xml");
-        }
+            if (!success) {
+                MATE.log("Serializing TestCase " + recordCounter + " failed!");
+                throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
+            }
 
-        if (!success) {
-            MATE.log("Content of test-cases folder: " + Arrays.toString(testCasesDir.list()));
-            MATE.log("TestCase" + recordCounter + ".xml exists: " + testCaseFile.exists());
-            MATE.log("Serializing TestCase " + recordCounter + " failed!");
-            throw new IllegalStateException("Serializing TestCase " + recordCounter + " failed!");
+            // Clean up by removing the test case file on the internal storage.
+            MATE.log("Removing original test case file: " + testCaseFile.delete());
         }
 
         recordCounter++;

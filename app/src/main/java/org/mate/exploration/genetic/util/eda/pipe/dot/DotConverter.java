@@ -39,7 +39,11 @@ public final class DotConverter {
     }
 
     /**
-     * Retrieves the most likely path through the PPT, i.e the path with the highest action probabilities.
+     * Retrieves the most likely (highest possible rewarded) path through the PPT, i.e., the path
+     * through the nodes with the highest action probabilities. If the action with the highest probability
+     * in the current node have not been taken so far the path ends at this location. In summary, this
+     * is not the path through the actions with the highest probabilities that has been actually
+     * traversed. In fact, this path might not even exist in the current PPT.
      *
      * @param ppt The given PPT.
      * @return Returns the most likely path through the PPT.
@@ -53,11 +57,19 @@ public final class DotConverter {
         final List<Tuple<TreeNode<ApplicationStateTree.ApplicationStateNode>,
                 TreeNode<ApplicationStateTree.ApplicationStateNode>>> path = new LinkedList<>();
 
+        // NOTE: The virtual root node might be connected to multiple real root nodes. The current
+        // implementation picks the transition to the lastly inserted real root node.
         TreeNode<ApplicationStateTree.ApplicationStateNode> prevNode = ppt.getRoot();
         Optional<TreeNode<ApplicationStateTree.ApplicationStateNode>> nextNode;
 
         do {
             final Action nextAction = prevNode.getContent().getActionWithBiggestProbability();
+
+            if (nextAction == null) {
+                // We reached a state that doesn't belong to the AUT and thus doesn't have any
+                // outgoing actions.
+                break;
+            }
 
             final IScreenState nextState = prevNode.getContent().getActionToNextState().get(nextAction);
             nextNode = prevNode.getChild(node -> node.getState().equals(nextState));
@@ -88,7 +100,7 @@ public final class DotConverter {
         final BiPredicate<TreeNode<ApplicationStateTree.ApplicationStateNode>,
                 TreeNode<ApplicationStateTree.ApplicationStateNode>> isOnMostLikelyPath
                 = (source, target) -> mostLikelyPath.stream()
-                .anyMatch(edge -> edge.getX() == source && edge.getY() == target);
+                .anyMatch(edge -> edge.getX().equals(source) && edge.getY().equals(target));
 
         // Ignore showing actions that have a very low probability.
         final BiPredicate<ApplicationStateTree.ApplicationStateNode, Action> keepAction
@@ -100,9 +112,8 @@ public final class DotConverter {
         final BiFunction<ApplicationStateTree.ApplicationStateNode, Action, String> printActionProb
                 = (node, action) -> {
 
-            final Double actionProbability = node.getActionProbabilities().get(action);
-
-            String label = action.toShortString() + ": " + actionProbability;
+            final double actionProbability = node.getActionProbabilities().get(action);
+            String label = action.toShortString() + ": " + String.format("%.3f", actionProbability);
 
             // label in bold if action with highest probability
             if (node.getActionWithBiggestProbability().equals(action)) {
@@ -114,6 +125,10 @@ public final class DotConverter {
 
         final StringJoiner stringJoiner = new StringJoiner("\n");
         stringJoiner.add("digraph D {");
+        // Shows all labels.
+        stringJoiner.add("forcelabels=true;");
+        // Controls how much horizontal space should be between two nodes.
+        stringJoiner.add("nodesep=10.0;");
 
         // Nodes are textually represented by the underlying screen state id.
         final Function<TreeNode<ApplicationStateTree.ApplicationStateNode>, String> nodeLabelFunction
@@ -126,30 +141,47 @@ public final class DotConverter {
         // Defines the node attributes.
         final Function<TreeNode<ApplicationStateTree.ApplicationStateNode>, Map<String, String>>
                 attributesFunction = node -> new HashMap<String, String>() {{
+            // TODO: There is no image for the virtual root node.
             put("image", "\"../" + SCREENSHOTS_DIR + "/" + node.getContent().getState().getId() + ".png\"");
             put("imagescale", "true");
             put("imagepos", "tc");
-            put("labelloc", "b");
+            // NOTE: The label is unfortunately placed inside the image. Since the menu bar at the
+            // bottom is black, the label wouldn't be visible at all. Since there is no easy option to
+            // place it outside the image, we highlight the label in red and place it in the center.
+            put("labelloc", "c");
+            put("label", "<<font color=\"red\"><font point-size=\"40\"><b>"
+                    + nodeLabelFunction.apply(node) + "</b></font></font>>");
+            put("width", "8");
             put("height", "6");
             put("fixedsize", "true");
             put("shape", "square");
             // Show next to each node the action probabilities.
             put("xlabel", "<" + node.getContent().getActionProbabilities().keySet().stream()
+                    // Only show not yet triggered actions.
                     .filter(action -> !node.getContent().getActionToNextState().containsKey(action))
+                    // TODO: Display only the best k actions since the label is getting somewhat too big.
+                    // Skip actions with a very low action probability.
                     .filter(action -> keepAction.test(node.getContent(), action))
                     .map(action -> printActionProb.apply(node.getContent(), action))
                     .collect(Collectors.joining("<BR/>")) + ">"
             );
         }};
 
+        // Defines the edge attributes.
         final BiFunction<TreeNode<ApplicationStateTree.ApplicationStateNode>,
                 TreeNode<ApplicationStateTree.ApplicationStateNode>, Map<String, String>>
                 edgeAttributeFunction = (source, target) -> new HashMap<String, String>() {{
             put("label", "<" + source.getContent().getActionToNextState().entrySet().stream()
-                    .filter(e -> e.getValue().equals(target.getContent().getState()))
-                    .filter(e -> keepAction.test(source.getContent(), e.getKey()))
-                    .map(e -> printActionProb.apply(source.getContent(), e.getKey()))
+                    // Ensure that there is actually an edge from the source to the target node.
+                    .filter(entry -> entry.getValue().equals(target.getContent().getState()))
+                    // Omit actions with a very low probability.
+                    .filter(entry -> keepAction.test(source.getContent(), entry.getKey()))
+                    .map(entry -> printActionProb.apply(source.getContent(), entry.getKey()))
                     .collect(Collectors.joining("<BR/>")) + ">");
+            // Controls the minimal length of an edge. Actually this should be dependent on the
+            // number of outgoing actions rather than a fixed value. This allows us to better separate
+            // nodes from each other vertically.
+            put("minlen", "10");
 
             if (isOnMostLikelyPath.test(source, target)) {
                 put("color", "red");
@@ -159,7 +191,7 @@ public final class DotConverter {
         final Function<Map<String, String>, String> attributesToString
                 = attributes -> (attributes == null || attributes.isEmpty()) ? ""
                 : " [" + attributes.entrySet().stream()
-                        .map(e -> e.getKey() + "=" + e.getValue())
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
                         .collect(Collectors.joining(", ")) + "]";
 
         final Queue<TreeNode<ApplicationStateTree.ApplicationStateNode>> nodes = new LinkedList<>();
@@ -168,13 +200,7 @@ public final class DotConverter {
         while (!nodes.isEmpty()) {
 
             final TreeNode<ApplicationStateTree.ApplicationStateNode> node = nodes.poll();
-
             final Map<String, String> attributes = attributesFunction.apply(node);
-
-            if (!attributes.containsKey("label")) {
-                attributes.put("label", '"' + nodeLabelFunction.apply(node) + '"');
-            }
-
             stringJoiner.add(nodeToEscapedLabelFunction.apply(node) + attributesToString.apply(attributes));
 
             for (final TreeNode<ApplicationStateTree.ApplicationStateNode> child : node.getChildren()) {
