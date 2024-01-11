@@ -2540,7 +2540,7 @@ public class DeviceMgr {
     /**
      * Retrieves the stack trace of the last discovered crash.
      *
-     * @return Returns the stack trace of the last crash.
+     * @return Returns the stack trace of the last crash or {@code null} if not extractable.
      */
     public StackTrace getLastCrashStackTrace() {
 
@@ -2558,6 +2558,9 @@ public class DeviceMgr {
                 }
             }
 
+            // couldn't extract the stack trace
+            MATE.log_warn("Couldn't extract stack trace from logcat: " + response);
+            return null;
         } catch (IOException e) {
             MATE.log_warn("Couldn't retrieve stack trace of last crash!");
             MATE.log_warn(e.getMessage());
