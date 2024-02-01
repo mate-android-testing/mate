@@ -48,6 +48,11 @@ public class ApplicationStateTree {
     private TreeNode<ApplicationStateNode> cursor;
 
     /**
+     * The package name of the AUT.
+     */
+    private final String packageName = Registry.getPackageName();
+
+    /**
      * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
      * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
      * screen state.
@@ -200,8 +205,21 @@ public class ApplicationStateTree {
             return;
         }
 
-
         cursor.getContent().updateActionToNextState(action, currentScreenState);
+
+        if (!currentScreenState.getPackageName().equals(packageName)) {
+            // We reached a state not belonging to the AUT. To avoid this we should reduce the
+            // action probability to a minimum. Although one might exclude those actions completely
+            // by specifying an action probability of zero, we cannot guarantee that those actions
+            // are not relevant to reproduce the target crash, e.g., they might have been simply
+            // triggered in the wrong internal state. Thus, we halve the action probability every
+            // time we observe such action. If the action is actually useful the PIPE algorithm
+            // will increase the action probability anyway.
+            // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
+            final double currentProbability = cursor.getContent().getActionProbabilities().get(action);
+            cursor.getContent().getActionProbabilities().put(action, currentProbability / 2);
+        }
+
         cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
                 .orElseGet(() -> cursor.addChild(initializeNode(testCase.getActionSequence(), currentScreenState)));
     }
