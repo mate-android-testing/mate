@@ -1,7 +1,9 @@
 package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.Registry;
+import org.mate.interaction.UIAbstractionLayer;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
 import org.mate.interaction.action.ui.ActionType;
 import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.IGUIModel;
@@ -44,6 +46,15 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
     public Map<Action, Double> apply(final List<Action> prevActions, final IScreenState state) {
 
         final Map<Action, Double> probabilities = new HashMap<>();
+
+        if (state.getId().equals("VIRTUAL_ROOT_STATE")) {
+            probabilities.put(new StartAction(), 1.0d);
+            return probabilities;
+        } else if (!state.getPackageName().equals(Registry.getPackageName())) {
+            // The state doesn't belong to the AUT, thus there is no reason to initialise any probabilities.
+            return probabilities;
+        }
+
         final Set<Action> promisingActions
                 = new HashSet<>(Registry.getUiAbstractionLayer().getPromisingActions(state));
 
@@ -116,6 +127,21 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
      * @return Returns {@code true} if the action leaves the AUT, otherwise {@code false} is returned.
      */
     private boolean actionLeavesAUT(final IScreenState state, final Action action) {
+
+        final UIAbstractionLayer uiAbstractionLayer = Registry.getUiAbstractionLayer();
+
+        // The 'BACK' action leaves the AUT when there is only a single activity or window displayed.
+        if (action instanceof UIAction && ((UIAction) action).getActionType() == ActionType.BACK) {
+            // NOTE: This check only works if the AUT is currently in the given state since the
+            // current activity and window stack is queried.
+            if (uiAbstractionLayer.getActivityStackSize() == 1
+                    && uiAbstractionLayer.getNumberOfWindows() == 1) {
+                return true;
+            }
+        }
+
+        // NOTE: This check only works for yet executed actions since those show up in the GUI model,
+        // but not for actions that haven't been executed so far.
         final IGUIModel iguiModel = Registry.getUiAbstractionLayer().getGuiModel();
         return iguiModel.getEdges(action).stream()
                 .anyMatch(edge -> edge.getSource().equals(state)

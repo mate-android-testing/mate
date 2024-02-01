@@ -716,7 +716,9 @@ public class EnvironmentManager {
         if (graphType == GraphType.INTRA_CFG) {
             messageBuilder.withParameter("method", Properties.METHOD_NAME());
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
-        } else if (graphType == GraphType.INTER_CFG) {
+        } else if (graphType == GraphType.INTER_CFG
+                || graphType == GraphType.INTER_CDG
+                || graphType == GraphType.MODULAR_CDG) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
             messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
@@ -731,13 +733,14 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the set of relevant stack trace tokens.
+     * Retrieves the set of relevant stack trace tokens which are necessary to determine promising
+     * actions.
      *
      * @return Returns the set of stack trace tokens.
      */
     public Set<String> getStackTraceTokens() {
 
-        if (tokens == null) {
+        if (tokens == null) { // only compute tokens once
             Message.MessageBuilder messageBuilder
                     = new Message.MessageBuilder("/graph/stack_trace_tokens")
                     .withParameter("package", Registry.getPackageName());
@@ -756,13 +759,13 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the set of user input tokens from the stack trace.
+     * Retrieves the set of user input tokens from the stack trace which are used as text inputs.
      *
      * @return Returns the set of user input tokens.
      */
     public Set<String> getStackTraceUserInput() {
 
-        if (userInputTokens == null) {
+        if (userInputTokens == null) { // only compute once
             Message.MessageBuilder messageBuilder
                     = new Message.MessageBuilder("/graph/stack_trace_user_tokens")
                     .withParameter("package", Registry.getPackageName());
@@ -771,18 +774,32 @@ public class EnvironmentManager {
             userInputTokens = new HashSet<>(Arrays.asList(response.getParameter("tokens").split(",")));
         }
 
-        return userInputTokens;
+        MATE.log_debug("User input tokens are: " + userInputTokens);
+        return Collections.unmodifiableSet(userInputTokens);
     }
 
     /**
      * Requests the drawing of the graph.
      */
     public void drawGraph() {
+        drawGraph(null);
+    }
+
+    /**
+     * Requests the drawing of the graph where the specified chromosome gets highlighted if desired.
+     *
+     * @param chromosome The chromosome that should be potentially highlighted.
+     * @param <T> The type of the chromosome.
+     */
+    public <T> void drawGraph(IChromosome<T> chromosome) {
 
         MATE.log_acc("Drawing graph!");
 
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/draw")
                 .withParameter("raw", String.valueOf(Properties.DRAW_GRAPH() == DrawType.RAW));
+        if (chromosome != null) {
+            messageBuilder = messageBuilder.withParameter("chromosome", getChromosomeId(chromosome));
+        }
         sendMessage(messageBuilder.build());
     }
 
@@ -810,18 +827,31 @@ public class EnvironmentManager {
      */
     public int getNumberOfBranches() {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_number_of_branches")
-                .withParameter("packageName", Registry.getPackageName());
+        if (Properties.GRAPH_TYPE() != null) {
+            // If we use a graph we know which branches are actually reachable and thus we should
+            // try to only optimize the search towards those branches.
+            Message.MessageBuilder messageBuilder
+                    = new Message.MessageBuilder("/graph/get_number_of_branches")
+                    .withParameter("packageName", Registry.getPackageName());
 
-        Message response = sendMessage(messageBuilder.build());
-        return Integer.parseInt(response.getParameter("branches"));
+            Message response = sendMessage(messageBuilder.build());
+            return Integer.parseInt(response.getParameter("branches"));
+        } else {
+            Message.MessageBuilder messageBuilder
+                    = new Message.MessageBuilder("/fitness/get_number_of_branches")
+                    .withParameter("packageName", Registry.getPackageName());
+
+            Message response = sendMessage(messageBuilder.build());
+            return Integer.parseInt(response.getParameter("branches"));
+        }
     }
 
     /**
-     * Retrieves the stack trace.
+     * Retrieves the 'at' stack trace.
      *
      * @return Returns the stack trace.
      */
+    @SuppressWarnings("unused")
     public List<String> getStackTrace() {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/stack_trace")
                 .withParameter("packageName", Registry.getPackageName());
@@ -884,13 +914,107 @@ public class EnvironmentManager {
     }
 
     /**
-     * Retrieves the crash distance for the given chromosome. Note that
-     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} has to be called previously.
+     * Invalidates the traces cache which stores the traces read per file to speed up subsequent
+     * read operations. However, to keep the cache size small we should invalidate the cache when
+     * we are sure that certain traces are no longer needed. Typically this is the case when a new
+     * population is formed.
+     */
+    public void invalidateTracesCache() {
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/invalidate_cache");
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Stores the complete action fitness data for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     * @param tracesPerAction The traces recorded per action.
+     * @param fitnessFunction The given fitness function.
+     */
+    public void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                       final Map<String, Set<String>> tracesPerAction,
+                                       final FitnessFunction fitnessFunction) {
+
+        // there is no fitness data to store for dummy test cases
+        if (chromosome.getValue().isDummy()) {
+            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            return;
+        }
+
+        final String testcase = getChromosomeId(chromosome);
+
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/store_action_fitness_data")
+                .withParameter("fitnessFunction", fitnessFunction.name())
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", testcase)
+                .withParameter("actions", String.valueOf(tracesPerAction.size()));
+
+        for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
+            messageBuilder.withParameter(entry.getKey(), entry.getValue().stream()
+                    .collect(Collectors.joining("+")));
+        }
+
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
+     * Retrieves the crash distance vector for the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
+     * {@link #storeActionFitnessData(IChromosome)} or
+     * {@link #storeActionFitnessData(IChromosome, Map, FitnessFunction)} has to be called previously.
      *
      * @param chromosome Refers either to a test case or to a test suite.
+     * @return Returns the crash distance vector for the given chromosome.
+     */
+    public <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+
+        if (chromosome.getValue() instanceof TestCase) {
+            if (((TestCase) chromosome.getValue()).isDummy()) {
+                MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
+                // a dummy test case has a crash distance of 1.0 (worst value)
+                return Collections.nCopies(((TestCase) chromosome.getValue())
+                        .getActionSequence().size(), 1.0d);
+            }
+        }
+
+        String chromosomeId = getChromosomeId(chromosome);
+
+        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_crash_distance_vector")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", chromosomeId);
+
+        Message response = sendMessage(messageBuilder.build());
+        final String[] crashDistances
+                = response.getParameter("crash_distance_vector").split("\\+");
+
+        final List<Double> crashDistanceVector = new ArrayList<>();
+
+        for (String crashDistance : crashDistances) {
+            crashDistanceVector.add(Double.parseDouble(crashDistance));
+        }
+
+        return crashDistanceVector;
+    }
+
+    /**
+     * Retrieves the crash distance for the given chromosome. Note that
+     * {@link #storeFitnessData(IChromosome, String, FitnessFunction)} or
+     * {@link #storeActionFitnessData(IChromosome)} or
+     * {@link #storeActionFitnessData(IChromosome, Map, FitnessFunction)} has to be called previously.
+     *
+     * @param chromosome Refers either to a test case or to a test suite.
+     * @param actions If not {@code null} then the crash distance is only derived for the given
+     *                  action range of the test case, e.g., for the first three actions.
      * @return Returns the crash distance for the given chromosome.
      */
-    public <T> double getCrashDistance(IChromosome<T> chromosome) {
+    public <T> double getCrashDistance(IChromosome<T> chromosome, Integer actions) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
@@ -905,6 +1029,10 @@ public class EnvironmentManager {
         Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/graph/get_crash_distance")
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
+
+        if (actions != null) {
+            messageBuilder = messageBuilder.withParameter("actions", String.valueOf(actions));
+        }
 
         Message response = sendMessage(messageBuilder.build());
         return Double.parseDouble(response.getParameter("crash_distance"));
@@ -1383,13 +1511,15 @@ public class EnvironmentManager {
      *
      * @param fileName The file name.
      * @param content The given content that should be written to file.
+     * @return Returns {@code true} if the operation succeeded, otherwise {@code false}.
      */
-    public void writeFile(final String fileName, final String content) {
-        sendMessage(new Message.MessageBuilder("/utility/write_file")
+    public boolean writeFile(final String fileName, final String content) {
+        final Message request = new Message.MessageBuilder("/utility/write_file")
                 .withParameter("deviceId", emulator)
                 .withParameter("fileName", fileName)
                 .withParameter("content", content)
-                .build());
+                .build();
+        return sendMessageSignalSuccess(request).isPresent();
     }
 
     /**

@@ -119,6 +119,10 @@ public final class DotConverter {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("digraph g {\n");
+        builder.append("forcelabels=true;\n"); // show all labels
+        if (Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
+            builder.append("nodesep=5.0;\n"); // the horizontal spacing between two nodes
+        }
         builder.append(toDotNodes(guiModel));
 
         if (RECORDED_TEST_CASES.isEmpty()) {
@@ -144,6 +148,10 @@ public final class DotConverter {
     private static String toDOT(IGUIModel guiModel, TestCase testCase) {
         final StringBuilder builder = new StringBuilder();
         builder.append("digraph g {\n");
+        builder.append("forcelabels=true;\n"); // show all labels
+        if (Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
+            builder.append("nodesep=5.0;\n"); // the horizontal spacing between two nodes
+        }
         builder.append(toDotNodes(guiModel));
         builder.append(toDotEdges(guiModel, testCase));
         builder.append("}\n");
@@ -164,34 +172,46 @@ public final class DotConverter {
 
             String stateId = state.getId();
             builder.append(stateId);
-            builder.append(" [label=\"");
+            builder.append(" [label=<<b>");
 
             if (Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
 
                 if (stateId.equals(FSMModel.VIRTUAL_ROOT_STATE_ID)) {
-                    builder.append("Root\", ");
+                    builder.append("Root</b>>, ");
                     builder.append("fontsize=250");
                 } else {
-                    builder.append("\", "); // empty label for screenshots
+                    // NOTE: The label is unfortunately placed inside the image. Since the menu bar
+                    // at the bottom is black, the label wouldn't be visible at all. Since there is
+                    // no easy option to place it outside the image, we highlight the label in red
+                    // and place it in the center.
+                    builder.append(stateId + "</b>>, ");
                     builder.append("image=\"../");
                     builder.append(SCREENSHOTS_DIR);
                     builder.append('/');
                     builder.append(stateId);
                     builder.append(".png\", ");
-                    builder.append("shape=\"box\"");
+                    builder.append("shape=square, ");
+                    builder.append("imagescale=true, ");
+                    builder.append("imagepos=tc, ");
+                    builder.append("labelloc=c, ");
+                    builder.append("width=8, ");
+                    builder.append("height=6, ");
+                    builder.append("fixedsize=true, ");
+                    builder.append("fontsize=40, ");
+                    builder.append("fontcolor=red");
                 }
             } else {
-                // no screenshots, use labels instead
+                // no screenshots, use solely state id as label
                 if (stateId.equals(FSMModel.VIRTUAL_ROOT_STATE_ID)) {
                     builder.append("Root");
                 } else {
                     builder.append(stateId);
                 }
 
-                builder.append("\"");
+                builder.append("</b>>"); // close the label tag
             }
 
-            builder.append("]\n");
+            builder.append("]\n"); // close the node attribute list
         }
 
         return builder.toString();

@@ -447,6 +447,12 @@ public class TestCase {
                 setCrashDetected();
                 if (Properties.RECORD_STACK_TRACE()) {
                     crashStackTrace = Registry.getUiAbstractionLayer().getLastCrashStackTrace();
+                    if (crashStackTrace != null) {
+                        Registry.getEnvironmentManager().writeFile("stack_traces/" + id + ".txt",
+                                crashStackTrace.getRawStackTraceLines()
+                                        .stream()
+                                        .collect(Collectors.joining("\n")));
+                    }
                 }
             case SUCCESS_OUTBOUND:
                 return false;

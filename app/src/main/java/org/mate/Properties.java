@@ -60,6 +60,23 @@ public class Properties {
     }
 
     /**
+     * The waiting time for idle state timeout used by the underlying
+     * {@link android.support.test.uiautomator.UiDevice} instance. The default timeout is 10 seconds.
+     * In most cases this timeout is never exhausted but there are certain apps that can't detect
+     * an idle state reliably and consequently the timeout is exhausted multiple times, which makes
+     * the action execution extremely show.
+     *
+     * NOTE: It remains unclear why a multiple of the default 10 seconds timeout can be reached when
+     * executing a single action. The only possible explanation might be that actions like a long click
+     * are internally represented by compound actions, which in turn wait multiple times for the
+     * idle timeout. The only reliable option seems to set the timeout to 0 for apps that fail to
+     * detect an idle state reliably.
+     *
+     * @return Returns the wait for idle timeout (in ms) used by UIAutomator.
+     */
+    public static Long WAIT_FOR_IDLE_TIMEOUT() { return propertyOr(10000L); }
+    
+    /**
      * Defines the equivalence check for two screen states.
      *
      * @return Returns the selected state equivalence check.
@@ -262,6 +279,8 @@ public class Properties {
     public static boolean PIPE_RECORD_PPT() { return propertyOr(false); }
 
     public static boolean PROMISING_ACTIONS() { return propertyOr(true); }
+
+    public static double PROMISING_ACTION_WEIGHT() { return propertyOr(0.6); }
 
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
@@ -565,13 +584,6 @@ public class Properties {
     public static boolean RECORD_STACK_TRACE() {
         return propertyOr(false);
     }
-
-    /**
-     * Whether a recorded stack trace should be written to file.
-     *
-     * @return Returns {@code false} by default, i.e. no stack trace is written to file.
-     */
-    public static boolean WRITE_STACK_TRACE_TO_FILE() { return propertyOr(false); }
 
     /**
      * The stack trace file name required for crash reproduction.

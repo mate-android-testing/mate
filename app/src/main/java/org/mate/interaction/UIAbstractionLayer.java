@@ -112,7 +112,7 @@ public class UIAbstractionLayer {
         // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
-            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
+            DotConverter.takeScreenshot(id, packageName);
         }
 
         if (Properties.SURROGATE_MODEL()) {
@@ -422,6 +422,15 @@ public class UIAbstractionLayer {
         lastScreenState = state;
 
         return result;
+    }
+
+    /**
+     * Reads the traces directly from the external memory.
+     *
+     * @return Returns the set of traces.
+     */
+    public Set<String> getTraces() {
+        return deviceMgr.getTraces();
     }
 
     /**
@@ -932,9 +941,11 @@ public class UIAbstractionLayer {
         }
 
         deviceMgr.reinstallApp();
-        Utils.sleep(5000);
-        deviceMgr.restartApp();
         Utils.sleep(2000);
+        deviceMgr.restartApp();
+        Utils.sleep(5000);
+
+        // TODO: Wait some additional time if state is not belonging to AUT.
 
         /*
          * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
@@ -1010,7 +1021,7 @@ public class UIAbstractionLayer {
         // take a screenshot of the new screen state for the dot model
         if ((Properties.CONVERT_GUI_TO_DOT() != DotConverter.Option.NONE)
                 && Properties.DOT_GRAPH_WITH_SCREENSHOTS()) {
-            DotConverter.takeScreenshot(id, lastScreenState.getPackageName());
+            DotConverter.takeScreenshot(id, packageName);
         }
 
         return screenState;

@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides utility functions to retrieving fitness related information.
@@ -77,12 +79,40 @@ public class FitnessUtils {
     }
 
     /**
-     * Stores the coverage data of the lastly executed action of the given chromosome.
+     * Stores the fitness data of the lastly executed action of the given chromosome.
      *
      * @param chromosome The given chromosome.
      */
     public static void storeActionFitnessData(final IChromosome<TestCase> chromosome) {
         storeFitnessData(chromosome, ChromosomeUtils.getActionEntityId(chromosome));
+    }
+
+    /**
+     * Stores the fitness data on a per action basis for the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     * @param tracesPerAction The recorded traces per action.
+     */
+    public static void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                              final Map<String, Set<String>> tracesPerAction) {
+
+        if (Properties.FITNESS_FUNCTIONS() == null) {
+            /*
+             * If the underlying algorithm doesn't use any fitness function but uses the default
+             * chromosome factory or any derivative of it, storeFitnessData() is called. Since there
+             * is no fitness function specified, the subsequent foreach loop would cause a NPE.
+             */
+            return;
+        }
+
+        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE);
+
+        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(fitnessFunction)) {
+                Registry.getEnvironmentManager()
+                        .storeActionFitnessData(chromosome, tracesPerAction, fitnessFunction);
+            }
+        }
     }
 
     /**
@@ -150,6 +180,27 @@ public class FitnessUtils {
     }
 
     /**
+     * Retrieves the fitness value for the given actions of the given chromosome.
+     * NOTE: Only call this method if you have stored the fitness data on a per action basis.
+     *
+     * @param chromosome The chromosome for which the fitness value should be evaluated.
+     * @param actions The range of actions for which the fitness should evaluated.
+     * @param fitnessFunction The fitness function used.
+     * @param <T> Specifies whether the chromosome is a test suite or a test case.
+     * @return Returns the fitness value for the given chromosome.
+     */
+    public static <T> double getFitness(IChromosome<T> chromosome, int actions, FitnessFunction fitnessFunction) {
+
+        switch (fitnessFunction) {
+            case CRASH_DISTANCE:
+                return Registry.getEnvironmentManager().getCrashDistance(chromosome, actions);
+            default:
+                throw new UnsupportedOperationException("Fitness function "
+                        + fitnessFunction + " not yet supported!");
+        }
+    }
+
+    /**
      * Retrieves the fitness value for the given chromosome.
      *
      * @param chromosome The chromosome for which the fitness value should be evaluated.
@@ -183,7 +234,7 @@ public class FitnessUtils {
                         .getCoverage(Coverage.BASIC_BLOCK_BRANCH_COVERAGE, chromosome)
                         .getBranchCoverage();
             case CRASH_DISTANCE:
-                return Registry.getEnvironmentManager().getCrashDistance(chromosome);
+                return Registry.getEnvironmentManager().getCrashDistance(chromosome, null);
             default:
                 throw new UnsupportedOperationException("Fitness function "
                         + fitnessFunction + " not yet supported!");
@@ -260,6 +311,18 @@ public class FitnessUtils {
         }
 
         return Registry.getEnvironmentManager().getLinePercentageVector(chromosome, numberOfLines);
+    }
+
+    /**
+     * Retrieves the crash distance vector for the given chromosome, i.e., a vector consisting of
+     * the individual action fitness values in action order.
+     *
+     * @param chromosome The chromosome for which the crash distance vector should be evaluated.
+     * @param <T> The type wrapped by the chromosome.
+     * @return Returns the crash distance vector for the given chromosome.
+     */
+    public static <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+        return Registry.getEnvironmentManager().getCrashDistanceVector(chromosome);
     }
 
     /**

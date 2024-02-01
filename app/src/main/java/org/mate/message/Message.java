@@ -55,7 +55,7 @@ public class Message {
     }
 
     public static class MessageBuilder {
-        private Message message;
+        private final Message message;
 
         public MessageBuilder(String subject) {
             message = new Message(subject);

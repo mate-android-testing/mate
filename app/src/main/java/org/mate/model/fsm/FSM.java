@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,8 +78,8 @@ public class FSM {
         this.root = root;
         this.packageName = packageName;
         nextStateId = 1;
-        states = new HashSet<>();
-        transitions = new HashSet<>();
+        states = new LinkedHashSet<>();
+        transitions = new LinkedHashSet<>();
         states.add(root);
 
         // the initial state is a new state

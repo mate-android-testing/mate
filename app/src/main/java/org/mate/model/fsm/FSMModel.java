@@ -16,6 +16,7 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateType;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -178,7 +179,7 @@ public class FSMModel implements IGUIModel {
      */
     @Override
     public Set<IScreenState> getStates() {
-        Set<IScreenState> screenStates = new HashSet<>();
+        final Set<IScreenState> screenStates = new LinkedHashSet<>();
         for (State state : fsm.getStates()) {
             screenStates.add(state.getScreenState());
         }
@@ -217,7 +218,7 @@ public class FSMModel implements IGUIModel {
         return getStates().stream()
                 .filter(screenState -> screenState.getId().equals(screenStateId))
                 .findFirst()
-                .orElse(null);
+                .orElse(null); // e.g., for the 'unknown' state
     }
 
     /**

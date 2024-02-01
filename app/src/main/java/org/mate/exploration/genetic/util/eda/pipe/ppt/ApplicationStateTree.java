@@ -1,9 +1,21 @@
 package org.mate.exploration.genetic.util.eda.pipe.ppt;
 
+import android.support.annotation.NonNull;
+
+import org.mate.MATE;
 import org.mate.Registry;
 import org.mate.interaction.action.Action;
+import org.mate.interaction.action.StartAction;
+import org.mate.interaction.action.intent.IntentAction;
+import org.mate.interaction.action.intent.IntentBasedAction;
+import org.mate.interaction.action.intent.SystemAction;
+import org.mate.interaction.action.ui.MotifAction;
+import org.mate.interaction.action.ui.UIAction;
+import org.mate.interaction.action.ui.Widget;
+import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
+import org.mate.state.ScreenStateType;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.function.BiFunction;
 
@@ -35,15 +48,127 @@ public class ApplicationStateTree {
     private TreeNode<ApplicationStateNode> cursor;
 
     /**
+     * The package name of the AUT.
+     */
+    private final String packageName = Registry.getPackageName();
+
+    /**
+     * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
+     * them appropriately, we introduce a virtual root state that has an outgoing edge to each start
+     * screen state.
+     */
+    private static final IScreenState VIRTUAL_ROOT_STATE = new IScreenState() {
+
+        @Override
+        public String getId() {
+            return "VIRTUAL_ROOT_STATE";
+        }
+
+        @Override
+        public void setId(String stateId) {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<Widget> getWidgets() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<Action> getActions() {
+            return Collections.singletonList(new StartAction());
+        }
+
+        @Override
+        public List<UIAction> getUIActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<SystemAction> getSystemActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentBasedAction> getIntentBasedActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<IntentAction> getIntentActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<WidgetAction> getWidgetActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public List<MotifAction> getMotifActions() {
+            throw new UnsupportedOperationException("Do not call this method!");
+        }
+
+        @Override
+        public String getActivityName() {
+            return "VIRTUAL_ROOT_STATE_ACTIVITY";
+        }
+
+        @Override
+        public String getPackageName() {
+            return "VIRTUAL_ROOT_STATE_PACKAGE";
+        }
+
+        @Override
+        public ScreenStateType getType() {
+            return ScreenStateType.ACTION_SCREEN_STATE;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return getId() + " [" + getActivityName() + "]";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IScreenState that = (IScreenState) o;
+            return Objects.equals(getId(), that.getId());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getId());
+        }
+    };
+
+    /**
      * Initialises a new PPT.
      *
      * @param initializeNodeFunction The initialization function for the action weights of a state.
      */
     public ApplicationStateTree(BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNodeFunction) {
         this.initializeNodeFunction = initializeNodeFunction;
-        tree = new Tree<>(initializeNode(Collections.emptyList(),
-                Registry.getUiAbstractionLayer().getLastScreenState()));
-        cursor = tree.getRoot();
+        tree = new Tree<>(initializeNode(Collections.emptyList(), VIRTUAL_ROOT_STATE));
+        cursor = addRootState(Registry.getUiAbstractionLayer().getLastScreenState());
+    }
+
+    /**
+     * Adds a new root state below the virtual root state.
+     *
+     * @param rootState The new root state.
+     * @return Returns the newly added root state in the tree.
+     */
+    private TreeNode<ApplicationStateNode> addRootState(IScreenState rootState) {
+        final ApplicationStateNode rootNode
+                = initializeNode(Collections.singletonList(new StartAction()), rootState);
+        // TODO: Enable 'non-deterministic' actions in the PPT. Right now, this overwrites the
+        //  outgoing action transition to a previous root state. In turn, the action will not be
+        //  attached to all root states in the PPT when drawn.
+        getRoot().getContent().actionToNextState.put(new StartAction(), rootState);
+        return getRoot().addChild(rootNode);
     }
 
     /**
@@ -72,8 +197,30 @@ public class ApplicationStateTree {
      * @param currentScreenState The current screen state.
      */
     public void updatePosition(final TestCase testCase, final Action action, final IScreenState currentScreenState) {
+
+        if (testCase.getVisitedStates().contains("unknown")) {
+            // We couldn't retrieve the correct screen state for the last action, thus we simply
+            // ignore this transition in the PPT.
+            MATE.log_warn("Ignoring transition to unknown state in PPT!");
+            return;
+        }
+
         cursor.getContent().updateActionToNextState(action, currentScreenState);
-        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
+
+        if (!currentScreenState.getPackageName().equals(packageName)) {
+            // We reached a state not belonging to the AUT. To avoid this we should reduce the
+            // action probability to a minimum. Although one might exclude those actions completely
+            // by specifying an action probability of zero, we cannot guarantee that those actions
+            // are not relevant to reproduce the target crash, e.g., they might have been simply
+            // triggered in the wrong internal state. Thus, we halve the action probability every
+            // time we observe such action. If the action is actually useful the PIPE algorithm
+            // will increase the action probability anyway.
+            // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
+            final double currentProbability = cursor.getContent().getActionProbabilities().get(action);
+            cursor.getContent().getActionProbabilities().put(action, currentProbability / 2);
+        }
+
+        cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
                 .orElseGet(() -> cursor.addChild(initializeNode(testCase.getActionSequence(), currentScreenState)));
     }
 
@@ -85,16 +232,22 @@ public class ApplicationStateTree {
     public void updatePositionImmutable(final IScreenState currentScreenState) {
 
         // relative change from current position
-        cursor = cursor.getChild(s -> s.state.equals(currentScreenState))
-                .orElseThrow(() -> new IllegalStateException("Can't locate state in child nodes!"));
+        cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
+                .orElseThrow(() -> new IllegalStateException("Can't locate state in child nodes: "
+                + cursor.getContent() + " --> " + currentScreenState));
     }
 
     /**
-     * Resets the cursor position to the root node of the PPT.
+     * Resets the cursor position to the given root node of the PPT.
+     *
+     * @param currentScreenState The new root state.
      */
-    public void resetPosition() {
-        // TODO: There might be multiple root states due to the dynamic nature of Android apps.
+    public void resetPosition(final IScreenState currentScreenState) {
+
+        // create new root state if not yet existent
         cursor = tree.getRoot();
+        cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
+                .orElseGet(() -> addRootState(currentScreenState));
     }
 
     /**
@@ -188,19 +341,29 @@ public class ApplicationStateTree {
          * @param nextState The resulting state upon applying the given action.
          */
         private void updateActionToNextState(final Action action, final IScreenState nextState) {
+
+            // TODO: Properly handle non-deterministic actions.
+            if (actionToNextState.containsKey(action)
+                    && !actionToNextState.get(action).equals(nextState)) {
+                // The action outcome is not deterministic.
+                MATE.log_debug("Non-deterministic action detected in state: " + state);
+            }
+
             actionToNextState.put(action, nextState);
         }
 
         /**
          * Retrieves the action with the highest action probability.
          *
-         * @return Returns the action with the highest assigned probability.
+         * @return Returns the action with the highest assigned probability if possible, otherwise
+         *          {@code null} is returned.
          */
         public Action getActionWithBiggestProbability() {
             return actionProbabilities.entrySet().stream()
                     .max(Comparator.comparingDouble(Map.Entry::getValue))
                     .map(Map.Entry::getKey)
-                    .orElseThrow(IllegalStateException::new);
+                    // States that don't belong to the AUT do not have any outgoing actions.
+                    .orElse(null);
         }
 
         /**
@@ -228,6 +391,24 @@ public class ApplicationStateTree {
          */
         public IScreenState getState() {
             return state;
+        }
+
+        @Override
+        public String toString() {
+            return state.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ApplicationStateNode that = (ApplicationStateNode) o;
+            return Objects.equals(state, that.state);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(state);
         }
     }
 }
