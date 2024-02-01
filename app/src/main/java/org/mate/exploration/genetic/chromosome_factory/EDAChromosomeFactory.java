@@ -208,6 +208,10 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         Action chosenAction;
 
+        if (sortedProbabilities.isEmpty()) {
+            throw new IllegalStateException("State without any defined action probabilities!");
+        }
+
         if (sortedProbabilities.size() == 1) { // there is only a single action that can be taken
             chosenAction = sortedProbabilities.get(0).getKey();
         } else {
