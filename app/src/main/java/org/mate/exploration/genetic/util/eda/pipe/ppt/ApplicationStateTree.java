@@ -323,6 +323,14 @@ public class ApplicationStateTree {
          * @param nextState The resulting state upon applying the given action.
          */
         private void updateActionToNextState(final Action action, final IScreenState nextState) {
+
+            // TODO: Properly handle non-deterministic actions.
+            if (actionToNextState.containsKey(action)
+                    && !actionToNextState.get(action).equals(nextState)) {
+                // The action outcome is not deterministic.
+                MATE.log_debug("Non-deterministic action detected in state: " + state);
+            }
+
             actionToNextState.put(action, nextState);
         }
 
