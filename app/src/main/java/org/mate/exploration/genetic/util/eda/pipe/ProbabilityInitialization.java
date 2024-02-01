@@ -130,7 +130,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
 
         final UIAbstractionLayer uiAbstractionLayer = Registry.getUiAbstractionLayer();
 
-        // The 'BACK' leaves the AUT when there is only a single activity or window displayed.
+        // The 'BACK' action leaves the AUT when there is only a single activity or window displayed.
         if (action instanceof UIAction && ((UIAction) action).getActionType() == ActionType.BACK) {
             // NOTE: This check only works if the AUT is currently in the given state since the
             // current activity and window stack is queried.
