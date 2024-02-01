@@ -2151,6 +2151,7 @@ public class DeviceMgr {
                 final Set<String> tokens = Registry.getEnvironmentManager().getStackTraceUserInput();
 
                 if (!tokens.isEmpty()) {
+                    MATE.log_debug("Using stack trace user token as input!");
                     return Randomness.randomElement(tokens);
                 }
             }
