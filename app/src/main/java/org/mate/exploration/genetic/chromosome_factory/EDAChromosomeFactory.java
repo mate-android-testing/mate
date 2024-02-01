@@ -112,6 +112,10 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
 
+                if (!probabilisticModel.getState().equals(uiAbstractionLayer.getLastScreenState())) {
+                    throw new IllegalStateException("Probabilistic model is not synced to current state!");
+                }
+
                 final Action nextAction = selectAction();
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
                 recordFitnessData(chromosome);
