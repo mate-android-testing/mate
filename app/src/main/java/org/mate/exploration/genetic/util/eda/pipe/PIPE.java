@@ -83,6 +83,11 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             = new ApplicationStateTree(new ProbabilityInitialization(Properties.PROMISING_ACTION_WEIGHT()));
 
     /**
+     * An epsilon that determines when a fitness increase/decrease of an action is rewarded good.
+     */
+    private static final double EPSILON = 0.002d;
+
+    /**
      * Initialises the PIPE algorithm with the given properties.
      *
      * @param fitnessFunction The used per action-based fitness function.
@@ -280,10 +285,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         final SplitTestCase splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestCase);
         final double fitness = fitnessFunction.getFitness(bestTestCase);
 
+        // TODO: There can be still thousands of iterations caused by the tiny path probabilities.
+        //  We should use some epsilon to avoid non significant probability changes.
+
         if (!splitTestCase.goodActions.isEmpty()) {
 
             // Compute the new target/path probability for the good nodes.
             double pTarget = betterTargetProbability(probability(splitTestCase.goodActions), fitness);
+            MATE.log_acc("Target probability good actions: " + pTarget);
 
             // Increase the probability of "good" actions (i.e. actions that decrease fitness) until
             // we reach the target probability.
@@ -303,6 +312,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
             // Compute the new target/path probability for the bad nodes.
             double pTarget = worseTargetProbability(probability(splitTestCase.badActions), fitness);
+            MATE.log_acc("Target probability bad actions: " + pTarget);
 
             int iterations = 0;
             while (probability(splitTestCase.badActions) > pTarget) {
@@ -343,9 +353,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             final double fitness = fitnessFunction.getFitnessAfterXActions(bestTestCase,
                     nodeWithPickedAction.actionIndex + 1);
 
-            // TODO: Check whether fitness function is maximising or minimising.
-            // check if fitness is getting better (decreases)
-            if (prevFitness - fitness > 0.002) { // TODO: Seems to be an epsilon, may use Double.compare()!
+            // TODO: Check whether the fitness function is maximising or minimising. This does not only
+            //  affect this computation but multiple locations where the fitness function is used.
+            if (prevFitness - fitness > EPSILON) { // check if fitness is getting better (decreases)
                 indexOfLastFitnessDecrease = i;
             }
 

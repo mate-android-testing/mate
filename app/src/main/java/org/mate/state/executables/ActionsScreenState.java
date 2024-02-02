@@ -118,6 +118,9 @@ public class ActionsScreenState extends AbstractScreenState {
     @Override
     public List<Action> getActions() {
 
+        // TODO: Do not initialise any actions for non-AUT states if possible unless they are not
+        //  required for handling some kind of dialog.
+
         final List<Action> actions = new ArrayList<>();
 
         if (Properties.USE_UI_ACTIONS()) {

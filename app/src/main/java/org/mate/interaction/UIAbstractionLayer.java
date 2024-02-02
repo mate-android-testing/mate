@@ -945,6 +945,8 @@ public class UIAbstractionLayer {
         deviceMgr.restartApp();
         Utils.sleep(5000);
 
+        // TODO: Wait some additional time if state is not belonging to AUT.
+
         /*
          * Restarting the AUT may lead to a distinct start screen state. Thus, we keep track of all
          * possible root states.

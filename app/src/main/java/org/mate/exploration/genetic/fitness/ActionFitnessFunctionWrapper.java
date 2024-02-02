@@ -102,12 +102,12 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     public void recordActionFitness(final IChromosome<TestCase> chromosome,
                                     final Map<String, Set<String>> tracesPerAction) {
 
-        final List<Double> crashDistances = fitnessFunction.getNormalizedFitnessVector(chromosome);
+        final List<Double> fitnessVector = fitnessFunction.getNormalizedFitnessVector(chromosome);
 
         for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
             // NOTE: The linked hashset guarantees traversing using the insertion order.
             final int actions = Integer.parseInt(entry.getKey().split("_")[0]);
-            actionFitnessValues.put(entry.getKey(), crashDistances.get(actions));
+            actionFitnessValues.put(entry.getKey(), fitnessVector.get(actions));
         }
     }
 

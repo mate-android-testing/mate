@@ -827,11 +827,23 @@ public class EnvironmentManager {
      */
     public int getNumberOfBranches() {
 
-        Message.MessageBuilder messageBuilder = new Message.MessageBuilder("/fitness/get_number_of_branches")
-                .withParameter("packageName", Registry.getPackageName());
+        if (Properties.GRAPH_TYPE() != null) {
+            // If we use a graph we know which branches are actually reachable and thus we should
+            // try to only optimize the search towards those branches.
+            Message.MessageBuilder messageBuilder
+                    = new Message.MessageBuilder("/graph/get_number_of_branches")
+                    .withParameter("packageName", Registry.getPackageName());
 
-        Message response = sendMessage(messageBuilder.build());
-        return Integer.parseInt(response.getParameter("branches"));
+            Message response = sendMessage(messageBuilder.build());
+            return Integer.parseInt(response.getParameter("branches"));
+        } else {
+            Message.MessageBuilder messageBuilder
+                    = new Message.MessageBuilder("/fitness/get_number_of_branches")
+                    .withParameter("packageName", Registry.getPackageName());
+
+            Message response = sendMessage(messageBuilder.build());
+            return Integer.parseInt(response.getParameter("branches"));
+        }
     }
 
     /**
