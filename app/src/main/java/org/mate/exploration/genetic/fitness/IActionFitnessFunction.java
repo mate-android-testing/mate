@@ -37,4 +37,11 @@ public interface IActionFitnessFunction<T> extends IFitnessFunction<T> {
      * @return Returns the normalised fitness vector for the given chromosome.
      */
     List<Double> getNormalizedFitnessVector(IChromosome<T> chromosome);
+
+    /**
+     * Retrieves the index of this FitnessFunction.
+     *
+     * @return Returns index of this FitnessFunction.
+     */
+    int getIndex();
 }

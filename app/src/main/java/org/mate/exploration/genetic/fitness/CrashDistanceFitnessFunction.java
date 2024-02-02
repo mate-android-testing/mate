@@ -74,4 +74,9 @@ public class CrashDistanceFitnessFunction<T> implements IActionFitnessFunction<T
 
         return crashDistances;
     }
+
+    @Override
+    public int getIndex() {
+        return 0;
+    }
 }

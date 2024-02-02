@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.builder;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.EDA;
 import org.mate.exploration.genetic.algorithm.MIO;
+import org.mate.exploration.genetic.algorithm.MIOEDA;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.NoveltySearch;
@@ -17,6 +18,7 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromos
 import org.mate.exploration.genetic.chromosome_factory.BitSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.EDAChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
@@ -185,6 +187,8 @@ public class GeneticAlgorithmProvider {
                 return (GeneticAlgorithm<T>) initializeNoveltySearchUsingSOSM();
             case EDA:
                 return initializeEDA();
+            case MIOEDA:
+                return initializeMIOEDA();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -415,6 +419,37 @@ public class GeneticAlgorithmProvider {
                 initializeTerminationCondition(),
                 getPopulationSize(),
                 probabilisticModel);
+    }
+
+    /**
+     * Initialises the MIO-EDA algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the MIOEDA algorithm.
+     */
+    private <T> MIOEDA<T> initializeMIOEDA() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() != ChromosomeFactory.MIO_EDA_CHROMOSOME_FACTORY) {
+            throw new IllegalStateException("MIOEDA requires the MIOEDA chromosome factory. You have to " +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("MIOEDA requires a fitness function. You have to " +
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
+            throw new IllegalStateException("MIOEDA requires a termination condition. You have to " +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        }
+
+        List<IFitnessFunction<T>> fitnessFunctions = this.initializeFitnessFunctions();
+
+        final IChromosomeFactory<T> chromosomeFactory
+                = (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(getNumEvents(), null);
+
+        return new MIOEDA<T>(
+                chromosomeFactory,
+                fitnessFunctions,
+                initializeTerminationCondition(),
+                getPopulationSize(), 0.1);
     }
 
     /**

@@ -70,7 +70,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     @SuppressWarnings("unused")
     public void recordCurrentActionFitness(final IChromosome<TestCase> chromosome) {
         final double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-        actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome), fitness);
+        actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome) + "_" + fitnessFunction.getIndex(), fitness);
     }
 
     /**
@@ -107,7 +107,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
         for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
             // NOTE: The linked hashset guarantees traversing using the insertion order.
             final int actions = Integer.parseInt(entry.getKey().split("_")[0]);
-            actionFitnessValues.put(entry.getKey(), fitnessVector.get(actions));
+            actionFitnessValues.put(entry.getKey() + "_" + fitnessFunction.getIndex(), fitnessVector.get(actions));
         }
     }
 
@@ -120,6 +120,6 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
      */
     public double getFitnessAfterXActions(final IChromosome<TestCase> testCase, final int actions) {
         return Objects.requireNonNull(actionFitnessValues.get(
-                ChromosomeUtils.getActionEntityId(testCase, actions)));
+                ChromosomeUtils.getActionEntityId(testCase, actions) + "_" + fitnessFunction.getIndex()));
     }
 }

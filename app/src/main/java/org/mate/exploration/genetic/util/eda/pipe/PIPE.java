@@ -196,14 +196,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         }
 
         // elitist learning does not lead to a new population so we repeatedly apply it
-        MATE.log_acc("Elitist learning...");
+//        MATE.log_acc("Elitist learning...");
         while (Randomness.getRnd().nextDouble() < pEl) {
             adaptPPTTowards(elitist);
             pptPruning();
         }
 
         // generation-based learning
-        MATE.log_acc("Generation-based learning...");
+//        MATE.log_acc("Generation-based learning...");
         adaptPPTTowards(best);
         pptMutation(best);
         pptPruning();
@@ -402,7 +402,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private void pptMutation(final IChromosome<TestCase> bestTestCase) {
 
-        MATE.log_acc("Mutation of PPT...");
+//        MATE.log_acc("Mutation of PPT...");
 
         if (Randomness.getRnd().nextDouble() < pMutation) {
 
@@ -443,7 +443,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * Performs the pruning of the PPT, i.e. it removes subtrees that became irrelevant over time.
      */
     private void pptPruning() {
-        MATE.log_acc("Pruning of PPT...");
+//        MATE.log_acc("Pruning of PPT...");
         // TODO Remove subtrees which are very unlikely to be reached, ignoring for now, since this
         //  is only a performance/memory optimization.
     }

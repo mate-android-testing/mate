@@ -105,7 +105,7 @@ public class FitnessUtils {
             return;
         }
 
-        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE);
+        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE, FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
 
         for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
             if (fitnessFunctions.contains(fitnessFunction)) {
@@ -278,6 +278,24 @@ public class FitnessUtils {
     }
 
     /**
+     * Fetches the branch distance vector for the specified chromosome while taking into account the associated actions.
+     *
+     * @param chromosome The chromosome for which fitness should be evaluated.
+     * @param numberOfBranches The number of branches.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    public static <T> List<List<Double>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome, int numberOfBranches) {
+
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
+                fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE)) {
+            throw new IllegalStateException("Unexpected fitness function!");
+        }
+
+        return Registry.getEnvironmentManager().getBranchDistanceVectorWithActions(chromosome, numberOfBranches);
+    }
+
+    /**
      * Retrieves the branch distance vector for the given chromosome.
      *
      * @param chromosome The chromosome for which fitness should be evaluated.
@@ -285,7 +303,7 @@ public class FitnessUtils {
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public static <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
+    public static <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
                 fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE)) {

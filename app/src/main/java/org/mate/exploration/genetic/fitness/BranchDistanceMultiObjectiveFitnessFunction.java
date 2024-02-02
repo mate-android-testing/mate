@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.Set;
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
-public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessFunction<T> {
+public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFitnessFunction<T> {
 
     /**
      * The cache is basically a two-dimensional array compacted to one dimension, i.e. the dimensions
@@ -37,7 +38,10 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
      * cache. By adding the branch index, we can retrieve the fitness value from the cache for the
      * given chromosome and objective (branch).
      */
-    private static final List<Float> cache = new ArrayList<>();
+    private static final List<Double> cache = new ArrayList<>();
+
+
+    private static final Map<IChromosome, List<List<Double>>> actionCache = new HashMap<>();
 
     /**
      * Maps a chromosome to its index in the cache.
@@ -88,7 +92,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
             cacheIndex = assignNewCacheIndex(chromosome);
 
             // retrieve the fitness value for every single branch
-            final List<Float> branchDistanceVector
+            final List<Double> branchDistanceVector
                     = FitnessUtils.getBranchDistanceVector(chromosome, numberOfBranches);
 
             // describes the starting position of the chromosome in the cache
@@ -163,6 +167,36 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
             usedCacheIndices.clear(index);
         }
 
+        // TODO: 01.02.2024 improve cache clearing
+        actionCache.clear();
+
         MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
+    }
+
+
+    @Override
+    public double getFitness(IChromosome<T> chromosome, int actions) {
+        return getNormalizedFitness(chromosome, actions);
+    }
+
+    @Override
+    public double getNormalizedFitness(IChromosome<T> chromosome, int actions) {
+        return FitnessUtils.getFitness(chromosome, actions, FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
+    }
+
+    @Override
+    public List<Double> getNormalizedFitnessVector(IChromosome<T> chromosome) {
+
+        if (!actionCache.containsKey(chromosome)) {
+            actionCache.put(chromosome, FitnessUtils.getBranchDistanceVectorWithActions(chromosome, ((TestCase) chromosome.getValue())
+                    .getActionSequence().size()));
+        }
+
+        return actionCache.get(chromosome).get(index);
+    }
+
+    @Override
+    public int getIndex() {
+        return index;
     }
 }

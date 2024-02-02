@@ -15,22 +15,15 @@ public class ExecuteMATEMIOEDA {
     @Test
     public void useAppContext() {
         MATE.log_acc("Starting Evolutionary Search...");
-        MATE.log_acc("MIO algorithm");
+        MATE.log_acc("MIO-EDA algorithm");
 
         MATE mate = new MATE();
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
-                .withAlgorithm(Algorithm.MIO)
-                .withChromosomeFactory(Properties.CHROMOSOME_FACTORY())
-                .withMutationFunction(Properties.MUTATION_FUNCTION())
+                .withAlgorithm(Algorithm.MIOEDA)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
-                .withBigPopulationSize(Properties.BIG_POPULATION_SIZE())
-                .withPMutate(Properties.P_MUTATE())
-                .withPCrossover(Properties.P_CROSSOVER())
-                .withPSampleRandom(Properties.P_SAMPLE_RANDOM())
-                .withFocusedSearchStart(Properties.P_FOCUSED_SEARCH_START())
-                .withMutationRate(Properties.MUTATION_RATE());
+                .withPSampleRandom(Properties.P_SAMPLE_RANDOM());
 
         int numberOfObjectives
                 = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
@@ -38,8 +31,8 @@ public class ExecuteMATEMIOEDA {
         // we need to associate with each objective (branch, line) a fitness function
         builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
 
-        final IGeneticAlgorithm mio = builder.build();
-        mate.testApp(mio);
+        final IGeneticAlgorithm mioeda = builder.build();
+        mate.testApp(mioeda);
     }
 }
 

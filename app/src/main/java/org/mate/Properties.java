@@ -278,7 +278,7 @@ public class Properties {
 
     public static boolean PIPE_RECORD_PPT() { return propertyOr(false); }
 
-    public static boolean PROMISING_ACTIONS() { return propertyOr(true); }
+    public static boolean PROMISING_ACTIONS() { return propertyOr(false); }
 
     public static double PROMISING_ACTION_WEIGHT() { return propertyOr(0.6); }
 

@@ -14,5 +14,6 @@ public enum Algorithm {
     NOVELTY_SEARCH,
     NOVELTY_SEARCH_USING_SOSM,
     EDA,
+    MIOEDA,
     SAPIENZ;
 }
