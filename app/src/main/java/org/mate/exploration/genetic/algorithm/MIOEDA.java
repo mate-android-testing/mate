@@ -99,7 +99,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         this.archive = new HashMap<>(); // (k -> T_k)
         this.samplingCounters = new HashMap<>(); // (k -> c_k)
-
         this.pSampleRandom = pSampleRandom; // P_r
         this.populationSize = populationSize; // n
 
