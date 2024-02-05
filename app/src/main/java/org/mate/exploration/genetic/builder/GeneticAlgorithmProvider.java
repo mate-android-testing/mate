@@ -449,7 +449,8 @@ public class GeneticAlgorithmProvider {
                 chromosomeFactory,
                 fitnessFunctions,
                 initializeTerminationCondition(),
-                getPopulationSize(), 0.1);
+                getPopulationSize(),
+                getPSampleRandom());
     }
 
     /**
