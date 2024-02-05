@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
+import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
@@ -14,7 +15,10 @@ import org.mate.exploration.genetic.util.eda.pipe.PIPE;
 import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
@@ -22,7 +26,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * The archive maintains for each target k a population T_k of size up to n.
      */
     private final Map<ActionFitnessFunctionWrapper, ArchiveContainer> archive;
-
 
     /**
      * Represents the current probability P_r for sampling a random chromosome.
@@ -41,6 +44,9 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
     // tracks the start point of the search to measure when the focused search should start
     private long startTime;
 
+    /**
+     * The chromosome factory to sample new chromosomes.
+     */
     private final IChromosomeFactory<T> randomChromosomeFactory;
 
     /**
@@ -69,23 +75,26 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                 0,
                 0);
 
-        //put all fitness functions into the wrapper
+        // Enhance the fitness functions to record and retrieve the fitness after individual actions.
         for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
             this.fitnessFunctions.add(new ActionFitnessFunctionWrapper(
                     (IActionFitnessFunction<TestCase>) fitnessFunction));
         }
 
-        //initializing the random probabilistic model
-        IProbabilisticModel<T> randomProbabilisticModel = (IProbabilisticModel<T>) new PIPE(this.fitnessFunctions.get(0),
-                org.mate.Properties.PIPE_LEARNING_RATE(),
-                org.mate.Properties.PIPE_NEGATIVE_LEARNING_RATE(),
-                org.mate.Properties.PIPE_EPSILON(),
-                org.mate.Properties.PIPE_CLR(),
-                org.mate.Properties.PIPE_PROB_ELITIST_LEARNING(),
-                org.mate.Properties.PIPE_PROB_MUTATION(),
-                org.mate.Properties.PIPE_MUTATION_RATE());
+        // Initialize the random probabilistic model.
+        IProbabilisticModel<T> randomProbabilisticModel
+                = (IProbabilisticModel<T>) new PIPE(this.fitnessFunctions.get(0),
+                Properties.PIPE_LEARNING_RATE(),
+                Properties.PIPE_NEGATIVE_LEARNING_RATE(),
+                Properties.PIPE_EPSILON(),
+                Properties.PIPE_CLR(),
+                Properties.PIPE_PROB_ELITIST_LEARNING(),
+                Properties.PIPE_PROB_MUTATION(),
+                Properties.PIPE_MUTATION_RATE());
 
-        randomChromosomeFactory = (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(10, randomProbabilisticModel);
+        randomChromosomeFactory
+                = (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(
+                        Properties.MAX_NUMBER_EVENTS(), randomProbabilisticModel);
 
 
         this.archive = new HashMap<>(); // (k -> T_k)
@@ -94,15 +103,16 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         this.pSampleRandom = pSampleRandom; // P_r
         this.populationSize = populationSize; // n
 
+        // Provide for each target a dedicated probabilistic model.
         for (ActionFitnessFunctionWrapper fitnessFunction : this.fitnessFunctions) {
             IProbabilisticModel<T> probabilisticModel = (IProbabilisticModel<T>) new PIPE(fitnessFunction,
-                    org.mate.Properties.PIPE_LEARNING_RATE(),
-                    org.mate.Properties.PIPE_NEGATIVE_LEARNING_RATE(),
-                    org.mate.Properties.PIPE_EPSILON(),
-                    org.mate.Properties.PIPE_CLR(),
-                    org.mate.Properties.PIPE_PROB_ELITIST_LEARNING(),
-                    org.mate.Properties.PIPE_PROB_MUTATION(),
-                    org.mate.Properties.PIPE_MUTATION_RATE());
+                    Properties.PIPE_LEARNING_RATE(),
+                    Properties.PIPE_NEGATIVE_LEARNING_RATE(),
+                    Properties.PIPE_EPSILON(),
+                    Properties.PIPE_CLR(),
+                    Properties.PIPE_PROB_ELITIST_LEARNING(),
+                    Properties.PIPE_PROB_MUTATION(),
+                    Properties.PIPE_MUTATION_RATE());
 
             ArchiveContainer archiveContainer = new ArchiveContainer(probabilisticModel, fitnessFunction);
             archive.put(fitnessFunction, archiveContainer);
