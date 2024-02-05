@@ -135,6 +135,10 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("We have " + fitnessFunctions.size() + " fitness functions");
     }
 
+    /**
+     * Creates the initial population consisting of a single random chromosome and then updates the
+     * probabilistic models accordingly.
+     */
     @Override
     public void createInitialPopulation() {
         this.startTime = System.currentTimeMillis();
@@ -143,13 +147,17 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         IChromosome<T> chromosome = randomChromosomeFactory.createChromosome();
         population.add(chromosome);
-
         evaluatePopulation(population);
 
         logCurrentFitness();
         currentGenerationNumber++;
     }
 
+    /**
+     * Forms a new generation consisting of a single chromosome that is either sampled randomly with
+     * a probability P_r or otherwise samples the chromosome from the archive, more precisely from
+     * one of the probabilistic models.
+     */
     @Override
     public void evolve() {
         MATE.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
@@ -172,11 +180,11 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             // increase sampling counter c_k, see section 3.3
             samplingCounters.put(target, samplingCounters.get(target) + 1);
 
-
             MATE.log_acc("Sampling new chromosome");
             MIOEDAChromosomeFactory cf = (MIOEDAChromosomeFactory) chromosomeFactory;
+            cf.setProbabilisticModel((IProbabilisticModel<TestCase>) archive.get(target).getProbabilisticModel());
             // TODO: 04.12.2023 Maybe change to using more Chromosome factories with a probabilistic model each
-            IChromosome<T> chromosome = (IChromosome<T>) cf.createChromosome((IProbabilisticModel<TestCase>) archive.get(target).getProbabilisticModel());
+            IChromosome<T> chromosome = (IChromosome<T>) cf.createChromosome();
             MATE.log_acc("sampled " + chromosome);
             population.add(chromosome);
         }
@@ -188,13 +196,14 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
     }
 
-    private void evaluatePopulation(List<IChromosome<T>> population) {
+    private void evaluatePopulation(final List<IChromosome<T>> population) {
         for (IChromosome<T> chromosome : population) {
             for (ActionFitnessFunctionWrapper target : this.fitnessFunctions) {
                 ArchiveContainer archiveContainer = archive.get(target);
                 if (archiveContainer == null || archiveContainer.isCovered()) continue;
 
                 double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
+                // TODO: Consider maximising and minimising fitness function values here.
                 if (fitness != 0.0) archiveContainer.getProbabilisticModel().update(population);
                 archiveContainer.updateFitness(fitness);
             }

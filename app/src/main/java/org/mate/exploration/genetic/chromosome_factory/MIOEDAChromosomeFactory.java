@@ -4,9 +4,6 @@ import org.mate.MATE;
 import org.mate.exploration.genetic.algorithm.MIOEDA;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
-import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -18,7 +15,11 @@ import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,9 +40,10 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
 
-
+    /**
+     * The archive consisting of a probabilistic model for each testing target, e.g., branch.
+     */
     private List<MIOEDA.ArchiveContainer> archiveContainers;
-
 
     /**
      * Initialises the chromosome factory with the given properties.
@@ -57,20 +59,17 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
-     * Creates a new chromosome that wraps a test case consisting of random actions. Note that
-     * the chromosome is inherently executed.
+     * Updates the probabilistic model that is used to sample new chromosomes.
      *
-     * @param probabilisticModel The probabilistic model used for the chromosome creation.
-     * @return Returns the generated chromosome.
+     * @param probabilisticModel The new probabilistic model.
      */
-    public IChromosome<TestCase> createChromosome(IProbabilisticModel<TestCase> probabilisticModel) {
+    public void setProbabilisticModel(final IProbabilisticModel<TestCase> probabilisticModel) {
         this.probabilisticModel = probabilisticModel;
-        return createChromosome();
     }
 
     /**
-     * Creates a new chromosome that wraps a test case consisting of random actions. Note that
-     * the chromosome is inherently executed.
+     * Creates a new chromosome that wraps a test case consisting of actions that are sampled from
+     * the underlying probabilistic model. Note that the chromosome is inherently executed.
      *
      * @return Returns the generated chromosome.
      */
