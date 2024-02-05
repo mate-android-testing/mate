@@ -135,7 +135,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("We have " + fitnessFunctions.size() + " fitness functions");
     }
 
-
     @Override
     public void createInitialPopulation() {
         this.startTime = System.currentTimeMillis();
@@ -148,7 +147,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         evaluatePopulation(population);
 
         logCurrentFitness();
-        logBranchCoverage();
         currentGenerationNumber++;
     }
 
@@ -188,7 +186,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // evaluate fitness and update archive
         evaluatePopulation(population);
         logCurrentFitness();
-        logBranchCoverage();
     }
 
     private void evaluatePopulation(List<IChromosome<T>> population) {
@@ -202,17 +199,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                 archiveContainer.updateFitness(fitness);
             }
         }
-    }
-
-
-    private void logBranchCoverage() {
-        int coveredBranches = 0;
-        for (ArchiveContainer container : archive.values())
-            if (container.isCovered()) coveredBranches++;
-
-        MATE.log_acc("After generation " + currentGenerationNumber + " we have " + coveredBranches + "/" + fitnessFunctions.size() + " covered. " + String.format("%.0f%%",
-                ((float) coveredBranches * 100) / (float) fitnessFunctions.size()));
-        currentGenerationNumber++;
     }
 
     private ArchiveContainer getBestTarget() {
