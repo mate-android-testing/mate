@@ -122,14 +122,13 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         //we have to add all archive containers to our chromosome factories since they need to update all the models.
         MIOEDAChromosomeFactory cf = (MIOEDAChromosomeFactory) chromosomeFactory;
+        MIOEDAChromosomeFactory cf2 = (MIOEDAChromosomeFactory) randomChromosomeFactory;
+
         List<MIOEDA.ArchiveContainer> archiveContainers = new ArrayList<>(archive.values());
         archiveContainers.add(new ArchiveContainer(randomProbabilisticModel, this.fitnessFunctions.get(0)));
-        cf.setArchiveContainers(archiveContainers);
 
-        MIOEDAChromosomeFactory cf2 = (MIOEDAChromosomeFactory) randomChromosomeFactory;
-        List<MIOEDA.ArchiveContainer> archiveContainers2 = new ArrayList<>(archive.values());
-        archiveContainers2.add(new ArchiveContainer(randomProbabilisticModel, this.fitnessFunctions.get(0)));
-        cf2.setArchiveContainers(archiveContainers2);
+        cf.setArchiveContainers(archiveContainers);
+        cf2.setArchiveContainers(archiveContainers);
 
         MATE.log_acc("We have " + fitnessFunctions.size() + " fitness functions");
     }
