@@ -122,8 +122,6 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
                             + nextAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
-
-                MATE.log_acc("Done with action #" + (actionsCount + 1));
             }
         } finally {
 
