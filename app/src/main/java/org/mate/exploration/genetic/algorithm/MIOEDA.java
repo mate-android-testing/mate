@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
@@ -41,7 +42,24 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
     /**
      * Represents the current probability P_r for sampling a random chromosome.
      */
-    private final double pSampleRandom;
+    private double pSampleRandom;
+
+    /**
+     * The sampling probability P_r during focused search.
+     */
+    private final double pSampleRandomFocusedSearch = 0.0;
+
+    /**
+     * Represents the initial probability P_r for sampling a random chromosome.
+     */
+    private final double pSampleRandomStart;
+
+    /**
+     * Represents the percentage F that defines after which time the focused search should start.
+     * For example, F = 0.5 means that the focused search should start when 50% of the search
+     * budget is exhausted.
+     */
+    private final double focusedSearchStart;
 
     /**
      * Wraps the underlying fitness functions such that we can store and retrieve the fitness after
@@ -54,6 +72,9 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
     // tracks the start point of the search to measure when the focused search should start
     private long startTime;
+
+    // whether the focused search phase has been started yet
+    private boolean startedFocusedSearch = false;
 
     /**
      * Initializes MIOEDA with the relevant attributes.
@@ -68,7 +89,8 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                   ITerminationCondition terminationCondition,
                   Map<IFitnessFunction<T>, IProbabilisticModel<T>> probabilisticModels,
                   int populationSize,
-                  double pSampleRandom) {
+                  double pSampleRandom,
+                  double focusedSearchStart) {
 
         super(chromosomeFactory,
                 null,
@@ -85,6 +107,8 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         this.samplingCounters = new HashMap<>(); // (k -> c_k)
         this.pSampleRandom = pSampleRandom; // P_r
         this.populationSize = populationSize; // n
+        this.focusedSearchStart = focusedSearchStart; // F
+        this.pSampleRandomStart = pSampleRandom;
 
         // Initialise the archive with a probabilistic model for each testing target.
         for (Map.Entry<IFitnessFunction<T>, IProbabilisticModel<T>> entry : probabilisticModels.entrySet()) {
@@ -153,6 +177,14 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             ((MIOEDAChromosomeFactory) chromosomeFactory).setProbabilisticModel(probabilisticModel);
             final IChromosome<T> chromosome = chromosomeFactory.createChromosome();
             population.add(chromosome);
+        }
+
+        /*
+         * The parameters P_r, n and m linearly increase/decrease over time until the focused
+         * search is started.
+         */
+        if (!startedFocusedSearch) {
+            updateParameters();
         }
 
         // Evaluates the fitness of the current population and updates the archive.
@@ -226,7 +258,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         if (possibleTargets.isEmpty()) {
             MATE.log_warn("No uncovered targets found where fitness is better than worst possible fitness value!");
             for (ActionFitnessFunctionWrapper target : fitnessFunctions) {
-                // TODO: Consider only those targets that haven't been covered yet.
                 final ProbabilisticModelState<T> probabilisticModelState = archive.get(target);
                 if (!probabilisticModelState.isCovered()) {
                     possibleTargets.add(probabilisticModelState);
@@ -234,8 +265,50 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             }
         }
 
-        // Randomly select a target from the possible candidates.
-        return possibleTargets.get(Randomness.getRandom(0, possibleTargets.size()));
+        // Randomly select a target from the possible candidates with the lowest sampling counter.
+        int lowestSamplingCounter = Integer.MAX_VALUE;
+        final List<ProbabilisticModelState<T>> lowestSamplingCountTargets = new ArrayList<>();
+
+        for (ProbabilisticModelState<T> probabilisticModelState : possibleTargets) {
+            final int samplingCounter = samplingCounters.get(probabilisticModelState.getFitnessFunction());
+
+            // Keep track of all targets with the same currently lowest sampling counter.
+            if (samplingCounter <= lowestSamplingCounter) {
+                // Only update/reset if we have found a smaller sampling counter.
+                if (samplingCounter < lowestSamplingCounter) {
+                    lowestSamplingCounter = samplingCounter;
+                    lowestSamplingCountTargets.clear();
+                }
+                lowestSamplingCountTargets.add(probabilisticModelState);
+            }
+        }
+
+        return lowestSamplingCountTargets.get(Randomness.getRandom(0, lowestSamplingCountTargets.size()));
+    }
+
+    /**
+     * Updates the parameter P_r. It linearly decreases with the passing of time until the focused
+     * search is started.
+     */
+    private void updateParameters() {
+
+        MATE.log_acc("Updating Parameters...");
+
+        long currentTime = System.currentTimeMillis();
+        long expiredTime = currentTime - startTime;
+        long focusedSearchStartTime = (long) (Registry.getTimeout() * focusedSearchStart);
+
+        if (expiredTime >= focusedSearchStartTime) {
+            MATE.log_acc("Starting focused search...");
+            startedFocusedSearch = true;
+            pSampleRandom = pSampleRandomFocusedSearch;
+        } else {
+            float focusedSearchStartProgress = (float) expiredTime / focusedSearchStartTime;
+            pSampleRandom = pSampleRandomStart
+                    + (pSampleRandomFocusedSearch - pSampleRandomStart) * focusedSearchStartProgress;
+        }
+
+        MATE.log_acc("New random sampling rate P_r: " + pSampleRandom);
     }
 
     /**

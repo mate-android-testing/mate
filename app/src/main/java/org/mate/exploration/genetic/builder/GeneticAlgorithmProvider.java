@@ -461,7 +461,8 @@ public class GeneticAlgorithmProvider {
                 initializeTerminationCondition(),
                 probabilisticModels,
                 getPopulationSize(),
-                getPSampleRandom());
+                getPSampleRandom(),
+                getFocusedSearchStart());
     }
 
     /**
