@@ -18,6 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Combines the traditional MIO algorithm with the benefits of an EDA. In particular, the original
+ * archive of MIO is replaced with a probabilistic model per target from which new chromosomes are
+ * sampled. Each probabilistic model is optimized towards one specific target, e.g., a branch, and
+ * sampling from a probabilistic model has the benefit that no dedicated mutation operator is required.
+ *
+ * @param <T> The type wrapped by the chromosomes.
+ */
 public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
     /**
