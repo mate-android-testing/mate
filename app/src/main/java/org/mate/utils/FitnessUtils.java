@@ -278,14 +278,16 @@ public class FitnessUtils {
     }
 
     /**
-     * Fetches the branch distance vector for the specified chromosome while taking into account the associated actions.
+     * Fetches the branch distance vector for the specified chromosome whereas the fitness is
+     * retrieved on a per-action basis.
      *
      * @param chromosome The chromosome for which fitness should be evaluated.
      * @param numberOfBranches The number of branches.
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public static <T> List<List<Double>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome, int numberOfBranches) {
+    public static <T> List<List<Double>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
+                                                                            int numberOfBranches) {
 
         if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
                 fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE)) {

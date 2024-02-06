@@ -40,7 +40,9 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
      */
     private static final List<Float> cache = new ArrayList<>();
 
-
+    /**
+     * Stores for each chromosome the fitness values after each action.
+     */
     private static final Map<IChromosome, List<List<Double>>> actionCache = new HashMap<>();
 
     /**
@@ -167,34 +169,46 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
             usedCacheIndices.clear(index);
         }
 
-        // TODO: 01.02.2024 improve cache clearing
+        // TODO: Improve cache clearing.
         actionCache.clear();
 
         MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getFitness(IChromosome<T> chromosome, int actions) {
         return getNormalizedFitness(chromosome, actions);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getNormalizedFitness(IChromosome<T> chromosome, int actions) {
         return FitnessUtils.getFitness(chromosome, actions, FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Double> getNormalizedFitnessVector(IChromosome<T> chromosome) {
 
         if (!actionCache.containsKey(chromosome)) {
-            actionCache.put(chromosome, FitnessUtils.getBranchDistanceVectorWithActions(chromosome, ((TestCase) chromosome.getValue())
-                    .getActionSequence().size()));
+            actionCache.put(chromosome,
+                    FitnessUtils.getBranchDistanceVectorWithActions(chromosome,
+                            ((TestCase) chromosome.getValue()).getActionSequence().size()));
         }
 
         return actionCache.get(chromosome).get(index);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getIndex() {
         return index;
