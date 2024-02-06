@@ -1,10 +1,10 @@
 package org.mate.exploration.genetic.chromosome_factory;
 
 import org.mate.MATE;
-import org.mate.exploration.genetic.algorithm.MIOEDA;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
+import org.mate.exploration.genetic.util.eda.ProbabilisticModelState;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
@@ -41,21 +41,17 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
 
     /**
-     * The archive consisting of a probabilistic model for each testing target, e.g., branch.
+     * The state of a probabilistic model for each testing target, e.g., branch.
      */
-    private List<MIOEDA.ArchiveContainer> archiveContainers;
+    private List<ProbabilisticModelState<TestCase>> probabilisticModelStates;
 
     /**
      * Initialises the chromosome factory with the given properties.
      *
      * @param maxNumEvents       The maximal number of actions of a test.
-     * @param probabilisticModel The probabilistic model used in EDA.
-     * @param <T>                The type wrapped by the chromosomes, must be a test case here.
      */
-    public <T> MIOEDAChromosomeFactory(int maxNumEvents,
-                                       IProbabilisticModel<T> probabilisticModel) {
+    public MIOEDAChromosomeFactory(int maxNumEvents) {
         super(maxNumEvents);
-        this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
     }
 
     /**
@@ -68,8 +64,18 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
+     * Sets the probabilistic models that should be updated when sampling a new chromosome.
+     *
+     * @param probabilisticModelStates The list of probabilistic models that should be updated.
+     */
+    public void setProbabilisticModelStates(List<ProbabilisticModelState<TestCase>> probabilisticModelStates) {
+        this.probabilisticModelStates = probabilisticModelStates;
+    }
+
+    /**
      * Creates a new chromosome that wraps a test case consisting of actions that are sampled from
-     * the underlying probabilistic model. Note that the chromosome is inherently executed.
+     * the underlying probabilistic model or random if no probabilistic model is provided. Note that
+     * the chromosome is inherently executed.
      *
      * @return Returns the generated chromosome.
      */
@@ -79,10 +85,12 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         if (resetApp) {
             uiAbstractionLayer.resetApp();
 
-            // reset the model cursor to the root state
-            for (MIOEDA.ArchiveContainer archive : archiveContainers) {
-                if (archive.isCovered()) continue;
-                archive.getProbabilisticModel().resetPosition(uiAbstractionLayer.getLastScreenState());
+            // Reset the model cursor to the root state for each probabilistic model.
+            for (ProbabilisticModelState<TestCase> probabilisticModelState : probabilisticModelStates) {
+                if (!probabilisticModelState.isCovered()) {
+                    probabilisticModelState.getProbabilisticModel()
+                            .resetPosition(uiAbstractionLayer.getLastScreenState());
+                }
             }
         }
 
@@ -101,9 +109,12 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
                 final IScreenState currentState = uiAbstractionLayer.getLastScreenState();
 
-                for (MIOEDA.ArchiveContainer archive : archiveContainers) {
-                    if (archive.isCovered()) continue;
-                    archive.getProbabilisticModel().updatePosition(testCase, nextAction, currentState);
+                // Update the position of each probabilistic model.
+                for (ProbabilisticModelState<TestCase> probabilisticModelState : probabilisticModelStates) {
+                    if (!probabilisticModelState.isCovered()) {
+                        probabilisticModelState.getProbabilisticModel()
+                                .updatePosition(testCase, nextAction, currentState);
+                    }
                 }
 
                 if (stop) {
@@ -142,10 +153,6 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         return chromosome;
     }
 
-    public void setArchiveContainers(List<MIOEDA.ArchiveContainer> archiveContainers) {
-        this.archiveContainers = archiveContainers;
-    }
-
     /**
      * Records the fitness data and inherently coverage data on a per action-basis for the given chromosome.
      *
@@ -163,11 +170,13 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      * @param chromosome The given chromosome.
      */
     private void storeFitnessData(final IChromosome<TestCase> chromosome) {
+
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
 
-        for (MIOEDA.ArchiveContainer archiveContainer : archiveContainers) {
-            archiveContainer.getFitnessFunction().recordActionFitness(chromosome, tracesPerAction);
+        for (ProbabilisticModelState<TestCase> probabilisticModelState : probabilisticModelStates) {
+            probabilisticModelState.getFitnessFunction().recordActionFitness(chromosome, tracesPerAction);
         }
+
         tracesPerAction.clear(); // clear traces for next chromosome
     }
 
@@ -178,6 +187,10 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     @Override
     protected Action selectAction() {
+
+        if (probabilisticModel == null) {
+            return super.selectAction(); // select random action
+        }
 
         final Map<Action, Double> actionProbabilities = probabilisticModel.getActionProbabilities();
 

@@ -1,17 +1,15 @@
 package org.mate.exploration.genetic.algorithm;
 
 import org.mate.MATE;
-import org.mate.Properties;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
-import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
-import org.mate.exploration.genetic.util.eda.pipe.PIPE;
+import org.mate.exploration.genetic.util.eda.ProbabilisticModelState;
 import org.mate.model.TestCase;
 import org.mate.utils.Randomness;
 
@@ -23,9 +21,9 @@ import java.util.Map;
 public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
     /**
-     * The archive maintains for each target k a population T_k of size up to n.
+     * The archive maintains for each target, e.g., branch, a probabilistic model.
      */
-    private final Map<ActionFitnessFunctionWrapper, ArchiveContainer> archive;
+    private final Map<ActionFitnessFunctionWrapper, ProbabilisticModelState<T>> archive;
 
     /**
      * Represents the current probability P_r for sampling a random chromosome.
@@ -45,22 +43,17 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
     private long startTime;
 
     /**
-     * The chromosome factory to sample new chromosomes.
-     */
-    private final IChromosomeFactory<T> randomChromosomeFactory;
-
-    /**
      * Initializes MIOEDA with the relevant attributes.
      *
      * @param chromosomeFactory    The used chromosome factory, see {@link IChromosomeFactory}.
-     * @param fitnessFunctions     The used fitness functions, see {@link IFitnessFunction}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
+     * @param probabilisticModels  The probabilistic models associated each with a fitness function.
      * @param populationSize       The population size n.
      * @param pSampleRandom        The sampling probability P_r.
      */
     public MIOEDA(IChromosomeFactory<T> chromosomeFactory,
-                  List<IFitnessFunction<T>> fitnessFunctions,
                   ITerminationCondition terminationCondition,
+                  Map<IFitnessFunction<T>, IProbabilisticModel<T>> probabilisticModels,
                   int populationSize,
                   double pSampleRandom) {
 
@@ -68,69 +61,34 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                 null,
                 null,
                 null,
-                fitnessFunctions,
+                new ArrayList<>(probabilisticModels.keySet()),
                 terminationCondition,
                 populationSize,
                 populationSize,
                 0,
                 0);
 
-        // Enhance the fitness functions to record and retrieve the fitness after individual actions.
-        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-            this.fitnessFunctions.add(new ActionFitnessFunctionWrapper(
-                    (IActionFitnessFunction<TestCase>) fitnessFunction));
-        }
-
-        // Initialize the random probabilistic model.
-        IProbabilisticModel<T> randomProbabilisticModel
-                = (IProbabilisticModel<T>) new PIPE(this.fitnessFunctions.get(0),
-                Properties.PIPE_LEARNING_RATE(),
-                Properties.PIPE_NEGATIVE_LEARNING_RATE(),
-                Properties.PIPE_EPSILON(),
-                Properties.PIPE_CLR(),
-                Properties.PIPE_PROB_ELITIST_LEARNING(),
-                Properties.PIPE_PROB_MUTATION(),
-                Properties.PIPE_MUTATION_RATE());
-
-        randomChromosomeFactory
-                = (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(
-                        Properties.MAX_NUMBER_EVENTS(), randomProbabilisticModel);
-
-
         this.archive = new HashMap<>(); // (k -> T_k)
         this.samplingCounters = new HashMap<>(); // (k -> c_k)
         this.pSampleRandom = pSampleRandom; // P_r
         this.populationSize = populationSize; // n
 
-        // Provide for each target a dedicated probabilistic model.
-        for (ActionFitnessFunctionWrapper fitnessFunction : this.fitnessFunctions) {
-            IProbabilisticModel<T> probabilisticModel = (IProbabilisticModel<T>) new PIPE(fitnessFunction,
-                    Properties.PIPE_LEARNING_RATE(),
-                    Properties.PIPE_NEGATIVE_LEARNING_RATE(),
-                    Properties.PIPE_EPSILON(),
-                    Properties.PIPE_CLR(),
-                    Properties.PIPE_PROB_ELITIST_LEARNING(),
-                    Properties.PIPE_PROB_MUTATION(),
-                    Properties.PIPE_MUTATION_RATE());
-
-            ArchiveContainer archiveContainer = new ArchiveContainer(probabilisticModel, fitnessFunction);
-            archive.put(fitnessFunction, archiveContainer);
+        // Initialise the archive with a probabilistic model for each testing target.
+        for (Map.Entry<IFitnessFunction<T>, IProbabilisticModel<T>> entry : probabilisticModels.entrySet()) {
+            final ActionFitnessFunctionWrapper fitnessFunction = (ActionFitnessFunctionWrapper) entry.getKey();
+            final IProbabilisticModel<T> probabilisticModel = entry.getValue();
+            final ProbabilisticModelState<T> probabilisticModelState
+                    = new ProbabilisticModelState<T>(fitnessFunction, probabilisticModel);
+            this.fitnessFunctions.add(fitnessFunction);
+            archive.put(fitnessFunction, probabilisticModelState);
 
             // initially the sampling counter c_k for each testing target k is zero
             samplingCounters.put(fitnessFunction, 0);
         }
 
-        //we have to add all archive containers to our chromosome factories since they need to update all the models.
-        MIOEDAChromosomeFactory cf = (MIOEDAChromosomeFactory) chromosomeFactory;
-        MIOEDAChromosomeFactory cf2 = (MIOEDAChromosomeFactory) randomChromosomeFactory;
-
-        List<MIOEDA.ArchiveContainer> archiveContainers = new ArrayList<>(archive.values());
-        archiveContainers.add(new ArchiveContainer(randomProbabilisticModel, this.fitnessFunctions.get(0)));
-
-        cf.setArchiveContainers(archiveContainers);
-        cf2.setArchiveContainers(archiveContainers);
-
-        MATE.log_acc("We have " + fitnessFunctions.size() + " fitness functions");
+        // The chromosome factory needs to update the probabilistic models when sampling a new chromosome.
+        List<ProbabilisticModelState<TestCase>> probabilisticModelStates = new ArrayList(archive.values());
+        ((MIOEDAChromosomeFactory) chromosomeFactory).setProbabilisticModelStates(probabilisticModelStates);
     }
 
     /**
@@ -143,7 +101,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         MATE.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
 
-        IChromosome<T> chromosome = randomChromosomeFactory.createChromosome();
+        final IChromosome<T> chromosome = chromosomeFactory.createChromosome();
         population.add(chromosome);
         evaluatePopulation(population);
 
@@ -163,120 +121,102 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         if (Randomness.getRnd().nextDouble() < pSampleRandom) {
             // sample random chromosome with probability P_r
-            IChromosome<T> chromosome = randomChromosomeFactory.createChromosome();
+            ((MIOEDAChromosomeFactory) chromosomeFactory).setProbabilisticModel(null);
+            final IChromosome<T> chromosome = chromosomeFactory.createChromosome();
             population.add(chromosome);
-            MATE.log_acc("Sampled random chromosome " + chromosome + "!");
         } else {
             /*
-             * Sample a chromosome from the archive with probability (1 - P_r). Pick a target k with
-             * the lowest sampling counter c_k. Then select randomly a chromosome from the
-             * population T_k in the archive.
+             * Sample a chromosome from the archive with probability (1 - P_r) from the target k with
+             * the lowest sampling counter c_k.
              */
-            ActionFitnessFunctionWrapper target = getBestTarget().getFitnessFunction();
-            MATE.log_acc("Sampled target " + target + " from archive!");
+            final ActionFitnessFunctionWrapper target = getBestTarget().getFitnessFunction();
 
             // increase sampling counter c_k, see section 3.3
             samplingCounters.put(target, samplingCounters.get(target) + 1);
 
-            MATE.log_acc("Sampling new chromosome");
-            MIOEDAChromosomeFactory cf = (MIOEDAChromosomeFactory) chromosomeFactory;
-            cf.setProbabilisticModel((IProbabilisticModel<TestCase>) archive.get(target).getProbabilisticModel());
-            // TODO: 04.12.2023 Maybe change to using more Chromosome factories with a probabilistic model each
-            IChromosome<T> chromosome = (IChromosome<T>) cf.createChromosome();
-            MATE.log_acc("sampled " + chromosome);
+            final IProbabilisticModel<TestCase> probabilisticModel
+                    = (IProbabilisticModel<TestCase>) archive.get(target);
+            ((MIOEDAChromosomeFactory) chromosomeFactory).setProbabilisticModel(probabilisticModel);
+            final IChromosome<T> chromosome = chromosomeFactory.createChromosome();
             population.add(chromosome);
         }
 
-        MATE.log_acc("Updating Archive...");
-
-        // evaluate fitness and update archive
+        // Evaluates the fitness of the current population and updates the archive.
         evaluatePopulation(population);
         logCurrentFitness();
     }
 
+    /**
+     * Evaluates the fitness of the given population and then updates the probabilistic models.
+     *
+     * @param population The population which should be evaluated.
+     */
     private void evaluatePopulation(final List<IChromosome<T>> population) {
         for (IChromosome<T> chromosome : population) {
             for (ActionFitnessFunctionWrapper target : this.fitnessFunctions) {
-                ArchiveContainer archiveContainer = archive.get(target);
-                if (archiveContainer == null || archiveContainer.isCovered()) continue;
+                final ProbabilisticModelState<T> probabilisticModelState = archive.get(target);
 
-                double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
-                // TODO: Consider maximising and minimising fitness function values here.
-                if (fitness != 0.0) archiveContainer.getProbabilisticModel().update(population);
-                archiveContainer.updateFitness(fitness);
+                // We only need to update probabilistic models that haven't been covered yet.
+                if (!probabilisticModelState.isCovered()) {
+
+                    final double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
+
+                    // Adjusting the probabilities only makes sense if the model hasn't been covered yet.
+                    if (target.isMaximizing()) {
+                        if (fitness != 1.0) {
+                            probabilisticModelState.getProbabilisticModel().update(population);
+                        }
+                    } else {
+                        if (fitness != 0.0) {
+                            probabilisticModelState.getProbabilisticModel().update(population);
+                        }
+                    }
+
+                    probabilisticModelState.updateFitness(fitness);
+                }
             }
         }
     }
 
-    private ArchiveContainer getBestTarget() {
-        List<ArchiveContainer> possibleTargets = new ArrayList<>();
+    /**
+     * Retrieves the probabilistic model associated with the best target, i.e., the target with the
+     * lowest sampling counter. If multiple targets have the same lowest sampling counter, a random
+     * selection is performed among them.
+     *
+     * @return Returns the probabilistic model associated with the lowest sampling counter.
+     */
+    private ProbabilisticModelState<T> getBestTarget() {
 
+        final List<ProbabilisticModelState<T>> possibleTargets = new ArrayList<>();
+
+        // We only need to consider targets that have been covered yet and that are likely coverable.
         for (ActionFitnessFunctionWrapper target : fitnessFunctions) {
-            ArchiveContainer archiveContainer = archive.get(target);
-            if (archiveContainer != null && !archiveContainer.isCovered() && archiveContainer.getBestFitness() < 1.0)
-                possibleTargets.add(archiveContainer);
+            final ProbabilisticModelState<T> probabilisticModelState = archive.get(target);
+            final double fitness = probabilisticModelState.getBestFitness();
+            if (!probabilisticModelState.isCovered()) {
+                if (target.isMaximizing() && fitness > 0.0) {
+                    possibleTargets.add(probabilisticModelState);
+                }
+            } else {
+                if (probabilisticModelState.getBestFitness() < 1.0) {
+                    possibleTargets.add(probabilisticModelState);
+                }
+            }
         }
 
-        MATE.log_acc("We have " + possibleTargets.size() + " possible targets with a fitness value lower than 1.0");
+        MATE.log_acc("We have " + possibleTargets.size() + " possible targets.");
 
+        // If none of the targets is likely coverable, we need to consider all targets again.
         if (possibleTargets.isEmpty()) {
-            MATE.log_warn("No uncovered targets found where fitness is better than 1.0");
+            MATE.log_warn("No uncovered targets found where fitness is better than worst possible fitness value!");
             for (ActionFitnessFunctionWrapper target : fitnessFunctions) {
-                ArchiveContainer archiveContainer = archive.get(target);
-                possibleTargets.add(archiveContainer);
+                // TODO: Consider only those targets that haven't been covered yet.
+                final ProbabilisticModelState<T> probabilisticModelState = archive.get(target);
+                possibleTargets.add(probabilisticModelState);
             }
         }
 
-        //sorted by fitness
-//        Collections.sort(possibleTargets, (o1, o2) -> {
-//            double diff = o1.getBestFitness() - o2.getBestFitness();
-//            if (diff < 0) return -1;
-//            else if (diff > 0) return 1;
-//            else return 0;
-//        });
-
+        // Randomly select a target from the possible candidates.
         return possibleTargets.get(Randomness.getRandom(0, possibleTargets.size()));
-
-//        Collections.sort(possibleTargets, (Comparator.comparingInt((ArchiveContainer o) -> samplingCounters.get(o.getFitnessFunction()))));
-//        MATE.log_acc("First sample count: " + samplingCounters.get(possibleTargets.get(0).getFitnessFunction()) + " last sample count: " + samplingCounters.get(possibleTargets.get(possibleTargets
-//        .size() - 1).getFitnessFunction()));
-//        return possibleTargets.get(0);
-    }
-
-    public class ArchiveContainer {
-        private final IProbabilisticModel<T> probabilisticModel;
-        private boolean covered = false;
-        private double bestFitness = 1;
-        private final ActionFitnessFunctionWrapper fitnessFunction;
-
-
-        public ArchiveContainer(IProbabilisticModel<T> probabilisticModel, ActionFitnessFunctionWrapper fitnessFunction) {
-            this.probabilisticModel = probabilisticModel;
-            this.fitnessFunction = fitnessFunction;
-        }
-
-        public double getBestFitness() {
-            return bestFitness;
-        }
-
-        public void updateFitness(double fitness) {
-            if(fitness < this.bestFitness){
-                MATE.log_acc("Fitness decreased from " + this.bestFitness + " to " + fitness);
-                if (fitness <= 0d) covered = true;
-                this.bestFitness = fitness;
-            }
-        }
-
-        public IProbabilisticModel<T> getProbabilisticModel() {
-            return probabilisticModel;
-        }
-
-        public boolean isCovered() {
-            return covered;
-        }
-
-        public ActionFitnessFunctionWrapper getFitnessFunction() {
-            return fitnessFunction;
-        }
     }
 }

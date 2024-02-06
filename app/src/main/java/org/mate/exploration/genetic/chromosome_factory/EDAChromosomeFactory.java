@@ -4,8 +4,6 @@ import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
-import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -53,18 +51,15 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      *
      * @param maxNumEvents The maximal number of actions of a test.
      * @param probabilisticModel The probabilistic model used in EDA.
-     * @param fitnessFunctions The list of fitness functions. Right now EDA only supports a single
-     *                          fitness function!
+     * @param fitnessFunction The underlying fitness function.
      * @param <T> The type wrapped by the chromosomes, must be a test case here.
      */
     public <T> EDAChromosomeFactory(int maxNumEvents,
-                                IProbabilisticModel<T> probabilisticModel,
-                                List<IFitnessFunction<T>> fitnessFunctions) {
+                                    IProbabilisticModel<T> probabilisticModel,
+                                    ActionFitnessFunctionWrapper fitnessFunction) {
         super(maxNumEvents);
-        assert fitnessFunctions.size() == 1;
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction
-                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        this.fitnessFunction = fitnessFunction;
     }
 
     /**
@@ -73,18 +68,15 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      * @param resetApp Whether to reset the AUT before initialising a new test case.
      * @param maxNumEvents The maximal number of actions of a test.
      * @param probabilisticModel The probabilistic model used in EDA.
-     * @param fitnessFunctions The list of fitness functions. Right now EDA only supports a single
-     *                          fitness function!
+     * @param fitnessFunction The underlying fitness function.
      * @param <T> The type wrapped by the chromosomes, must be a test case here.
      */
     public <T> EDAChromosomeFactory(boolean resetApp, int maxNumEvents,
-                                IProbabilisticModel<T> probabilisticModel,
-                                List<IFitnessFunction<T>> fitnessFunctions) {
+                                    IProbabilisticModel<T> probabilisticModel,
+                                    ActionFitnessFunctionWrapper fitnessFunction) {
         super(resetApp, maxNumEvents);
-        assert fitnessFunctions.size() == 1;
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction
-                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        this.fitnessFunction = fitnessFunction;
     }
 
     /**

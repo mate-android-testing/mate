@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
+import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
 
 @RunWith(AndroidJUnit4.class)
@@ -21,6 +22,7 @@ public class ExecuteMATEMIOEDA {
 
         GeneticAlgorithmBuilder builder = new GeneticAlgorithmBuilder()
                 .withAlgorithm(Algorithm.MIOEDA)
+                .withChromosomeFactory(ChromosomeFactory.MIO_EDA_CHROMOSOME_FACTORY)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
                 .withPSampleRandom(Properties.P_SAMPLE_RANDOM());

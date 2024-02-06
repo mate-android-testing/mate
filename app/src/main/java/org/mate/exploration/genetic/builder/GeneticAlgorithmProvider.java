@@ -18,11 +18,11 @@ import org.mate.exploration.genetic.chromosome_factory.AndroidSuiteRandomChromos
 import org.mate.exploration.genetic.chromosome_factory.BitSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.EDAChromosomeFactory;
-import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntentChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
@@ -100,7 +100,9 @@ import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 import org.mate.model.TestCase;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
@@ -404,14 +406,16 @@ public class GeneticAlgorithmProvider {
         }
 
         final List<IFitnessFunction<T>> fitnessFunctions = this.<T>initializeFitnessFunctions();
-        final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(fitnessFunctions);
+        final ActionFitnessFunctionWrapper actionFitnessFunction
+                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
+        final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(actionFitnessFunction);
 
         // TODO: Hand over the probabilistic model and the fitness functions via a setter within
         //  the EDA class. Then, we can initialise the chromosome factory the default way.
 
         final IChromosomeFactory<T> chromosomeFactory
                 = (IChromosomeFactory<T>) new EDAChromosomeFactory(getNumEvents(),
-                probabilisticModel, fitnessFunctions);
+                probabilisticModel, actionFitnessFunction);
 
         return new EDA<>(
                 chromosomeFactory,
@@ -440,15 +444,22 @@ public class GeneticAlgorithmProvider {
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         }
 
-        List<IFitnessFunction<T>> fitnessFunctions = this.initializeFitnessFunctions();
+        final IChromosomeFactory<T> chromosomeFactory = this.initializeChromosomeFactory();
+        final List<IFitnessFunction<T>> fitnessFunctions = this.initializeFitnessFunctions();
 
-        final IChromosomeFactory<T> chromosomeFactory
-                = (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(getNumEvents(), null);
+        // Construct for each fitness function a probabilistic model.
+        final Map<IFitnessFunction<T>, IProbabilisticModel<T>> probabilisticModels = new LinkedHashMap<>();
+        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
+            final ActionFitnessFunctionWrapper actionFitnessFunction
+                    = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunction);
+            final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(actionFitnessFunction);
+            probabilisticModels.put((IFitnessFunction<T>) actionFitnessFunction, probabilisticModel);
+        }
 
-        return new MIOEDA<T>(
+        return new MIOEDA<>(
                 chromosomeFactory,
-                fitnessFunctions,
                 initializeTerminationCondition(),
+                probabilisticModels,
                 getPopulationSize(),
                 getPSampleRandom());
     }
@@ -743,6 +754,8 @@ public class GeneticAlgorithmProvider {
                 return (IChromosomeFactory<T>) new BitSequenceChromosomeFactory(getSequenceLength());
             case INTEGER_SEQUENCE_CHROMOSOME_FACTORY:
                 return (IChromosomeFactory<T>) new IntegerSequenceChromosomeFactory(getSequenceLength());
+            case MIO_EDA_CHROMOSOME_FACTORY:
+                return (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(getNumEvents());
             default:
                 throw new UnsupportedOperationException("Unknown chromosome factory: "
                         + chromosomeFactoryId);
@@ -1140,21 +1153,20 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Initializes the probabilistic model for the EDA-based approach.
+     * Initializes a probabilistic model for the given fitness function (target).
      *
-     * @param fitnessFunctions The fitness function(s) used in EDA.
+     * @param fitnessFunction The fitness function for which a probabilistic model should be init.
      * @param <T> The type of the chromosomes.
      * @return Returns the probabilistic model.
      */
-    private <T> IProbabilisticModel<T> getProbabilisticModel(final List<IFitnessFunction<T>> fitnessFunctions) {
+    private <T> IProbabilisticModel<T> getProbabilisticModel(
+            final ActionFitnessFunctionWrapper fitnessFunction) {
         // default learning rate 0.01
         // default epsilon 0.000001
         // default clr 0.1
         // default pEl 0.01
         // default pMutation 0.4
         // default mutationRate 0.4
-        final ActionFitnessFunctionWrapper fitnessFunction
-                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
         return (IProbabilisticModel<T>) new PIPE(fitnessFunction,
                 org.mate.Properties.PIPE_LEARNING_RATE(),
                 org.mate.Properties.PIPE_NEGATIVE_LEARNING_RATE(),
