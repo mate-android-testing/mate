@@ -154,6 +154,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // Evaluates the fitness of the current population and updates the archive.
         evaluatePopulation(population);
         logCurrentFitness();
+        currentGenerationNumber++;
         FitnessUtils.cleanCache(population);
     }
 
