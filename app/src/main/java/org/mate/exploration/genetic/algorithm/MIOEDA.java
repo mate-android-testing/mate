@@ -11,6 +11,7 @@ import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.exploration.genetic.util.eda.ProbabilisticModelState;
 import org.mate.model.TestCase;
+import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 
 import java.util.ArrayList;
@@ -115,6 +116,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         logCurrentFitness();
         currentGenerationNumber++;
+        FitnessUtils.cleanCache(population);
     }
 
     /**
@@ -152,6 +154,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // Evaluates the fitness of the current population and updates the archive.
         evaluatePopulation(population);
         logCurrentFitness();
+        FitnessUtils.cleanCache(population);
     }
 
     /**

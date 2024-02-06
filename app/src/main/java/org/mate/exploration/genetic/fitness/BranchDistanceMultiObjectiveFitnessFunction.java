@@ -169,7 +169,8 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
             usedCacheIndices.clear(index);
         }
 
-        // TODO: Improve cache clearing.
+        // NOTE: Clearing the entire cache only makes sense if chromosomes of previous populations
+        //  are no longer used.
         actionCache.clear();
 
         MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");

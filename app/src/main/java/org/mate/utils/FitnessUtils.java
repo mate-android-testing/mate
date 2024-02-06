@@ -2,7 +2,6 @@ package org.mate.utils;
 
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
@@ -158,8 +157,6 @@ public class FitnessUtils {
      * @param activeChromosomes The list of active chromosomes.
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
-
-        assert Properties.ALGORITHM() == Algorithm.MIO || Properties.ALGORITHM() == Algorithm.MOSA;
 
         // TODO: perform a sanity check that the same fitness function is used for every objective
         FitnessFunction fitnessFunction = Properties.FITNESS_FUNCTIONS()[0];
