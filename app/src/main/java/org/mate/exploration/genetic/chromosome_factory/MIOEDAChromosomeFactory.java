@@ -216,7 +216,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         // plain UI action this action is inherently allowed.
         if (chosenAction instanceof WidgetAction
                 && !uiAbstractionLayer.getExecutableUIActions().contains(chosenAction)) {
-            MATE.log_warn("EDAChromosomeFactory: Action ( " + actionsCount + ") "
+            MATE.log_warn("MIOEDAChromosomeFactory: Action ( " + actionsCount + ") "
                     + chosenAction.toShortString() + " not applicable!");
             // TODO: Remove this candidate action from the current state of the probabilistic model?
             return super.selectAction(); // select random action
