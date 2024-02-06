@@ -147,7 +147,6 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
             testCase.finish();
             Utils.throwOnInterrupt();
         }
-        MATE.log_acc("actionsCount: " + actionsCount);
         return chromosome;
     }
 
