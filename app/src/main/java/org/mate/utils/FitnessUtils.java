@@ -105,7 +105,8 @@ public class FitnessUtils {
             return;
         }
 
-        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE, FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
+        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE,
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
 
         for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
             if (fitnessFunctions.contains(fitnessFunction)) {
