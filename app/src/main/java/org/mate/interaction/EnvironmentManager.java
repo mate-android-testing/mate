@@ -1209,13 +1209,13 @@ public class EnvironmentManager {
      * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
+    public <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
                 // a dummy test case has a branch distance of 1.0 (worst value) for each objective
-                return Collections.nCopies(numberOfBranches, 1.0d);
+                return Collections.nCopies(numberOfBranches, 1.0f);
             }
         }
 
@@ -1229,10 +1229,10 @@ public class EnvironmentManager {
         String[] branchDistances = response.getParameter("branch_distance_vector").split("\\+");
         assert branchDistances.length == numberOfBranches;
 
-        List<Double> branchDistanceVector = new ArrayList<>();
+        List<Float> branchDistanceVector = new ArrayList<>();
 
         for (String branchDistance : branchDistances) {
-            branchDistanceVector.add(Double.parseDouble(branchDistance));
+            branchDistanceVector.add(Float.parseFloat(branchDistance));
         }
 
         return branchDistanceVector;

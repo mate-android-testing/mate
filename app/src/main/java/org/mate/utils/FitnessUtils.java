@@ -303,7 +303,7 @@ public class FitnessUtils {
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public static <T> List<Double> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
+    public static <T> List<Float> getBranchDistanceVector(IChromosome<T> chromosome, int numberOfBranches) {
 
         if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
                 fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE)) {

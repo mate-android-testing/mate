@@ -38,7 +38,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
      * cache. By adding the branch index, we can retrieve the fitness value from the cache for the
      * given chromosome and objective (branch).
      */
-    private static final List<Double> cache = new ArrayList<>();
+    private static final List<Float> cache = new ArrayList<>();
 
 
     private static final Map<IChromosome, List<List<Double>>> actionCache = new HashMap<>();
@@ -92,7 +92,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
             cacheIndex = assignNewCacheIndex(chromosome);
 
             // retrieve the fitness value for every single branch
-            final List<Double> branchDistanceVector
+            final List<Float> branchDistanceVector
                     = FitnessUtils.getBranchDistanceVector(chromosome, numberOfBranches);
 
             // describes the starting position of the chromosome in the cache
