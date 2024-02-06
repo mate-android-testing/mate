@@ -143,7 +143,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             samplingCounters.put(target, samplingCounters.get(target) + 1);
 
             final IProbabilisticModel<TestCase> probabilisticModel
-                    = (IProbabilisticModel<TestCase>) archive.get(target);
+                    = (IProbabilisticModel<TestCase>) archive.get(target).getProbabilisticModel();
             ((MIOEDAChromosomeFactory) chromosomeFactory).setProbabilisticModel(probabilisticModel);
             final IChromosome<T> chromosome = chromosomeFactory.createChromosome();
             population.add(chromosome);
