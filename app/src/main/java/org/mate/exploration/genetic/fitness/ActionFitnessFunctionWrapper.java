@@ -70,7 +70,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     @SuppressWarnings("unused")
     public void recordCurrentActionFitness(final IChromosome<TestCase> chromosome) {
         final double fitness = fitnessFunction.getNormalizedFitness(chromosome);
-        actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome) + "_" + fitnessFunction.getIndex(), fitness);
+        actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome), fitness);
     }
 
     /**
