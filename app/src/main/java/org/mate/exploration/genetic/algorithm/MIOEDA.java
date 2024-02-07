@@ -228,7 +228,9 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             for (ActionFitnessFunctionWrapper target : fitnessFunctions) {
                 // TODO: Consider only those targets that haven't been covered yet.
                 final ProbabilisticModelState<T> probabilisticModelState = archive.get(target);
-                possibleTargets.add(probabilisticModelState);
+                if (!probabilisticModelState.isCovered()) {
+                    possibleTargets.add(probabilisticModelState);
+                }
             }
         }
 
