@@ -460,7 +460,6 @@ public class GeneticAlgorithmProvider {
                 chromosomeFactory,
                 initializeTerminationCondition(),
                 probabilisticModels,
-                getPopulationSize(),
                 getPSampleRandom(),
                 getFocusedSearchStart());
     }

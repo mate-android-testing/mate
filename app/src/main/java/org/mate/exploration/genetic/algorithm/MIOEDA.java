@@ -82,14 +82,12 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * @param chromosomeFactory    The used chromosome factory, see {@link IChromosomeFactory}.
      * @param terminationCondition The used termination condition, see {@link ITerminationCondition}.
      * @param probabilisticModels  The probabilistic models associated each with a fitness function.
-     * @param populationSize       The population size n.
      * @param pSampleRandom        The sampling probability P_r.
      * @param focusedSearchStart   The start point of the focused search.
      */
     public MIOEDA(IChromosomeFactory<T> chromosomeFactory,
                   ITerminationCondition terminationCondition,
                   Map<IFitnessFunction<T>, IProbabilisticModel<T>> probabilisticModels,
-                  int populationSize,
                   double pSampleRandom,
                   double focusedSearchStart) {
 
@@ -99,15 +97,14 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                 null,
                 new ArrayList<>(probabilisticModels.keySet()),
                 terminationCondition,
-                populationSize,
-                populationSize,
+                1,
+                1,
                 0,
                 0);
 
         this.archive = new HashMap<>(); // (k -> T_k)
         this.samplingCounters = new HashMap<>(); // (k -> c_k)
         this.pSampleRandom = pSampleRandom; // P_r
-        this.populationSize = populationSize; // n
         this.focusedSearchStart = focusedSearchStart; // F
         this.pSampleRandomStart = pSampleRandom;
 
