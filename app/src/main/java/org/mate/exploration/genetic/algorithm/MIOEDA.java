@@ -84,6 +84,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * @param probabilisticModels  The probabilistic models associated each with a fitness function.
      * @param populationSize       The population size n.
      * @param pSampleRandom        The sampling probability P_r.
+     * @param focusedSearchStart   The start point of the focused search.
      */
     public MIOEDA(IChromosomeFactory<T> chromosomeFactory,
                   ITerminationCondition terminationCondition,
