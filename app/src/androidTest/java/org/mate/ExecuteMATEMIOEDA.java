@@ -25,6 +25,7 @@ public class ExecuteMATEMIOEDA {
                 .withChromosomeFactory(ChromosomeFactory.MIO_EDA_CHROMOSOME_FACTORY)
                 .withTerminationCondition(Properties.TERMINATION_CONDITION())
                 .withPopulationSize(Properties.POPULATION_SIZE())
+                .withFocusedSearchStart(Properties.P_FOCUSED_SEARCH_START())
                 .withPSampleRandom(Properties.P_SAMPLE_RANDOM());
 
         int numberOfObjectives
