@@ -277,7 +277,7 @@ public class FitnessUtils {
 
     /**
      * Fetches the branch distance vector for the specified chromosome whereas the fitness is
-     * retrieved on a per-action basis.
+     * retrieved on a per action basis.
      *
      * @param chromosome The chromosome for which fitness should be evaluated.
      * @param numberOfBranches The number of branches.

@@ -1156,7 +1156,7 @@ public class EnvironmentManager {
     /**
      * Retrieves the branch distance vector for the given chromosome. A branch distance vector
      * consists of n entries, where n refers to the number of branches. The nth entry in the vector
-     * refers to the fitness values of the nth branch on a per-action basis.
+     * refers to the fitness values of the nth branch on a per action basis.
      *
      * @param chromosome The given chromosome.
      * @param numberOfBranches The number of branches.

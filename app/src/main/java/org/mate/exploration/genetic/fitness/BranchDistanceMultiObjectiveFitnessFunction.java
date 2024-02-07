@@ -41,7 +41,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
     private static final List<Float> cache = new ArrayList<>();
 
     /**
-     * Stores for each chromosome the fitness values after each action.
+     * Stores for each chromosome the fitness values (one value per target) on a per action basis.
      */
     private static final Map<IChromosome, List<List<Double>>> actionCache = new HashMap<>();
 
