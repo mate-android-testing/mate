@@ -1167,38 +1167,39 @@ public class EnvironmentManager {
                                                                      int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase && ((TestCase) chromosome.getValue()).isDummy()) {
-            MATE.log_warn("Trying to retrieve branch distance vector of dummy test case...");
+
+            MATE.log_warn("Trying to retrieve action branch distance vector of dummy test case...");
+
             // a dummy test case has a branch distance of 1.0 (worst value) for each objective
-            List<List<Double>> dummyList = new ArrayList<>();
+            final List<List<Double>> dummyList = new ArrayList<>();
             for (int i = 0; i < numberOfBranches; i++) {
                 dummyList.add(Collections.nCopies(numberOfBranches, 1.0d));
             }
             return dummyList;
         }
 
-        String chromosomeId = getChromosomeId(chromosome);
+        final String chromosomeId = getChromosomeId(chromosome);
 
         Message.MessageBuilder messageBuilder
-                = new Message.MessageBuilder("/graph/get_branch_distance_vector_with_action")
+                = new Message.MessageBuilder("/graph/get_branch_distance_action_vector")
                 .withParameter("packageName", Registry.getPackageName())
                 .withParameter("chromosome", chromosomeId);
 
-        Message response = sendMessage(messageBuilder.build());
-        String[] branches = response.getParameter("branch_distance_vector_with_action").split("-");
-        assert branches.length == numberOfBranches;
+        final Message response = sendMessage(messageBuilder.build());
+        final String[] branches = response.getParameter("branch_distance_vector").split("-");
 
-        final List<List<Double>> branchDistanceVector = new ArrayList<>();
+        final List<List<Double>> actionBranchDistanceVector = new ArrayList<>();
 
-        for (String branch : branches) {
-            String[] actions = branch.split("\\+");
-            final List<Double> actionDistances = new ArrayList<>();
-            for (String actionDistance : actions){
-                actionDistances.add(Double.parseDouble(actionDistance));
+        for (final String branch : branches) {
+            final String[] actionDistances = branch.split("\\+"); // action distances per branch
+            final List<Double> actionBranchDistances = new ArrayList<>();
+            for (final String actionDistance : actionDistances) {
+                actionBranchDistances.add(Double.parseDouble(actionDistance));
             }
-            branchDistanceVector.add(actionDistances);
+            actionBranchDistanceVector.add(actionBranchDistances);
         }
 
-        return branchDistanceVector;
+        return actionBranchDistanceVector;
     }
 
     /**
