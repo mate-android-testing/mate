@@ -46,7 +46,7 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     TestCaseModelIterator(IProbabilisticModel<TestCase> probabilisticModel, TestCase testCase) {
 
         this.probabilisticModel = probabilisticModel;
-        this.actionIterator = testCase.getVisitedStates().contains("unkown")
+        this.actionIterator = testCase.getVisitedStates().contains("unknown")
                 // A transition to the 'unknown' state can only happen at the very end, thus we
                 // simply cut off the last action in such a case.
                 ? testCase.getActionSequence().subList(0, testCase.getActionSequence().size() - 1).iterator()
