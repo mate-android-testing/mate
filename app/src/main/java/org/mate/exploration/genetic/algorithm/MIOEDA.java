@@ -235,17 +235,19 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         final List<ProbabilisticModelState<T>> possibleTargets = new ArrayList<>();
 
-        // We only need to consider targets that have been covered yet and that are likely coverable.
+        // We only need to consider targets that haven't been covered yet but that are likely coverable.
         for (ActionFitnessFunctionWrapper target : fitnessFunctions) {
             final ProbabilisticModelState<T> probabilisticModelState = archive.get(target);
             final double fitness = probabilisticModelState.getBestFitness();
             if (!probabilisticModelState.isCovered()) {
-                if (target.isMaximizing() && fitness > 0.0) {
-                    possibleTargets.add(probabilisticModelState);
-                }
-            } else {
-                if (probabilisticModelState.getBestFitness() < 1.0) {
-                    possibleTargets.add(probabilisticModelState);
+                if (target.isMaximizing()) {
+                    if (fitness > 0.0) {
+                        possibleTargets.add(probabilisticModelState);
+                    }
+                } else {
+                    if (fitness < 1.0) {
+                        possibleTargets.add(probabilisticModelState);
+                    }
                 }
             }
         }
