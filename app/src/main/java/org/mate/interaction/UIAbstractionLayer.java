@@ -249,9 +249,11 @@ public class UIAbstractionLayer {
             MATE.log_debug("Interrupt during executeAction()!");
             throw e;
         } catch (UIAutomatorException e) {
+            // TODO: Provide 'unknown' state when retrieving the last screen state.
             Log.e("acc", "UIAutomator disconnect during action execution: ", e);
             return FAILURE_UIAUTOMATOR;
         } catch (Exception e) {
+            // TODO: Provide 'unknown' state when retrieving the last screen state.
             Log.e("acc", "Unexpected exception during action execution: ", e);
             return FAILURE_UNKNOWN;
         }
