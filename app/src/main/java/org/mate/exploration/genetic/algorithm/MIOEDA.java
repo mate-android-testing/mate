@@ -10,6 +10,7 @@ import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
 import org.mate.exploration.genetic.fitness.IFitnessFunction;
+import org.mate.exploration.genetic.termination.ConditionalTerminationCondition;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.exploration.genetic.util.eda.ProbabilisticModelState;
@@ -143,6 +144,9 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
         currentGenerationNumber++;
         FitnessUtils.cleanCache(population);
+        if (coveredAllTargets()) {
+            ConditionalTerminationCondition.satisfiedCondition();
+        }
     }
 
     /**
@@ -190,6 +194,18 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
         currentGenerationNumber++;
         FitnessUtils.cleanCache(population);
+        if (coveredAllTargets()) {
+            ConditionalTerminationCondition.satisfiedCondition();
+        }
+    }
+
+    /**
+     * Checks whether all targets, e.g., branches, have been covered.
+     *
+     * @return Returns {@code true} if all targets have been covered, otherwise {@code false}.
+     */
+    private boolean coveredAllTargets() {
+        return archive.values().parallelStream().allMatch(ProbabilisticModelState::isCovered);
     }
 
     /**
