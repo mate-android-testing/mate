@@ -281,6 +281,12 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             }
         }
 
+        // NOTE: This should never happen since we check whether all targets have been covered after
+        // each population which always consists of a single chromosome.
+        if (possibleTargets.isEmpty()) {
+            throw new IllegalStateException("No further uncovered targets present!");
+        }
+
         // Randomly select a target from the possible candidates with the lowest sampling counter.
         int lowestSamplingCounter = Integer.MAX_VALUE;
         final List<ProbabilisticModelState<T>> lowestSamplingCountTargets = new ArrayList<>();
