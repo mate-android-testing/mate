@@ -20,9 +20,8 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Combines the traditional MIO algorithm with the benefits of an EDA. In particular, the original
@@ -75,7 +74,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * Maintains for each target k a sampling counter c_k that determines how often from each target
      * a new chromosome was already sampled.
      */
-    private final Map<ActionFitnessFunctionWrapper, Integer> samplingCounters;
+    private final int[] samplingCounters;
 
     /**
      * Tracks the start point of the search.
@@ -114,7 +113,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                 0);
 
         this.archive = new ArrayList<>(probabilisticModel.getTargets().size()); // (k -> T_k)
-        this.samplingCounters = new HashMap<>(); // (k -> c_k)
+        this.samplingCounters = new int[probabilisticModel.getTargets().size()]; // (k -> c_k)
         this.pSampleRandom = pSampleRandom; // P_r
         this.focusedSearchStart = focusedSearchStart; // F
         this.pSampleRandomStart = pSampleRandom;
@@ -124,10 +123,10 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // Initialise the archive and the sampling counter for each target.
         for (final ActionFitnessFunctionWrapper fitnessFunction : probabilisticModel.getTargets()) {
             archive.add(new FitnessFunctionState(fitnessFunction));
-
-            // Initially the sampling counter c_k for each testing target k is zero.
-            samplingCounters.put(fitnessFunction, 0);
         }
+
+        // Initially the sampling counter c_k for each testing target k is zero.
+        Arrays.fill(samplingCounters, 0);
 
         this.chromosomeFactory.setFitnessFunctionStates(archive);
         this.startTime = System.currentTimeMillis();
@@ -177,7 +176,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             final ActionFitnessFunctionWrapper target = getBestTarget().getFitnessFunction();
 
             // increase sampling counter c_k, see section 3.3
-            samplingCounters.put(target, samplingCounters.get(target) + 1);
+            samplingCounters[target.getIndex()] += 1;
 
             chromosomeFactory.setSampleRandom(false);
             probabilisticModel.setFitnessFunction(target);
@@ -296,7 +295,8 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         final List<FitnessFunctionState> lowestSamplingCountTargets = new ArrayList<>();
 
         for (FitnessFunctionState fitnessFunctionState : possibleTargets) {
-            final int samplingCounter = samplingCounters.get(fitnessFunctionState.getFitnessFunction());
+            final int samplingCounter
+                    = samplingCounters[(fitnessFunctionState.getFitnessFunction().getIndex())];
 
             // Keep track of all targets with the same currently lowest sampling counter.
             if (samplingCounter <= lowestSamplingCounter) {
