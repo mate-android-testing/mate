@@ -1,6 +1,7 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
@@ -172,6 +173,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
         // NOTE: Clearing the entire cache only makes sense if chromosomes of previous populations
         //  are no longer used.
         actionCache.clear();
+        Registry.getEnvironmentManager().invalidateTracesCache();
 
         MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
     }
