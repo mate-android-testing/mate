@@ -187,7 +187,7 @@ public class FitnessUtils {
      * @param <T> Specifies whether the chromosome is a test suite or a test case.
      * @return Returns the fitness value for the given chromosome.
      */
-    public static <T> double getFitness(IChromosome<T> chromosome, int actions, FitnessFunction fitnessFunction) {
+    public static <T> float getFitness(IChromosome<T> chromosome, int actions, FitnessFunction fitnessFunction) {
 
         switch (fitnessFunction) {
             case CRASH_DISTANCE:
@@ -284,7 +284,7 @@ public class FitnessUtils {
      * @param <T> The type wrapped by the chromosomes.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public static <T> List<List<Double>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
+    public static <T> List<List<Float>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
                                                                             int numberOfBranches) {
 
         if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
@@ -339,7 +339,7 @@ public class FitnessUtils {
      * @param <T> The type wrapped by the chromosome.
      * @return Returns the crash distance vector for the given chromosome.
      */
-    public static <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+    public static <T> List<Float> getCrashDistanceVector(IChromosome<T> chromosome) {
         return Registry.getEnvironmentManager().getCrashDistanceVector(chromosome);
     }
 

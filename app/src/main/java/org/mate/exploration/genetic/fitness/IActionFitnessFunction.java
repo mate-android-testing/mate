@@ -18,7 +18,7 @@ public interface IActionFitnessFunction<T> extends IFitnessFunction<T> {
      * @param actions The range of actions starting at 0.
      * @return Returns the fitness value for the given chromosome.
      */
-    double getFitness(IChromosome<T> chromosome, int actions);
+    float getFitness(IChromosome<T> chromosome, int actions);
 
     /**
      * Retrieves the normalised fitness value for the specified range of actions of the given chromosome.
@@ -27,7 +27,7 @@ public interface IActionFitnessFunction<T> extends IFitnessFunction<T> {
      * @param actions The range of actions starting at 0.
      * @return Returns the normalised fitness value for the given chromosome.
      */
-    double getNormalizedFitness(IChromosome<T> chromosome, int actions);
+    float getNormalizedFitness(IChromosome<T> chromosome, int actions);
 
     /**
      * Retrieves the normalised fitness vector of the given chromosome, i.e., a vector consisting
@@ -36,7 +36,7 @@ public interface IActionFitnessFunction<T> extends IFitnessFunction<T> {
      * @param chromosome The chromosome for which the fitness should be evaluated.
      * @return Returns the normalised fitness vector for the given chromosome.
      */
-    List<Double> getNormalizedFitnessVector(IChromosome<T> chromosome);
+    List<Float> getNormalizedFitnessVector(IChromosome<T> chromosome);
 
     /**
      * Retrieves the index of the associated fitness function.

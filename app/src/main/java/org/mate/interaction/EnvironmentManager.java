@@ -973,14 +973,14 @@ public class EnvironmentManager {
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the crash distance vector for the given chromosome.
      */
-    public <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+    public <T> List<Float> getCrashDistanceVector(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
                 // a dummy test case has a crash distance of 1.0 (worst value)
                 return Collections.nCopies(((TestCase) chromosome.getValue())
-                        .getActionSequence().size(), 1.0d);
+                        .getActionSequence().size(), 1.0f);
             }
         }
 
@@ -994,10 +994,10 @@ public class EnvironmentManager {
         final String[] crashDistances
                 = response.getParameter("crash_distance_vector").split("\\+");
 
-        final List<Double> crashDistanceVector = new ArrayList<>();
+        final List<Float> crashDistanceVector = new ArrayList<>();
 
         for (String crashDistance : crashDistances) {
-            crashDistanceVector.add(Double.parseDouble(crashDistance));
+            crashDistanceVector.add(Float.parseFloat(crashDistance));
         }
 
         return crashDistanceVector;
@@ -1014,13 +1014,13 @@ public class EnvironmentManager {
      *                  action range of the test case, e.g., for the first three actions.
      * @return Returns the crash distance for the given chromosome.
      */
-    public <T> double getCrashDistance(IChromosome<T> chromosome, Integer actions) {
+    public <T> float getCrashDistance(IChromosome<T> chromosome, Integer actions) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
                 // a dummy test case has a crash distance of 1.0 (worst value)
-                return 1.0;
+                return 1.0f;
             }
         }
 
@@ -1035,7 +1035,7 @@ public class EnvironmentManager {
         }
 
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("crash_distance"));
+        return Float.parseFloat(response.getParameter("crash_distance"));
     }
 
     /**
@@ -1163,7 +1163,7 @@ public class EnvironmentManager {
      * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
      * @return Returns the branch distance vector for the given chromosome.
      */
-    public <T> List<List<Double>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
+    public <T> List<List<Float>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
                                                                      int numberOfBranches) {
 
         if (chromosome.getValue() instanceof TestCase && ((TestCase) chromosome.getValue()).isDummy()) {
@@ -1171,9 +1171,9 @@ public class EnvironmentManager {
             MATE.log_warn("Trying to retrieve action branch distance vector of dummy test case...");
 
             // a dummy test case has a branch distance of 1.0 (worst value) for each objective
-            final List<List<Double>> dummyList = new ArrayList<>();
+            final List<List<Float>> dummyList = new ArrayList<>();
             for (int i = 0; i < numberOfBranches; i++) {
-                dummyList.add(Collections.nCopies(numberOfBranches, 1.0d));
+                dummyList.add(Collections.nCopies(numberOfBranches, 1.0f));
             }
             return dummyList;
         }
@@ -1188,13 +1188,13 @@ public class EnvironmentManager {
         final Message response = sendMessage(messageBuilder.build());
         final String[] branches = response.getParameter("branch_distance_vector").split("-");
 
-        final List<List<Double>> actionBranchDistanceVector = new ArrayList<>();
+        final List<List<Float>> actionBranchDistanceVector = new ArrayList<>();
 
         for (final String branch : branches) {
             final String[] actionDistances = branch.split("\\+"); // action distances per branch
-            final List<Double> actionBranchDistances = new ArrayList<>();
+            final List<Float> actionBranchDistances = new ArrayList<>();
             for (final String actionDistance : actionDistances) {
-                actionBranchDistances.add(Double.parseDouble(actionDistance));
+                actionBranchDistances.add(Float.parseFloat(actionDistance));
             }
             actionBranchDistanceVector.add(actionBranchDistances);
         }

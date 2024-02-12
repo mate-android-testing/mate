@@ -44,7 +44,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
     /**
      * Stores for each chromosome the fitness values (one value per target) on a per action basis.
      */
-    private static final Map<IChromosome, List<List<Double>>> actionCache = new HashMap<>();
+    private static final Map<IChromosome, List<List<Float>>> actionCache = new HashMap<>();
 
     /**
      * Maps a chromosome to its index in the cache.
@@ -182,7 +182,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
      * {@inheritDoc}
      */
     @Override
-    public double getFitness(IChromosome<T> chromosome, int actions) {
+    public float getFitness(IChromosome<T> chromosome, int actions) {
         return getNormalizedFitness(chromosome, actions);
     }
 
@@ -190,15 +190,15 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
      * {@inheritDoc}
      */
     @Override
-    public double getNormalizedFitness(IChromosome<T> chromosome, int actions) {
-        return FitnessUtils.getFitness(chromosome, actions, FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
+    public float getNormalizedFitness(IChromosome<T> chromosome, int actions) {
+        throw new UnsupportedOperationException("Not yet implemented.");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<Double> getNormalizedFitnessVector(IChromosome<T> chromosome) {
+    public List<Float> getNormalizedFitnessVector(IChromosome<T> chromosome) {
 
         if (!actionCache.containsKey(chromosome)) {
             actionCache.put(chromosome,

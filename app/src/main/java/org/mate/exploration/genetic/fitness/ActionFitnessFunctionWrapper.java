@@ -18,7 +18,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     /**
      * Stores for every action the associated fitness value.
      */
-    private static final Map<String, Double> actionFitnessValues = new HashMap<>();
+    private static final Map<String, Float> actionFitnessValues = new HashMap<>();
 
     /**
      * The underlying fitness function.
@@ -78,7 +78,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
      */
     @SuppressWarnings("unused")
     public void recordCurrentActionFitness(final IChromosome<TestCase> chromosome) {
-        final double fitness = fitnessFunction.getNormalizedFitness(chromosome);
+        final float fitness = (float) fitnessFunction.getNormalizedFitness(chromosome);
         actionFitnessValues.put(ChromosomeUtils.getActionEntityId(chromosome), fitness);
     }
 
@@ -111,7 +111,7 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     public void recordActionFitness(final IChromosome<TestCase> chromosome,
                                     final Map<String, Set<String>> tracesPerAction) {
 
-        final List<Double> fitnessVector = fitnessFunction.getNormalizedFitnessVector(chromosome);
+        final List<Float> fitnessVector = fitnessFunction.getNormalizedFitnessVector(chromosome);
 
         for (final Map.Entry<String, Set<String>> entry : tracesPerAction.entrySet()) {
             // NOTE: The linked hashset guarantees traversing using the insertion order.
