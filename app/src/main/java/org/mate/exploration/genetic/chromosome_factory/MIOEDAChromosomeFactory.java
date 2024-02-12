@@ -3,13 +3,13 @@ package org.mate.exploration.genetic.chromosome_factory;
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.ChromosomeUtils;
-import org.mate.utils.FitnessFunctionState;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
-     * The probabilistic model used in EDA.
+     * The probabilistic model used to sample new chromosomes.
      */
     private final IProbabilisticModel<TestCase> probabilisticModel;
 
@@ -39,11 +39,6 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      * Records the traces on a per action-basis.
      */
     private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
-
-    /**
-     * The state of a probabilistic model for each testing target, e.g., branch.
-     */
-    private List<FitnessFunctionState> fitnessFunctionStates;
 
     /**
      * Controls whether to sample a new chromosome randomly or from the probabilistic model.
@@ -68,15 +63,6 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     public void setSampleRandom(boolean sampleRandom) {
         this.sampleRandom = sampleRandom;
-    }
-
-    /**
-     * Sets the states that should be updated when sampling a new chromosome.
-     *
-     * @param fitnessFunctionStates The list of states that should be updated.
-     */
-    public void setFitnessFunctionStates(List<FitnessFunctionState> fitnessFunctionStates) {
-        this.fitnessFunctionStates = fitnessFunctionStates;
     }
 
     /**
@@ -171,8 +157,8 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
 
-        for (FitnessFunctionState fitnessFunctionState : fitnessFunctionStates) {
-            fitnessFunctionState.getFitnessFunction().recordActionFitness(chromosome, tracesPerAction);
+        for (ActionFitnessFunctionWrapper target : probabilisticModel.getTargets()) {
+            target.recordActionFitness(chromosome, tracesPerAction);
         }
 
         tracesPerAction.clear(); // clear traces for next chromosome

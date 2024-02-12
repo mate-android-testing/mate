@@ -128,7 +128,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // Initially the sampling counter c_k for each testing target k is zero.
         Arrays.fill(samplingCounters, 0);
 
-        this.chromosomeFactory.setFitnessFunctionStates(archive);
         this.startTime = System.currentTimeMillis();
     }
 
