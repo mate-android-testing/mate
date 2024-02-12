@@ -38,7 +38,7 @@ public interface IProbabilisticModel<T> {
      *
      * @return Returns the action probabilities of the current state.
      */
-    Map<Action, Double> getActionProbabilities();
+    Map<Action, Float> getActionProbabilities();
 
     /**
      * Retrieves the current screen state according to the probabilistic model.

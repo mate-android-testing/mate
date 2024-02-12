@@ -46,7 +46,7 @@ public final class DotConverter {
      * @return Returns the action with the highest assigned probability if possible, otherwise
      *          {@code null} is returned.
      */
-    private static Action getActionWithBiggestProbability(final Map<Action, Double> actionProbabilities) {
+    private static Action getActionWithBiggestProbability(final Map<Action, Float> actionProbabilities) {
         return actionProbabilities.entrySet().stream()
                 .max(Comparator.comparingDouble(Map.Entry::getValue))
                 .map(Map.Entry::getKey)
@@ -128,18 +128,18 @@ public final class DotConverter {
         // Ignore showing actions that have a very low probability.
         final BiPredicate<ApplicationStateTree.ApplicationStateNode, Action> keepAction
                 = (node, action) -> {
-            final Map<Action, Double> actionProbabilities
+            final Map<Action, Float> actionProbabilities
                     = node.getActionProbabilities().get(fitnessFunction.getIndex());
             final Action mostLikelyAction = getActionWithBiggestProbability(actionProbabilities);
             return action.equals(mostLikelyAction)
-                    || actionProbabilities.getOrDefault(action, 0d) > 0.01;
+                    || actionProbabilities.getOrDefault(action, 0f) > 0.01f;
         };
 
         // Prints for the given action its action probability.
         final BiFunction<ApplicationStateTree.ApplicationStateNode, Action, String> printActionProb
                 = (node, action) -> {
 
-            final Map<Action, Double> actionProbabilities
+            final Map<Action, Float> actionProbabilities
                     = node.getActionProbabilities().get(fitnessFunction.getIndex());
             final Action mostLikelyAction = getActionWithBiggestProbability(actionProbabilities);
             final double actionProbability = actionProbabilities.get(action);

@@ -44,39 +44,39 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * The learning rate used to update the probability of good nodes of the best test case.
      */
-    private final double learningRate;
+    private final float learningRate;
 
     /**
      * The negative learning rate used to update the probability of bad nodes of the best test case.
      */
-    private final double negativeLearningRate;
+    private final float negativeLearningRate;
 
     /**
      * A user defined epsilon used in updating the probability of good and bad nodes.
      */
-    private final double epsilon;
+    private final float epsilon;
 
     /**
      * A further constant learning rate that influences the number of iterations when updating
      * the probabilities along the path of good and bad nodes of the best test case. According to
      * the paper, a value of {@code 0.1} is deemed to be the best rate.
      */
-    private final double clr;
+    private final float clr;
 
     /**
      * The probability for elitist learning.
      */
-    private final double pEl;
+    private final float pEl;
 
     /**
      * The probability for mutating probabilities in the PPT.
      */
-    private final double pMutation;
+    private final float pMutation;
 
     /**
      * The mutation rate (degree) used during mutating probabilities in the PPT.
      */
-    private final double mutationRate;
+    private final float mutationRate;
 
     /**
      * Stores the best chromosome per target seen so far.
@@ -91,7 +91,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * An epsilon that determines when a fitness increase/decrease of an action is rewarded good.
      */
-    private static final double EPSILON = 0.002d;
+    private static final float EPSILON = 0.002f;
 
     /**
      * The package name of the AUT.
@@ -110,9 +110,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @param pMutation The used probability for mutation.
      * @param mutationRate The used mutation rate (degree of mutation).
      */
-    public PIPE(List<ActionFitnessFunctionWrapper> targets, double learningRate,
-                double negativeLearningRate, double epsilon, double clr,
-                double pEl, double pMutation, double mutationRate) {
+    public PIPE(List<ActionFitnessFunctionWrapper> targets, float learningRate,
+                float negativeLearningRate, float epsilon, float clr,
+                float pEl, float pMutation, float mutationRate) {
         this.targets = targets;
         this.learningRate = learningRate;
         this.negativeLearningRate = negativeLearningRate;
@@ -177,8 +177,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             // time we observe such action. If the action is actually useful the PIPE algorithm
             // will increase the action probability anyway.
             // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
-            for (Map<Action, Double> actionProbabilities : ppt.getActionProbabilities()) {
-                final double currentProbability = actionProbabilities.get(action);
+            for (Map<Action, Float> actionProbabilities : ppt.getActionProbabilities()) {
+                final float currentProbability = actionProbabilities.get(action);
                 actionProbabilities.put(action, currentProbability / 2);
             }
         }
@@ -190,7 +190,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * {@inheritDoc}
      */
     @Override
-    public Map<Action, Double> getActionProbabilities() {
+    public Map<Action, Float> getActionProbabilities() {
         return ppt.getActionProbabilities().get(fitnessFunction.getIndex());
     }
 
@@ -296,10 +296,10 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @param nodes A list of nodes denoting a path in the PPT.
      * @return Returns the path probability for the given nodes.
      */
-    private double probability(final List<NodeWithPickedAction> nodes) {
+    private float probability(final List<NodeWithPickedAction> nodes) {
 
         // PIPE paper 4.1
-        double pathProbability = 1;
+        float pathProbability = 1;
 
         // The path probability is the product over the individual probabilities of the path nodes.
         for (NodeWithPickedAction nodeWithPickedAction : nodes) {
@@ -363,7 +363,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             int iterations = 0;
             while (probability(splitTestCase.goodActions) < pTarget) {
                 for (final NodeWithPickedAction nodeWithPickedAction : splitTestCase.goodActions) {
-                    final double probBefore = nodeWithPickedAction.getProbabilityOfAction();
+                    final float probBefore = nodeWithPickedAction.getProbabilityOfAction();
                     nodeWithPickedAction.setProbabilityOfAction(probBefore
                             + clr * learningRate * (1 - probBefore));
                 }
@@ -383,7 +383,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 // Decrease probability of "bad" actions (i.e. actions that increase fitness) until
                 // we reach the target probability.
                 for (final NodeWithPickedAction nodeWithPickedAction : splitTestCase.badActions) {
-                    final double probBefore = nodeWithPickedAction.getProbabilityOfAction();
+                    final float probBefore = nodeWithPickedAction.getProbabilityOfAction();
                     nodeWithPickedAction.setProbabilityOfAction(probBefore
                             - clr * negativeLearningRate * probBefore);
                 }
@@ -445,14 +445,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         while (testCaseModelIterator.hasNext()) {
 
             final NodeWithPickedAction nodeWithPickedAction = testCaseModelIterator.next();
-            final double probAction = nodeWithPickedAction.getProbabilityOfAction();
-            final double sum = nodeWithPickedAction.getActionProbabilities().values().stream()
+            final float probAction = nodeWithPickedAction.getProbabilityOfAction();
+            final float sum = (float) nodeWithPickedAction.getActionProbabilities().values().stream()
                     .mapToDouble(d -> d).sum();
 
             // Normalize the action probabilities of the traversed node.
-            for (final Map.Entry<Action, Double> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
+            for (final Map.Entry<Action, Float> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
                 if (!entry.getKey().equals(nodeWithPickedAction.action)) {
-                    double probBefore = entry.getValue();
+                    final float probBefore = entry.getValue();
                     entry.setValue(probBefore * (1 - (1 - sum) / (probAction - sum)));
                 }
             }
@@ -472,8 +472,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
             // TODO: How to adapt formula 4.4 for the variable P_MP as we don't distinct between terminals
             //  and non-terminals?
-            int z = 1;
-            double pMP = pMutation / (z * Math.sqrt(bestTestCase.getValue().getActionSequence().size()));
+            final int z = 1;
+            final float pMP = (float) (pMutation
+                    / (z * Math.sqrt(bestTestCase.getValue().getActionSequence().size())));
 
             final Iterator<NodeWithPickedAction> testCaseModelIterator
                     = new TestCaseModelIterator(this, bestTestCase.getValue());
@@ -485,18 +486,18 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
                 // TODO: Do we really mutate all action probabilities of every node that were traversed by
                 //  the best test case or only the action probabilities of the best test case?
-                for (final Map.Entry<Action, Double> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
+                for (final Map.Entry<Action, Float> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
                     if (Randomness.getRnd().nextDouble() < pMP) {
-                        final double probBefore = entry.getValue();
+                        final float probBefore = entry.getValue();
                         // PIPE paper 4.5
                         entry.setValue(probBefore + mutationRate * (1 - probBefore));
                     }
                 }
 
                 // Normalise to form a valid probability distribution at the given node.
-                double sum = nodeWithPickedAction.getActionProbabilities().values().stream()
+                float sum = (float) nodeWithPickedAction.getActionProbabilities().values().stream()
                         .mapToDouble(d -> d).sum();
-                for (final Map.Entry<Action, Double> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
+                for (final Map.Entry<Action, Float> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
                     entry.setValue(entry.getValue() / sum);
                 }
             }

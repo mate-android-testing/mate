@@ -11,11 +11,11 @@ import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.utils.ChromosomeUtils;
 import org.mate.utils.FitnessUtils;
+import org.mate.utils.FloatComparator;
 import org.mate.utils.Randomness;
 import org.mate.utils.Utils;
 import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,11 +173,11 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     @Override
     protected Action selectAction() {
 
-        final Map<Action, Double> actionProbabilities = probabilisticModel.getActionProbabilities();
+        final Map<Action, Float> actionProbabilities = probabilisticModel.getActionProbabilities();
 
         final double randomNumber = Randomness.getRnd().nextDouble();
-        final List<Map.Entry<Action, Double>> sortedProbabilities = actionProbabilities.entrySet().stream()
-                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+        final List<Map.Entry<Action, Float>> sortedProbabilities = actionProbabilities.entrySet().stream()
+                .sorted(FloatComparator.comparingFloat(Map.Entry::getValue))
                 .collect(Collectors.toList());
 
         Action chosenAction;

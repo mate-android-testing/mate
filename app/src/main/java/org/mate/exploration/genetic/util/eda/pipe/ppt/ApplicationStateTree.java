@@ -35,7 +35,7 @@ public class ApplicationStateTree {
     /**
      * Initialises the probabilities (action weights) of a state.
      */
-    private final BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNodeFunction;
+    private final BiFunction<List<Action>, IScreenState, Map<Action, Float>> initializeNodeFunction;
 
     /**
      * The actual PPT.
@@ -152,7 +152,7 @@ public class ApplicationStateTree {
      *                  maintained per node.
      */
     public ApplicationStateTree(
-            BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNodeFunction,
+            BiFunction<List<Action>, IScreenState, Map<Action, Float>> initializeNodeFunction,
             int targets) {
         this.initializeNodeFunction = initializeNodeFunction;
         this.targets = targets;
@@ -181,7 +181,7 @@ public class ApplicationStateTree {
      *
      * @return Returns the action probabilities of the current PPT state.
      */
-    public List<Map<Action, Double>> getActionProbabilities() {
+    public List<Map<Action, Float>> getActionProbabilities() {
         return cursor.getContent().actionProbabilities;
     }
 
@@ -299,7 +299,7 @@ public class ApplicationStateTree {
         /**
          * The action probabilities for each individual target of the state.
          */
-        private final List<Map<Action, Double>> actionProbabilities = new ArrayList<>();
+        private final List<Map<Action, Float>> actionProbabilities = new ArrayList<>();
 
         /**
          * The outgoing action transitions of the state.
@@ -312,7 +312,7 @@ public class ApplicationStateTree {
          * @param state The underlying screen state.
          * @param actionProbabilities The initial action probabilities of the state.
          */
-        private ApplicationStateNode(IScreenState state, Map<Action, Double> actionProbabilities) {
+        private ApplicationStateNode(IScreenState state, Map<Action, Float> actionProbabilities) {
             this.state = state;
 
             // The initial action probabilities are identical for each target.
@@ -344,7 +344,7 @@ public class ApplicationStateTree {
          *
          * @return Returns the action probabilities for the given state.
          */
-        public List<Map<Action, Double>> getActionProbabilities() {
+        public List<Map<Action, Float>> getActionProbabilities() {
             return actionProbabilities;
         }
 

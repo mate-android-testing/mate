@@ -262,25 +262,25 @@ public class Properties {
         return propertyOr(1);
     }
 
-    public static double PIPE_LEARNING_RATE() { return propertyOr(0.01); }
+    public static float PIPE_LEARNING_RATE() { return propertyOr(0.01f); }
 
-    public static double PIPE_NEGATIVE_LEARNING_RATE() { return propertyOr(0.2); }
+    public static float PIPE_NEGATIVE_LEARNING_RATE() { return propertyOr(0.2f); }
 
-    public static double PIPE_CLR() { return propertyOr(0.1); }
+    public static float PIPE_CLR() { return propertyOr(0.1f); }
 
-    public static double PIPE_PROB_ELITIST_LEARNING() { return propertyOr(0.1); }
+    public static float PIPE_PROB_ELITIST_LEARNING() { return propertyOr(0.1f); }
 
-    public static double PIPE_EPSILON() { return propertyOr(0.000001); }
+    public static float PIPE_EPSILON() { return propertyOr(0.000001f); }
 
-    public static double PIPE_PROB_MUTATION() { return propertyOr(0.4); }
+    public static float PIPE_PROB_MUTATION() { return propertyOr(0.4f); }
 
-    public static double PIPE_MUTATION_RATE() { return propertyOr(0.4); }
+    public static float PIPE_MUTATION_RATE() { return propertyOr(0.4f); }
 
     public static boolean PIPE_RECORD_PPT() { return propertyOr(false); }
 
     public static boolean PROMISING_ACTIONS() { return propertyOr(false); }
 
-    public static double PROMISING_ACTION_WEIGHT() { return propertyOr(0.6); }
+    public static float PROMISING_ACTION_WEIGHT() { return propertyOr(0.6f); }
 
     public static int TOURNAMENT_SIZE() { return propertyOr(2); }
 
