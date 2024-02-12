@@ -2,6 +2,7 @@ package org.mate.exploration.genetic.util.eda.pipe;
 
 import org.mate.MATE;
 import org.mate.Properties;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,9 +32,14 @@ import java.util.stream.Collectors;
 public class PIPE implements IProbabilisticModel<TestCase> {
 
     /**
-     * The fitness function wrapper used to store and retrieve fitness values after each action.
+     * The list of targets associated with the probabilistic model.
      */
-    private final ActionFitnessFunctionWrapper fitnessFunction;
+    private final List<ActionFitnessFunctionWrapper> targets;
+
+    /**
+     * The currently active fitness function (target).
+     */
+    private ActionFitnessFunctionWrapper fitnessFunction = null;
 
     /**
      * The learning rate used to update the probability of good nodes of the best test case.
@@ -72,15 +79,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     private final double mutationRate;
 
     /**
-     * Stores the best chromosome seen so far.
+     * Stores the best chromosome per target seen so far.
      */
-    private IChromosome<TestCase> elitist;
+    private final Map<ActionFitnessFunctionWrapper, IChromosome<TestCase>> elitists = new HashMap<>();
 
     /**
      * The probabilistic prototype tree (PPT).
      */
-    private final ApplicationStateTree ppt
-            = new ApplicationStateTree(new ProbabilityInitialization(Properties.PROMISING_ACTION_WEIGHT()));
+    private final ApplicationStateTree ppt;
 
     /**
      * An epsilon that determines when a fitness increase/decrease of an action is rewarded good.
@@ -88,9 +94,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     private static final double EPSILON = 0.002d;
 
     /**
+     * The package name of the AUT.
+     */
+    private final String packageName = Registry.getPackageName();
+
+    /**
      * Initialises the PIPE algorithm with the given properties.
      *
-     * @param fitnessFunction The used per action-based fitness function.
+     * @param targets The list of targets for which an action probability should be maintained.
      * @param learningRate The used learning rate for good nodes.
      * @param negativeLearningRate The used negative learning rate for bad nodes.
      * @param epsilon The used epsilon (small user defined constant).
@@ -99,11 +110,10 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @param pMutation The used probability for mutation.
      * @param mutationRate The used mutation rate (degree of mutation).
      */
-    public PIPE(ActionFitnessFunctionWrapper fitnessFunction, double learningRate,
+    public PIPE(List<ActionFitnessFunctionWrapper> targets, double learningRate,
                 double negativeLearningRate, double epsilon, double clr,
                 double pEl, double pMutation, double mutationRate) {
-
-        this.fitnessFunction = fitnessFunction;
+        this.targets = targets;
         this.learningRate = learningRate;
         this.negativeLearningRate = negativeLearningRate;
         this.epsilon = epsilon;
@@ -111,8 +121,17 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         this.pEl = pEl;
         this.pMutation = pMutation;
         this.mutationRate = mutationRate;
+        this.ppt = new ApplicationStateTree(
+                new ProbabilityInitialization(Properties.PROMISING_ACTION_WEIGHT()), targets.size()
+        );
 
-        MATE.log_acc(String.format(Locale.getDefault(),
+        // If there is only a single target, e.g., for crash reproduction, we can directly set the
+        // current target.
+        if (targets.size() == 1) {
+            this.fitnessFunction = targets.get(0);
+        }
+
+        MATE.log_debug(String.format(Locale.getDefault(),
                 "Using PIPE with {learningRate: %f, epsilon: %f, clr: %f, pEL: %f, " +
                         "pMutation: %f, mutationRate: %f}",
                 learningRate, epsilon, clr, pEl, pMutation, mutationRate
@@ -123,8 +142,47 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * {@inheritDoc}
      */
     @Override
+    public List<ActionFitnessFunctionWrapper> getTargets() {
+        return targets;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setFitnessFunction(ActionFitnessFunctionWrapper fitnessFunction) {
+        this.fitnessFunction = fitnessFunction;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void updatePosition(final TestCase testCase, final Action action,
                                final IScreenState currentScreenState) {
+
+        if (testCase.getVisitedStates().contains("unknown")) {
+            // We couldn't retrieve the correct screen state for the last action, thus we simply
+            // ignore this transition in the PPT.
+            MATE.log_warn("Ignoring transition to unknown state in PPT!");
+            return;
+        }
+
+        if (!currentScreenState.getPackageName().equals(packageName)) {
+            // We reached a state not belonging to the AUT. To avoid this we should reduce the
+            // action probability to a minimum. Although one might exclude those actions completely
+            // by specifying an action probability of zero, we cannot guarantee that those actions
+            // are not relevant to reproduce the target crash, e.g., they might have been simply
+            // triggered in the wrong internal state. Thus, we halve the action probability every
+            // time we observe such action. If the action is actually useful the PIPE algorithm
+            // will increase the action probability anyway.
+            // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
+            for (Map<Action, Double> actionProbabilities : ppt.getActionProbabilities()) {
+                final double currentProbability = actionProbabilities.get(action);
+                actionProbabilities.put(action, currentProbability / 2);
+            }
+        }
+
         ppt.updatePosition(testCase, action, currentScreenState);
     }
 
@@ -133,7 +191,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     @Override
     public Map<Action, Double> getActionProbabilities() {
-        return ppt.getActionProbabilities();
+        return ppt.getActionProbabilities().get(fitnessFunction.getIndex());
     }
 
     /**
@@ -181,7 +239,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot before the model is refined.
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-            DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-before-update.dot");
+            DotConverter.toDot(ppt, fitnessFunction,
+                    LocalDateTime.now().format(formatter) + "-model-"
+                            + fitnessFunction.getIndex() + "-before-update.dot");
         }
 
         final List<IChromosome<TestCase>> sortedPopulation = population.stream()
@@ -189,21 +249,23 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 .collect(Collectors.toList());
 
         final IChromosome<TestCase> best = sortedPopulation.get(0);
+        IChromosome<TestCase> elitist = elitists.get(fitnessFunction);
 
         // keep track of the best chromosome seen so far
         if (elitist == null || fitnessFunction.getFitness(best) < fitnessFunction.getFitness(elitist)) {
             elitist = best;
+            elitists.put(fitnessFunction, elitist);
         }
 
         // elitist learning does not lead to a new population so we repeatedly apply it
-//        MATE.log_acc("Elitist learning...");
+        MATE.log_debug("Elitist learning...");
         while (Randomness.getRnd().nextDouble() < pEl) {
             adaptPPTTowards(elitist);
             pptPruning();
         }
 
         // generation-based learning
-//        MATE.log_acc("Generation-based learning...");
+        MATE.log_debug("Generation-based learning...");
         adaptPPTTowards(best);
         pptMutation(best);
         pptPruning();
@@ -211,7 +273,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot after the model was refined.
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-            DotConverter.toDot(ppt, LocalDateTime.now().format(formatter) + "-model-after-update.dot");
+            DotConverter.toDot(ppt, fitnessFunction,
+                    LocalDateTime.now().format(formatter) + "-model-"
+                            + fitnessFunction.getIndex() + "-after-update.dot");
         }
     }
 
@@ -254,7 +318,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
-        final double fitElitist = fitnessFunction.getFitness(elitist);
+        final double fitElitist = fitnessFunction.getFitness(elitists.get(fitnessFunction));
         return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
                 * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
@@ -267,7 +331,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @return Returns the new path probability for the bad nodes of the best test case.
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
-        final double fitElitist = fitnessFunction.getFitness(elitist);
+        final double fitElitist = fitnessFunction.getFitness(elitists.get(fitnessFunction));
         return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
                 * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
@@ -292,7 +356,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
 
             // Compute the new target/path probability for the good nodes.
             double pTarget = betterTargetProbability(probability(splitTestCase.goodActions), fitness);
-            MATE.log_acc("Target probability good actions: " + pTarget);
+            MATE.log_debug("Target probability good actions: " + pTarget);
 
             // Increase the probability of "good" actions (i.e. actions that decrease fitness) until
             // we reach the target probability.
@@ -305,14 +369,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 }
                 iterations++;
             }
-            MATE.log_acc("PIPE increaseOfBest good iterations: " + iterations);
+            MATE.log_debug("PIPE increaseOfBest good iterations: " + iterations);
         }
 
         if (!splitTestCase.badActions.isEmpty()) {
 
             // Compute the new target/path probability for the bad nodes.
             double pTarget = worseTargetProbability(probability(splitTestCase.badActions), fitness);
-            MATE.log_acc("Target probability bad actions: " + pTarget);
+            MATE.log_debug("Target probability bad actions: " + pTarget);
 
             int iterations = 0;
             while (probability(splitTestCase.badActions) > pTarget) {
@@ -325,7 +389,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 }
                 iterations++;
             }
-            MATE.log_acc("PIPE increaseOfBest bad iterations: " + iterations);
+            MATE.log_debug("PIPE increaseOfBest bad iterations: " + iterations);
         }
     }
 
@@ -402,7 +466,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private void pptMutation(final IChromosome<TestCase> bestTestCase) {
 
-//        MATE.log_acc("Mutation of PPT...");
+        MATE.log_debug("Mutation of PPT...");
 
         if (Randomness.getRnd().nextDouble() < pMutation) {
 
@@ -443,7 +507,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * Performs the pruning of the PPT, i.e. it removes subtrees that became irrelevant over time.
      */
     private void pptPruning() {
-//        MATE.log_acc("Pruning of PPT...");
+        MATE.log_debug("Pruning of PPT...");
         // TODO Remove subtrees which are very unlikely to be reached, ignoring for now, since this
         //  is only a performance/memory optimization.
     }

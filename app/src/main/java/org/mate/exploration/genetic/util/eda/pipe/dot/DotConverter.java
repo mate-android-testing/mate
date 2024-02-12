@@ -1,12 +1,14 @@
 package org.mate.exploration.genetic.util.eda.pipe.dot;
 
 import org.mate.Registry;
+import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.util.eda.pipe.ppt.ApplicationStateTree;
 import org.mate.exploration.genetic.util.eda.pipe.ppt.TreeNode;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
 import org.mate.utils.Tuple;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +41,20 @@ public final class DotConverter {
     }
 
     /**
+     * Retrieves the action with the highest action probability.
+     *
+     * @return Returns the action with the highest assigned probability if possible, otherwise
+     *          {@code null} is returned.
+     */
+    private static Action getActionWithBiggestProbability(final Map<Action, Double> actionProbabilities) {
+        return actionProbabilities.entrySet().stream()
+                .max(Comparator.comparingDouble(Map.Entry::getValue))
+                .map(Map.Entry::getKey)
+                // States that don't belong to the AUT do not have any outgoing actions.
+                .orElse(null);
+    }
+
+    /**
      * Retrieves the most likely (highest possible rewarded) path through the PPT, i.e., the path
      * through the nodes with the highest action probabilities. If the action with the highest probability
      * in the current node have not been taken so far the path ends at this location. In summary, this
@@ -46,10 +62,13 @@ public final class DotConverter {
      * traversed. In fact, this path might not even exist in the current PPT.
      *
      * @param ppt The given PPT.
+     * @param fitnessFunction The currently active fitness function (target).
      * @return Returns the most likely path through the PPT.
      */
     private static List<Tuple<TreeNode<ApplicationStateTree.ApplicationStateNode>,
-                TreeNode<ApplicationStateTree.ApplicationStateNode>>> getMostLikelyPath(final ApplicationStateTree ppt) {
+                TreeNode<ApplicationStateTree.ApplicationStateNode>>> getMostLikelyPath(
+                        final ApplicationStateTree ppt,
+                        final ActionFitnessFunctionWrapper fitnessFunction) {
 
         // TODO: This is not necessarily the real most likely path through the PPT, since there might
         //  multiple actions in a state having the same (highest) action probability.
@@ -63,7 +82,8 @@ public final class DotConverter {
         Optional<TreeNode<ApplicationStateTree.ApplicationStateNode>> nextNode;
 
         do {
-            final Action nextAction = prevNode.getContent().getActionWithBiggestProbability();
+            final Action nextAction = getActionWithBiggestProbability(
+                    prevNode.getContent().getActionProbabilities().get(fitnessFunction.getIndex()));
 
             if (nextAction == null) {
                 // We reached a state that doesn't belong to the AUT and thus doesn't have any
@@ -87,14 +107,17 @@ public final class DotConverter {
      * Converts the given PPT to a DOT representation.
      *
      * @param ppt The given PPT.
+     * @param fitnessFunction The currently active target.
      * @param fileName The file to which the DOT converted representation of the PPT should be stored.
      */
-    public static void toDot(final ApplicationStateTree ppt, final String fileName) {
+    public static void toDot(final ApplicationStateTree ppt,
+                             final ActionFitnessFunctionWrapper fitnessFunction,
+                             final String fileName) {
 
         // Track which nodes represent the most likely path.
         final List<Tuple<TreeNode<ApplicationStateTree.ApplicationStateNode>,
                 TreeNode<ApplicationStateTree.ApplicationStateNode>>>
-                mostLikelyPath = getMostLikelyPath(ppt);
+                mostLikelyPath = getMostLikelyPath(ppt, fitnessFunction);
 
         // Determines whether a node lies on the most likely path.
         final BiPredicate<TreeNode<ApplicationStateTree.ApplicationStateNode>,
@@ -104,19 +127,26 @@ public final class DotConverter {
 
         // Ignore showing actions that have a very low probability.
         final BiPredicate<ApplicationStateTree.ApplicationStateNode, Action> keepAction
-                = (node, action) ->
-                node.getActionWithBiggestProbability().equals(action)
-                        || node.getActionProbabilities().getOrDefault(action, 0d) > 0.01;
+                = (node, action) -> {
+            final Map<Action, Double> actionProbabilities
+                    = node.getActionProbabilities().get(fitnessFunction.getIndex());
+            final Action mostLikelyAction = getActionWithBiggestProbability(actionProbabilities);
+            return action.equals(mostLikelyAction)
+                    || actionProbabilities.getOrDefault(action, 0d) > 0.01;
+        };
 
         // Prints for the given action its action probability.
         final BiFunction<ApplicationStateTree.ApplicationStateNode, Action, String> printActionProb
                 = (node, action) -> {
 
-            final double actionProbability = node.getActionProbabilities().get(action);
+            final Map<Action, Double> actionProbabilities
+                    = node.getActionProbabilities().get(fitnessFunction.getIndex());
+            final Action mostLikelyAction = getActionWithBiggestProbability(actionProbabilities);
+            final double actionProbability = actionProbabilities.get(action);
             String label = action.toShortString() + ": " + String.format("%.3f", actionProbability);
 
             // label in bold if action with highest probability
-            if (node.getActionWithBiggestProbability().equals(action)) {
+            if (action.equals(mostLikelyAction)) {
                 label = "<B>" + label + "</B>";
             }
 
@@ -156,7 +186,8 @@ public final class DotConverter {
             put("fixedsize", "true");
             put("shape", "square");
             // Show next to each node the action probabilities.
-            put("xlabel", "<" + node.getContent().getActionProbabilities().keySet().stream()
+            put("xlabel", "<" + node.getContent().getActionProbabilities().get(fitnessFunction.getIndex())
+                    .keySet().stream()
                     // Only show not yet triggered actions.
                     .filter(action -> !node.getContent().getActionToNextState().containsKey(action))
                     // TODO: Display only the best k actions since the label is getting somewhat too big.

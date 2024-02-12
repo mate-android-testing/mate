@@ -8,8 +8,6 @@ import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.core.GeneticAlgorithm;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.fitness.GenotypePhenotypeMappedFitnessFunction;
-import org.mate.exploration.genetic.fitness.IActionFitnessFunction;
-import org.mate.exploration.genetic.fitness.IFitnessFunction;
 import org.mate.exploration.genetic.termination.ITerminationCondition;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.model.TestCase;
@@ -32,32 +30,20 @@ public class EDA<T> extends GeneticAlgorithm<T> {
     private final IProbabilisticModel<T> probabilisticModel;
 
     /**
-     * Wraps the underlying fitness functions such that we can store and retrieve the fitness after
-     * individual actions.
-     */
-    private final List<ActionFitnessFunctionWrapper> fitnessFunctions = new ArrayList<>();
-
-    /**
      * Initialises the estimation of distribution algorithm with the necessary attributes.
      *
      * @param chromosomeFactory The used chromosome factory.
-     * @param fitnessFunctions The list of fitness functions.
      * @param terminationCondition The used termination condition.
      * @param populationSize The population size.
      */
     public EDA(final IChromosomeFactory<T> chromosomeFactory,
-               final List<IFitnessFunction<T>> fitnessFunctions,
                final ITerminationCondition terminationCondition,
                final int populationSize,
                final IProbabilisticModel<T> probabilisticModel) {
         super(chromosomeFactory, null, null, null,
-                fitnessFunctions, terminationCondition, populationSize,
+                null, terminationCondition, populationSize,
                 populationSize, 0.0, 0.0);
         this.probabilisticModel = probabilisticModel;
-        for (IFitnessFunction<T> fitnessFunction : fitnessFunctions) {
-            this.fitnessFunctions.add(new ActionFitnessFunctionWrapper(
-                    (IActionFitnessFunction<TestCase>) fitnessFunction));
-        }
     }
 
     /**
@@ -109,10 +95,12 @@ public class EDA<T> extends GeneticAlgorithm<T> {
         // TODO: Use chromosome id in logs instead of natural index + find a better solution for
         //  multi-objective algorithms + a fix for MIO/MOSA/NSGA-II used in combination with GE.
 
-        for (int i = 0; i < this.fitnessFunctions.size(); i++) {
+        final List<ActionFitnessFunctionWrapper> targets = probabilisticModel.getTargets();
+
+        for (int i = 0; i < targets.size(); i++) {
             MATE.log_acc("Fitness function " + (i + 1) + ":");
             // We can use the cached fitness values here and avoid an unnecessary re-computation.
-            final ActionFitnessFunctionWrapper fitnessFunction = this.fitnessFunctions.get(i);
+            final ActionFitnessFunctionWrapper fitnessFunction = targets.get(i);
             for (int j = 0; j < population.size(); j++) {
                 IChromosome<TestCase> chromosome = (IChromosome<TestCase>) population.get(j);
                 MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));

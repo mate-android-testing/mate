@@ -60,7 +60,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
 
         // The PIPE paper differentiates between terminals and functions, which is why they define
         // a probability P_T for picking a terminal.
-        // We differentiate between promising actions and normal ones
+        // We differentiate between promising actions and normal ones.
 
         // P_j(I) = P_T / l, where I elem promising actions
         // P_j(I) = (1 - P_T) / l, where I not elem promising actions

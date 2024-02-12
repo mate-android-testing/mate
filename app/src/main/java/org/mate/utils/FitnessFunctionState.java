@@ -1,20 +1,14 @@
-package org.mate.exploration.genetic.util.eda;
+package org.mate.utils;
 
 import org.mate.MATE;
 import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 
-/**
- * Associates a {@link IProbabilisticModel} with an {@link ActionFitnessFunctionWrapper} to track
- * which probabilistic model has been covered according to the fitness function.
- *
- * @param <T> The type wrapped by the chromosomes.
- */
-public class ProbabilisticModelState<T> {
+public class FitnessFunctionState {
 
     /**
-     * The probabilistic model.
+     * The fitness function to evaluate the target, e.g., branch, associated with the probabilistic model.
      */
-    private final IProbabilisticModel<T> probabilisticModel;
+    private final ActionFitnessFunctionWrapper fitnessFunction;
 
     /**
      * Whether the associated target has been covered according to the fitness function.
@@ -27,20 +21,12 @@ public class ProbabilisticModelState<T> {
     private double bestFitness;
 
     /**
-     * The fitness function to evaluate the target, e.g., branch, associated with the probabilistic model.
-     */
-    private final ActionFitnessFunctionWrapper fitnessFunction;
-
-    /**
-     * Constructs a new probabilistic model state.
+     * Constructs a new fitness function state.
      *
-     * @param fitnessFunction The fitness function associated with the probabilistic model.
-     * @param probabilisticModel The probabilistic model.
+     * @param fitnessFunction The action-based fitness function.
      */
-    public ProbabilisticModelState(ActionFitnessFunctionWrapper fitnessFunction,
-                                   IProbabilisticModel<T> probabilisticModel) {
+    public FitnessFunctionState (ActionFitnessFunctionWrapper fitnessFunction) {
         this.fitnessFunction = fitnessFunction;
-        this.probabilisticModel = probabilisticModel;
         this.bestFitness = fitnessFunction.isMaximizing() ? 0 : 1;
     }
 
@@ -62,13 +48,13 @@ public class ProbabilisticModelState<T> {
     public void updateFitness(final double fitness) {
         if (fitnessFunction.isMaximizing()) {
             if (fitness > this.bestFitness) {
-                MATE.log_acc("Fitness increase from " + this.bestFitness + " to " + fitness);
+                MATE.log_debug("Fitness increase from " + this.bestFitness + " to " + fitness);
                 if (fitness >= 1d) covered = true;
                 this.bestFitness = fitness;
             }
         } else {
             if (fitness < this.bestFitness) {
-                MATE.log_acc("Fitness decreased from " + this.bestFitness + " to " + fitness);
+                MATE.log_debug("Fitness decreased from " + this.bestFitness + " to " + fitness);
                 if (fitness <= 0d) covered = true;
                 this.bestFitness = fitness;
             }
@@ -86,18 +72,9 @@ public class ProbabilisticModelState<T> {
     }
 
     /**
-     * Returns the probabilistic model.
+     * Returns the action-based fitness function.
      *
-     * @return Returns the probabilistic model.
-     */
-    public IProbabilisticModel<T> getProbabilisticModel() {
-        return probabilisticModel;
-    }
-
-    /**
-     * Returns the fitness function.
-     *
-     * @return Returns the fitness function.
+     * @return Returns the action-based fitness function.
      */
     public ActionFitnessFunctionWrapper getFitnessFunction() {
         return fitnessFunction;

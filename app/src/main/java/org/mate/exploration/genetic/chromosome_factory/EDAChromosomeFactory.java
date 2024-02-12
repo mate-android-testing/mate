@@ -36,12 +36,6 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     private final IProbabilisticModel<TestCase> probabilisticModel;
 
     /**
-     * Wraps the underlying fitness function such that we can store and retrieve the fitness after
-     * individual actions.
-     */
-    private final ActionFitnessFunctionWrapper fitnessFunction;
-
-    /**
      * Records the traces on a per action-basis.
      */
     private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
@@ -51,32 +45,12 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      *
      * @param maxNumEvents The maximal number of actions of a test.
      * @param probabilisticModel The probabilistic model used in EDA.
-     * @param fitnessFunction The underlying fitness function.
      * @param <T> The type wrapped by the chromosomes, must be a test case here.
      */
     public <T> EDAChromosomeFactory(int maxNumEvents,
-                                    IProbabilisticModel<T> probabilisticModel,
-                                    ActionFitnessFunctionWrapper fitnessFunction) {
+                                    IProbabilisticModel<T> probabilisticModel) {
         super(maxNumEvents);
         this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction = fitnessFunction;
-    }
-
-    /**
-     * Initialises the chromosome factory with the given properties.
-     *
-     * @param resetApp Whether to reset the AUT before initialising a new test case.
-     * @param maxNumEvents The maximal number of actions of a test.
-     * @param probabilisticModel The probabilistic model used in EDA.
-     * @param fitnessFunction The underlying fitness function.
-     * @param <T> The type wrapped by the chromosomes, must be a test case here.
-     */
-    public <T> EDAChromosomeFactory(boolean resetApp, int maxNumEvents,
-                                    IProbabilisticModel<T> probabilisticModel,
-                                    ActionFitnessFunctionWrapper fitnessFunction) {
-        super(resetApp, maxNumEvents);
-        this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
-        this.fitnessFunction = fitnessFunction;
     }
 
     /**
@@ -162,7 +136,9 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     private void storeCoverageAndFitnessData(final IChromosome<TestCase> chromosome) {
         CoverageUtils.storeActionCoverageData(chromosome);
         FitnessUtils.storeActionFitnessData(chromosome);
-        fitnessFunction.recordCurrentActionFitness(chromosome);
+        for (ActionFitnessFunctionWrapper fitnessFunction : probabilisticModel.getTargets()) {
+            fitnessFunction.recordCurrentActionFitness(chromosome);
+        }
     }
 
     /**
@@ -183,7 +159,9 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private void storeFitnessData(final IChromosome<TestCase> chromosome) {
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
-        fitnessFunction.recordActionFitness(chromosome, tracesPerAction);
+        for (ActionFitnessFunctionWrapper fitnessFunction : probabilisticModel.getTargets()) {
+            fitnessFunction.recordActionFitness(chromosome, tracesPerAction);
+        }
         tracesPerAction.clear(); // clear traces for next chromosome
     }
 

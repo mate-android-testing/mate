@@ -35,6 +35,15 @@ public class ActionFitnessFunctionWrapper implements IFitnessFunction<TestCase> 
     }
 
     /**
+     * Returns the index of the underlying fitness function.
+     *
+     * @return Returns the index of the underlying fitness function.
+     */
+    public int getIndex() {
+        return fitnessFunction.getIndex();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

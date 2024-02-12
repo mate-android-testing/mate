@@ -1,11 +1,13 @@
 package org.mate.exploration.genetic.util.eda;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,4 +60,18 @@ public interface IProbabilisticModel<T> {
      * @param currentScreenState The new state of the probabilistic model.
      */
     void resetPosition(IScreenState currentScreenState);
+
+    /**
+     * Retrieves the list of targets associated with the probabilistic model.
+     *
+     * @return Returns the list of targets associated with the probabilistic model.
+     */
+    List<ActionFitnessFunctionWrapper> getTargets();
+
+    /**
+     * Sets the currently active fitness function (target) of the probabilistic model.
+     *
+     * @param fitnessFunction The new active fitness function.
+     */
+    void setFitnessFunction(ActionFitnessFunctionWrapper fitnessFunction);
 }
