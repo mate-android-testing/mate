@@ -3,7 +3,6 @@ package org.mate.exploration.genetic.chromosome_factory;
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -154,13 +153,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      * @param chromosome The given chromosome.
      */
     private void storeFitnessData(final IChromosome<TestCase> chromosome) {
-
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
-
-        for (ActionFitnessFunctionWrapper target : probabilisticModel.getTargets()) {
-            target.recordActionFitness(chromosome, tracesPerAction);
-        }
-
         tracesPerAction.clear(); // clear traces for next chromosome
     }
 

@@ -3,7 +3,6 @@ package org.mate.exploration.genetic.chromosome_factory;
 import org.mate.MATE;
 import org.mate.exploration.genetic.chromosome.Chromosome;
 import org.mate.exploration.genetic.chromosome.IChromosome;
-import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.exploration.genetic.util.eda.IProbabilisticModel;
 import org.mate.interaction.action.Action;
 import org.mate.interaction.action.ui.WidgetAction;
@@ -122,26 +121,6 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
-     * Stores the intermediate coverage and fitness of the chromosome, i.e. the coverage/fitness data
-     * associated with the last executed action.
-     *
-     * NOTE: This implementation has been replaced in favour of a faster implementation that directly
-     * retrieves the traces (coverage/fitness data) from the external storage and stores them to disk
-     * in one pass upon test case completion, see {@link #recordFitnessData(IChromosome)} and
-     * {@link #storeFitnessData(IChromosome)}.
-     *
-     * @param chromosome The chromosome for which coverage and fitness should be stored.
-     */
-    @SuppressWarnings("unused")
-    private void storeCoverageAndFitnessData(final IChromosome<TestCase> chromosome) {
-        CoverageUtils.storeActionCoverageData(chromosome);
-        FitnessUtils.storeActionFitnessData(chromosome);
-        for (ActionFitnessFunctionWrapper fitnessFunction : probabilisticModel.getTargets()) {
-            fitnessFunction.recordCurrentActionFitness(chromosome);
-        }
-    }
-
-    /**
      * Records the fitness data and inherently coverage data on a per action-basis for the given chromosome.
      *
      * @param chromosome The given chromosome.
@@ -159,9 +138,6 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     private void storeFitnessData(final IChromosome<TestCase> chromosome) {
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
-        for (ActionFitnessFunctionWrapper fitnessFunction : probabilisticModel.getTargets()) {
-            fitnessFunction.recordActionFitness(chromosome, tracesPerAction);
-        }
         tracesPerAction.clear(); // clear traces for next chromosome
     }
 

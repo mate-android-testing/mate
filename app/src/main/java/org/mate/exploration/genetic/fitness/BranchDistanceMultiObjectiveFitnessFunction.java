@@ -191,7 +191,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
      */
     @Override
     public float getNormalizedFitness(IChromosome<T> chromosome, int actions) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        return getNormalizedFitnessVector(chromosome).get(actions);
     }
 
     /**
