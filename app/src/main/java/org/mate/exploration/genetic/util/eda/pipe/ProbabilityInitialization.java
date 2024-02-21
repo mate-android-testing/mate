@@ -9,8 +9,8 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
     @Override
     public Map<Action, Float> apply(final List<Action> prevActions, final IScreenState state) {
 
-        final Map<Action, Float> probabilities = new HashMap<>();
+        final Map<Action, Float> probabilities = new LinkedHashMap<>();
 
         if (state.getId().equals("VIRTUAL_ROOT_STATE")) {
             probabilities.put(new StartAction(), 1.0f);
@@ -81,7 +81,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
      */
     private Map<Action, Float> toProbabilities(final Map<Action, Float> weights) {
 
-        final Map<Action, Float> probabilities = new HashMap<>();
+        final Map<Action, Float> probabilities = new LinkedHashMap<>();
 
         float sum = (float) weights.values().stream().mapToDouble(Number::doubleValue).sum();
 

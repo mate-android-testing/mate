@@ -177,7 +177,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             // time we observe such action. If the action is actually useful the PIPE algorithm
             // will increase the action probability anyway.
             // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
-            for (Map<Action, Float> actionProbabilities : ppt.getActionProbabilities()) {
+            for (int i = 0; i < targets.size(); i++) {
+                Map<Action, Float> actionProbabilities
+                        = ppt.getActionProbabilities().getActionProbabilities(i);
                 final float currentProbability = actionProbabilities.get(action);
                 actionProbabilities.put(action, currentProbability / 2);
             }
@@ -191,7 +193,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     @Override
     public Map<Action, Float> getActionProbabilities() {
-        return ppt.getActionProbabilities().get(fitnessFunction.getIndex());
+        return ppt.getActionProbabilities().getActionProbabilities(fitnessFunction.getIndex());
     }
 
     /**

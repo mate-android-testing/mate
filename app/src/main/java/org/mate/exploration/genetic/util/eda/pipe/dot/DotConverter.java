@@ -6,9 +6,9 @@ import org.mate.exploration.genetic.util.eda.pipe.ppt.ApplicationStateTree;
 import org.mate.exploration.genetic.util.eda.pipe.ppt.TreeNode;
 import org.mate.interaction.action.Action;
 import org.mate.state.IScreenState;
+import org.mate.utils.FloatComparator;
 import org.mate.utils.Tuple;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +48,7 @@ public final class DotConverter {
      */
     private static Action getActionWithBiggestProbability(final Map<Action, Float> actionProbabilities) {
         return actionProbabilities.entrySet().stream()
-                .max(Comparator.comparingDouble(Map.Entry::getValue))
+                .max(FloatComparator.comparingFloat(Map.Entry::getValue))
                 .map(Map.Entry::getKey)
                 // States that don't belong to the AUT do not have any outgoing actions.
                 .orElse(null);
@@ -83,7 +83,9 @@ public final class DotConverter {
 
         do {
             final Action nextAction = getActionWithBiggestProbability(
-                    prevNode.getContent().getActionProbabilities().get(fitnessFunction.getIndex()));
+                    prevNode.getContent().getActionProbabilities()
+                            .getActionProbabilities(fitnessFunction.getIndex())
+            );
 
             if (nextAction == null) {
                 // We reached a state that doesn't belong to the AUT and thus doesn't have any
@@ -129,7 +131,7 @@ public final class DotConverter {
         final BiPredicate<ApplicationStateTree.ApplicationStateNode, Action> keepAction
                 = (node, action) -> {
             final Map<Action, Float> actionProbabilities
-                    = node.getActionProbabilities().get(fitnessFunction.getIndex());
+                    = node.getActionProbabilities().getActionProbabilities(fitnessFunction.getIndex());
             final Action mostLikelyAction = getActionWithBiggestProbability(actionProbabilities);
             return action.equals(mostLikelyAction)
                     || actionProbabilities.getOrDefault(action, 0f) > 0.01f;
@@ -140,9 +142,9 @@ public final class DotConverter {
                 = (node, action) -> {
 
             final Map<Action, Float> actionProbabilities
-                    = node.getActionProbabilities().get(fitnessFunction.getIndex());
+                    = node.getActionProbabilities().getActionProbabilities(fitnessFunction.getIndex());
             final Action mostLikelyAction = getActionWithBiggestProbability(actionProbabilities);
-            final double actionProbability = actionProbabilities.get(action);
+            final float actionProbability = actionProbabilities.get(action);
             String label = action.toShortString() + ": " + String.format("%.3f", actionProbability);
 
             // label in bold if action with highest probability
@@ -186,7 +188,7 @@ public final class DotConverter {
             put("fixedsize", "true");
             put("shape", "square");
             // Show next to each node the action probabilities.
-            put("xlabel", "<" + node.getContent().getActionProbabilities().get(fitnessFunction.getIndex())
+            put("xlabel", "<" + node.getContent().getActionProbabilities().getActionProbabilities(fitnessFunction.getIndex())
                     .keySet().stream()
                     // Only show not yet triggered actions.
                     .filter(action -> !node.getContent().getActionToNextState().containsKey(action))

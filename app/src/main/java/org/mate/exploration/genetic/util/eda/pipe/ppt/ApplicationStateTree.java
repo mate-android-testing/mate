@@ -17,7 +17,6 @@ import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateType;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -181,7 +180,7 @@ public class ApplicationStateTree {
      *
      * @return Returns the action probabilities of the current PPT state.
      */
-    public List<Map<Action, Float>> getActionProbabilities() {
+    public ActionProbabilities getActionProbabilities() {
         return cursor.getContent().actionProbabilities;
     }
 
@@ -299,7 +298,7 @@ public class ApplicationStateTree {
         /**
          * The action probabilities for each individual target of the state.
          */
-        private final List<Map<Action, Float>> actionProbabilities = new ArrayList<>();
+        private final ActionProbabilities actionProbabilities;
 
         /**
          * The outgoing action transitions of the state.
@@ -314,11 +313,7 @@ public class ApplicationStateTree {
          */
         private ApplicationStateNode(IScreenState state, Map<Action, Float> actionProbabilities) {
             this.state = state;
-
-            // The initial action probabilities are identical for each target.
-            for (int i = 0; i < targets; i++) {
-                this.actionProbabilities.add(new HashMap<>(actionProbabilities));
-            }
+            this.actionProbabilities = new ActionProbabilities(targets, actionProbabilities);
         }
 
         /**
@@ -344,7 +339,7 @@ public class ApplicationStateTree {
          *
          * @return Returns the action probabilities for the given state.
          */
-        public List<Map<Action, Float>> getActionProbabilities() {
+        public ActionProbabilities getActionProbabilities() {
             return actionProbabilities;
         }
 
