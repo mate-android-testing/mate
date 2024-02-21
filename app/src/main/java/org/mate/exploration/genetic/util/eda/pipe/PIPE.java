@@ -84,6 +84,16 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     private final Map<ActionFitnessFunctionWrapper, IChromosome<TestCase>> elitists = new HashMap<>();
 
     /**
+     * Stores the fitness of the best chromosome per target seen so far.
+     */
+    private final Map<ActionFitnessFunctionWrapper, Double> elitistsFitness = new HashMap<>();
+
+    /**
+     * Stores the {@link SplitTestCase} of the best chromosome per target seen so far.
+     */
+    private final Map<ActionFitnessFunctionWrapper, SplitTestCase> elitistsSplitTestCase = new HashMap<>();
+
+    /**
      * The probabilistic prototype tree (PPT).
      */
     private final ApplicationStateTree ppt;
@@ -257,6 +267,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         if (elitist == null || fitnessFunction.getFitness(best) < fitnessFunction.getFitness(elitist)) {
             elitist = best;
             elitists.put(fitnessFunction, elitist);
+            elitistsFitness.put(fitnessFunction, fitnessFunction.getFitness(elitist));
+            elitistsSplitTestCase.put(fitnessFunction, cutOffAfterLastFitnessEnhancement(elitist));
         }
 
         // elitist learning does not lead to a new population so we repeatedly apply it
@@ -320,7 +332,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
-        final double fitElitist = fitnessFunction.getFitness(elitists.get(fitnessFunction));
+        final double fitElitist = elitistsFitness.get(fitnessFunction);
         return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
                 * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
@@ -333,7 +345,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @return Returns the new path probability for the bad nodes of the best test case.
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
-        final double fitElitist = fitnessFunction.getFitness(elitists.get(fitnessFunction));
+        final double fitElitist = elitistsFitness.get(fitnessFunction);
         return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
                 * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
@@ -347,9 +359,17 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private void increaseOfBest(final IChromosome<TestCase> bestTestCase) {
 
+        final SplitTestCase splitTestCase;
+        final double fitness;
+
         // PIPE paper 4.3, we split the test case into good and bad actions.
-        final SplitTestCase splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestCase);
-        final double fitness = fitnessFunction.getFitness(bestTestCase);
+        if (elitists.get(fitnessFunction).equals(bestTestCase)) { // read from cache if possible
+            splitTestCase = elitistsSplitTestCase.get(fitnessFunction);
+            fitness = elitistsFitness.get(fitnessFunction);
+        } else {
+            splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestCase);
+            fitness = fitnessFunction.getFitness(bestTestCase);
+        }
 
         // TODO: There can be still thousands of iterations caused by the tiny path probabilities.
         //  We should use some epsilon to avoid non significant probability changes.
