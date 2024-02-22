@@ -81,17 +81,17 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * Stores the best chromosome per target seen so far.
      */
-    private final Map<ActionFitnessFunctionWrapper, IChromosome<TestCase>> elitists = new HashMap<>();
+    private final Map<Integer, IChromosome<TestCase>> elitists = new HashMap<>();
 
     /**
      * Stores the fitness of the best chromosome per target seen so far.
      */
-    private final Map<ActionFitnessFunctionWrapper, Double> elitistsFitness = new HashMap<>();
+    private final Map<Integer, Double> elitistsFitness = new HashMap<>();
 
     /**
      * Stores the {@link SplitTestCase} of the best chromosome per target seen so far.
      */
-    private final Map<ActionFitnessFunctionWrapper, SplitTestCase> elitistsSplitTestCase = new HashMap<>();
+    private final Map<Integer, SplitTestCase> elitistsSplitTestCase = new HashMap<>();
 
     /**
      * The probabilistic prototype tree (PPT).
@@ -261,14 +261,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 .collect(Collectors.toList());
 
         final IChromosome<TestCase> best = sortedPopulation.get(0);
-        IChromosome<TestCase> elitist = elitists.get(fitnessFunction);
+        IChromosome<TestCase> elitist = elitists.get(fitnessFunction.getIndex());
 
         // keep track of the best chromosome seen so far
         if (elitist == null || fitnessFunction.getFitness(best) < fitnessFunction.getFitness(elitist)) {
             elitist = best;
-            elitists.put(fitnessFunction, elitist);
-            elitistsFitness.put(fitnessFunction, fitnessFunction.getFitness(elitist));
-            elitistsSplitTestCase.put(fitnessFunction, cutOffAfterLastFitnessEnhancement(elitist));
+            elitists.put(fitnessFunction.getIndex(), elitist);
+            elitistsFitness.put(fitnessFunction.getIndex(), fitnessFunction.getFitness(elitist));
+            elitistsSplitTestCase.put(fitnessFunction.getIndex(), cutOffAfterLastFitnessEnhancement(elitist));
         }
 
         // elitist learning does not lead to a new population so we repeatedly apply it
@@ -332,7 +332,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
-        final double fitElitist = elitistsFitness.get(fitnessFunction);
+        final double fitElitist = elitistsFitness.get(fitnessFunction.getIndex());
         return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
                 * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
@@ -345,7 +345,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @return Returns the new path probability for the bad nodes of the best test case.
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
-        final double fitElitist = elitistsFitness.get(fitnessFunction);
+        final double fitElitist = elitistsFitness.get(fitnessFunction.getIndex());
         return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
                 * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
@@ -363,9 +363,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         final double fitness;
 
         // PIPE paper 4.3, we split the test case into good and bad actions.
-        if (elitists.get(fitnessFunction).equals(bestTestCase)) { // read from cache if possible
-            splitTestCase = elitistsSplitTestCase.get(fitnessFunction);
-            fitness = elitistsFitness.get(fitnessFunction);
+        if (elitists.get(fitnessFunction.getIndex()).equals(bestTestCase)) { // read from cache if possible
+            splitTestCase = elitistsSplitTestCase.get(fitnessFunction.getIndex());
+            fitness = elitistsFitness.get(fitnessFunction.getIndex());
         } else {
             splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestCase);
             fitness = fitnessFunction.getFitness(bestTestCase);
