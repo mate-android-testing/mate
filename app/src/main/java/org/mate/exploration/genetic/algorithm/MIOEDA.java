@@ -180,7 +180,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             samplingCounters[target.getIndex()] += 1;
 
             chromosomeFactory.setSampleRandom(false);
-            probabilisticModel.setFitnessFunction(target);
+            probabilisticModel.setCurrentTarget(target);
             final IChromosome<T> chromosome = (IChromosome<T>) chromosomeFactory.createChromosome();
             population.add(chromosome);
         }
@@ -234,7 +234,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                     fitnessFunctionState.updateFitness(fitness); // the target might be now covered
 
                     if (!fitnessFunctionState.isCovered()) { // update the model
-                        probabilisticModel.setFitnessFunction(target);
+                        probabilisticModel.setCurrentTarget(target);
                         probabilisticModel.update(population);
                     } else {
                         coveredTargets.add(target.getIndex()); // mark for removal
