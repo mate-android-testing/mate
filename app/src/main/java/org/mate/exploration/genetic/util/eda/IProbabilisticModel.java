@@ -70,11 +70,11 @@ public interface IProbabilisticModel<T> {
     List<ActionFitnessFunctionWrapper> getTargets();
 
     /**
-     * Sets the currently active fitness function (target) of the probabilistic model.
+     * Sets the currently active target of the probabilistic model.
      *
-     * @param fitnessFunction The new active fitness function.
+     * @param target The new active target.
      */
-    void setFitnessFunction(ActionFitnessFunctionWrapper fitnessFunction);
+    void setCurrentTarget(ActionFitnessFunctionWrapper target);
 
     /**
      * Removes the action probabilities of the given targets.

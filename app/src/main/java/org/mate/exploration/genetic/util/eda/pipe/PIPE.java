@@ -44,9 +44,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     private final Set<Integer> coveredTargets = new HashSet<>();
 
     /**
-     * The currently active fitness function (target).
+     * The currently active target.
      */
-    private ActionFitnessFunctionWrapper fitnessFunction = null;
+    private ActionFitnessFunctionWrapper target = null;
 
     /**
      * The learning rate used to update the probability of good nodes of the best test case.
@@ -145,7 +145,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         // If there is only a single target, e.g., for crash reproduction, we can directly set the
         // current target.
         if (targets.size() == 1) {
-            this.fitnessFunction = targets.get(0);
+            this.target = targets.get(0);
         }
 
         MATE.log_debug(String.format(Locale.getDefault(),
@@ -167,8 +167,8 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * {@inheritDoc}
      */
     @Override
-    public void setFitnessFunction(ActionFitnessFunctionWrapper fitnessFunction) {
-        this.fitnessFunction = fitnessFunction;
+    public void setCurrentTarget(ActionFitnessFunctionWrapper target) {
+        this.target = target;
     }
 
     /**
@@ -212,7 +212,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     @Override
     public Map<Action, Float> getActionProbabilities() {
-        return ppt.getActionProbabilities().getActionProbabilities(fitnessFunction.getIndex());
+        return ppt.getActionProbabilities().getActionProbabilities(target.getIndex());
     }
 
     /**
@@ -269,24 +269,24 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot before the model is refined.
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-            DotConverter.toDot(ppt, fitnessFunction,
+            DotConverter.toDot(ppt, target,
                     LocalDateTime.now().format(formatter) + "-model-"
                             + fitnessFunction.getIndex() + "-before-update.dot");
         }
 
         final List<IChromosome<TestCase>> sortedPopulation = population.stream()
-                .sorted(Comparator.comparingDouble(fitnessFunction::getNormalizedFitness))
+                .sorted(Comparator.comparingDouble(target::getNormalizedFitness))
                 .collect(Collectors.toList());
 
         final IChromosome<TestCase> best = sortedPopulation.get(0);
-        IChromosome<TestCase> elitist = elitists.get(fitnessFunction.getIndex());
+        IChromosome<TestCase> elitist = elitists.get(target.getIndex());
 
         // keep track of the best chromosome seen so far
-        if (elitist == null || fitnessFunction.getFitness(best) < fitnessFunction.getFitness(elitist)) {
+        if (elitist == null || target.getFitness(best) < target.getFitness(elitist)) {
             elitist = best;
-            elitists.put(fitnessFunction.getIndex(), elitist);
-            elitistsFitness.put(fitnessFunction.getIndex(), fitnessFunction.getFitness(elitist));
-            elitistsSplitTestCase.put(fitnessFunction.getIndex(), cutOffAfterLastFitnessEnhancement(elitist));
+            elitists.put(target.getIndex(), elitist);
+            elitistsFitness.put(target.getIndex(), target.getFitness(elitist));
+            elitistsSplitTestCase.put(target.getIndex(), cutOffAfterLastFitnessEnhancement(elitist));
         }
 
         // elitist learning does not lead to a new population so we repeatedly apply it
@@ -305,9 +305,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         if (Properties.PIPE_RECORD_PPT()) {
             // Convert to dot after the model was refined.
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-            DotConverter.toDot(ppt, fitnessFunction,
+            DotConverter.toDot(ppt, target,
                     LocalDateTime.now().format(formatter) + "-model-"
-                            + fitnessFunction.getIndex() + "-after-update.dot");
+                            + target.getIndex() + "-after-update.dot");
         }
     }
 
@@ -350,7 +350,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
-        final double fitElitist = elitistsFitness.get(fitnessFunction.getIndex());
+        final double fitElitist = elitistsFitness.get(target.getIndex());
         return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
                 * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
@@ -363,7 +363,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @return Returns the new path probability for the bad nodes of the best test case.
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
-        final double fitElitist = elitistsFitness.get(fitnessFunction.getIndex());
+        final double fitElitist = elitistsFitness.get(target.getIndex());
         return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
                 * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
@@ -381,12 +381,12 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         final double fitness;
 
         // PIPE paper 4.3, we split the test case into good and bad actions.
-        if (elitists.get(fitnessFunction.getIndex()).equals(bestTestCase)) { // read from cache if possible
-            splitTestCase = elitistsSplitTestCase.get(fitnessFunction.getIndex());
-            fitness = elitistsFitness.get(fitnessFunction.getIndex());
+        if (elitists.get(target.getIndex()).equals(bestTestCase)) { // read from cache if possible
+            splitTestCase = elitistsSplitTestCase.get(target.getIndex());
+            fitness = elitistsFitness.get(target.getIndex());
         } else {
             splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestCase);
-            fitness = fitnessFunction.getFitness(bestTestCase);
+            fitness = target.getFitness(bestTestCase);
         }
 
         // TODO: There can be still thousands of iterations caused by the tiny path probabilities.
@@ -448,13 +448,13 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         }};
 
         int indexOfLastFitnessDecrease = -1;
-        double prevFitness = fitnessFunction.getFitnessAfterXActions(bestTestCase, 0);
+        double prevFitness = target.getFitnessAfterXActions(bestTestCase, 0);
 
         // Determine point in test case sequence when fitness doesn't get better (decrease) anymore.
         for (int i = 0; i < nodes.size(); i++) {
 
             final NodeWithPickedAction nodeWithPickedAction = nodes.get(i);
-            final double fitness = fitnessFunction.getFitnessAfterXActions(bestTestCase,
+            final double fitness = target.getFitnessAfterXActions(bestTestCase,
                     nodeWithPickedAction.actionIndex + 1);
 
             // TODO: Check whether the fitness function is maximising or minimising. This does not only
