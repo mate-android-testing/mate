@@ -88,17 +88,17 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * Stores the best chromosome per target seen so far.
      */
-    private final Map<Integer, IChromosome<TestCase>> elitists = new HashMap<>();
+    private final Map<Integer, IChromosome<TestCase>> elitists;
 
     /**
      * Stores the fitness of the best chromosome per target seen so far.
      */
-    private final Map<Integer, Double> elitistsFitness = new HashMap<>();
+    private final Map<Integer, Double> elitistsFitness;
 
     /**
      * Stores the {@link SplitTestCase} of the best chromosome per target seen so far.
      */
-    private final Map<Integer, SplitTestCase> elitistsSplitTestCase = new HashMap<>();
+    private final Map<Integer, SplitTestCase> elitistsSplitTestCase;
 
     /**
      * The probabilistic prototype tree (PPT).
@@ -141,6 +141,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         this.ppt = new ApplicationStateTree(
                 new ProbabilityInitialization(Properties.PROMISING_ACTION_WEIGHT()), targets.size()
         );
+        this.elitists = new HashMap<>(targets.size());
+        this.elitistsFitness = new HashMap<>(targets.size());
+        this.elitistsSplitTestCase = new HashMap<>(targets.size());
 
         // If there is only a single target, e.g., for crash reproduction, we can directly set the
         // current target.
