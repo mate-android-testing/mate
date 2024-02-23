@@ -271,7 +271,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
             DotConverter.toDot(ppt, target,
                     LocalDateTime.now().format(formatter) + "-model-"
-                            + fitnessFunction.getIndex() + "-before-update.dot");
+                            + target.getIndex() + "-before-update.dot");
         }
 
         final List<IChromosome<TestCase>> sortedPopulation = population.stream()
