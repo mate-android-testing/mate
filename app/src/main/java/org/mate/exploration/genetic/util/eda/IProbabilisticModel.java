@@ -9,6 +9,7 @@ import org.mate.state.IScreenState;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Defines the interface for a probabilistic model used in an EDA-based approach.
@@ -74,4 +75,11 @@ public interface IProbabilisticModel<T> {
      * @param fitnessFunction The new active fitness function.
      */
     void setFitnessFunction(ActionFitnessFunctionWrapper fitnessFunction);
+
+    /**
+     * Removes the action probabilities of the given targets.
+     *
+     * @param targets The targets for which the action probabilities should be removed.
+     */
+    void removeTargets(Set<Integer> targets);
 }

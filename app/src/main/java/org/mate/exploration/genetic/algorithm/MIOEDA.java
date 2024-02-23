@@ -21,7 +21,9 @@ import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Combines the traditional MIO algorithm with the benefits of an EDA. In particular, the original
@@ -216,31 +218,33 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * @param population The population which should be evaluated.
      */
     private void evaluatePopulation(final List<IChromosome<T>> population) {
-        for (IChromosome<T> chromosome : population) {
+
+        final Set<Integer> coveredTargets = new LinkedHashSet<>();
+
+        for (final IChromosome<T> chromosome : population) {
+            // TODO: Remove covered targets from archive.
             for (final FitnessFunctionState fitnessFunctionState : archive) {
-                final ActionFitnessFunctionWrapper target = fitnessFunctionState.getFitnessFunction();
 
                 // We only need to update probabilistic models that haven't been covered yet.
                 if (!fitnessFunctionState.isCovered()) {
 
+                    // We only need to evaluate the fitness for not yet covered targets.
+                    final ActionFitnessFunctionWrapper target = fitnessFunctionState.getFitnessFunction();
                     final double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
+                    fitnessFunctionState.updateFitness(fitness); // the target might be now covered
 
-                    // Adjusting the probabilities only makes sense if the model hasn't been covered yet.
-                    if (target.isMaximizing()) {
-                        if (fitness != 1.0) {
-                            probabilisticModel.setFitnessFunction(target);
-                            probabilisticModel.update(population);
-                        }
+                    if (!fitnessFunctionState.isCovered()) { // update the model
+                        probabilisticModel.setFitnessFunction(target);
+                        probabilisticModel.update(population);
                     } else {
-                        if (fitness != 0.0) {
-                            probabilisticModel.setFitnessFunction(target);
-                            probabilisticModel.update(population);
-                        }
+                        coveredTargets.add(target.getIndex()); // mark for removal
                     }
-
-                    fitnessFunctionState.updateFitness(fitness);
                 }
             }
+        }
+
+        if (!coveredTargets.isEmpty()) { // Remove the action probabilities for covered targets.
+            probabilisticModel.removeTargets(coveredTargets);
         }
     }
 

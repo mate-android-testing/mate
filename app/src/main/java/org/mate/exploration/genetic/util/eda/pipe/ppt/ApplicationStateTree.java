@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 /**
@@ -283,6 +284,27 @@ public class ApplicationStateTree {
      */
     private ApplicationStateNode initializeNode(final List<Action> prevActions, final IScreenState state) {
         return new ApplicationStateNode(state, initializeNodeFunction.apply(prevActions, state));
+    }
+
+    /**
+     * Removes the action probabilities for the given targets.
+     *
+     * @param targets The targets for which the action probabilities should be removed.
+     */
+    public void removeTargets(final Set<Integer> targets) {
+
+        final Queue<TreeNode<ApplicationStateNode>> bfsQueue = new LinkedList<>();
+        bfsQueue.add(tree.getRoot());
+
+        while(!bfsQueue.isEmpty()) {
+
+            final TreeNode<ApplicationStateNode> node = bfsQueue.poll();
+            node.getContent().actionProbabilities.removeActionProbabilities(targets);
+
+            for (TreeNode<ApplicationStateNode> child : node.getChildren()) {
+                bfsQueue.add(child);
+            }
+        }
     }
 
     /**

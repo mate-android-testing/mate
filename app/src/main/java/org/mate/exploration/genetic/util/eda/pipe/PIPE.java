@@ -18,11 +18,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +37,11 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * The list of targets associated with the probabilistic model.
      */
     private final List<ActionFitnessFunctionWrapper> targets;
+
+    /**
+     * Maintains which targets have been covered.
+     */
+    private final Set<Integer> coveredTargets = new HashSet<>();
 
     /**
      * The currently active fitness function (target).
@@ -188,10 +195,12 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             // will increase the action probability anyway.
             // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
             for (int i = 0; i < targets.size(); i++) {
-                Map<Action, Float> actionProbabilities
-                        = ppt.getActionProbabilities().getActionProbabilities(i);
-                final float currentProbability = actionProbabilities.get(action);
-                actionProbabilities.put(action, currentProbability / 2);
+                if (!coveredTargets.contains(i)) { // there are no action probabilities any longer
+                    final Map<Action, Float> actionProbabilities
+                            = ppt.getActionProbabilities().getActionProbabilities(i);
+                    final float currentProbability = actionProbabilities.get(action);
+                    actionProbabilities.put(action, currentProbability / 2);
+                }
             }
         }
 
@@ -228,6 +237,15 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     @Override
     public void resetPosition(final IScreenState currentScreenState) {
         ppt.resetPosition(currentScreenState);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeTargets(final Set<Integer> targets) {
+        coveredTargets.addAll(targets); // TODO: Better avoid this side effect here.
+        ppt.removeTargets(targets);
     }
 
     /**
