@@ -1188,11 +1188,11 @@ public class EnvironmentManager {
         final Message response = sendMessage(messageBuilder.build());
         final String[] branches = response.getParameter("branch_distance_vector").split("-");
 
-        final List<List<Float>> actionBranchDistanceVector = new ArrayList<>();
+        final List<List<Float>> actionBranchDistanceVector = new ArrayList<>(numberOfBranches);
 
         for (final String branch : branches) {
             final String[] actionDistances = branch.split("\\+"); // action distances per branch
-            final List<Float> actionBranchDistances = new ArrayList<>();
+            final List<Float> actionBranchDistances = new ArrayList<>(actionDistances.length);
             for (final String actionDistance : actionDistances) {
                 actionBranchDistances.add(Float.parseFloat(actionDistance));
             }
