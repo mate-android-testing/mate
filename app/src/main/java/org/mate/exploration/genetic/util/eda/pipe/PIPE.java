@@ -285,7 +285,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         IChromosome<TestCase> elitist = elitists.get(target.getIndex());
 
         // keep track of the best chromosome seen so far
-        if (elitist == null || target.getFitness(best) < target.getFitness(elitist)) {
+        if (elitist == null || target.getFitness(best) < elitistsFitness.get(target.getIndex())) {
             elitist = best;
             elitists.put(target.getIndex(), elitist);
             elitistsFitness.put(target.getIndex(), target.getFitness(elitist));
