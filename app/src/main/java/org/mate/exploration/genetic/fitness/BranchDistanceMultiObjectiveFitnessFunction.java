@@ -202,8 +202,7 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFi
 
         if (!actionCache.containsKey(chromosome)) {
             actionCache.put(chromosome,
-                    FitnessUtils.getBranchDistanceVectorWithActions(chromosome,
-                            ((TestCase) chromosome.getValue()).getActionSequence().size()));
+                    FitnessUtils.getBranchDistanceVectorWithActions(chromosome, numberOfBranches));
         }
 
         return actionCache.get(chromosome).get(index);
