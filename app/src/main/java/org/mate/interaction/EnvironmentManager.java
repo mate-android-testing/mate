@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.mate.utils.ChromosomeUtils.getChromosomeId;
 import static org.mate.utils.ChromosomeUtils.getChromosomeIds;
@@ -1190,14 +1191,31 @@ public class EnvironmentManager {
 
         final List<List<Float>> actionBranchDistanceVector = new ArrayList<>(numberOfBranches);
 
-        for (final String branch : branches) {
-            final String[] actionDistances = branch.split("\\+"); // action distances per branch
+        // Initialise for each branch an empty list such that we can update them later in a parallel manner.
+        if (chromosome.getValue() instanceof TestCase) {
+            final int numberOfActions = ((TestCase) chromosome.getValue()).getActionSequence().size();
+            for (int i = 0; i < numberOfBranches; i++) {
+                actionBranchDistanceVector.add(new ArrayList<>(numberOfActions));
+            }
+        } else {
+            for (int i = 0; i < numberOfBranches; i++) {
+                actionBranchDistanceVector.add(new ArrayList<>());
+            }
+        }
+
+        // Reassemble the branch distance vector.
+        IntStream.range(0, branches.length).parallel().forEach(branchIndex -> {
+
+            // action distances per branch
+            final String[] actionDistances = branches[branchIndex].split("\\+");
             final List<Float> actionBranchDistances = new ArrayList<>(actionDistances.length);
+
+            // NOTE: Parallelizing the parsing doesn't yield any speed up.
             for (final String actionDistance : actionDistances) {
                 actionBranchDistances.add(Float.parseFloat(actionDistance));
             }
-            actionBranchDistanceVector.add(actionBranchDistances);
-        }
+            actionBranchDistanceVector.set(branchIndex, actionBranchDistances);
+        });
 
         return actionBranchDistanceVector;
     }
