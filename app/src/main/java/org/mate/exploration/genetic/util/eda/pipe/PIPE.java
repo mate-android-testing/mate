@@ -41,7 +41,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * Maintains which targets have been covered.
      */
-    private final Set<Integer> coveredTargets = new HashSet<>();
+    private final Set<ActionFitnessFunctionWrapper> coveredTargets = new HashSet<>();
 
     /**
      * The currently active target.
@@ -197,10 +197,10 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             // time we observe such action. If the action is actually useful the PIPE algorithm
             // will increase the action probability anyway.
             // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
-            for (int i = 0; i < targets.size(); i++) {
-                if (!coveredTargets.contains(i)) { // there are no action probabilities any longer
+            for (ActionFitnessFunctionWrapper target : targets) {
+                if (!coveredTargets.contains(target)) { // there are no action probabilities any longer
                     final Map<Action, Float> actionProbabilities
-                            = ppt.getActionProbabilities().getActionProbabilities(i);
+                            = ppt.getActionProbabilities().getActionProbabilities(target.getIndex());
                     final float currentProbability = actionProbabilities.get(action);
                     actionProbabilities.put(action, currentProbability / 2);
                 }
@@ -246,9 +246,12 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * {@inheritDoc}
      */
     @Override
-    public void removeTargets(final Set<Integer> targets) {
+    public void removeTargets(final Set<ActionFitnessFunctionWrapper> targets) {
         coveredTargets.addAll(targets); // TODO: Better avoid this side effect here.
-        ppt.removeTargets(targets);
+        ppt.removeTargets(targets.parallelStream()
+                .map(ActionFitnessFunctionWrapper::getIndex)
+                .collect(Collectors.toSet())
+        );
     }
 
     /**

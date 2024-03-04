@@ -81,5 +81,5 @@ public interface IProbabilisticModel<T> {
      *
      * @param targets The targets for which the action probabilities should be removed.
      */
-    void removeTargets(Set<Integer> targets);
+    void removeTargets(Set<ActionFitnessFunctionWrapper> targets);
 }
