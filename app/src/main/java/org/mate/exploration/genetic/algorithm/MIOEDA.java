@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -209,7 +210,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * @return Returns {@code true} if all targets have been covered, otherwise {@code false}.
      */
     private boolean coveredAllTargets() {
-        return archive.parallelStream().allMatch(FitnessFunctionState::isCovered);
+        return archive.parallelStream().filter(Objects::nonNull).allMatch(FitnessFunctionState::isCovered);
     }
 
     /**
@@ -219,11 +220,14 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      */
     private void evaluatePopulation(final List<IChromosome<T>> population) {
 
-        final Set<Integer> coveredTargets = new LinkedHashSet<>();
+        final Set<ActionFitnessFunctionWrapper> coveredTargets = new LinkedHashSet<>();
 
         for (final IChromosome<T> chromosome : population) {
-            // TODO: Remove covered targets from archive.
             for (final FitnessFunctionState fitnessFunctionState : archive) {
+
+                if (fitnessFunctionState == null) {
+                    continue;
+                }
 
                 // We only need to update probabilistic models that haven't been covered yet.
                 if (!fitnessFunctionState.isCovered()) {
@@ -245,6 +249,10 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         if (!coveredTargets.isEmpty()) { // Remove the action probabilities for covered targets.
             probabilisticModel.removeTargets(coveredTargets);
+
+            for (ActionFitnessFunctionWrapper target : coveredTargets) {
+                archive.set(target.getIndex(), null);
+            }
         }
     }
 
@@ -260,6 +268,11 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         // We only need to consider targets that haven't been covered yet but that are likely coverable.
         for (final FitnessFunctionState fitnessFunctionState : archive) {
+
+            if (fitnessFunctionState == null) {
+                continue;
+            }
+
             final ActionFitnessFunctionWrapper target = fitnessFunctionState.getFitnessFunction();
             final double fitness = fitnessFunctionState.getBestFitness();
             if (!fitnessFunctionState.isCovered()) {
@@ -281,6 +294,11 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         if (possibleTargets.isEmpty()) {
             MATE.log_warn("No uncovered targets found where fitness is better than worst possible fitness value!");
             for (final FitnessFunctionState fitnessFunctionState : archive) {
+
+                if (fitnessFunctionState == null) {
+                    continue;
+                }
+
                 if (!fitnessFunctionState.isCovered()) {
                     possibleTargets.add(fitnessFunctionState);
                 }
@@ -351,19 +369,19 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // TODO: Use chromosome id in logs instead of natural index + find a better solution for
         //  multi-objective algorithms + a fix for MIO/MOSA/NSGA-II used in combination with GE.
 
-        for (int i = 0; i < Math.min(archive.size(), 5); i++) {
+        for (int i = 0; i < Math.min(probabilisticModel.getTargets().size(), 5); i++) {
             MATE.log_acc("Fitness function " + (i + 1) + ":");
             // We can use the cached fitness values here and avoid an unnecessary re-computation.
-            final ActionFitnessFunctionWrapper fitnessFunction = archive.get(i).getFitnessFunction();
+            final ActionFitnessFunctionWrapper fitnessFunction = probabilisticModel.getTargets().get(i);
             for (int j = 0; j < population.size(); j++) {
                 IChromosome<TestCase> chromosome = (IChromosome<TestCase>) population.get(j);
                 MATE.log_acc("Chromosome " + (j + 1) + ": " + fitnessFunction.getFitness(chromosome));
             }
         }
 
-        if (archive.size() > 5) {
+        if (probabilisticModel.getTargets().size() > 5) {
             MATE.log_acc("Omitted other fitness function because there are too many ("
-                    + archive.size() + ")");
+                    + probabilisticModel.getTargets().size() + ")");
         }
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
