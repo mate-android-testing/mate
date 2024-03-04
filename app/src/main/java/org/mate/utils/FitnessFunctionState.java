@@ -11,11 +11,6 @@ public class FitnessFunctionState {
     private final ActionFitnessFunctionWrapper fitnessFunction;
 
     /**
-     * Whether the associated target has been covered according to the fitness function.
-     */
-    private boolean covered = false;
-
-    /**
      * The currently best fitness value.
      */
     private double bestFitness;
@@ -49,13 +44,11 @@ public class FitnessFunctionState {
         if (fitnessFunction.isMaximizing()) {
             if (fitness > this.bestFitness) {
                 MATE.log_debug("Fitness increase from " + this.bestFitness + " to " + fitness);
-                if (fitness >= 1d) covered = true;
                 this.bestFitness = fitness;
             }
         } else {
             if (fitness < this.bestFitness) {
                 MATE.log_debug("Fitness decreased from " + this.bestFitness + " to " + fitness);
-                if (fitness <= 0d) covered = true;
                 this.bestFitness = fitness;
             }
         }
@@ -68,7 +61,7 @@ public class FitnessFunctionState {
      * @return Returns {@code true} if the target has been covered, otherwise {@code false}.
      */
     public boolean isCovered() {
-        return covered;
+        return fitnessFunction.isMaximizing() ? bestFitness == 1.0d : bestFitness == 0.0d;
     }
 
     /**
