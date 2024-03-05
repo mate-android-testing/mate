@@ -225,7 +225,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         for (final IChromosome<T> chromosome : population) {
             for (final FitnessFunctionState fitnessFunctionState : archive) {
 
-                if (fitnessFunctionState == null) {
+                if (fitnessFunctionState == null) { // covered target, skip
                     continue;
                 }
 
@@ -237,11 +237,34 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                     final double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
                     fitnessFunctionState.updateFitness(fitness); // the target might be now covered
 
-                    if (!fitnessFunctionState.isCovered()) { // update the model
-                        probabilisticModel.setCurrentTarget(target);
-                        probabilisticModel.update(population);
+                    if (fitnessFunctionState.isCovered()) {
+                        coveredTargets.add(target); // mark for removal
                     } else {
-                        coveredTargets.add(target.getIndex()); // mark for removal
+                        if (fitness == 0.5f) { // covered the if statement but not the respective branch (target)
+                            /*
+                            * To keep the number of updates reasonable, we only update the action
+                            * probabilities of targets that are close to be covered. It doesn't make
+                            * sense to even initialise action probabilities for targets that are
+                            * dependent on other targets which haven't been covered yet. In terms of
+                            * the control flow graph (CFG), the closest not yet covered targets are
+                            * those where the respective if or switch statement has been covered,
+                            * which corresponds to an approach level of '1'. Since we deal with
+                            * normalised fitness values, this is equal to an approach level of '0.5'
+                            * under the assumption that we use x / x + 1 for the normalisation.
+                             */
+                            probabilisticModel.setCurrentTarget(target);
+                            probabilisticModel.update(population);
+                        } else if (samplingCounters[target.getIndex()] > 0) {
+                            /*
+                            * We update the action probabilities for those targets where the action
+                            * probabilities have been already initialised. This means that we must
+                            * have sampled from the target at least once, which can be directly
+                            * observed from the sampling counter.
+                             */
+                            // update since we have already initialised the action probabilities for this target
+                            probabilisticModel.setCurrentTarget(target);
+                            probabilisticModel.update(population);
+                        }
                     }
                 }
             }
