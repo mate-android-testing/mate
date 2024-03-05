@@ -841,6 +841,14 @@ public class Properties {
      */
 
     /**
+     * Whether to only use the approach level or the combination of approach level + branch distance
+     * in the {@link FitnessFunction#BRANCH_DISTANCE_MULTI_OBJECTIVE} fitness function.
+     *
+     * @return Returns {@code true} if only the approach level should be used, otherwise {@code false}.
+     */
+    public static boolean ONLY_APPROACH_LEVEL() { return propertyOr(false); }
+
+    /**
      * Looks up the value of the property in the Properties object stored in the Registry using the
      * name of the caller method as the key of the property. If no property with that key is stored
      * the given default value will be returned.
