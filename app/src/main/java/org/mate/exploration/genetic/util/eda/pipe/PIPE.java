@@ -252,6 +252,11 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 .map(ActionFitnessFunctionWrapper::getIndex)
                 .collect(Collectors.toSet())
         );
+        for (final ActionFitnessFunctionWrapper target : targets) {
+            elitists.remove(target);
+            elitistsFitness.remove(target);
+            elitistsSplitTestCase.remove(target);
+        }
     }
 
     /**
