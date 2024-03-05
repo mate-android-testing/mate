@@ -88,17 +88,17 @@ public class PIPE implements IProbabilisticModel<TestCase> {
     /**
      * Stores the best chromosome per target seen so far.
      */
-    private final Map<Integer, IChromosome<TestCase>> elitists;
+    private final Map<ActionFitnessFunctionWrapper, IChromosome<TestCase>> elitists;
 
     /**
      * Stores the fitness of the best chromosome per target seen so far.
      */
-    private final Map<Integer, Double> elitistsFitness;
+    private final Map<ActionFitnessFunctionWrapper, Double> elitistsFitness;
 
     /**
      * Stores the {@link SplitTestCase} of the best chromosome per target seen so far.
      */
-    private final Map<Integer, SplitTestCase> elitistsSplitTestCase;
+    private final Map<ActionFitnessFunctionWrapper, SplitTestCase> elitistsSplitTestCase;
 
     /**
      * The probabilistic prototype tree (PPT).
@@ -285,14 +285,14 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                 .collect(Collectors.toList());
 
         final IChromosome<TestCase> best = sortedPopulation.get(0);
-        IChromosome<TestCase> elitist = elitists.get(target.getIndex());
+        IChromosome<TestCase> elitist = elitists.get(target);
 
         // keep track of the best chromosome seen so far
-        if (elitist == null || target.getFitness(best) < elitistsFitness.get(target.getIndex())) {
+        if (elitist == null || target.getFitness(best) < elitistsFitness.get(target)) {
             elitist = best;
-            elitists.put(target.getIndex(), elitist);
-            elitistsFitness.put(target.getIndex(), target.getFitness(elitist));
-            elitistsSplitTestCase.put(target.getIndex(), cutOffAfterLastFitnessEnhancement(elitist));
+            elitists.put(target, elitist);
+            elitistsFitness.put(target, target.getFitness(elitist));
+            elitistsSplitTestCase.put(target, cutOffAfterLastFitnessEnhancement(elitist));
         }
 
         // elitist learning does not lead to a new population so we repeatedly apply it
@@ -356,7 +356,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      */
     private double betterTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
         // PIPE paper 4.2
-        final double fitElitist = elitistsFitness.get(target.getIndex());
+        final double fitElitist = elitistsFitness.get(target);
         return Math.min(probBestTestCase + (1 - probBestTestCase) * learningRate
                 * ((epsilon + fitElitist) / (epsilon + fitBestTestCase)), 1.0);
     }
@@ -369,7 +369,7 @@ public class PIPE implements IProbabilisticModel<TestCase> {
      * @return Returns the new path probability for the bad nodes of the best test case.
      */
     private double worseTargetProbability(final double probBestTestCase, final double fitBestTestCase) {
-        final double fitElitist = elitistsFitness.get(target.getIndex());
+        final double fitElitist = elitistsFitness.get(target);
         return Math.max(probBestTestCase - probBestTestCase * negativeLearningRate
                 * ((epsilon + fitBestTestCase) / (epsilon + fitElitist)), 0.0);
     }
@@ -387,9 +387,9 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         final double fitness;
 
         // PIPE paper 4.3, we split the test case into good and bad actions.
-        if (elitists.get(target.getIndex()).equals(bestTestCase)) { // read from cache if possible
-            splitTestCase = elitistsSplitTestCase.get(target.getIndex());
-            fitness = elitistsFitness.get(target.getIndex());
+        if (elitists.get(target).equals(bestTestCase)) { // read from cache if possible
+            splitTestCase = elitistsSplitTestCase.get(target);
+            fitness = elitistsFitness.get(target);
         } else {
             splitTestCase = cutOffAfterLastFitnessEnhancement(bestTestCase);
             fitness = target.getFitness(bestTestCase);
