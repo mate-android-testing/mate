@@ -563,25 +563,4 @@ public class PIPE implements IProbabilisticModel<TestCase> {
         // TODO Remove subtrees which are very unlikely to be reached, ignoring for now, since this
         //  is only a performance/memory optimization.
     }
-
-    /**
-     * Splits a test case into good and bad actions.
-     */
-    private static class SplitTestCase {
-
-        /**
-         * The list of good actions in a test case (those that improve the fitness).
-         */
-        private final List<NodeWithPickedAction> goodActions;
-
-        /**
-         * The list of bad actions in a test case (those that don't improve the fitness).
-         */
-        private final List<NodeWithPickedAction> badActions;
-
-        private SplitTestCase(List<NodeWithPickedAction> goodActions, List<NodeWithPickedAction> badActions) {
-            this.goodActions = goodActions;
-            this.badActions = badActions;
-        }
-    }
 }
