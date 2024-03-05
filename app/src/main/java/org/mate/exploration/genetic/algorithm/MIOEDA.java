@@ -261,7 +261,6 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                             * have sampled from the target at least once, which can be directly
                             * observed from the sampling counter.
                              */
-                            // update since we have already initialised the action probabilities for this target
                             probabilisticModel.setCurrentTarget(target);
                             probabilisticModel.update(population);
                         }
