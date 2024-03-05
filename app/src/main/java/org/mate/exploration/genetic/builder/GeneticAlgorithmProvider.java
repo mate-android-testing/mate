@@ -438,8 +438,8 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
             throw new IllegalStateException("MIOEDA requires a fitness function. You have to " +
                     "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
-        } else if (org.mate.Properties.TERMINATION_CONDITION() == null) {
-            throw new IllegalStateException("MIOEDA requires a termination condition. You have to " +
+        } else if (org.mate.Properties.TERMINATION_CONDITION() != TerminationCondition.CONDITIONAL_TERMINATION) {
+            throw new IllegalStateException("MIOEDA requires the conditional termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
         }
 
