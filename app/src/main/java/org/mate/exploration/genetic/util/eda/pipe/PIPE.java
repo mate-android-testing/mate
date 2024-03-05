@@ -34,6 +34,11 @@ import java.util.stream.Collectors;
 public class PIPE implements IProbabilisticModel<TestCase> {
 
     /**
+     * The maximal number of iterations that are performed when updating the action probabilities.
+     */
+    private static final int MAX_ITERATIONS = 50;
+
+    /**
      * The list of targets associated with the probabilistic model.
      */
     private final List<ActionFitnessFunctionWrapper> targets;
@@ -413,6 +418,22 @@ public class PIPE implements IProbabilisticModel<TestCase> {
             // we reach the target probability.
             int iterations = 0;
             while (probability(splitTestCase.goodActions) < pTarget) {
+
+                /*
+                * Since the target probability can become extremely small, it might require a large
+                * number of tiny updates to converge eventually. To speed up this process, we stop
+                * after a pre-defined number of iterations and set the new probability of all affected
+                * nodes to the nth root of the target probability, i.e. all nodes equally benefit
+                * from the probability increase.
+                 */
+                if (iterations >= MAX_ITERATIONS) {
+                    float newProb = (float) Math.pow(pTarget, (float) 1 / splitTestCase.goodActions.size());
+                    for (final NodeWithPickedAction nodeWithPickedAction : splitTestCase.goodActions) {
+                        nodeWithPickedAction.setProbabilityOfAction(newProb);
+                    }
+                    break;
+                }
+
                 for (final NodeWithPickedAction nodeWithPickedAction : splitTestCase.goodActions) {
                     final float probBefore = nodeWithPickedAction.getProbabilityOfAction();
                     nodeWithPickedAction.setProbabilityOfAction(probBefore
