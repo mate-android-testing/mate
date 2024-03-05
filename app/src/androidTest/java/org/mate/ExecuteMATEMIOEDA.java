@@ -8,7 +8,9 @@ import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.builder.GeneticAlgorithmBuilder;
 import org.mate.exploration.genetic.chromosome_factory.ChromosomeFactory;
 import org.mate.exploration.genetic.core.IGeneticAlgorithm;
+import org.mate.exploration.genetic.fitness.FitnessFunction;
 import org.mate.exploration.genetic.termination.TerminationCondition;
+import org.mate.utils.Objective;
 
 @RunWith(AndroidJUnit4.class)
 public class ExecuteMATEMIOEDA {
@@ -29,10 +31,10 @@ public class ExecuteMATEMIOEDA {
                 .withPSampleRandom(Properties.P_SAMPLE_RANDOM());
 
         int numberOfObjectives
-                = Registry.getEnvironmentManager().getNumberOfObjectives(Properties.OBJECTIVE());
+                = Registry.getEnvironmentManager().getNumberOfObjectives(Objective.BRANCHES);
 
         // we need to associate with each objective (branch, line) a fitness function
-        builder = builder.withFitnessFunctions(Properties.FITNESS_FUNCTION(), numberOfObjectives);
+        builder = builder.withFitnessFunctions(FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE, numberOfObjectives);
 
         final IGeneticAlgorithm mioeda = builder.build();
         mate.testApp(mioeda);
