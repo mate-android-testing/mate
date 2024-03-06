@@ -522,12 +522,11 @@ public class PIPE implements IProbabilisticModel<TestCase> {
                     .mapToDouble(d -> d).sum();
 
             // Normalize the action probabilities of the traversed node.
-            for (final Map.Entry<Action, Float> entry : nodeWithPickedAction.getActionProbabilities().entrySet()) {
-                if (!entry.getKey().equals(nodeWithPickedAction.action)) {
-                    final float probBefore = entry.getValue();
-                    entry.setValue(probBefore * (1 - (1 - sum) / (probAction - sum)));
-                }
-            }
+            nodeWithPickedAction.getActionProbabilities().entrySet().parallelStream()
+                    .filter(entry -> !entry.getKey().equals(nodeWithPickedAction.action))
+                    .forEach(entry -> {
+                        entry.setValue(entry.getValue() * (1 - (1 - sum) / (probAction - sum)));
+                    });
         }
     }
 
