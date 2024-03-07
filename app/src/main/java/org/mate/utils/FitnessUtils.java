@@ -87,6 +87,37 @@ public class FitnessUtils {
     }
 
     /**
+     * Stores the action fitness data (traces) of the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     * @param actionID The action id.
+     * @param traces The traces belonging to the specified action that should be stored.
+     */
+    public static void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                              final String actionID,
+                                              final Set<String> traces) {
+
+        if (Properties.FITNESS_FUNCTIONS() == null) {
+            /*
+             * If the underlying algorithm doesn't use any fitness function but uses the default
+             * chromosome factory or any derivative of it, storeFitnessData() is called. Since there
+             * is no fitness function specified, the subsequent foreach loop would cause a NPE.
+             */
+            return;
+        }
+
+        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE,
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
+
+        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(fitnessFunction)) {
+                Registry.getEnvironmentManager()
+                        .storeActionFitnessData(chromosome, actionID, traces, fitnessFunction);
+            }
+        }
+    }
+
+    /**
      * Stores the fitness data on a per action basis for the given chromosome.
      *
      * @param chromosome The given chromosome.

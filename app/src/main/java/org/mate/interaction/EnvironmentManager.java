@@ -927,6 +927,44 @@ public class EnvironmentManager {
     }
 
     /**
+     * Stores the action fitness data (traces) for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     * @param actionID The action id.
+     * @param traces The traces belonging to the specified action that should be stored.
+     * @param fitnessFunction The given fitness function.
+     */
+    public void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                       final String actionID,
+                                       final Set<String> traces,
+                                       final FitnessFunction fitnessFunction) {
+
+        // there is no fitness data to store for dummy test cases
+        if (chromosome.getValue().isDummy()) {
+            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            return;
+        }
+
+        String testcase = ChromosomeUtils.getActionEntityId(chromosome);
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/fitness/store_action_fitness_data")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("fitnessFunction", fitnessFunction.name())
+                .withParameter("chromosome", String.valueOf(chromosome))
+                .withParameter("actionId", actionID)
+                .withParameter("traces", traces.stream().collect(Collectors.joining("+")));
+
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
      * Stores the complete action fitness data for the given chromosome.
      *
      * @param chromosome The chromosome for which the action fitness data should be stored.

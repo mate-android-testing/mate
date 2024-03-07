@@ -37,6 +37,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     /**
      * Records the traces on a per action-basis.
      */
+    @SuppressWarnings("unused")
     private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
 
     /**
@@ -85,7 +86,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         // Ignore (split off from first action) the traces produced by the reset of the AUT.
-        recordFitnessData(chromosome);
+        storeActionFitnessData(chromosome);
 
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
@@ -96,7 +97,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
                 final Action nextAction = selectAction();
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
-                recordFitnessData(chromosome);
+                storeActionFitnessData(chromosome);
 
                 final IScreenState currentState = uiAbstractionLayer.getLastScreenState();
 
@@ -119,7 +120,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
             // We need to write out the recorded fitness data and inherently coverage data before we
             // can evaluate the fitness or coverage.
-            storeFitnessData(chromosome);
+            storeActionFitnessData(chromosome);
 
             // We need to update the activity coverage manually here.
             CoverageUtils.updateTestCaseChromosomeActivityCoverage(chromosome,
@@ -137,10 +138,30 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
+     * Stores the intermediate coverage and fitness of the chromosome, i.e. the coverage/fitness data
+     * associated with the last executed action.
+     *
+     * NOTE: This implementation should be replaced in favour of a faster implementation that caches
+     * the traces and stores them to disk in one pass upon test case completion, see
+     * {@link #recordFitnessData(IChromosome)} and {@link #storeFitnessData(IChromosome)}. However,
+     * depending on the number of actions and the size of the traces, caching the traces can cause
+     * in rare cases a memory issues, thus this method is preferred currently since the overhead
+     * caused by sending multiple requests to MATE-Server is tolerable.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     */
+    private void storeActionFitnessData(final IChromosome<TestCase> chromosome) {
+        final String actionID = ChromosomeUtils.getActionEntityId(chromosome);
+        final Set<String> traces = uiAbstractionLayer.getTraces();
+        FitnessUtils.storeActionFitnessData(chromosome, actionID, traces);
+    }
+
+    /**
      * Records the fitness data and inherently coverage data on a per action-basis for the given chromosome.
      *
      * @param chromosome The given chromosome.
      */
+    @SuppressWarnings("unused")
     private void recordFitnessData(final IChromosome<TestCase> chromosome) {
         final String actionID = ChromosomeUtils.getActionEntityId(chromosome);
         final Set<String> traces = uiAbstractionLayer.getTraces();
@@ -152,6 +173,7 @@ public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      *
      * @param chromosome The given chromosome.
      */
+    @SuppressWarnings("unused")
     private void storeFitnessData(final IChromosome<TestCase> chromosome) {
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
         tracesPerAction.clear(); // clear traces for next chromosome
