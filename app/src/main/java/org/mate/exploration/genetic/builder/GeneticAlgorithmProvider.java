@@ -98,6 +98,7 @@ import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisio
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 import org.mate.model.TestCase;
+import org.mate.utils.coverage.Coverage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -441,6 +442,10 @@ public class GeneticAlgorithmProvider {
         } else if (org.mate.Properties.TERMINATION_CONDITION() != TerminationCondition.CONDITIONAL_TERMINATION) {
             throw new IllegalStateException("MIOEDA requires the conditional termination condition. You have to " +
                     "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.COVERAGE() != Coverage.BRANCH_COVERAGE
+                && org.mate.Properties.COVERAGE() != Coverage.ALL_COVERAGE) {
+            throw new IllegalStateException("MIOEDA requires to report branch coverage. You have to "
+                    + "define the property org.mate.Properties.COVERAGE() appropriately!");
         }
 
         final List<IFitnessFunction<T>> fitnessFunctions = this.initializeFitnessFunctions();

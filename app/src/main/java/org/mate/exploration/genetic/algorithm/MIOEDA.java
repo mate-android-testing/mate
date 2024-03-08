@@ -17,6 +17,7 @@ import org.mate.utils.FitnessFunctionState;
 import org.mate.utils.FitnessUtils;
 import org.mate.utils.Randomness;
 import org.mate.utils.coverage.Coverage;
+import org.mate.utils.coverage.CoverageDTO;
 import org.mate.utils.coverage.CoverageUtils;
 
 import java.util.ArrayList;
@@ -90,6 +91,12 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
     private boolean startedFocusedSearch = false;
 
     /**
+     * Keeps track whether all branches have been covered, this not only includes the connected
+     * branches (targets) in the underlying control flow graph but really all branches.
+     */
+    private boolean coveredAllBranches = false;
+
+    /**
      * Initializes MIOEDA with the relevant attributes.
      *
      * @param chromosomeFactory    The used chromosome factory, see {@link IChromosomeFactory}.
@@ -150,7 +157,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
         currentGenerationNumber++;
         FitnessUtils.cleanCache(population);
-        if (coveredAllTargets()) {
+        if (coveredAllBranches) {
             ConditionalTerminationCondition.satisfiedCondition();
         }
     }
@@ -165,8 +172,8 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         MATE.log_acc("Generating population # " + (currentGenerationNumber + 1) + "!");
         population.clear();
 
-        if (Randomness.getRnd().nextDouble() < pSampleRandom) {
-            // sample random chromosome with probability P_r
+        if (Randomness.getRnd().nextDouble() < pSampleRandom || coveredAllTargets()) {
+            // sample random chromosome with probability P_r or in case all targets have been covered
             chromosomeFactory.setSampleRandom(true);
             final IChromosome<T> chromosome = (IChromosome<T>) chromosomeFactory.createChromosome();
             population.add(chromosome);
@@ -199,7 +206,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         logCurrentFitness();
         currentGenerationNumber++;
         FitnessUtils.cleanCache(population);
-        if (coveredAllTargets()) {
+        if (coveredAllBranches) {
             ConditionalTerminationCondition.satisfiedCondition();
         }
     }
@@ -408,8 +415,17 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
         if (Properties.COVERAGE() != Coverage.NO_COVERAGE) {
 
-            MATE.log_acc("Combined coverage until now: "
-                    + CoverageUtils.getCombinedCoverage(Properties.COVERAGE()));
+            /*
+             * We only want to terminate the search once we have covered really all branches not only
+             * those selected as targets. The initial set of targets refers to connected branches in the
+             * underlying control flow graph but there are actually more in most cases, e.g., certain
+             * branches couldn't be modelled correctly in the graph. Thus, we check the branch coverage
+             * which relies upon all branches not only the connected ones.
+             */
+            final CoverageDTO coverage = CoverageUtils.getCombinedCoverage(Properties.COVERAGE());
+            coveredAllBranches = coverage.getBranchCoverage() == 100.0d;
+
+            MATE.log_acc("Combined coverage until now: " + coverage);
 
             if (Properties.GENO_TO_PHENO_TYPE_MAPPING()) {
 
