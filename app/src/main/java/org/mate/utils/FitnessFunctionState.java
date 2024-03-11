@@ -39,19 +39,23 @@ public class FitnessFunctionState {
      * the associated target has been covered.
      *
      * @param fitness The new fitness value.
+     * @return whether the given fitness was better than the previous.
      */
-    public void updateFitness(final double fitness) {
+    public boolean updateFitness(final double fitness) {
         if (fitnessFunction.isMaximizing()) {
             if (fitness > this.bestFitness) {
                 MATE.log_debug("Fitness increase from " + this.bestFitness + " to " + fitness);
                 this.bestFitness = fitness;
+                return true;
             }
         } else {
             if (fitness < this.bestFitness) {
                 MATE.log_debug("Fitness decreased from " + this.bestFitness + " to " + fitness);
                 this.bestFitness = fitness;
+                return true;
             }
         }
+        return false;
     }
 
     /**

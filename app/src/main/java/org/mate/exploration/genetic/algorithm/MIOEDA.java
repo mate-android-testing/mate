@@ -20,12 +20,7 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageDTO;
 import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Combines the traditional MIO algorithm with the benefits of an EDA. In particular, the original
@@ -79,6 +74,11 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
      * a new chromosome was already sampled.
      */
     private final int[] samplingCounters;
+
+    /**
+     * Maintains a set that tracks the targets for which the probabilistic model was initialized and therefore should be updated.
+     */
+    private final Set<Integer> initializedTargets = new HashSet<>();
 
     /**
      * Tracks the start point of the search.
@@ -186,6 +186,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
 
             // increase sampling counter c_k, see section 3.3
             samplingCounters[target.getIndex()] += 1;
+            initializedTargets.add(target.getIndex());
 
             chromosomeFactory.setSampleRandom(false);
             probabilisticModel.setCurrentTarget(target);
@@ -242,7 +243,8 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                     // We only need to evaluate the fitness for not yet covered targets.
                     final ActionFitnessFunctionWrapper target = fitnessFunctionState.getFitnessFunction();
                     final double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
-                    fitnessFunctionState.updateFitness(fitness); // the target might be now covered
+                    if (fitnessFunctionState.updateFitness(fitness)) // the target might be now covered
+                        samplingCounters[target.getIndex()] = 0;
 
                     if (fitnessFunctionState.isCovered()) {
                         coveredTargets.add(target); // mark for removal
@@ -261,7 +263,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                              */
                             probabilisticModel.setCurrentTarget(target);
                             probabilisticModel.update(population);
-                        } else if (samplingCounters[target.getIndex()] > 0) {
+                        } else if (initializedTargets.contains(target.getIndex())) {
                             /*
                             * We update the action probabilities for those targets where the action
                             * probabilities have been already initialised. This means that we must
