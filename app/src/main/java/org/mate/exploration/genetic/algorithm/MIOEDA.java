@@ -20,7 +20,13 @@ import org.mate.utils.coverage.Coverage;
 import org.mate.utils.coverage.CoverageDTO;
 import org.mate.utils.coverage.CoverageUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Combines the traditional MIO algorithm with the benefits of an EDA. In particular, the original
@@ -76,7 +82,8 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
     private final int[] samplingCounters;
 
     /**
-     * Maintains a set that tracks the targets for which the probabilistic model was initialized and therefore should be updated.
+     * Maintains a set that tracks the targets for which the probabilistic model was initialized and
+     * therefore should be updated.
      */
     private final Set<Integer> initializedTargets = new HashSet<>();
 
@@ -240,11 +247,16 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                 // We only need to update probabilistic models that haven't been covered yet.
                 if (!fitnessFunctionState.isCovered()) {
 
-                    // We only need to evaluate the fitness for not yet covered targets.
+                    // We only need to evaluate the fitness for not yet covered targets, which might
+                    // imply that the target is covered afterwards.
                     final ActionFitnessFunctionWrapper target = fitnessFunctionState.getFitnessFunction();
                     final double fitness = target.getNormalizedFitness((IChromosome<TestCase>) chromosome);
-                    if (fitnessFunctionState.updateFitness(fitness)) // the target might be now covered
+
+                    if (fitnessFunctionState.updateFitness(fitness)) {
+                        // If there was a fitness improvement, we reset the sampling counter to make
+                        // the target more likely to be re-selected in the upcoming generations.
                         samplingCounters[target.getIndex()] = 0;
+                    }
 
                     if (fitnessFunctionState.isCovered()) {
                         coveredTargets.add(target); // mark for removal
@@ -266,9 +278,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
                         } else if (initializedTargets.contains(target.getIndex())) {
                             /*
                             * We update the action probabilities for those targets where the action
-                            * probabilities have been already initialised. This means that we must
-                            * have sampled from the target at least once, which can be directly
-                            * observed from the sampling counter.
+                            * probabilities have been already initialised.
                              */
                             probabilisticModel.setCurrentTarget(target);
                             probabilisticModel.update(population);
@@ -300,7 +310,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
         // We only need to consider targets that haven't been covered yet but that are likely coverable.
         for (final FitnessFunctionState fitnessFunctionState : archive) {
 
-            if (fitnessFunctionState == null) {
+            if (fitnessFunctionState == null) { // skip, covered target
                 continue;
             }
 
@@ -308,11 +318,11 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             final double fitness = fitnessFunctionState.getBestFitness();
             if (!fitnessFunctionState.isCovered()) {
                 if (target.isMaximizing()) {
-                    if (fitness > 0.0) {
+                    if (fitness > 0.0) { // select only target that is likely coverable
                         possibleTargets.add(fitnessFunctionState);
                     }
                 } else {
-                    if (fitness < 1.0) {
+                    if (fitness < 1.0) { // select only target that is likely coverable
                         possibleTargets.add(fitnessFunctionState);
                     }
                 }
@@ -326,7 +336,7 @@ public class MIOEDA<T> extends GeneticAlgorithm<T> {
             MATE.log_warn("No uncovered targets found where fitness is better than worst possible fitness value!");
             for (final FitnessFunctionState fitnessFunctionState : archive) {
 
-                if (fitnessFunctionState == null) {
+                if (fitnessFunctionState == null) { // skip, covered target
                     continue;
                 }
 

@@ -39,7 +39,8 @@ public class FitnessFunctionState {
      * the associated target has been covered.
      *
      * @param fitness The new fitness value.
-     * @return whether the given fitness was better than the previous.
+     * @return Returns {@code true} when the given fitness was better than the previous,
+     *          otherwise {@code false}.
      */
     public boolean updateFitness(final double fitness) {
         if (fitnessFunction.isMaximizing()) {
