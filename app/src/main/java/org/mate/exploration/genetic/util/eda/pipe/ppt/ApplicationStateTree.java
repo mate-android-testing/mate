@@ -18,13 +18,13 @@ import org.mate.state.IScreenState;
 import org.mate.state.ScreenStateType;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 /**
@@ -35,7 +35,7 @@ public class ApplicationStateTree {
     /**
      * Initialises the probabilities (action weights) of a state.
      */
-    private final BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNodeFunction;
+    private final BiFunction<List<Action>, IScreenState, Map<Action, Float>> initializeNodeFunction;
 
     /**
      * The actual PPT.
@@ -48,9 +48,9 @@ public class ApplicationStateTree {
     private TreeNode<ApplicationStateNode> cursor;
 
     /**
-     * The package name of the AUT.
+     * The number of targets for which each node in the PPT has dedicated action probabilities.
      */
-    private final String packageName = Registry.getPackageName();
+    private final int targets;
 
     /**
      * Since the AUT can be non-deterministic, there might be multiple start screen states. To handle
@@ -148,9 +148,14 @@ public class ApplicationStateTree {
      * Initialises a new PPT.
      *
      * @param initializeNodeFunction The initialization function for the action weights of a state.
+     * @param targets The number of targets for which dedicated action probabilities should be
+     *                  maintained per node.
      */
-    public ApplicationStateTree(BiFunction<List<Action>, IScreenState, Map<Action, Double>> initializeNodeFunction) {
+    public ApplicationStateTree(
+            BiFunction<List<Action>, IScreenState, Map<Action, Float>> initializeNodeFunction,
+            int targets) {
         this.initializeNodeFunction = initializeNodeFunction;
+        this.targets = targets;
         tree = new Tree<>(initializeNode(Collections.emptyList(), VIRTUAL_ROOT_STATE));
         cursor = addRootState(Registry.getUiAbstractionLayer().getLastScreenState());
     }
@@ -176,7 +181,7 @@ public class ApplicationStateTree {
      *
      * @return Returns the action probabilities of the current PPT state.
      */
-    public Map<Action, Double> getActionProbabilities() {
+    public ActionProbabilities getActionProbabilities() {
         return cursor.getContent().actionProbabilities;
     }
 
@@ -197,29 +202,7 @@ public class ApplicationStateTree {
      * @param currentScreenState The current screen state.
      */
     public void updatePosition(final TestCase testCase, final Action action, final IScreenState currentScreenState) {
-
-        if (testCase.getVisitedStates().contains("unknown")) {
-            // We couldn't retrieve the correct screen state for the last action, thus we simply
-            // ignore this transition in the PPT.
-            MATE.log_warn("Ignoring transition to unknown state in PPT!");
-            return;
-        }
-
         cursor.getContent().updateActionToNextState(action, currentScreenState);
-
-        if (!currentScreenState.getPackageName().equals(packageName)) {
-            // We reached a state not belonging to the AUT. To avoid this we should reduce the
-            // action probability to a minimum. Although one might exclude those actions completely
-            // by specifying an action probability of zero, we cannot guarantee that those actions
-            // are not relevant to reproduce the target crash, e.g., they might have been simply
-            // triggered in the wrong internal state. Thus, we halve the action probability every
-            // time we observe such action. If the action is actually useful the PIPE algorithm
-            // will increase the action probability anyway.
-            // TODO: Normalise the remaining action probabilities to form a valid probability distribution.
-            final double currentProbability = cursor.getContent().getActionProbabilities().get(action);
-            cursor.getContent().getActionProbabilities().put(action, currentProbability / 2);
-        }
-
         cursor = cursor.getChild(child -> child.state.equals(currentScreenState))
                 .orElseGet(() -> cursor.addChild(initializeNode(testCase.getActionSequence(), currentScreenState)));
     }
@@ -304,9 +287,30 @@ public class ApplicationStateTree {
     }
 
     /**
+     * Removes the action probabilities for the given targets.
+     *
+     * @param targets The targets for which the action probabilities should be removed.
+     */
+    public void removeTargets(final Set<Integer> targets) {
+
+        final Queue<TreeNode<ApplicationStateNode>> bfsQueue = new LinkedList<>();
+        bfsQueue.add(tree.getRoot());
+
+        while(!bfsQueue.isEmpty()) {
+
+            final TreeNode<ApplicationStateNode> node = bfsQueue.poll();
+            node.getContent().actionProbabilities.removeActionProbabilities(targets);
+
+            for (TreeNode<ApplicationStateNode> child : node.getChildren()) {
+                bfsQueue.add(child);
+            }
+        }
+    }
+
+    /**
      * A single node in the PPT.
      */
-    public static class ApplicationStateNode {
+    public class ApplicationStateNode {
 
         /**
          * The underlying screen state.
@@ -314,9 +318,9 @@ public class ApplicationStateTree {
         private final IScreenState state;
 
         /**
-         * The action probabilities of the state.
+         * The action probabilities for each individual target of the state.
          */
-        private final Map<Action, Double> actionProbabilities;
+        private final ActionProbabilities actionProbabilities;
 
         /**
          * The outgoing action transitions of the state.
@@ -327,11 +331,11 @@ public class ApplicationStateTree {
          * Constructs a new node in the PPT.
          *
          * @param state The underlying screen state.
-         * @param actionProbabilities The action probabilities of the state.
+         * @param actionProbabilities The initial action probabilities of the state.
          */
-        private ApplicationStateNode(IScreenState state, Map<Action, Double> actionProbabilities) {
+        private ApplicationStateNode(IScreenState state, Map<Action, Float> actionProbabilities) {
             this.state = state;
-            this.actionProbabilities = actionProbabilities;
+            this.actionProbabilities = new ActionProbabilities(targets, actionProbabilities);
         }
 
         /**
@@ -353,25 +357,11 @@ public class ApplicationStateTree {
         }
 
         /**
-         * Retrieves the action with the highest action probability.
-         *
-         * @return Returns the action with the highest assigned probability if possible, otherwise
-         *          {@code null} is returned.
-         */
-        public Action getActionWithBiggestProbability() {
-            return actionProbabilities.entrySet().stream()
-                    .max(Comparator.comparingDouble(Map.Entry::getValue))
-                    .map(Map.Entry::getKey)
-                    // States that don't belong to the AUT do not have any outgoing actions.
-                    .orElse(null);
-        }
-
-        /**
          * Retrieves the action probabilities for the given state.
          *
          * @return Returns the action probabilities for the given state.
          */
-        public Map<Action, Double> getActionProbabilities() {
+        public ActionProbabilities getActionProbabilities() {
             return actionProbabilities;
         }
 

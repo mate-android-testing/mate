@@ -3,6 +3,7 @@ package org.mate.exploration.genetic.builder;
 import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.algorithm.EDA;
 import org.mate.exploration.genetic.algorithm.MIO;
+import org.mate.exploration.genetic.algorithm.MIOEDA;
 import org.mate.exploration.genetic.algorithm.MOSA;
 import org.mate.exploration.genetic.algorithm.NSGAII;
 import org.mate.exploration.genetic.algorithm.NoveltySearch;
@@ -21,6 +22,7 @@ import org.mate.exploration.genetic.chromosome_factory.HeuristicalChromosomeFact
 import org.mate.exploration.genetic.chromosome_factory.IChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntegerSequenceChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.IntentChromosomeFactory;
+import org.mate.exploration.genetic.chromosome_factory.MIOEDAChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.PrimitiveAndroidRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzRandomChromosomeFactory;
 import org.mate.exploration.genetic.chromosome_factory.SapienzSuiteRandomChromosomeFactory;
@@ -96,10 +98,12 @@ import org.mate.exploration.genetic.util.ge.AndroidListBasedEqualWeightedDecisio
 import org.mate.exploration.genetic.util.ge.GEMappingFunction;
 import org.mate.exploration.genetic.util.ge.IGenotypePhenotypeMapping;
 import org.mate.model.TestCase;
+import org.mate.utils.coverage.Coverage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.mate.Properties.GE_TEST_CASE_ENDING_BIAS_PER_TEN_THOUSAND;
 
@@ -185,6 +189,8 @@ public class GeneticAlgorithmProvider {
                 return (GeneticAlgorithm<T>) initializeNoveltySearchUsingSOSM();
             case EDA:
                 return initializeEDA();
+            case MIOEDA:
+                return initializeMIOEDA();
             default:
                 throw new UnsupportedOperationException("Unknown algorithm: " + algorithmName);
         }
@@ -400,21 +406,66 @@ public class GeneticAlgorithmProvider {
         }
 
         final List<IFitnessFunction<T>> fitnessFunctions = this.<T>initializeFitnessFunctions();
-        final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(fitnessFunctions);
+        final List<ActionFitnessFunctionWrapper> actionFitnessFunctions = fitnessFunctions.stream()
+                .map(fitnessFunction -> new ActionFitnessFunctionWrapper(
+                        (IActionFitnessFunction<TestCase>) fitnessFunction))
+                .collect(Collectors.toList());
+        final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(actionFitnessFunctions);
 
         // TODO: Hand over the probabilistic model and the fitness functions via a setter within
         //  the EDA class. Then, we can initialise the chromosome factory the default way.
 
         final IChromosomeFactory<T> chromosomeFactory
-                = (IChromosomeFactory<T>) new EDAChromosomeFactory(getNumEvents(),
-                probabilisticModel, fitnessFunctions);
+                = (IChromosomeFactory<T>) new EDAChromosomeFactory(getNumEvents(), probabilisticModel);
 
         return new EDA<>(
                 chromosomeFactory,
-                fitnessFunctions,
                 initializeTerminationCondition(),
                 getPopulationSize(),
                 probabilisticModel);
+    }
+
+    /**
+     * Initialises the MIO-EDA algorithm. Ensures that the mandatory properties are defined.
+     *
+     * @param <T> The type of the chromosomes.
+     * @return Returns an instance of the MIOEDA algorithm.
+     */
+    private <T> MIOEDA<T> initializeMIOEDA() {
+
+        if (org.mate.Properties.CHROMOSOME_FACTORY() != ChromosomeFactory.MIO_EDA_CHROMOSOME_FACTORY) {
+            throw new IllegalStateException("MIOEDA requires the MIOEDA chromosome factory. You have to " +
+                    "define the property org.mate.Properties.CHROMOSOME_FACTORY() appropriately!");
+        } else if (org.mate.Properties.FITNESS_FUNCTIONS() == null) {
+            throw new IllegalStateException("MIOEDA requires a fitness function. You have to " +
+                    "define the property org.mate.Properties.FITNESS_FUNCTIONS() appropriately!");
+        } else if (org.mate.Properties.TERMINATION_CONDITION() != TerminationCondition.CONDITIONAL_TERMINATION) {
+            throw new IllegalStateException("MIOEDA requires the conditional termination condition. You have to " +
+                    "define the property org.mate.Properties.TERMINATION_CONDITION() appropriately!");
+        } else if (org.mate.Properties.COVERAGE() != Coverage.BRANCH_COVERAGE
+                && org.mate.Properties.COVERAGE() != Coverage.ALL_COVERAGE) {
+            throw new IllegalStateException("MIOEDA requires to report branch coverage. You have to "
+                    + "define the property org.mate.Properties.COVERAGE() appropriately!");
+        }
+
+        final List<IFitnessFunction<T>> fitnessFunctions = this.initializeFitnessFunctions();
+
+        final List<ActionFitnessFunctionWrapper> actionFitnessFunctions = fitnessFunctions.stream()
+                .map(fitnessFunction -> new ActionFitnessFunctionWrapper(
+                                (IActionFitnessFunction<TestCase>) fitnessFunction))
+                .collect(Collectors.toList());
+        final IProbabilisticModel<T> probabilisticModel = getProbabilisticModel(actionFitnessFunctions);
+
+        final IChromosomeFactory<T> chromosomeFactory
+                = (IChromosomeFactory<T>) new MIOEDAChromosomeFactory(getNumEvents(),
+                (IProbabilisticModel<TestCase>) probabilisticModel);
+
+        return new MIOEDA<>(
+                chromosomeFactory,
+                initializeTerminationCondition(),
+                probabilisticModel,
+                getPSampleRandom(),
+                getFocusedSearchStart());
     }
 
     /**
@@ -1104,22 +1155,21 @@ public class GeneticAlgorithmProvider {
     }
 
     /**
-     * Initializes the probabilistic model for the EDA-based approach.
+     * Initializes a probabilistic model for the given fitness functions (targets).
      *
-     * @param fitnessFunctions The fitness function(s) used in EDA.
+     * @param fitnessFunctions The list of fitness functions (targets) of the probabilistic model.
      * @param <T> The type of the chromosomes.
      * @return Returns the probabilistic model.
      */
-    private <T> IProbabilisticModel<T> getProbabilisticModel(final List<IFitnessFunction<T>> fitnessFunctions) {
+    private <T> IProbabilisticModel<T> getProbabilisticModel(
+            final List<ActionFitnessFunctionWrapper> fitnessFunctions) {
         // default learning rate 0.01
         // default epsilon 0.000001
         // default clr 0.1
         // default pEl 0.01
         // default pMutation 0.4
         // default mutationRate 0.4
-        final ActionFitnessFunctionWrapper fitnessFunction
-                = new ActionFitnessFunctionWrapper((IActionFitnessFunction<TestCase>) fitnessFunctions.get(0));
-        return (IProbabilisticModel<T>) new PIPE(fitnessFunction,
+        return (IProbabilisticModel<T>) new PIPE(fitnessFunctions,
                 org.mate.Properties.PIPE_LEARNING_RATE(),
                 org.mate.Properties.PIPE_NEGATIVE_LEARNING_RATE(),
                 org.mate.Properties.PIPE_EPSILON(),

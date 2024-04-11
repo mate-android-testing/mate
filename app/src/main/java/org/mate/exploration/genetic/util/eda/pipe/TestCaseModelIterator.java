@@ -8,9 +8,13 @@ import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Provides an iterator over the nodes in the PPT described by a test case.
@@ -38,6 +42,16 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     private int returnedNodes = 0;
 
     /**
+     * A cache to store the actions of each test case.
+     */
+    private static final Map<TestCase, List<Action>> actionCache = new HashMap<>();
+
+    /**
+     * A cache to store the screen state a test case goes through.
+     */
+    private static final Map<TestCase, List<IScreenState>> stateCache = new HashMap<>();
+
+    /**
      * Initialises a new test case iterator over the probabilistic model.
      *
      * @param probabilisticModel The probabilistic model.
@@ -46,15 +60,24 @@ class TestCaseModelIterator implements Iterator<NodeWithPickedAction> {
     TestCaseModelIterator(IProbabilisticModel<TestCase> probabilisticModel, TestCase testCase) {
 
         this.probabilisticModel = probabilisticModel;
-        this.actionIterator = testCase.getVisitedStates().contains("unkown")
-                // A transition to the 'unknown' state can only happen at the very end, thus we
-                // simply cut off the last action in such a case.
-                ? testCase.getActionSequence().subList(0, testCase.getActionSequence().size() - 1).iterator()
-                : testCase.getActionSequence().iterator();
-        this.stateIterator = testCase.getStateSequence().stream()
-                .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
-                .filter(Objects::nonNull) // ignore a transition to the 'unknown' state
-                .iterator();
+
+        if (!actionCache.containsKey(testCase)) {
+            actionCache.put(testCase, testCase.getVisitedStates().contains("unknown")
+                    // A transition to the 'unknown' state can only happen at the very end, thus we
+                    // simply cut off the last action in such a case.
+                    ? testCase.getActionSequence().subList(0, testCase.getActionSequence().size() - 1)
+                    : testCase.getActionSequence());
+        }
+        
+        this.actionIterator = actionCache.get(testCase).iterator();
+
+        if (!stateCache.containsKey(testCase)) {
+            stateCache.put(testCase, testCase.getStateSequence().stream()
+                    .map(stateId -> Registry.getUiAbstractionLayer().getGuiModel().getScreenStateById(stateId))
+                    .filter(Objects::nonNull).collect(Collectors.toList()));
+        }
+
+        this.stateIterator = stateCache.get(testCase).iterator();
 
         if (Properties.PIPE_RECORD_PPT()) {
             MATE.log_debug("PPT: ");

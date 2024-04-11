@@ -1,7 +1,9 @@
 package org.mate.exploration.genetic.fitness;
 
 import org.mate.MATE;
+import org.mate.Registry;
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.model.TestCase;
 import org.mate.utils.FitnessUtils;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import java.util.Set;
  *
  * @param <T> Refers either to a {@link org.mate.model.TestCase} or {@link org.mate.model.TestSuite}.
  */
-public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessFunction<T> {
+public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IActionFitnessFunction<T> {
 
     /**
      * The cache is basically a two-dimensional array compacted to one dimension, i.e. the dimensions
@@ -38,6 +40,11 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
      * given chromosome and objective (branch).
      */
     private static final List<Float> cache = new ArrayList<>();
+
+    /**
+     * Stores for each chromosome the fitness values (one value per target) on a per action basis.
+     */
+    private static final Map<IChromosome, List<List<Float>>> actionCache = new HashMap<>();
 
     /**
      * Maps a chromosome to its index in the cache.
@@ -163,6 +170,49 @@ public class BranchDistanceMultiObjectiveFitnessFunction<T> implements IFitnessF
             usedCacheIndices.clear(index);
         }
 
+        // NOTE: Clearing the entire cache only makes sense if chromosomes of previous populations
+        //  are no longer used.
+        actionCache.clear();
+        Registry.getEnvironmentManager().invalidateTracesCache();
+
         MATE.log_acc("Cleaning cache: " + cachedChromosomes.size() + " inactive chromosome removed.");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float getFitness(IChromosome<T> chromosome, int actions) {
+        return getNormalizedFitness(chromosome, actions);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public float getNormalizedFitness(IChromosome<T> chromosome, int actions) {
+        return getNormalizedFitnessVector(chromosome).get(actions);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Float> getNormalizedFitnessVector(IChromosome<T> chromosome) {
+
+        if (!actionCache.containsKey(chromosome)) {
+            actionCache.put(chromosome,
+                    FitnessUtils.getBranchDistanceVectorWithActions(chromosome, numberOfBranches));
+        }
+
+        return actionCache.get(chromosome).get(index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getIndex() {
+        return index;
     }
 }

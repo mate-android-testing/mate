@@ -2,7 +2,6 @@ package org.mate.utils;
 
 import org.mate.Properties;
 import org.mate.Registry;
-import org.mate.exploration.genetic.algorithm.Algorithm;
 import org.mate.exploration.genetic.chromosome.IChromosome;
 import org.mate.exploration.genetic.fitness.BasicBlockMultiObjectiveFitnessFunction;
 import org.mate.exploration.genetic.fitness.BranchDistanceMultiObjectiveFitnessFunction;
@@ -88,6 +87,37 @@ public class FitnessUtils {
     }
 
     /**
+     * Stores the action fitness data (traces) of the given chromosome.
+     *
+     * @param chromosome The given chromosome.
+     * @param actionID The action id.
+     * @param traces The traces belonging to the specified action that should be stored.
+     */
+    public static void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                              final String actionID,
+                                              final Set<String> traces) {
+
+        if (Properties.FITNESS_FUNCTIONS() == null) {
+            /*
+             * If the underlying algorithm doesn't use any fitness function but uses the default
+             * chromosome factory or any derivative of it, storeFitnessData() is called. Since there
+             * is no fitness function specified, the subsequent foreach loop would cause a NPE.
+             */
+            return;
+        }
+
+        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE,
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
+
+        for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
+            if (fitnessFunctions.contains(fitnessFunction)) {
+                Registry.getEnvironmentManager()
+                        .storeActionFitnessData(chromosome, actionID, traces, fitnessFunction);
+            }
+        }
+    }
+
+    /**
      * Stores the fitness data on a per action basis for the given chromosome.
      *
      * @param chromosome The given chromosome.
@@ -105,7 +135,8 @@ public class FitnessUtils {
             return;
         }
 
-        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE);
+        EnumSet<FitnessFunction> fitnessFunctions = EnumSet.of(FitnessFunction.CRASH_DISTANCE,
+                FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE);
 
         for (FitnessFunction fitnessFunction : Properties.FITNESS_FUNCTIONS()) {
             if (fitnessFunctions.contains(fitnessFunction)) {
@@ -158,8 +189,6 @@ public class FitnessUtils {
      */
     public static <T> void cleanCache(List<IChromosome<T>> activeChromosomes) {
 
-        assert Properties.ALGORITHM() == Algorithm.MIO || Properties.ALGORITHM() == Algorithm.MOSA;
-
         // TODO: perform a sanity check that the same fitness function is used for every objective
         FitnessFunction fitnessFunction = Properties.FITNESS_FUNCTIONS()[0];
 
@@ -189,7 +218,7 @@ public class FitnessUtils {
      * @param <T> Specifies whether the chromosome is a test suite or a test case.
      * @return Returns the fitness value for the given chromosome.
      */
-    public static <T> double getFitness(IChromosome<T> chromosome, int actions, FitnessFunction fitnessFunction) {
+    public static <T> float getFitness(IChromosome<T> chromosome, int actions, FitnessFunction fitnessFunction) {
 
         switch (fitnessFunction) {
             case CRASH_DISTANCE:
@@ -278,6 +307,26 @@ public class FitnessUtils {
     }
 
     /**
+     * Fetches the branch distance vector for the specified chromosome whereas the fitness is
+     * retrieved on a per action basis.
+     *
+     * @param chromosome The chromosome for which fitness should be evaluated.
+     * @param numberOfBranches The number of branches.
+     * @param <T> The type wrapped by the chromosomes.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    public static <T> List<List<Float>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
+                                                                            int numberOfBranches) {
+
+        if (Arrays.stream(Properties.FITNESS_FUNCTIONS()).noneMatch(
+                fitnessFunction -> fitnessFunction == FitnessFunction.BRANCH_DISTANCE_MULTI_OBJECTIVE)) {
+            throw new IllegalStateException("Unexpected fitness function!");
+        }
+
+        return Registry.getEnvironmentManager().getBranchDistanceVectorWithActions(chromosome, numberOfBranches);
+    }
+
+    /**
      * Retrieves the branch distance vector for the given chromosome.
      *
      * @param chromosome The chromosome for which fitness should be evaluated.
@@ -321,7 +370,7 @@ public class FitnessUtils {
      * @param <T> The type wrapped by the chromosome.
      * @return Returns the crash distance vector for the given chromosome.
      */
-    public static <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+    public static <T> List<Float> getCrashDistanceVector(IChromosome<T> chromosome) {
         return Registry.getEnvironmentManager().getCrashDistanceVector(chromosome);
     }
 

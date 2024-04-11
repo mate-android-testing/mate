@@ -1,12 +1,15 @@
 package org.mate.exploration.genetic.util.eda;
 
 import org.mate.exploration.genetic.chromosome.IChromosome;
+import org.mate.exploration.genetic.fitness.ActionFitnessFunctionWrapper;
 import org.mate.interaction.action.Action;
 import org.mate.model.TestCase;
 import org.mate.state.IScreenState;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Defines the interface for a probabilistic model used in an EDA-based approach.
@@ -36,7 +39,7 @@ public interface IProbabilisticModel<T> {
      *
      * @return Returns the action probabilities of the current state.
      */
-    Map<Action, Double> getActionProbabilities();
+    Map<Action, Float> getActionProbabilities();
 
     /**
      * Retrieves the current screen state according to the probabilistic model.
@@ -58,4 +61,25 @@ public interface IProbabilisticModel<T> {
      * @param currentScreenState The new state of the probabilistic model.
      */
     void resetPosition(IScreenState currentScreenState);
+
+    /**
+     * Retrieves the list of targets associated with the probabilistic model.
+     *
+     * @return Returns the list of targets associated with the probabilistic model.
+     */
+    List<ActionFitnessFunctionWrapper> getTargets();
+
+    /**
+     * Sets the currently active target of the probabilistic model.
+     *
+     * @param target The new active target.
+     */
+    void setCurrentTarget(ActionFitnessFunctionWrapper target);
+
+    /**
+     * Removes the action probabilities of the given targets.
+     *
+     * @param targets The targets for which the action probabilities should be removed.
+     */
+    void removeTargets(Set<ActionFitnessFunctionWrapper> targets);
 }

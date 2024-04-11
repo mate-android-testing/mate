@@ -9,8 +9,8 @@ import org.mate.interaction.action.ui.UIAction;
 import org.mate.model.IGUIModel;
 import org.mate.state.IScreenState;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,19 +19,19 @@ import java.util.function.BiFunction;
 /**
  * The (default) initialization strategy of weights/probabilities for each action of a state.
  */
-public class ProbabilityInitialization implements BiFunction<List<Action>, IScreenState, Map<Action, Double>> {
+public class ProbabilityInitialization implements BiFunction<List<Action>, IScreenState, Map<Action, Float>> {
 
     /**
      * An additional weight factor for promising actions.
      */
-    private final double pPromisingAction;
+    private final float pPromisingAction;
 
     /**
      * Initialises the probability initializer with the given weight factor for promising actions.
      *
      * @param pPromisingAction The weight factor for promising actions, must be between 0 and 1.
      */
-    public ProbabilityInitialization(double pPromisingAction) {
+    public ProbabilityInitialization(float pPromisingAction) {
         this.pPromisingAction = pPromisingAction;
     }
 
@@ -43,12 +43,12 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
      * @return Returns a map defining for each action the probability.
      */
     @Override
-    public Map<Action, Double> apply(final List<Action> prevActions, final IScreenState state) {
+    public Map<Action, Float> apply(final List<Action> prevActions, final IScreenState state) {
 
-        final Map<Action, Double> probabilities = new HashMap<>();
+        final Map<Action, Float> probabilities = new LinkedHashMap<>();
 
         if (state.getId().equals("VIRTUAL_ROOT_STATE")) {
-            probabilities.put(new StartAction(), 1.0d);
+            probabilities.put(new StartAction(), 1.0f);
             return probabilities;
         } else if (!state.getPackageName().equals(Registry.getPackageName())) {
             // The state doesn't belong to the AUT, thus there is no reason to initialise any probabilities.
@@ -60,12 +60,12 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
 
         // The PIPE paper differentiates between terminals and functions, which is why they define
         // a probability P_T for picking a terminal.
-        // We differentiate between promising actions and normal ones
+        // We differentiate between promising actions and normal ones.
 
         // P_j(I) = P_T / l, where I elem promising actions
         // P_j(I) = (1 - P_T) / l, where I not elem promising actions
         for (final Action action : state.getActions()) {
-            double weight = getActionWeight(prevActions, state, action) *
+            float weight = getActionWeight(prevActions, state, action) *
                     (promisingActions.contains(action) ? pPromisingAction : (1 - pPromisingAction));
             probabilities.put(action, weight);
         }
@@ -79,14 +79,14 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
      * @param weights The map of action weights.
      * @return Returns the probability for each action.
      */
-    private Map<Action, Double> toProbabilities(final Map<Action, Double> weights) {
+    private Map<Action, Float> toProbabilities(final Map<Action, Float> weights) {
 
-        final Map<Action, Double> probabilities = new HashMap<>();
+        final Map<Action, Float> probabilities = new LinkedHashMap<>();
 
-        double sum = weights.values().stream().mapToDouble(Number::doubleValue).sum();
+        float sum = (float) weights.values().stream().mapToDouble(Number::doubleValue).sum();
 
         // Assign to each action a probability proportionate to its weight.
-        for (Map.Entry<Action, Double> weightEntry : weights.entrySet()) {
+        for (Map.Entry<Action, Float> weightEntry : weights.entrySet()) {
             probabilities.put(weightEntry.getKey(), weightEntry.getValue() / sum);
         }
 
@@ -101,11 +101,11 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
      * @param action The action for which the action weight should be computed.
      * @return Returns the action weight for the given action.
      */
-    private double getActionWeight(final List<Action> prevActions, final IScreenState state,
+    private float getActionWeight(final List<Action> prevActions, final IScreenState state,
                                    final Action action) {
 
         // the weight depends on the action type
-        double eventTypeWeight = actionLeavesAUT(state, action) ? 0.1 : getActionTypeWeight(action);
+        float eventTypeWeight = actionLeavesAUT(state, action) ? 0.1f : getActionTypeWeight(action);
 
         // TODO: Here is some computation missing, lookup the Stoat paper for more details.
         int unvisitedChildren = 0;
@@ -113,9 +113,9 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
         // count how often the given action has been executed so far (+1 to avoid division by zero)
         long executionFrequency = prevActions.stream().filter(a -> a.equals(action)).count() + 1;
 
-        double alpha = 1;
-        double beta = 0.3;
-        double gamma = 1.5;
+        float alpha = 1f;
+        float beta = 0.3f;
+        float gamma = 1.5f;
         return ((alpha * eventTypeWeight) + (beta * unvisitedChildren)) / (gamma * executionFrequency);
     }
 
@@ -156,7 +156,7 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
      * @param action The given action.
      * @return Returns the action type weight for the given action.
      */
-    private double getActionTypeWeight(final Action action) {
+    private float getActionTypeWeight(final Action action) {
 
         if (action instanceof UIAction) {
 
@@ -168,27 +168,27 @@ public class ProbabilityInitialization implements BiFunction<List<Action>, IScre
                 case DPAD_LEFT:
                 case DPAD_RIGHT:
                 case DPAD_CENTER:
-                    return 0.1;
+                    return 0.1f;
                 case SWIPE_UP:
                 case SWIPE_LEFT:
                 case SWIPE_RIGHT:
                 case DELETE:
                 case SEARCH:
-                    return 0.5;
+                    return 0.5f;
                 case MENU:
                 case SPINNER_SCROLLING:
                 case MENU_CLICK_AND_ITEM_SELECTION:
                 case FILL_FORM_AND_SUBMIT:
                 case SWIPE_DOWN:
-                    return 2;
+                    return 2f;
                 case CLICK:
-                    return 1.5;
+                    return 1.5f;
                 default:
-                    return 1;
+                    return 1f;
             }
         } else {
             // TODO: Differentiate between intent and system actions.
-            return 1;
+            return 1f;
         }
     }
 }

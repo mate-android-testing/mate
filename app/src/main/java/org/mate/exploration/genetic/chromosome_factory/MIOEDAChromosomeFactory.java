@@ -27,33 +27,47 @@ import java.util.stream.Collectors;
  * in combination with {@link org.mate.model.TestSuite}s, since we abuse the coverage/fitness storing
  * mechanism of test suites to store the coverage/fitness of individual actions.
  */
-public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
+public class MIOEDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
     /**
-     * The probabilistic model used in EDA.
+     * The probabilistic model used to sample new chromosomes.
      */
     private final IProbabilisticModel<TestCase> probabilisticModel;
 
     /**
      * Records the traces on a per action-basis.
      */
+    @SuppressWarnings("unused")
     private final Map<String, Set<String>> tracesPerAction = new LinkedHashMap<>();
+
+    /**
+     * Controls whether to sample a new chromosome randomly or from the probabilistic model.
+     */
+    private boolean sampleRandom = true;
 
     /**
      * Initialises the chromosome factory with the given properties.
      *
-     * @param maxNumEvents The maximal number of actions of a test.
-     * @param probabilisticModel The probabilistic model used in EDA.
-     * @param <T> The type wrapped by the chromosomes, must be a test case here.
+     * @param maxNumEvents       The maximal number of actions of a test.
+     * @param probabilisticModel The probabilistic model.
      */
-    public <T> EDAChromosomeFactory(int maxNumEvents,
-                                    IProbabilisticModel<T> probabilisticModel) {
+    public MIOEDAChromosomeFactory(int maxNumEvents, IProbabilisticModel<TestCase> probabilisticModel) {
         super(maxNumEvents);
-        this.probabilisticModel = (IProbabilisticModel<TestCase>) probabilisticModel;
+        this.probabilisticModel = probabilisticModel;
     }
 
     /**
-     * Creates a new chromosome that wraps a test case consisting of random actions. Note that
+     * Determines whether to sample randomly or from the probabilistic model.
+     *
+     * @param sampleRandom If {@code true} the next chromosome is sampled randomly.
+     */
+    public void setSampleRandom(boolean sampleRandom) {
+        this.sampleRandom = sampleRandom;
+    }
+
+    /**
+     * Creates a new chromosome that wraps a test case consisting of actions that are sampled from
+     * the underlying probabilistic model or random if no probabilistic model is provided. Note that
      * the chromosome is inherently executed.
      *
      * @return Returns the generated chromosome.
@@ -64,7 +78,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         if (resetApp) {
             uiAbstractionLayer.resetApp();
 
-            // reset the model cursor to the root state
+            // Reset the model cursor to the root state of the probabilistic model.
             probabilisticModel.resetPosition(uiAbstractionLayer.getLastScreenState());
         }
 
@@ -72,7 +86,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         final Chromosome<TestCase> chromosome = new Chromosome<>(testCase);
 
         // Ignore (split off from first action) the traces produced by the reset of the AUT.
-        recordFitnessData(chromosome);
+        storeActionFitnessData(chromosome);
 
         try {
             for (actionsCount = 0; !finishTestCase(); actionsCount++) {
@@ -83,13 +97,15 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
                 final Action nextAction = selectAction();
                 boolean stop = !testCase.updateTestCase(nextAction, actionsCount);
-                recordFitnessData(chromosome);
+                storeActionFitnessData(chromosome);
 
                 final IScreenState currentState = uiAbstractionLayer.getLastScreenState();
+
+                // Update the position of the probabilistic model.
                 probabilisticModel.updatePosition(testCase, nextAction, currentState);
 
                 if (stop) {
-                    MATE.log_warn("EDAChromosomeFactory: Action (" + actionsCount + ") "
+                    MATE.log_warn("MIOEDAChromosomeFactory: Action (" + actionsCount + ") "
                             + nextAction.toShortString() + " crashed or left AUT.");
                     return chromosome;
                 }
@@ -104,11 +120,12 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
 
             // We need to write out the recorded fitness data and inherently coverage data before we
             // can evaluate the fitness or coverage.
-            storeFitnessData(chromosome);
+            storeActionFitnessData(chromosome);
 
             // We need to update the activity coverage manually here.
             CoverageUtils.updateTestCaseChromosomeActivityCoverage(chromosome,
                     testCase.getVisitedActivitiesOfApp());
+
             CoverageUtils.logChromosomeCoverage(chromosome);
 
             // Since the finish() method can be an expensive operation, we should terminate the
@@ -121,10 +138,30 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
     }
 
     /**
+     * Stores the intermediate coverage and fitness of the chromosome, i.e. the coverage/fitness data
+     * associated with the last executed action.
+     *
+     * NOTE: This implementation should be replaced in favour of a faster implementation that caches
+     * the traces and stores them to disk in one pass upon test case completion, see
+     * {@link #recordFitnessData(IChromosome)} and {@link #storeFitnessData(IChromosome)}. However,
+     * depending on the number of actions and the size of the traces, caching the traces can cause
+     * in rare cases a memory issues, thus this method is preferred currently since the overhead
+     * caused by sending multiple requests to MATE-Server is tolerable.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     */
+    private void storeActionFitnessData(final IChromosome<TestCase> chromosome) {
+        final String actionID = ChromosomeUtils.getActionEntityId(chromosome);
+        final Set<String> traces = uiAbstractionLayer.getTraces();
+        FitnessUtils.storeActionFitnessData(chromosome, actionID, traces);
+    }
+
+    /**
      * Records the fitness data and inherently coverage data on a per action-basis for the given chromosome.
      *
      * @param chromosome The given chromosome.
      */
+    @SuppressWarnings("unused")
     private void recordFitnessData(final IChromosome<TestCase> chromosome) {
         final String actionID = ChromosomeUtils.getActionEntityId(chromosome);
         final Set<String> traces = uiAbstractionLayer.getTraces();
@@ -136,6 +173,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      *
      * @param chromosome The given chromosome.
      */
+    @SuppressWarnings("unused")
     private void storeFitnessData(final IChromosome<TestCase> chromosome) {
         FitnessUtils.storeActionFitnessData(chromosome, tracesPerAction);
         tracesPerAction.clear(); // clear traces for next chromosome
@@ -148,6 +186,10 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
      */
     @Override
     protected Action selectAction() {
+
+        if (sampleRandom) {
+            return super.selectAction(); // select random action
+        }
 
         final Map<Action, Float> actionProbabilities = probabilisticModel.getActionProbabilities();
 
@@ -181,7 +223,7 @@ public class EDAChromosomeFactory extends AndroidRandomChromosomeFactory {
         // plain UI action this action is inherently allowed.
         if (chosenAction instanceof WidgetAction
                 && !uiAbstractionLayer.getExecutableUIActions().contains(chosenAction)) {
-            MATE.log_warn("EDAChromosomeFactory: Action (" + actionsCount + ") "
+            MATE.log_warn("MIOEDAChromosomeFactory: Action (" + actionsCount + ") "
                     + chosenAction.toShortString() + " not applicable!");
             // TODO: Remove this candidate action from the current state of the probabilistic model?
             return super.selectAction(); // select random action

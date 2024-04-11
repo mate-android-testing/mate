@@ -13,7 +13,7 @@ public class NodeWithPickedAction {
     /**
      * The action probabilities at the given node.
      */
-    private final Map<Action, Double> actionProbabilities;
+    private final Map<Action, Float> actionProbabilities;
 
     /**
      * The chosen action at the given node.
@@ -25,7 +25,7 @@ public class NodeWithPickedAction {
      */
     public final int actionIndex;
 
-    NodeWithPickedAction(Map<Action, Double> actionProbabilities, Action action, int actionIndex) {
+    NodeWithPickedAction(Map<Action, Float> actionProbabilities, Action action, int actionIndex) {
         this.actionProbabilities = actionProbabilities;
         this.action = action;
         this.actionIndex = actionIndex;
@@ -36,7 +36,7 @@ public class NodeWithPickedAction {
      *
      * @return Returns the action probability.
      */
-    public double getProbabilityOfAction() {
+    public float getProbabilityOfAction() {
         return actionProbabilities.get(action);
     }
 
@@ -45,7 +45,7 @@ public class NodeWithPickedAction {
      *
      * @param newProb The new action probability.
      */
-    public void setProbabilityOfAction(double newProb) {
+    public void setProbabilityOfAction(float newProb) {
         actionProbabilities.put(action, newProb);
     }
 
@@ -54,7 +54,7 @@ public class NodeWithPickedAction {
      *
      * @return Returns the action probabilities of the given node.
      */
-    public Map<Action, Double> getActionProbabilities() {
+    public Map<Action, Float> getActionProbabilities() {
         return actionProbabilities;
     }
 

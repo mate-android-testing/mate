@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.mate.utils.ChromosomeUtils.getChromosomeId;
 import static org.mate.utils.ChromosomeUtils.getChromosomeIds;
@@ -55,7 +56,7 @@ public class EnvironmentManager {
     private static final String DEFAULT_SERVER_IP = "10.0.2.2";
     private static final int DEFAULT_PORT = 12345;
     private static final String METADATA_PREFIX = "__meta__";
-    private static final String MESSAGE_PROTOCOL_VERSION = "3.4";
+    private static final String MESSAGE_PROTOCOL_VERSION = "3.5";
     private static final String MESSAGE_PROTOCOL_VERSION_KEY = "version";
 
     private String emulator = null;
@@ -722,6 +723,7 @@ public class EnvironmentManager {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
             messageBuilder.withParameter("resolve_only_aut_classes", String.valueOf(Properties.RESOLVE_ONLY_AUT_CLASSES()));
+            messageBuilder.withParameter("only_approach_level", String.valueOf(Properties.ONLY_APPROACH_LEVEL()));
         } else if (graphType == GraphType.CALL_TREE) {
             messageBuilder.withParameter("basic_blocks", String.valueOf(Properties.BASIC_BLOCKS()));
             messageBuilder.withParameter("exclude_art_classes", String.valueOf(Properties.EXCLUDE_ART_CLASSES()));
@@ -925,6 +927,44 @@ public class EnvironmentManager {
     }
 
     /**
+     * Stores the action fitness data (traces) for the given chromosome.
+     *
+     * @param chromosome The chromosome for which the action fitness data should be stored.
+     * @param actionID The action id.
+     * @param traces The traces belonging to the specified action that should be stored.
+     * @param fitnessFunction The given fitness function.
+     */
+    public void storeActionFitnessData(final IChromosome<TestCase> chromosome,
+                                       final String actionID,
+                                       final Set<String> traces,
+                                       final FitnessFunction fitnessFunction) {
+
+        // there is no fitness data to store for dummy test cases
+        if (chromosome.getValue().isDummy()) {
+            MATE.log_warn("Trying to store fitness data of dummy test case...");
+            return;
+        }
+
+        String testcase = ChromosomeUtils.getActionEntityId(chromosome);
+        if (coveredTestCases.contains(testcase)) {
+            // don't fetch again traces file from emulator
+            return;
+        }
+        coveredTestCases.add(testcase);
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/fitness/store_action_fitness_data")
+                .withParameter("deviceId", emulator)
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("fitnessFunction", fitnessFunction.name())
+                .withParameter("chromosome", String.valueOf(chromosome))
+                .withParameter("actionId", actionID)
+                .withParameter("traces", traces.stream().collect(Collectors.joining("+")));
+
+        sendMessage(messageBuilder.build());
+    }
+
+    /**
      * Stores the complete action fitness data for the given chromosome.
      *
      * @param chromosome The chromosome for which the action fitness data should be stored.
@@ -973,14 +1013,14 @@ public class EnvironmentManager {
      * @param chromosome Refers either to a test case or to a test suite.
      * @return Returns the crash distance vector for the given chromosome.
      */
-    public <T> List<Double> getCrashDistanceVector(IChromosome<T> chromosome) {
+    public <T> List<Float> getCrashDistanceVector(IChromosome<T> chromosome) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
                 // a dummy test case has a crash distance of 1.0 (worst value)
                 return Collections.nCopies(((TestCase) chromosome.getValue())
-                        .getActionSequence().size(), 1.0d);
+                        .getActionSequence().size(), 1.0f);
             }
         }
 
@@ -994,10 +1034,10 @@ public class EnvironmentManager {
         final String[] crashDistances
                 = response.getParameter("crash_distance_vector").split("\\+");
 
-        final List<Double> crashDistanceVector = new ArrayList<>();
+        final List<Float> crashDistanceVector = new ArrayList<>();
 
         for (String crashDistance : crashDistances) {
-            crashDistanceVector.add(Double.parseDouble(crashDistance));
+            crashDistanceVector.add(Float.parseFloat(crashDistance));
         }
 
         return crashDistanceVector;
@@ -1014,13 +1054,13 @@ public class EnvironmentManager {
      *                  action range of the test case, e.g., for the first three actions.
      * @return Returns the crash distance for the given chromosome.
      */
-    public <T> double getCrashDistance(IChromosome<T> chromosome, Integer actions) {
+    public <T> float getCrashDistance(IChromosome<T> chromosome, Integer actions) {
 
         if (chromosome.getValue() instanceof TestCase) {
             if (((TestCase) chromosome.getValue()).isDummy()) {
                 MATE.log_warn("Trying to retrieve crash distance of dummy test case...");
                 // a dummy test case has a crash distance of 1.0 (worst value)
-                return 1.0;
+                return 1.0f;
             }
         }
 
@@ -1035,7 +1075,7 @@ public class EnvironmentManager {
         }
 
         Message response = sendMessage(messageBuilder.build());
-        return Double.parseDouble(response.getParameter("crash_distance"));
+        return Float.parseFloat(response.getParameter("crash_distance"));
     }
 
     /**
@@ -1151,6 +1191,72 @@ public class EnvironmentManager {
         }
 
         return basicBlockFitnessVector;
+    }
+
+    /**
+     * Retrieves the branch distance vector for the given chromosome. A branch distance vector
+     * consists of n entries, where n refers to the number of branches. The nth entry in the vector
+     * refers to the fitness values of the nth branch on a per action basis.
+     *
+     * @param chromosome The given chromosome.
+     * @param numberOfBranches The number of branches.
+     * @param <T> Specifies whether the chromosome refers to a test case or a test suite.
+     * @return Returns the branch distance vector for the given chromosome.
+     */
+    public <T> List<List<Float>> getBranchDistanceVectorWithActions(IChromosome<T> chromosome,
+                                                                     int numberOfBranches) {
+
+        if (chromosome.getValue() instanceof TestCase && ((TestCase) chromosome.getValue()).isDummy()) {
+
+            MATE.log_warn("Trying to retrieve action branch distance vector of dummy test case...");
+
+            // a dummy test case has a branch distance of 1.0 (worst value) for each objective
+            final List<List<Float>> dummyList = new ArrayList<>();
+            for (int i = 0; i < numberOfBranches; i++) {
+                dummyList.add(Collections.nCopies(numberOfBranches, 1.0f));
+            }
+            return dummyList;
+        }
+
+        final String chromosomeId = getChromosomeId(chromosome);
+
+        Message.MessageBuilder messageBuilder
+                = new Message.MessageBuilder("/graph/get_branch_distance_action_vector")
+                .withParameter("packageName", Registry.getPackageName())
+                .withParameter("chromosome", chromosomeId);
+
+        final Message response = sendMessage(messageBuilder.build());
+        final String[] branches = response.getParameter("branch_distance_vector").split("-");
+
+        final List<List<Float>> actionBranchDistanceVector = new ArrayList<>(numberOfBranches);
+
+        // Initialise for each branch an empty list such that we can update them later in a parallel manner.
+        if (chromosome.getValue() instanceof TestCase) {
+            final int numberOfActions = ((TestCase) chromosome.getValue()).getActionSequence().size();
+            for (int i = 0; i < numberOfBranches; i++) {
+                actionBranchDistanceVector.add(new ArrayList<>(numberOfActions));
+            }
+        } else {
+            for (int i = 0; i < numberOfBranches; i++) {
+                actionBranchDistanceVector.add(new ArrayList<>());
+            }
+        }
+
+        // Reassemble the branch distance vector.
+        IntStream.range(0, branches.length).parallel().forEach(branchIndex -> {
+
+            // action distances per branch
+            final String[] actionDistances = branches[branchIndex].split("\\+");
+            final List<Float> actionBranchDistances = new ArrayList<>(actionDistances.length);
+
+            // NOTE: Parallelizing the parsing doesn't yield any speed up.
+            for (final String actionDistance : actionDistances) {
+                actionBranchDistances.add(Float.parseFloat(actionDistance));
+            }
+            actionBranchDistanceVector.set(branchIndex, actionBranchDistances);
+        });
+
+        return actionBranchDistanceVector;
     }
 
     /**
